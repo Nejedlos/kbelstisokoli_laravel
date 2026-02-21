@@ -15,7 +15,8 @@ Stránka se zobrazuje automaticky, pokud není publikován žádný obsah, nebo 
     - Šum (grainy overlay) je implementován jako pseudoelement `body::before` s nízkou opacitou (2 %), což dodává pocit "materiálu" bez vizuálního šumu.
 - **Tlačítka:** Hlavní akce (CTA) využívají plnou brandovou barvu s výrazným stínem pro maximální viditelnost.
 - **Interaktivita:** Animovaný basketbalový míč s CSS září a hover efekty.
-- **Responzivita:** Stránka je plně optimalizována pro mobilní zařízení. Hlavní nadpis "TIME-OUT!" využívá zjemněnou responzivní stupnici (6xl až 9xl) a zvětšený kontejner (`max-w-7xl`), aby se na žádném zařízení neořezával.
+- **Responzivita:** Stránka je plně optimalizována pro mobilní zařízení. Hlavní nadpis "TIME-OUT!" využívá zjemněnou responzivní stupnici (6xl až 9xl) a kontejner s `max-w-max mx-auto`, aby byl štítek "Lakujeme palubovku!" vždy přesně a stabilně ukotven k pravé straně textu (exklamace) s minimálním vizuálním překryvem.
+- **Štítek (Lakujeme palubovku!):** Odstraněna původní animace pro dosažení statického a stabilního vzhledu. Štítek je nyní pozicován absolutně s jemným offsetem od pravého okraje kontejneru, což jej drží v těsné blízkosti konce nadpisu na všech rozlišeních.
 - **Typografie (Moderní sportovní styl):**
     - Hlavní titulky (`h1`) využívají kombinaci `font-display` (Oswald), `font-black`, `italic`, `uppercase` a `tracking-tighter`.
     - Textový obsah (`h2`, `p`) využívá hlavní bezpatkové písmo projektu (`font-sans` / Instrument Sans) s extrémně výrazným prokladem (pro `h2` `tracking-[0.2em]`, pro `p` `tracking-[0.4em]`).

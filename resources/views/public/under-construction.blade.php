@@ -142,11 +142,11 @@
             </span>
         </div>
 
-        <div class="relative max-w-max mx-auto mb-12 md:mb-20 overflow-visible">
-            <h1 class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-12 sm:px-16 md:px-20 lg:px-24 py-4 overflow-visible">
+        <div class="relative w-fit mx-auto mb-12 md:mb-20 overflow-visible text-center">
+            <h1 class="w-fit mx-auto text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-12 sm:px-16 md:px-20 lg:px-24 py-4 overflow-visible">
                 TIME<span class="text-primary">-</span>OUT!
             </h1>
-            <div class="absolute -top-4 right-2 md:-top-8 md:right-4 lg:right-8 z-20 rotate-12">
+            <div class="absolute -top-4 md:-top-8 z-20 rotate-12 right-[-20px] md:right-[-40px]">
                 <div class="marker-font text-primary text-lg md:text-3xl lg:text-4xl bg-white px-3 py-1 md:px-5 md:py-2 rounded-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,0.3)] border-2 border-brand-navy whitespace-nowrap">
                     Lakujeme palubovku!
                 </div>
