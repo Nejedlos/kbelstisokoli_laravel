@@ -1,28 +1,43 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="min-h-[80vh] flex flex-col items-center justify-center section-padding bg-slate-50">
-    <div class="w-full max-w-md">
+<div class="auth-gradient">
+    <!-- Floating Background Objects -->
+    <div class="floating-objects">
+        <div class="floating-ball w-64 h-64 top-[-10%] left-[-5%]"></div>
+        <div class="floating-ball w-96 h-96 bottom-[-15%] right-[-10%] opacity-5"></div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
         <!-- Logo/Header -->
-        <div class="text-center mb-10">
+        <div class="text-center mb-12 animate-fade-in-down">
             @if($branding['logo_path'] ?? null)
-                <div class="w-20 h-20 bg-secondary rounded-club flex items-center justify-center mx-auto mb-6 shadow-lg border-2 border-white/10 p-3">
-                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain" alt="">
+                <div class="w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
+                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
+                </div>
+            @else
+                <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
+                    <i class="fa-duotone fa-solid fa-basketball-hoop text-6xl icon-bounce icon-glow"></i>
                 </div>
             @endif
-            <h1 class="text-3xl font-black uppercase tracking-tight text-secondary">Přihlášení</h1>
-            <p class="text-slate-500 font-medium mt-2 italic">Vítejte zpět na palubovce!</p>
+            <h1 class="auth-title">Vítejte zpět</h1>
+            <p class="auth-sub tracking-tight">Vstupte na palubovku ###TEAM_NAME###</p>
         </div>
 
         @if (session('status'))
-            <div class="bg-success-50 border-l-4 border-success text-success-700 p-4 mb-6 rounded shadow-sm font-bold text-sm">
-                {{ session('status') }}
+            <div class="glass-card !bg-emerald-500/10 border-emerald-500/30 text-emerald-200 p-5 mb-8 rounded-2xl flex items-center gap-4 animate-fade-in">
+                <i class="fa-solid fa-circle-check text-xl"></i>
+                <span class="font-bold text-sm">{{ session('status') }}</span>
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="bg-danger-50 border-l-4 border-danger text-danger-700 p-4 mb-6 rounded shadow-sm font-bold text-sm">
-                <ul class="list-disc list-inside">
+            <div class="glass-card !bg-rose-500/10 border-rose-500/30 text-rose-200 p-5 mb-8 rounded-2xl animate-shake">
+                <div class="flex items-center gap-4 mb-2">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                    <span class="font-bold text-sm underline decoration-rose-500/50 underline-offset-4">Chyba při přihlášení</span>
+                </div>
+                <ul class="list-none text-xs font-medium opacity-80 pl-9">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -30,59 +45,71 @@
             </div>
         @endif
 
-        <div class="card p-8 shadow-xl border-t-4 border-primary">
-            <form method="POST" action="{{ route('login') }}" class="space-y-6">
+        <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
+            <!-- Decorative corner accent -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
+
+            <form method="POST" action="{{ route('login') }}" class="space-y-8">
                 @csrf
 
-                <div class="space-y-2">
-                    <label for="email" class="text-xs font-black uppercase tracking-widest text-slate-400">E-mailová adresa</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                            <x-heroicon-o-envelope class="w-5 h-5" />
+                <div class="space-y-3">
+                    <label for="email" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">E‑mailová adresa</label>
+                    <div class="relative group/input">
+                        <div class="input-icon group-focus-within/input:text-primary">
+                            <i class="fa-solid fa-envelope-open text-lg"></i>
                         </div>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                               class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
+                               placeholder="jmeno@klub.cz"
+                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white placeholder-slate-600 outline-none">
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center">
-                        <label for="password" class="text-xs font-black uppercase tracking-widest text-slate-400">Heslo</label>
-                        <a href="{{ route('password.request') }}" class="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-hover transition-colors">
-                            Zapomenuté heslo?
-                        </a>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <label for="password" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Heslo</label>
+                        <a href="{{ route('password.request') }}" class="auth-link text-[10px]">Zapomněli jste?</a>
                     </div>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                            <x-heroicon-o-lock-closed class="w-5 h-5" />
+                    <div class="relative group/input">
+                        <div class="input-icon group-focus-within/input:text-primary">
+                            <i class="fa-solid fa-lock-keyhole text-lg"></i>
                         </div>
                         <input id="password" type="password" name="password" required autocomplete="current-password"
-                               class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
+                               placeholder="••••••••"
+                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white placeholder-slate-600 outline-none">
                     </div>
                 </div>
 
-                <div class="flex items-center">
-                    <label class="flex items-center cursor-pointer group">
-                        <input type="checkbox" name="remember" class="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary">
-                        <span class="ml-2 text-xs font-bold text-slate-500 group-hover:text-secondary transition-colors uppercase tracking-widest">Pamatovat si mě</span>
+                <div class="flex items-center px-1">
+                    <label class="flex items-center cursor-pointer group/check">
+                        <div class="relative flex items-center justify-center">
+                            <input type="checkbox" name="remember" class="peer sr-only">
+                            <div class="w-5 h-5 bg-white/5 border border-white/10 rounded-md peer-checked:bg-primary peer-checked:border-primary transition-all"></div>
+                            <i class="fa-solid fa-check absolute text-[10px] text-white opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                        </div>
+                        <span class="ml-3 text-[10px] font-black text-slate-400 group-hover/check:text-white transition-colors uppercase tracking-widest">Pamatovat si mě</span>
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full py-4 shadow-lg hover:shadow-primary/20">
-                    Vstoupit do hry
+                <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
+                    <span class="relative z-10 flex items-center justify-center gap-3">
+                        Vstoupit do hry
+                        <i class="fa-solid fa-arrow-right-long group-hover/btn:translate-x-2 transition-transform duration-500"></i>
+                    </span>
                 </button>
             </form>
         </div>
 
-        <div class="flex flex-col items-center space-y-6 mt-8">
-            <a href="{{ url('/') }}" class="flex items-center space-x-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors group">
-                <x-heroicon-m-arrow-left class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                <span>Zpět na web</span>
+        <div class="mt-12 flex flex-col items-center gap-8 animate-fade-in" style="animation-delay: 0.4s">
+            <a href="{{ url('/') }}" class="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/5 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 group">
+                <i class="fa-solid fa-house-chimney text-primary group-hover:scale-110 transition-transform"></i>
+                <span>Zpět na úvodní stránku</span>
             </a>
 
-            <p class="text-center text-slate-400 font-medium text-sm italic">
-                Nemáte účet? Obraťte se na svého trenéra.
-            </p>
+            <div class="flex items-center gap-4 text-slate-600">
+                <div class="h-px w-8 bg-white/5"></div>
+                <p class="text-[10px] font-black uppercase tracking-widest italic">###TEAM_SHORT### Arena</p>
+                <div class="h-px w-8 bg-white/5"></div>
+            </div>
         </div>
     </div>
 </div>

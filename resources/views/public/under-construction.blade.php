@@ -82,6 +82,35 @@
         .animate-spin-slow {
             animation: spin-slow 12s infinite linear;
         }
+
+        /* Garantované pozicování štítku i při problémech s buildem */
+        .label-pos-custom {
+            position: absolute;
+            top: -1rem;
+            z-index: 20;
+            left: 100%;
+            transform: translateX(-80px) rotate(12deg);
+            white-space: nowrap;
+        }
+
+        @media (min-width: 640px) {
+            .label-pos-custom {
+                transform: translateX(40px) rotate(12deg);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .label-pos-custom {
+                top: -2rem;
+                transform: translateX(56px) rotate(12deg);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .label-pos-custom {
+                transform: translateX(80px) rotate(12deg);
+            }
+        }
     </style>
 </head>
 <body class="min-h-full flex flex-col items-center justify-center overflow-x-hidden overflow-y-auto text-white selection:bg-primary selection:text-white pb-12">
@@ -146,7 +175,7 @@
             <h1 class="w-fit mx-auto text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-2 sm:px-12 md:px-16 lg:px-20 py-4 overflow-visible whitespace-nowrap">
                 TIME<span class="text-primary">-</span>OUT!
             </h1>
-            <div class="absolute -top-4 md:-top-8 z-20 rotate-12 left-3/4 translate-x-[40%] sm:left-full sm:translate-x-10 md:translate-x-14 lg:translate-x-20">
+            <div class="label-pos-custom">
                 <div class="marker-font text-primary text-lg md:text-3xl lg:text-4xl bg-white px-3 py-1 md:px-5 md:py-2 rounded-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,0.3)] border-2 border-brand-navy whitespace-nowrap">
                     LAKUJEME PALUBOVKU!
                 </div>
@@ -223,7 +252,7 @@
         <div class="container mx-auto flex flex-col items-center">
             <div class="flex items-center gap-4 mb-4">
                 <div class="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div>
-                <div class="text-xs font-black uppercase tracking-[0.8em] text-white/30 translate-x-[0.4em]">Waiting for the buzzer</div>
+                <div class="text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.8em] text-white/30 translate-x-[0.15em] md:translate-x-[0.4em]">Waiting for the buzzer</div>
             </div>
             <div class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-medium">
                 © {{ date('Y') }} {{ $branding['club_name'] ?? 'Kbelští sokoli' }} • Všechna práva vyhrazena

@@ -11,6 +11,7 @@ Repozitář: [https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.
 - [Ekonomický modul](economy_management.md)
 - [Administrace](administration.md)
 - [Veřejný frontend](public_frontend.md)
+- [Font Awesome Pro](font-awesome.md)
 - [Konfigurace prostředí](configuration.md)
 - [Nasazení (Deployment)](deployment.md)
 

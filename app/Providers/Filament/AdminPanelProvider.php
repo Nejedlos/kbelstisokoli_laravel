@@ -41,12 +41,13 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex($colors['red']),
                 'gray' => Color::Slate,
             ])
-            ->assets([
-                Css::make('filament-auth-styles', resource_path('css/filament-auth.css')),
-            ])
             ->renderHook(
                 'panels::auth.login.form.after',
                 fn (): string => view('filament.hooks.login-footer'),
+            )
+            ->renderHook(
+                'panels::head.end',
+                fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/filament-auth.css'])"),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

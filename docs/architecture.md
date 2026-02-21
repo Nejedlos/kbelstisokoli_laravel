@@ -755,27 +755,45 @@ php artisan finance:sync
 - **Loga a favicony:** Administrace využívá nahraná loga z brandingu pro branding panelu a faviconu.
 
 ### 23.2 Hypermoderní Login stránka
-- **Vlastní Login třída:** `App\Filament\Pages\Auth\Login` zajišťuje vtipné a motivační nadpisy v basketbalovém stylu.
+- **Vlastní Login třída:** `App\Filament\Pages\Auth\Login` zajišťuje vtipné a motivační nadpisy v basketbalovém stylu s ikonami Font Awesome.
 - **Vlastní CSS:** `resources/css/filament-auth.css` přidává:
     - Dynamické gradientní pozadí s brandovými barvami (Navy/Red/Blue).
-    - Backdrop blur efekty a jemnou texturu šumu.
+    - Glassmorphism efekty (backdrop blur) a jemnou texturu šumu.
+    - Tmavé téma pro přihlašovací kartu s neonovými akcenty.
     - Specifické stylování karet a tlačítek s důrazem na typografii.
-- **Render Hooky:** Do login formuláře jsou vloženy motivační hlášky ("Taktika je připravena...") pro odlehčení UX.
+- **Render Hooky:** Do login formuláře jsou vloženy motivační hlášky a odkazy zpět na web.
 
 ### 23.3 Obnova přístupu
 - **Zapomenuté heslo:** V panelu je aktivován odkaz na reset hesla, který využívá sjednocené moderní šablony systému.
 
 ### 23.4 CLI a vývoj
 ```bash
-# Aktualizace oprávnění a rolí
-php artisan db:seed --class=RoleSeeder
-
-# Pročištění cache po změnách v auth middleware
+# Vyčištění cache po změnách v panelu
 php artisan optimize:clear
 ```
 
-### 22.7 Doporučené commity
-1) `feat(auth): disable public registration and implement mandatory 2FA for admins`
-2) `feat(auth): add invitation system and onboarding tracking`
-3) `feat(ui): implement modern login, password reset and 2FA challenge templates`
-4) `feat(security): add audit logging for auth events and security logger`
+## 24. Integrace Font Awesome 7 Pro (npm)
+
+Projekt je připraven na použití **Font Awesome 7 Pro**. Protože se jedná o placenou knihovnu, instalace probíhá přes privátní registr.
+
+### 24.1 Postup instalace
+1.  **Vytvořte soubor `.npmrc`** v kořenu projektu (nepřidávejte do Gitu):
+    ```ini
+    @fortawesome:registry=https://npm.fontawesome.com/
+    //npm.fontawesome.com/:_authToken=VÁŠ_TOKEN
+    ```
+2.  **Nainstalujte balíček:**
+    ```bash
+    npm install @fortawesome/fontawesome-pro@latest --save
+    ```
+3.  **Aktivujte v CSS:**
+    - V `resources/css/app.css` odkomentujte řádek `@import "@fortawesome/fontawesome-pro/css/all.css";`.
+    - V `resources/css/filament-auth.css` je již import připraven.
+4.  **Sestavte assety:**
+    ```bash
+    npm run build
+    php artisan optimize:clear
+    ```
+
+### 24.2 Použití ikon
+V šablonách jsou již připraveny třídy jako `<i class="fa-solid fa-basketball-hoop"></i>` nebo `<i class="fa-solid fa-envelope"></i>`. Po úspěšné instalaci se ikony automaticky zobrazí.
