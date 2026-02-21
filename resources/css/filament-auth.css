@@ -203,6 +203,20 @@
     filter: drop-shadow(0 0 15px rgba(225, 29, 72, 0.8)) !important;
 }
 
+/* Hide default Filament loading indicators to use custom JS library */
+.fi-loading-indicator {
+    display: none !important;
+}
+
+/* Custom JS Spinner placeholder style */
+.js-spinner-container {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
 /* Animace */
 @keyframes icon-bounce-slow {
     0%, 100% { transform: translateY(0); }
