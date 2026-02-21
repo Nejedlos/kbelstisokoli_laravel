@@ -9,8 +9,8 @@
                 <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
             </div>
         @else
-            <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
-                <i class="fa-duotone fa-light fa-shield-check text-6xl icon-bounce icon-glow"></i>
+            <div class="auth-icon-container">
+                <i class="fa-duotone fa-light fa-shield-check text-5xl text-primary icon-bounce icon-glow"></i>
             </div>
         @endif
         <h1 class="auth-title">Ověření přístupu</h1>
@@ -20,6 +20,8 @@
 
 
     <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
+        <!-- Decorative corner accent -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
         <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-8" novalidate>
             @csrf
 
@@ -68,28 +70,34 @@
             </button>
 
             <div class="text-center pt-2">
-                <button type="button" class="auth-link text-[10px] flex items-center justify-center gap-2 mx-auto"
+                <button type="button" class="auth-footer-link-primary flex items-center justify-center gap-2 mx-auto"
                         x-show="!recovery" @click="recovery = true; $nextTick(() => { $refs.recovery_code?.focus() })">
-                    <i class="fa-light fa-life-ring text-primary"></i>
+                    <i class="fa-light fa-life-ring"></i>
                     Použít záchranný kód
                 </button>
 
-                <button type="button" class="auth-link text-[10px] flex items-center justify-center gap-2 mx-auto"
+                <button type="button" class="auth-footer-link-primary flex items-center justify-center gap-2 mx-auto"
                         x-show="recovery" x-cloak @click="recovery = false; $nextTick(() => { $refs.code?.focus() })">
-                    <i class="fa-light fa-mobile-notch text-primary"></i>
+                    <i class="fa-light fa-mobile-notch"></i>
                     Použít ověřovací kód
                 </button>
             </div>
         </form>
     </div>
 
-    <div class="mt-12 text-center animate-fade-in" style="animation-delay: 0.4s">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-rose-500 transition-colors">
-                Zrušit a odhlásit se
-            </button>
-        </form>
+<div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="auth-footer-link-danger">
+            Zrušit a odhlásit se
+        </button>
+    </form>
+
+    <div class="flex items-center justify-center gap-4 text-slate-600">
+        <div class="h-px w-8 bg-white/5"></div>
+        <p class="text-[9px] font-black uppercase tracking-[0.3em] italic opacity-40">{{ $branding['club_short_name'] }} Arena</p>
+        <div class="h-px w-8 bg-white/5"></div>
     </div>
+</div>
 </div>
 @endsection

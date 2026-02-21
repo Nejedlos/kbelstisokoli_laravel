@@ -18,15 +18,25 @@ class Login extends BaseLogin
         $branding = app(\App\Services\BrandingService::class)->getSettings();
         $clubName = $branding['club_name'] ?? 'Kbelští sokoli';
 
+        if ($branding['logo_path'] ?? null) {
+            return new HtmlString('
+                <div class="flex flex-col items-center">
+                    <div class="mb-10 w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
+                        <img src="' . asset('storage/' . $branding['logo_path']) . '" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="' . e($clubName) . '">
+                    </div>
+                    <h1 class="auth-title">Vítejte zpět</h1>
+                    <p class="auth-sub tracking-tight">Vstupte na palubovku ' . e($clubName) . '</p>
+                </div>
+            ');
+        }
+
         return new HtmlString('
             <div class="flex flex-col items-center">
-                <div class="mb-14 flex items-center justify-center w-24 h-24 rounded-full bg-slate-50 shadow-2xl relative group ring-8 ring-slate-100/50">
-                    <i class="fa-light fa-basketball-hoop text-primary text-5xl fa-glow icon-bounce-slow relative z-10"></i>
-                    <div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="auth-icon-container">
+                    <i class="fa-duotone fa-light fa-basketball-hoop text-5xl text-primary icon-bounce icon-glow"></i>
                 </div>
-                <p class="text-primary font-black uppercase tracking-[0.5em] text-[10px] mb-4 leading-none">' . e(brand_text('Vstup do hry')) . '</p>
-                <h2 class="text-slate-900 font-black uppercase tracking-tight text-2xl leading-none m-0 p-0">' . e($clubName) . '</h2>
-                <p class="text-slate-400 font-medium italic text-[11px] mt-4 opacity-80">Strategická porada a příprava na vítězství</p>
+                <h1 class="auth-title">Vítejte zpět</h1>
+                <p class="auth-sub tracking-tight">Vstupte na palubovku ' . e($clubName) . '</p>
             </div>
         ');
     }

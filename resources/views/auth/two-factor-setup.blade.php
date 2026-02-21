@@ -64,8 +64,8 @@
                     <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
                 </div>
             @else
-                <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
-                    <i class="fa-duotone fa-light fa-shield-plus text-6xl icon-bounce icon-glow"></i>
+                <div class="auth-icon-container">
+                    <i class="fa-duotone fa-light fa-shield-plus text-5xl text-primary icon-bounce icon-glow"></i>
                 </div>
             @endif
             <h1 class="auth-title">Zabezpečení účtu</h1>
@@ -73,6 +73,8 @@
         </div>
 
         <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
+            <!-- Decorative corner accent -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
             @if(! $user->two_factor_secret)
                 {{-- Krok 1: Aktivace --}}
                 <div class="text-center space-y-8">
@@ -191,23 +193,29 @@
             @endif
         </div>
 
-        <div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
-            <button @click="showHelp = true" class="block w-full text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">
-                <i class="fa-light fa-circle-question mr-2"></i> Potřebujete nápovědu?
-            </button>
+<div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
+    <button @click="showHelp = true" class="auth-footer-link">
+        <i class="fa-light fa-circle-question mr-2"></i> Potřebujete nápovědu?
+    </button>
 
-            <div class="flex flex-col gap-4">
-                <a href="{{ route('member.dashboard') }}" class="block text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-light transition-colors">
-                    <i class="fa-light fa-arrow-left-long mr-2"></i> Přejít do členské sekce
-                </a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-rose-400 transition-colors">
-                        Odhlásit se
-                    </button>
-                </form>
-            </div>
-        </div>
+    <div class="flex flex-col gap-4">
+        <a href="{{ route('member.dashboard') }}" class="auth-footer-link-primary">
+            <i class="fa-light fa-arrow-left-long mr-2"></i> Přejít do členské sekce
+        </a>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="auth-footer-link-danger">
+                Odhlásit se
+            </button>
+        </form>
+    </div>
+
+    <div class="flex items-center justify-center gap-4 text-slate-600 mt-8">
+        <div class="h-px w-8 bg-white/5"></div>
+        <p class="text-[9px] font-black uppercase tracking-[0.3em] italic opacity-40">{{ $branding['club_short_name'] }} Arena</p>
+        <div class="h-px w-8 bg-white/5"></div>
+    </div>
+</div>
     </div>
 </div>
 @endsection

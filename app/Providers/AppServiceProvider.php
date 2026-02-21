@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
                 ->outsidePanelPlacement(\BezhanSalleh\LanguageSwitch\Enums\Placement::TopRight);
         });
 
-        \Illuminate\Support\Facades\View::composer(['layouts.public', 'layouts.member', 'layouts.auth'], function ($view) {
+        \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {
             $brandingService = app(\App\Services\BrandingService::class);
             $seoService = app(\App\Services\SeoService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);

@@ -8,8 +8,8 @@
             <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
         </div>
     @else
-        <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
-            <i class="fa-duotone fa-light fa-basketball-hoop text-6xl icon-bounce icon-glow"></i>
+        <div class="auth-icon-container">
+            <i class="fa-duotone fa-light fa-basketball-hoop text-5xl text-primary icon-bounce icon-glow"></i>
         </div>
     @endif
     <h1 class="auth-title">Vítejte zpět</h1>
@@ -29,8 +29,8 @@
         @endif
 
         <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
-            <!-- Decorative corner accent -->
-            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
+    <!-- Decorative corner accent -->
+    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
 
             <form method="POST" action="{{ route('login') }}" class="space-y-8" novalidate>
                 @csrf
@@ -94,16 +94,16 @@
             </form>
         </div>
 
-        <div class="mt-12 flex flex-col items-center gap-8 animate-fade-in" style="animation-delay: 0.4s">
-            <a href="{{ url('/') }}" class="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/5 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 group">
-                <i class="fa-light fa-house-chimney text-primary group-hover:scale-110 transition-transform"></i>
-                <span>Zpět na úvodní stránku</span>
-            </a>
+<div class="mt-12 text-center animate-fade-in space-y-8" style="animation-delay: 0.4s">
+    <a href="{{ url('/') }}" class="inline-flex items-center gap-3 px-8 py-3 rounded-full bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 group shadow-lg">
+        <i class="fa-light fa-house-chimney text-primary group-hover:scale-110 transition-transform"></i>
+        <span>Zpět na úvodní stránku</span>
+    </a>
 
-            <div class="flex items-center gap-4 text-slate-600">
-                <div class="h-px w-8 bg-white/5"></div>
-                <p class="text-[10px] font-black uppercase tracking-widest italic">{{ $branding['club_short_name'] }} Arena</p>
-                <div class="h-px w-8 bg-white/5"></div>
-            </div>
-        </div>
+    <div class="flex items-center justify-center gap-4 text-slate-600">
+        <div class="h-px w-8 bg-white/5"></div>
+        <p class="text-[9px] font-black uppercase tracking-[0.3em] italic opacity-40">{{ $branding['club_short_name'] }} Arena</p>
+        <div class="h-px w-8 bg-white/5"></div>
+    </div>
+</div>
 @endsection

@@ -159,6 +159,10 @@
     .icon-bounce { animation: icon-bounce 2s infinite ease-in-out; }
     @keyframes icon-bounce { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-10px);} }
 
+    .auth-icon-container {
+        @apply w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(225,29,72,0.15)] border border-primary/20 transition-transform hover:scale-105 duration-500;
+    }
+
     .input-with-icon { @apply pl-12 pr-4 py-4; }
     .input-icon { @apply absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 transition-colors; }
 
@@ -211,4 +215,20 @@
         font-size: 0.875rem !important; /* 14px */
         line-height: 1.25rem !important;
     }
+}
+
+.auth-link {
+    @apply text-primary hover:opacity-80 transition-all duration-300 font-black uppercase tracking-widest italic;
+}
+
+.auth-footer-link {
+    @apply text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors;
+}
+
+.auth-footer-link-primary {
+    @apply text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-80 transition-colors;
+}
+
+.auth-footer-link-danger {
+    @apply text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-rose-400 transition-colors;
 }

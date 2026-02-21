@@ -8,8 +8,8 @@
             <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
         </div>
     @else
-        <div class="w-16 h-16 mx-auto mb-8 text-primary flex items-center justify-center">
-            <i class="fa-duotone fa-light fa-key-skeleton text-6xl icon-bounce icon-glow"></i>
+        <div class="auth-icon-container">
+            <i class="fa-duotone fa-light fa-key-skeleton text-5xl text-primary icon-bounce icon-glow"></i>
         </div>
     @endif
     <h1 class="auth-title tracking-tight">Nové heslo</h1>
@@ -17,6 +17,8 @@
 </div>
 
 <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
+    <!-- Decorative corner accent -->
+    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
     <form method="POST" action="{{ route('password.update') }}" class="space-y-8" novalidate>
         @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
@@ -75,5 +77,13 @@
             </span>
         </button>
     </form>
+</div>
+
+<div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
+    <div class="flex items-center justify-center gap-4 text-slate-600">
+        <div class="h-px w-8 bg-white/5"></div>
+        <p class="text-[9px] font-black uppercase tracking-[0.3em] italic opacity-40">{{ $branding['club_short_name'] }} Arena</p>
+        <div class="h-px w-8 bg-white/5"></div>
+    </div>
 </div>
 @endsection
