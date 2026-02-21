@@ -79,11 +79,14 @@ class UsersTable
                     ->relationship('roles', 'name'),
                 TernaryFilter::make('is_active')
                     ->label('Pouze aktivní'),
-                TernaryFilter::make('two_factor')
-                    ->label('Aktivní 2FA')
+                TernaryFilter::make('two_factor_confirmed')
+                    ->label('Stav 2FA')
+                    ->placeholder('Všichni')
+                    ->trueLabel('Zabezpečeno (Potvrzeno)')
+                    ->falseLabel('Nezabezpečeno / Čeká')
                     ->queries(
-                        true: fn ($query) => $query->whereNotNull('two_factor_secret'),
-                        false: fn ($query) => $query->whereNull('two_factor_secret'),
+                        true: fn ($query) => $query->whereNotNull('two_factor_confirmed_at'),
+                        false: fn ($query) => $query->whereNull('two_factor_confirmed_at'),
                     ),
                 TernaryFilter::make('onboarding')
                     ->label('Dokončený onboarding')
@@ -157,6 +160,19 @@ class UsersTable
                         ->requiresConfirmation()
                         ->authorize(fn () => auth()->user()?->can('manage_users'))
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false])),
+                    BulkAction::make('reset2fa')
+                        ->label('Resetovat 2FA')
+                        ->icon('heroicon-o-shield-exclamation')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Resetovat 2FA u vybraných uživatelů?')
+                        ->modalDescription('Tato akce zruší nastavení 2FA u všech vybraných uživatelů. Budou se muset znovu zajistit při příštím vstupu do adminu.')
+                        ->authorize(fn () => auth()->user()?->can('manage_users'))
+                        ->action(fn (Collection $records) => $records->each->update([
+                            'two_factor_secret' => null,
+                            'two_factor_recovery_codes' => null,
+                            'two_factor_confirmed_at' => null,
+                        ])),
                 ]),
             ]);
     }

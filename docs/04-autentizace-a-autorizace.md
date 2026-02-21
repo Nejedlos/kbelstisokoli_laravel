@@ -174,3 +174,49 @@ feat(auth): allow admin to access member area; enforce 2FA only for admin panel;
 ### Další krok
 - Přidat integrační testy pro scénáře admin bez 2FA → member sekce povolena, admin sekce blokována.
 - Ověřit lokalizační texty a ikony v obou menu (Font Awesome Light varianta) napříč prostředími.
+
+---
+
+## Aktualizace: Rozšířená správa 2FA v administraci (2026-02-21)
+
+Tato aktualizace přináší kompletní nástroje pro správu dvoufázového ověření (2FA) přímo v administraci uživatelů.
+
+### 1. Detailní stav 2FA ve formuláři uživatele
+V `UserResource` (formulář uživatele) byla přidána dedikovaná sekce „Dvoufázové ověření (2FA)“, která přehledně zobrazuje:
+- **Aktuální stav:** Neaktivní / Čeká na potvrzení (vygenerován QR) / Aktivní a ověřeno.
+- **Datum aktivace:** Kdy bylo 2FA plně potvrzeno.
+
+### 2. Správcovské akce (pro administrátory)
+Administrátoři s oprávněním `manage_users` nyní mohou:
+- **Resetovat 2FA:** Akce „Vypnout / Resetovat 2FA“ smaže veškeré 2FA údaje uživatele (secret, kódy). To je nezbytné, pokud uživatel ztratí přístup k telefonu. Po resetu bude uživatel (pokud je admin) při příštím přihlášení znovu vyzván k nastavení.
+- **Hromadný reset:** V tabulce uživatelů lze označit více záznamů a provést hromadný reset 2FA.
+
+### 3. Sebe-správa (pro přihlášeného uživatele)
+Uživatel při editaci svého vlastního profilu v admin panelu vidí rozšířené možnosti:
+- **Zobrazit záchranné kódy:** Zobrazení kódů je chráněno opětovným zadáním hesla uživatele. Kódy se zobrazí v persistentní notifikaci.
+- **Regenerovat kódy:** Umožňuje zneplatnit staré a vygenerovat nové záchranné kódy.
+- **Vypnout 2FA:** Uživatel si může sám vypnout 2FA, přičemž při příštím přístupu do adminu jej systém opět vyzve k nastavení (pokud je pro něj 2FA povinné).
+
+### 4. Filtrování v tabulce
+V tabulce uživatelů byl vylepšen filtr pro 2FA:
+- Lze filtrovat uživatele, kteří mají 2FA **plně potvrzené** (zabezpečené), oproti těm, kteří jej mají rozpracované nebo neaktivní.
+
+### Změněné soubory
+- `app/Filament/Resources/Users/Schemas/UserForm.php` – přidána sekce 2FA a interaktivní akce.
+- `app/Filament/Resources/Users/Tables/UsersTable.php` – vylepšen filtr a přidána hromadná akce resetu.
+
+### Ověřené scénáře
+1. Admin resetuje 2FA jinému uživateli → 2FA data v DB smazána (null).
+2. Admin si zobrazí své kódy → vyžadováno heslo → kódy zobrazeny v notifikaci.
+3. Filtrování „Zabezpečeno“ v tabulce → zobrazí pouze uživatele s `two_factor_confirmed_at`.
+4. Hromadný reset 2FA → úspěšně aplikováno na vybrané uživatele.
+
+### Doporučená commit zpráva
+```
+feat(auth): enhance 2FA management in admin panel
+
+- added 2FA management section to UserForm with actions (reset, view codes, regenerate)
+- self-viewing of recovery codes protected by password confirmation
+- improved 2FA status filtering in UsersTable
+- added bulk reset action for 2FA
+```
