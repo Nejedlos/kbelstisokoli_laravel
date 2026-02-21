@@ -17,6 +17,7 @@ class HomeController extends Controller
         if (data_get($branding, 'maintenance_mode')) {
             return view('public.under-construction', [
                 'branding' => $branding,
+                'branding_css' => $brandingService->getCssVariables(),
                 'title' => data_get($branding, 'maintenance_title'),
                 'text' => data_get($branding, 'maintenance_text'),
             ]);
@@ -28,6 +29,7 @@ class HomeController extends Controller
         if (!$hasContent) {
             return view('public.under-construction', [
                 'branding' => $branding,
+                'branding_css' => $brandingService->getCssVariables(),
                 'title' => 'Web v přípravě',
                 'text' => 'Aktuálně pro vás připravujeme obsah. Brzy se tu objeví něco velkého!',
             ]);

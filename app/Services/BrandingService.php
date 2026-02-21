@@ -43,8 +43,8 @@ class BrandingService
             ],
             'footer_text' => $dbSettings['footer_text'] ?? $cfg['footer_text'] ?? null,
             'maintenance_mode' => filter_var($dbSettings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            'maintenance_title' => $dbSettings['maintenance_title'] ?? 'Web je v přípravě',
-            'maintenance_text' => $dbSettings['maintenance_text'] ?? 'Pracujeme na novém webu pro Kbelští sokoli. Brzy se vidíme na palubovce!',
+            'maintenance_title' => $dbSettings['maintenance_title'] ?? 'Kreslíme vítěznou taktiku',
+            'maintenance_text' => $dbSettings['maintenance_text'] ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!',
         ];
     }
 

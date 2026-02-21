@@ -461,3 +461,22 @@ php artisan optimize:clear
 1. `feat(frontend): implement public shared components and dynamic seo layout`
 2. `feat(public): add news and match center templates with sports branding`
 3. `feat(public): implement team listing and contact page with branding integration`
+
+## 16. Režim přípravy (Under Construction)
+Účel: Stylové zobrazení informace o přípravě webu s basketbalovou tématikou.
+
+### 16.1 Vizuální pojetí
+- **Design:** Stránka je navržena jako samostatné HTML bez menu (nezávislá na `layouts.public`).
+- **Téma:** Basketbalová taktická tabule ("TIME-OUT!") s křídovými čárami (X a O) a animovaným míčem.
+- **Humor:** Využívá basketbalovou terminologii ("Trenér kreslí taktiku", "Lakujeme palubovku").
+- **Branding:** Plně integrované barvy přes CSS proměnné z `BrandingService`.
+
+### 16.2 Aktivace a kontrola
+- **Manuální:** V administraci (Nastavení -> Branding) lze režim zapnout/vypnout.
+- **Automatická:** Pokud v databázi neexistuje žádná publikovaná a viditelná `Page`, web se do tohoto režimu přepne automaticky.
+- **Middleware:** `PublicMaintenanceMiddleware` zajišťuje přesměrování všech veřejných rout na domovskou stránku, pokud je režim aktivní.
+
+### 16.3 Doporučené commity
+1. `feat(public): implement funny basketball-themed under construction page`
+2. `refactor(home): pass branding css variables to maintenance view`
+3. `feat(admin): update maintenance mode defaults and hints in branding settings`
