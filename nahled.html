@@ -1,83 +1,176 @@
-<!DOCTYPE html><html class=fi dir=ltr lang=cs><head><meta charset=utf-8><meta content=c0tHp4hijRVApAJVxui9vcAENqA5g3wje9eqn2HI name=csrf-token><meta content="width=device-width, initial-scale=1" name=viewport><title> Přihlášení - Kbelští sokoli C &amp; E </title><style>[x-cloak=''],
-[x-cloak='x-cloak'],
-[x-cloak='1'] {
-    display: none !important;
-}
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kbelští sokoli C &amp; E</title>
 
-[x-cloak='inline-flex'] {
-    display: inline-flex !important;
-}
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="https://kbelstisokoli.test/favicon.ico">
 
-@media (max-width: 1023px) {
-    [x-cloak='-lg'] {
-        display: none !important;
-    }
-}
+    <meta name="theme-color" content="#E11D48">
+    <style>:root {
+        --color-brand-navy: #0B1F3A;
+        --color-brand-navy-rgb: 11, 31, 58;
+        --color-brand-blue: #2563EB;
+        --color-brand-blue-rgb: 37, 99, 235;
+        --color-brand-red: #E11D48;
+        --color-brand-red-rgb: 225, 29, 72;
+        --color-brand-white: #FFFFFF;
+        --color-brand-white-rgb: 255, 255, 255;
+        --color-ui-bg: #F8FAFC;
+        --color-ui-surface: #FFFFFF;
+        --color-ui-surface-alt: #EEF2F7;
+        --color-ui-border: #DCE3EC;
+        --color-ui-text: #0F172A;
+        --color-ui-text-muted: #64748B;
+        --color-primary: #E11D48;
+        --color-primary-rgb: 225, 29, 72;
+    }</style>
+    <link rel="preload" as="style" href="https://kbelstisokoli.test/build/assets/app-C0QEeZ0S.css" /><link rel="preload" as="style" href="https://kbelstisokoli.test/build/assets/app-BHLTWQJn.css" /><link rel="modulepreload" as="script" href="https://kbelstisokoli.test/build/assets/app-ND93Kpmd.js" /><link rel="stylesheet" href="https://kbelstisokoli.test/build/assets/app-C0QEeZ0S.css" data-navigate-track="reload" /><link rel="stylesheet" href="https://kbelstisokoli.test/build/assets/app-BHLTWQJn.css" data-navigate-track="reload" /><script type="module" src="https://kbelstisokoli.test/build/assets/app-ND93Kpmd.js" data-navigate-track="reload"></script>
+</head>
+<body class="antialiased text-white/90">
+<div class="auth-gradient">
+    <!-- Floating Background Objects -->
+    <div class="floating-objects pointer-events-none">
+        <div class="floating-ball w-64 h-64 top-[-10%] left-[-5%]"></div>
+        <div class="floating-ball w-96 h-96 bottom-[-15%] right-[-10%] opacity-5"></div>
+    </div>
 
-@media (min-width: 1024px) {
-    [x-cloak='lg'] {
-        display: none !important;
-    }
-}</style><link data-navigate-track="" href="//kbelstisokoli.test/fonts/filament/filament/inter/index.css?v=5.2.2.0" rel=stylesheet><style>:root {
-    --danger-50:oklch(0.971 0.013 17.38);  --danger-100:oklch(0.936 0.032 17.717);  --danger-200:oklch(0.885 0.062 18.334);  --danger-300:oklch(0.808 0.114 19.571);  --danger-400:oklch(0.704 0.191 22.216);  --danger-500:oklch(0.637 0.237 25.331);  --danger-600:oklch(0.577 0.245 27.325);  --danger-700:oklch(0.505 0.213 27.518);  --danger-800:oklch(0.444 0.177 26.899);  --danger-900:oklch(0.396 0.141 25.723);  --danger-950:oklch(0.258 0.092 26.042);  --gray-50:oklch(0.984 0.003 247.858);  --gray-100:oklch(0.968 0.007 247.896);  --gray-200:oklch(0.929 0.013 255.508);  --gray-300:oklch(0.869 0.022 252.894);  --gray-400:oklch(0.704 0.04 256.788);  --gray-500:oklch(0.554 0.046 257.417);  --gray-600:oklch(0.446 0.043 257.281);  --gray-700:oklch(0.372 0.044 257.287);  --gray-800:oklch(0.279 0.041 260.031);  --gray-900:oklch(0.208 0.042 265.755);  --gray-950:oklch(0.129 0.042 264.695);  --info-50:oklch(0.97 0.014 254.604);  --info-100:oklch(0.932 0.032 255.585);  --info-200:oklch(0.882 0.059 254.128);  --info-300:oklch(0.809 0.105 251.813);  --info-400:oklch(0.707 0.165 254.624);  --info-500:oklch(0.623 0.214 259.815);  --info-600:oklch(0.546 0.245 262.881);  --info-700:oklch(0.488 0.243 264.376);  --info-800:oklch(0.424 0.199 265.638);  --info-900:oklch(0.379 0.146 265.522);  --info-950:oklch(0.282 0.091 267.935);  --primary-50:oklch(0.97717647058824 0.01395454545455 17.585);  --primary-100:oklch(0.95035294117647 0.03272727272727 17.585);  --primary-200:oklch(0.90547058823529 0.06318181818182 17.585);  --primary-300:oklch(0.84047058823529 0.10604545454546 17.585);  --primary-400:oklch(0.75352941176471 0.15027272727273 17.585);  --primary-500:oklch(0.68270588235294 0.17009090909091 17.585);  --primary-600:oklch(0.59782352941176 0.16913636363636 17.585);  --primary-700:oklch(0.51494117647059 0.14940909090909 17.585);  --primary-800:oklch(0.44611764705882 0.12331818181818 17.585);  --primary-900:oklch(0.39458823529412 0.09963636363636 17.585);  --primary-950:oklch(0.27788235294118 0.07136363636364 17.585);  --success-50:oklch(0.982 0.018 155.826);  --success-100:oklch(0.962 0.044 156.743);  --success-200:oklch(0.925 0.084 155.995);  --success-300:oklch(0.871 0.15 154.449);  --success-400:oklch(0.792 0.209 151.711);  --success-500:oklch(0.723 0.219 149.579);  --success-600:oklch(0.627 0.194 149.214);  --success-700:oklch(0.527 0.154 150.069);  --success-800:oklch(0.448 0.119 151.328);  --success-900:oklch(0.393 0.095 152.535);  --success-950:oklch(0.266 0.065 152.934);  --warning-50:oklch(0.987 0.022 95.277);  --warning-100:oklch(0.962 0.059 95.617);  --warning-200:oklch(0.924 0.12 95.746);  --warning-300:oklch(0.879 0.169 91.605);  --warning-400:oklch(0.828 0.189 84.429);  --warning-500:oklch(0.769 0.188 70.08);  --warning-600:oklch(0.666 0.179 58.318);  --warning-700:oklch(0.555 0.163 48.998);  --warning-800:oklch(0.473 0.137 46.201);  --warning-900:oklch(0.414 0.112 45.904);  --warning-950:oklch(0.279 0.077 45.635);     }</style><link data-navigate-track="" href="//kbelstisokoli.test/css/filament/filament/app.css?v=5.2.2.0" rel=stylesheet><link as=font crossorigin="" href=//kbelstisokoli.test/fonts/filament/filament/inter/inter-latin-wght-normal-NRMW37G5.woff2 rel=preload type=font/woff2><style>:root {
-    --font-family: 'Inter Variable';
-    --mono-font-family: 'ui-monospace';
-    --serif-font-family: 'ui-serif';
-    --sidebar-width: 20rem;
-    --collapsed-sidebar-width: 4.5rem;
-    --default-theme-mode: system;
-}</style><script>const loadDarkMode = () => {
-    window.theme = localStorage.getItem('theme') ?? 'system'
-    if (
-        window.theme === 'dark' ||
-        (window.theme === 'system' &&
-            window.matchMedia('(prefers-color-scheme: dark)')
-                .matches)
-    ) {
-        document.documentElement.classList.add('dark')
-    }
-}
+    <div class="w-full max-w-md relative z-10">
+        <div x-data="{ showHelp: false }">
+            <!-- Help Section (Conditional) -->
+            <div x-show="showHelp"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="relative z-10"
+                 style="display: none;">
 
-loadDarkMode()
+                <div class="text-center mb-10">
+                    <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fa-light fa-circle-info text-primary text-4xl icon-glow"></i>
+                    </div>
+                    <h1 class="auth-title">Nápověda k zabezpečení</h1>
+                    <p class="auth-sub">Jak nastavit dvoufázové ověření</p>
+                </div>
 
-document.addEventListener('livewire:navigated', loadDarkMode)</script><link as=style href=//kbelstisokoli.test/build/assets/filament-auth-CAOZNeus.css rel=preload><link data-navigate-track=reload href=//kbelstisokoli.test/build/assets/filament-auth-CAOZNeus.css rel=stylesheet><body class="fi-body fi-panel-admin"><div class=fi-simple-layout><div class=fi-simple-main-ctn><main class="fi-simple-main fi-width-lg"><div class=fi-simple-page wire:effects={&quot;partials&quot;:[],&quot;url&quot;:{&quot;defaultAction&quot;:{&quot;as&quot;:&quot;action&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionArguments&quot;:{&quot;as&quot;:&quot;actionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionContext&quot;:{&quot;as&quot;:&quot;actionContext&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableAction&quot;:{&quot;as&quot;:&quot;tableAction&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionRecord&quot;:{&quot;as&quot;:&quot;tableActionRecord&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionArguments&quot;:{&quot;as&quot;:&quot;tableActionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null}},&quot;listeners&quot;:[&quot;refresh-page&quot;]} wire:id=mPpTDuvqRgPzb5GjUpC2 wire:name=App\Filament\Pages\Auth\Login wire:snapshot={&quot;data&quot;:{&quot;data&quot;:[{&quot;email&quot;:null,&quot;password&quot;:null,&quot;remember&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],&quot;userUndertakingMultiFactorAuthentication&quot;:null,&quot;mountedActions&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;defaultAction&quot;:null,&quot;defaultActionArguments&quot;:null,&quot;defaultActionContext&quot;:null,&quot;defaultTableAction&quot;:null,&quot;defaultTableActionRecord&quot;:null,&quot;defaultTableActionArguments&quot;:null,&quot;componentFileAttachments&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;areSchemaStateUpdateHooksDisabledForTesting&quot;:false,&quot;discoveredSchemaNames&quot;:[[&quot;form&quot;,&quot;content&quot;],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;mPpTDuvqRgPzb5GjUpC2&quot;,&quot;name&quot;:&quot;App\\Filament\\Pages\\Auth\\Login&quot;,&quot;path&quot;:&quot;admin\/login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;cs&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;8251ab02f1f5834385e6d6274a365a4979e7e95e73b9f291a352c3d4a7d721a1&quot;}><div class=fi-simple-page-content><!--[if BLOCK]><![endif]--><header class=fi-simple-header><!--[if BLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class=fi-logo> Kbelští sokoli C &amp; E </div><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><h1 class=fi-simple-header-heading><div class="flex flex-col items-center"><div class="bg-slate-50 flex group h-24 items-center justify-center mb-14 relative ring-8 ring-slate-100/50 rounded-full shadow-2xl w-24"><i class="fa-basketball-hoop fa-glow fa-light icon-bounce-slow relative text-5xl text-primary z-10"></i><div class="absolute bg-primary/10 blur-2xl group-hover:opacity-100 inset-0 opacity-50 rounded-full transition-opacity"></div></div><p class="font-black leading-none mb-4 text-[10px] text-primary tracking-[0.5em] uppercase">Vstup do hry <h2 class="font-black leading-none m-0 p-0 text-2xl text-slate-900 tracking-tight uppercase">Kbelští sokoli C &amp; E</h2><p class="font-medium italic mt-4 opacity-80 text-[11px] text-slate-400">Strategická porada a příprava na vítězství</div></h1><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><p class=fi-simple-header-subheading> &nbsp;  <!--[if ENDBLOCK]><![endif]--></header><!--[if ENDBLOCK]><![endif]--><div class="fi-grid fi-sc fi-sc-has-gap" style="--cols-default: repeat(1, minmax(0, 1fr));" x-data="filamentSchema({ livewireId: 'mPpTDuvqRgPzb5GjUpC2' })" x-on:form-validation-error.window=handleFormValidationError><div class=fi-grid-col style="--col-span-default: span 1 / span 1;" x-data="filamentSchemaComponent({
-                    path: '',
-                    containerPath: '',
-                    $wire,
-                })"><div class=fi-sc-component><form id=form class=fi-sc-form wire:submit=authenticate><div class="fi-grid fi-sc fi-sc-has-gap" style="--cols-default: repeat(1, minmax(0, 1fr));"><div class=fi-grid-col style="--col-span-default: span 1 / span 1;" x-data="filamentSchemaComponent({
-                    path: '',
-                    containerPath: '',
-                    $wire,
-                })"><div class=fi-sc-component><div class="fi-grid fi-sc fi-sc-has-gap" style="--cols-default: repeat(1, minmax(0, 1fr));" x-data="filamentSchema({ livewireId: 'mPpTDuvqRgPzb5GjUpC2' })" x-on:form-validation-error.window=handleFormValidationError><div class=fi-grid-col style="--col-span-default: span 1 / span 1;" wire:key=mPpTDuvqRgPzb5GjUpC2.form.email wire:partial=schema-component::form.email x-data="filamentSchemaComponent({
-                    path: 'data.email',
-                    containerPath: 'data',
-                    $wire,
-                })"><div class=fi-sc-component><div class=fi-fo-field data-field-wrapper=""><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class=fi-fo-field-label-col><div class=fi-fo-field-label-ctn><!--[if BLOCK]><![endif]--><label class=fi-fo-field-label for=form.email><!--[if BLOCK]><![endif]--><span class=fi-fo-field-label-content> Emailová adresa<!--[if BLOCK]><![endif]--><sup class=fi-fo-field-label-required-mark>*</sup><!--[if ENDBLOCK]><![endif]--></span><!--[if ENDBLOCK]><![endif]--></label><!--[if ENDBLOCK]><![endif]--></div></div><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class=fi-fo-field-content-col><!--[if BLOCK]><![endif]--><div class="fi-fo-text-input fi-input-wrp" x-on:focus-input.stop="$el.querySelector('input')?.focus()"><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><div class=fi-input-wrp-content-ctn><input id=form.email autocomplete=on autofocus class=fi-input required type=email wire:model=data.email></div><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div><!--[if ENDBLOCK]><![endif]--></div></div></div><div class=fi-grid-col style="--col-span-default: span 1 / span 1;" wire:key=mPpTDuvqRgPzb5GjUpC2.form.password wire:partial=schema-component::form.password x-data="filamentSchemaComponent({
-                    path: 'data.password',
-                    containerPath: 'data',
-                    $wire,
-                })"><div class=fi-sc-component><div class=fi-fo-field data-field-wrapper=""><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class=fi-fo-field-label-col><div class=fi-fo-field-label-ctn><!--[if BLOCK]><![endif]--><label class=fi-fo-field-label for=form.password><!--[if BLOCK]><![endif]--><span class=fi-fo-field-label-content> Heslo<!--[if BLOCK]><![endif]--><sup class=fi-fo-field-label-required-mark>*</sup><!--[if ENDBLOCK]><![endif]--></span><!--[if ENDBLOCK]><![endif]--></label><!--[if ENDBLOCK]><![endif]--><div class="fi-align-end fi-inline fi-sc fi-sc-dense fi-sc-has-gap"><div x-data="filamentSchemaComponent({
-                    path: 'data.password',
-                    containerPath: 'data',
-                    $wire,
-                })"><div class=fi-sc-component><!--[if BLOCK]><![endif]--><span class=fi-sc-text><a class="dark:fi-text-color-400 fi-color fi-color-primary fi-link fi-size-md fi-text-color-700" href=https://kbelstisokoli.test/admin/password-reset/request> Zapomněli jste heslo? </a></span><!--[if ENDBLOCK]><![endif]--></div></div></div></div></div><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class=fi-fo-field-content-col><!--[if BLOCK]><![endif]--><div class="fi-fo-text-input fi-input-wrp" x-data="{ isPasswordRevealed: false }" x-on:focus-input.stop="$el.querySelector('input')?.focus()"><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><div class=fi-input-wrp-content-ctn><input id=form.password autocomplete=current-password class="fi-input fi-revealable" required wire:model=data.password x-bind:type="isPasswordRevealed ? 'text' : 'password'"></div><!--[if BLOCK]><![endif]--><div class=fi-input-wrp-suffix><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class=fi-input-wrp-actions><!--[if BLOCK]><![endif]--><button aria-label="Zobrazit heslo" class="fi-ac-icon-btn-action fi-icon-btn fi-size-sm" title="Zobrazit heslo" type=button wire:loading.attr=disabled x-on:click="isPasswordRevealed = true" x-show="! isPasswordRevealed"><svg xmlns=http://www.w3.org/2000/svg aria-hidden=true class="fi-icon fi-size-md" data-slot=icon fill=currentColor viewbox="0 0 20 20"><path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"></path><path clip-rule=evenodd d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" fill-rule=evenodd></path></svg></button><button aria-label="Skrýt heslo" class="fi-ac-icon-btn-action fi-icon-btn fi-size-sm" title="Skrýt heslo" type=button wire:loading.attr=disabled x-cloak=x-cloak x-on:click="isPasswordRevealed = false" x-show=isPasswordRevealed><svg xmlns=http://www.w3.org/2000/svg aria-hidden=true class="fi-icon fi-size-md" data-slot=icon fill=currentColor viewbox="0 0 20 20"><path clip-rule=evenodd d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.029 10.029 0 0 0 3.3-4.38 1.651 1.651 0 0 0 0-1.185A10.004 10.004 0 0 0 9.999 3a9.956 9.956 0 0 0-4.744 1.194L3.28 2.22ZM7.752 6.69l1.092 1.092a2.5 2.5 0 0 1 3.374 3.373l1.091 1.092a4 4 0 0 0-5.557-5.557Z" fill-rule=evenodd></path><path d="m10.748 13.93 2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a1.651 1.651 0 0 1 0-1.186A10.007 10.007 0 0 1 2.839 6.02L6.07 9.252a4 4 0 0 0 4.678 4.678Z"></path></svg></button><!--[if ENDBLOCK]><![endif]--></div><!--[if ENDBLOCK]><![endif]--></div><!--[if ENDBLOCK]><![endif]--></div><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div><!--[if ENDBLOCK]><![endif]--></div></div></div><div class=fi-grid-col style="--col-span-default: span 1 / span 1;" wire:key=mPpTDuvqRgPzb5GjUpC2.form.remember wire:partial=schema-component::form.remember x-data="filamentSchemaComponent({
-                    path: 'data.remember',
-                    containerPath: 'data',
-                    $wire,
-                })"><div class=fi-sc-component><div class=fi-fo-field data-field-wrapper=""><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class=fi-fo-field-label-col><div class=fi-fo-field-label-ctn><!--[if BLOCK]><![endif]--><label class=fi-fo-field-label for=form.remember><input id=form.remember class="fi-checkbox-input fi-valid" type=checkbox wire:loading.attr=disabled wire:model=data.remember><!--[if BLOCK]><![endif]--><span class=fi-fo-field-label-content> Zapamatovat si mě<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></span><!--[if ENDBLOCK]><![endif]--></label><!--[if ENDBLOCK]><![endif]--></div></div><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div></div></div></div></div></div></div><div class="fi-grid fi-sc fi-sc-has-gap" style="--cols-default: repeat(1, minmax(0, 1fr));"><div class=fi-grid-col style="--col-span-default: span 1 / span 1;" wire:key=mPpTDuvqRgPzb5GjUpC2.content.form-actions wire:partial=schema-component::content.form-actions x-data="filamentSchemaComponent({
-                    path: '',
-                    containerPath: '',
-                    $wire,
-                })"><div class=fi-sc-component><div id=content.form-actions class=fi-sc-actions><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div class="fi-ac fi-width-full"><!--[if BLOCK]><![endif]--><!--[if BLOCK]><![endif]--><button class="dark:fi-bg-color-600 dark:fi-text-color-0 dark:hover:fi-bg-color-700 dark:hover:fi-text-color-0 fi-ac-btn-action fi-bg-color-400 fi-btn fi-color fi-color-primary fi-size-md fi-text-color-950 hover:fi-bg-color-300 hover:fi-text-color-800" wire:loading.attr=disabled wire:target=authenticate x-bind:class="{ 'fi-processing': isProcessing }" x-bind:disabled=isProcessing x-data=filamentFormButton><svg xmlns=http://www.w3.org/2000/svg class="fi-icon fi-loading-indicator fi-size-md" fill=none viewbox="0 0 24 24" wire:loading.delay.default="" wire:target=authenticate><path clip-rule=evenodd d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill=currentColor fill-rule=evenodd opacity=0.2></path><path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill=currentColor></path></svg><svg xmlns=http://www.w3.org/2000/svg class="fi-icon fi-loading-indicator fi-size-md" fill=none viewbox="0 0 24 24" x-cloak=x-cloak x-show=isProcessing><path clip-rule=evenodd d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill=currentColor fill-rule=evenodd opacity=0.2></path><path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill=currentColor></path></svg><span x-show="! isProcessing"> Přihlásit se </span><span x-cloak="" x-show=isProcessing x-text=processingMessage></span></button><!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div><!--[if ENDBLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div></div></div></div></form></div></div><div class="fi-grid-col fi-hidden" style="--col-span-default: span 1 / span 1;"></div><div class="border-slate-100 border-t flex flex-col items-center mt-12 pt-8 text-center w-full"><p class="font-bold italic mb-8 text-[10px] text-slate-400 tracking-[0.25em] uppercase"> "Taktika je připravena, stačí vstoupit do hry." <div class="flex flex-col items-center space-y-8"><a class="bg-slate-50 border border-slate-200 duration-300 font-black group hover:border-primary/30 hover:text-primary inline-flex items-center px-6 py-3 rounded-full shadow-sm space-x-3 text-[11px] text-slate-500 tracking-[0.15em] transition-all uppercase" href=https://kbelstisokoli.test><i class="fa-arrow-left fa-light group-hover:-translate-x-1 transition-transform"></i><span>Zpět na úvodní stránku</span></a><div class="flex justify-center opacity-10 space-x-3"><div class="animate-pulse bg-slate-900 h-1.5 rounded-full w-1.5"></div><div class="[animation-delay:200ms] animate-pulse bg-slate-900 h-1.5 rounded-full w-1.5"></div><div class="[animation-delay:400ms] animate-pulse bg-slate-900 h-1.5 rounded-full w-1.5"></div></div></div></div></div></div><!--[if BLOCK]><![endif]--><!--[if BLOCK]><![endif]--><div style="height: 0" wire:partial=action-modals x-data="filamentActionModals({
-                    livewireId: 'mPpTDuvqRgPzb5GjUpC2',
-                })"><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div><!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div></main></div></div><div wire:effects={&quot;partials&quot;:[],&quot;listeners&quot;:[&quot;notificationsSent&quot;,&quot;notificationSent&quot;,&quot;notificationClosed&quot;]} wire:id=hPgnB4wfKNYQbsFegVBJ wire:key=lw-1482003686-0-2 wire:name=Filament\Livewire\Notifications wire:snapshot={&quot;data&quot;:{&quot;isFilamentNotificationsComponent&quot;:true,&quot;notifications&quot;:[[],{&quot;class&quot;:&quot;Filament\\Notifications\\Collection&quot;,&quot;s&quot;:&quot;wrbl&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;hPgnB4wfKNYQbsFegVBJ&quot;,&quot;name&quot;:&quot;Filament\\Livewire\\Notifications&quot;,&quot;path&quot;:&quot;admin\/login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;cs&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;f7c9385bb61a6dc690f6a3455ea9d4a1c4435440fd682cb68ed30ff3a9d37878&quot;}><div class="fi-align-right fi-no fi-vertical-align-start" role=status><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div><script>window.filamentData = []</script><script src="//kbelstisokoli.test/js/filament/actions/actions.js?v=5.2.2.0"></script><script src="//kbelstisokoli.test/js/filament/notifications/notifications.js?v=5.2.2.0"></script><script src="//kbelstisokoli.test/js/filament/schemas/schemas.js?v=5.2.2.0"></script><script src="//kbelstisokoli.test/js/filament/support/support.js?v=5.2.2.0"></script><script src="//kbelstisokoli.test/js/filament/tables/tables.js?v=5.2.2.0"></script><script src="//kbelstisokoli.test/js/filament/filament/echo.js?v=5.2.2.0"></script><script src="//kbelstisokoli.test/js/filament/filament/app.js?v=5.2.2.0"></script><style>:root {
-}</style><script>loadDarkMode()</script><script>const disableNativeValidation = () => {
-    document.querySelectorAll("form").forEach(form => {
-        if (!form.hasAttribute("novalidate")) {
-            form.setAttribute("novalidate", "novalidate");
-        }
-    });
-};
-document.addEventListener("DOMContentLoaded", disableNativeValidation);
-document.addEventListener("livewire:navigated", disableNativeValidation);
-document.addEventListener("livewire:load", disableNativeValidation);</script>
+                <div class="glass-card p-10 space-y-8 border-t-2 border-primary/50">
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">1</div>
+                            <div>
+                                <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Stáhněte si aplikaci</h3>
+                                <p class="text-[11px] text-slate-400 leading-relaxed">Nainstalujte si Google Authenticator, Microsoft Authenticator nebo podobnou aplikaci z App Store nebo Google Play.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">2</div>
+                            <div>
+                                <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Naskenujte QR kód</h3>
+                                <p class="text-[11px] text-slate-400 leading-relaxed">V aplikaci zvolte "Přidat účet" a naskenujte kód, který vidíte na obrazovce.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">3</div>
+                            <div>
+                                <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Zadejte kód</h3>
+                                <p class="text-[11px] text-slate-400 leading-relaxed">Aplikace začne generovat 6místné kódy. Ten aktuální zadejte do políčka a potvrďte.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="showHelp = false" class="btn btn-primary w-full py-4 rounded-2xl text-sm btn-glow group/btn">
+                <span class="relative z-10 flex items-center justify-center gap-3">
+                    <i class="fa-light fa-arrow-left"></i>
+                    Zpět na nastavení
+                </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content (Setup) -->
+            <div x-show="!showHelp" x-transition class="relative z-10">
+                <!-- Header -->
+                <div class="text-center mb-12 animate-fade-in-down">
+                    <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
+                        <i class="fa-duotone fa-light fa-shield-plus text-6xl icon-bounce icon-glow"></i>
+                    </div>
+                    <h1 class="auth-title">Zabezpečení účtu</h1>
+                    <p class="auth-sub tracking-tight">Pro přístup do administrace je vyžadováno 2FA</p>
+                </div>
+
+                <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
+
+                    <div class="space-y-8">
+                        <div class="text-center space-y-3">
+                            <h2 class="text-xl font-black uppercase tracking-tight text-white italic">Propojení aplikace</h2>
+                            <p class="text-xs text-slate-400 font-medium leading-relaxed">
+                                Naskenujte tento kód ve vaší autentizační aplikaci.
+                            </p>
+                        </div>
+
+                        <div class="flex justify-center">
+                            <div class="p-6 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-primary/20 relative group/qr">
+                                <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover/qr:opacity-100 transition-opacity rounded-2xl"></div>
+                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="192" height="192" viewBox="0 0 192 192"><rect x="0" y="0" width="192" height="192" fill="#ffffff"/><g transform="scale(3.918)"><g transform="translate(0.000,0.000)"><path fill-rule="evenodd" d="M9 0L9 1L8 1L8 2L9 2L9 3L8 3L8 4L9 4L9 3L10 3L10 5L11 5L11 4L12 4L12 3L14 3L14 2L12 2L12 1L10 1L10 0ZM14 0L14 1L15 1L15 2L17 2L17 3L18 3L18 4L16 4L16 3L15 3L15 4L16 4L16 5L14 5L14 4L13 4L13 5L12 5L12 7L11 7L11 6L10 6L10 7L9 7L9 5L8 5L8 7L9 7L9 8L6 8L6 9L8 9L8 11L7 11L7 10L5 10L5 11L4 11L4 10L3 10L3 9L5 9L5 8L0 8L0 14L1 14L1 15L0 15L0 16L1 16L1 17L0 17L0 20L3 20L3 21L1 21L1 22L0 22L0 25L2 25L2 27L1 27L1 28L0 28L0 31L1 31L1 30L2 30L2 32L3 32L3 30L2 30L2 29L4 29L4 30L6 30L6 31L8 31L8 32L5 32L5 31L4 31L4 33L3 33L3 34L2 34L2 33L1 33L1 32L0 32L0 33L1 33L1 34L0 34L0 35L2 35L2 36L3 36L3 35L5 35L5 36L4 36L4 37L3 37L3 38L4 38L4 37L5 37L5 39L7 39L7 38L8 38L8 37L11 37L11 38L10 38L10 39L9 39L9 40L8 40L8 43L9 43L9 44L8 44L8 49L9 49L9 48L10 48L10 46L11 46L11 47L12 47L12 48L11 48L11 49L12 49L12 48L13 48L13 45L15 45L15 46L16 46L16 45L15 45L15 41L16 41L16 40L17 40L17 43L16 43L16 44L17 44L17 45L18 45L18 47L17 47L17 49L22 49L22 47L21 47L21 48L19 48L19 47L20 47L20 46L19 46L19 45L20 45L20 44L21 44L21 43L22 43L22 45L21 45L21 46L22 46L22 45L28 45L28 44L29 44L29 46L27 46L27 48L29 48L29 46L31 46L31 47L30 47L30 49L31 49L31 48L34 48L34 47L37 47L37 44L38 44L38 43L39 43L39 45L40 45L40 46L38 46L38 47L40 47L40 46L41 46L41 48L43 48L43 49L45 49L45 47L42 47L42 46L41 46L41 45L44 45L44 46L46 46L46 45L47 45L47 46L49 46L49 45L47 45L47 44L48 44L48 43L49 43L49 42L47 42L47 40L48 40L48 39L49 39L49 38L47 38L47 40L46 40L46 39L45 39L45 40L44 40L44 39L43 39L43 36L44 36L44 37L45 37L45 38L46 38L46 37L47 37L47 36L46 36L46 34L47 34L47 35L49 35L49 34L47 34L47 33L48 33L48 31L49 31L49 30L48 30L48 29L49 29L49 26L47 26L47 28L45 28L45 29L47 29L47 33L46 33L46 32L44 32L44 29L43 29L43 28L44 28L44 27L46 27L46 26L45 26L45 25L49 25L49 22L48 22L48 20L49 20L49 18L48 18L48 20L46 20L46 21L47 21L47 23L48 23L48 24L46 24L46 23L45 23L45 22L43 22L43 21L44 21L44 20L45 20L45 19L44 19L44 20L43 20L43 18L45 18L45 17L43 17L43 16L46 16L46 17L47 17L47 16L46 16L46 15L48 15L48 17L49 17L49 14L46 14L46 13L49 13L49 9L48 9L48 8L47 8L47 9L48 9L48 10L47 10L47 12L46 12L46 13L44 13L44 12L45 12L45 11L41 11L41 10L40 10L40 12L39 12L39 13L40 13L40 12L42 12L42 13L41 13L41 16L39 16L39 14L38 14L38 15L37 15L37 13L38 13L38 11L39 11L39 10L38 10L38 9L42 9L42 10L46 10L46 8L45 8L45 9L44 9L44 8L43 8L43 9L42 9L42 8L40 8L40 7L41 7L41 6L40 6L40 7L39 7L39 5L38 5L38 4L37 4L37 3L36 3L36 5L34 5L34 4L33 4L33 5L34 5L34 7L33 7L33 6L32 6L32 3L33 3L33 2L39 2L39 4L40 4L40 3L41 3L41 0L40 0L40 1L38 1L38 0L36 0L36 1L32 1L32 0L29 0L29 1L28 1L28 2L27 2L27 1L24 1L24 0L23 0L23 1L21 1L21 2L22 2L22 3L21 3L21 4L19 4L19 3L20 3L20 0L18 0L18 2L17 2L17 1L15 1L15 0ZM9 1L9 2L10 2L10 1ZM23 1L23 2L24 2L24 1ZM30 1L30 2L29 2L29 3L27 3L27 2L25 2L25 3L26 3L26 4L27 4L27 8L28 8L28 10L27 10L27 9L26 9L26 10L25 10L25 11L24 11L24 10L23 10L23 9L19 9L19 10L18 10L18 9L16 9L16 10L15 10L15 11L16 11L16 12L15 12L15 13L13 13L13 12L14 12L14 11L13 11L13 12L12 12L12 11L10 11L10 9L9 9L9 11L8 11L8 12L11 12L11 13L8 13L8 15L6 15L6 16L7 16L7 17L6 17L6 18L7 18L7 17L9 17L9 14L10 14L10 18L11 18L11 19L12 19L12 20L11 20L11 21L12 21L12 22L10 22L10 23L9 23L9 26L10 26L10 25L11 25L11 24L12 24L12 25L13 25L13 23L15 23L15 24L14 24L14 25L15 25L15 29L13 29L13 28L14 28L14 27L11 27L11 28L10 28L10 29L11 29L11 33L10 33L10 31L9 31L9 32L8 32L8 33L6 33L6 34L7 34L7 35L6 35L6 36L5 36L5 37L6 37L6 38L7 38L7 37L8 37L8 36L7 36L7 35L9 35L9 34L12 34L12 35L10 35L10 36L11 36L11 37L12 37L12 38L11 38L11 39L10 39L10 40L11 40L11 41L10 41L10 43L11 43L11 41L12 41L12 40L13 40L13 37L14 37L14 41L15 41L15 40L16 40L16 39L15 39L15 38L16 38L16 37L18 37L18 36L16 36L16 35L18 35L18 34L19 34L19 33L18 33L18 32L20 32L20 34L21 34L21 31L22 31L22 33L25 33L25 34L24 34L24 36L23 36L23 37L24 37L24 38L23 38L23 39L24 39L24 40L26 40L26 39L27 39L27 43L29 43L29 41L32 41L32 42L30 42L30 44L32 44L32 45L33 45L33 46L35 46L35 45L34 45L34 44L32 44L32 43L33 43L33 42L34 42L34 43L35 43L35 44L36 44L36 43L38 43L38 42L39 42L39 43L40 43L40 42L39 42L39 41L38 41L38 40L40 40L40 39L41 39L41 40L43 40L43 39L42 39L42 37L41 37L41 36L42 36L42 35L38 35L38 34L39 34L39 32L40 32L40 31L41 31L41 32L42 32L42 34L43 34L43 32L42 32L42 31L41 31L41 29L42 29L42 28L43 28L43 27L41 27L41 28L40 28L40 24L37 24L37 23L39 23L39 19L40 19L40 20L41 20L41 21L40 21L40 22L42 22L42 18L41 18L41 17L38 17L38 18L37 18L37 17L35 17L35 16L37 16L37 15L36 15L36 14L35 14L35 13L34 13L34 14L33 14L33 16L32 16L32 15L31 15L31 14L32 14L32 13L33 13L33 12L32 12L32 11L33 11L33 10L35 10L35 11L34 11L34 12L36 12L36 11L38 11L38 10L35 10L35 8L34 8L34 9L33 9L33 8L32 8L32 6L31 6L31 5L29 5L29 4L31 4L31 3L32 3L32 1ZM23 3L23 4L24 4L24 3ZM21 4L21 7L22 7L22 4ZM13 5L13 7L14 7L14 9L15 9L15 8L16 8L16 6L15 6L15 7L14 7L14 5ZM18 5L18 6L17 6L17 8L19 8L19 7L20 7L20 5ZM23 5L23 8L26 8L26 5ZM28 5L28 8L30 8L30 9L29 9L29 11L27 11L27 10L26 10L26 11L27 11L27 12L24 12L24 11L23 11L23 12L21 12L21 14L22 14L22 13L23 13L23 15L24 15L24 16L23 16L23 17L24 17L24 16L25 16L25 18L26 18L26 19L27 19L27 20L30 20L30 21L29 21L29 22L31 22L31 21L32 21L32 24L30 24L30 23L28 23L28 21L27 21L27 22L25 22L25 20L24 20L24 18L22 18L22 17L21 17L21 16L22 16L22 15L21 15L21 16L19 16L19 15L20 15L20 14L19 14L19 13L20 13L20 12L19 12L19 13L18 13L18 12L17 12L17 13L18 13L18 14L17 14L17 15L18 15L18 16L16 16L16 15L12 15L12 16L11 16L11 18L15 18L15 21L16 21L16 22L15 22L15 23L16 23L16 24L17 24L17 25L18 25L18 26L16 26L16 28L17 28L17 29L18 29L18 30L17 30L17 32L18 32L18 31L20 31L20 30L19 30L19 29L20 29L20 28L22 28L22 27L23 27L23 29L24 29L24 30L22 30L22 29L21 29L21 30L22 30L22 31L24 31L24 32L25 32L25 33L26 33L26 34L25 34L25 35L28 35L28 36L24 36L24 37L26 37L26 38L25 38L25 39L26 39L26 38L27 38L27 37L28 37L28 36L29 36L29 38L31 38L31 39L28 39L28 40L31 40L31 39L32 39L32 40L33 40L33 41L34 41L34 40L35 40L35 41L36 41L36 42L35 42L35 43L36 43L36 42L38 42L38 41L37 41L37 40L38 40L38 39L40 39L40 38L38 38L38 36L36 36L36 35L37 35L37 34L36 34L36 33L38 33L38 32L39 32L39 31L40 31L40 28L39 28L39 30L36 30L36 29L38 29L38 28L36 28L36 29L35 29L35 28L34 28L34 27L32 27L32 26L31 26L31 25L32 25L32 24L33 24L33 21L34 21L34 19L35 19L35 18L34 18L34 17L33 17L33 18L32 18L32 16L31 16L31 15L30 15L30 16L29 16L29 15L27 15L27 14L25 14L25 15L24 15L24 13L27 13L27 12L29 12L29 13L28 13L28 14L31 14L31 13L32 13L32 12L31 12L31 11L32 11L32 10L33 10L33 9L32 9L32 8L31 8L31 6L30 6L30 7L29 7L29 5ZM18 6L18 7L19 7L19 6ZM24 6L24 7L25 7L25 6ZM35 6L35 7L36 7L36 8L38 8L38 6L37 6L37 7L36 7L36 6ZM10 7L10 8L11 8L11 9L13 9L13 8L11 8L11 7ZM2 10L2 12L3 12L3 13L2 13L2 15L3 15L3 14L4 14L4 16L3 16L3 17L1 17L1 18L3 18L3 17L4 17L4 22L5 22L5 20L7 20L7 19L5 19L5 17L4 17L4 16L5 16L5 14L7 14L7 13L5 13L5 14L4 14L4 11L3 11L3 10ZM16 10L16 11L18 11L18 10ZM20 10L20 11L21 11L21 10ZM30 10L30 11L31 11L31 10ZM5 11L5 12L7 12L7 11ZM11 13L11 14L13 14L13 13ZM15 13L15 14L16 14L16 13ZM18 14L18 15L19 15L19 14ZM34 14L34 16L35 16L35 14ZM42 14L42 15L43 15L43 14ZM45 14L45 15L46 15L46 14ZM25 15L25 16L26 16L26 18L27 18L27 19L28 19L28 17L29 17L29 18L30 18L30 19L31 19L31 20L32 20L32 21L33 21L33 20L32 20L32 18L30 18L30 17L31 17L31 16L30 16L30 17L29 17L29 16L26 16L26 15ZM14 16L14 17L16 17L16 21L18 21L18 20L17 20L17 19L18 19L18 18L17 18L17 17L16 17L16 16ZM19 17L19 19L21 19L21 20L19 20L19 21L21 21L21 23L22 23L22 20L23 20L23 21L24 21L24 20L23 20L23 19L22 19L22 18L21 18L21 17ZM8 18L8 19L9 19L9 18ZM33 18L33 19L34 19L34 18ZM36 18L36 20L35 20L35 22L34 22L34 24L35 24L35 27L36 27L36 25L37 25L37 26L38 26L38 27L39 27L39 26L38 26L38 25L37 25L37 24L36 24L36 23L37 23L37 22L38 22L38 19L39 19L39 18L38 18L38 19L37 19L37 18ZM40 18L40 19L41 19L41 18ZM13 19L13 20L14 20L14 19ZM8 20L8 22L9 22L9 20ZM6 21L6 22L7 22L7 21ZM13 21L13 22L12 22L12 23L13 23L13 22L14 22L14 21ZM2 22L2 25L3 25L3 28L4 28L4 29L5 29L5 28L4 28L4 23L3 23L3 22ZM17 22L17 24L19 24L19 25L20 25L20 26L18 26L18 27L17 27L17 28L18 28L18 29L19 29L19 28L20 28L20 27L21 27L21 26L22 26L22 24L19 24L19 23L20 23L20 22ZM5 23L5 26L8 26L8 23ZM23 23L23 26L26 26L26 23ZM41 23L41 26L44 26L44 23ZM6 24L6 25L7 25L7 24ZM24 24L24 25L25 25L25 24ZM27 24L27 26L30 26L30 28L28 28L28 27L24 27L24 28L28 28L28 30L27 30L27 29L25 29L25 32L26 32L26 31L29 31L29 29L30 29L30 28L31 28L31 29L32 29L32 30L30 30L30 31L31 31L31 32L27 32L27 33L29 33L29 34L28 34L28 35L29 35L29 36L32 36L32 37L31 37L31 38L35 38L35 40L37 40L37 39L36 39L36 38L37 38L37 37L36 37L36 36L35 36L35 37L34 37L34 35L35 35L35 33L34 33L34 32L38 32L38 31L36 31L36 30L35 30L35 29L34 29L34 28L31 28L31 26L30 26L30 25L29 25L29 24ZM42 24L42 25L43 25L43 24ZM6 27L6 28L7 28L7 29L6 29L6 30L9 30L9 29L8 29L8 28L9 28L9 27ZM11 28L11 29L12 29L12 30L13 30L13 31L12 31L12 32L13 32L13 33L14 33L14 34L15 34L15 33L16 33L16 31L15 31L15 33L14 33L14 30L13 30L13 29L12 29L12 28ZM15 29L15 30L16 30L16 29ZM32 30L32 32L31 32L31 33L30 33L30 34L31 34L31 35L32 35L32 36L33 36L33 35L34 35L34 34L33 34L33 33L32 33L32 32L34 32L34 31L35 31L35 30ZM4 33L4 34L5 34L5 33ZM8 33L8 34L9 34L9 33ZM17 33L17 34L18 34L18 33ZM31 33L31 34L32 34L32 35L33 35L33 34L32 34L32 33ZM44 33L44 34L45 34L45 33ZM22 34L22 35L23 35L23 34ZM13 35L13 36L12 36L12 37L13 37L13 36L14 36L14 35ZM20 35L20 36L19 36L19 37L21 37L21 35ZM6 36L6 37L7 37L7 36ZM15 36L15 37L16 37L16 36ZM39 36L39 37L40 37L40 36ZM45 36L45 37L46 37L46 36ZM48 36L48 37L49 37L49 36ZM35 37L35 38L36 38L36 37ZM1 38L1 40L0 40L0 41L3 41L3 40L4 40L4 39L2 39L2 38ZM17 38L17 39L18 39L18 40L19 40L19 41L20 41L20 43L21 43L21 42L22 42L22 38L21 38L21 40L19 40L19 39L20 39L20 38L19 38L19 39L18 39L18 38ZM11 39L11 40L12 40L12 39ZM6 40L6 41L7 41L7 40ZM45 40L45 41L46 41L46 40ZM23 41L23 44L26 44L26 41ZM41 41L41 44L44 44L44 41ZM18 42L18 43L17 43L17 44L18 44L18 45L19 45L19 42ZM24 42L24 43L25 43L25 42ZM42 42L42 43L43 43L43 42ZM12 43L12 44L14 44L14 43ZM46 43L46 44L47 44L47 43ZM9 44L9 46L10 46L10 45L11 45L11 46L12 46L12 45L11 45L11 44ZM23 46L23 48L24 48L24 49L26 49L26 48L24 48L24 47L26 47L26 46ZM14 47L14 48L15 48L15 49L16 49L16 47ZM48 47L48 48L46 48L46 49L49 49L49 47ZM35 48L35 49L38 49L38 48ZM0 0L0 7L7 7L7 0ZM1 1L1 6L6 6L6 1ZM2 2L2 5L5 5L5 2ZM49 0L42 0L42 7L49 7ZM48 1L43 1L43 6L48 6ZM47 2L44 2L44 5L47 5ZM0 49L7 49L7 42L0 42ZM1 48L6 48L6 43L1 43ZM2 47L5 47L5 44L2 44Z" fill="#2d3748"/></g></g></svg>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/5 rounded-2xl p-5 border border-white/10 text-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 blur-2xl -mr-8 -mt-8"></div>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Nelze naskenovat? Zadejte klíč:</p>
+                            <code class="text-[11px] font-bold text-primary bg-white/5 px-4 py-2 rounded-xl block border border-white/5 tracking-wider select-all">
+                                GXL25NLZG3QMMOP3
+                            </code>
+                        </div>
+
+                        <form method="POST" action="https://kbelstisokoli.test/user/confirmed-two-factor-authentication" class="space-y-6">
+                            <input type="hidden" name="_token" value="loskVCskyNM4cRCNSlZdGuzSZUcqTdldU4dIe1T5" autocomplete="off">                        <div class="space-y-3">
+                            <label for="code" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center block">Zadejte 6místný kód z aplikace</label>
+                            <div class="relative group/input">
+                                <div class="input-icon group-focus-within/input:text-primary">
+                                    <i class="fa-light fa-fingerprint text-xl"></i>
+                                </div>
+                                <input id="code" type="text" name="code" inputmode="numeric" autofocus required autocomplete="one-time-code"
+                                       placeholder="000 000"
+                                       class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-black text-white placeholder-slate-700 outline-none tracking-[0.4em] text-center text-3xl py-6">
+                            </div>
+                        </div>
+
+                            <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
+                            <span class="relative z-10 flex items-center justify-center gap-3">
+                                Ověřit a aktivovat
+                                <i class="fa-light fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>
+                            </span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
+                    <button @click="showHelp = true" class="block w-full text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">
+                        <i class="fa-light fa-circle-question mr-2"></i> Potřebujete nápovědu?
+                    </button>
+
+                    <div class="flex flex-col gap-4">
+                        <a href="https://kbelstisokoli.test/clenska-sekce/dashboard" class="block text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-light transition-colors">
+                            <i class="fa-light fa-arrow-left-long mr-2"></i> Přejít do členské sekce
+                        </a>
+                        <form method="POST" action="https://kbelstisokoli.test/logout">
+                            <input type="hidden" name="_token" value="loskVCskyNM4cRCNSlZdGuzSZUcqTdldU4dIe1T5" autocomplete="off">                    <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-rose-400 transition-colors">
+                            Odhlásit se
+                        </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

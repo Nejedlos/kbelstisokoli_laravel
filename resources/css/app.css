@@ -162,34 +162,6 @@
     .input-with-icon { @apply pl-12 pr-4 py-4; }
     .input-icon { @apply absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 transition-colors; }
 
-    .auth-title {
-        @apply font-black uppercase tracking-tighter text-white mb-2;
-        font-family: 'Oswald', sans-serif;
-        font-size: 1.25rem !important; /* text-xl */
-        line-height: 1.75rem !important;
-    }
-
-    @media (min-width: 768px) {
-        .auth-title {
-            font-size: 1.5rem !important; /* text-2xl */
-            line-height: 2rem !important;
-        }
-    }
-
-    .auth-sub {
-        @apply font-medium italic;
-        color: rgba(148, 163, 184, 0.8) !important;
-        font-size: 0.75rem !important; /* text-xs */
-        line-height: 1rem !important;
-    }
-
-    @media (min-width: 768px) {
-        .auth-sub {
-            font-size: 0.875rem !important; /* text-sm */
-            line-height: 1.25rem !important;
-        }
-    }
-
     .btn-glow {
         @apply relative overflow-hidden transition-all duration-500;
         box-shadow: 0 10px 30px -10px rgba(225, 29, 72, 0.5);
@@ -201,4 +173,42 @@
 
     .floating-objects { @apply absolute inset-0 overflow-hidden pointer-events-none; }
     .floating-ball { @apply absolute opacity-10 blur-3xl rounded-full bg-primary; }
+}
+
+/* Explicitní definice nadpisů mimo Tailwind layers pro vynucení priority a zamezení automatickému škálování */
+.auth-title {
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: -0.05em !important;
+    color: #ffffff !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 1.25rem !important; /* 20px */
+    line-height: 1.75rem !important;
+    display: block !important;
+}
+
+@media (min-width: 768px) {
+    .auth-title {
+        font-size: 1.5rem !important; /* 24px */
+        line-height: 2rem !important;
+    }
+}
+
+.auth-sub {
+    font-family: 'Instrument Sans', sans-serif !important;
+    font-weight: 500 !important;
+    font-style: italic !important;
+    letter-spacing: -0.025em !important;
+    color: rgba(148, 163, 184, 0.8) !important;
+    font-size: 0.75rem !important; /* 12px */
+    line-height: 1rem !important;
+    display: block !important;
+}
+
+@media (min-width: 768px) {
+    .auth-sub {
+        font-size: 0.875rem !important; /* 14px */
+        line-height: 1.25rem !important;
+    }
 }
