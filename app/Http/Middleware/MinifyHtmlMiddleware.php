@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+use voku\helper\HtmlMin;
+
+class MinifyHtmlMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $response = $next($request);
+
+        if ($this->shouldMinify($response)) {
+            $content = $response->getContent();
+
+            $htmlMin = new HtmlMin();
+
+            // Aggressive but clean cleaning
+            $htmlMin->doRemoveComments(true);
+            $htmlMin->doSumUpWhitespace(true);
+            $htmlMin->doRemoveWhitespaceAroundTags(true);
+            $htmlMin->doOptimizeAttributes(true);
+            $htmlMin->doRemoveHttpPrefixFromAttributes(true);
+            $htmlMin->doKeepHttpAndHttpsPrefix(false);
+
+            $content = $htmlMin->minify($content);
+
+            $response->setContent($content);
+        }
+
+        return $response;
+    }
+
+    protected function shouldMinify($response): bool
+    {
+        // Accept any Symfony Response (includes Laravel and Livewire responses)
+        if (! $response instanceof Response) {
+            return false;
+        }
+
+        $contentType = $response->headers->get('Content-Type');
+
+        return $contentType && str_contains($contentType, 'text/html');
+    }
+}

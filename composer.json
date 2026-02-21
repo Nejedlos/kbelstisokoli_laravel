@@ -26,7 +26,8 @@
         "spatie/laravel-backup": "^10.0",
         "spatie/laravel-medialibrary": "^11.20",
         "spatie/laravel-permission": "^7.2",
-        "spatie/laravel-query-builder": "^6.4"
+        "spatie/laravel-query-builder": "^6.4",
+        "voku/html-min": "^4.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

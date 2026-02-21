@@ -49,6 +49,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'public.maintenance' => \App\Http\Middleware\PublicMaintenanceMiddleware::class,
             '2fa.required' => \App\Http\Middleware\EnsureTwoFactorEnabled::class,
+            'minify.html' => \App\Http\Middleware\MinifyHtmlMiddleware::class,
+        ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\MinifyHtmlMiddleware::class,
         ]);
 
         $middleware->group('member', [
