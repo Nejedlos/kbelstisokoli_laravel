@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Public\ContactController;
+use App\Http\Controllers\Public\HistoryController;
+use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\MatchController;
+use App\Http\Controllers\Public\NewsController;
+use App\Http\Controllers\Public\TeamController;
+use App\Http\Controllers\Public\TrainingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,7 +20,26 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::name('public.')->group(function (): void {
-    Route::get('/uvod', function () {
-        return view('public.home');
-    })->name('home');
+    // Úvod
+    Route::get('/uvod', HomeController::class)->name('home');
+
+    // Novinky
+    Route::get('/novinky', [NewsController::class, 'index'])->name('news.index');
+    Route::get('/novinky/{slug}', [NewsController::class, 'show'])->name('news.show');
+
+    // Zápasy
+    Route::get('/zapasy', [MatchController::class, 'index'])->name('matches.index');
+    Route::get('/zapasy/{id}', [MatchController::class, 'show'])->name('matches.show');
+
+    // Tým
+    Route::get('/tym', [TeamController::class, 'index'])->name('team.index');
+
+    // Tréninky
+    Route::get('/treninky', [TrainingController::class, 'index'])->name('trainings.index');
+
+    // Historie
+    Route::get('/historie', [HistoryController::class, 'index'])->name('history.index');
+
+    // Kontakt
+    Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
 });

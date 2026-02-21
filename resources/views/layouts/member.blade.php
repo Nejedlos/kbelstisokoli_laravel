@@ -8,11 +8,27 @@
 </head>
 <body>
     <header>
-        <!-- Navigace pro členy -->
+        <nav>
+            <ul>
+                @foreach (data_get(config('navigation.member'), 'header', []) as $item)
+                    <li>
+                        <a href="{{ route($item['route']) }}">{{ $item['title'] }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
     </header>
 
     <div class="sidebar">
-        <!-- Boční menu členské sekce -->
+        <nav>
+            <ul>
+                @foreach (data_get(config('navigation.member'), 'sidebar', []) as $item)
+                    <li>
+                        <a href="{{ route($item['route']) }}">{{ $item['title'] }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
     </div>
 
     <main>

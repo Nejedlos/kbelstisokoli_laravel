@@ -35,17 +35,27 @@ Aplikace je rozdělena do tří hlavních oblastí:
     - `member.php`: Trasy pro přihlášené členy.
     - `admin.php`: Vlastní trasy pro administraci (mimo Filament).
 
-## 3. Konvence pojmenování
-- **Routy:**
-    - Public: `public.home`, `public.news.show` atd.
-    - Member: `member.dashboard`, `member.attendance` atd.
-    - Admin (custom): `admin.custom.export` atd.
-- **Middleware:**
-    - Veřejné: `web`
-    - Členské: `web`, `auth`, `verified`
-    - Admin: `web`, `auth`, `can:access_admin` (nebo dle Filament konfigurace)
+## 3. Konvence rout a přístupů
+- Pojmenování rout využívá prefixy pro jasné odlišení oblastí:
+  - Public: `public.*` (např. `public.home`, `public.news.index`, `public.matches.show`)
+  - Member: `member.*` (např. `member.dashboard`, `member.attendance.index`, `member.profile.edit`)
+  - Admin: `admin.*` (např. `admin.dashboard`, `admin.content.index`)
+- URL prefixy a middleware skupiny:
+  - Public: bez speciálního prefixu (v rámci `web`)
+  - Member: prefix `/clenska-sekce`, skupina `member` (`auth`, `verified`, `permission:view_member_section`)
+  - Admin (custom mimo Filament): prefix `/admin/custom`, skupina `admin` (`auth`, `permission:access_admin`)
 
-## 4. Technologie
+## 4. Navigace (menu)
+- Struktura menu je centralizovaná v `config/navigation.php` a je rozdělena na části:
+  - `public`: hlavní veřejné menu
+  - `member.header`, `member.sidebar`: menu pro členskou sekci
+  - `admin`: menu pro vlastní admin stránky (mimo Filament)
+- Layout šablony načítají menu dynamicky:
+  - `resources/views/layouts/public.blade.php`
+  - `resources/views/layouts/member.blade.php`
+  - `resources/views/layouts/admin.blade.php`
+
+## 5. Technologie
 - **Framework:** Laravel 12
 - **Administrace:** Filament PHP 5
 - **Routing:** Laravel Folio (pro určité části) & Standardní routování

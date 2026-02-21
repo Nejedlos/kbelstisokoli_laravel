@@ -8,7 +8,15 @@
 </head>
 <body>
     <header>
-        <!-- Veřejná navigace -->
+        <nav>
+            <ul>
+                @foreach (config('navigation.public', []) as $item)
+                    <li>
+                        <a href="{{ route($item['route']) }}">{{ $item['title'] }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
     </header>
 
     <main>

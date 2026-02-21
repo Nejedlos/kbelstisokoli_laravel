@@ -7,6 +7,18 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
+    <header>
+        <nav>
+            <ul>
+                @foreach (config('navigation.admin', []) as $item)
+                    <li>
+                        <a href="{{ route($item['route']) }}">{{ $item['title'] }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
+    </header>
+
     <main>
         @yield('content')
     </main>
