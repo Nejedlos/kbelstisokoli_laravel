@@ -8,9 +8,14 @@ Stránka se zobrazuje automaticky, pokud není publikován žádný obsah, nebo 
 
 ### Vizuální prvky
 - **Téma:** Basketbalové hřiště s taktickými prvky (X a O).
-- **Textura:** Na celou stránku je aplikován jemný "grainy" overlay pro prémiovější vzhled.
+- **Pozadí a hloubka:**
+    - Odstraněna rušivá tečkovaná mřížka a nahrazena systémem tří velkých atmosférických gradientů (primární barva nahoře, doplňková modrá v rozích).
+    - Taktické prvky jsou ztlumeny a překryty vertikálním gradientem pro plynulý zánik v okrajích.
+    - Šum (grainy overlay) je implementován jako pseudoelement `body::before` s nízkou opacitou (2 %), což dodává pocit "materiálu" bez vizuálního šumu.
+- **Tlačítka:** Hlavní akce (CTA) využívají plnou brandovou barvu s výrazným stínem pro maximální viditelnost.
 - **Interaktivita:** Animovaný basketbalový míč s CSS září a hover efekty.
-- **Responzivita:** Stránka je plně optimalizována pro mobilní zařízení (využívá `overflow-y-auto` místo `hidden`, aby byl obsah dostupný i na malých obrazovkách).
+- **Responzivita:** Stránka je plně optimalizována pro mobilní zařízení.
+- **Záře (Glow):** Využívá se pozadí s rozmazanou září (blur) kolem hlavního obsahu pro lepší hloubku.
 
 ### Technické detaily
 - **Šablona:** `resources/views/public/under-construction.blade.php`.

@@ -422,7 +422,54 @@ php artisan optimize:clear
 3) feat(logic): add event-driven RSVP notifications and BaseNotification branding
 
 
-## 13. Frontend Design System a Render Pipeline (Public)
+## 20. Scheduler a provozní automatizace (Cron Modul)
+
+Účel: Centralizovaná správa plánovaných úloh, automatizace workflow a monitoring provozu systému.
+
+### 20.1 Architektura
+- **Dynamický Scheduler:** Úlohy jsou definovány v databázi (tabulka `cron_tasks`) a dynamicky registrovány do Laravel scheduleru v `bootstrap/app.php`.
+- **Job Wrapper:** Všechny Artisan příkazy jsou spouštěny přes `RunCronTaskJob`, který zajišťuje izolaci a detailní logování každého běhu.
+- **Logování:** Každý pokus o spuštění, jeho výstup, trvání a případné chyby jsou ukládány do tabulky `cron_logs`.
+
+### 20.2 Webový trigger (Cron URL)
+Pro prostředí, kde není možné nastavit systémový cronjob, je připraven webový trigger:
+- **URL:** `/system/cron/run?token=VAŠ_TOKEN`
+- **Bezpečnost:** Vyžaduje `CRON_TOKEN` definovaný v `.env`. Bez platného tokenu není spuštění scheduleru povoleno.
+
+### 20.3 Implementované úlohy (Skeletony)
+1.  **RSVP Upomínky (`rsvp:reminders`):** Vyhledává členy, kteří nepotvrdili účast na akcích začínajících v příštích 24 hodinách.
+2.  **Sync oznámení (`announcements:sync`):** Automaticky deaktivuje (přepne `is_active` na `false`) oznámení, kterým vypršel čas platnosti.
+3.  **Import statistik (`stats:import`):** Vstupní bod pro budoucí automatizovanou pipeline stahování dat z externích webů.
+4.  **Systémový úklid (`system:cleanup`):** Pravidelné promazávání starých logů (standardně starší než 30 dní) pro úsporu místa v DB.
+
+### 20.4 Admin správa (Filament)
+Resource **Cron tabulka** v sekci "Nastavení":
+- **Správa úloh:** Editace cron výrazů, Artisan příkazů a priorit.
+- **Ruční spuštění:** Tlačítko "Spustit nyní" přidá úlohu okamžitě do fronty k provedení.
+- **Audit:** Detailní historie všech běhů s náhledem na textový výstup příkazu.
+
+### 20.5 Provozní nastavení
+- **Log Retention:** Doba uchování logů je nastavitelná v `config/system.php` (výchozí 30 dní).
+- **Idempotence:** Úlohy jsou navrženy tak, aby jejich opakované spuštění nezpůsobilo chybu nebo duplicitní data.
+
+### 20.6 CLI a vývoj
+```bash
+# Inicializace základních úloh
+php artisan db:seed --class=CronTaskSeeder
+
+# Ruční spuštění scheduleru
+php artisan schedule:run
+
+# Spuštění queue workera (nutné pro RunCronTaskJob)
+php artisan queue:work
+```
+
+### 20.7 Doporučený produkční setup
+Pro plnou funkčnost automatizace nastavte na serveru cronjob:
+```cron
+* * * * * cd /cesta/k/projektu && php artisan schedule:run >> /dev/null 2>&1
+```
+Nebo využijte webový trigger nastavením externí služby na volání URL každou minutu.
 
 Cíl: Vytvořit konzistentní, hypermoderní a sportovní veřejný frontend řízený backendem (global settings + page builder), mobile‑first, bez seed obsahu.
 

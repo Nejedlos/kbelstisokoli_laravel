@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
+            CronTaskSeeder::class,
         ]);
 
         // Záměrně nevytváříme žádné uživatele v základním seedingu.

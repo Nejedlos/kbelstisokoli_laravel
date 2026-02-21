@@ -4,6 +4,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Schema;
+use App\Models\CronTask;
+use App\Jobs\RunCronTaskJob;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,6 +26,21 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/admin.php'));
         },
     )
+    ->withSchedule(function (Schedule $schedule) {
+        // Dynamická registrace úloh z databáze
+        if (!app()->runningInConsole() || Schema::hasTable('cron_tasks')) {
+            try {
+                CronTask::where('is_active', true)->each(function ($task) use ($schedule) {
+                    $schedule->job(new RunCronTaskJob($task))
+                        ->cron($task->expression)
+                        ->name($task->name)
+                        ->withoutOverlapping();
+                });
+            } catch (\Exception $e) {
+                // Tichý fail, pokud DB není připravena (např. při první migraci)
+            }
+        }
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         // Vlastní middleware skupiny pro přehlednou správu přístupů
         // Pozn.: Skupina 'web' je již aplikována v bootstrappingu rout výše.

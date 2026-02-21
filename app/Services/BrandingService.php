@@ -58,9 +58,13 @@ class BrandingService
 
         $vars = [
             '--color-brand-navy' => $colors['navy'],
+            '--color-brand-navy-rgb' => $this->hexToRgb($colors['navy']),
             '--color-brand-blue' => $colors['blue'],
+            '--color-brand-blue-rgb' => $this->hexToRgb($colors['blue']),
             '--color-brand-red' => $colors['red'],
+            '--color-brand-red-rgb' => $this->hexToRgb($colors['red']),
             '--color-brand-white' => $colors['white'],
+            '--color-brand-white-rgb' => $this->hexToRgb($colors['white']),
             '--color-ui-bg' => $colors['bg'],
             '--color-ui-surface' => $colors['surface'],
             '--color-ui-surface-alt' => $colors['surface_alt'],

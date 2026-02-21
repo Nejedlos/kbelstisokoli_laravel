@@ -17,8 +17,22 @@
         body {
             background-color: var(--color-brand-navy);
             background-image:
-                radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-            background-size: 40px 40px;
+                radial-gradient(circle at 50% -20%, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 70%),
+                radial-gradient(circle at 0% 100%, rgba(var(--color-brand-blue-rgb), 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(var(--color-brand-blue-rgb), 0.15) 0%, transparent 50%);
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        /* Jemná textura místo "kropenatosti" */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.02;
+            pointer-events: none;
+            z-index: 1;
         }
 
         .marker-font {
@@ -72,41 +86,43 @@
 </head>
 <body class="min-h-full flex flex-col items-center justify-center overflow-x-hidden overflow-y-auto text-white selection:bg-primary selection:text-white pb-12">
 
-    <!-- Grainy overlay pro texturu -->
-    <div class="fixed inset-0 z-[1] pointer-events-none opacity-[0.03] contrast-150 brightness-100" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')"></div>
+    <!-- Hlavní obsah -->
 
     <!-- Taktické prvky na pozadí -->
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <svg class="w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+        <div class="absolute inset-0 bg-gradient-to-b from-brand-navy via-transparent to-brand-navy z-[1]"></div>
+        <svg class="w-full h-full opacity-60" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
             <!-- Hřiště -->
-            <circle cx="500" cy="500" r="150" class="court-line" />
-            <line x1="0" y1="500" x2="1000" y2="500" class="court-line" />
-            <rect x="250" y="0" width="500" height="200" class="court-line" />
-            <rect x="250" y="800" width="500" height="200" class="court-line" />
+            <circle cx="500" cy="500" r="150" class="court-line" style="stroke-opacity: 0.1;" />
+            <line x1="0" y1="500" x2="1000" y2="500" class="court-line" style="stroke-opacity: 0.1;" />
+            <rect x="250" y="0" width="500" height="200" class="court-line" style="stroke-opacity: 0.1;" />
+            <rect x="250" y="800" width="500" height="200" class="court-line" style="stroke-opacity: 0.1;" />
 
             <!-- Taktika (X a O) -->
-            <g class="animate-pulse" style="animation-duration: 4s;">
-                <text x="150" y="200" class="chalk-text text-6xl">X</text>
-                <text x="250" y="350" class="chalk-text text-6xl">O</text>
-                <text x="800" y="700" class="chalk-text text-6xl">X</text>
-                <text x="700" y="800" class="chalk-text text-6xl">O</text>
+            <g class="animate-pulse" style="animation-duration: 8s;">
+                <text x="150" y="200" class="chalk-text text-6xl" style="opacity: 0.15;">X</text>
+                <text x="250" y="350" class="chalk-text text-6xl" style="opacity: 0.15;">O</text>
+                <text x="800" y="700" class="chalk-text text-6xl" style="opacity: 0.15;">X</text>
+                <text x="700" y="800" class="chalk-text text-6xl" style="opacity: 0.15;">O</text>
 
-                <path d="M 180 220 Q 220 300 240 330" class="chalk-line" />
-                <path d="M 780 720 Q 720 750 710 780" class="chalk-line" />
+                <path d="M 180 220 Q 220 300 240 330" class="chalk-line" style="opacity: 0.2;" />
+                <path d="M 780 720 Q 720 750 710 780" class="chalk-line" style="opacity: 0.2;" />
 
                 <!-- Šipka k cíli -->
-                <path d="M 500 600 Q 550 700 600 750" class="chalk-line" style="stroke: white; opacity: 0.2;" />
-                <text x="620" y="780" class="chalk-text-primary text-4xl">VÍTĚZSTVÍ!</text>
+                <path d="M 500 600 Q 550 700 600 750" class="chalk-line" style="stroke: white; opacity: 0.1;" />
+                <text x="620" y="780" class="chalk-text-primary text-4xl" style="opacity: 0.4;">VÍTĚZSTVÍ!</text>
             </g>
         </svg>
     </div>
 
     <!-- Hlavní kontejner -->
-    <div class="relative z-10 w-full max-w-4xl px-6 py-12 md:py-20 flex flex-col items-center text-center">
+    <div class="relative z-10 w-full max-w-5xl px-6 py-12 md:py-24 flex flex-col items-center text-center">
+        <!-- Aura záře za obsahem -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-[600px] bg-primary/10 blur-[140px] rounded-full -z-10 pointer-events-none"></div>
 
         <!-- Velký nápis / Stav -->
         <div class="mb-4">
-            <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 backdrop-blur-md text-white font-black uppercase tracking-[0.3em] text-[10px] md:text-xs rounded-full mb-8 shadow-2xl">
+            <span class="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/20 backdrop-blur-md text-primary font-black uppercase tracking-[0.3em] text-[10px] md:text-xs rounded-full mb-8 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.2)]">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -126,11 +142,11 @@
             </div>
         </div>
 
-        <h2 class="text-xl md:text-4xl font-bold uppercase tracking-tight text-white mb-6 md:mb-8 max-w-2xl balance">
+        <h2 class="text-2xl md:text-5xl font-black uppercase tracking-tight text-white mb-6 md:mb-10 max-w-3xl balance leading-tight">
             {{ $title ?? 'Trenér právě kreslí vítěznou taktiku pro náš nový web.' }}
         </h2>
 
-        <p class="text-base md:text-2xl text-slate-300/80 font-medium leading-relaxed mb-10 md:mb-16 max-w-3xl">
+        <p class="text-lg md:text-2xl text-slate-200 font-medium leading-relaxed mb-12 md:mb-20 max-w-3xl">
             {{ $text ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!' }}
         </p>
 
@@ -156,29 +172,33 @@
         </div>
 
         <!-- Akce -->
-        <div class="flex flex-col md:flex-row items-stretch md:items-center gap-6 md:gap-12 w-full max-w-lg md:max-w-none">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center gap-6 md:gap-16 w-full max-w-lg md:max-w-3xl">
             <div class="flex flex-col items-center flex-1">
-                <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Pro trenéry</div>
-                <a href="/admin" class="w-full md:w-auto btn bg-white/5 border-white/10 text-white hover:bg-white hover:text-brand-navy backdrop-blur-sm transition-all px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-sm border-2">
-                    Vstup do šatny
+                <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Pro trenéry</div>
+                <a href="/admin" class="w-full md:w-auto group/btn relative overflow-hidden bg-primary text-white hover:bg-white hover:text-brand-navy transition-all px-12 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-[0_20px_40px_-15px_rgba(var(--color-primary-rgb),0.5)] hover:shadow-none active:scale-95">
+                    <span class="relative z-10 flex items-center justify-center gap-3">
+                        Vstup do šatny
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+                    </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700"></div>
                 </a>
             </div>
 
-            <div class="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+            <div class="hidden md:block w-px h-24 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
 
             <div class="flex flex-col items-center flex-1">
-                <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Sledujte nás</div>
-                <div class="flex items-center gap-4 md:gap-8">
+                <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Sledujte nás</div>
+                <div class="flex items-center gap-5 md:gap-8">
                     @if($branding['socials']['facebook'] ?? null)
-                        <a href="{{ $branding['socials']['facebook'] }}" target="_blank" class="p-3 bg-white/5 border border-white/10 rounded-full text-white/60 hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all">
+                        <a href="{{ $branding['socials']['facebook'] }}" target="_blank" class="p-4 bg-white/10 border border-white/20 rounded-2xl text-white hover:text-primary hover:border-primary hover:bg-white transition-all shadow-xl group/social">
                             <span class="sr-only">Facebook</span>
-                            <svg class="w-6 h-6 fill-currentColor" viewBox="0 0 24 24"><path d="M9 8H6v4h3v12h5v-12h3.642L18 8h-4V6.333C14 5.378 14.192 5 15.115 5H18V0h-3.808C10.596 0 9 1.583 9 4.615V8z"/></svg>
+                            <svg class="w-7 h-7 fill-currentColor" viewBox="0 0 24 24"><path d="M9 8H6v4h3v12h5v-12h3.642L18 8h-4V6.333C14 5.378 14.192 5 15.115 5H18V0h-3.808C10.596 0 9 1.583 9 4.615V8z"/></svg>
                         </a>
                     @endif
                     @if($branding['socials']['instagram'] ?? null)
-                        <a href="{{ $branding['socials']['instagram'] }}" target="_blank" class="p-3 bg-white/5 border border-white/10 rounded-full text-white/60 hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all">
+                        <a href="{{ $branding['socials']['instagram'] }}" target="_blank" class="p-4 bg-white/10 border border-white/20 rounded-2xl text-white hover:text-primary hover:border-primary hover:bg-white transition-all shadow-xl group/social">
                             <span class="sr-only">Instagram</span>
-                            <svg class="w-6 h-6 fill-currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            <svg class="w-7 h-7 fill-currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                         </a>
                     @endif
                 </div>
