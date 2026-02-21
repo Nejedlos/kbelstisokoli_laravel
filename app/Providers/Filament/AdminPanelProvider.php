@@ -23,9 +23,48 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Support\Facades\FilamentView;
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function boot(): void
+    {
+        FilamentView::registerRenderHook(
+            'panels::head.end',
+            fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/filament-auth.css', 'resources/js/filament-error-handler.js'])"),
+        );
+
+        FilamentView::registerRenderHook(
+            'panels::auth.login.before',
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header subtitle="Vstupte na palubovku vaší arény" />'),
+        );
+
+        FilamentView::registerRenderHook(
+            'panels::auth.password-reset.request.before',
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header title="Zapomenuté heslo" subtitle="Zašleme vám odkaz pro obnovu přístupu" icon="fa-key-skeleton" />'),
+        );
+
+        FilamentView::registerRenderHook(
+            'panels::auth.password-reset.reset.before',
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header title="Nové heslo" subtitle="Nastavte si bezpečné heslo k vašemu účtu" icon="fa-lock-keyhole" />'),
+        );
+
+        FilamentView::registerRenderHook(
+            'panels::auth.login.form.after',
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-footer />'),
+        );
+
+        FilamentView::registerRenderHook(
+            'panels::auth.password-reset.request.form.after',
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-footer back-label="Zpět na přihlášení" back-url="/admin/login" />'),
+        );
+
+        FilamentView::registerRenderHook(
+            'panels::auth.password-reset.reset.form.after',
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-footer back-label="Zpět na přihlášení" back-url="/admin/login" />'),
+        );
+    }
+
     public function panel(Panel $panel): Panel
     {
         $branding = app(BrandingService::class)->getSettings();
@@ -50,37 +89,6 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex($colors['red']),
                 'gray' => Color::Slate,
             ])
-            ->renderHook(
-                'panels::auth.login.before',
-                fn (): string => \Illuminate\Support\Facades\Blade::render(<<<'HTML'
-                    @php
-                        $branding = app(\App\Services\BrandingService::class)->getSettings();
-                        $clubName = $branding['club_name'] ?? 'Kbelští sokoli';
-                    @endphp
-                    <div class="auth-header-external">
-                        <div class="animate-fade-in-down">
-                            <div class="auth-icon-container">
-                                <i class="fa-duotone fa-light fa-basketball-hoop text-5xl text-primary icon-bounce icon-glow"></i>
-                            </div>
-                            <h1 class="auth-title">{{ $clubName }}</h1>
-                            <p class="auth-sub tracking-tight">Vstupte na palubovku vaší arény</p>
-                        </div>
-                    </div>
-                HTML),
-            )
-            ->renderHook(
-                'panels::auth.login.form.after',
-                fn (): string => view('filament.hooks.login-footer'),
-            )
-            ->renderHook(
-                'panels::head.end',
-                fn (): string => \Illuminate\Support\Facades\Blade::render(<<<'HTML'
-                    @isset($__vite_main) @else
-                        @vite(['resources/css/filament-auth.css', 'resources/js/filament-error-handler.js'])
-                        @php $__vite_main = true; @endphp
-                    @endisset
-                HTML),
-            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

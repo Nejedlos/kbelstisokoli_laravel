@@ -1,24 +1,10 @@
 @extends('layouts.auth')
 
 @section('content')
-<!-- Header -->
-<div class="text-center mb-12 animate-fade-in-down">
-    @if($branding['logo_path'] ?? null)
-        <div class="w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
-            <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
-        </div>
-    @else
-        <div class="auth-icon-container">
-            <i class="fa-duotone fa-light fa-key-skeleton text-5xl text-primary icon-bounce icon-glow"></i>
-        </div>
-    @endif
-    <h1 class="auth-title tracking-tight">Nové heslo</h1>
-    <p class="auth-sub tracking-tight">Nastavte si bezpečný přístup</p>
-</div>
+<div class="animate-fade-in-down">
+    <x-auth-header title="Nové heslo" subtitle="Nastavte si bezpečný přístup" icon="fa-lock-keyhole" />
 
-<div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
-    <!-- Decorative corner accent -->
-    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
+    <div class="glass-card">
     <form method="POST" action="{{ route('password.update') }}" class="space-y-8" novalidate>
         @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
@@ -79,11 +65,6 @@
     </form>
 </div>
 
-<div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
-    <div class="flex items-center justify-center gap-4 text-slate-600">
-        <div class="h-px w-8 bg-white/5"></div>
-        <p class="text-[9px] font-black uppercase tracking-[0.3em] italic opacity-40">{{ $branding['club_short_name'] }} Arena</p>
-        <div class="h-px w-8 bg-white/5"></div>
-    </div>
+    <x-auth-footer back-label="Zpět na přihlášení" :back-url="route('login')" />
 </div>
 @endsection

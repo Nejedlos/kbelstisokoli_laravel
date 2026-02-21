@@ -1,13 +1,13 @@
 /*
    ==========================================================================
-   HYPERMODERN ARENA LOGIN - FILAMENT OVERRIDE (VITE READY)
+   KBELŠTÍ SOKOLI ARENA AUTH - FILAMENT OVERRIDE
    ==========================================================================
 */
 
-/* Font Awesome Pro integration - Lokální (Vendored) */
+/* Font Awesome Pro integration */
 @import "../vendor/fontawesome/css/all.min.css";
 
-/* Animace (Identické s app.css pro konzistenci) */
+/* Animace */
 @keyframes shake {
     10%, 90% { transform: translate3d(-1px, 0, 0); }
     20%, 80% { transform: translate3d(2px, 0, 0); }
@@ -21,129 +21,54 @@
 }
 
 @keyframes fade-in-down {
-    from { opacity: 0; transform: translateY(-20px); }
+    from { opacity: 0; transform: translateY(-30px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes glass-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes icon-glow {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(225, 29, 72, 0.3)); }
+    50% { filter: drop-shadow(0 0 25px rgba(225, 29, 72, 0.6)); }
+}
+
 .animate-fade-in-down {
-    animation: fade-in-down 0.6s ease-out forwards !important;
+    animation: fade-in-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.animate-fade-in {
+    animation: fade-in 1s ease-out forwards !important;
 }
 
 /* Custom Validations & Error States */
 .fi-fo-field-wrp-error-message,
 .fi-fo-field-error-message,
-.fi-fo-field-content-col .text-danger-600,
-.fi-fo-field-content-col [class*="fi-fo-field-wrp-error"],
-.fi-fo-field-content-col [id*="-error"],
-[data-field-wrapper] .fi-fo-field-error-message,
-.fi-error-message,
-.fi-fo-field-content-col .fi-error-message {
-    color: #E11D48 !important; /* Brand Red */
-    font-size: 0.85rem !important; /* Slightly larger for better readability */
+.fi-error-message {
+    color: #E11D48 !important;
+    font-size: 0.75rem !important;
     font-weight: 800 !important;
-    letter-spacing: 0.01em !important;
+    letter-spacing: 0.025em !important;
     display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
     align-items: center !important;
-    gap: 0.6rem !important;
+    gap: 0.5rem !important;
     margin-top: 0.75rem !important;
     animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both !important;
-    padding: 0.65rem 1rem !important;
-    background: #FFF1F2 !important; /* Very light rose background */
-    border: 1px solid rgba(225, 29, 72, 0.2) !important;
+    padding: 0.75rem 1rem !important;
+    background: rgba(225, 29, 72, 0.05) !important;
+    border: 1px solid rgba(225, 29, 72, 0.15) !important;
     border-left: 4px solid #E11D48 !important;
     border-radius: 0.75rem !important;
-    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08) !important;
-    z-index: 50 !important;
-    position: relative !important;
 }
 
-/* Explicitní ikony pro všechny typy chyb */
 .fi-fo-field-wrp-error-message::before,
 .fi-fo-field-error-message::before,
-[data-field-wrapper] .fi-fo-field-error-message::before,
-.fi-error-message::before,
-.fi-fo-field-content-col .text-danger-600::before,
-.fi-fo-field-content-col [id*="-error"]::before {
-    content: "\f06a" !important; /* circle-exclamation */
+.fi-error-message::before {
+    content: "\f06a" !important;
     font-family: "Font Awesome 7 Pro" !important;
     font-weight: 900 !important;
-    font-size: 1rem !important;
-    flex-shrink: 0 !important;
-}
-
-/* Explicitní barva labelu při chybě */
-.fi-fo-field-label.fi-is-invalid,
-.fi-fo-field-label-content.fi-is-invalid,
-.fi-invalid-field .fi-fo-field-label,
-.fi-invalid-field .fi-fo-field-label-content {
-    color: #E11D48 !important;
-    font-weight: 950 !important;
-}
-
-/* Error state pro input wrapper - Robustní detekce přes třídy a :has() */
-.fi-input-wrp.fi-is-invalid,
-.fi-input-wrp.fi-color-danger,
-.fi-input-wrp.fi-is-invalid input,
-.fi-input-wrp.fi-is-invalid select,
-.fi-input-wrp.fi-is-invalid textarea,
-.fi-fo-field-content .fi-input-wrp.fi-color-danger,
-.fi-fo-field-content-col:has(.fi-error-message) .fi-input-wrp,
-.fi-fo-field-content-col:has(.fi-fo-field-wrp-error-message) .fi-input-wrp,
-.fi-fo-field-content-col:has(.text-danger-600) .fi-input-wrp,
-.fi-fo-field-content-col:has([id*="-error"]) .fi-input-wrp,
-.fi-fo-field:has(.text-danger-600) .fi-input-wrp,
-.fi-fo-field:has([id*="-error"]) .fi-input-wrp {
-    border-color: #E11D48 !important;
-    border-width: 2px !important;
-    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.12) !important;
-    background-color: #FFF1F2 !important; /* Jemné červené pozadí pro indikaci chyby i bez focusu */
-    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both !important;
-}
-
-/* Speciální focus barva pro invalid input */
-.fi-input-wrp.fi-is-invalid:focus-within,
-.fi-input-wrp.fi-is-invalid input:focus {
-    border-color: #E11D48 !important;
-    box-shadow: 0 0 0 5px rgba(225, 29, 72, 0.25) !important;
-    background-color: #ffffff !important;
-}
-
-.fi-input.fi-is-invalid {
-    color: #E11D48 !important;
-}
-
-/* Výrazná vizuální indikace celého pole při chybě */
-.fi-invalid-field,
-.fi-fo-field:has(.fi-is-invalid),
-.fi-fo-field:has(.fi-color-danger),
-.fi-fo-field:has(.text-danger-600),
-.fi-fo-field:has(.fi-error-message),
-.fi-fo-field:has([id*="-error"]) {
-    background: rgba(225, 29, 72, 0.03) !important;
-    padding: 0.75rem !important;
-    border-radius: 1rem !important;
-    border: 1px dashed rgba(225, 29, 72, 0.2) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* Notifikace (Filament Notifications) */
-.fi-no-notification {
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(12px) !important;
-    border: none !important;
-    border-radius: 1.25rem !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-    padding: 1.25rem !important;
-}
-
-.fi-no-notification.fi-color-danger {
-    border-left: 6px solid #E11D48 !important;
-}
-
-.fi-no-notification.fi-color-success {
-    border-left: 6px solid #10b981 !important;
 }
 
 /* Reset a základní pozadí */
@@ -152,21 +77,18 @@
     --color-brand-blue: #2563eb;
     --color-brand-red: #e11d48;
     --color-brand-red-hover: #be123c;
-    --color-brand-white: #ffffff;
     --color-ui-bg: #f8fafc;
-    --color-ui-surface: #ffffff;
-    --color-ui-surface-alt: #eef2f7;
-    --color-ui-border: #dce3ec;
-    --color-ui-text: #0f172a;
-    --color-ui-text-muted: #64748b;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
-.fi-simple-layout {
+.fi-simple-layout, .auth-gradient {
     background-color: #020617 !important;
     background-image:
-        radial-gradient(circle at 50% -20%, var(--color-brand-red) 0%, transparent 40%),
-        radial-gradient(circle at 0% 100%, var(--color-brand-navy) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, var(--color-brand-blue) 0%, transparent 50%) !important;
+        radial-gradient(circle at 50% -20%, rgba(225, 29, 72, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 0% 100%, rgba(11, 31, 58, 0.4) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.1) 0%, transparent 60%) !important;
     background-attachment: fixed !important;
     min-height: 100vh !important;
     display: flex !important;
@@ -176,349 +98,204 @@
     padding: 2rem !important;
 }
 
-/* Auth header positioning for Filament login - Move it ABOVE the card */
-.auth-header-external {
-    position: absolute !important;
-    bottom: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    padding-bottom: 2rem !important;
-    width: 100% !important;
-    pointer-events: none !important;
-    z-index: 100 !important;
-    display: block !important;
-    text-align: center !important;
+/* Floating Objects */
+.floating-ball {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.1;
+    background: var(--color-brand-red);
 }
 
-/* Glass Card - Dark theme to match 2FA setup */
-.fi-simple-main {
-    background-color: rgba(15, 23, 42, 0.4) !important; /* Slate 900 with opacity */
-    backdrop-filter: blur(24px) !important;
-    -webkit-backdrop-filter: blur(24px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 2px solid rgba(225, 29, 72, 0.5) !important;
-    box-shadow:
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        inset 0 0 80px rgba(255, 255, 255, 0.02) !important;
+/* Auth Card Wrapper */
+.fi-simple-main-ctn {
+    width: 100% !important;
+    max-width: 28rem !important;
+    margin: 0 auto !important;
+    z-index: 10 !important;
+    padding: 0 !important;
+}
+
+/* Light Glass Card */
+.fi-simple-main, .glass-card {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
     border-radius: 2rem !important;
     padding: 2.5rem !important;
-    margin: 0 auto !important;
     position: relative !important;
-    overflow: visible !important; /* Let the header be visible above */
-    width: 100% !important;
-    max-width: 28rem !important;
+    overflow: hidden !important;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease !important;
 }
 
-.fi-simple-main-ctn {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    max-width: 28rem !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    margin-top: 10rem !important; /* Make room for the header above */
+.fi-simple-main:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Hide original Filament header to use our external one via hook */
+/* Hide original Filament header to use our component */
 .fi-simple-header {
     display: none !important;
 }
 
-/* Decorative corner accent in Filament login */
-.fi-simple-main::after {
-    content: "" !important;
-    position: absolute !important;
-    top: 0 !important;
-    right: 0 !important;
-    width: 8rem !important;
-    height: 8rem !important;
-    background: rgba(225, 29, 72, 0.05) !important;
-    filter: blur(48px) !important;
-    margin-right: -4rem !important;
-    margin-top: -4rem !important;
-    pointer-events: none !important;
-    transition: background 0.7s !important;
+/* Auth Header Styling */
+.auth-header-container {
+    text-align: center;
+    position: relative;
+    z-index: 20;
 }
 
-.fi-simple-main:hover::after {
-    background: rgba(225, 29, 72, 0.1) !important;
+.auth-logo-wrapper {
+    width: 6rem;
+    height: 6rem;
+    background: white;
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem;
 }
 
-@media (max-width: 640px) {
-    .fi-simple-main {
-        margin-top: 8rem !important;
-    }
+.auth-logo-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
-.fi-simple-page-content {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    width: 100% !important;
+.auth-icon-container {
+    width: 5rem;
+    height: 5rem;
+    background: white;
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Nadpisy - White text on dark glass card */
-.fi-simple-header-heading {
-    color: #ffffff !important;
-    font-size: 1.25rem !important; /* text-xl/2xl equivalent to auth-title */
-    font-weight: 950 !important;
-    letter-spacing: -0.05em !important;
-    text-transform: uppercase !important;
-    font-family: 'Oswald', sans-serif !important;
-    text-shadow: none !important;
-    line-height: 1.4 !important;
-    text-align: center !important;
-    display: block !important;
-}
-
-.fi-simple-header-subheading {
-    color: #94a3b8 !important; /* Slate 400 */
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    font-style: italic !important;
-    text-transform: none !important;
-    letter-spacing: -0.025em !important;
-    margin-top: 0.5rem !important;
-    text-shadow: none !important;
-    display: block !important;
-    text-align: center !important;
-}
-
-/* Auth Title and Sub consistent with app.css */
 .auth-title {
     font-family: 'Oswald', sans-serif !important;
     font-weight: 900 !important;
     text-transform: uppercase !important;
-    letter-spacing: -0.05em !important;
+    letter-spacing: -0.02em !important;
     color: #ffffff !important;
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
     margin-bottom: 0.5rem !important;
-    font-size: 1.25rem !important;
-    line-height: 1.75rem !important;
-    display: block !important;
-    text-align: center !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
 .auth-sub {
-    font-family: 'Instrument Sans', sans-serif !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 0.875rem !important;
     font-weight: 500 !important;
     font-style: italic !important;
-    letter-spacing: -0.025em !important;
-    color: rgba(148, 163, 184, 0.8) !important;
-    font-size: 0.875rem !important;
-    line-height: 1.25rem !important;
-    display: block !important;
-    text-align: center !important;
 }
 
-.auth-icon-container {
-    width: 6rem !important; /* 24 */
-    height: 6rem !important;
-    background-color: rgba(225, 29, 72, 0.1) !important;
-    border-radius: 1.5rem !important; /* 3xl */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    margin-bottom: 2rem !important;
-    box-shadow: 0 0 40px rgba(225, 29, 72, 0.15) !important;
-    border: 1px solid rgba(225, 29, 72, 0.2) !important;
-    transition: transform 0.5s !important;
-}
-
-.auth-icon-container:hover {
-    transform: scale(1.05) !important;
-}
-
-/* Formulářová pole - High contrast Dark elements to match glass-card */
-.fi-fo-field {
-    gap: 0.75rem !important;
-    margin-bottom: 2rem !important;
-}
-
-.fi-fo-field-label,
-.fi-fo-field-label-content {
-    color: #94a3b8 !important; /* Slate 400 */
-    font-size: 10px !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.2em !important;
+/* Form Fields */
+.fi-fo-field-label, .fi-fo-field-label-content {
+    color: #475569 !important; /* Slate 600 */
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
-    margin-left: 0.25rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 .fi-input-wrp {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 1rem !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
     transition: all 0.3s ease !important;
-    box-shadow: none !important;
 }
 
 .fi-input-wrp:focus-within {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border-color: #E11D48 !important; /* Brand Primary */
-    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.2) !important;
-    transform: none !important;
+    border-color: var(--color-brand-red) !important;
+    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1) !important;
 }
 
 .fi-input {
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    font-size: 1rem !important;
-    padding: 1rem !important;
+    color: #0f172a !important; /* Dark text on light background */
+    font-weight: 600 !important;
+    padding: 0.75rem 1rem !important;
 }
 
 .fi-input::placeholder {
-    color: #475569 !important; /* Slate 600 */
-}
-
-/* Button - Explicit Primary */
-.fi-btn {
-    border-radius: 1.25rem !important;
-    font-weight: 950 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.15em !important;
-    padding: 1.25rem 2.5rem !important;
-    font-size: 1rem !important;
-    box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.4) !important;
-}
-
-.fi-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba(225, 29, 72, 0.6) !important;
-}
-
-/* Checkbox */
-.fi-checkbox-input {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-.fi-checkbox-label {
     color: #94a3b8 !important;
-    font-size: 10px !important;
-    font-weight: 900 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.2em !important;
 }
 
-/* Links */
-.fi-link {
-    color: #e11d48 !important;
-    font-weight: 900 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.15em !important;
-    font-style: italic !important;
-    font-size: 10px !important;
-}
-
-/* Checkbox */
-.fi-checkbox {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 0.375rem !important;
-}
-
-.fi-checkbox:checked {
-    background-color: #E11D48 !important;
-    border-color: #E11D48 !important;
-}
-
-/* Tlačítka */
-.fi-btn-color-primary {
-    background-color: #E11D48 !important;
-    color: #ffffff !important;
-    font-weight: 900 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
+/* Primary Button - Premium Style */
+.fi-btn-color-primary, .btn-primary {
+    background: #E11D48 !important;
+    color: white !important;
     border-radius: 1rem !important;
-    padding: 1rem 2rem !important;
-    font-size: 1rem !important;
-    box-shadow: 0 12px 20px -10px rgba(225, 29, 72, 0.6) !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 0.875rem 1.5rem !important;
+    box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.3) !important;
+    border: none !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-}
-
-.fi-btn-color-primary:hover {
-    background-color: #f43f5e !important;
-    transform: translateY(-4px) scale(1.02) !important;
-    box-shadow: 0 20px 30px -10px rgba(225, 29, 72, 0.7) !important;
-}
-
-.fi-btn-color-primary:active {
-    transform: translateY(-1px) !important;
-}
-
-/* Logo a Ikony */
-.fi-logo {
-    filter: drop-shadow(0 0 12px rgba(225, 29, 72, 0.5)) !important;
-    margin-bottom: 1.5rem !important;
-}
-
-.fa-glow {
-    filter: drop-shadow(0 0 15px rgba(225, 29, 72, 0.8)) !important;
-}
-
-/* Hide default Filament loading indicators to use custom JS library */
-.fi-loading-indicator {
-    display: none !important;
-}
-
-/* Custom JS Spinner placeholder style */
-.js-spinner-container {
-    position: absolute;
-    right: 1.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-/* Animace */
-@keyframes icon-bounce-slow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-}
-
-.icon-bounce-slow {
-    animation: icon-bounce-slow 2.5s infinite ease-in-out !important;
-}
-
-/* Spodní odkaz a patička */
-.fi-simple-main footer,
-.mt-12.text-center,
-[wire\:partial="schema-component\:\:content\.form-actions"] + div {
+    cursor: pointer !important;
     display: flex !important;
-    flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 100% !important;
-    text-align: center !important;
+    gap: 0.75rem !important;
 }
 
+.fi-btn-color-primary:hover, .btn-primary:hover {
+    background: #be123c !important;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px -5px rgba(225, 29, 72, 0.4) !important;
+}
+
+/* Links & Footer */
 .fi-link {
     color: #64748b !important;
-    font-size: 0.85rem !important;
-    font-weight: 900 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.12em !important;
-    transition: all 0.3s ease !important;
-    padding: 0.5rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    transition: color 0.3s ease !important;
 }
 
 .fi-link:hover {
-    color: #E11D48 !important;
+    color: var(--color-brand-red) !important;
     text-decoration: none !important;
 }
 
-/* Custom "Back to web" styling if needed specifically */
-.back-link {
-    margin-top: 2rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
+.auth-footer-link-primary {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 700;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.auth-footer-link-primary:hover {
+    color: white;
+}
+
+/* 2FA Specific */
+.icon-glow {
+    animation: icon-glow 2.5s infinite ease-in-out;
+}
+
+/* Reveal Password Icon */
+.fi-input-wrp-action {
+    color: #94a3b8 !important;
+}
+
+.fi-input-wrp-action:hover {
+    color: #64748b !important;
 }

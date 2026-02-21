@@ -1,22 +1,10 @@
 @extends('layouts.auth')
 
 @section('content')
-<!-- Header -->
-<div class="text-center mb-12 animate-fade-in-down">
-    @if($branding['logo_path'] ?? null)
-        <div class="w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
-            <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
-        </div>
-    @else
-        <div class="auth-icon-container">
-            <i class="fa-duotone fa-light fa-envelope-open-text text-5xl text-primary icon-bounce icon-glow"></i>
-        </div>
-    @endif
-    <h1 class="auth-title tracking-tight">Zapomněli jste?</h1>
-    <p class="auth-sub tracking-tight">Pošleme vám odkaz pro obnovu přístupu.</p>
-</div>
+<div class="animate-fade-in-down">
+    <x-auth-header title="Zapomenuté heslo" subtitle="Pošleme vám odkaz pro obnovu přístupu" icon="fa-key-skeleton" />
 
-@if (session('status'))
+    @if (session('status'))
     <div class="glass-card !bg-emerald-500/10 border-emerald-500/30 text-emerald-200 p-6 mb-8 rounded-3xl flex items-center gap-4 animate-fade-in shadow-lg shadow-emerald-500/5">
         <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
             <i class="fa-light fa-paper-plane-launch text-xl"></i>
@@ -28,10 +16,8 @@
     </div>
 @endif
 
-<div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
-    <!-- Decorative corner accent -->
-    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
-    <form method="POST" action="{{ route('password.email') }}" class="space-y-8" novalidate>
+    <div class="glass-card">
+        <form method="POST" action="{{ route('password.email') }}" class="space-y-8" novalidate>
         @csrf
 
         <div class="space-y-3">
@@ -58,17 +44,9 @@
                 <i class="fa-light fa-chevron-right group-hover/btn:translate-x-1 transition-transform"></i>
             </span>
         </button>
+    </form>
+</div>
 
-<div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
-    <a href="{{ route('login') }}" class="auth-footer-link flex items-center justify-center gap-2 mx-auto">
-        <i class="fa-light fa-arrow-left"></i>
-        Zpět na přihlášení
-    </a>
-
-    <div class="flex items-center justify-center gap-4 text-slate-600">
-        <div class="h-px w-8 bg-white/5"></div>
-        <p class="text-[9px] font-black uppercase tracking-[0.3em] italic opacity-40">{{ $branding['club_short_name'] }} Arena</p>
-        <div class="h-px w-8 bg-white/5"></div>
-    </div>
+    <x-auth-footer back-label="Zpět na přihlášení" :back-url="route('login')" />
 </div>
 @endsection
