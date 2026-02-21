@@ -36,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
 
         FilamentView::registerRenderHook(
             'panels::auth.login.form.before',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<div style="background: red; color: white; padding: 10px; text-align: center; font-weight: bold; border-radius: 10px; margin-bottom: 20px;">DEBUG: FILAMENT LOGIN HOOK FUNGUJE</div><x-auth-header subtitle="Vstupte na palubovku vaší arény" />'),
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header subtitle="Vstupte na palubovku vaší arény" />'),
         );
 
         FilamentView::registerRenderHook(

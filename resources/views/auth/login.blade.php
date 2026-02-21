@@ -28,7 +28,7 @@
                         </div>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" autofocus
                                placeholder="jmeno@klub.cz"
-                               class="w-full input-with-icon bg-white/5 border {{ $errors->has('email') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white placeholder-slate-600 outline-none">
+                               class="w-full input-with-icon bg-white border {{ $errors->has('email') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-slate-200' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-bold text-slate-900 placeholder-slate-400 outline-none">
                     </div>
                     @error('email')
                         <div class="flex items-center gap-2 text-rose-400 mt-2 ml-1 animate-shake">
@@ -49,7 +49,7 @@
                         </div>
                         <input id="password" type="password" name="password" autocomplete="current-password"
                                placeholder="••••••••"
-                               class="w-full input-with-icon bg-white/5 border {{ $errors->has('password') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white placeholder-slate-600 outline-none">
+                               class="w-full input-with-icon bg-white border {{ $errors->has('password') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-slate-200' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-bold text-slate-900 placeholder-slate-400 outline-none">
                     </div>
                     @error('password')
                         <div class="flex items-center gap-2 text-rose-400 mt-2 ml-1 animate-shake">
