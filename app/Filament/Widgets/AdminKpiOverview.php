@@ -9,11 +9,11 @@ use App\Models\Team;
 use App\Models\Training;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class AdminKpiOverview extends BaseWidget
 {
-    protected function getCards(): array
+    protected function getStats(): array
     {
         $users = User::count();
         $activeUsers = User::where('is_active', true)->count();
@@ -26,20 +26,20 @@ class AdminKpiOverview extends BaseWidget
         $attendanceTotal = class_exists(Attendance::class) ? Attendance::count() : 0;
 
         return [
-            Card::make('Uživatelé (celkem)', $users)
+            Stat::make('Uživatelé (celkem)', $users)
                 ->description("Aktivních: {$activeUsers}")
                 ->color('primary'),
-            Card::make('Hráčské profily', $players)
+            Stat::make('Hráčské profily', $players)
                 ->color('success'),
-            Card::make('Týmy', $teams)
+            Stat::make('Týmy', $teams)
                 ->color('warning'),
-            Card::make('Zápasy', $matchesTotal)
+            Stat::make('Zápasy', $matchesTotal)
                 ->description("Nadcházející: {$matchesUpcoming}")
                 ->color('info'),
-            Card::make('Tréninky', $trainingsTotal)
+            Stat::make('Tréninky', $trainingsTotal)
                 ->description("Nadcházející: {$trainingsUpcoming}")
                 ->color('info'),
-            Card::make('RSVP/Docházka', $attendanceTotal)
+            Stat::make('RSVP/Docházka', $attendanceTotal)
                 ->description('Počet záznamů (placeholder)')
                 ->color('gray'),
         ];

@@ -8,6 +8,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
+use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -39,6 +40,12 @@ class AdminPanelProvider extends PanelProvider
             ->brandName($branding['club_name'])
             ->brandLogo($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
             ->favicon($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
+            ->userMenuItems([
+                'profile' => MenuItem::make()
+                    ->label('Členská sekce')
+                    ->url(fn (): string => route('member.dashboard'))
+                    ->icon('heroicon-o-user-group'),
+            ])
             ->colors([
                 'primary' => Color::hex($colors['red']),
                 'gray' => Color::Slate,

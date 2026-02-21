@@ -16,7 +16,8 @@ class EnsureTwoFactorEnabled
         $user = $request->user();
 
         // Pokud je uživatel přihlášen a má oprávnění pro přístup do adminu
-        if ($user && $user->can('access_admin')) {
+        // A ZÁROVEŇ se pokouší přistoupit k admin sekci (včetně Filamentu)
+        if ($user && $user->can('access_admin') && ($request->is('admin*') || $request->routeIs('admin.*'))) {
             // A nemá AKTIVOVANÉ (potvrzené) 2FA
             // Fortify používá two_factor_confirmed_at pokud je zapnuté 'confirm' v configu
             $isConfirmed = $user->two_factor_confirmed_at !== null;
@@ -24,10 +25,9 @@ class EnsureTwoFactorEnabled
 
             if (! $user->two_factor_secret || ($needsConfirmation && !$isConfirmed)) {
 
-                // Pokud už není na stránce profilu, přesměrujeme ho tam
-                if (! $request->routeIs('member.profile.edit')) {
-                    return redirect()->route('member.profile.edit')
-                        ->with('error', 'Pro přístup do administrace je vyžadováno AKTIVNÍ dvoufázové ověření (2FA). Prosím, dokončete nastavení ve svém profilu.');
+                // Pokud už není na stránce nastavení 2FA, přesměrujeme ho tam
+                if (! $request->routeIs('auth.two-factor-setup')) {
+                    return redirect()->route('auth.two-factor-setup');
                 }
             }
         }

@@ -26,7 +26,7 @@ class LoginResponse implements LoginResponseContract, FilamentLoginResponseContr
         }
 
         // 2. Role-based redirect
-        if ($user->hasAnyRole(['admin', 'editor', 'coach'])) {
+        if ($user->can('access_admin')) {
             // Admin sekce
             return redirect()->to(config('filament.panels.admin.path', 'admin'));
         }
