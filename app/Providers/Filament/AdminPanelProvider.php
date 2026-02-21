@@ -35,17 +35,17 @@ class AdminPanelProvider extends PanelProvider
         );
 
         FilamentView::registerRenderHook(
-            'panels::auth.login.before',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header subtitle="Vstupte na palubovku vaší arény" />'),
+            'panels::auth.login.form.before',
+            fn (): string => \Illuminate\Support\Facades\Blade::render('<div style="background: red; color: white; padding: 10px; text-align: center; font-weight: bold; border-radius: 10px; margin-bottom: 20px;">DEBUG: FILAMENT LOGIN HOOK FUNGUJE</div><x-auth-header subtitle="Vstupte na palubovku vaší arény" />'),
         );
 
         FilamentView::registerRenderHook(
-            'panels::auth.password-reset.request.before',
+            'panels::auth.password-reset.request.form.before',
             fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header title="Zapomenuté heslo" subtitle="Zašleme vám odkaz pro obnovu přístupu" icon="fa-key-skeleton" />'),
         );
 
         FilamentView::registerRenderHook(
-            'panels::auth.password-reset.reset.before',
+            'panels::auth.password-reset.reset.form.before',
             fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header title="Nové heslo" subtitle="Nastavte si bezpečné heslo k vašemu účtu" icon="fa-lock-keyhole" />'),
         );
 

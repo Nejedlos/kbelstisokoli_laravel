@@ -1,6 +1,7 @@
 @extends('layouts.auth')
 
 @section('content')
+<h1 style="background: red; color: white; padding: 20px; text-align: center; font-size: 30px; margin-bottom: 20px;">DEBUG: TATO ŠABLONA JE UPRAVENA (RESOURCES/VIEWS/AUTH/FORGOT-PASSWORD.BLADE.PHP)</h1>
 <div class="animate-fade-in-down">
     <x-auth-header title="Zapomenuté heslo" subtitle="Pošleme vám odkaz pro obnovu přístupu" icon="fa-key-skeleton" />
 
