@@ -16,6 +16,11 @@ class MenuItem extends Model
         'route_name',
         'target',
         'sort_order',
+        'is_visible',
+    ];
+
+    protected $casts = [
+        'is_visible' => 'boolean',
     ];
 
     /**

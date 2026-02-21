@@ -82,3 +82,32 @@ Aplikace je rozdělena do tří hlavních oblastí:
   - Public: `routes/public.php` (`/uvod` → `resources/views/public/home.blade.php`)
   - Member: `routes/member.php` (prefix `/clenska-sekce`, route `member.dashboard`)
   - Admin (custom): `routes/admin.php` (prefix `/admin/custom`, route `admin.custom.dashboard`)
+
+
+## 6. CMS jádro (Struktura a správa obsahu)
+- Účel: Univerzální backend správa obsahu (stránky, novinky, kategorie, menu) s připravenou SEO vrstvou a publikovacím workflow.
+
+### Datový model
+- `post_categories`: název, slug (unikátní), popis, `sort_order`.
+- `posts`: `category_id` (nullable), titul, slug (unikátní), `excerpt`, `content` (longtext), `status` (draft/published), `publish_at` (nullable), `featured_image` (string), `is_visible` (bool).
+- `pages`: titul, slug (unikátní), `content` (JSON) – připraveno na bloky, `status` (draft/published), `is_visible` (bool).
+- `menus`: název, `location` (unikátní, nullable).
+- `menu_items`: `menu_id`, `parent_id` (nullable), `label`, `url` (nullable), `route_name` (nullable), `target` (`_self|_blank`), `sort_order`, `is_visible` (bool).
+- `seo_metadatas`: polymorfní SEO pro `Page` a `Post` (trait `HasSeo`).
+
+Pozn.: Tagy lze doplnit následně (`tags`, `post_tag` pivot) bez zásahu do jádra.
+
+### Publikační workflow a viditelnost
+- `status` (draft/published) + `publish_at` (u příspěvků) definují publikovatelnost.
+- `is_visible` umožní rychle dočasně skrýt objekt bez změny obsahu.
+- Řazení: `sort_order` u kategorií a položek menu; příspěvky primárně dle `publish_at`/vytvoření.
+
+### Administrace (Filament)
+- Resource: `Pages\PageResource`, `Posts\PostResource`, `PostCategories\PostCategoryResource`, `Menus\MenuResource`.
+- Formuláře: srozumitelné popisky, helper texty pro slug, přepínače viditelnosti, sekce SEO přes `CmsForms::getSeoSection()`.
+- Menu položky: Relation Manager `ItemsRelationManager` s možností řazení (`reorderable('sort_order')`) a parent-child vazbou.
+
+### Rozšiřitelnost
+- Blokový obsah: `pages.content` (JSON) připraven pro Page Builder/Blocks (další prompt).
+- Média: `featured_image` + SEO `og_image` jsou string reference – snadná pozdější integrace Spatie Media Library.
+- Oprávnění: stávající role/permissions (`manage_content`, `access_admin`) – lze připojit k Resource (policies) bez zásahů do schématu.

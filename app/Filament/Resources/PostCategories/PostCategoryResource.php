@@ -35,6 +35,7 @@ class PostCategoryResource extends Resource
 
                 TextInput::make('slug')
                     ->label('Slug (URL)')
+                    ->helperText('Použijte krátký, srozumitelný identifikátor bez diakritiky (např. "novinky-klubu").')
                     ->required()
                     ->unique(ignoreRecord: true),
 
