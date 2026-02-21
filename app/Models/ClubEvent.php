@@ -6,8 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+use Spatie\Translatable\HasTranslations;
+
 class ClubEvent extends Model
 {
+    use HasTranslations;
+
     protected $table = 'club_events';
 
     protected $fillable = [
@@ -21,6 +25,8 @@ class ClubEvent extends Model
         'is_public',
         'rsvp_enabled',
     ];
+
+    public $translatable = ['title', 'description'];
 
     protected $casts = [
         'starts_at' => 'datetime',

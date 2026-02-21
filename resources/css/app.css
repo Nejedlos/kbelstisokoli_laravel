@@ -48,6 +48,26 @@
 
     /* Stíny */
     --shadow-club: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+    /* Animace */
+    --animate-shake: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    --animate-fade-in-down: fade-in-down 0.5s ease-out;
+    --animate-fade-in: fade-in 0.5s ease-out;
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+    @keyframes fade-in-down {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
 }
 
 @layer base {
@@ -117,6 +137,14 @@
                     radial-gradient(circle at 100% 100%, var(--color-brand-blue) 0%, transparent 50%),
                     #020617;
     }
+
+    @media (max-width: 640px) {
+        .auth-gradient {
+            padding-top: 8rem !important;
+            align-items: flex-start !important;
+        }
+    }
+
     .auth-gradient::before {
         content: ""; @apply absolute inset-0 opacity-[0.03] pointer-events-none;
         background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");

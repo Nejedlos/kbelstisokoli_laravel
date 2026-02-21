@@ -24,7 +24,7 @@
             <div class="flex items-center gap-4">
                 <!-- Mobile Menu Trigger -->
                 <button @click="sidebarOpen = true" class="lg:hidden p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                    <i class="fa-solid fa-bars text-xl"></i>
+                    <i class="fa-light fa-bars text-xl"></i>
                 </button>
 
                 <!-- Logo -->
@@ -45,7 +45,7 @@
             <div class="flex items-center gap-2 sm:gap-4">
                 <!-- Notifications -->
                 <a href="{{ route('member.notifications.index') }}" class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors mr-2">
-                    <i class="fa-solid fa-bell text-xl"></i>
+                    <i class="fa-light fa-bell text-xl"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
                         <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-secondary animate-pulse">
                             {{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}
@@ -141,7 +141,7 @@
             <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100">
                 <span class="font-black uppercase tracking-tight text-secondary">Menu sekce</span>
                 <button @click="sidebarOpen = false" class="p-2 text-slate-400 hover:text-rose-500 transition-colors">
-                    <i class="fa-solid fa-xmark text-2xl"></i>
+                    <i class="fa-light fa-xmark text-2xl"></i>
                 </button>
             </div>
             <nav class="flex-1 overflow-y-auto p-6 space-y-2">
@@ -196,14 +196,14 @@
                 <div class="max-w-6xl mx-auto">
                     @if (session('status'))
                         <div class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-2xl flex items-center gap-4 animate-fade-in">
-                            <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
+                            <i class="fa-light fa-circle-check text-emerald-500 text-lg"></i>
                             <span class="font-bold text-sm">{{ session('status') }}</span>
                         </div>
                     @endif
 
                     @if (session('error'))
                         <div class="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-700 rounded-2xl flex items-center gap-4">
-                            <i class="fa-solid fa-circle-exclamation text-rose-500 text-lg"></i>
+                            <i class="fa-light fa-circle-exclamation text-rose-500 text-lg"></i>
                             <span class="font-bold text-sm">{{ session('error') }}</span>
                         </div>
                     @endif
@@ -217,19 +217,19 @@
     <!-- Bottom Navigation (Mobile Only) -->
     <nav class="lg:hidden h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-30 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
         <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.dashboard') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
-            <i class="fa-solid fa-grid-2 text-xl"></i>
+            <i class="fa-light fa-grid-2 text-xl"></i>
             <span class="text-[9px] font-black uppercase tracking-widest">Dashboard</span>
         </a>
         <a href="{{ route('member.attendance.index') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.attendance.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
-            <i class="fa-solid fa-calendar-star text-xl"></i>
+            <i class="fa-light fa-calendar-star text-xl"></i>
             <span class="text-[9px] font-black uppercase tracking-widest">Program</span>
         </a>
         <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.profile.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
-            <i class="fa-solid fa-user-gear text-xl"></i>
+            <i class="fa-light fa-user-gear text-xl"></i>
             <span class="text-[9px] font-black uppercase tracking-widest">Profil</span>
         </a>
         <button @click="sidebarOpen = true" class="flex flex-col items-center gap-1.5 text-slate-400 hover:text-primary transition-colors duration-300">
-            <i class="fa-solid fa-circle-nodes text-xl"></i>
+            <i class="fa-light fa-circle-nodes text-xl"></i>
             <span class="text-[9px] font-black uppercase tracking-widest">Více</span>
         </button>
     </nav>

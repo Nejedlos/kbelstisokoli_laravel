@@ -17,7 +17,7 @@
                 </div>
             @else
                 <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
-                    <i class="fa-duotone fa-solid fa-shield-check text-6xl icon-bounce icon-glow"></i>
+                    <i class="fa-duotone fa-light fa-shield-check text-6xl icon-bounce icon-glow"></i>
                 </div>
             @endif
             <h1 class="auth-title">Ověření přístupu</h1>
@@ -34,7 +34,7 @@
                     <label for="code" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center block">6místný ověřovací kód</label>
                     <div class="relative group/input">
                         <div class="input-icon group-focus-within/input:text-primary">
-                            <i class="fa-solid fa-fingerprint text-xl"></i>
+                            <i class="fa-light fa-fingerprint text-xl"></i>
                         </div>
                         <input id="code" type="text" name="code" inputmode="numeric" autofocus autocomplete="one-time-code"
                                placeholder="000 000"
@@ -42,7 +42,7 @@
                     </div>
                     @error('code')
                         <div class="flex items-center justify-center gap-2 text-rose-400 mt-2 animate-shake">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                            <i class="fa-light fa-circle-exclamation text-[10px]"></i>
                             <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
                         </div>
                     @enderror
@@ -53,7 +53,7 @@
                     <label for="recovery_code" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center block">Záchranný kód</label>
                     <div class="relative group/input">
                         <div class="input-icon group-focus-within/input:text-primary">
-                            <i class="fa-solid fa-key-skeleton text-xl"></i>
+                            <i class="fa-light fa-key-skeleton text-xl"></i>
                         </div>
                         <input id="recovery_code" type="text" name="recovery_code" autocomplete="one-time-code"
                                placeholder="abcde-fghij"
@@ -61,7 +61,7 @@
                     </div>
                     @error('recovery_code')
                         <div class="flex items-center justify-center gap-2 text-rose-400 mt-2 animate-shake">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                            <i class="fa-light fa-circle-exclamation text-[10px]"></i>
                             <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
                         </div>
                     @enderror
@@ -70,20 +70,20 @@
                 <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
                     <span class="relative z-10 flex items-center justify-center gap-3">
                         Ověřit a vstoupit
-                        <i class="fa-solid fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>
+                        <i class="fa-light fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>
                     </span>
                 </button>
 
                 <div class="text-center pt-2">
                     <button type="button" class="auth-link text-[10px] flex items-center justify-center gap-2 mx-auto"
                             x-show="!recovery" @click="recovery = true; $nextTick(() => { $refs.recovery_code?.focus() })">
-                        <i class="fa-solid fa-life-ring text-primary"></i>
+                        <i class="fa-light fa-life-ring text-primary"></i>
                         Použít záchranný kód
                     </button>
 
                     <button type="button" class="auth-link text-[10px] flex items-center justify-center gap-2 mx-auto"
                             x-show="recovery" x-cloak @click="recovery = false; $nextTick(() => { $refs.code?.focus() })">
-                        <i class="fa-solid fa-mobile-notch text-primary"></i>
+                        <i class="fa-light fa-mobile-notch text-primary"></i>
                         Použít ověřovací kód
                     </button>
                 </div>

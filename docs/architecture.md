@@ -796,4 +796,4 @@ Projekt je připraven na použití **Font Awesome 7 Pro**. Protože se jedná o 
     ```
 
 ### 24.2 Použití ikon
-V šablonách jsou již připraveny třídy jako `<i class="fa-solid fa-basketball-hoop"></i>` nebo `<i class="fa-solid fa-envelope"></i>`. Po úspěšné instalaci se ikony automaticky zobrazí.
+V šablonách jsou již připraveny třídy jako `<i class="fa-light fa-basketball-hoop"></i>` nebo `<i class="fa-light fa-envelope"></i>`. Po úspěšné instalaci se ikony automaticky zobrazí.

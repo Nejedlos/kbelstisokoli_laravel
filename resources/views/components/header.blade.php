@@ -27,14 +27,26 @@
 
         <!-- Right Side / CTA -->
         <div class="flex items-center gap-4">
+            <!-- Language Switcher -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full text-[10px] font-black tracking-tighter shadow-sm border border-slate-200">
+                <a href="{{ request()->fullUrlWithQuery(['lang' => 'cs']) }}"
+                   class="px-3 py-2 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
+                    CZ
+                </a>
+                <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
+                   class="px-3 py-2 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
+                    EN
+                </a>
+            </div>
+
             <a href="{{ route('login') }}" class="btn btn-primary hidden sm:inline-flex py-2 px-4 text-xs">
-                Členská sekce
+                {{ __('Členská sekce') }}
             </a>
 
             <!-- Mobile Toggle -->
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-slate-700 hover:text-primary focus:outline-none transition-colors">
-                <i x-show="!mobileMenuOpen" class="fa-solid fa-bars-staggered text-2xl"></i>
-                <i x-show="mobileMenuOpen" class="fa-solid fa-xmark text-2xl"></i>
+                <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
+                <i x-show="mobileMenuOpen" class="fa-light fa-xmark text-2xl"></i>
             </button>
         </div>
     </div>
@@ -57,7 +69,7 @@
                 </a>
             @endforeach
             <a href="{{ route('login') }}" class="btn btn-primary mt-4">
-                Přihlášení pro členy
+                {{ __('Přihlášení pro členy') }}
             </a>
         </div>
     </div>

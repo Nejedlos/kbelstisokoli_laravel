@@ -7,6 +7,136 @@
 /* Font Awesome Pro integration - Lokální (Vendored) */
 @import "../vendor/fontawesome/css/all.min.css";
 
+/* Animace (Identické s app.css pro konzistenci) */
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Custom Validations & Error States */
+.fi-fo-field-wrp-error-message,
+.fi-fo-field-error-message,
+.fi-fo-field-content-col .text-danger-600,
+.fi-fo-field-content-col [class*="fi-fo-field-wrp-error"],
+.fi-fo-field-content-col [id*="-error"],
+[data-field-wrapper] .fi-fo-field-error-message,
+.fi-error-message,
+.fi-fo-field-content-col .fi-error-message {
+    color: #E11D48 !important; /* Brand Red */
+    font-size: 0.85rem !important; /* Slightly larger for better readability */
+    font-weight: 800 !important;
+    letter-spacing: 0.01em !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    margin-top: 0.75rem !important;
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both !important;
+    padding: 0.65rem 1rem !important;
+    background: #FFF1F2 !important; /* Very light rose background */
+    border: 1px solid rgba(225, 29, 72, 0.2) !important;
+    border-left: 4px solid #E11D48 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08) !important;
+    z-index: 50 !important;
+    position: relative !important;
+}
+
+/* Explicitní ikony pro všechny typy chyb */
+.fi-fo-field-wrp-error-message::before,
+.fi-fo-field-error-message::before,
+[data-field-wrapper] .fi-fo-field-error-message::before,
+.fi-error-message::before,
+.fi-fo-field-content-col .text-danger-600::before,
+.fi-fo-field-content-col [id*="-error"]::before {
+    content: "\f06a" !important; /* circle-exclamation */
+    font-family: "Font Awesome 7 Pro" !important;
+    font-weight: 900 !important;
+    font-size: 1rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* Explicitní barva labelu při chybě */
+.fi-fo-field-label.fi-is-invalid,
+.fi-fo-field-label-content.fi-is-invalid,
+.fi-invalid-field .fi-fo-field-label,
+.fi-invalid-field .fi-fo-field-label-content {
+    color: #E11D48 !important;
+    font-weight: 950 !important;
+}
+
+/* Error state pro input wrapper - Robustní detekce přes třídy a :has() */
+.fi-input-wrp.fi-is-invalid,
+.fi-input-wrp.fi-color-danger,
+.fi-input-wrp.fi-is-invalid input,
+.fi-input-wrp.fi-is-invalid select,
+.fi-input-wrp.fi-is-invalid textarea,
+.fi-fo-field-content .fi-input-wrp.fi-color-danger,
+.fi-fo-field-content-col:has(.fi-error-message) .fi-input-wrp,
+.fi-fo-field-content-col:has(.fi-fo-field-wrp-error-message) .fi-input-wrp,
+.fi-fo-field-content-col:has(.text-danger-600) .fi-input-wrp,
+.fi-fo-field-content-col:has([id*="-error"]) .fi-input-wrp,
+.fi-fo-field:has(.text-danger-600) .fi-input-wrp,
+.fi-fo-field:has([id*="-error"]) .fi-input-wrp {
+    border-color: #E11D48 !important;
+    border-width: 2px !important;
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.12) !important;
+    background-color: #FFF1F2 !important; /* Jemné červené pozadí pro indikaci chyby i bez focusu */
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both !important;
+}
+
+/* Speciální focus barva pro invalid input */
+.fi-input-wrp.fi-is-invalid:focus-within,
+.fi-input-wrp.fi-is-invalid input:focus {
+    border-color: #E11D48 !important;
+    box-shadow: 0 0 0 5px rgba(225, 29, 72, 0.25) !important;
+    background-color: #ffffff !important;
+}
+
+.fi-input.fi-is-invalid {
+    color: #E11D48 !important;
+}
+
+/* Výrazná vizuální indikace celého pole při chybě */
+.fi-invalid-field,
+.fi-fo-field:has(.fi-is-invalid),
+.fi-fo-field:has(.fi-color-danger),
+.fi-fo-field:has(.text-danger-600),
+.fi-fo-field:has(.fi-error-message),
+.fi-fo-field:has([id*="-error"]) {
+    background: rgba(225, 29, 72, 0.03) !important;
+    padding: 0.75rem !important;
+    border-radius: 1rem !important;
+    border: 1px dashed rgba(225, 29, 72, 0.2) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Notifikace (Filament Notifications) */
+.fi-no-notification {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    border: none !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    padding: 1.25rem !important;
+}
+
+.fi-no-notification.fi-color-danger {
+    border-left: 6px solid #E11D48 !important;
+}
+
+.fi-no-notification.fi-color-success {
+    border-left: 6px solid #10b981 !important;
+}
+
 /* Reset a základní pozadí */
 .fi-simple-layout {
     background-color: #0B1F3A !important; /* Brand Navy */
@@ -55,12 +185,18 @@
         0 30px 60px -12px rgba(0, 0, 0, 0.6),
         0 0 120px rgba(0, 0, 0, 0.4) !important;
     border-radius: 2.5rem !important;
-    padding: 4.5rem !important;
+    padding: 3.5rem !important; /* Reduced from 4.5rem */
     margin: 3rem auto !important;
     position: relative !important;
     overflow: visible !important;
     width: 100% !important;
     max-width: 32rem !important;
+}
+
+@media (max-width: 640px) {
+    .fi-simple-main {
+        margin-top: 8rem !important;
+    }
 }
 
 .fi-simple-page-content {
@@ -98,11 +234,37 @@
 }
 
 /* Formulářová pole - High contrast Light elements */
-.fi-fo-field-wrp-label label {
+.fi-fo-field {
+    gap: 0.25rem !important; /* Reduced gap even more */
+    margin-bottom: 1.5rem !important;
+}
+
+.fi-fo-field-label-col {
+    padding-bottom: 0 !important;
+    margin-bottom: -0.25rem !important;
+}
+
+.fi-fo-field-label-ctn {
+    display: flex !important;
+    align-items: center !important; /* Changed from baseline to center */
+    justify-content: space-between !important;
+    margin-bottom: 0.2rem !important; /* Even less margin */
+    min-height: 1.5rem !important;
+}
+
+.fi-fo-field-label,
+.fi-fo-field-label-content {
     color: #1e293b !important; /* Slate 800 */
-    font-size: 0.8rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.05em !important;
+    font-size: 0.75rem !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    margin: 0 !important;
+}
+
+/* Oprava linku u hesla aby nebyl "v luftě" */
+.fi-fo-field-label-ctn .fi-align-end {
+    margin-bottom: -1px !important;
 }
 
 .fi-input-wrp {
@@ -115,9 +277,16 @@
 
 .fi-input-wrp:focus-within {
     background-color: #ffffff !important;
-    border-color: #E11D48 !important;
-    box-shadow: 0 0 0 5px rgba(225, 29, 72, 0.15) !important;
+    border-color: #2563EB !important; /* Modrá pro standardní focus, aby se nepletla s chybou */
+    box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15) !important;
     transform: translateY(-1px);
+}
+
+/* Pokud je v poli chyba, focus zůstává červený */
+.fi-input-wrp.fi-is-invalid:focus-within,
+.fi-input-wrp.fi-color-danger:focus-within {
+    border-color: #E11D48 !important;
+    box-shadow: 0 0 0 5px rgba(225, 29, 72, 0.2) !important;
 }
 
 .fi-input {

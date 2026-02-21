@@ -2,11 +2,16 @@
 
 Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbelští sokoli. Projekt je postaven na frameworku **Laravel 12** s využitím **Filament PHP 5** pro administraci.
 
-## 1. Jazyk projektu
+## 1. Jazyk projektu a lokalizace
 - **Kód a komentáře:** Kód (názvy tříd, metod, proměnných) píšeme v **angličtině** (standard Laravelu). Komentáře v kódu, pokud jsou nezbytné, píšeme v **češtině**.
-- **Uživatelské rozhraní:** Celé UI (frontend i backend) je výhradně v **češtině**.
+- **Uživatelské rozhraní (Bilingvnost):** Celé UI (frontend i backend) je plně **dvojjazyčné** (čeština a angličtina).
+    - Výchozím jazykem je čeština (`cs`).
+    - Druhým podporovaným jazykem je angličtina (`en`).
+- **Lokalizace obsahu (Modely):** Pro překlady polí v databázi používáme balíček `spatie/laravel-translatable`. Překládaná pole jsou v databázi typu `json`.
+- **Lokalizace UI:** Používáme standardní Laravel překlady (`lang/*.json` nebo `lang/{locale}/*.php`).
+- **Administrace (Filament):** Používáme plugin pro přepínání jazyků a vestavěnou podporu pro translatable atributy ve formulářích a tabulkách.
 - **Dokumentace:** Veškerá dokumentace v `docs/` a v tomto souboru je v **češtině**.
-- **Databáze:** Názvy tabulek a sloupců v databázi píšeme v **angličtině**.
+- **Databáze:** Názvy tabulek a sloupců v databázi píšeme v **angličtině**. Sloupce s překlady pojmenováváme v jednotném čísle (např. `title`, nikoliv `titles`), protože balíček se o zbytek postará.
 
 ## 2. Vývojová strategie
 - **Backend:** Laravel 12 s využitím moderních prvků (Folio pro routing, Sanctum pro API, Fortify pro auth).
@@ -27,7 +32,7 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
 - Dodržujeme **PSR-12**.
 - Používáme **Laravel Pint** pro formátování kódu (konfigurace v projektu).
 - Typování: Vždy definujeme návratové typy metod a typy parametrů, kde je to možné.
-- Ikony: Používáme **Font Awesome 7 Pro**. Ikony vkládáme pomocí `<i>` tagů s příslušnými třídami (např. `<i class="fa-solid fa-basketball"></i>`).
+- Ikony: Používáme **Font Awesome 7 Pro**. Ikony vkládáme pomocí `<i>` tagů s příslušnými třídami ve stylu **Light** (např. `<i class="fa-light fa-basketball"></i>` nebo `<i class="fa-duotone fa-light fa-basketball"></i>`). V celém projektu striktně dodržujeme variantu **Light**.
 - Pojmenování:
     - Modely: Jednotné číslo, PascalCase (např. `Member`).
     - Kontrolery: PascalCase + přípona `Controller` (např. `MemberController`).
@@ -49,6 +54,12 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
     2. Na produkci se změny stahují pomocí `git pull` (přes SSH).
     3. Následně se spouští podpůrné příkazy (`composer install`, `npm install`, `npm run build`, `php artisan migrate`).
 - **Automatizace:** Pro nasazení používáme **Laravel Envoy** (viz `Envoy.blade.php`).
+
+## 8. Správa assetů (Vite, CSS, JS)
+- **Konfigurace:** Všechny nové vstupní body (entrypoints) musí být přidány do `vite.config.js`.
+- **Build (Kritické):** Po přidání nového souboru do `vite.config.js` nebo při nasazení je nutné spustit `npm run build`, aby se aktualizoval manifest. Bez aktualizace manifestu aplikace vyhodí `ViteException`.
+- **Administrace (Filament):** Vlastní assety do administrace vkládáme robustně přes `renderHook('panels::head.end')` v `AdminPanelProvider.php` s využitím direktivy `@vite`.
+- **Minifikace:** V administraci nepoužíváme agresivní HTML minifikaci, která by mohla poškodit funkčnost Livewire/Filamentu.
 
 ## 9. Konfigurace prostředí
 - Používáme specifické proměnné prostředí pro cesty a disky (`PUBLIC_FOLDER`, `UPLOADS_DIR` atd.) pro kompatibilitu s Webglobe hostingem.

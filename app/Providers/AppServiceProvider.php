@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $switch
+                ->locales(config('app.supported_locales', ['cs', 'en']))
+                ->visible(insidePanels: true, outsidePanels: true)
+                ->renderHook('panels::global-search.after')
+                ->outsidePanelPlacement(\BezhanSalleh\LanguageSwitch\Enums\Placement::TopRight);
+        });
+
         \Illuminate\Support\Facades\View::composer(['layouts.public', 'layouts.member'], function ($view) {
             $brandingService = app(\App\Services\BrandingService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);

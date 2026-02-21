@@ -6,8 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+use Spatie\Translatable\HasTranslations;
+
 class Gallery extends Model
 {
+    use HasTranslations;
+
     protected $fillable = [
         'title',
         'slug',
@@ -18,6 +22,8 @@ class Gallery extends Model
         'cover_asset_id',
         'published_at',
     ];
+
+    public $translatable = ['title', 'description'];
 
     protected $casts = [
         'is_public' => 'boolean',

@@ -43,8 +43,8 @@ class BrandingService
             ],
             'footer_text' => $dbSettings['footer_text'] ?? $cfg['footer_text'] ?? null,
             'maintenance_mode' => filter_var($dbSettings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            'maintenance_title' => $dbSettings['maintenance_title'] ?? 'Kreslíme vítěznou taktiku',
-            'maintenance_text' => $dbSettings['maintenance_text'] ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!',
+            'maintenance_title' => $dbSettings['maintenance_title'] ?? __('Trenér právě kreslí vítěznou taktiku pro náš nový web.'),
+            'maintenance_text' => $dbSettings['maintenance_text'] ?? __('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),
         ];
     }
 
@@ -107,8 +107,13 @@ class BrandingService
      */
     protected function getDbSettings(): array
     {
-        return Cache::remember('global_branding_settings', 3600, function () {
-            return Setting::pluck('value', 'key')->toArray();
+        return Cache::remember('global_branding_settings_' . app()->getLocale(), 3600, function () {
+            $settings = Setting::all();
+            $mapped = [];
+            foreach ($settings as $setting) {
+                $mapped[$setting->key] = $setting->value;
+            }
+            return $mapped;
         });
     }
 

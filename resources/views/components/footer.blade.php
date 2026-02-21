@@ -37,19 +37,19 @@
             <ul class="space-y-3 text-slate-300">
                 @if(data_get($branding, 'contact.address'))
                     <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-location-dot mt-1 text-primary"></i>
+                        <i class="fa-light fa-location-dot mt-1 text-primary"></i>
                         <span>{{ $branding['contact']['address'] }}</span>
                     </li>
                 @endif
                 @if(data_get($branding, 'contact.email'))
                     <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-envelope text-primary"></i>
+                        <i class="fa-light fa-envelope text-primary"></i>
                         <a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary transition-colors">{{ $branding['contact']['email'] }}</a>
                     </li>
                 @endif
                 @if(data_get($branding, 'contact.phone'))
                     <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-phone text-primary"></i>
+                        <i class="fa-light fa-phone text-primary"></i>
                         <a href="tel:{{ $branding['contact']['phone'] }}" class="hover:text-primary transition-colors">{{ $branding['contact']['phone'] }}</a>
                     </li>
                 @endif

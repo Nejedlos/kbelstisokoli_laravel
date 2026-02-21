@@ -6,8 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Spatie\Translatable\HasTranslations;
+
 class MenuItem extends Model
 {
+    use HasTranslations;
+
     protected $fillable = [
         'menu_id',
         'parent_id',
@@ -18,6 +22,8 @@ class MenuItem extends Model
         'sort_order',
         'is_visible',
     ];
+
+    public $translatable = ['label'];
 
     protected $casts = [
         'is_visible' => 'boolean',

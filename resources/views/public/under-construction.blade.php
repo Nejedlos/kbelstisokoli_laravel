@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="cs" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Web v přípravě' }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
+    <title>{{ $title ?? __('Web v přípravě') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,6 +92,14 @@
         }
 
         /* Garantované pozicování štítku i při problémech s buildem */
+        .mobile-top-air {
+            padding-top: 60px !important; /* Optimalizovaný vzduch pro mobil */
+        }
+        @media (min-width: 768px) {
+            .mobile-top-air {
+                padding-top: 6rem !important; /* Desktop standard */
+            }
+        }
         .label-pos-custom {
             position: absolute;
             top: -1rem;
@@ -121,7 +129,21 @@
         }
     </style>
 </head>
-<body class="min-h-full flex flex-col items-center justify-center overflow-x-hidden overflow-y-auto text-white selection:bg-primary selection:text-white pb-12">
+<body class="min-h-screen flex flex-col items-center overflow-x-hidden text-white selection:bg-primary selection:text-white pb-12">
+
+    <!-- Jazykový přepínač -->
+    <div class="fixed top-0 right-0 z-[9999] p-4 md:p-6">
+        <div class="flex items-center gap-1 p-1 bg-white/10 border border-white/20 backdrop-blur-xl rounded-full shadow-2xl">
+            <a href="{{ request()->fullUrlWithQuery(['lang' => 'cs']) }}"
+               class="px-5 py-3 md:px-4 md:py-2 rounded-full text-[11px] md:text-xs font-black uppercase tracking-widest transition-all {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/20' }}">
+                CZ
+            </a>
+            <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
+               class="px-5 py-3 md:px-4 md:py-2 rounded-full text-[11px] md:text-xs font-black uppercase tracking-widest transition-all {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/20' }}">
+                EN
+            </a>
+        </div>
+    </div>
 
     <!-- Hlavní obsah -->
 
@@ -159,23 +181,23 @@
                 <!-- Šipka k cíli - posunuta blíž ke středu -->
                 <g transform="translate(550, 550) scale(0.7)">
                     <path d="M 0 0 Q 60 100 120 150" class="chalk-line" style="stroke: white; opacity: 0.2;" />
-                    <text x="130" y="180" class="chalk-text-primary text-4xl" style="opacity: 0.6;">VÍTĚZSTVÍ!</text>
+                    <text x="130" y="180" class="chalk-text-primary text-4xl" style="opacity: 0.6;">{{ app()->getLocale() === 'en' ? 'VICTORY!' : 'VÍTĚZSTVÍ!' }}</text>
                 </g>
             </g>
         </svg>
     </div>
 
     <!-- Hlavní kontejner -->
-    <div class="relative z-10 w-full max-w-7xl px-6 py-8 md:py-12 flex flex-col items-center text-center">
+    <div class="relative z-10 w-full max-w-7xl px-6 pb-12 flex flex-col items-center text-center mobile-top-air">
 
         <!-- Velký nápis / Stav -->
         <div class="mb-4">
-            <span class="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/20 backdrop-blur-md text-primary font-black uppercase tracking-[0.6em] text-xs rounded-full mb-4 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.2)]">
+            <span class="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/20 backdrop-blur-md text-primary font-black uppercase tracking-[0.3em] text-xs rounded-full mb-4 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.2)]">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
-                Status: Time-out
+                {{ __('Status: Time-out') }}
             </span>
         </div>
 
@@ -185,17 +207,17 @@
             </h1>
             <div class="label-pos-custom">
                 <div class="marker-font text-primary text-lg md:text-3xl lg:text-4xl bg-white px-3 py-1 md:px-5 md:py-2 rounded-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,0.3)] border-2 border-brand-navy whitespace-nowrap">
-                    LAKUJEME PALUBOVKU!
+                    {{ __('LAKUJEME PALUBOVKU!') }}
                 </div>
             </div>
         </div>
 
         <div class="max-w-5xl mx-auto mb-6 md:mb-8 space-y-4">
-            <h2 class="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-[0.14em] text-white balance leading-[1.1] italic opacity-95">
-                {{ $title ?? 'Trenér právě kreslí vítěznou taktiku pro náš nový web.' }}
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-[0.2em] text-white balance leading-[1.3] italic opacity-95">
+                {{ $branding['maintenance_title'] }}
             </h2>
-            <p class="text-base md:text-lg lg:text-xl text-white leading-[1.6] balance tracking-[0.2em] md:tracking-[0.56em] uppercase opacity-75">
-                {{ $text ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!' }}
+            <p class="text-base md:text-lg lg:text-xl text-white leading-[1.6] balance tracking-[0.15em] md:tracking-[0.45em] uppercase opacity-75">
+                {{ $branding['maintenance_text'] }}
             </p>
         </div>
 
@@ -264,10 +286,10 @@
         <!-- Akce -->
         <div class="flex flex-col md:flex-row items-stretch md:items-center gap-6 md:gap-16 w-full max-w-lg md:max-w-3xl">
             <div class="flex flex-col items-center flex-1">
-                <div class="text-xs font-black uppercase tracking-[0.6em] text-slate-400 mb-6">Pro trenéry</div>
-                <a href="/admin" class="w-full md:w-auto group/btn relative overflow-hidden bg-primary text-white hover:bg-white hover:text-primary transition-all px-12 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-[0_20px_40px_-15px_rgba(var(--color-primary-rgb),0.5)] hover:shadow-none active:scale-95">
+                <div class="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6">{{ __('Pro trenéry') }}</div>
+                <a href="/admin" class="w-full md:w-auto group/btn relative overflow-hidden bg-primary text-white hover:bg-white hover:text-primary transition-all px-12 py-5 rounded-2xl font-black uppercase tracking-[0.15em] text-sm shadow-[0_20px_40px_-15px_rgba(var(--color-primary-rgb),0.5)] hover:shadow-none active:scale-95">
                     <span class="relative z-10 flex items-center justify-center gap-3">
-                        Vstup do šatny
+                        {{ __('Vstup do šatny') }}
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
                     </span>
                     <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700"></div>
@@ -277,7 +299,7 @@
             <div class="hidden md:block w-px h-24 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
 
             <div class="flex flex-col items-center flex-1">
-                <div class="text-xs font-black uppercase tracking-[0.6em] text-slate-400 mb-6">Sledujte nás</div>
+                <div class="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6">{{ __('Sledujte nás') }}</div>
                 <div class="flex items-center gap-5 md:gap-8">
                     @if($branding['socials']['facebook'] ?? null)
                         <a href="{{ $branding['socials']['facebook'] }}" target="_blank" class="p-4 bg-white/10 border border-white/20 rounded-2xl text-white hover:text-primary hover:border-primary hover:bg-white transition-all shadow-xl group/social">
@@ -301,13 +323,12 @@
         <div class="container mx-auto flex flex-col items-center">
             <div class="flex flex-col items-center gap-3 mb-4">
                 <div class="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div>
-                <div class="text-xs font-black uppercase text-center tracking-[0.15em] md:tracking-[0.8em] text-white/30 translate-x-[0.075em] md:translate-x-[0.4em] max-w-[140px] md:max-w-none">Waiting for the buzzer</div>
+                <div class="text-xs font-black uppercase text-center tracking-[0.1em] md:tracking-[0.4em] text-white/30 translate-x-[0.05em] md:translate-x-[0.2em] max-w-[140px] md:max-w-none">{{ __('Waiting for the buzzer') }}</div>
             </div>
-            <div class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-medium max-w-[280px] md:max-w-none mx-auto leading-relaxed">
-                © 2026{{ date('Y') > 2026 ? ' - ' . date('Y') : '' }} {{ $branding['club_name'] ?? 'Kbelští sokoli' }} <br class="md:hidden"> • Všechna práva vyhrazena
+            <div class="text-[10px] text-white/20 uppercase tracking-[0.2em] font-medium max-w-[280px] md:max-w-none mx-auto leading-relaxed text-center">
+                © 2026{{ date('Y') > 2026 ? ' - ' . date('Y') : '' }} {{ $branding['club_name'] ?? 'Kbelští sokoli' }} <br class="md:hidden"> • {{ __('Všechna práva vyhrazena') }}
             </div>
         </div>
     </div>
-
 </body>
 </html>

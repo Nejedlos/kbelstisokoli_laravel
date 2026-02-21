@@ -12,6 +12,8 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -47,7 +49,12 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook(
                 'panels::head.end',
-                fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/filament-auth.css'])"),
+                fn (): string => \Illuminate\Support\Facades\Blade::render(<<<'HTML'
+                    @isset($__vite_main) @else
+                        @vite(['resources/css/filament-auth.css', 'resources/js/filament-error-handler.js'])
+                        @php $__vite_main = true; @endphp
+                    @endisset
+                HTML),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -71,7 +78,6 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\MinifyHtmlMiddleware::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -6,8 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+use Spatie\Translatable\HasTranslations;
+
 class BasketballMatch extends Model
 {
+    use HasTranslations;
+
     protected $table = 'matches';
 
     protected $fillable = [
@@ -23,6 +27,8 @@ class BasketballMatch extends Model
         'notes_internal',
         'notes_public',
     ];
+
+    public $translatable = ['notes_public'];
 
     protected $casts = [
         'scheduled_at' => 'datetime',

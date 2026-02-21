@@ -6,9 +6,11 @@ use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use Spatie\Translatable\HasTranslations;
+
 class Post extends Model
 {
-    use HasSeo;
+    use HasSeo, HasTranslations;
 
     protected $fillable = [
         'category_id',
@@ -24,9 +26,11 @@ class Post extends Model
         'footer_code',
     ];
 
+    public $translatable = ['title', 'excerpt', 'content'];
+
     protected $casts = [
         'publish_at' => 'datetime',
-                'is_visible' => 'boolean',
+        'is_visible' => 'boolean',
     ];
 
     /**

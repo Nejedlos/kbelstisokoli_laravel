@@ -8,7 +8,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/css/filament-auth.css'
+                'resources/css/filament-auth.css',
+                'resources/js/filament-error-handler.js'
             ],
             refresh: true,
         }),

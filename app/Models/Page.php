@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Spatie\Translatable\HasTranslations;
+
 class Page extends Model
 {
-    use HasSeo;
+    use HasSeo, HasTranslations;
 
     protected $fillable = [
         'title',
@@ -21,8 +23,9 @@ class Page extends Model
         'footer_code',
     ];
 
+    public $translatable = ['title', 'content'];
+
     protected $casts = [
-        'content' => 'array',
         'is_visible' => 'boolean',
     ];
 

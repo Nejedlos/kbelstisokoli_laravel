@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Spatie\Translatable\HasTranslations;
+
 class Announcement extends Model
 {
+    use HasTranslations;
+
     protected $fillable = [
         'title',
         'message',
@@ -18,6 +22,8 @@ class Announcement extends Model
         'ends_at',
         'priority',
     ];
+
+    public $translatable = ['title', 'message', 'cta_label'];
 
     protected $casts = [
         'is_active' => 'boolean',

@@ -21,18 +21,15 @@ Knihovna je importována v hlavním CSS souboru `resources/css/app.css`:
 ```
 
 ## Použití v šablonách
-Ikony lze používat standardním způsobem pomocí tříd, např.:
+Ikony vkládáme výhradně ve stylu **Light** (např. pomocí tříd `fa-light` nebo `fa-duotone fa-light`):
 
 ```html
-<i class="fa-solid fa-house"></i>
-<i class="fa-duotone fa-user"></i>
+<i class="fa-light fa-house"></i>
+<i class="fa-duotone fa-light fa-user"></i>
 ```
 
-Díky verzi Pro jsou k dispozici všechny styly:
-- Solid (`fa-solid`)
-- Regular (`fa-regular`)
+Díky verzi Pro jsou k dispozici všechny styly, ale v tomto projektu používáme pouze:
 - Light (`fa-light`)
-- Thin (`fa-thin`)
-- Duotone (`fa-duotone`)
-- Brands (`fa-brands`)
-- Sharp styly (pokud jsou součástí verze 7)
+- Duotone Light (`fa-duotone fa-light`)
+- Brands (`fa-brands`) - pouze pokud neexistuje varianta light.
+- Sharp styly (pokud jsou součástí verze 7 a v light variantě)
