@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends('layouts.auth')
 
 @section('content')
 <div class="auth-gradient">
@@ -21,7 +21,7 @@
                 </div>
             @endif
             <h1 class="auth-title">Vítejte zpět</h1>
-            <p class="auth-sub tracking-tight">Vstupte na palubovku ###TEAM_NAME###</p>
+            <p class="auth-sub tracking-tight">Vstupte na palubovku {{ $branding['club_name'] }}</p>
         </div>
 
         @if (session('status'))
@@ -110,7 +110,7 @@
 
             <div class="flex items-center gap-4 text-slate-600">
                 <div class="h-px w-8 bg-white/5"></div>
-                <p class="text-[10px] font-black uppercase tracking-widest italic">###TEAM_SHORT### Arena</p>
+                <p class="text-[10px] font-black uppercase tracking-widest italic">{{ $branding['club_short_name'] }} Arena</p>
                 <div class="h-px w-8 bg-white/5"></div>
             </div>
         </div>

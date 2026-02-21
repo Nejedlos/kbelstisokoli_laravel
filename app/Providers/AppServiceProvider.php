@@ -28,14 +28,20 @@ class AppServiceProvider extends ServiceProvider
                 ->outsidePanelPlacement(\BezhanSalleh\LanguageSwitch\Enums\Placement::TopRight);
         });
 
-        \Illuminate\Support\Facades\View::composer(['layouts.public', 'layouts.member'], function ($view) {
+        \Illuminate\Support\Facades\View::composer(['layouts.public', 'layouts.member', 'layouts.auth'], function ($view) {
             $brandingService = app(\App\Services\BrandingService::class);
             $seoService = app(\App\Services\SeoService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);
 
             $audience = str_contains($view->getName(), 'member') ? 'member' : 'public';
 
-            $view->with('branding', $brandingService->getSettings());
+            // Branding and CSS
+            $branding = $brandingService->getSettings();
+            $branding['club_name'] = $brandingService->replacePlaceholders($branding['club_name']);
+            $branding['club_short_name'] = $brandingService->replacePlaceholders($branding['club_short_name']);
+            $branding['slogan'] = $brandingService->replacePlaceholders($branding['slogan'] ?? '');
+
+            $view->with('branding', $branding);
             $view->with('branding_css', $brandingService->getCssVariables());
             $view->with('announcements', $communicationService->getActiveAnnouncements($audience));
 

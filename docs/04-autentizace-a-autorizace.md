@@ -220,3 +220,33 @@ feat(auth): enhance 2FA management in admin panel
 - improved 2FA status filtering in UsersTable
 - added bulk reset action for 2FA
 ```
+
+---
+
+## Aktualizace: Oprava kompletního odhlášení (2026-02-21)
+
+Tato aktualizace zajišťuje, že uživatel se může vždy „kompletně odhlásit“, i když se nachází v rozpracovaném stavu přihlašování (2FA challenge).
+
+### 1. Přístupnost logoutu bez autentizace
+Původně byla logout routa `/logout` chráněna middlewarem `auth`, což znemožňovalo odhlášení uživatelům, kteří zadali správné heslo, ale ještě nepotvrdili druhý faktor (v tomto stavu nejsou pro systém plně „autentizováni“).
+- **Změna:** V `routes/web.php` byla logout routa explicitně definována s použitím pouze `web` middleware.
+- **Důsledek:** Tlačítko „Zrušit a odhlásit se“ na stránce 2FA challenge nyní spolehlivě funguje.
+
+### 2. Kompletní invalidace session
+Logout proces ve Fortify standardně volá `session()->invalidate()` a `session()->regenerateToken()`.
+- **Důsledek:** Při odhlášení jsou ze session odstraněna veškerá data, včetně dočasného ID uživatele (`login.id`) a příznaku „remember“ pro 2FA. Uživatel je tak odhlášen z 1FA i probíhajícího 2FA pokusu.
+
+### Změněné soubory
+- `routes/web.php` – uvolnění logout routy z `auth` middleware.
+
+### Ověřené scénáře
+1. Uživatel v 2FA challenge klikne na odhlášení → je přesměrován na úvodní stránku, session je vyčištěna, při pokusu o přístup do adminu musí znovu zadat heslo.
+2. Plně přihlášený uživatel se odhlásí → standardní odhlášení funguje beze změn.
+
+### Doporučená commit zpráva
+```
+fix(auth): allow logout during 2FA challenge for complete session clearance
+
+- removed auth middleware from /logout route
+- ensured session is fully invalidated even for partially authenticated users
+```

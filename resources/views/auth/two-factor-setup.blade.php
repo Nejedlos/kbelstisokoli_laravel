@@ -1,14 +1,68 @@
-@extends('layouts.public')
+@extends('layouts.auth')
 
 @section('content')
-<div class="auth-gradient">
+<div class="w-full max-w-md relative" x-data="{ showHelp: false }">
     <!-- Floating Background Objects -->
-    <div class="floating-objects">
+    <div class="floating-objects pointer-events-none">
         <div class="floating-ball w-64 h-64 top-[-10%] right-[-5%] bg-primary opacity-10"></div>
         <div class="floating-ball w-96 h-96 bottom-[-15%] left-[-10%] opacity-5"></div>
     </div>
 
-    <div class="w-full max-w-md relative z-10">
+    <!-- Help Section (Conditional) -->
+    <div x-show="showHelp"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="relative z-10"
+         style="display: none;">
+
+        <div class="text-center mb-10">
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-light fa-circle-info text-primary text-4xl icon-glow"></i>
+            </div>
+            <h1 class="auth-title">Nápověda k zabezpečení</h1>
+            <p class="auth-sub">Jak nastavit dvoufázové ověření</p>
+        </div>
+
+        <div class="glass-card p-10 space-y-8 border-t-2 border-primary/50">
+            <div class="space-y-6">
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-[10px] font-black">1</div>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Stáhněte si aplikaci</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">Nainstalujte si Google Authenticator, Microsoft Authenticator nebo podobnou aplikaci z App Store nebo Google Play.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-[10px] font-black">2</div>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Naskenujte QR kód</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">V aplikaci zvolte "Přidat účet" a naskenujte kód, který vidíte na obrazovce.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-[10px] font-black">3</div>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Zadejte kód</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">Aplikace začne generovat 6místné kódy. Ten aktuální zadejte do políčka a potvrďte.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="showHelp = false" class="btn btn-primary w-full py-4 rounded-2xl text-sm btn-glow group/btn">
+                <span class="relative z-10 flex items-center justify-center gap-3">
+                    <i class="fa-light fa-arrow-left"></i>
+                    Zpět na nastavení
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content (Setup) -->
+    <div x-show="!showHelp" x-transition class="relative z-10">
         <!-- Header -->
         <div class="text-center mb-12 animate-fade-in-down">
             @if($branding['logo_path'] ?? null)
@@ -54,7 +108,7 @@
                     <div class="text-center space-y-3">
                         <h2 class="text-xl font-black uppercase tracking-tight text-white italic">Propojení aplikace</h2>
                         <p class="text-xs text-slate-400 font-medium leading-relaxed">
-                            Naskenujte tento kód ve vaší autentizační aplikaci (Google Authenticator, Microsoft Authenticator, Authy apod.).
+                            Naskenujte tento kód ve vaší autentizační aplikaci.
                         </p>
                     </div>
 
@@ -86,7 +140,7 @@
                                        class="w-full input-with-icon bg-white/5 border {{ $errors->has('code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-black text-white placeholder-slate-700 outline-none tracking-[0.4em] text-center text-3xl py-6">
                             </div>
                             @error('code')
-                                <div class="flex items-center justify-center gap-2 text-rose-400 mt-2 animate-shake">
+                                <div class="flex items-center gap-2 text-rose-400 mt-2 ml-1 animate-shake">
                                     <i class="fa-light fa-circle-exclamation text-[10px]"></i>
                                     <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
                                 </div>
@@ -143,16 +197,22 @@
             @endif
         </div>
 
-        <div class="mt-12 text-center animate-fade-in space-y-4" style="animation-delay: 0.4s">
-            <a href="{{ route('member.dashboard') }}" class="block text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-light transition-colors">
-                <i class="fa-light fa-arrow-left-long mr-2"></i> Přejít do členské sekce (bez admin přístupu)
-            </a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-rose-400 transition-colors">
-                    Odhlásit se
-                </button>
-            </form>
+        <div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
+            <button @click="showHelp = true" class="block w-full text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">
+                <i class="fa-light fa-circle-question mr-2"></i> Potřebujete nápovědu?
+            </button>
+
+            <div class="flex flex-col gap-4">
+                <a href="{{ route('member.dashboard') }}" class="block text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-light transition-colors">
+                    <i class="fa-light fa-arrow-left-long mr-2"></i> Přejít do členské sekce
+                </a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-rose-400 transition-colors">
+                        Odhlásit se
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

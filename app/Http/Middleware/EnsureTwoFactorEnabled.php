@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Laravel\Fortify\Fortify;
 
 class EnsureTwoFactorEnabled
 {
@@ -17,11 +18,13 @@ class EnsureTwoFactorEnabled
 
         // Pokud je uživatel přihlášen a má oprávnění pro přístup do adminu
         // A ZÁROVEŇ se pokouší přistoupit k admin sekci (včetně Filamentu)
-        if ($user && $user->can('access_admin') && ($request->is('admin*') || $request->routeIs('admin.*'))) {
+        $isAdminRoute = $request->is('admin*') || $request->routeIs('admin.*') || $request->routeIs('filament.admin.*');
+
+        if ($user && $user->can('access_admin') && $isAdminRoute) {
             // A nemá AKTIVOVANÉ (potvrzené) 2FA
             // Fortify používá two_factor_confirmed_at pokud je zapnuté 'confirm' v configu
             $isConfirmed = $user->two_factor_confirmed_at !== null;
-            $needsConfirmation = config('fortify.features.two-factor-authentication.confirm') ?? false;
+            $needsConfirmation = Fortify::confirmsTwoFactorAuthentication();
 
             if (! $user->two_factor_secret || ($needsConfirmation && !$isConfirmed)) {
 
