@@ -43,6 +43,14 @@ Notifikace o úspěšných akcích (např. odeslání e-mailu pro obnovu hesla) 
 ### 5. Kontrola aktivního účtu
 V `FortifyServiceProvider` byla upravena logika autentizace. Pokud uživatel zadá správné údaje, ale jeho účet není aktivní (`is_active = false`), zobrazí se srozumitelná chybová hláška přímo u e-mailu.
 
+### 6. Sjednocený vizuální styl (Glassmorphism)
+Od února 2026 byl zaveden nový vizuální standard pro všechny autentizační stránky (Login, 2FA, Obnova hesla). 
+
+- **Layout:** Společný `layouts.auth` s tmavým gradientním pozadím a plovoucími dekoracemi.
+- **Karty:** Používá se třída `.glass-card` (bílá s 85% opacitou, silný blur, jemný stín).
+- **Vstupní pole:** Pro maximální čitelnost používáme bílé pozadí (`bg-white`) a tmavý text (`text-slate-900`) s výrazným zaoblením (`rounded-2xl`).
+- **Unifikace:** Filament i Fortify šablony využívají stejné Blade komponenty `<x-auth-header />` a `<x-auth-footer />` pro vizuální identitu.
+
 ## Způsob použití
 
 ### Pro vývojáře
