@@ -3,6 +3,8 @@
 use App\Http\Controllers\Member\AttendanceController;
 use App\Http\Controllers\Member\DashboardController;
 use App\Http\Controllers\Member\ProfileController;
+use App\Http\Controllers\Member\EconomyController;
+use App\Http\Controllers\Member\TeamController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,9 +28,17 @@ Route::middleware(['member'])
 
         // Docházka / Program
         Route::get('/program', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/dochazka/historie', [AttendanceController::class, 'history'])->name('attendance.history');
         Route::post('/program/{type}/{id}/respond', [AttendanceController::class, 'store'])->name('attendance.store');
 
         // Profil
         Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profil', [ProfileController::class, 'update'])->name('profile.update');
+
+        // Ekonomika / Platby (Shell)
+        Route::get('/platby', [EconomyController::class, 'index'])->name('economy.index');
+
+        // Trenérské přehledy
+        Route::get('/tymove-prehledy', [TeamController::class, 'index'])->name('teams.index');
+        Route::get('/tymove-prehledy/{team}', [TeamController::class, 'show'])->name('teams.show');
     });

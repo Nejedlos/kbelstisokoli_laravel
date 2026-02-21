@@ -12,14 +12,17 @@ return [
         ['title' => 'Kontakt', 'route' => 'public.contact.index'],
     ],
 
-    // Členská sekce: rozděleno na header (rychlé odkazy) a sidebar (sekce)
+    // Členská sekce: kompletní struktura pro portál
     'member' => [
-        'header' => [
-            ['title' => 'Dashboard', 'route' => 'member.dashboard'],
-            ['title' => 'Profil', 'route' => 'member.profile.edit'],
+        'main' => [
+            ['title' => 'Nástěnka', 'route' => 'member.dashboard', 'icon' => 'heroicon-o-home'],
+            ['title' => 'Můj program', 'route' => 'member.attendance.index', 'icon' => 'heroicon-o-calendar-days'],
+            ['title' => 'Historie docházky', 'route' => 'member.attendance.history', 'icon' => 'heroicon-o-clock'],
+            ['title' => 'Můj profil', 'route' => 'member.profile.edit', 'icon' => 'heroicon-o-user'],
+            ['title' => 'Platby a příspěvky', 'route' => 'member.economy.index', 'icon' => 'heroicon-o-credit-card'],
         ],
-        'sidebar' => [
-            ['title' => 'Docházka', 'route' => 'member.attendance.index'],
+        'coach' => [
+            ['title' => 'Týmové přehledy', 'route' => 'member.teams.index', 'icon' => 'heroicon-o-users-group'],
         ],
     ],
 

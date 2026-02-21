@@ -18,21 +18,21 @@ class AttendanceController extends Controller
         $user = auth()->user();
         $now = now();
 
-        // Tréninky (budoucí)
+        // Budoucí události, na které je hráč přihlášen přes tým nebo jsou globální
+        // Pro zjednodušení skeletonu bereme vše budoucí, kde je RSVP zapnuto
+
         $trainings = Training::with(['team', 'attendances' => fn($q) => $q->where('user_id', $user->id)])
             ->where('starts_at', '>=', $now)
             ->orderBy('starts_at')
             ->get()
             ->map(fn($item) => ['type' => 'training', 'data' => $item, 'time' => $item->starts_at]);
 
-        // Zápasy (budoucí)
         $matches = BasketballMatch::with(['team', 'opponent', 'attendances' => fn($q) => $q->where('user_id', $user->id)])
             ->where('scheduled_at', '>=', $now)
             ->orderBy('scheduled_at')
             ->get()
             ->map(fn($item) => ['type' => 'match', 'data' => $item, 'time' => $item->scheduled_at]);
 
-        // Akce (budoucí)
         $events = ClubEvent::with(['team', 'attendances' => fn($q) => $q->where('user_id', $user->id)])
             ->where('starts_at', '>=', $now)
             ->where('rsvp_enabled', true)
@@ -40,11 +40,24 @@ class AttendanceController extends Controller
             ->get()
             ->map(fn($item) => ['type' => 'event', 'data' => $item, 'time' => $item->starts_at]);
 
-        // Spojení a seřazení
         $program = $trainings->concat($matches)->concat($events)->sortBy('time');
 
         return view('member.attendance.index', [
             'program' => $program,
+        ]);
+    }
+
+    public function history(Request $request): View
+    {
+        $user = auth()->user();
+
+        $attendances = Attendance::with('attendable')
+            ->where('user_id', $user->id)
+            ->orderBy('responded_at', 'desc')
+            ->paginate(20);
+
+        return view('member.attendance.history', [
+            'attendances' => $attendances,
         ]);
     }
 

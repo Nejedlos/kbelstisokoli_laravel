@@ -307,11 +307,40 @@ php artisan optimize:clear
 - Připravena služba `App\Services\Cms\RedirectImporter`, která umožňuje hromadný import redirectů z polí/souborů.
 - Podporuje normalizaci cest a detekci externích URL.
 
-### 11.11 Doporučené commity
-1) feat(users): add is_active/phone/last_login_at/admin_note and enforce active login
-2) feat(players): introduce PlayerProfile + team pivot and Filament resources
-3) feat(admin): add user/profile policies, role/permission overview, KPI dashboard
-4) chore: docs for user management, policies, and dashboard
+## 17. Členský portál (Member Section)
+Účel: Osobní zóna pro hráče a trenéry pro správu docházky, profilu a týmových informací.
+
+### 17.1 Architektura a přístup
+- **URL prostor:** `/clenska-sekce` (v kódu route name prefix `member.`).
+- **Middleware:** Skupina `member` (`auth`, `verified`, `active`, `permission:view_member_section`).
+- **Layout:** `resources/views/layouts/member.blade.php` – mobile-first design, postranní navigace (desktop), spodní lišta (mobil).
+
+### 17.2 Funkcionality
+1. **Dashboard:** Role-aware rozcestník. Zobrazuje nejbližší program, stav docházky (pending) a týmy. Trenéři vidí navíc rychlé odkazy na své týmy.
+2. **Můj program:** Sjednocený chronologický přehled tréninků, zápasů a akcí.
+3. **RSVP / Docházka:** Rychlé potvrzení účasti (Ano/Ne/Možná) přímo z přehledu. Historie odpovědí je dostupná v samostatné sekci.
+4. **Můj profil:** Možnost editace jména, telefonu, veřejného bio a změna hesla. Citlivé údaje (role, týmy) jsou pouze pro čtení.
+5. **Ekonomika (Shell):** Připravený modul pro přehled plateb a členských příspěvků s informacemi o bankovním spojení.
+6. **Týmové přehledy (Trenér):** Přehled docházky celého týmu na blížící se akce (vyžaduje oprávnění `manage_teams`).
+
+### 17.3 Datové napojení
+- Čerpá data z modulů: `Users`, `PlayerProfiles`, `Attendance`, `BasketballMatches`, `Trainings`, `ClubEvents`.
+- Využívá `BrandingService` pro konzistentní barvy a zástupné symboly (hashe).
+
+### 17.4 UI Komponenty
+- `x-member.kpi-card`: Karty pro číselné přehledy na dashboardu.
+- `x-member.event-card`: Komponenta pro událost s integrovanými RSVP formuláři.
+
+### 17.5 CLI a vývoj
+```bash
+# Vyčištění cache po změnách v navigaci nebo layoutu
+php artisan optimize:clear
+```
+
+### 17.6 Doporučené commity
+1) feat(member): implement mobile-first layout and member portal navigation
+2) feat(member): add role-aware dashboard and unified event overview
+3) feat(member): implement profile editing and coach team overviews
 
 
 ## 13. Frontend Design System a Render Pipeline (Public)
