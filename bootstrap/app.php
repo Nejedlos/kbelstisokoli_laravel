@@ -50,6 +50,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'public.maintenance' => \App\Http\Middleware\PublicMaintenanceMiddleware::class,
             '2fa.required' => \App\Http\Middleware\EnsureTwoFactorEnabled::class,
             'minify.html' => \App\Http\Middleware\MinifyHtmlMiddleware::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
 
         $middleware->appendToGroup('web', [
