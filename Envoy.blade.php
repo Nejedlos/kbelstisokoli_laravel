@@ -1,7 +1,7 @@
 @servers(['web' => 'user@your-server-ip'])
 
 @setup
-    $repository = 'git@github.com:user/kbelstisokoli.git';
+    $repository = 'git@github.com:Nejedlos/kbelstisokoli_laravel.git';
     $path = '/path/to/your/web/root';
 @endsetup
 

@@ -1,6 +1,6 @@
 # Deployment (Nasazení na produkci)
 
-Projekt využívá moderní přístup k nasazení, který kombinuje **GitHub** jako zdrojový repozitář a **SSH konzoli** na hostingu (Webglobe) pro finální kroky.
+Projekt využívá moderní přístup k nasazení, který kombinuje **GitHub** ([https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.com/Nejedlos/kbelstisokoli_laravel)) jako zdrojový repozitář a **SSH konzoli** na hostingu (Webglobe) pro finální kroky.
 
 ## Předpoklady na serveru (Webglobe)
 1. **PHP:** Verze 8.2+ (podle Laravel 12 nároků).
