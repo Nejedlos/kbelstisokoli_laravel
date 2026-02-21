@@ -6,8 +6,10 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 
 class CmsForms
 {
@@ -20,23 +22,35 @@ class CmsForms
                 Grid::make(2)
                     ->schema([
                         TextInput::make('title')
-                            ->label('SEO Titulek')
-                            ->helperText('Doporučená délka do 60 znaků. Pokud zůstane prázdné, použije se název stránky.')
+                            ->label('SEO Titulek (Browser Title)')
+                            ->helperText('Doporučená délka do 60 znaků. Pokud zůstane prázdné, použije se název stránky + globální přípona.')
                             ->maxLength(100),
 
-                        TextInput::make('keywords')
-                            ->label('Klíčová slova')
-                            ->helperText('Slova oddělená čárkou (např. basketbal, Kbely, sokoli).'),
+                        TextInput::make('canonical_url')
+                            ->label('Kanonická URL')
+                            ->helperText('Pokud má stránka duplicitu jinde, uveďte originální URL. Standardně se použije aktuální URL.')
+                            ->url()
+                            ->maxLength(255),
                     ]),
 
                 Textarea::make('description')
                     ->label('SEO Popis (Meta Description)')
-                    ->helperText('Stručný popis obsahu pro vyhledávače (cca 150-160 znaků).')
+                    ->helperText('Stručný popis obsahu pro vyhledávače (cca 150-160 znaků). Pokud zůstane prázdné, zkusíme vygenerovat z obsahu.')
                     ->rows(3)
                     ->maxLength(255),
 
-                Section::make('Sociální sítě (Open Graph)')
-                    ->description('Jak se bude stránka zobrazovat při sdílení na Facebooku nebo X (Twitter).')
+                Grid::make(2)
+                    ->schema([
+                        Toggle::make('robots_index')
+                            ->label('Indexovat ve vyhledávačích (Index)')
+                            ->default(true),
+                        Toggle::make('robots_follow')
+                            ->label('Sledovat odkazy (Follow)')
+                            ->default(true),
+                    ]),
+
+                Section::make('Sociální sítě (Open Graph & Twitter)')
+                    ->description('Jak se bude stránka zobrazovat při sdílení na Facebooku, LinkedIn nebo X (Twitter).')
                     ->collapsible()
                     ->collapsed()
                     ->schema([
@@ -51,14 +65,34 @@ class CmsForms
                                         ->label('OG Popis')
                                         ->rows(3)
                                         ->placeholder('Ponechte prázdné pro použití SEO popisu'),
+
+                                    Select::make('twitter_card')
+                                        ->label('Twitter Card')
+                                        ->options([
+                                            'summary' => 'Malý náhled',
+                                            'summary_large_image' => 'Velký náhled (doporučeno)',
+                                        ])
+                                        ->default('summary_large_image'),
                                 ]),
 
                                 FileUpload::make('og_image')
                                     ->label('Sdílený obrázek (OG Image)')
-                                    ->helperText('Doporučený rozměr 1200x630px.')
+                                    ->helperText('Doporučený rozměr 1200x630px. Pokud nevyberete, použije se náhledový obrázek stránky nebo globální logo.')
                                     ->image()
                                     ->directory('seo/og-images'),
                             ]),
+                    ]),
+
+                Section::make('Pokročilé / Vývojář')
+                    ->description('Nastavení pro experty.')
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        Textarea::make('structured_data_override')
+                            ->label('Vlastní strukturovaná data (JSON-LD)')
+                            ->helperText('Vložte validní JSON pole. Bude přidáno k automaticky generovaným datům.')
+                            ->rows(5)
+                            ->fontFamily('monospace'),
                     ]),
             ])
             ->collapsible()

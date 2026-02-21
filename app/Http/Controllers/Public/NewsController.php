@@ -31,17 +31,8 @@ class NewsController extends Controller
             ->where('is_visible', true)
             ->firstOrFail();
 
-        // SEO data
-        $seo = $post->seo;
-
         return view('public.news.show', [
             'post' => $post,
-            'seo_title' => $seo?->title ?? $post->title,
-            'seo_description' => $seo?->description ?? $post->excerpt,
-            'seo_keywords' => $seo?->keywords,
-            'og_title' => $seo?->og_title,
-            'og_description' => $seo?->og_description,
-            'og_image' => ($seo?->og_image) ? asset('storage/' . $seo->og_image) : (($post->featured_image) ? asset('storage/' . $post->featured_image) : null),
             'head_code' => $post->head_code,
             'footer_code' => $post->footer_code,
         ]);

@@ -3,17 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ brand_text($seo_title ?? $title ?? ($branding['club_name'] ?? config('app.name'))) }}</title>
-    <meta name="description" content="{{ brand_text($seo_description ?? $branding['slogan'] ?? '') }}">
-    <meta name="keywords" content="{{ brand_text($seo_keywords ?? '') }}">
+    <title>{{ $seo['title'] }}</title>
+    <meta name="description" content="{{ $seo['description'] }}">
+    <link rel="canonical" href="{{ $seo['canonical'] }}">
+    <meta name="robots" content="{{ $seo['robots'] }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="{{ brand_text($og_title ?? $seo_title ?? $title ?? ($branding['club_name'] ?? config('app.name'))) }}">
-    <meta property="og:description" content="{{ brand_text($og_description ?? $seo_description ?? $branding['slogan'] ?? '') }}">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ $og_image ?? ($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : '') }}">
-    <meta property="og:site_name" content="{{ $branding['club_name'] ?? config('app.name') }}">
+    <meta property="og:title" content="{{ $seo['og_title'] }}">
+    <meta property="og:description" content="{{ $seo['og_description'] }}">
+    <meta property="og:type" content="{{ $seo['og_type'] }}">
+    <meta property="og:url" content="{{ $seo['canonical'] }}">
+    @if($seo['og_image'])
+        <meta property="og:image" content="{{ $seo['og_image'] }}">
+    @endif
+    <meta property="og:site_name" content="{{ $seo['site_name'] }}">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="{{ $seo['twitter_card'] }}">
+    <meta name="twitter:title" content="{{ $seo['og_title'] }}">
+    <meta name="twitter:description" content="{{ $seo['og_description'] }}">
+    @if($seo['og_image'])
+        <meta name="twitter:image" content="{{ $seo['og_image'] }}">
+    @endif
+
+    <!-- Structured Data -->
+    @foreach($seo['structured_data'] as $schema)
+        <script type="application/ld+json">
+            {!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @endforeach
 
     <meta name="theme-color" content="{{ $branding['colors']['red'] ?? '#e11d48' }}">
     <style>{!! $branding_css !!}</style>

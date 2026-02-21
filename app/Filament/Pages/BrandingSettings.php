@@ -181,6 +181,32 @@ class BrandingSettings extends Page
                             ->placeholder('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky...')
                             ->default('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),
                     ]),
+
+                Section::make('Globální SEO nastavení')
+                    ->description('Výchozí hodnoty pro vyhledávače a sociální sítě, které se použijí, pokud nejsou vyplněny u konkrétní stránky.')
+                    ->schema([
+                        TextInput::make('seo_title_suffix')
+                            ->label('Přípona titulku (Title Suffix)')
+                            ->placeholder(' | Název klubu')
+                            ->helperText('Bude přidáno za titulek stránky (např. "O nás | Kbelští sokoli").'),
+                        Textarea::make('seo_description')
+                            ->label('Výchozí meta popis')
+                            ->helperText('Použije se jako fallback, pokud stránka nemá vlastní popis.'),
+                        FileUpload::make('seo_og_image_path')
+                            ->label('Výchozí OG obrázek')
+                            ->image()
+                            ->directory('branding')
+                            ->helperText('Obrázek, který se zobrazí při sdílení na sociálních sítích (doporučeno 1200x630px).'),
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('seo_robots_index')
+                                    ->label('Indexovat web (Robots Index)')
+                                    ->default(true),
+                                Toggle::make('seo_robots_follow')
+                                    ->label('Sledovat odkazy (Robots Follow)')
+                                    ->default(true),
+                            ]),
+                    ]),
             ]);
     }
 

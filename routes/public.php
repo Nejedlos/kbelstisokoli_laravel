@@ -48,6 +48,10 @@ Route::name('public.')->middleware(['public.maintenance'])->group(function (): v
     // Kontakt
     Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
 
+    // Sitemap & Robots
+    Route::get('/sitemap.xml', [\App\Http\Controllers\Public\SitemapController::class, 'index'])->name('sitemap');
+    Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class, 'robots'])->name('robots');
+
     // Generické stránky (vždy na konci skupiny)
     Route::get('/{slug}', [PageController::class, 'show'])->name('pages.show');
 });
