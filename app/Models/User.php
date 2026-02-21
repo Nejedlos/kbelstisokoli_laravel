@@ -37,6 +37,7 @@ class User extends Authenticatable implements FilamentUser
         'phone',
         'last_login_at',
         'admin_note',
+        'notification_preferences',
     ];
 
     /**
@@ -61,6 +62,7 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -78,6 +80,17 @@ class User extends Authenticatable implements FilamentUser
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Zkontroluje, zda má uživatel zapnutý daný typ notifikace.
+     */
+    public function prefersNotification(string $type, string $channel = 'mail'): bool
+    {
+        $prefs = $this->notification_preferences ?? [];
+
+        // Pokud preference neexistují, defaultně posíláme (pokud není řečeno jinak)
+        return (bool) data_get($prefs, "{$type}.{$channel}", true);
     }
 
     /**

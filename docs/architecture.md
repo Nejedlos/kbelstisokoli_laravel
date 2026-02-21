@@ -384,6 +384,43 @@ php artisan optimize:clear
 2) feat(admin): implement Media Library and Gallery resources in Filament
 3) feat(public): add gallery listing/detail views and Page Builder integration
 
+## 19. Komunikace a notifikace
+
+Účel: Správa veřejných oznámení (bannerů) a doručování cílených notifikací členům klubu přes in-app a emailové kanály.
+
+### 19.1 Oznámení (Announcements)
+- **Model:** `Announcement` (tabulka `announcements`).
+- **Funkce:** Horní lišta (Announcement Bar) na webu pro důležité zprávy.
+- **Parametry:** Titulek, zpráva, CTA (tlačítko s odkazem), publikum (veřejnost/členové/všichni), stylová varianta (info/success/warning/urgent) a časová platnost.
+- **Admin:** Filament Resource v sekci "Komunikace".
+- **Frontend:** Komponenta `x-announcement-bar` integrovaná v public i member layoutu.
+
+### 19.2 In-app Notifikace (Member Portal)
+- **Technologie:** Vestavěný systém Laravel Notifications využívající `database` kanál.
+- **Notifikační centrum:** Sekce v členské zóně (`/clenska-sekce/notifikace`) s výpisem zpráv, stavem přečtení a možností hromadného označení za přečtené.
+- **Badge:** Ikona zvonku v horní navigaci s dynamickým počtem nepřečtených zpráv.
+
+### 19.3 Emailové notifikace
+- **BaseNotification:** Abstraktní třída zajišťující sjednocený vzhled emailů s brandingem klubu.
+- **Šablony:** Publikované a upravené Blade šablony v `resources/views/vendor/notifications`.
+- **Kanály:** Automatické doručování přes `mail` a `database` na základě typu zprávy a uživatelských preferencí.
+
+### 19.4 Architektura a integrace
+- **Event-driven:** Notifikace jsou spouštěny pomocí Laravel Eventů (např. `RsvpChanged`).
+- **CommunicationService:** Centrální služba pro načítání oznámení s cachováním pro maximální výkon.
+- **User Preferences:** Každý uživatel má v DB JSON sloupec `notification_preferences` pro individuální nastavení doručování (skeleton).
+
+### 19.5 CLI a vývoj
+```bash
+# Vyčištění cache oznámení a rout
+php artisan optimize:clear
+```
+
+### 19.6 Doporučené commity
+1) feat(comm): add Announcement model and Filament admin resource
+2) feat(notifications): implement member notification center and unread badge
+3) feat(logic): add event-driven RSVP notifications and BaseNotification branding
+
 
 ## 13. Frontend Design System a Render Pipeline (Public)
 

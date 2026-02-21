@@ -38,6 +38,11 @@ Route::middleware(['member'])
         // Ekonomika / Platby (Shell)
         Route::get('/platby', [EconomyController::class, 'index'])->name('economy.index');
 
+        // Notifikace
+        Route::get('/notifikace', [\App\Http\Controllers\Member\NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifikace/mark-all-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+        Route::post('/notifikace/{id}/mark-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAsRead'])->name('notifications.markRead');
+
         // Trenérské přehledy
         Route::get('/tymove-prehledy', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/tymove-prehledy/{team}', [TeamController::class, 'show'])->name('teams.show');

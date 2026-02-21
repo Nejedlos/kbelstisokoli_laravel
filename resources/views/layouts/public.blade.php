@@ -26,6 +26,8 @@
     @stack('head')
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
+    <x-announcement-bar :announcements="$announcements ?? []" />
+
     <!-- Header -->
     <x-header :branding="$branding ?? []" :navigation="config('navigation.public', [])" />
 

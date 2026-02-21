@@ -18,6 +18,9 @@ class EventServiceProvider extends ServiceProvider
         Login::class => [
             UpdateLastLoginAt::class,
         ],
+        \App\Events\RsvpChanged::class => [
+            \App\Listeners\SendRsvpNotification::class,
+        ],
     ];
 
     /**

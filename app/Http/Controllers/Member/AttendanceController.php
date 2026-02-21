@@ -77,7 +77,7 @@ class AttendanceController extends Controller
 
         $item = $modelClass::findOrFail($id);
 
-        Attendance::updateOrCreate(
+        $attendance = Attendance::updateOrCreate(
             [
                 'user_id' => auth()->id(),
                 'attendable_id' => $item->id,
@@ -89,6 +89,8 @@ class AttendanceController extends Controller
                 'responded_at' => now(),
             ]
         );
+
+        event(new \App\Events\RsvpChanged($attendance));
 
         return back()->with('status', 'Vaše odpověď byla uložena.');
     }
