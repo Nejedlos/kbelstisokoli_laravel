@@ -27,6 +27,7 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
 - Dodržujeme **PSR-12**.
 - Používáme **Laravel Pint** pro formátování kódu (konfigurace v projektu).
 - Typování: Vždy definujeme návratové typy metod a typy parametrů, kde je to možné.
+- Ikony: Používáme **Font Awesome 7 Pro**. Ikony vkládáme pomocí `<i>` tagů s příslušnými třídami (např. `<i class="fa-solid fa-basketball"></i>`).
 - Pojmenování:
     - Modely: Jednotné číslo, PascalCase (např. `Member`).
     - Kontrolery: PascalCase + přípona `Controller` (např. `MemberController`).

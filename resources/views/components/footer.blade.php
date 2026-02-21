@@ -34,27 +34,42 @@
         <!-- Contact / Socials -->
         <div>
             <h3 class="text-white font-bold uppercase mb-4">Kontakt</h3>
-            <ul class="space-y-2 text-slate-300">
+            <ul class="space-y-3 text-slate-300">
                 @if(data_get($branding, 'contact.address'))
-                    <li>{{ $branding['contact']['address'] }}</li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-location-dot mt-1 text-primary"></i>
+                        <span>{{ $branding['contact']['address'] }}</span>
+                    </li>
                 @endif
                 @if(data_get($branding, 'contact.email'))
-                    <li><a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary">{{ $branding['contact']['email'] }}</a></li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-envelope text-primary"></i>
+                        <a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary transition-colors">{{ $branding['contact']['email'] }}</a>
+                    </li>
                 @endif
                 @if(data_get($branding, 'contact.phone'))
-                    <li><a href="tel:{{ $branding['contact']['phone'] }}" class="hover:text-primary">{{ $branding['contact']['phone'] }}</a></li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-phone text-primary"></i>
+                        <a href="tel:{{ $branding['contact']['phone'] }}" class="hover:text-primary transition-colors">{{ $branding['contact']['phone'] }}</a>
+                    </li>
                 @endif
             </ul>
 
-            <div class="mt-4 flex items-center gap-4">
+            <div class="mt-6 flex items-center gap-4">
                 @if(data_get($branding, 'socials.facebook'))
-                    <a href="{{ $branding['socials']['facebook'] }}" class="hover:text-primary" target="_blank" rel="noopener">Facebook</a>
+                    <a href="{{ $branding['socials']['facebook'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
+                        <i class="fa-brands fa-facebook-f text-lg"></i>
+                    </a>
                 @endif
                 @if(data_get($branding, 'socials.instagram'))
-                    <a href="{{ $branding['socials']['instagram'] }}" class="hover:text-primary" target="_blank" rel="noopener">Instagram</a>
+                    <a href="{{ $branding['socials']['instagram'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
+                        <i class="fa-brands fa-instagram text-lg"></i>
+                    </a>
                 @endif
                 @if(data_get($branding, 'socials.youtube'))
-                    <a href="{{ $branding['socials']['youtube'] }}" class="hover:text-primary" target="_blank" rel="noopener">YouTube</a>
+                    <a href="{{ $branding['socials']['youtube'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
+                        <i class="fa-brands fa-youtube text-lg"></i>
+                    </a>
                 @endif
             </div>
         </div>

@@ -83,6 +83,14 @@
             animation: spin-slow 12s infinite linear;
         }
 
+        @keyframes aura-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.6); opacity: 0.9; }
+        }
+        .animate-aura {
+            animation: aura-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
         /* Garantované pozicování štítku i při problémech s buildem */
         .label-pos-custom {
             position: absolute;
@@ -171,7 +179,7 @@
             </span>
         </div>
 
-        <div class="relative w-fit mx-auto mb-6 md:mb-10 overflow-visible text-center">
+        <div class="relative w-fit mx-auto mb-4 md:mb-6 overflow-visible text-center">
             <h1 class="w-fit mx-auto text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-2 sm:px-12 md:px-16 lg:px-20 py-4 overflow-visible whitespace-nowrap">
                 TIME<span class="text-primary">-</span>OUT!
             </h1>
@@ -182,7 +190,7 @@
             </div>
         </div>
 
-        <div class="max-w-5xl mx-auto mb-8 md:mb-12 space-y-4">
+        <div class="max-w-5xl mx-auto mb-6 md:mb-8 space-y-4">
             <h2 class="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-[0.14em] text-white balance leading-[1.1] italic opacity-95">
                 {{ $title ?? 'Trenér právě kreslí vítěznou taktiku pro náš nový web.' }}
             </h2>
@@ -192,22 +200,63 @@
         </div>
 
         <!-- Interaktivní / Vizuální prvek -->
-        <div class="relative group cursor-pointer mb-8 md:mb-12">
+        <div class="relative group cursor-pointer mb-6 md:mb-8">
+            <!-- Záře za míčem -->
             <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full group-hover:bg-primary/40 transition-colors duration-700 animate-pulse"></div>
-            <div class="relative animate-spin-slow">
-                <svg class="w-24 h-24 md:w-56 md:h-56 text-primary transition-all duration-700 group-hover:scale-110 group-hover:rotate-[360deg] filter drop-shadow-[0_20px_50px_rgba(var(--color-primary-rgb),0.3)]" viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="10" />
-                    <!-- Odlesk na míči -->
-                    <path d="M7 7c2-2 5-2 7 0" fill="none" stroke="white" stroke-width="0.5" stroke-linecap="round" stroke-opacity="0.3" />
-                    <!-- Basketbalové linky -->
-                    <g fill="none" stroke="black" stroke-opacity="0.2" stroke-width="0.8">
-                        <path d="M12 2a14.5 14.5 0 0 0 0 20" />
-                        <path d="M2 12h20" />
-                        <path d="M4.93 4.93a10 10 0 0 1 14.14 0" />
-                        <path d="M4.93 19.07a10 10 0 0 0 14.14 0" />
-                    </g>
-                </svg>
+
+            <div class="relative w-24 h-24 md:w-36 md:h-36 mx-auto">
+                <!-- Pulzující aura kolem míče -->
+                <div class="absolute inset-[-5%] bg-primary/40 blur-2xl rounded-full animate-aura pointer-events-none"></div>
+
+                <!-- Rotující část (Míč + Textura + Linky) -->
+                <div class="absolute inset-0 animate-spin-slow transition-all duration-700 group-hover:scale-110">
+                    <svg class="w-full h-full text-primary filter drop-shadow-[0_20px_50px_rgba(var(--color-primary-rgb),0.3)]" viewBox="0 0 100 100" fill="currentColor">
+                        <defs>
+                            <!-- Pebble textura pro "kožený" povrch -->
+                            <pattern id="ballPebbles" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+                                <circle cx="2" cy="2" r="1" fill="black" fill-opacity="0.2" />
+                                <circle cx="6" cy="6" r="1" fill="black" fill-opacity="0.2" />
+                            </pattern>
+                        </defs>
+                        <!-- Základní koule -->
+                        <circle cx="50" cy="50" r="48" />
+                        <!-- Textura -->
+                        <circle cx="50" cy="50" r="48" fill="url(#ballPebbles)" />
+                        <!-- Basketbalové rýhy (Grooves) -->
+                        <g fill="none" stroke="black" stroke-opacity="0.3" stroke-width="2.5" stroke-linecap="round">
+                            <circle cx="50" cy="50" r="48" stroke-opacity="0.5" />
+                            <path d="M50 2v96" />
+                            <path d="M2 50h96" />
+                            <path d="M18 18c15 15 15 45 0 60" />
+                            <path d="M82 18c-15 15-15 45 0 60" />
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Statická část (Stínování a Odlesk - nerotuje s míčem pro větší realismus) -->
+                <div class="absolute inset-0 pointer-events-none transition-all duration-700 group-hover:scale-110">
+                    <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">
+                        <defs>
+                            <!-- 3D Sférické stínování -->
+                            <radialGradient id="ballVolume" cx="35%" cy="35%" r="60%">
+                                <stop offset="0%" stop-color="white" stop-opacity="0.4" />
+                                <stop offset="50%" stop-color="black" stop-opacity="0" />
+                                <stop offset="100%" stop-color="black" stop-opacity="0.5" />
+                            </radialGradient>
+                            <!-- Vrchní lesk -->
+                            <linearGradient id="ballShine" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="white" stop-opacity="0.2" />
+                                <stop offset="50%" stop-color="white" stop-opacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Stínování -->
+                        <circle cx="50" cy="50" r="48" fill="url(#ballVolume)" />
+                        <!-- Horní odlesk -->
+                        <circle cx="50" cy="50" r="48" fill="url(#ballShine)" />
+                    </svg>
+                </div>
             </div>
+
             <!-- Stín pod míčem -->
             <div class="mt-6 w-16 md:w-32 h-2 md:h-3 bg-black/40 blur-md rounded-full mx-auto animate-pulse"></div>
         </div>
@@ -250,12 +299,12 @@
     <!-- Spodní lišta / Siréna -->
     <div class="relative mt-auto py-6 w-full">
         <div class="container mx-auto flex flex-col items-center">
-            <div class="flex items-center gap-4 mb-4">
+            <div class="flex flex-col items-center gap-3 mb-4">
                 <div class="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div>
-                <div class="text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.8em] text-white/30 translate-x-[0.15em] md:translate-x-[0.4em]">Waiting for the buzzer</div>
+                <div class="text-xs font-black uppercase text-center tracking-[0.15em] md:tracking-[0.8em] text-white/30 translate-x-[0.075em] md:translate-x-[0.4em] max-w-[140px] md:max-w-none">Waiting for the buzzer</div>
             </div>
-            <div class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-medium">
-                © {{ date('Y') }} {{ $branding['club_name'] ?? 'Kbelští sokoli' }} • Všechna práva vyhrazena
+            <div class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-medium max-w-[280px] md:max-w-none mx-auto leading-relaxed">
+                © 2026{{ date('Y') > 2026 ? ' - ' . date('Y') : '' }} {{ $branding['club_name'] ?? 'Kbelští sokoli' }} <br class="md:hidden"> • Všechna práva vyhrazena
             </div>
         </div>
     </div>

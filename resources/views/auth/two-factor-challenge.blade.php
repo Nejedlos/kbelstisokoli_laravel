@@ -1,27 +1,33 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="auth-gradient flex items-center justify-center py-16" x-data="{ recovery: false }">
-    <div class="w-full max-w-md">
+<div class="auth-gradient" x-data="{ recovery: false }">
+    <!-- Floating Background Objects -->
+    <div class="floating-objects">
+        <div class="floating-ball w-64 h-64 top-[-10%] right-[-5%] bg-accent"></div>
+        <div class="floating-ball w-96 h-96 bottom-[-15%] left-[-10%] opacity-5"></div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
         <!-- Header -->
-        <div class="text-center mb-10">
+        <div class="text-center mb-12 animate-fade-in-down">
             @if($branding['logo_path'] ?? null)
-                <div class="w-20 h-20 bg-white/5 rounded-club flex items-center justify-center mx-auto mb-6 shadow-lg border border-white/10 p-3">
-                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain" alt="">
+                <div class="w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
+                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
                 </div>
             @else
-                <div class="w-16 h-16 mx-auto mb-6 text-primary">
-                    <i class="fa-solid fa-shield-halved text-5xl icon-bounce icon-glow"></i>
+                <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
+                    <i class="fa-duotone fa-solid fa-shield-check text-6xl icon-bounce icon-glow"></i>
                 </div>
             @endif
-            <h1 class="auth-title">Zabezpečení účtu</h1>
-            <p class="auth-sub" x-show="!recovery">Zadejte kód z vaší autentizační aplikace.</p>
-            <p class="auth-sub" x-show="recovery">Zadejte některý ze svých záchranných kódů.</p>
+            <h1 class="auth-title">Ověření přístupu</h1>
+            <p class="auth-sub tracking-tight" x-show="!recovery">Zadejte kód z vaší aplikace</p>
+            <p class="auth-sub tracking-tight" x-show="recovery">Zadejte záchranný kód</p>
         </div>
 
         @if ($errors->any())
-            <div class="bg-rose-600/20 border-l-4 border-rose-500 text-rose-100 p-4 mb-6 rounded shadow-sm font-bold text-sm">
-                <ul class="list-disc list-inside">
+            <div class="glass-card !bg-rose-500/10 border-rose-500/30 text-rose-200 p-5 mb-8 rounded-2xl animate-shake">
+                <ul class="list-none text-xs font-bold pl-0 text-center">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -29,47 +35,64 @@
             </div>
         @endif
 
-        <div class="glass-card p-8 border-t-4 border-primary text-white/90">
-            <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-6">
+        <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
+            <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-8">
                 @csrf
 
-                <div class="space-y-2" x-show="!recovery">
-                    <label for="code" class="text-xs font-black uppercase tracking-widest text-slate-300">Ověřovací kód</label>
-                    <div class="relative">
-                        <div class="input-icon"><i class="fa-solid fa-shield-keyhole text-slate-400"></i></div>
+                <div class="space-y-4" x-show="!recovery">
+                    <label for="code" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center block">6místný ověřovací kód</label>
+                    <div class="relative group/input">
+                        <div class="input-icon group-focus-within/input:text-primary">
+                            <i class="fa-solid fa-fingerprint text-xl"></i>
+                        </div>
                         <input id="code" type="text" name="code" inputmode="numeric" autofocus autocomplete="one-time-code"
-                               class="w-full input-with-icon pr-4 py-3 bg-white/5 border border-white/10 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-white placeholder-slate-400 outline-none tracking-[0.5em] text-center text-2xl">
+                               placeholder="000 000"
+                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-black text-white placeholder-slate-700 outline-none tracking-[0.5em] text-center text-3xl py-6">
                     </div>
-                    <p class="text-[10px] text-slate-300 font-medium text-center italic mt-2">Otevřete aplikaci (Google Authenticator, Authy…) a opište 6místný kód.</p>
+                    <p class="text-[10px] text-slate-400 font-medium text-center italic">Otevřete Google Authenticator nebo podobnou aplikaci.</p>
                 </div>
 
-                <div class="space-y-2" x-show="recovery" x-cloak>
-                    <label for="recovery_code" class="text-xs font-black uppercase tracking-widest text-slate-300">Záchranný kód</label>
-                    <div class="relative">
-                        <div class="input-icon"><i class="fa-solid fa-key text-slate-400"></i></div>
+                <div class="space-y-4" x-show="recovery" x-cloak>
+                    <label for="recovery_code" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center block">Záchranný kód</label>
+                    <div class="relative group/input">
+                        <div class="input-icon group-focus-within/input:text-primary">
+                            <i class="fa-solid fa-key-skeleton text-xl"></i>
+                        </div>
                         <input id="recovery_code" type="text" name="recovery_code" autocomplete="one-time-code"
-                               class="w-full input-with-icon pr-4 py-3 bg-white/5 border border-white/10 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-white placeholder-slate-400 outline-none font-mono text-center">
+                               placeholder="abcde-fghij"
+                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-mono font-bold text-white placeholder-slate-700 outline-none text-center text-xl py-6 uppercase">
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full py-4 btn-glow uppercase tracking-widest">
-                    <i class="fa-solid fa-unlock-keyhole mr-2"></i>
-                    Ověřit a pokračovat
+                <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
+                    <span class="relative z-10 flex items-center justify-center gap-3">
+                        Ověřit a vstoupit
+                        <i class="fa-solid fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>
+                    </span>
                 </button>
 
                 <div class="text-center pt-2">
-                    <button type="button" class="auth-link"
+                    <button type="button" class="auth-link text-[10px] flex items-center justify-center gap-2 mx-auto"
                             x-show="!recovery" @click="recovery = true; $nextTick(() => { $refs.recovery_code?.focus() })">
-                        <i class="fa-solid fa-key mr-1"></i>
+                        <i class="fa-solid fa-life-ring text-primary"></i>
                         Použít záchranný kód
                     </button>
 
-                    <button type="button" class="auth-link"
+                    <button type="button" class="auth-link text-[10px] flex items-center justify-center gap-2 mx-auto"
                             x-show="recovery" x-cloak @click="recovery = false; $nextTick(() => { $refs.code?.focus() })">
-                        <i class="fa-solid fa-shield-keyhole mr-1"></i>
+                        <i class="fa-solid fa-mobile-notch text-primary"></i>
                         Použít ověřovací kód
                     </button>
                 </div>
+            </form>
+        </div>
+
+        <div class="mt-12 text-center animate-fade-in" style="animation-delay: 0.4s">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-rose-500 transition-colors">
+                    Zrušit a odhlásit se
+                </button>
             </form>
         </div>
     </div>

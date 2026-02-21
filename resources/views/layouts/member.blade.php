@@ -24,9 +24,7 @@
             <div class="flex items-center gap-4">
                 <!-- Mobile Menu Trigger -->
                 <button @click="sidebarOpen = true" class="lg:hidden p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    <i class="fa-solid fa-bars text-xl"></i>
                 </button>
 
                 <!-- Logo -->
@@ -47,9 +45,7 @@
             <div class="flex items-center gap-2 sm:gap-4">
                 <!-- Notifications -->
                 <a href="{{ route('member.notifications.index') }}" class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors mr-2">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
+                    <i class="fa-solid fa-bell text-xl"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
                         <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-secondary animate-pulse">
                             {{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}
@@ -144,10 +140,8 @@
              class="fixed inset-y-0 left-0 w-72 bg-white z-50 lg:hidden shadow-2xl flex flex-col">
             <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100">
                 <span class="font-black uppercase tracking-tight text-secondary">Menu sekce</span>
-                <button @click="sidebarOpen = false" class="p-2 text-slate-400">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                <button @click="sidebarOpen = false" class="p-2 text-slate-400 hover:text-rose-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
                 </button>
             </div>
             <nav class="flex-1 overflow-y-auto p-6 space-y-2">
@@ -201,19 +195,15 @@
             <div class="py-8 px-4 sm:px-8">
                 <div class="max-w-6xl mx-auto">
                     @if (session('status'))
-                        <div class="mb-8 p-4 bg-success-50 border border-success-200 text-success-700 rounded-club flex items-center gap-3 animate-fade-in">
-                            <svg class="w-5 h-5 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
+                        <div class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-2xl flex items-center gap-4 animate-fade-in">
+                            <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
                             <span class="font-bold text-sm">{{ session('status') }}</span>
                         </div>
                     @endif
 
                     @if (session('error'))
-                        <div class="mb-8 p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-club flex items-center gap-3">
-                            <svg class="w-5 h-5 text-danger-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div class="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-700 rounded-2xl flex items-center gap-4">
+                            <i class="fa-solid fa-circle-exclamation text-rose-500 text-lg"></i>
                             <span class="font-bold text-sm">{{ session('error') }}</span>
                         </div>
                     @endif
@@ -225,22 +215,22 @@
     </div>
 
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="lg:hidden h-16 bg-white border-t border-slate-200 flex items-center justify-around px-2 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-        <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('member.dashboard') ? 'text-primary' : 'text-slate-400' }}">
-            <x-heroicon-o-home class="w-6 h-6" />
-            <span class="text-[10px] font-black uppercase tracking-widest">Domů</span>
+    <nav class="lg:hidden h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-30 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
+        <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.dashboard') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
+            <i class="fa-solid fa-grid-2 text-xl"></i>
+            <span class="text-[9px] font-black uppercase tracking-widest">Dashboard</span>
         </a>
-        <a href="{{ route('member.attendance.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('member.attendance.*') ? 'text-primary' : 'text-slate-400' }}">
-            <x-heroicon-o-calendar-days class="w-6 h-6" />
-            <span class="text-[10px] font-black uppercase tracking-widest">Akce</span>
+        <a href="{{ route('member.attendance.index') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.attendance.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
+            <i class="fa-solid fa-calendar-star text-xl"></i>
+            <span class="text-[9px] font-black uppercase tracking-widest">Program</span>
         </a>
-        <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('member.profile.*') ? 'text-primary' : 'text-slate-400' }}">
-            <x-heroicon-o-user class="w-6 h-6" />
-            <span class="text-[10px] font-black uppercase tracking-widest">Profil</span>
+        <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.profile.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
+            <i class="fa-solid fa-user-gear text-xl"></i>
+            <span class="text-[9px] font-black uppercase tracking-widest">Profil</span>
         </a>
-        <button @click="sidebarOpen = true" class="flex flex-col items-center gap-1 text-slate-400">
-            <x-heroicon-o-bars-3 class="w-6 h-6" />
-            <span class="text-[10px] font-black uppercase tracking-widest">Více</span>
+        <button @click="sidebarOpen = true" class="flex flex-col items-center gap-1.5 text-slate-400 hover:text-primary transition-colors duration-300">
+            <i class="fa-solid fa-circle-nodes text-xl"></i>
+            <span class="text-[9px] font-black uppercase tracking-widest">Více</span>
         </button>
     </nav>
 

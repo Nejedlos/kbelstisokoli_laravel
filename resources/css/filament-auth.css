@@ -9,17 +9,22 @@
 
 /* Reset a základní pozadí */
 .fi-simple-layout {
-    background-color: #020617 !important; /* Ultra Dark Slate */
+    background-color: #0B1F3A !important; /* Brand Navy */
     background-image:
-        radial-gradient(circle at 50% -20%, rgba(225, 29, 72, 0.3) 0%, transparent 70%),
-        radial-gradient(circle at 0% 100%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(225, 29, 72, 0.15) 0%, transparent 50%) !important;
+        radial-gradient(circle at 50% -20%, rgba(225, 29, 72, 0.5) 0%, transparent 70%),
+        radial-gradient(circle at 0% 100%, rgba(37, 99, 235, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(225, 29, 72, 0.3) 0%, transparent 50%) !important;
     background-attachment: fixed !important;
     min-height: 100vh !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-family: 'Instrument Sans', sans-serif !important;
+}
+
+/* Skrytí textového loga, dokud nebude nahrán obrázek */
+.fi-logo {
+    display: none !important;
 }
 
 /* Noise Textura */
@@ -39,76 +44,117 @@
     width: 100% !important;
 }
 
-/* Glass Card - Jádro "Sexy" vzhledu */
-.fi-simple-card {
-    background-color: rgba(15, 23, 42, 0.7) !important; /* Slate 900 semi-transparent */
-    backdrop-filter: blur(24px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 4px solid #E11D48 !important; /* Brand Red */
+/* Glass Card - Light theme on dark background */
+.fi-simple-main {
+    background-color: #ffffff !important; /* Pure White for maximum contrast */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    border-top: 10px solid #E11D48 !important; /* Thicker Brand Red top border */
     box-shadow:
-        0 0 40px rgba(0, 0, 0, 0.6),
-        0 20px 50px -12px rgba(0, 0, 0, 0.8),
-        inset 0 0 20px rgba(225, 29, 72, 0.05) !important;
-    border-radius: 2rem !important;
-    padding: 3rem !important;
-    max-width: 28rem !important;
-    margin: auto !important;
+        0 30px 60px -12px rgba(0, 0, 0, 0.6),
+        0 0 120px rgba(0, 0, 0, 0.4) !important;
+    border-radius: 2.5rem !important;
+    padding: 4.5rem !important;
+    margin: 3rem auto !important;
+    position: relative !important;
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 32rem !important;
 }
 
-/* Nadpisy */
+.fi-simple-page-content {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+}
+
+/* Nadpisy - Dark text on light card */
 .fi-simple-header-heading {
-    color: #ffffff !important;
-    font-size: 2rem !important;
-    font-weight: 900 !important;
-    letter-spacing: -0.05em !important;
+    color: #0f172a !important; /* Slate 900 */
+    font-size: 1.25rem !important; /* XL size equivalent, much smaller */
+    font-weight: 950 !important;
+    letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
-    margin-bottom: 0.75rem !important;
+    margin-top: 2rem !important; /* Even more air between icon and heading */
     font-family: 'Oswald', sans-serif !important;
-    text-shadow: 0 0 20px rgba(225, 29, 72, 0.3);
+    text-shadow: none !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    display: block !important;
 }
 
 .fi-simple-header-subheading {
-    color: rgba(203, 213, 225, 0.8) !important; /* Slate 300 */
-    font-size: 0.95rem !important;
-    font-style: italic !important;
-    font-weight: 500 !important;
+    color: #475569 !important; /* Slate 600 */
+    font-size: 0.875rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.25em !important;
+    margin-top: 1rem !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
 }
 
-/* Formulářová pole */
+/* Formulářová pole - High contrast Light elements */
 .fi-fo-field-wrp-label label {
-    color: rgba(203, 213, 225, 0.6) !important;
-    text-transform: uppercase !important;
-    font-size: 0.7rem !important;
-    letter-spacing: 0.2em !important;
+    color: #1e293b !important; /* Slate 800 */
+    font-size: 0.8rem !important;
     font-weight: 900 !important;
-    margin-bottom: 0.75rem !important;
+    letter-spacing: 0.05em !important;
 }
 
 .fi-input-wrp {
-    background-color: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 1rem !important;
-    box-shadow: none !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background-color: #f8fafc !important; /* Slate 50 */
+    border: 2px solid #cbd5e1 !important; /* Slate 300 */
+    border-radius: 0.375rem !important; /* Even less rounded md */
+    transition: all 0.3s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
 .fi-input-wrp:focus-within {
-    background-color: rgba(255, 255, 255, 0.08) !important;
+    background-color: #ffffff !important;
     border-color: #E11D48 !important;
-    box-shadow: 0 0 15px rgba(225, 29, 72, 0.2) !important;
-    transform: scale(1.01);
+    box-shadow: 0 0 0 5px rgba(225, 29, 72, 0.15) !important;
+    transform: translateY(-1px);
 }
 
 .fi-input {
-    color: #ffffff !important;
-    font-weight: 600 !important;
-    padding: 1rem 1.25rem !important;
-    font-size: 1rem !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    font-size: 1.125rem !important;
 }
 
-.fi-input::placeholder {
-    color: rgba(255, 255, 255, 0.25) !important;
+/* Button - Explicit Primary */
+.fi-btn {
+    border-radius: 1.25rem !important;
+    font-weight: 950 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.15em !important;
+    padding: 1.25rem 2.5rem !important;
+    font-size: 1rem !important;
+    box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.4) !important;
+}
+
+.fi-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(225, 29, 72, 0.6) !important;
+}
+
+/* Checkbox */
+.fi-checkbox-input {
+    border-color: #cbd5e1 !important;
+}
+
+/* Links */
+.fi-link {
+    color: #64748b !important;
+    font-weight: 700 !important;
+}
+
+.fi-link:hover {
+    color: #E11D48 !important;
 }
 
 /* Checkbox */
@@ -167,20 +213,32 @@
     animation: icon-bounce-slow 2.5s infinite ease-in-out !important;
 }
 
-/* Spodní odkaz */
+/* Spodní odkaz a patička */
+.fi-simple-main footer,
+.mt-12.text-center {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
 .fi-link {
-    color: rgba(255, 255, 255, 0.5) !important;
-    font-size: 0.8rem !important;
-    font-weight: 800 !important;
+    color: #64748b !important;
+    font-size: 0.85rem !important;
+    font-weight: 900 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.12em !important;
     transition: all 0.3s ease !important;
     padding: 0.5rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
 }
 
 .fi-link:hover {
-    color: #ffffff !important;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
+    color: #E11D48 !important;
     text-decoration: none !important;
 }
 

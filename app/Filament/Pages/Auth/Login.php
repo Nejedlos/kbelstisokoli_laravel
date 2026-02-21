@@ -14,10 +14,17 @@ class Login extends BaseLogin
      */
     public function getHeading(): string|Htmlable
     {
+        $branding = app(\App\Services\BrandingService::class)->getSettings();
+        $clubName = $branding['club_name'] ?? 'Kbelští sokoli';
+
         return new HtmlString('
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-basketball-hoop text-primary text-4xl mb-4 fa-glow icon-bounce-slow"></i>
-                <span>' . brand_text('Vítejte zpět na palubovce') . '</span>
+                <div class="mb-16 flex items-center justify-center w-24 h-24 rounded-full bg-slate-50 shadow-xl relative group ring-8 ring-slate-100">
+                    <i class="fa-solid fa-basketball-hoop text-primary text-5xl fa-glow icon-bounce-slow relative z-10"></i>
+                    <div class="absolute inset-0 rounded-full bg-primary/10 blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <h2 class="text-slate-900 font-black uppercase tracking-tight text-lg leading-none m-0 p-0">' . e($clubName) . '</h2>
+                <p class="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] mt-4 m-0 p-0">Vstup pro oprávněné osoby</p>
             </div>
         ');
     }
@@ -27,6 +34,6 @@ class Login extends BaseLogin
      */
     public function getSubheading(): string|Htmlable
     {
-        return brand_text('Přihlášení do administrace ###TEAM_NAME###');
+        return new HtmlString('&nbsp;');
     }
 }
