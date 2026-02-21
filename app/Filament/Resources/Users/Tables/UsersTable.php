@@ -5,16 +5,18 @@ namespace App\Filament\Resources\Users\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\BulkAction;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 
-use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Password;
 use App\Notifications\UserInvitationNotification;
 use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Database\Eloquent\Collection;
 
 class UsersTable
 {
@@ -39,7 +41,7 @@ class UsersTable
                     ->label('Aktivní')
                     ->boolean()
                     ->sortable(),
-                IconColumn::make('two_factor_secret')
+                IconColumn::make('two_factor_confirmed_at')
                     ->label('2FA')
                     ->boolean()
                     ->trueIcon('heroicon-o-shield-check')
@@ -79,17 +81,23 @@ class UsersTable
                     ->label('Pouze aktivní'),
                 TernaryFilter::make('two_factor')
                     ->label('Aktivní 2FA')
-                    ->trueQuery(fn ($query) => $query->whereNotNull('two_factor_secret'))
-                    ->falseQuery(fn ($query) => $query->whereNull('two_factor_secret')),
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('two_factor_secret'),
+                        false: fn ($query) => $query->whereNull('two_factor_secret'),
+                    ),
                 TernaryFilter::make('onboarding')
                     ->label('Dokončený onboarding')
-                    ->trueQuery(fn ($query) => $query->whereNotNull('onboarding_completed_at'))
-                    ->falseQuery(fn ($query) => $query->whereNull('onboarding_completed_at')),
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('onboarding_completed_at'),
+                        false: fn ($query) => $query->whereNull('onboarding_completed_at'),
+                    ),
                 TernaryFilter::make('player_profile_exists')
                     ->label('Má hráčský profil')
                     ->placeholder('Všichni')
-                    ->trueQuery(fn ($query) => $query->has('playerProfile'))
-                    ->falseQuery(fn ($query) => $query->doesntHave('playerProfile')),
+                    ->queries(
+                        true: fn ($query) => $query->has('playerProfile'),
+                        false: fn ($query) => $query->doesntHave('playerProfile'),
+                    ),
             ])
             ->recordActions([
                 Action::make('sendInvitation')
@@ -109,6 +117,27 @@ class UsersTable
                             ->send();
                     })
                     ->visible(fn ($record) => $record->is_active && !$record->onboarding_completed_at),
+                Action::make('disable2fa')
+                    ->label('Resetovat 2FA')
+                    ->icon('heroicon-o-shield-exclamation')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Resetovat dvoufázové ověření?')
+                    ->modalDescription('Uživateli bude zrušeno nastavené 2FA. Tuto akci proveďte pouze pokud uživatel ztratil přístup k autentikátoru. Po resetu bude uživatel při příštím vstupu do adminu vyzván k novému nastavení.')
+                    ->authorize(fn ($record) => auth()->user()?->can('manage_users'))
+                    ->action(function ($record) {
+                        $record->update([
+                            'two_factor_secret' => null,
+                            'two_factor_recovery_codes' => null,
+                            'two_factor_confirmed_at' => null,
+                        ]);
+
+                        FilamentNotification::make()
+                            ->title('2FA bylo resetováno')
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn ($record) => $record->two_factor_secret !== null),
                 EditAction::make(),
             ])
             ->bulkActions([

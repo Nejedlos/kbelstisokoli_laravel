@@ -24,12 +24,17 @@ class TwoFactorSetupController extends Controller
         $isConfirmed = $user->two_factor_confirmed_at !== null;
         $needsConfirmation = config('fortify.features.two-factor-authentication.confirm') ?? false;
 
+        // Pokud už má 2FA aktivní a potvrzené, redirect do adminu
+        // ALE pokud jsme právě potvrdili (status v session), necháme ho zobrazit recovery kódy
         if ($user->two_factor_secret && (!$needsConfirmation || $isConfirmed)) {
-            return redirect()->intended(config('filament.panels.admin.path', 'admin'));
+            if (session('status') !== 'two-factor-authentication-confirmed') {
+                return redirect()->intended(config('filament.panels.admin.path', 'admin'));
+            }
         }
 
         return view('auth.two-factor-setup', [
             'user' => $user,
+            'isConfirmed' => $isConfirmed,
         ]);
     }
 }

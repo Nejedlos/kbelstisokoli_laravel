@@ -63,7 +63,10 @@ class UserForm
                             ->schema([
                                 \Filament\Forms\Components\Placeholder::make('2fa_status')
                                     ->label('Stav 2FA')
-                                    ->content(fn ($record) => $record?->two_factor_secret ? 'Aktivní' : 'Neaktivní'),
+                                    ->content(function ($record) {
+                                        if (! $record?->two_factor_secret) return 'Neaktivní';
+                                        return $record->two_factor_confirmed_at ? 'Aktivní (Zabezpečeno)' : 'Čeká na potvrzení (QR vygenerován)';
+                                    }),
                                 \Filament\Forms\Components\Placeholder::make('onboarding_status')
                                     ->label('Stav onboardingu')
                                     ->content(fn ($record) => $record?->onboarding_completed_at ? 'Dokončeno (' . $record->onboarding_completed_at->format('d.m.Y H:i') . ')' : 'Čeká na nastavení hesla'),
