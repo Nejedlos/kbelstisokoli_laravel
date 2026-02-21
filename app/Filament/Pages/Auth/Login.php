@@ -13,32 +13,9 @@ class Login extends BaseLogin
     /**
      * @return string|Htmlable
      */
-    public function getHeading(): string|Htmlable
+    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        $branding = app(\App\Services\BrandingService::class)->getSettings();
-        $clubName = $branding['club_name'] ?? 'Kbelští sokoli';
-
-        if ($branding['logo_path'] ?? null) {
-            return new HtmlString('
-                <div class="flex flex-col items-center">
-                    <div class="mb-10 w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
-                        <img src="' . asset('storage/' . $branding['logo_path']) . '" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="' . e($clubName) . '">
-                    </div>
-                    <h1 class="auth-title">Vítejte zpět</h1>
-                    <p class="auth-sub tracking-tight">Vstupte na palubovku ' . e($clubName) . '</p>
-                </div>
-            ');
-        }
-
-        return new HtmlString('
-            <div class="flex flex-col items-center">
-                <div class="auth-icon-container">
-                    <i class="fa-duotone fa-light fa-basketball-hoop text-5xl text-primary icon-bounce icon-glow"></i>
-                </div>
-                <h1 class="auth-title">Vítejte zpět</h1>
-                <p class="auth-sub tracking-tight">Vstupte na palubovku ' . e($clubName) . '</p>
-            </div>
-        ');
+        return '';
     }
 
     /**

@@ -138,6 +138,20 @@
 }
 
 /* Reset a základní pozadí */
+:root {
+    --color-brand-navy: #0b1f3a;
+    --color-brand-blue: #2563eb;
+    --color-brand-red: #e11d48;
+    --color-brand-red-hover: #be123c;
+    --color-brand-white: #ffffff;
+    --color-ui-bg: #f8fafc;
+    --color-ui-surface: #ffffff;
+    --color-ui-surface-alt: #eef2f7;
+    --color-ui-border: #dce3ec;
+    --color-ui-text: #0f172a;
+    --color-ui-text-muted: #64748b;
+}
+
 .fi-simple-layout {
     background-color: #020617 !important;
     background-image:
@@ -164,11 +178,24 @@
         inset 0 0 80px rgba(255, 255, 255, 0.02) !important;
     border-radius: 2rem !important;
     padding: 2.5rem !important;
-    margin: 2rem auto !important;
+    margin: 0 auto 2rem auto !important; /* Remove top margin since we have external header */
     position: relative !important;
     overflow: hidden !important;
     width: 100% !important;
     max-width: 28rem !important;
+}
+
+.fi-simple-main-ctn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2rem !important;
+}
+
+/* Hide original Filament header to use our external one via hook */
+.fi-simple-header {
+    display: none !important;
 }
 
 /* Decorative corner accent in Filament login */

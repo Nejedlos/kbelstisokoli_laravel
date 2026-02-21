@@ -51,6 +51,22 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Slate,
             ])
             ->renderHook(
+                'panels::auth.login.before',
+                fn (): string => \Illuminate\Support\Facades\Blade::render(<<<'HTML'
+                    @php
+                        $branding = app(\App\Services\BrandingService::class)->getSettings();
+                        $clubName = app(\App\Services\BrandingService::class)->replacePlaceholders('###TEAM_NAME###');
+                    @endphp
+                    <div class="text-center mb-12 animate-fade-in-down">
+                        <div class="auth-icon-container">
+                            <i class="fa-duotone fa-light fa-basketball-hoop text-5xl text-primary icon-bounce icon-glow"></i>
+                        </div>
+                        <h1 class="auth-title">{{ $clubName }}</h1>
+                        <p class="auth-sub tracking-tight">Vstupte na palubovku vaší arény</p>
+                    </div>
+                HTML),
+            )
+            ->renderHook(
                 'panels::auth.login.form.after',
                 fn (): string => view('filament.hooks.login-footer'),
             )
