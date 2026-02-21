@@ -17,12 +17,17 @@ class EnsureTwoFactorEnabled
 
         // Pokud je uživatel přihlášen a má oprávnění pro přístup do adminu
         if ($user && $user->can('access_admin')) {
-            // A nemá aktivované 2FA
-            if (! $user->two_factor_secret) {
+            // A nemá AKTIVOVANÉ (potvrzené) 2FA
+            // Fortify používá two_factor_confirmed_at pokud je zapnuté 'confirm' v configu
+            $isConfirmed = $user->two_factor_confirmed_at !== null;
+            $needsConfirmation = config('fortify.features.two-factor-authentication.confirm') ?? false;
+
+            if (! $user->two_factor_secret || ($needsConfirmation && !$isConfirmed)) {
+
                 // Pokud už není na stránce profilu, přesměrujeme ho tam
                 if (! $request->routeIs('member.profile.edit')) {
                     return redirect()->route('member.profile.edit')
-                        ->with('error', 'Pro přístup do administrace je vyžadováno dvoufázové ověření (2FA). Prosím, aktivujte si jej ve svém profilu.');
+                        ->with('error', 'Pro přístup do administrace je vyžadováno AKTIVNÍ dvoufázové ověření (2FA). Prosím, dokončete nastavení ve svém profilu.');
                 }
             }
         }
