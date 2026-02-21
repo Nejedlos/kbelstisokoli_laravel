@@ -41,6 +41,11 @@ class MinifyHtmlMiddleware
             $htmlMin->doRemoveEmptyAttributes(true);
             $htmlMin->doSortHtmlAttributes(true);
             $htmlMin->doSortCssClassNames(true);
+            $htmlMin->doOptimizeViaHtmlDomParser(true);
+            $htmlMin->doRemoveSpacesBetweenTags(true);
+            $htmlMin->doRemoveOmittedHtmlTags(true);
+            $htmlMin->doRemoveOmittedQuotes(true);
+            $htmlMin->doRemoveValueFromEmptyInput(true);
 
             $content = $htmlMin->minify($content);
 

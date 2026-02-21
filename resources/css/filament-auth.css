@@ -74,11 +74,10 @@
 /* Nadpisy - Dark text on light card */
 .fi-simple-header-heading {
     color: #0f172a !important; /* Slate 900 */
-    font-size: 1rem !important; /* Standard base size, very discrete */
+    font-size: 1.125rem !important; /* text-lg equivalent */
     font-weight: 950 !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
-    margin-top: 3rem !important; /* Even more air between icon and heading */
     font-family: 'Oswald', sans-serif !important;
     text-shadow: none !important;
     line-height: 1.4 !important;
