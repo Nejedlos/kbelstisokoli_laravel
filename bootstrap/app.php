@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -10,9 +11,30 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::middleware('web')
+                ->group(base_path('routes/public.php'));
+
+            Route::middleware('web')
+                ->group(base_path('routes/member.php'));
+
+            Route::middleware('web')
+                ->group(base_path('routes/admin.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Vlastní middleware skupiny pro přehlednou správu přístupů
+        // Pozn.: Skupina 'web' je již aplikována v bootstrappingu rout výše.
+        $middleware->group('member', [
+            'auth',
+            'verified',
+            'permission:view_member_section',
+        ]);
+
+        $middleware->group('admin', [
+            'auth',
+            'permission:access_admin',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -17,9 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RoleSeeder::class,
         ]);
+
+        // Záměrně nevytváříme žádné uživatele v základním seedingu.
+        // Uživatelé budou zakládáni později přes administraci nebo migrační skripty.
     }
 }
