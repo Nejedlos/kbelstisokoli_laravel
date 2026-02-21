@@ -18,6 +18,7 @@
         </a>
 
         <!-- Desktop Navigation -->
+        @if(!($branding['maintenance_mode'] ?? false))
         <nav class="hidden lg:flex items-center gap-8">
             @foreach($navigation as $item)
                 <a href="{{ route($item['route']) }}"
@@ -26,6 +27,7 @@
                 </a>
             @endforeach
         </nav>
+        @endif
 
         <!-- Right Side / CTA -->
         <div class="flex items-center gap-4">
@@ -46,6 +48,7 @@
     </div>
 
     <!-- Mobile Menu Shell -->
+    @if(!($branding['maintenance_mode'] ?? false))
     <div x-show="mobileMenuOpen"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-4"
@@ -66,4 +69,5 @@
             </a>
         </div>
     </div>
+    @endif
 </header>

@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // alias pro kontrolu aktivního účtu
         $middleware->alias([
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+            'public.maintenance' => \App\Http\Middleware\PublicMaintenanceMiddleware::class,
         ]);
 
         $middleware->group('member', [

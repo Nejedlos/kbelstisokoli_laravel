@@ -42,6 +42,9 @@ class BrandingService
                 'url' => $dbSettings['cta_url'] ?? $cfg['default_cta']['url'] ?? null,
             ],
             'footer_text' => $dbSettings['footer_text'] ?? $cfg['footer_text'] ?? null,
+            'maintenance_mode' => filter_var($dbSettings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'maintenance_title' => $dbSettings['maintenance_title'] ?? 'Web je v přípravě',
+            'maintenance_text' => $dbSettings['maintenance_text'] ?? 'Pracujeme na novém webu pro Kbelští sokoli. Brzy se vidíme na palubovce!',
         ];
     }
 

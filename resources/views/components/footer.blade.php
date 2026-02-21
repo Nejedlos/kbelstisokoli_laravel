@@ -20,6 +20,7 @@
         </div>
 
         <!-- Navigation -->
+        @if(!($branding['maintenance_mode'] ?? false))
         <div>
             <h3 class="text-white font-bold uppercase mb-4">Navigace</h3>
             <ul class="space-y-2">
@@ -32,6 +33,7 @@
                 @endforelse
             </ul>
         </div>
+        @endif
 
         <!-- Contact / Socials -->
         <div>
@@ -65,7 +67,9 @@
     <div class="bg-dark text-slate-400 text-sm">
         <div class="container py-4 flex items-center justify-between">
             <span>{{ $branding['footer_text'] ?? (__('Všechna práva vyhrazena')) }}</span>
-            <a href="{{ route('public.contact.index') }}" class="hover:text-primary">Kontakt</a>
+            @if(!($branding['maintenance_mode'] ?? false))
+                <a href="{{ route('public.contact.index') }}" class="hover:text-primary">Kontakt</a>
+            @endif
         </div>
     </div>
 </footer>

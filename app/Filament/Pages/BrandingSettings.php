@@ -156,6 +156,22 @@ class BrandingSettings extends Page
                             ->label('Copyright text (patička)')
                             ->placeholder('© ' . date('Y') . ' Kbelští sokoli. Všechna práva vyhrazena.'),
                     ]),
+                Section::make('Režim přípravy (Under Construction)')
+                    ->description('Aktivujte, pokud web teprve připravujete. Návštěvníkům se zobrazí stylová informační stránka s basketbalovou tématikou.')
+                    ->schema([
+                        Toggle::make('maintenance_mode')
+                            ->label('Aktivovat režim přípravy')
+                            ->helperText('Pokud je zapnuto, web na hlavní stránce zobrazí pouze informační panel o přípravě.')
+                            ->default(false),
+                        TextInput::make('maintenance_title')
+                            ->label('Nadpis stránky')
+                            ->placeholder('Web je v přípravě')
+                            ->default('Web je v přípravě'),
+                        Textarea::make('maintenance_text')
+                            ->label('Text zprávy')
+                            ->placeholder('Pracujeme na novém webu pro Kbelští sokoli. Brzy se vidíme na palubovce!')
+                            ->default('Pracujeme na novém webu pro Kbelští sokoli. Brzy se vidíme na palubovce!'),
+                    ]),
             ]);
     }
 

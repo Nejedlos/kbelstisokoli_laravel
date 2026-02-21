@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::name('public.')->group(function (): void {
+Route::name('public.')->middleware(['public.maintenance'])->group(function (): void {
     // Úvod
     Route::get('/uvod', HomeController::class)->name('home');
 
