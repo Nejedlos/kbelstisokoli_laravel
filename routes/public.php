@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::name('public.')->middleware(['public.maintenance'])->group(function (): void {
     // Úvod
-    Route::get('/uvod', HomeController::class)->name('home');
+    Route::get('/', HomeController::class)->name('home');
 
     // Novinky
     Route::get('/novinky', [NewsController::class, 'index'])->name('news.index');

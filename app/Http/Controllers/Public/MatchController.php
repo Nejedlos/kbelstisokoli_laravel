@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\BasketballMatch;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MatchController extends Controller

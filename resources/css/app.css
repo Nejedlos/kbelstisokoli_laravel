@@ -10,6 +10,7 @@
     --color-brand-navy: #0b1f3a;
     --color-brand-blue: #2563eb;
     --color-brand-red: #e11d48;
+    --color-brand-red-hover: #be123c;
     --color-brand-white: #ffffff;
     --color-ui-bg: #f8fafc;
     --color-ui-surface: #ffffff;
@@ -27,6 +28,7 @@
 
     /* Barvy navázané na Branding Tokens */
     --color-primary: var(--color-brand-red);
+    --color-primary-hover: #be123c;
     --color-secondary: var(--color-brand-navy);
     --color-accent: var(--color-brand-blue);
     --color-dark: #020617;
