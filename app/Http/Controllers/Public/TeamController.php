@@ -9,6 +9,8 @@ class TeamController extends Controller
 {
     public function index(): View
     {
-        return view('public.teams.index');
+        $teams = \App\Models\Team::orderBy('name')->get()->groupBy('category');
+
+        return view('public.teams.index', compact('teams'));
     }
 }

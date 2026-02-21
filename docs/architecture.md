@@ -430,3 +430,34 @@ php artisan optimize:clear
 1. `feat(branding): add settings table and theme preset configuration`
 2. `feat(branding): implement BrandingService with dynamic CSS variable generation`
 3. `feat(admin): create BrandingSettings page for easy identity management`
+
+## 15. Veřejné šablony a stránky (Public Frontend)
+
+Účel: Poskytnout návštěvníkům konzistentní, moderní a sportovní zážitek s plnou integrací na CMS a sportovní moduly.
+
+### 15.1 Routing a Strategie
+- **Systémové stránky:** Pevně definované cesty (`/novinky`, `/zapasy`, `/kontakt`).
+- **CMS Stránky:** Dynamické slugy (`/{slug}`) s fallbackem. Systémové cesty mají přednost.
+- **Redirects:** Integrovaný `RedirectMiddleware` vyhodnocuje přesměrování před vyhozením 404.
+
+### 15.2 SEO a Metadata
+- **Dynamické tagy:** `layouts.public` obsahuje meta tagy pro SEO (title, description, keywords) a Open Graph (og:title, og:image, atd.).
+- **Fallbacky:** Pokud data v modelu (`seo` vztah) chybí, použijí se výchozí hodnoty z brandingu nebo název entity.
+- **Controller integrace:** `NewsController` a `PageController` proaktivně načítají SEO metadata.
+
+### 15.3 Klíčové komponenty
+- `x-page-header`: Jednotné záhlaví pro systémové stránky s podporou drobečkové navigace (breadcrumbs) a obrázků na pozadí.
+- `x-news-card`: Karta článku s náhledem, kategorií a datem.
+- `x-match-card`: Sportovní karta zápasu s výsledkem, termínem a vizuálním odlišením (doma/venku).
+- `x-empty-state`: Jednotný design pro prázdné seznamy nebo nenalezená data.
+
+### 15.4 Implementované stránky
+- **Novinky:** Přehled s paginací a detail s podporou Tailwind Typography (`prose`).
+- **Zápasy:** Match Center s výsledkovou tabulí, informacemi o srazu a barvě dresů. Filtry na Nadcházející/Odehrané.
+- **Týmy:** Seznam kategorií (Mládež/Dospělí) se sportovními kartami týmů.
+- **Kontakt:** Plně řízený z `BrandingService` (adresy, maily, sociální sítě).
+
+### 15.5 Doporučené commity
+1. `feat(frontend): implement public shared components and dynamic seo layout`
+2. `feat(public): add news and match center templates with sports branding`
+3. `feat(public): implement team listing and contact page with branding integration`

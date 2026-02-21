@@ -1,51 +1,45 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Zápasy</h1>
+    <x-page-header
+        title="Zápasy"
+        subtitle="Sledujte výsledky a rozpis utkání našich týmů."
+        :breadcrumbs="['Zápasy' => null]"
+    />
 
-    @if($matches->isEmpty())
-        <p class="text-gray-600">Aktuálně nejsou naplánovány žádné zápasy.</p>
-    @else
-        <div class="space-y-4">
-            @foreach($matches as $match)
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
-                    <div class="flex-1">
-                        <div class="text-sm text-gray-500 mb-1">
-                            {{ $match->scheduled_at->format('d.m.Y H:i') }} | {{ $match->season->name }}
-                        </div>
-                        <div class="text-lg font-semibold">
-                            {{ $match->team->name }} vs. {{ $match->opponent->name }}
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            {{ $match->location ?? 'Místo neuvedeno' }}
-                        </div>
-                    </div>
+    <div class="bg-slate-50 border-b border-slate-200">
+        <div class="container">
+            <div class="flex items-center space-x-8">
+                <a href="{{ route('public.matches.index', ['type' => 'upcoming']) }}"
+                   class="py-6 border-b-2 font-black uppercase tracking-widest text-sm transition-colors {{ $type === 'upcoming' ? 'border-primary text-secondary' : 'border-transparent text-slate-400 hover:text-secondary' }}">
+                    Nadcházející
+                </a>
+                <a href="{{ route('public.matches.index', ['type' => 'latest']) }}"
+                   class="py-6 border-b-2 font-black uppercase tracking-widest text-sm transition-colors {{ $type === 'latest' ? 'border-primary text-secondary' : 'border-transparent text-slate-400 hover:text-secondary' }}">
+                    Poslední výsledky
+                </a>
+            </div>
+        </div>
+    </div>
 
-                    @if($match->status === 'completed')
-                        <div class="text-2xl font-bold ml-8">
-                            {{ $match->score_home }} : {{ $match->score_away }}
-                        </div>
-                    @else
-                        <div class="ml-8">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {{ ucfirst($match->status) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    <div class="ml-8">
-                        <a href="{{ route('public.matches.show', $match->id) }}" class="text-primary hover:underline">
-                            Detail
-                        </a>
-                    </div>
+    <div class="section-padding bg-bg">
+        <div class="container">
+            @if($matches->isEmpty())
+                <x-empty-state
+                    title="{{ $type === 'upcoming' ? 'Žádné nadcházející zápasy' : 'Žádné odehrané zápasy' }}"
+                    subtitle="Aktuálně v této kategorii nemáme žádné záznamy."
+                />
+            @else
+                <div class="flex flex-col gap-6">
+                    @foreach($matches as $match)
+                        <x-match-card :match="$match" />
+                    @endforeach
                 </div>
-            @endforeach
-        </div>
 
-        <div class="mt-8">
-            {{ $matches->links() }}
+                <div class="mt-12">
+                    {{ $matches->appends(['type' => $type])->links() }}
+                </div>
+            @endif
         </div>
-    @endif
-</div>
+    </div>
 @endsection
