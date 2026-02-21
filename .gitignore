@@ -19,6 +19,7 @@
 /storage/*.key
 /storage/pail
 /vendor
+!/resources/vendor
 !composer.lock
 !bootstrap/cache/
 !storage/framework/cache/data/
