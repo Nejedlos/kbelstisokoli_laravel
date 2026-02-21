@@ -1,59 +1,67 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Kbelští sokoli
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Projekt moderní webové prezentace a administrativního systému pro klub **Kbelští sokoli**. Systém je postaven na frameworku **Laravel 12** a využívá **Filament PHP 5** pro správu dat a administraci.
 
-## About Laravel
+## Hlavní vlastnosti
+- **Moderní UI:** Postaveno na Blade, Livewire a Tailwind CSS s využitím Laravel Folio pro routing.
+- **Komplexní Administrace:** Správa uživatelů, ekonomický modul a klubové záležitosti přes Filament.
+- **Automatizovaný Deployment:** Podpora pro Laravel Envoy a CI/CD přes GitHub Actions.
+- **Lokalizace:** Celé uživatelské rozhraní i dokumentace jsou v češtině.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Technický Stack
+- **PHP:** ^8.4
+- **Framework:** Laravel 12.x
+- **Administrace:** Filament PHP 5.x
+- **Databáze:** SQLite (lokálně) / MySQL (produkce)
+- **Deployment:** GitHub + SSH (Webglobe) + Laravel Envoy
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Rychlý start (Lokální vývoj)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Klonování repozitáře:**
+   ```bash
+   git clone https://github.com/Nejedlos/kbelstisokoli_laravel.git
+   cd kbelstisokoli_laravel
+   ```
 
-## Learning Laravel
+2. **Instalace závislostí:**
+   ```bash
+   composer install
+   npm install
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+3. **Nastavení prostředí:**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+4. **Databáze a migrace:**
+   ```bash
+   php artisan migrate --seed
+   ```
 
-## Laravel Sponsors
+5. **Spuštění vývojového serveru:**
+   ```bash
+   npm run dev
+   # v jiném terminálu
+   php artisan serve
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Dokumentace
+Podrobná dokumentace k projektu se nachází v adresáři `docs/`:
 
-### Premium Partners
+- [**Index dokumentace**](docs/index.md) - Rozcestník všech témat.
+- [Struktura projektu](docs/project_structure.md) - Technický popis a stack.
+- [Konfigurace prostředí](docs/configuration.md) - Popis `.env` proměnných.
+- [Nasazení (Deployment)](docs/deployment.md) - Návod pro produkční server (Webglobe).
+- [Správa uživatelů](docs/user_management.md) - Role a oprávnění.
+- [Ekonomický modul](docs/economy_management.md) - Správa financí a klubových poplatků.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Vývojové pokyny
+- Dodržujeme **PSR-12** a používáme **Laravel Pint** pro formátování.
+- Veškerý kód je v angličtině, ale UI a komentáře/dokumentace jsou v **češtině**.
+- Každá nová funkce musí být zdokumentována v `docs/`.
+- Podrobná pravidla naleznete v [.junie/guidelines.md](.junie/guidelines.md).
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+© 2026 Kbelští sokoli. Spravováno pomocí [GitHubu](https://github.com/Nejedlos/kbelstisokoli_laravel).
