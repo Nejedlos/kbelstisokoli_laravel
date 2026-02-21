@@ -41,9 +41,12 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::authenticateUsing(function (Request $request) {
             $user = User::where('email', $request->email)->first();
 
-            if ($user &&
-                Hash::check($request->password, $user->password) &&
-                $user->is_active) {
+            if ($user && Hash::check($request->password, $user->password)) {
+                if (!$user->is_active) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        Fortify::username() => ['Váš účet momentálně není aktivní. Kontaktujte prosím správce svého týmu.'],
+                    ]);
+                }
                 return $user;
             }
 

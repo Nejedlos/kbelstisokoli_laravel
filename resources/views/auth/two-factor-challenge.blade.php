@@ -25,18 +25,9 @@
             <p class="auth-sub tracking-tight" x-show="recovery">Zadejte záchranný kód</p>
         </div>
 
-        @if ($errors->any())
-            <div class="glass-card !bg-rose-500/10 border-rose-500/30 text-rose-200 p-5 mb-8 rounded-2xl animate-shake">
-                <ul class="list-none text-xs font-bold pl-0 text-center">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
-            <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-8">
+            <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-8" novalidate>
                 @csrf
 
                 <div class="space-y-4" x-show="!recovery">
@@ -47,8 +38,14 @@
                         </div>
                         <input id="code" type="text" name="code" inputmode="numeric" autofocus autocomplete="one-time-code"
                                placeholder="000 000"
-                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-black text-white placeholder-slate-700 outline-none tracking-[0.5em] text-center text-3xl py-6">
+                               class="w-full input-with-icon bg-white/5 border {{ $errors->has('code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-black text-white placeholder-slate-700 outline-none tracking-[0.5em] text-center text-3xl py-6">
                     </div>
+                    @error('code')
+                        <div class="flex items-center justify-center gap-2 text-rose-400 mt-2 animate-shake">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                            <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
+                        </div>
+                    @enderror
                     <p class="text-[10px] text-slate-400 font-medium text-center italic">Otevřete Google Authenticator nebo podobnou aplikaci.</p>
                 </div>
 
@@ -60,8 +57,14 @@
                         </div>
                         <input id="recovery_code" type="text" name="recovery_code" autocomplete="one-time-code"
                                placeholder="abcde-fghij"
-                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-mono font-bold text-white placeholder-slate-700 outline-none text-center text-xl py-6 uppercase">
+                               class="w-full input-with-icon bg-white/5 border {{ $errors->has('recovery_code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-mono font-bold text-white placeholder-slate-700 outline-none text-center text-xl py-6 uppercase">
                     </div>
+                    @error('recovery_code')
+                        <div class="flex items-center justify-center gap-2 text-rose-400 mt-2 animate-shake">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                            <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
+                        </div>
+                    @enderror
                 </div>
 
                 <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">

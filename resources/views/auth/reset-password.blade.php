@@ -25,7 +25,7 @@
         </div>
 
         <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
-            <form method="POST" action="{{ route('password.update') }}" class="space-y-8">
+            <form method="POST" action="{{ route('password.update') }}" class="space-y-8" novalidate>
                 @csrf
                 <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
@@ -35,10 +35,15 @@
                         <div class="input-icon group-focus-within/input:text-primary">
                             <i class="fa-solid fa-envelope text-lg"></i>
                         </div>
-                        <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus
-                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white outline-none">
+                        <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" autofocus
+                               class="w-full input-with-icon bg-white/5 border {{ $errors->has('email') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white outline-none">
                     </div>
-                    @error('email') <p class="text-[10px] text-rose-400 font-bold mt-2 ml-1">{{ $message }}</p> @enderror
+                    @error('email')
+                        <div class="flex items-center gap-2 text-rose-400 mt-2 ml-1 animate-shake">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                            <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
+                        </div>
+                    @enderror
                 </div>
 
                 <div class="space-y-3">
@@ -47,11 +52,16 @@
                         <div class="input-icon group-focus-within/input:text-primary">
                             <i class="fa-solid fa-lock-keyhole text-lg"></i>
                         </div>
-                        <input id="password" type="password" name="password" required autocomplete="new-password"
+                        <input id="password" type="password" name="password" autocomplete="new-password"
                                placeholder="••••••••"
-                               class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white outline-none">
+                               class="w-full input-with-icon bg-white/5 border {{ $errors->has('password') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white outline-none">
                     </div>
-                    @error('password') <p class="text-[10px] text-rose-400 font-bold mt-2 ml-1">{{ $message }}</p> @enderror
+                    @error('password')
+                        <div class="flex items-center gap-2 text-rose-400 mt-2 ml-1 animate-shake">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                            <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
+                        </div>
+                    @enderror
                 </div>
 
                 <div class="space-y-3">
@@ -60,7 +70,7 @@
                         <div class="input-icon group-focus-within/input:text-primary">
                             <i class="fa-solid fa-shield-check text-lg"></i>
                         </div>
-                        <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                        <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password"
                                placeholder="••••••••"
                                class="w-full input-with-icon bg-white/5 border border-white/10 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-bold text-white outline-none">
                     </div>

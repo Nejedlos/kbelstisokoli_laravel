@@ -7,12 +7,13 @@ Tento modul zajišťuje správu uživatelů, jejich registrace, přihlašování
 - **Autorizace:** Spatie Laravel Permission (role a oprávnění).
 - **UI Administrace:** Filament PHP.
 
-## Role
-V systému se počítá s následujícími základními rolemi:
-1. **Super Admin:** Plný přístup ke všem funkcím.
-2. **Admin:** Přístup k administraci (bez možnosti měnit kritické nastavení).
-3. **Vedoucí:** Správa oddílů a členů.
-4. **Člen:** Základní přístup k vlastním datům.
+## První Administrátor
+První superadmin uživatel byl vytvořen s údaji:
+- **Jméno:** Michal Nejedlý
+- **Email:** nejedlymi@gmail.com
+- **Role:** `admin` (superadmin)
+- **Stav:** `is_active = true`
+- **Přihlašování:** Pomocí emailu a hesla.
 
 ## Modely
 - `User` - Hlavní model pro uživatele.

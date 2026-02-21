@@ -1,0 +1,16 @@
+{
+    "The provided password does not match your current password.": "Zadané heslo se neshoduje s vaším současným heslem.",
+    "The provided password is incorrect.": "Zadané heslo není správné, zkuste to prosím znovu.",
+    "These credentials do not match our records.": "Tyto údaje nám nesouhlasí. Zkuste to znovu nebo si obnovte zapomenuté heslo.",
+    "Too many login attempts. Please try again in :seconds seconds.": "Zkoušíte to až příliš často. Počkejte prosím :seconds sekund, než se pokusíte znovu přihlásit.",
+    "Your password has been reset.": "Vaše heslo bylo úspěšně změněno. Teď se můžete přihlásit.",
+    "We have emailed your password reset link.": "Odkaz pro obnovu hesla jsme vám odeslali e-mailem. Podívejte se do schránky (i do spamu).",
+    "Please wait before retrying.": "Už jste o obnovu hesla požádali nedávno. Počkejte prosím chvíli, než to zkusíte znovu.",
+    "This password reset token is invalid.": "Tento odkaz pro obnovu hesla už vypršel nebo není platný. Zkuste si prosím nechat poslat nový.",
+    "We can't find a user with that email address.": "Uživatel s touto e-mailovou adresou u nás není registrovaný. Zkontrolujte prosím překlepy.",
+    "Whoops! Something went wrong.": "Jejda! Něco se nepovedlo.",
+    "Please confirm access to your account by entering the authentication code provided by your authenticator application.": "Potvrďte prosím přístup k vašemu účtu zadáním ověřovacího kódu z vaší aplikace.",
+    "Please confirm access to your account by entering one of your emergency recovery codes.": "Potvrďte prosím přístup k vašemu účtu zadáním jednoho z vašich záchranných kódů.",
+    "Invalid code.": "Zadaný kód není správný, zkuste to prosím znovu.",
+    "Invalid recovery code.": "Zadaný záchranný kód není správný, zkuste to prosím znovu."
+}
