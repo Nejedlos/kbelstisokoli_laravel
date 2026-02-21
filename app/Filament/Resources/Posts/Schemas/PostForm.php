@@ -104,6 +104,25 @@ class PostForm
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
+
+                        Tabs\Tab::make('Vývojář')
+                            ->icon('heroicon-o-code-bracket')
+                            ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
+                            ->schema([
+                                Section::make('Vlastní kódy a skripty')
+                                    ->description('Vložte kód, který se provede pouze pro tuto novinku.')
+                                    ->schema([
+                                        Textarea::make('head_code')
+                                            ->label('Kód do <head>')
+                                            ->rows(10)
+                                            ->fontFamily('monospace'),
+
+                                        Textarea::make('footer_code')
+                                            ->label('Kód před </body>')
+                                            ->rows(10)
+                                            ->fontFamily('monospace'),
+                                    ]),
+                            ]),
                     ])
                     ->columnSpanFull(),
             ]);

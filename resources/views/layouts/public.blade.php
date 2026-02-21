@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Kbelští sokoli' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @if(isset($head_code))
+        {!! $head_code !!}
+    @endif
+
+    @stack('head')
 </head>
 <body>
     <header>
@@ -26,5 +32,11 @@
     <footer>
         <!-- Patička -->
     </footer>
+
+    @if(isset($footer_code))
+        {!! $footer_code !!}
+    @endif
+
+    @stack('scripts')
 </body>
 </html>

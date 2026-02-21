@@ -22,7 +22,12 @@ class BlockRegistry
      */
     public static function getBlocks(): array
     {
-        return [
+        return array_map(function (Block $block) {
+            return $block->schema(array_merge(
+                $block->getChildComponents(),
+                [self::getAdvancedSettingsSection()]
+            ));
+        }, [
             self::getHeroBlock(),
             self::getRichTextBlock(),
             self::getImageBlock(),
@@ -34,7 +39,45 @@ class BlockRegistry
             self::getGalleryBlock(),
             self::getContactInfoBlock(),
             self::getCustomHtmlBlock(),
-        ];
+        ]);
+    }
+
+    protected static function getAdvancedSettingsSection(): Section
+    {
+        return Section::make('Pokročilé nastavení (Expert)')
+            ->description('Nastavení pro vývojáře a superadminy. Umožňuje přímé stylování bloku.')
+            ->icon('heroicon-o-code-bracket')
+            ->collapsible()
+            ->collapsed()
+            ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
+            ->schema([
+                Grid::make(2)
+                    ->schema([
+                        TextInput::make('custom_id')
+                            ->label('Vlastní ID (Anchor)')
+                            ->helperText('ID elementu pro přímé odkazu nebo JS (např. #kontakt).')
+                            ->placeholder('kontakt-sekce'),
+                        TextInput::make('custom_class')
+                            ->label('Vlastní CSS třídy')
+                            ->helperText('Přidejte libovolné Tailwind nebo vlastní třídy oddělené mezerou.')
+                            ->placeholder('bg-gray-100 py-20'),
+                    ]),
+                Repeater::make('custom_attributes')
+                    ->label('Vlastní HTML atributy')
+                    ->helperText('Přidejte data atributy nebo jiné vlastnosti (např. data-aos="fade-up").')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Název atributu')
+                            ->required(),
+                        TextInput::make('value')
+                            ->label('Hodnota')
+                            ->required(),
+                    ])
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed()
+                    ->itemLabel(fn (array $state): ?string => $state['name'] ?? null),
+            ]);
     }
 
     protected static function getHeroBlock(): Block

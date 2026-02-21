@@ -14,6 +14,14 @@ class NewsController extends Controller
 
     public function show(string $slug): View
     {
-        return view('public.news.show', compact('slug'));
+        $post = \App\Models\Post::where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
+
+        return view('public.news.show', [
+            'post' => $post,
+            'head_code' => $post->head_code,
+            'footer_code' => $post->footer_code,
+        ]);
     }
 }

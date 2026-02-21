@@ -20,6 +20,8 @@ class Post extends Model
         'is_visible',
         'publish_at',
         'featured_image',
+        'head_code',
+        'footer_code',
     ];
 
     protected $casts = [

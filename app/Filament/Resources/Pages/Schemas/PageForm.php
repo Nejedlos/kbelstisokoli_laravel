@@ -80,6 +80,27 @@ class PageForm
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
+
+                        Tabs\Tab::make('Vývojář')
+                            ->icon('heroicon-o-code-bracket')
+                            ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
+                            ->schema([
+                                Section::make('Vlastní kódy a skripty')
+                                    ->description('Vložte kód, který se provede pouze na této stránce.')
+                                    ->schema([
+                                        Textarea::make('head_code')
+                                            ->label('Kód do <head>')
+                                            ->helperText('Např. vlastní CSS <style> nebo meta tagy.')
+                                            ->rows(10)
+                                            ->fontFamily('monospace'),
+
+                                        Textarea::make('footer_code')
+                                            ->label('Kód před </body>')
+                                            ->helperText('Např. měřící kódy nebo vlastní JavaScript <script>.')
+                                            ->rows(10)
+                                            ->fontFamily('monospace'),
+                                    ]),
+                            ]),
                     ])
                     ->columnSpanFull(),
             ]);

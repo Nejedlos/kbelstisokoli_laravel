@@ -70,8 +70,9 @@ Aplikace je rozdělena do tří hlavních oblastí:
   - `manage_users`, `manage_content`, `manage_teams`, `manage_attendance`
   - `view_member_section` (přístup do členské sekce)
   - `use_raw_html` (vkládání surového HTML v Page Builderu)
+  - `manage_advanced_settings` (pokročilé nastavení bloků a vkládání head/footer kódů)
 - **Přiřazení (výchozí skeleton):**
-  - `admin`: všechna oprávnění (včetně `use_raw_html`)
+  - `admin`: všechna oprávnění (včetně `use_raw_html`, `manage_advanced_settings`)
   - `editor`: `access_admin`, `manage_content`
   - `coach`: `access_admin`, `manage_teams`, `manage_attendance`, `view_member_section`
   - `player`: `view_member_section`
@@ -91,6 +92,10 @@ Aplikace je rozdělena do tří hlavních oblastí:
     - Omezení na předdefinované varianty (styly, rozvržení) zajišťuje branding.
     - Drag & drop řazení s náhledy (itemLabels) pro snadnou orientaci.
     - Bezpečnost: Surové HTML je dostupné pouze pro roli Admin s patřičným oprávněním.
+    - **Expert UX (Superadmin):** 
+        - Každý blok obsahuje skrytou sekci "Pokročilé", kde lze definovat vlastní CSS třídy, ID a HTML atributy.
+        - Stránky a novinky mají záložku "Vývojář" pro vkládání vlastních skriptů do `<head>` a před `</body>`.
+        - Tato pole jsou viditelná pouze s oprávněním `manage_advanced_settings`.
 
 ### Technické řešení
 - **Datový model:**

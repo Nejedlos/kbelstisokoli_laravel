@@ -15,12 +15,16 @@ class PageBlock extends Model
         'is_visible',
         'data',
         'variant',
+        'custom_id',
+        'custom_class',
+        'custom_attributes',
     ];
 
     protected $casts = [
         'data' => 'array',
         'is_visible' => 'boolean',
         'sort_order' => 'integer',
+        'custom_attributes' => 'array',
     ];
 
     public function page(): BelongsTo

@@ -17,6 +17,8 @@ class Page extends Model
         'content',
         'status',
         'is_visible',
+        'head_code',
+        'footer_code',
     ];
 
     protected $casts = [

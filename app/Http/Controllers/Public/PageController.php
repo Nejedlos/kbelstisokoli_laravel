@@ -17,6 +17,10 @@ class PageController extends Controller
             ->where('is_visible', true)
             ->firstOrFail();
 
-        return view('public.pages.show', compact('page'));
+        return view('public.pages.show', [
+            'page' => $page,
+            'head_code' => $page->head_code,
+            'footer_code' => $page->footer_code,
+        ]);
     }
 }

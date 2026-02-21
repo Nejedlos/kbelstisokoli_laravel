@@ -25,6 +25,7 @@ class RoleSeeder extends Seeder
             'manage_attendance',
             'view_member_section',
             'use_raw_html',
+            'manage_advanced_settings',
         ];
 
         foreach ($permissions as $permission) {
