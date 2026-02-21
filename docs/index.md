@@ -10,6 +10,7 @@ Repozitář: [https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.
 - [Správa uživatelů](user_management.md)
 - [Ekonomický modul](economy_management.md)
 - [Administrace](administration.md)
+- [Konfigurace prostředí](configuration.md)
 - [Nasazení (Deployment)](deployment.md)
 
 ## Rychlý start

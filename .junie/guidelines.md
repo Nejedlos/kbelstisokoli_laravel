@@ -49,7 +49,7 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
     3. Následně se spouští podpůrné příkazy (`composer install`, `npm install`, `npm run build`, `php artisan migrate`).
 - **Automatizace:** Pro nasazení používáme **Laravel Envoy** (viz `Envoy.blade.php`).
 
-## 8. Práce s Junie
-- Junie bude při každé změně aktualizovat příslušnou část dokumentace v `docs/`.
-- Junie bude dodržovat tyto guidelines a v případě nejasností se dotáže.
-- Nové poznatky z vývoje budou průběžně doplňovány do tohoto souboru `guidelines.md`.
+## 9. Konfigurace prostředí
+- Používáme specifické proměnné prostředí pro cesty a disky (`PUBLIC_FOLDER`, `UPLOADS_DIR` atd.) pro kompatibilitu s Webglobe hostingem.
+- Vždy udržujeme `.env.example` aktuální se všemi klíči (bez citlivých dat).
+- Pro integraci s AI využíváme `OPENAI_*` proměnné.
