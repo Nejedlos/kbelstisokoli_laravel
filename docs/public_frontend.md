@@ -15,14 +15,13 @@ Stránka se zobrazuje automaticky, pokud není publikován žádný obsah, nebo 
     - Šum (grainy overlay) je implementován jako pseudoelement `body::before` s nízkou opacitou (2 %), což dodává pocit "materiálu" bez vizuálního šumu.
 - **Tlačítka:** Hlavní akce (CTA) využívají plnou brandovou barvu s výrazným stínem pro maximální viditelnost.
 - **Interaktivita:** Animovaný basketbalový míč s CSS září a hover efekty.
-- **Responzivita:** Stránka je plně optimalizována pro mobilní zařízení. Hlavní nadpis "TIME-OUT!" využívá zjemněnou responzivní stupnici (6xl až 9xl) a kontejner s `max-w-max mx-auto`, aby byl štítek "Lakujeme palubovku!" vždy přesně a stabilně ukotven k pravé straně textu (exklamace) s minimálním vizuálním překryvem.
-- **Štítek (Lakujeme palubovku!):** Odstraněna původní animace pro dosažení statického a stabilního vzhledu. Štítek je nyní pozicován absolutně s jemným offsetem od pravého okraje kontejneru, což jej drží v těsné blízkosti konce nadpisu na všech rozlišeních.
+    - **Responzivita:** Stránka je plně optimalizována pro mobilní zařízení. Hlavní nadpis "TIME-OUT!" využívá zjemněnou responzivní stupnici a na nejmenších displejích (xs) dynamickou velikost `12vw`, aby se na mobilech nelámal na dva řádky. Štítek "LAKUJEME PALUBOVKU!" je na mobilu umístěn na 75 % šířky nadpisu (`left-3/4`) s pozitivním posunem (`translate-x-[40%]`), aby byl v bezpečné zóně a nepřetékal, zatímco na desktopu je ukotven k pravé straně (`left-full`) a vysunut doprava (`translate-x-10` až `translate-x-20`) pro dynamičtější vzhled. Celý layout je vertikálně kompaktnější, aby se na desktopových obrazovkách zobrazoval bez nutnosti scrollování. Podnadpis `h2` je na mobilech mírně zvětšen (`text-2xl`) pro lepší hierarchii.
 - **Typografie (Moderní sportovní styl):**
-    - Hlavní titulky (`h1`) využívají kombinaci `font-display` (Oswald), `font-black`, `italic`, `uppercase` a `tracking-tighter`.
-    - Textový obsah (`h2`, `p`) využívá hlavní bezpatkové písmo projektu (`font-sans` / Instrument Sans) s extrémně výrazným prokladem (pro `h2` `tracking-[0.2em]`, pro `p` `tracking-[0.4em]`).
-    - Hlavní podnadpis (`h2`) si zachovává tučný a kurzivní styl (`font-black`, `italic`, `uppercase`).
-    - Doprovodný text (`p`) je menší, bez kurzívy (`non-italic`) a s velmi rozvolněným řádkováním (`leading-[1.6]`), což zajišťuje vzdušnost a moderní technický vzhled i při velkém množství textu při zachování sportovního charakteru.
-    - Menší štítky a pomocné texty (např. "Status", "Pro trenéry", "Sledujte nás") jsou sjednoceny do stylu: `text-xs`, `font-black`, `uppercase` s velmi výrazným prokladem (`tracking-[0.6em]`) pro prémiový a technický vzhled.
+    - Hlavní titulky (`h1`) využívají kombinaci `font-display` (Oswald), `font-black`, `italic`, `uppercase` and `tracking-tighter`.
+    - Textový obsah (`h2`, `p`) využívá hlavní bezpatkové písmo projektu (`font-sans` / Instrument Sans).
+    - Pro doprovodný text (`p`) je na mobilech snížen proklad na `tracking-[0.2em]` pro lepší čitelnost delších vět, zatímco na desktopu zůstává výrazný `tracking-[0.56em]`.
+    - Menší štítky a pomocné texty jsou sjednoceny do stylu: `text-xs`, `font-black`, `uppercase` s velmi výrazným prokladem (`tracking-[0.6em]`).
+    - **Tlačítka:** Hlavní tlačítko "Vstup do šatny" má na hoveru prohozené barvy (červený text `text-primary` na bílém pozadí).
 - **Záře (Glow):** Využívá se velká, vycentrovaná červená záře v pozadí (pod taktickými prvky), která dodává scéně hloubku a barvu. Nadpis "TIME-OUT!" má navíc přidán dostatečný padding a `overflow-visible`, aby nedocházelo k ořezávání zkoseného písma (italic) na okrajích, což je u `bg-clip-text` častý problém.
 
 ### Technické detaily

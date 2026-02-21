@@ -59,6 +59,15 @@ class UserForm
                                     ->helperText('Deaktivovaný uživatel se nebude moci přihlásit.')
                                     ->default(true),
                             ]),
+                        Grid::make(2)
+                            ->schema([
+                                \Filament\Forms\Components\Placeholder::make('2fa_status')
+                                    ->label('Stav 2FA')
+                                    ->content(fn ($record) => $record?->two_factor_secret ? 'Aktivní' : 'Neaktivní'),
+                                \Filament\Forms\Components\Placeholder::make('onboarding_status')
+                                    ->label('Stav onboardingu')
+                                    ->content(fn ($record) => $record?->onboarding_completed_at ? 'Dokončeno (' . $record->onboarding_completed_at->format('d.m.Y H:i') . ')' : 'Čeká na nastavení hesla'),
+                            ])->visible(fn ($record) => $record !== null),
                     ]),
 
                 Section::make('Administrativní poznámka')

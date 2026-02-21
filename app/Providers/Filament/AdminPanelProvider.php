@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Services\BrandingService;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -10,6 +11,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Assets\Css;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -23,14 +25,29 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $branding = app(BrandingService::class)->getSettings();
+        $colors = $branding['colors'];
+
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->passwordReset()
+            ->brandName($branding['club_name'])
+            ->brandLogo($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
+            ->favicon($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex($colors['red']),
+                'gray' => Color::Slate,
             ])
+            ->assets([
+                Css::make('filament-auth-styles', resource_path('css/filament-auth.css')),
+            ])
+            ->renderHook(
+                'panels::auth.login.form.after',
+                fn (): string => view('filament.hooks.login-footer'),
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -56,6 +73,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                '2fa.required',
             ]);
     }
 }

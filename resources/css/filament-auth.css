@@ -1,0 +1,51 @@
+/* Hypermoderní stylování pro login stránku administrace */
+
+.fi-simple-layout {
+    background-color: #0B1F3A !important; /* Brand Navy */
+    background-image:
+        radial-gradient(circle at 50% -20%, rgba(225, 29, 72, 0.15) 0%, transparent 70%),
+        radial-gradient(circle at 0% 100%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.15) 0%, transparent 50%) !important;
+    background-attachment: fixed !important;
+    position: relative;
+}
+
+/* Jemná textura šumu */
+.fi-simple-layout::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.fi-simple-main-ctn {
+    position: relative;
+    z-index: 1;
+}
+
+.fi-simple-card {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-top: 5px solid #E11D48 !important; /* Brand Red */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 1rem !important;
+}
+
+/* Vylepšení tlačítek */
+.fi-btn {
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-weight: 800 !important;
+}
+
+/* Animace loga */
+.fi-logo {
+    transition: transform 0.3s ease-in-out;
+}
+
+.fi-logo:hover {
+    transform: scale(1.05) rotate(-2deg);
+}

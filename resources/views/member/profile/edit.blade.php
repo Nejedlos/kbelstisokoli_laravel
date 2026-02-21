@@ -67,7 +67,7 @@
                         <div class="space-y-2">
                             <label for="current_password" class="text-xs font-black uppercase tracking-widest text-slate-400">Stávající heslo</label>
                             <input type="password" name="current_password" id="current_password"
-                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary">
+                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
                             @error('current_password') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
                         </div>
 
@@ -75,15 +75,113 @@
                             <div class="space-y-2">
                                 <label for="new_password" class="text-xs font-black uppercase tracking-widest text-slate-400">Nové heslo</label>
                                 <input type="password" name="new_password" id="new_password"
-                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary">
+                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
                                 @error('new_password') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div class="space-y-2">
                                 <label for="new_password_confirmation" class="text-xs font-black uppercase tracking-widest text-slate-400">Potvrzení nového hesla</label>
                                 <input type="password" name="new_password_confirmation" id="new_password_confirmation"
-                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary">
+                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <!-- Two Factor Authentication -->
+                <section class="card p-6 md:p-8 space-y-6 border-l-4 {{ $user->two_factor_secret ? 'border-l-success' : 'border-l-warning' }}">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-black uppercase tracking-tight text-secondary">Dvoufázové ověření (2FA)</h3>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $user->two_factor_secret ? 'bg-success-100 text-success-700' : 'bg-warning-100 text-warning-700' }}">
+                            {{ $user->two_factor_secret ? 'Aktivní' : 'Neaktivní' }}
+                        </span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <p class="text-sm text-slate-600 font-medium leading-relaxed">
+                            Dvoufázové ověření přidává další vrstvu zabezpečení k vašemu účtu. Při přihlášení budete muset zadat ověřovací kód z mobilní aplikace.
+                            @if($user->can('access_admin'))
+                                <span class="text-danger-600 font-bold block mt-2">Důležité: Jako administrátor musíte mít 2FA aktivní pro přístup do správy klubu.</span>
+                            @endif
+                        </p>
+
+                        @if(! $user->two_factor_secret)
+                            {{-- Enable 2FA --}}
+                            <form method="POST" action="{{ route('two-factor.enable') }}">
+                                @csrf
+                                <button type="submit" class="btn btn-secondary py-2 px-6 text-sm">
+                                    Aktivovat 2FA
+                                </button>
+                            </form>
+                        @else
+                            {{-- 2FA Setup Flow (Confirming) --}}
+                            @if($user->two_factor_confirmed_at)
+                                {{-- Show Recovery Codes --}}
+                                <div class="space-y-4 pt-4">
+                                    <div class="flex flex-wrap gap-4">
+                                        <form method="POST" action="{{ route('two-factor.recovery-codes') }}">
+                                            @csrf
+                                            <button type="submit" class="btn btn-outline py-2 px-4 text-xs">
+                                                Regenerovat záchranné kódy
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="{{ route('two-factor.disable') }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn bg-danger-50 text-danger-600 hover:bg-danger-100 py-2 px-4 text-xs uppercase tracking-widest font-black">
+                                                Deaktivovat 2FA
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    @if(session('status') == 'two-factor-authentication-enabled' || session('status') == 'recovery-codes-generated')
+                                        <div class="bg-slate-900 rounded-club p-6 mt-4">
+                                            <p class="text-xs font-black uppercase tracking-widest text-primary mb-4">Vaše záchranné kódy</p>
+                                            <p class="text-[10px] text-slate-400 mb-4 font-medium italic">Uložte si tyto kódy na bezpečné místo. Pomohou vám se přihlásit, pokud ztratíte přístup k aplikaci.</p>
+                                            <div class="grid grid-cols-2 gap-2 font-mono text-sm text-white">
+                                                @foreach ($user->recoveryCodes() as $code)
+                                                    <div class="bg-white/5 px-3 py-1 rounded">{{ $code }}</div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @else
+                                {{-- Confirming 2FA --}}
+                                <div class="bg-slate-50 border border-slate-200 rounded-club p-6 space-y-6">
+                                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                                        <div class="p-4 bg-white rounded-club shadow-sm border border-slate-100">
+                                            {!! $user->twoFactorQrCodeSvg() !!}
+                                        </div>
+                                        <div class="space-y-4 flex-1">
+                                            <h4 class="font-black uppercase tracking-tight text-secondary text-sm">Dokončení nastavení</h4>
+                                            <ol class="text-xs text-slate-600 space-y-2 list-decimal list-inside font-medium">
+                                                <li>Nainstalujte si aplikaci (např. Google Authenticator).</li>
+                                                <li>Naskenujte tento QR kód ve vaší aplikaci.</li>
+                                                <li>Opište 6místný kód, který se vám v aplikaci zobrazil.</li>
+                                            </ol>
+                                            <div class="pt-2">
+                                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Ruční klíč:</p>
+                                                <code class="text-xs font-bold text-secondary bg-slate-200 px-2 py-1 rounded break-all">{{ decrypt($user->two_factor_secret) }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <form method="POST" action="{{ route('two-factor.confirm') }}" class="flex items-end gap-4 max-w-sm border-t border-slate-200 pt-6">
+                                        @csrf
+                                        <div class="flex-1 space-y-2">
+                                            <label for="code" class="text-[10px] font-black uppercase tracking-widest text-slate-400">Ověřovací kód</label>
+                                            <input id="code" type="text" name="code" inputmode="numeric" required autofocus autocomplete="one-time-code"
+                                                   class="w-full px-4 py-2 bg-white border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none tracking-widest text-center">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary py-2 px-6 text-sm uppercase tracking-widest">
+                                            Potvrdit
+                                        </button>
+                                    </form>
+                                    @error('code') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            @endif
+                        @endif
                     </div>
                 </section>
 

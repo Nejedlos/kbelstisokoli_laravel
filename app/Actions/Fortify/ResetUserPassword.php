@@ -24,6 +24,7 @@ class ResetUserPassword implements ResetsUserPasswords
 
         $user->forceFill([
             'password' => Hash::make($input['password']),
+            'onboarding_completed_at' => $user->onboarding_completed_at ?? now(),
         ])->save();
     }
 }

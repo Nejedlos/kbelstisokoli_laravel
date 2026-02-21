@@ -11,8 +11,10 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 
-use Filament\Tables\Actions\BulkAction;
-use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Password;
+use App\Notifications\UserInvitationNotification;
+use Filament\Notifications\Notification as FilamentNotification;
 
 class UsersTable
 {
@@ -36,6 +38,20 @@ class UsersTable
                 IconColumn::make('is_active')
                     ->label('Aktivní')
                     ->boolean()
+                    ->sortable(),
+                IconColumn::make('two_factor_secret')
+                    ->label('2FA')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-shield-check')
+                    ->falseIcon('heroicon-o-shield-exclamation')
+                    ->color(fn ($state) => $state ? 'success' : 'warning')
+                    ->sortable(),
+                IconColumn::make('onboarding_completed_at')
+                    ->label('Aktivováno')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-badge')
+                    ->falseIcon('heroicon-o-clock')
+                    ->color(fn ($state) => $state ? 'success' : 'gray')
                     ->sortable(),
                 IconColumn::make('playerProfile')
                     ->label('Hráč')
@@ -61,6 +77,14 @@ class UsersTable
                     ->relationship('roles', 'name'),
                 TernaryFilter::make('is_active')
                     ->label('Pouze aktivní'),
+                TernaryFilter::make('two_factor')
+                    ->label('Aktivní 2FA')
+                    ->trueQuery(fn ($query) => $query->whereNotNull('two_factor_secret'))
+                    ->falseQuery(fn ($query) => $query->whereNull('two_factor_secret')),
+                TernaryFilter::make('onboarding')
+                    ->label('Dokončený onboarding')
+                    ->trueQuery(fn ($query) => $query->whereNotNull('onboarding_completed_at'))
+                    ->falseQuery(fn ($query) => $query->whereNull('onboarding_completed_at')),
                 TernaryFilter::make('player_profile_exists')
                     ->label('Má hráčský profil')
                     ->placeholder('Všichni')
@@ -68,6 +92,23 @@ class UsersTable
                     ->falseQuery(fn ($query) => $query->doesntHave('playerProfile')),
             ])
             ->recordActions([
+                Action::make('sendInvitation')
+                    ->label('Poslat pozvánku')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->modalHeading('Odeslat pozvánku k aktivaci účtu')
+                    ->modalDescription('Uživateli bude zaslán e-mail s odkazem pro nastavení hesla. Tato akce je vhodná pro nově vytvořené účty.')
+                    ->action(function ($record) {
+                        $token = Password::createToken($record);
+                        $record->notify(new UserInvitationNotification($token));
+
+                        FilamentNotification::make()
+                            ->title('Pozvánka byla odeslána')
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn ($record) => $record->is_active && !$record->onboarding_completed_at),
                 EditAction::make(),
             ])
             ->bulkActions([

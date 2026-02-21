@@ -4,16 +4,12 @@
     <div class="container section-padding grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Brand / About -->
         <div>
-            <div class="flex items-center gap-3 mb-4">
-                @if($branding['logo_path'])
+            @if($branding['logo_path'])
+                <div class="flex items-center gap-3 mb-4">
                     <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ brand_text($branding['club_name'] ?? 'Klub') }}" class="h-10 w-auto">
-                @else
-                    <div class="bg-primary text-white p-2 rounded-club font-display font-bold text-lg uppercase tracking-tighter">
-                        {{ brand_text($branding['club_short_name'] ?? 'KLUB') }}
-                    </div>
-                @endif
-                <span class="font-display font-bold uppercase tracking-wide">{{ brand_text($branding['club_name'] ?? config('app.name')) }}</span>
-            </div>
+                    <span class="font-display font-bold uppercase tracking-wide">{{ brand_text($branding['club_name'] ?? config('app.name')) }}</span>
+                </div>
+            @endif
             @if(!empty($branding['slogan']))
                 <p class="text-slate-400">{{ brand_text($branding['slogan']) }}</p>
             @endif

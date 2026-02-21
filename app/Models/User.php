@@ -38,6 +38,7 @@ class User extends Authenticatable implements FilamentUser
         'last_login_at',
         'admin_note',
         'notification_preferences',
+        'onboarding_completed_at',
     ];
 
     /**
@@ -63,6 +64,7 @@ class User extends Authenticatable implements FilamentUser
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
             'notification_preferences' => 'array',
+            'onboarding_completed_at' => 'datetime',
         ];
     }
 

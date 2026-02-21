@@ -702,3 +702,80 @@ php artisan finance:sync
 2) feat(admin): add finance management resources and allocation system
 3) feat(member): connect economy section to real financial data and summaries
 4) feat(finance): add automated status sync and new charge notifications
+
+## 22. Autentizace a bezpečnost
+
+Účel: Zajištění bezpečného přístupu k systému s různou úrovní rizika pro veřejnost, členy a administrátory.
+
+### 22.1 Bezpečnostní zóny
+1. **Veřejná zóna:** Bez nutnosti přihlášení.
+2. **Členská zóna (Member):** Vyžaduje standardní přihlášení (e-mail + heslo). Dvoufázové ověření (2FA) je pro běžné členy volitelné.
+3. **Administrace (Admin):** Vyžaduje přihlášení a **povinné** dvoufázové ověření (2FA). Bez aktivního 2FA je přístup do administrace blokován middlewarem.
+
+### 22.2 Technologie a komponenty
+- **Laravel Fortify:** Zajišťuje backend pro login, logout, reset hesla a 2FA (TOTP).
+- **Spatie Laravel Permission:** Řízení přístupu na základě rolí a oprávnění.
+- **Middleware `2fa.required`:** Kontroluje, zda mají administrátoři aktivní 2FA.
+- **Onboarding systém:** Sleduje stav aktivace účtu přes pole `onboarding_completed_at`.
+
+### 22.3 Klíčová workflow
+
+#### 1. Registrace a onboarding
+- **Veřejná registrace je zakázána.** Účty může vytvářet pouze administrátor.
+- Nově vytvořený účet nemá nastavené heslo a má prázdné pole `onboarding_completed_at`.
+- Administrátor odešle "Pozvánku" (akce v seznamu uživatelů), která uživateli zašle bezpečný odkaz pro nastavení hesla.
+- Dokončením resetu hesla se nastaví `onboarding_completed_at` a účet je považován za aktivovaný.
+
+#### 2. Přihlášení a 2FA
+- Pokud uživatel s přístupem do administrace nemá aktivní 2FA, je po přihlášení přesměrován do svého profilu s výzvou k aktivaci.
+- 2FA využívá standard TOTP (kompatibilní s Google Authenticator, Authy, Microsoft Authenticator).
+- Při ztrátě zařízení lze použít vygenerované záchranné kódy (Recovery Codes).
+
+#### 3. Bezpečnostní audit
+- Všechny klíčové události (úspěšný login, selhání, reset hesla, změna 2FA) jsou logovány přes `SecurityLogger` do denního logu s prefixem `SECURITY_EVENT`.
+- Logování obsahuje IP adresu a User Agent pro detekci podezřelé aktivity.
+
+### 22.4 Middleware a enforcement
+- `auth`: Základní autentizace.
+- `active`: Kontrola, zda účet není deaktivován adminem (`is_active`).
+- `2fa.required`: Vynucení 2FA pro role s `access_admin`.
+- `permission:view_member_section`: Přístup do členské zóny.
+
+### 22.5 Správa v profilu
+Členové si mohou ve svém profilu sami spravovat:
+- Změnu hesla (vyžaduje potvrzení stávajícím heslem).
+- Aktivaci/deaktivaci 2FA.
+- Zobrazení a regeneraci záchranných kódů.
+
+## 23. Vizuální sjednocení administrace (Branding UX)
+Účel: Zajištění hypermoderního a vizuálně konzistentního zážitku i v administrátorském rozhraní.
+
+### 23.1 Design systému panelu
+- **Barvy:** Panel automaticky přebírá barvy z `BrandingService`. Primární barva (tlačítka, aktivní prvky) odpovídá nastavené klubové červené.
+- **Loga a favicony:** Administrace využívá nahraná loga z brandingu pro branding panelu a faviconu.
+
+### 23.2 Hypermoderní Login stránka
+- **Vlastní Login třída:** `App\Filament\Pages\Auth\Login` zajišťuje vtipné a motivační nadpisy v basketbalovém stylu.
+- **Vlastní CSS:** `resources/css/filament-auth.css` přidává:
+    - Dynamické gradientní pozadí s brandovými barvami (Navy/Red/Blue).
+    - Backdrop blur efekty a jemnou texturu šumu.
+    - Specifické stylování karet a tlačítek s důrazem na typografii.
+- **Render Hooky:** Do login formuláře jsou vloženy motivační hlášky ("Taktika je připravena...") pro odlehčení UX.
+
+### 23.3 Obnova přístupu
+- **Zapomenuté heslo:** V panelu je aktivován odkaz na reset hesla, který využívá sjednocené moderní šablony systému.
+
+### 23.4 CLI a vývoj
+```bash
+# Aktualizace oprávnění a rolí
+php artisan db:seed --class=RoleSeeder
+
+# Pročištění cache po změnách v auth middleware
+php artisan optimize:clear
+```
+
+### 22.7 Doporučené commity
+1) `feat(auth): disable public registration and implement mandatory 2FA for admins`
+2) `feat(auth): add invitation system and onboarding tracking`
+3) `feat(ui): implement modern login, password reset and 2FA challenge templates`
+4) `feat(security): add audit logging for auth events and security logger`

@@ -129,11 +129,11 @@
     </div>
 
     <!-- Hlavní kontejner -->
-    <div class="relative z-10 w-full max-w-7xl px-6 py-12 md:py-24 flex flex-col items-center text-center">
+    <div class="relative z-10 w-full max-w-7xl px-6 py-8 md:py-12 flex flex-col items-center text-center">
 
         <!-- Velký nápis / Stav -->
         <div class="mb-4">
-            <span class="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/20 backdrop-blur-md text-primary font-black uppercase tracking-[0.6em] text-xs rounded-full mb-8 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.2)]">
+            <span class="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/20 backdrop-blur-md text-primary font-black uppercase tracking-[0.6em] text-xs rounded-full mb-4 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.2)]">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -142,28 +142,28 @@
             </span>
         </div>
 
-        <div class="relative w-fit mx-auto mb-12 md:mb-20 overflow-visible text-center">
-            <h1 class="w-fit mx-auto text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-12 sm:px-16 md:px-20 lg:px-24 py-4 overflow-visible">
+        <div class="relative w-fit mx-auto mb-6 md:mb-10 overflow-visible text-center">
+            <h1 class="w-fit mx-auto text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-2 sm:px-12 md:px-16 lg:px-20 py-4 overflow-visible whitespace-nowrap">
                 TIME<span class="text-primary">-</span>OUT!
             </h1>
-            <div class="absolute -top-4 md:-top-8 z-20 rotate-12 right-[-20px] md:right-[-40px]">
+            <div class="absolute -top-4 md:-top-8 z-20 rotate-12 left-3/4 translate-x-[40%] sm:left-full sm:translate-x-10 md:translate-x-14 lg:translate-x-20">
                 <div class="marker-font text-primary text-lg md:text-3xl lg:text-4xl bg-white px-3 py-1 md:px-5 md:py-2 rounded-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,0.3)] border-2 border-brand-navy whitespace-nowrap">
-                    Lakujeme palubovku!
+                    LAKUJEME PALUBOVKU!
                 </div>
             </div>
         </div>
 
-        <div class="max-w-5xl mx-auto mb-12 md:mb-24 space-y-8">
-            <h2 class="text-2xl md:text-5xl lg:text-6xl font-black uppercase tracking-[0.14em] text-white balance leading-[1.1] italic opacity-95">
+        <div class="max-w-5xl mx-auto mb-8 md:mb-12 space-y-4">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-[0.14em] text-white balance leading-[1.1] italic opacity-95">
                 {{ $title ?? 'Trenér právě kreslí vítěznou taktiku pro náš nový web.' }}
             </h2>
-            <p class="text-lg md:text-xl lg:text-2xl text-white leading-[1.6] balance tracking-[0.56em] uppercase opacity-75">
+            <p class="text-base md:text-lg lg:text-xl text-white leading-[1.6] balance tracking-[0.2em] md:tracking-[0.56em] uppercase opacity-75">
                 {{ $text ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!' }}
             </p>
         </div>
 
         <!-- Interaktivní / Vizuální prvek -->
-        <div class="relative group cursor-pointer mb-12 md:mb-20">
+        <div class="relative group cursor-pointer mb-8 md:mb-12">
             <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full group-hover:bg-primary/40 transition-colors duration-700 animate-pulse"></div>
             <div class="relative animate-spin-slow">
                 <svg class="w-24 h-24 md:w-56 md:h-56 text-primary transition-all duration-700 group-hover:scale-110 group-hover:rotate-[360deg] filter drop-shadow-[0_20px_50px_rgba(var(--color-primary-rgb),0.3)]" viewBox="0 0 24 24" fill="currentColor">
@@ -187,7 +187,7 @@
         <div class="flex flex-col md:flex-row items-stretch md:items-center gap-6 md:gap-16 w-full max-w-lg md:max-w-3xl">
             <div class="flex flex-col items-center flex-1">
                 <div class="text-xs font-black uppercase tracking-[0.6em] text-slate-400 mb-6">Pro trenéry</div>
-                <a href="/admin" class="w-full md:w-auto group/btn relative overflow-hidden bg-primary text-white hover:bg-white hover:text-brand-navy transition-all px-12 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-[0_20px_40px_-15px_rgba(var(--color-primary-rgb),0.5)] hover:shadow-none active:scale-95">
+                <a href="/admin" class="w-full md:w-auto group/btn relative overflow-hidden bg-primary text-white hover:bg-white hover:text-primary transition-all px-12 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-[0_20px_40px_-15px_rgba(var(--color-primary-rgb),0.5)] hover:shadow-none active:scale-95">
                     <span class="relative z-10 flex items-center justify-center gap-3">
                         Vstup do šatny
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
@@ -219,7 +219,7 @@
     </div>
 
     <!-- Spodní lišta / Siréna -->
-    <div class="relative mt-auto py-12 w-full">
+    <div class="relative mt-auto py-6 w-full">
         <div class="container mx-auto flex flex-col items-center">
             <div class="flex items-center gap-4 mb-4">
                 <div class="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div>

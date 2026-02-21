@@ -48,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'public.maintenance' => \App\Http\Middleware\PublicMaintenanceMiddleware::class,
+            '2fa.required' => \App\Http\Middleware\EnsureTwoFactorEnabled::class,
         ]);
 
         $middleware->group('member', [
@@ -60,6 +61,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->group('admin', [
             'auth',
             'active',
+            '2fa.required',
             'permission:access_admin',
         ]);
 
