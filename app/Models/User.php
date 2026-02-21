@@ -17,6 +17,14 @@ class User extends Authenticatable implements FilamentUser
     use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
 
     /**
+     * Docházka uživatele k různým akcím.
+     */
+    public function attendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

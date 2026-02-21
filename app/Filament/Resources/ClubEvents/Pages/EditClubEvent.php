@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Events\Pages;
+namespace App\Filament\Resources\ClubEvents\Pages;
 
-use App\Filament\Resources\Events\EventResource;
+use App\Filament\Resources\ClubEvents\ClubEventResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditEvent extends EditRecord
+class EditClubEvent extends EditRecord
 {
-    protected static string $resource = EventResource::class;
+    protected static string $resource = ClubEventResource::class;
 
     protected function getHeaderActions(): array
     {

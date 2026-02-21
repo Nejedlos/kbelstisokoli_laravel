@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
 class BasketballMatch extends Model
 {
     protected $table = 'matches';
@@ -28,6 +30,14 @@ class BasketballMatch extends Model
         'score_home' => 'integer',
         'score_away' => 'integer',
     ];
+
+    /**
+     * Docházka (dostupnost) k tomuto zápasu.
+     */
+    public function attendances(): MorphMany
+    {
+        return $this->morphMany(Attendance::class, 'attendable');
+    }
 
     public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

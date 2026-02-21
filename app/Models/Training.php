@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
 class Training extends Model
 {
     protected $fillable = [
@@ -18,6 +20,14 @@ class Training extends Model
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
     ];
+
+    /**
+     * Docházka k tomuto tréninku.
+     */
+    public function attendances(): MorphMany
+    {
+        return $this->morphMany(Attendance::class, 'attendable');
+    }
 
     public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

@@ -53,3 +53,23 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
 - Používáme specifické proměnné prostředí pro cesty a disky (`PUBLIC_FOLDER`, `UPLOADS_DIR` atd.) pro kompatibilitu s Webglobe hostingem.
 - Vždy udržujeme `.env.example` aktuální se všemi klíči (bez citlivých dat).
 - Pro integraci s AI využíváme `OPENAI_*` proměnné.
+
+## 10. Artisan generátory a CLI příkazy
+- **Preference neinteraktivních příkazů:** Při generování kódu přes Laravel/Filament (např. `make:model`, `make:filament-resource`) preferujeme **plně specifikované příkazy**, aby terminál nečekal na doplňující otázky.
+- **Parametry a příznaky:**
+    - Pokud je příkaz standardně interaktivní, použijte příznak `--no-interaction` nebo `-n`.
+    - Všechny potřebné parametry (názvy modelů, labelů, relací, resources) uvádějte přímo v příkazu.
+- **Postup u nevyhnutelně interaktivních příkazů:** Pokud neinteraktivní režim není možný, Junie musí:
+    1. Předem uvést, jaké otázky budou v terminálu položeny.
+    2. Poskytnout přesné odpovědi (text nebo volbu), které mají být použity.
+    3. Vyhnout se řetězení příkazů (batching), pokud by hrozilo zablokování na skrytém dotazu.
+- **Filament specifika:** Preferujte předvídatelné vzorce příkazů a vyhněte se komplexním dávkám, pokud nejsou všechny odpovědi předem známé a zdokumentované.
+- **Dokumentace příkazů:** Na konci každého úkolu, kde byly použity generátory, stručně zaznamenejte použité příkazy (např. v dokumentaci modulu nebo v popisu úkolu).
+
+### Best practices pro CLI generování (Příklady)
+- **Laravel:**
+    - Místo `php artisan make:model Product` (které se ptá na migraci/factory) použijte `php artisan make:model Product -mf`.
+- **Filament:**
+    - Místo `php artisan make:filament-resource Product` (které se ptá na model/soft-deletes/view) použijte `php artisan make:filament-resource Product --model=Product --view --soft-deletes`.
+- **Obecné:**
+    - Vždy používejte `--help` k ověření dostupných parametrů před spuštěním, abyste se vyhnuli interaktivitě.

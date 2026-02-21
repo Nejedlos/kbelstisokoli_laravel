@@ -24,10 +24,9 @@ Route::middleware(['member'])
         // Dashboard
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
-        // Docházka
-        Route::get('/dochazka', [AttendanceController::class, 'index'])->name('attendance.index');
-        Route::post('/dochazka/{id}/potvrdit', [AttendanceController::class, 'confirm'])->name('attendance.confirm');
-        Route::post('/dochazka/{id}/odmitnout', [AttendanceController::class, 'decline'])->name('attendance.decline');
+        // Docházka / Program
+        Route::get('/program', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/program/{type}/{id}/respond', [AttendanceController::class, 'store'])->name('attendance.store');
 
         // Profil
         Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');

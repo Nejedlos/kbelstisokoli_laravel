@@ -14,6 +14,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
+
 class BasketballMatchResource extends Resource
 {
     protected static ?string $model = BasketballMatch::class;
@@ -39,7 +41,7 @@ class BasketballMatchResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AttendancesRelationManager::class,
         ];
     }
 
