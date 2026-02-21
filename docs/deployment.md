@@ -3,7 +3,7 @@
 Projekt využívá moderní přístup k nasazení, který kombinuje **GitHub** ([https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.com/Nejedlos/kbelstisokoli_laravel)) jako zdrojový repozitář a **SSH konzoli** na hostingu (Webglobe) pro finální kroky.
 
 ## Předpoklady na serveru (Webglobe)
-1. **PHP:** Verze 8.2+ (podle Laravel 12 nároků).
+1. **PHP:** Verze 8.4+ (včetně JIT optimalizací).
 2. **SSH Přístup:** Povoleno v administraci Webglobe.
 3. **Git:** Musí být nainstalován.
 4. **Composer:** Globálně dostupný nebo jako `composer.phar` v rootu.

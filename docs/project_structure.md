@@ -3,7 +3,7 @@
 ## Hlavní komponenty
 Projekt využívá následující technologický stack:
 
-- **Framework:** Laravel 12.x
+- **Framework:** Laravel 12.x (vyžaduje PHP 8.4+)
 - **Backend administrace:** Filament PHP 5.x
 - **Routing:** Laravel Folio (pro frontend i backend)
 - **Frontend:** Blade, Livewire 3.x, Tailwind CSS, Vite
