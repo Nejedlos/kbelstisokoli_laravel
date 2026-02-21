@@ -5,15 +5,15 @@
         <!-- Logo -->
         <a href="{{ route('public.home') }}" class="flex items-center gap-3">
             @if($branding['logo_path'])
-                <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ $branding['club_name'] }}" class="h-12 w-auto">
+                <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-12 w-auto">
             @else
                 <div class="bg-primary text-white p-2 rounded-club font-display font-bold text-xl uppercase tracking-tighter">
-                    {{ $branding['club_short_name'] }}
+                    {{ brand_text($branding['club_short_name']) }}
                 </div>
             @endif
             <div class="hidden md:block">
-                <span class="block font-display font-bold text-xl leading-none uppercase">{{ $branding['club_name'] }}</span>
-                <span class="block text-xs text-slate-500 font-medium tracking-wider uppercase">{{ $branding['slogan'] }}</span>
+                <span class="block font-display font-bold text-xl leading-none uppercase">{{ brand_text($branding['club_name']) }}</span>
+                <span class="block text-xs text-slate-500 font-medium tracking-wider uppercase">{{ brand_text($branding['slogan']) }}</span>
             </div>
         </a>
 

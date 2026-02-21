@@ -6,16 +6,16 @@
         <div>
             <div class="flex items-center gap-3 mb-4">
                 @if($branding['logo_path'])
-                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ $branding['club_name'] ?? 'Klub' }}" class="h-10 w-auto">
+                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ brand_text($branding['club_name'] ?? 'Klub') }}" class="h-10 w-auto">
                 @else
                     <div class="bg-primary text-white p-2 rounded-club font-display font-bold text-lg uppercase tracking-tighter">
-                        {{ $branding['club_short_name'] ?? 'KLUB' }}
+                        {{ brand_text($branding['club_short_name'] ?? 'KLUB') }}
                     </div>
                 @endif
-                <span class="font-display font-bold uppercase tracking-wide">{{ $branding['club_name'] ?? config('app.name') }}</span>
+                <span class="font-display font-bold uppercase tracking-wide">{{ brand_text($branding['club_name'] ?? config('app.name')) }}</span>
             </div>
             @if(!empty($branding['slogan']))
-                <p class="text-slate-400">{{ $branding['slogan'] }}</p>
+                <p class="text-slate-400">{{ brand_text($branding['slogan']) }}</p>
             @endif
         </div>
 
@@ -66,7 +66,7 @@
 
     <div class="bg-dark text-slate-400 text-sm">
         <div class="container py-4 flex items-center justify-between">
-            <span>{{ $branding['footer_text'] ?? (__('Všechna práva vyhrazena')) }}</span>
+            <span>{{ brand_text($branding['footer_text'] ?? (__('Všechna práva vyhrazena'))) }}</span>
             @if(!($branding['maintenance_mode'] ?? false))
                 <a href="{{ route('public.contact.index') }}" class="hover:text-primary">Kontakt</a>
             @endif

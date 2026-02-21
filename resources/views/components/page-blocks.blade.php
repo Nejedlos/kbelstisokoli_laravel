@@ -5,7 +5,7 @@
         @php
             // Filament Builder vrací pole s 'type' a 'data'
             $type = $block['type'] ?? null;
-            $data = $block['data'] ?? [];
+            $data = brand_text($block['data'] ?? []);
 
             // Respektuj viditelnost bloku
             $visible = data_get($data, 'is_visible', true);

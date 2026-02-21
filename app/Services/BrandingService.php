@@ -96,4 +96,40 @@ class BrandingService
     {
         Cache::forget('global_branding_settings');
     }
+
+    /**
+     * Nahradí zástupné symboly (hashe) v textu skutečnými hodnotami z brandingu.
+     */
+    public function replacePlaceholders(?string $text): string
+    {
+        if (!$text) {
+            return '';
+        }
+
+        $settings = $this->getSettings();
+
+        $placeholders = [
+            '###TEAM_NAME###' => $settings['club_name'],
+            '###TEAM_SHORT###' => $settings['club_short_name'],
+            '###CLUB_NAME###' => $settings['club_name'],
+        ];
+
+        return str_replace(array_keys($placeholders), array_values($placeholders), $text);
+    }
+
+    /**
+     * Rekurzivně nahradí zástupné symboly v celém poli (např. v datech bloku).
+     */
+    public function replaceInArray(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $data[$key] = $this->replacePlaceholders($value);
+            } elseif (is_array($value)) {
+                $data[$key] = $this->replaceInArray($value);
+            }
+        }
+
+        return $data;
+    }
 }

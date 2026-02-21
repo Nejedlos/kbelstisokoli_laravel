@@ -29,12 +29,12 @@
 
                 @if($post->excerpt)
                     <p class="text-xl md:text-2xl text-slate-600 font-medium leading-relaxed mb-12 italic border-l-4 border-primary pl-8">
-                        {{ $post->excerpt }}
+                        {{ brand_text($post->excerpt) }}
                     </p>
                 @endif
 
                 <div class="prose prose-slate prose-lg md:prose-xl max-w-none prose-headings:font-display prose-headings:uppercase prose-headings:tracking-tight prose-a:text-primary prose-img:rounded-club">
-                    {!! $post->content !!}
+                    {!! brand_text($post->content) !!}
                 </div>
 
                 <div class="mt-16 pt-8 border-t border-slate-100 flex items-center justify-between">

@@ -31,7 +31,15 @@ class BrandingSettings extends Page
 
     public function mount(): void
     {
-        $this->data = Setting::pluck('value', 'key')->toArray();
+        $dbData = Setting::pluck('value', 'key')->toArray();
+        $configDefaults = [
+            'club_name' => config('branding.club_name'),
+            'club_short_name' => config('branding.club_short_name'),
+            'slogan' => config('branding.slogan'),
+            'footer_text' => config('branding.footer_text'),
+        ];
+
+        $this->data = array_merge($configDefaults, $dbData);
     }
 
     public function form(Form $form): Form
@@ -81,6 +89,7 @@ class BrandingSettings extends Page
                     ]),
 
                 Section::make('Základní identita')
+                    ->description('Zde nastavte názvy klubu. V textu můžete používat zástupné symboly ###TEAM_NAME### nebo ###TEAM_SHORT###, které budou automaticky nahrazeny těmito hodnotami.')
                     ->schema([
                         Grid::make(2)
                             ->schema([

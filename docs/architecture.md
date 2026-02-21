@@ -413,12 +413,26 @@ php artisan optimize:clear
 - Pokud nastavení v DB chybí, systém automaticky fallbackuje na hodnoty v `config/branding.php`.
 - Cache pro nastavení brandingu se automaticky promazává při uložení změn.
 
-### 14.5 Jak přidat nový preset
+### 14.5 Zástupné symboly (Hashe)
+V CMS obsahu, sloganech a textech lze používat hashe, které se dynamicky mění podle nastavení klubu:
+- `###TEAM_NAME###` – Plný název klubu (např. Kbelští sokoli C & E).
+- `###TEAM_SHORT###` – Zkrácený název (např. Sokoli).
+- `###CLUB_NAME###` – Alias pro plný název.
+
+Tyto hashe jsou automaticky nahrazovány v:
+- Page Builder blocích.
+- Detailu novinek (perex, obsah).
+- Hlavičce a patičce (slogany, texty).
+- Meta tazích (SEO).
+
+Pro nahrazení v kódu slouží helper `brand_text($text)`.
+
+### 14.6 Jak přidat nový preset
 1. V `config/branding.php` přidejte nový klíč do pole `themes`.
 2. Definujte název (`label`) a paletu barev (`colors`).
 3. Nový preset se okamžitě objeví v administraci ve výběru.
 
-### 14.6 Příkazy
+### 14.7 Příkazy
 ```
 # Migrace pro tabulku nastavení
 php artisan migrate
@@ -426,10 +440,11 @@ php artisan migrate
 php artisan optimize:clear
 ```
 
-### 14.7 Doporučené commity
+### 14.8 Doporučené commity
 1. `feat(branding): add settings table and theme preset configuration`
 2. `feat(branding): implement BrandingService with dynamic CSS variable generation`
 3. `feat(admin): create BrandingSettings page for easy identity management`
+4. `feat(branding): add dynamic placeholder hash system for club names`
 
 ## 15. Veřejné šablony a stránky (Public Frontend)
 
@@ -475,8 +490,11 @@ php artisan optimize:clear
 - **Manuální:** V administraci (Nastavení -> Branding) lze režim zapnout/vypnout.
 - **Automatická:** Pokud v databázi neexistuje žádná publikovaná a viditelná `Page`, web se do tohoto režimu přepne automaticky.
 - **Middleware:** `PublicMaintenanceMiddleware` zajišťuje přesměrování všech veřejných rout na domovskou stránku, pokud je režim aktivní.
-
-### 16.3 Doporučené commity
+### 16.3 Bypass pro adminy
+- **Princip:** Přihlášení uživatelé s oprávněním `access_admin` (role Admin, Editor, Coach) vidí frontend v plné podobě i v případě, že je režim přípravy aktivní nebo chybí obsah.
+- **Implementace:** Bypass je ošetřen v `PublicMaintenanceMiddleware` (pro podstránky) a v `HomeController` (pro domovskou stránku). To umožňuje týmu připravovat a testovat web před jeho oficiálním spuštěním.
+### 16.4 Doporučené commity
 1. `feat(public): implement funny basketball-themed under construction page`
 2. `refactor(home): pass branding css variables to maintenance view`
 3. `feat(admin): update maintenance mode defaults and hints in branding settings`
+4. `feat(maintenance): add admin bypass for under construction mode`
