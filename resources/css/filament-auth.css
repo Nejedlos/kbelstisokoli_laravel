@@ -74,11 +74,11 @@
 /* Nadpisy - Dark text on light card */
 .fi-simple-header-heading {
     color: #0f172a !important; /* Slate 900 */
-    font-size: 1.25rem !important; /* XL size equivalent, much smaller */
+    font-size: 1rem !important; /* Standard base size, very discrete */
     font-weight: 950 !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
-    margin-top: 2rem !important; /* Even more air between icon and heading */
+    margin-top: 3rem !important; /* Even more air between icon and heading */
     font-family: 'Oswald', sans-serif !important;
     text-shadow: none !important;
     line-height: 1.4 !important;
@@ -87,14 +87,15 @@
 }
 
 .fi-simple-header-subheading {
-    color: #475569 !important; /* Slate 600 */
-    font-size: 0.875rem !important;
+    color: #64748b !important; /* Slate 500 */
+    font-size: 0.75rem !important;
     font-weight: 800 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.25em !important;
-    margin-top: 1rem !important;
+    letter-spacing: 0.3em !important;
+    margin-top: 0.5rem !important;
     text-shadow: none !important;
-    opacity: 1 !important;
+    display: block !important;
+    text-align: center !important;
 }
 
 /* Formulářová pole - High contrast Light elements */
@@ -215,7 +216,8 @@
 
 /* Spodní odkaz a patička */
 .fi-simple-main footer,
-.mt-12.text-center {
+.mt-12.text-center,
+[wire\:partial="schema-component\:\:content\.form-actions"] + div {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;

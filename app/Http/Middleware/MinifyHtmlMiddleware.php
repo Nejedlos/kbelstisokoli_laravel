@@ -24,17 +24,28 @@ class MinifyHtmlMiddleware
 
             $htmlMin = new HtmlMin();
 
-            // Aggressive but clean cleaning
+            // Extreme cleaning for "perfect" output using valid library methods
             $htmlMin->doRemoveComments(true);
             $htmlMin->doSumUpWhitespace(true);
             $htmlMin->doRemoveWhitespaceAroundTags(true);
             $htmlMin->doOptimizeAttributes(true);
             $htmlMin->doRemoveHttpPrefixFromAttributes(true);
-            $htmlMin->doKeepHttpAndHttpsPrefix(false);
+            $htmlMin->doRemoveHttpsPrefixFromAttributes(true);
+            $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes(true);
+            $htmlMin->doRemoveDefaultAttributes(true);
+            $htmlMin->doRemoveDeprecatedAnchorName(true);
+            $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(true);
+            $htmlMin->doRemoveDeprecatedTypeFromStyleAndLinkTag(true);
+            $htmlMin->doRemoveDefaultMediaTypeFromStyleAndLinkTag(true);
+            $htmlMin->doRemoveDefaultTypeFromButton(true);
+            $htmlMin->doRemoveEmptyAttributes(true);
+            $htmlMin->doSortHtmlAttributes(true);
+            $htmlMin->doSortCssClassNames(true);
 
             $content = $htmlMin->minify($content);
 
             $response->setContent($content);
+            $response->headers->set('X-HTML-Minified', 'yes');
         }
 
         return $response;

@@ -23,8 +23,8 @@ class Login extends BaseLogin
                     <i class="fa-solid fa-basketball-hoop text-primary text-5xl fa-glow icon-bounce-slow relative z-10"></i>
                     <div class="absolute inset-0 rounded-full bg-primary/10 blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
                 </div>
-                <h2 class="text-slate-900 font-black uppercase tracking-tight text-lg leading-none m-0 p-0">' . e($clubName) . '</h2>
-                <p class="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] mt-4 m-0 p-0">Vstup pro oprávněné osoby</p>
+                <h2 class="text-slate-900 font-black uppercase tracking-widest leading-none text-base m-0 p-0">' . e($clubName) . '</h2>
+                <p class="text-slate-500 font-bold uppercase tracking-[0.3em] text-[9px] mt-4 m-0 p-0">Vstup do administrace</p>
             </div>
         ');
     }
