@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class BrandingService
 {
@@ -108,7 +109,18 @@ class BrandingService
     protected function getDbSettings(): array
     {
         return Cache::remember('global_branding_settings_' . app()->getLocale(), 3600, function () {
-            $settings = Setting::all();
+            // Pokud tabulka ještě neexistuje (např. během prvních migrací / v testech), vrať prázdné nastavení
+            if (!Schema::hasTable('settings')) {
+                return [];
+            }
+
+            try {
+                $settings = Setting::all();
+            } catch (\Throwable $e) {
+                // Bezpečný fallback v případě, že DB ještě není připravena
+                return [];
+            }
+
             $mapped = [];
             foreach ($settings as $setting) {
                 $mapped[$setting->key] = $setting->value;
@@ -122,7 +134,7 @@ class BrandingService
      */
     public function clearCache(): void
     {
-        Cache::forget('global_branding_settings');
+        Cache::forget('global_branding_settings_' . app()->getLocale());
     }
 
     /**

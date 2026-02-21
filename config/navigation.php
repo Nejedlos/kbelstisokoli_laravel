@@ -22,7 +22,7 @@ return [
             ['title' => 'Platby a příspěvky', 'route' => 'member.economy.index', 'icon' => 'heroicon-o-credit-card'],
         ],
         'coach' => [
-            ['title' => 'Týmové přehledy', 'route' => 'member.teams.index', 'icon' => 'heroicon-o-users-group'],
+            ['title' => 'Týmové přehledy', 'route' => 'member.teams.index', 'icon' => 'heroicon-o-user-group'],
         ],
     ],
 
