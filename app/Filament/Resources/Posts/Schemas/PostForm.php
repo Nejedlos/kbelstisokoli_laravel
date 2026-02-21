@@ -7,10 +7,12 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class PostForm
@@ -24,59 +26,77 @@ class PostForm
                         Tabs\Tab::make('Obsah')
                             ->icon('heroicon-o-document-text')
                             ->schema([
-                                TextInput::make('title')
-                                    ->label('Titulek')
-                                    ->required(),
-
-                                TextInput::make('slug')
-                                    ->label('Slug (URL)')
-                                    ->helperText('Vyplňte ručně, nebo použijte vlastní konvenci. Musí být jedinečné.')
-                                    ->required()
-                                    ->unique('posts', 'slug', ignoreRecord: true),
-
-                                Select::make('category_id')
-                                    ->label('Kategorie')
-                                    ->relationship('category', 'name')
-                                    ->searchable()
-                                    ->preload(),
-
-                                Textarea::make('excerpt')
-                                    ->label('Perex (stručný výtah)')
-                                    ->rows(3)
-                                    ->columnSpanFull(),
-
-                                RichEditor::make('content')
-                                    ->label('Obsah článku')
-                                    ->columnSpanFull(),
-                            ]),
-
-                        Tabs\Tab::make('Publikace')
-                            ->icon('heroicon-o-paper-airplane')
-                            ->schema([
-                                Grid::make(2)
+                                Section::make('Základní informace')
                                     ->schema([
-                                        Select::make('status')
-                                            ->label('Stav')
-                                            ->options([
-                                                'draft' => 'Koncept',
-                                                'published' => 'Publikováno',
-                                            ])
-                                            ->default('draft')
+                                        TextInput::make('title')
+                                            ->label('Titulek novinky')
+                                            ->helperText('Hlavní nadpis článku.')
                                             ->required(),
 
-                                        DateTimePicker::make('publish_at')
-                                            ->label('Datum publikace')
-                                            ->native(false),
+                                        TextInput::make('slug')
+                                            ->label('URL adresa (slug)')
+                                            ->helperText('Část URL za lomítkem. Musí být unikátní.')
+                                            ->required()
+                                            ->unique('posts', 'slug', ignoreRecord: true),
+
+                                        Select::make('category_id')
+                                            ->label('Kategorie')
+                                            ->helperText('Vyberte téma novinky pro lepší přehlednost.')
+                                            ->relationship('category', 'name')
+                                            ->searchable()
+                                            ->preload(),
+                                    ])->columns(2),
+
+                                Section::make('Text článku')
+                                    ->schema([
+                                        Textarea::make('excerpt')
+                                            ->label('Perex (stručný výtah)')
+                                            ->helperText('Zobrazuje se v přehledu novinek. Krátký úvod do článku.')
+                                            ->rows(3)
+                                            ->columnSpanFull(),
+
+                                        RichEditor::make('content')
+                                            ->label('Hlavní obsah článku')
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Publikace a média')
+                            ->icon('heroicon-o-paper-airplane')
+                            ->schema([
+                                Section::make('Stav publikace')
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                Select::make('status')
+                                                    ->label('Stav')
+                                                    ->options([
+                                                        'draft' => 'Koncept (skrytý)',
+                                                        'published' => 'Publikováno (veřejné)',
+                                                    ])
+                                                    ->default('draft')
+                                                    ->required(),
+
+                                                DateTimePicker::make('publish_at')
+                                                    ->label('Datum a čas publikace')
+                                                    ->helperText('Pokud nastavíte budoucí datum, článek se zobrazí až v daný čas.')
+                                                    ->native(false),
+                                            ]),
+
+                                        Toggle::make('is_visible')
+                                            ->label('Zobrazit na webu?')
+                                            ->helperText('Globální vypínač viditelnosti.')
+                                            ->default(true),
                                     ]),
 
-                                FileUpload::make('featured_image')
-                                    ->label('Náhledový obrázek')
-                                    ->image()
-                                    ->directory('posts'),
-
-                                \Filament\Forms\Components\Toggle::make('is_visible')
-                                    ->label('Zobrazit na webu?')
-                                    ->default(true),
+                                Section::make('Média')
+                                    ->schema([
+                                        FileUpload::make('featured_image')
+                                            ->label('Hlavní náhledový obrázek')
+                                            ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku.')
+                                            ->image()
+                                            ->directory('posts'),
+                                    ]),
                             ]),
 
                         Tabs\Tab::make('SEO')

@@ -69,8 +69,9 @@ Aplikace je rozdělena do tří hlavních oblastí:
   - `access_admin` (přístup do administrace a vlastních admin rout)
   - `manage_users`, `manage_content`, `manage_teams`, `manage_attendance`
   - `view_member_section` (přístup do členské sekce)
+  - `use_raw_html` (vkládání surového HTML v Page Builderu)
 - **Přiřazení (výchozí skeleton):**
-  - `admin`: všechna oprávnění
+  - `admin`: všechna oprávnění (včetně `use_raw_html`)
   - `editor`: `access_admin`, `manage_content`
   - `coach`: `access_admin`, `manage_teams`, `manage_attendance`, `view_member_section`
   - `player`: `view_member_section`
@@ -83,9 +84,13 @@ Aplikace je rozdělena do tří hlavních oblastí:
   - Member: `routes/member.php` (prefix `/clenska-sekce`, route `member.dashboard`)
   - Admin (custom): `routes/admin.php` (prefix `/admin/custom`, route `admin.custom.dashboard`)
 
-
 ## 7. Page Builder (Blokový systém)
 - Účel: Umožnit správcům sestavovat stránky z předdefinovaných vizuálně konzistentních bloků.
+- **UX pro laiky:** 
+    - Každý blok má nápovědné texty a srozumitelné popisky.
+    - Omezení na předdefinované varianty (styly, rozvržení) zajišťuje branding.
+    - Drag & drop řazení s náhledy (itemLabels) pro snadnou orientaci.
+    - Bezpečnost: Surové HTML je dostupné pouze pro roli Admin s patřičným oprávněním.
 
 ### Technické řešení
 - **Datový model:**
@@ -97,17 +102,17 @@ Aplikace je rozdělena do tří hlavních oblastí:
 - **Centrální registr:** `App\Services\Cms\BlockRegistry` definuje schémata a ikony pro všech 11 typů bloků.
 
 ### Podporované typy bloků
-1. **Hero sekce:** nadpis, podnadpis, CTA, obrázek na pozadí, zarovnání.
-2. **Textový blok:** formátovaný text.
-3. **Obrázek:** s popiskem a alt textem.
-4. **CTA:** výrazná výzva k akci s volitelným stylem.
-5. **Mřížka karet:** opakovatelné položky s ikonou, titulkem a popisem.
-6. **Statistické karty:** číselné údaje pro sportovní/ekonomické výstupy.
-7. **Výpis novinek:** napojení na moduly novinek (limit, kategorie).
-8. **Výpis zápasů:** napojení na moduly zápasů (nadcházející/výsledky).
-9. **Galerie:** mřížka obrázků s reorderem.
-10. **Kontakt / Info:** adresa, kontakty, volitelná mapa.
-11. **Vlastní HTML:** pro embed kódy a pokročilé úpravy (raw HTML).
+1. **Hero sekce:** varianty (standard, centered, minimal), nadpis, podnadpis, CTA, obrázek, zarovnání.
+2. **Textový blok:** formátovaný text (Tiptap/RichEditor).
+3. **Obrázek:** nastavení šířky, popisek, alt text.
+4. **CTA:** styl (primární, sekundární, outline), odkaz.
+5. **Mřížka karet:** volba počtu sloupců (2-4), opakovatelné karty.
+6. **Statistické údaje:** číselné hodnoty s popisky a ikonami.
+7. **Výpis novinek:** nastavení limitu, kategorie a rozvržení (mřížka/seznam).
+8. **Výpis zápasů:** typ (nadcházející/poslední), limit.
+9. **Galerie:** styl (mřížka/masonry), hromadný upload.
+10. **Kontakt / Info:** adresa, kontakty, volitelná interaktivní mapa.
+11. **Vlastní HTML:** módy Safe Embed (všem) vs Raw HTML (pouze admin).
 
 ### Renderování (Frontend)
 - Komponenta `<x-page-blocks :blocks="$page->content" />` prochází pole bloků a inkluduje příslušné Blade šablony z `resources/views/public/blocks/`.

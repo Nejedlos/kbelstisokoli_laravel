@@ -10,6 +10,10 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
 
 class BlockRegistry
 {
@@ -38,21 +42,66 @@ class BlockRegistry
         return Block::make('hero')
             ->label('Hero sekce')
             ->icon('heroicon-o-sparkles')
+            ->itemLabel(fn (array $state): ?string => $state['headline'] ?? 'Hero sekce')
             ->schema([
-                TextInput::make('headline')->label('Hlavní nadpis')->required(),
-                TextInput::make('subheadline')->label('Podnadpis'),
-                TextInput::make('cta_label')->label('Text tlačítka'),
-                TextInput::make('cta_url')->label('URL tlačítka'),
-                FileUpload::make('image')->label('Obrázek na pozadí')->image()->directory('blocks/hero'),
-                Select::make('alignment')
-                    ->label('Zarovnání')
-                    ->options([
-                        'left' => 'Vlevo',
-                        'center' => 'Na střed',
-                        'right' => 'Vpravo',
-                    ])
-                    ->default('center'),
-                Toggle::make('overlay')->label('Tmavý překryv')->default(true),
+                Section::make('Hlavní obsah')
+                    ->schema([
+                        TextInput::make('headline')
+                            ->label('Hlavní nadpis')
+                            ->helperText('Hlavní poutavý nadpis sekce.')
+                            ->required(),
+                        TextInput::make('subheadline')
+                            ->label('Podnadpis')
+                            ->helperText('Doplňující text pod nadpisem.'),
+                    ])->columns(2),
+
+                Section::make('Tlačítko (CTA)')
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('cta_label')
+                                    ->label('Text tlačítka')
+                                    ->placeholder('Zjistit více'),
+                                TextInput::make('cta_url')
+                                    ->label('URL tlačítka')
+                                    ->placeholder('/kontakt nebo https://...'),
+                            ]),
+                    ]),
+
+                Section::make('Vzhled a styl')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('variant')
+                                    ->label('Varianta rozvržení')
+                                    ->options([
+                                        'standard' => 'Standardní (obrazek vpravo)',
+                                        'centered' => 'Vycentrované (pozadí)',
+                                        'minimal' => 'Minimální (bez obrázku)',
+                                    ])
+                                    ->default('standard')
+                                    ->required(),
+                                Select::make('alignment')
+                                    ->label('Zarovnání textu')
+                                    ->options([
+                                        'left' => 'Vlevo',
+                                        'center' => 'Na střed',
+                                        'right' => 'Vpravo',
+                                    ])
+                                    ->default('left'),
+                            ]),
+                        FileUpload::make('image')
+                            ->label('Obrázek / Pozadí')
+                            ->helperText('Doporučený rozměr 1920x1080px pro variantu s pozadím.')
+                            ->image()
+                            ->directory('blocks/hero'),
+                        Toggle::make('overlay')
+                            ->label('Tmavý překryv obrázku')
+                            ->helperText('Zlepší čitelnost textu na světlém obrázku.')
+                            ->default(true),
+                    ]),
             ]);
     }
 
@@ -61,9 +110,11 @@ class BlockRegistry
         return Block::make('rich_text')
             ->label('Textový blok')
             ->icon('heroicon-o-document-text')
+            ->itemLabel(fn (array $state): ?string => strip_tags($state['content'] ?? 'Textový blok'))
             ->schema([
                 RichEditor::make('content')
-                    ->label('Obsah')
+                    ->label('Formátovaný text')
+                    ->helperText('Používejte nadpisy H2 nebo H3 pro strukturu obsahu.')
                     ->required(),
             ]);
     }
@@ -73,10 +124,34 @@ class BlockRegistry
         return Block::make('image')
             ->label('Obrázek')
             ->icon('heroicon-o-photo')
+            ->itemLabel(fn (array $state): ?string => $state['caption'] ?? 'Obrázek')
             ->schema([
-                FileUpload::make('image')->label('Obrázek')->image()->required()->directory('blocks/images'),
-                TextInput::make('caption')->label('Popisek'),
-                TextInput::make('alt')->label('Alt text (pro SEO/čtečky)'),
+                Grid::make(2)
+                    ->schema([
+                        FileUpload::make('image')
+                            ->label('Obrázek')
+                            ->image()
+                            ->required()
+                            ->directory('blocks/images'),
+                        Section::make('Nastavení obrázku')
+                            ->schema([
+                                TextInput::make('caption')
+                                    ->label('Viditelný popisek')
+                                    ->helperText('Zobrazí se pod obrázkem.'),
+                                TextInput::make('alt')
+                                    ->label('Alternativní text (SEO)')
+                                    ->helperText('Popis obrázku pro vyhledávače a nevidomé.'),
+                                Select::make('width_class')
+                                    ->label('Šířka obrázku')
+                                    ->options([
+                                        'max-w-full' => 'Plná šířka obsahu',
+                                        'max-w-4xl' => 'Široký',
+                                        'max-w-2xl' => 'Střední',
+                                        'max-w-md' => 'Malý',
+                                    ])
+                                    ->default('max-w-full'),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -85,18 +160,31 @@ class BlockRegistry
         return Block::make('cta')
             ->label('Výzva k akci (CTA)')
             ->icon('heroicon-o-megaphone')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'CTA blok')
             ->schema([
-                TextInput::make('title')->label('Titulek')->required(),
-                TextInput::make('button_text')->label('Text tlačítka')->required(),
-                TextInput::make('button_url')->label('URL tlačítka')->required(),
-                Select::make('style')
-                    ->label('Styl')
-                    ->options([
-                        'primary' => 'Primární',
-                        'secondary' => 'Sekundární',
-                        'outline' => 'Obrysové',
-                    ])
-                    ->default('primary'),
+                Grid::make(2)
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Titulek')
+                            ->required()
+                            ->columnSpanFull(),
+                        TextInput::make('button_text')
+                            ->label('Text tlačítka')
+                            ->default('Klikněte zde')
+                            ->required(),
+                        TextInput::make('button_url')
+                            ->label('Odkaz (URL)')
+                            ->placeholder('/kontakt')
+                            ->required(),
+                        Select::make('style')
+                            ->label('Vizuální styl')
+                            ->options([
+                                'primary' => 'Klubová červená (Primární)',
+                                'secondary' => 'Tmavá (Sekundární)',
+                                'outline' => 'Obrysové tlačítko',
+                            ])
+                            ->default('primary'),
+                    ]),
             ]);
     }
 
@@ -105,18 +193,41 @@ class BlockRegistry
         return Block::make('cards_grid')
             ->label('Mřížka karet')
             ->icon('heroicon-o-squares-2x2')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Mřížka karet')
             ->schema([
-                TextInput::make('title')->label('Nadpis mřížky'),
+                TextInput::make('title')
+                    ->label('Nadpis celé sekce')
+                    ->placeholder('Naše přednosti'),
+
+                Select::make('columns')
+                    ->label('Počet sloupců')
+                    ->options([
+                        2 => '2 sloupce',
+                        3 => '3 sloupce',
+                        4 => '4 sloupce',
+                    ])
+                    ->default(3),
+
                 Repeater::make('cards')
-                    ->label('Karty')
+                    ->label('Jednotlivé karty')
                     ->schema([
-                        TextInput::make('title')->label('Titulek karty')->required(),
-                        Textarea::make('description')->label('Popis'),
-                        TextInput::make('link')->label('Odkaz'),
-                        FileUpload::make('icon')->label('Ikona/Obrázek')->image(),
+                        TextInput::make('title')
+                            ->label('Titulek karty')
+                            ->required(),
+                        Textarea::make('description')
+                            ->label('Stručný popis')
+                            ->rows(2),
+                        TextInput::make('link')
+                            ->label('Odkaz (volitelně)')
+                            ->placeholder('https://...'),
+                        FileUpload::make('icon')
+                            ->label('Ikona nebo obrázek')
+                            ->image()
+                            ->directory('blocks/cards'),
                     ])
                     ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
                     ->collapsible()
+                    ->collapsed()
                     ->grid(2),
             ]);
     }
@@ -124,17 +235,26 @@ class BlockRegistry
     protected static function getStatsCardsBlock(): Block
     {
         return Block::make('stats_cards')
-            ->label('Statistické karty')
+            ->label('Statistické údaje')
             ->icon('heroicon-o-chart-bar')
+            ->itemLabel(fn (array $state): ?string => 'Statistické údaje (' . count($state['stats'] ?? []) . ')')
             ->schema([
                 Repeater::make('stats')
                     ->label('Statistiky')
                     ->schema([
-                        TextInput::make('value')->label('Hodnota (např. 150)')->required(),
-                        TextInput::make('label')->label('Popisek (např. Členů)')->required(),
-                        TextInput::make('icon')->label('Heroicon name (volitelně)'),
+                        TextInput::make('value')
+                            ->label('Číselná hodnota')
+                            ->placeholder('např. 250')
+                            ->required(),
+                        TextInput::make('label')
+                            ->label('Popisek')
+                            ->placeholder('např. Aktivních hráčů')
+                            ->required(),
+                        TextInput::make('icon')
+                            ->label('Heroicon (název)')
+                            ->placeholder('user-group'),
                     ])
-                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                    ->itemLabel(fn (array $state): ?string => ($state['value'] ?? '') . ' ' . ($state['label'] ?? ''))
                     ->grid(3),
             ]);
     }
@@ -144,14 +264,34 @@ class BlockRegistry
         return Block::make('news_listing')
             ->label('Výpis novinek')
             ->icon('heroicon-o-newspaper')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Výpis novinek')
             ->schema([
-                TextInput::make('title')->label('Nadpis sekce')->default('Aktuality'),
-                TextInput::make('limit')->label('Počet novinek')->numeric()->default(3),
-                // Použijeme model pro získání kategorií, protože Select::relationship nemusí v Builderu fungovat správně při smazání
-                Select::make('category_id')
-                    ->label('Filtrovat podle kategorie')
-                    ->options(\App\Models\PostCategory::pluck('name', 'id'))
-                    ->searchable(),
+                Grid::make(2)
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Nadpis sekce')
+                            ->default('Aktuality'),
+                        Select::make('limit')
+                            ->label('Počet zobrazených položek')
+                            ->options([
+                                3 => '3 novinky',
+                                6 => '6 novinek',
+                                9 => '9 novinek',
+                            ])
+                            ->default(3),
+                        Select::make('category_id')
+                            ->label('Filtrovat podle kategorie')
+                            ->options(\App\Models\PostCategory::pluck('name', 'id'))
+                            ->placeholder('Všechny kategorie')
+                            ->searchable(),
+                        Select::make('layout')
+                            ->label('Rozvržení')
+                            ->options([
+                                'grid' => 'Mřížka',
+                                'list' => 'Seznam pod sebou',
+                            ])
+                            ->default('grid'),
+                    ]),
             ]);
     }
 
@@ -160,16 +300,25 @@ class BlockRegistry
         return Block::make('matches_listing')
             ->label('Výpis zápasů')
             ->icon('heroicon-o-trophy')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Výpis zápasů')
             ->schema([
-                TextInput::make('title')->label('Nadpis sekce')->default('Následující zápasy'),
-                Select::make('type')
-                    ->label('Typ zápasů')
-                    ->options([
-                        'upcoming' => 'Nadcházející',
-                        'latest' => 'Poslední výsledky',
-                    ])
-                    ->default('upcoming'),
-                TextInput::make('limit')->label('Počet zápasů')->numeric()->default(5),
+                Grid::make(3)
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Nadpis sekce')
+                            ->default('Následující zápasy'),
+                        Select::make('type')
+                            ->label('Typ zápasů')
+                            ->options([
+                                'upcoming' => 'Nadcházející',
+                                'latest' => 'Poslední výsledky',
+                            ])
+                            ->default('upcoming'),
+                        TextInput::make('limit')
+                            ->label('Limit')
+                            ->numeric()
+                            ->default(5),
+                    ]),
             ]);
     }
 
@@ -178,14 +327,25 @@ class BlockRegistry
         return Block::make('gallery')
             ->label('Galerie')
             ->icon('heroicon-o-rectangle-group')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Galerie')
             ->schema([
-                TextInput::make('title')->label('Nadpis galerie'),
+                TextInput::make('title')
+                    ->label('Nadpis galerie')
+                    ->placeholder('Fotky z turnaje'),
                 FileUpload::make('images')
-                    ->label('Obrázky')
+                    ->label('Obrázky do galerie')
+                    ->helperText('Můžete nahrát více obrázků najednou a měnit jejich pořadí přetažením.')
                     ->multiple()
                     ->image()
                     ->reorderable()
                     ->directory('blocks/gallery'),
+                Select::make('layout')
+                    ->label('Styl galerie')
+                    ->options([
+                        'grid' => 'Mřížka (stejné čtverce)',
+                        'masonry' => 'Mozaika (původní poměry)',
+                    ])
+                    ->default('grid'),
             ]);
     }
 
@@ -194,26 +354,68 @@ class BlockRegistry
         return Block::make('contact_info')
             ->label('Kontakt / Info')
             ->icon('heroicon-o-information-circle')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Kontakt')
             ->schema([
-                TextInput::make('title')->label('Nadpis')->default('Kontaktujte nás'),
-                Textarea::make('address')->label('Adresa'),
-                TextInput::make('email')->label('Email')->email(),
-                TextInput::make('phone')->label('Telefon'),
-                Toggle::make('show_map')->label('Zobrazit mapu')->default(false),
+                TextInput::make('title')
+                    ->label('Nadpis')
+                    ->default('Kontaktujte nás'),
+                Grid::make(2)
+                    ->schema([
+                        Textarea::make('address')
+                            ->label('Adresa / Sídlo')
+                            ->rows(3),
+                        Grid::make(1)
+                            ->schema([
+                                TextInput::make('email')
+                                    ->label('E-mailová adresa')
+                                    ->email(),
+                                TextInput::make('phone')
+                                    ->label('Telefonní číslo'),
+                            ]),
+                    ]),
+                Toggle::make('show_map')
+                    ->label('Zobrazit interaktivní mapu')
+                    ->default(false),
             ]);
     }
 
     protected static function getCustomHtmlBlock(): Block
     {
+        $canUseRawHtml = auth()->user()?->can('use_raw_html') ?? false;
+
         return Block::make('custom_html')
             ->label('Vlastní HTML / Embed')
             ->icon('heroicon-o-code-bracket')
+            ->itemLabel(fn (array $state): ?string => ($state['mode'] ?? '') === 'raw' ? 'Vlastní HTML (Raw)' : 'Bezpečný Embed')
             ->schema([
-                Textarea::make('html')
-                    ->label('HTML kód')
-                    ->helperText('Zadejte surový HTML kód, skripty nebo embed kódy.')
-                    ->rows(10)
+                Select::make('mode')
+                    ->label('Režim vkládání')
+                    ->options([
+                        'safe' => 'Bezpečný Embed (Iframe, Youtube, Facebook)',
+                        'raw' => 'Surový HTML kód (Pouze pro zkušené)',
+                    ])
+                    ->default('safe')
+                    ->live()
                     ->required(),
+
+                Placeholder::make('raw_warning')
+                    ->label('Upozornění')
+                    ->content(new HtmlString('<span class="text-danger-600 font-bold">Pozor: Surové HTML může rozbít vzhled webu nebo představovat bezpečnostní riziko.</span>'))
+                    ->visible(fn ($get) => $get('mode') === 'raw'),
+
+                Textarea::make('html')
+                    ->label('Kód k vložení')
+                    ->helperText(fn ($get) => $get('mode') === 'raw'
+                        ? 'Zadejte čisté HTML, CSS nebo JS.'
+                        : 'Vložte <iframe> kód nebo URL pro embed.')
+                    ->rows(10)
+                    ->required()
+                    ->disabled(fn ($get) => $get('mode') === 'raw' && !$canUseRawHtml),
+
+                Placeholder::make('permission_denied')
+                    ->label('Přístup odepřen')
+                    ->content(new HtmlString('<span class="text-danger-500">Nemáte oprávnění pro vkládání surového HTML kódu. Kontaktujte administrátora.</span>'))
+                    ->visible(fn ($get) => $get('mode') === 'raw' && !$canUseRawHtml),
             ]);
     }
 }
