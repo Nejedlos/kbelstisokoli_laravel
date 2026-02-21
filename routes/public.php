@@ -35,6 +35,10 @@ Route::name('public.')->middleware(['public.maintenance'])->group(function (): v
     // Tým
     Route::get('/tym', [TeamController::class, 'index'])->name('team.index');
 
+    // Galerie
+    Route::get('/galerie', [\App\Http\Controllers\Public\GalleryController::class, 'index'])->name('galleries.index');
+    Route::get('/galerie/{slug}', [\App\Http\Controllers\Public\GalleryController::class, 'show'])->name('galleries.show');
+
     // Tréninky
     Route::get('/treninky', [TrainingController::class, 'index'])->name('trainings.index');
 

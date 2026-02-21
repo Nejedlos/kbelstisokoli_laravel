@@ -136,11 +136,12 @@ class BlockRegistry
                                     ])
                                     ->default('left'),
                             ]),
-                        FileUpload::make('image')
-                            ->label('Obrázek / Pozadí')
-                            ->helperText('Doporučený rozměr 1920x1080px pro variantu s pozadím.')
-                            ->image()
-                            ->directory('blocks/hero'),
+                        Select::make('media_asset_id')
+                            ->label('Obrázek / Pozadí z knihovny')
+                            ->relationship('mediaAsset', 'title', fn ($query) => $query->where('type', 'image'))
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Vyberte obrázek z centrální knihovny.'),
                         Toggle::make('overlay')
                             ->label('Tmavý překryv obrázku')
                             ->helperText('Zlepší čitelnost textu na světlém obrázku.')
@@ -172,19 +173,17 @@ class BlockRegistry
             ->schema([
                 Grid::make(2)
                     ->schema([
-                        FileUpload::make('image')
-                            ->label('Obrázek')
-                            ->image()
-                            ->required()
-                            ->directory('blocks/images'),
+                        Select::make('media_asset_id')
+                            ->label('Obrázek z knihovny')
+                            ->relationship('mediaAsset', 'title', fn ($query) => $query->where('type', 'image'))
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         Section::make('Nastavení obrázku')
                             ->schema([
                                 TextInput::make('caption')
                                     ->label('Viditelný popisek')
-                                    ->helperText('Zobrazí se pod obrázkem.'),
-                                TextInput::make('alt')
-                                    ->label('Alternativní text (SEO)')
-                                    ->helperText('Popis obrázku pro vyhledávače a nevidomé.'),
+                                    ->helperText('Zobrazí se pod obrázkem. Ponechte prázdné pro použití popisku z knihovny.'),
                                 Select::make('width_class')
                                     ->label('Šířka obrázku')
                                     ->options([
@@ -374,15 +373,15 @@ class BlockRegistry
             ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Galerie')
             ->schema([
                 TextInput::make('title')
-                    ->label('Nadpis galerie')
+                    ->label('Nadpis sekce')
                     ->placeholder('Fotky z turnaje'),
-                FileUpload::make('images')
-                    ->label('Obrázky do galerie')
-                    ->helperText('Můžete nahrát více obrázků najednou a měnit jejich pořadí přetažením.')
-                    ->multiple()
-                    ->image()
-                    ->reorderable()
-                    ->directory('blocks/gallery'),
+                Select::make('gallery_id')
+                    ->label('Vybrat galerii')
+                    ->relationship('gallery', 'title')
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->helperText('Vyberte existující galerii ze systému.'),
                 Select::make('layout')
                     ->label('Styl galerie')
                     ->options([

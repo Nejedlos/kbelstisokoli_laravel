@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.4",
         "filament/filament": "^5.2",
+        "filament/spatie-laravel-media-library-plugin": "^3.2",
         "laravel-lang/lang": "^15.28",
         "laravel/dusk": "^8.3",
         "laravel/envoy": "^2.10",
@@ -42,7 +43,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/brand.php"
+            "app/Helpers/brand.php",
+            "app/Helpers/media.php"
         ]
     },
     "autoload-dev": {

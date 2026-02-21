@@ -1,7 +1,12 @@
+@php
+    $asset = isset($data['media_asset_id']) ? \App\Models\MediaAsset::find($data['media_asset_id']) : null;
+    $imageUrl = $asset ? $asset->getUrl('large') : null;
+@endphp
+
 <section class="block-hero section-padding bg-secondary text-white text-{{ $data['alignment'] ?? 'center' }} relative overflow-hidden">
-    @if($data['image'] ?? null)
+    @if($imageUrl)
         <div class="absolute inset-0 z-0 {{ ($data['overlay'] ?? true) ? 'opacity-50' : '' }}">
-            <img src="{{ asset('storage/' . $data['image']) }}" alt="" class="w-full h-full object-cover">
+            <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover">
         </div>
     @endif
     <div class="container relative z-10">
