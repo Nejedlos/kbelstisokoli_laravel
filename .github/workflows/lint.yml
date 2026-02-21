@@ -14,6 +14,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create required directories
+        run: |
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/testing
+          mkdir -p storage/framework/views
+          chmod -R 775 bootstrap/cache storage/framework
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
