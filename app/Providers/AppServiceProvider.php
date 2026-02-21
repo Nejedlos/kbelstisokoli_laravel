@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\View::composer('layouts.public', function ($view) {
+            $brandingService = app(\App\Services\BrandingService::class);
+            $view->with('branding', $brandingService->getSettings());
+            $view->with('branding_css', $brandingService->getCssVariables());
+        });
     }
 }

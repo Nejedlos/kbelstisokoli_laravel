@@ -312,3 +312,121 @@ php artisan optimize:clear
 2) feat(players): introduce PlayerProfile + team pivot and Filament resources
 3) feat(admin): add user/profile policies, role/permission overview, KPI dashboard
 4) chore: docs for user management, policies, and dashboard
+
+
+## 13. Frontend Design System a Render Pipeline (Public)
+
+Cíl: Vytvořit konzistentní, hypermoderní a sportovní veřejný frontend řízený backendem (global settings + page builder), mobile‑first, bez seed obsahu.
+
+### 13.1 Co bylo vytvořeno / upraveno
+- Design tokens a utility v `resources/css/app.css` (Tailwind CSS v4, `@theme`).
+- Komponenty: `x-header`, `x-footer`, `x-section-heading`, `x-empty-state`.
+- Layout: `resources/views/layouts/public.blade.php` (napojení na branding + navigaci, mobile-first).
+- Renderer bloků: `resources/views/components/page-blocks.blade.php` (respekt `is_visible`, fallback unknown).
+- Úpravy šablon bloků pro konzistenci: `hero`, `cards_grid`, `news_listing`, `matches_listing`, `fallback`.
+- Moderní error pages: `resources/views/errors/{403,404,410}.blade.php` v novém stylu.
+- Branding vrstva: `config/branding.php` + `App\Services\BrandingService` + view composer v `AppServiceProvider`.
+
+### 13.2 Design system (principy, varianty, patterns)
+- Tokens (`@theme`):
+  - Barvy: `--color-primary`, `--color-secondary`, `--color-dark`, `--color-light` (utility např. `bg-primary`, `text-primary`).
+  - Typografie: `--font-sans` (default), `--font-display` pro nadpisy.
+  - Radius, stíny: `--radius-club` (`rounded-club`), `--shadow-club` (`shadow-club`).
+  - Spacing: `--spacing-club` pro sekční odsazení (`.section-padding`).
+- Reusable patterns:
+  - Buttons: `.btn`, `.btn-primary`, `.btn-outline`.
+  - Cards: `.card`, `.card-hover`.
+  - Section heading: `<x-section-heading />` (title, subtitle, align, CTA).
+  - Empty state: `<x-empty-state />` (title, subtitle, CTA, icon).
+
+### 13.3 Render pipeline pro Page Builder bloky
+- Vstup: pole bloků (Filament Builder: `type` + `data`).
+- Renderer: `<x-page-blocks :blocks="$page->content" />` iteruje, respektuje `data.is_visible` a přidává `section-padding`.
+- Pokročilé nastavení (Expert): `custom_id`, `custom_class`, `custom_attributes` – atributy se přenesou do wrapperu bloku.
+- Fallback: `public.blocks.fallback` pro neznámé/nezpracované bloky (bez pádu aplikace).
+
+### 13.4 Napojení na global settings / branding
+- Konfigurace `config/branding.php` (bez seed obsahu), možnost napojit na env proměnné.
+- `BrandingService` poskytuje bezpečné fallbacky; připojeno do `layouts.public` přes View composer (`AppServiceProvider`).
+- Header/Footer komponenty čtou `branding` a `config('navigation.public')`. Sekce se nezobrazí, pokud data chybí.
+
+### 13.5 Fallbacky a chybové/empty stavy
+- Error pages 403/404/410 v novém designu, s rozcestníkem na klíčové sekce.
+- Empty states přes `<x-empty-state />` (žádné novinky, zápasy, atd.).
+- Unknown block fallback s decentní kartou a vysvětlením.
+- Chybějící branding hodnoty nezpůsobí pád – části UI se skryjí.
+
+### 13.6 Jak přidat nový frontend block renderer / komponentu
+1. Přidejte šablonu do `resources/views/public/blocks/{block}.blade.php` a držte se design systemu (container, section-padding, btn/card utilit).
+2. Pokud je to nový typ, zaregistrujte ho v `App\Services\Cms\BlockRegistry` (admin Builder).
+3. Pro společné nadpisy použijte `<x-section-heading />`, pro prázdný stav `<x-empty-state />`.
+4. V případě potřeby doplňte tokeny do `resources/css/app.css` a spusťte build.
+
+### 13.7 Příkazy (npm/composer/artisan)
+```
+# Instalace lehké JS knihovny pro interakce
+npm install alpinejs
+
+# Build assetů (Vite)
+npm run build
+
+# Vyčištění cache (po přidání configu/komponent)
+php artisan optimize:clear
+```
+
+### 13.8 Doporučené commity (conventional commits)
+1. `feat(frontend): introduce Tailwind v4 design tokens and base UI components`
+2. `feat(public): add header/footer layout, page blocks renderer and modern error pages`
+3. `feat(cms): align public block templates with design system and add empty states`
+
+### 13.9 Next step (doporučení)
+- Napojit `Header/Footer` na skutečné menu z DB (resource `Menu` + `menu_items`) s cache vrstvou.
+- Rozšířit renderery zbývajících bloků (rich text, image, CTA, gallery) o varianty a empty states.
+- Přidat lazy‑loading obrázků a `aspect-ratio` helpers (Media Library integrace).
+- (Volitelně) Doplnit vlastní fonty přes Vite a preload.
+
+## 14. Branding Presets a Design Tokens
+Účel: Umožnit snadnou změnu barevného schématu a identity webu bez nutnosti zásahu do kódu.
+
+### 14.1 Theme Preset Architektura
+- Systém podporuje více předdefinovaných témat (např. `club-default`, `dark-arena`, `light-clean`).
+- Konfigurace témat je uložena v `config/branding.php`.
+- Každé téma definuje sadu barev pro brand (navy, blue, red, white) a UI (bg, surface, border, text).
+
+### 14.2 Design Tokens a CSS Proměnné
+- Frontend nevyužívá pevné hex barvy, ale CSS custom properties (např. `--color-brand-red`).
+- Tyto proměnné jsou dynamicky generovány v `BrandingService` na základě aktivního tématu.
+- `layouts.public` obsahuje `<style>` tag s těmito proměnnými v sekci `:root`.
+- `app.css` mapuje Tailwind tokens (`primary`, `secondary`, `bg`, atd.) na tyto CSS proměnné.
+
+### 14.3 Administrace (Branding Settings)
+- Stránka **Branding a vzhled** v sekci Nastavení umožňuje:
+    - Výběr barevného tématu (Presetu).
+    - Nastavení základní identity (názvy, slogany).
+    - Nahrávání log (hlavní a alternativní).
+    - Správu kontaktních údajů a sociálních sítí pro patičku.
+    - Konfiguraci globálního CTA tlačítka.
+- Nastavení jsou ukládána do tabulky `settings` (klíč-hodnota).
+
+### 14.4 Ochrana vizuální konzistence
+- Admin nemůže zadávat libovolné barvy, vybírá pouze z otestovaných presetů.
+- Pokud nastavení v DB chybí, systém automaticky fallbackuje na hodnoty v `config/branding.php`.
+- Cache pro nastavení brandingu se automaticky promazává při uložení změn.
+
+### 14.5 Jak přidat nový preset
+1. V `config/branding.php` přidejte nový klíč do pole `themes`.
+2. Definujte název (`label`) a paletu barev (`colors`).
+3. Nový preset se okamžitě objeví v administraci ve výběru.
+
+### 14.6 Příkazy
+```
+# Migrace pro tabulku nastavení
+php artisan migrate
+# Vyčištění cache po změně brandingu (pokud nebylo provedeno přes admin)
+php artisan optimize:clear
+```
+
+### 14.7 Doporučené commity
+1. `feat(branding): add settings table and theme preset configuration`
+2. `feat(branding): implement BrandingService with dynamic CSS variable generation`
+3. `feat(admin): create BrandingSettings page for easy identity management`

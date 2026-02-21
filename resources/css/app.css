@@ -5,7 +5,101 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+:root {
+    /* Fallbacky pro build a statickou analýzu */
+    --color-brand-navy: #0b1f3a;
+    --color-brand-blue: #2563eb;
+    --color-brand-red: #e11d48;
+    --color-brand-white: #ffffff;
+    --color-ui-bg: #f8fafc;
+    --color-ui-surface: #ffffff;
+    --color-ui-surface-alt: #eef2f7;
+    --color-ui-border: #dce3ec;
+    --color-ui-text: #0f172a;
+    --color-ui-text-muted: #64748b;
+}
+
 @theme {
+    /* Design Tokens - Hypermoderní Sportovní Styl */
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Oswald', 'Inter', sans-serif;
+
+    /* Barvy navázané na Branding Tokens */
+    --color-primary: var(--color-brand-red);
+    --color-secondary: var(--color-brand-navy);
+    --color-accent: var(--color-brand-blue);
+    --color-dark: #020617;
+    --color-light: var(--color-brand-white);
+
+    /* UI barvy z Branding Tokens */
+    --color-bg: var(--color-ui-bg);
+    --color-surface: var(--color-ui-surface);
+    --color-surface-alt: var(--color-ui-surface-alt);
+    --color-border: var(--color-ui-border);
+    --color-text: var(--color-ui-text);
+    --color-text-muted: var(--color-ui-text-muted);
+
+    /* Rozměry a tvary */
+    --radius-club: 0.5rem;
+    --spacing-club: 1.25rem;
+
+    /* Stíny */
+    --shadow-club: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+@layer base {
+    body {
+        @apply bg-bg text-text antialiased font-sans;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-display font-bold uppercase tracking-tight;
+    }
+}
+
+@layer components {
+    .container {
+        @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+    }
+
+    /* Tlačítka */
+    .btn {
+        @apply inline-flex items-center justify-center px-6 py-3 rounded-club font-bold uppercase tracking-wide transition duration-200 cursor-pointer;
+    }
+
+    .btn-primary {
+        @apply bg-primary text-white hover:bg-primary-hover shadow-md hover:shadow-lg;
+    }
+
+    .btn-secondary {
+        @apply bg-secondary text-white hover:bg-dark shadow-md hover:shadow-lg;
+    }
+
+    .btn-outline {
+        @apply border-2 border-primary text-primary hover:bg-primary hover:text-white;
+    }
+
+    /* Karty */
+    .card {
+        @apply bg-white rounded-club shadow-club overflow-hidden border border-slate-100;
+    }
+
+    .card-hover {
+        @apply transition duration-300 hover:shadow-lg hover:-translate-y-1;
+    }
+
+    /* Sekce */
+    .section-padding {
+        @apply py-12 md:py-20;
+    }
+
+    .section-title {
+        @apply text-3xl md:text-4xl lg:text-5xl mb-8 relative inline-block;
+    }
+
+    .section-title::after {
+        content: '';
+        @apply absolute bottom-0 left-0 w-12 h-1 bg-primary;
+    }
 }

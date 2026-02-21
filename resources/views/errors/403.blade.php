@@ -1,27 +1,19 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="min-h-[60vh] flex items-center justify-center px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-    <div class="max-w-max mx-auto">
-        <main class="sm:flex">
-            <p class="text-4xl font-extrabold text-red-600 sm:text-5xl">403</p>
-            <div class="sm:ml-6">
-                <div class="sm:border-l sm:border-gray-200 sm:pl-6">
-                    <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">Přístup odepřen</h1>
-                    <p class="mt-1 text-base text-gray-500 italic">Tady pískáme útočný faul... do této sekce nemáte oprávnění vstoupit.</p>
-                </div>
-                <div class="mt-10 flex space-x-3 sm:border-l sm:border-transparent sm:pl-6">
-                    <a href="{{ route('public.home') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                        Zpět na úvod
-                    </a>
-                    @guest
-                    <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                        Přihlásit se
-                    </a>
-                    @endguest
-                </div>
-            </div>
-        </main>
+<section class="section-padding">
+    <div class="container text-center">
+        <div class="mb-8">
+            <span class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary text-white text-3xl font-bold">403</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold mb-4">Přístup odepřen</h1>
+        <p class="text-slate-600 mb-8">Pro tuto stránku nemáte potřebná oprávnění.</p>
+        <div class="flex flex-wrap gap-3 justify-center">
+            @guest
+                <a href="{{ route('login') }}" class="btn btn-primary">Přihlásit se</a>
+            @endguest
+            <a href="{{ route('public.home') }}" class="btn btn-outline">Domů</a>
+        </div>
     </div>
-</div>
+</section>
 @endsection
