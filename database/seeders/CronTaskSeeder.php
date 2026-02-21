@@ -41,6 +41,13 @@ class CronTaskSeeder extends Seeder
                 'description' => 'Provede promazání starých logů a dočasných souborů.',
                 'priority' => -10,
             ],
+            [
+                'name' => 'Synchronizace financí',
+                'command' => 'finance:sync',
+                'expression' => '0 1 * * *', // Každý den v 1:00
+                'description' => 'Kontroluje splatnost předpisů a aktualizuje jejich statusy.',
+                'priority' => 10,
+            ],
         ];
 
         foreach ($tasks as $task) {

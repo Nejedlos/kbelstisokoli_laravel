@@ -8,7 +8,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;700&family=Oswald:wght@700&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800;900&family=Oswald:wght@400;500;600;700&family=Patrick+Hand&display=swap&subset=latin-ext" rel="stylesheet">
 
     <style>{!! $branding_css !!}</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -17,9 +17,9 @@
         body {
             background-color: var(--color-brand-navy);
             background-image:
-                radial-gradient(circle at 50% -20%, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 70%),
-                radial-gradient(circle at 0% 100%, rgba(var(--color-brand-blue-rgb), 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(var(--color-brand-blue-rgb), 0.15) 0%, transparent 50%);
+                radial-gradient(circle at 50% -20%, rgba(var(--color-primary-rgb, 255, 0, 0), 0.1) 0%, transparent 70%),
+                radial-gradient(circle at 0% 100%, rgba(var(--color-brand-blue-rgb, 59, 130, 246), 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(var(--color-brand-blue-rgb, 59, 130, 246), 0.15) 0%, transparent 50%);
             background-attachment: fixed;
             position: relative;
         }
@@ -36,7 +36,7 @@
         }
 
         .marker-font {
-            font-family: 'Permanent Marker', cursive;
+            font-family: 'Patrick Hand', cursive;
         }
 
         .court-line {
@@ -57,14 +57,14 @@
         .chalk-text {
             fill: white;
             opacity: 0.3;
-            font-family: 'Permanent Marker', cursive;
+            font-family: 'Patrick Hand', cursive;
         }
 
         .chalk-text-primary {
             fill: var(--color-primary);
             opacity: 0.8;
-            font-family: 'Permanent Marker', cursive;
-            filter: drop-shadow(0 0 10px rgba(var(--color-primary-rgb), 0.5));
+            font-family: 'Patrick Hand', cursive;
+            filter: drop-shadow(0 0 10px rgba(var(--color-primary-rgb, 255, 0, 0), 0.5));
         }
 
         @keyframes bounce-slow {
@@ -90,39 +90,50 @@
 
     <!-- Taktické prvky na pozadí -->
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <div class="absolute inset-0 bg-gradient-to-b from-brand-navy via-transparent to-brand-navy z-[1]"></div>
-        <svg class="w-full h-full opacity-60" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+        <!-- Velká červená záře v pozadí - navrácena a vycentrována -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(100vw,80rem)] h-[min(100vw,80rem)] bg-primary/20 blur-[150px] rounded-full opacity-60 z-0"></div>
+
+        <!-- Vertikální stmívání - upraveno pro lepší viditelnost prvků -->
+        <div class="absolute inset-0 bg-gradient-to-b from-brand-navy/80 via-transparent to-brand-navy/80 z-[2]"></div>
+
+        <svg class="w-full h-full opacity-50 z-[1] relative" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
             <!-- Hřiště -->
-            <circle cx="500" cy="500" r="150" class="court-line" style="stroke-opacity: 0.1;" />
-            <line x1="0" y1="500" x2="1000" y2="500" class="court-line" style="stroke-opacity: 0.1;" />
-            <rect x="250" y="0" width="500" height="200" class="court-line" style="stroke-opacity: 0.1;" />
-            <rect x="250" y="800" width="500" height="200" class="court-line" style="stroke-opacity: 0.1;" />
+            <circle cx="500" cy="500" r="150" class="court-line" style="stroke-opacity: 0.08;" />
+            <line x1="0" y1="500" x2="1000" y2="500" class="court-line" style="stroke-opacity: 0.08;" />
+            <rect x="250" y="0" width="500" height="200" class="court-line" style="stroke-opacity: 0.08;" />
+            <rect x="250" y="800" width="500" height="200" class="court-line" style="stroke-opacity: 0.08;" />
 
-            <!-- Taktika (X a O) -->
+            <!-- Taktika (X a O) - Zmenšeno a vycentrováno pro lepší viditelnost na mobilech -->
             <g class="animate-pulse" style="animation-duration: 8s;">
-                <text x="150" y="200" class="chalk-text text-6xl" style="opacity: 0.15;">X</text>
-                <text x="250" y="350" class="chalk-text text-6xl" style="opacity: 0.15;">O</text>
-                <text x="800" y="700" class="chalk-text text-6xl" style="opacity: 0.15;">X</text>
-                <text x="700" y="800" class="chalk-text text-6xl" style="opacity: 0.15;">O</text>
+                <!-- Levá horní skupina -->
+                <g transform="translate(200, 250) scale(0.6)">
+                    <text x="0" y="0" class="chalk-text text-6xl" style="opacity: 0.2;">X</text>
+                    <text x="100" y="120" class="chalk-text text-6xl" style="opacity: 0.2;">O</text>
+                    <path d="M 30 30 Q 70 80 90 110" class="chalk-line" style="opacity: 0.3;" />
+                </g>
 
-                <path d="M 180 220 Q 220 300 240 330" class="chalk-line" style="opacity: 0.2;" />
-                <path d="M 780 720 Q 720 750 710 780" class="chalk-line" style="opacity: 0.2;" />
+                <!-- Pravá dolní skupina -->
+                <g transform="translate(750, 650) scale(0.6)">
+                    <text x="0" y="0" class="chalk-text text-6xl" style="opacity: 0.2;">X</text>
+                    <text x="-100" y="120" class="chalk-text text-6xl" style="opacity: 0.2;">O</text>
+                    <path d="M -30 30 Q -70 80 -90 110" class="chalk-line" style="opacity: 0.3;" />
+                </g>
 
-                <!-- Šipka k cíli -->
-                <path d="M 500 600 Q 550 700 600 750" class="chalk-line" style="stroke: white; opacity: 0.1;" />
-                <text x="620" y="780" class="chalk-text-primary text-4xl" style="opacity: 0.4;">VÍTĚZSTVÍ!</text>
+                <!-- Šipka k cíli - posunuta blíž ke středu -->
+                <g transform="translate(550, 550) scale(0.7)">
+                    <path d="M 0 0 Q 60 100 120 150" class="chalk-line" style="stroke: white; opacity: 0.2;" />
+                    <text x="130" y="180" class="chalk-text-primary text-4xl" style="opacity: 0.6;">VÍTĚZSTVÍ!</text>
+                </g>
             </g>
         </svg>
     </div>
 
     <!-- Hlavní kontejner -->
-    <div class="relative z-10 w-full max-w-5xl px-6 py-12 md:py-24 flex flex-col items-center text-center">
-        <!-- Aura záře za obsahem -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-[600px] bg-primary/10 blur-[140px] rounded-full -z-10 pointer-events-none"></div>
+    <div class="relative z-10 w-full max-w-7xl px-6 py-12 md:py-24 flex flex-col items-center text-center">
 
         <!-- Velký nápis / Stav -->
         <div class="mb-4">
-            <span class="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/20 backdrop-blur-md text-primary font-black uppercase tracking-[0.3em] text-[10px] md:text-xs rounded-full mb-8 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.2)]">
+            <span class="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/20 backdrop-blur-md text-primary font-black uppercase tracking-[0.6em] text-xs rounded-full mb-8 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.2)]">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -131,24 +142,25 @@
             </span>
         </div>
 
-        <div class="relative mb-10 md:mb-16">
-            <h1 class="text-6xl sm:text-7xl md:text-9xl font-black uppercase italic tracking-tighter leading-[0.8] mb-4 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20">
+        <div class="relative max-w-max mx-auto mb-12 md:mb-20 overflow-visible">
+            <h1 class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-12 sm:px-16 md:px-20 lg:px-24 py-4 overflow-visible">
                 TIME<span class="text-primary">-</span>OUT!
             </h1>
-            <div class="absolute -top-4 -right-4 md:-top-8 md:-right-12 animate-bounce-slow">
-                <div class="marker-font text-primary text-lg md:text-3xl lg:text-4xl rotate-12 bg-white px-3 py-1 md:px-5 md:py-2 rounded-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,0.3)] border-2 border-brand-navy">
+            <div class="absolute -top-4 right-2 md:-top-8 md:right-4 lg:right-8 z-20 rotate-12">
+                <div class="marker-font text-primary text-lg md:text-3xl lg:text-4xl bg-white px-3 py-1 md:px-5 md:py-2 rounded-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,0.3)] border-2 border-brand-navy whitespace-nowrap">
                     Lakujeme palubovku!
                 </div>
             </div>
         </div>
 
-        <h2 class="text-2xl md:text-5xl font-black uppercase tracking-tight text-white mb-6 md:mb-10 max-w-3xl balance leading-tight">
-            {{ $title ?? 'Trenér právě kreslí vítěznou taktiku pro náš nový web.' }}
-        </h2>
-
-        <p class="text-lg md:text-2xl text-slate-200 font-medium leading-relaxed mb-12 md:mb-20 max-w-3xl">
-            {{ $text ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!' }}
-        </p>
+        <div class="max-w-5xl mx-auto mb-12 md:mb-24 space-y-8">
+            <h2 class="text-2xl md:text-5xl lg:text-6xl font-black uppercase tracking-[0.14em] text-white balance leading-[1.1] italic opacity-95">
+                {{ $title ?? 'Trenér právě kreslí vítěznou taktiku pro náš nový web.' }}
+            </h2>
+            <p class="text-lg md:text-xl lg:text-2xl text-white leading-[1.6] balance tracking-[0.56em] uppercase opacity-75">
+                {{ $text ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!' }}
+            </p>
+        </div>
 
         <!-- Interaktivní / Vizuální prvek -->
         <div class="relative group cursor-pointer mb-12 md:mb-20">
@@ -174,7 +186,7 @@
         <!-- Akce -->
         <div class="flex flex-col md:flex-row items-stretch md:items-center gap-6 md:gap-16 w-full max-w-lg md:max-w-3xl">
             <div class="flex flex-col items-center flex-1">
-                <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Pro trenéry</div>
+                <div class="text-xs font-black uppercase tracking-[0.6em] text-slate-400 mb-6">Pro trenéry</div>
                 <a href="/admin" class="w-full md:w-auto group/btn relative overflow-hidden bg-primary text-white hover:bg-white hover:text-brand-navy transition-all px-12 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-[0_20px_40px_-15px_rgba(var(--color-primary-rgb),0.5)] hover:shadow-none active:scale-95">
                     <span class="relative z-10 flex items-center justify-center gap-3">
                         Vstup do šatny
@@ -187,7 +199,7 @@
             <div class="hidden md:block w-px h-24 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
 
             <div class="flex flex-col items-center flex-1">
-                <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Sledujte nás</div>
+                <div class="text-xs font-black uppercase tracking-[0.6em] text-slate-400 mb-6">Sledujte nás</div>
                 <div class="flex items-center gap-5 md:gap-8">
                     @if($branding['socials']['facebook'] ?? null)
                         <a href="{{ $branding['socials']['facebook'] }}" target="_blank" class="p-4 bg-white/10 border border-white/20 rounded-2xl text-white hover:text-primary hover:border-primary hover:bg-white transition-all shadow-xl group/social">
@@ -211,7 +223,7 @@
         <div class="container mx-auto flex flex-col items-center">
             <div class="flex items-center gap-4 mb-4">
                 <div class="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div>
-                <div class="text-[10px] font-black uppercase tracking-[0.8em] text-white/30 translate-x-[0.4em]">Waiting for the buzzer</div>
+                <div class="text-xs font-black uppercase tracking-[0.8em] text-white/30 translate-x-[0.4em]">Waiting for the buzzer</div>
             </div>
             <div class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-medium">
                 © {{ date('Y') }} {{ $branding['club_name'] ?? 'Kbelští sokoli' }} • Všechna práva vyhrazena

@@ -40,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 \App\Filament\Widgets\AdminKpiOverview::class,
+                \App\Filament\Widgets\FinanceOverview::class,
                 FilamentInfoWidget::class,
             ])
             ->middleware([

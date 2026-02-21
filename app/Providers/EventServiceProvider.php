@@ -21,6 +21,9 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\RsvpChanged::class => [
             \App\Listeners\SendRsvpNotification::class,
         ],
+        \App\Events\FinanceChargeCreated::class => [
+            \App\Listeners\SendFinanceNotification::class,
+        ],
     ];
 
     /**

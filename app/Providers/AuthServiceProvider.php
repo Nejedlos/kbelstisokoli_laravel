@@ -25,6 +25,9 @@ class AuthServiceProvider extends ServiceProvider
         PlayerProfile::class => PlayerProfilePolicy::class,
         Role::class => RolePolicy::class,
         Permission::class => PermissionPolicy::class,
+        \App\Models\FinanceCharge::class => \App\Policies\FinanceChargePolicy::class,
+        \App\Models\FinancePayment::class => \App\Policies\FinancePaymentPolicy::class,
+        \App\Models\ChargePaymentAllocation::class => \App\Policies\ChargePaymentAllocationPolicy::class,
     ];
 
     /**

@@ -653,3 +653,52 @@ php artisan optimize:clear
 2. `refactor(home): pass branding css variables to maintenance view`
 3. `feat(admin): update maintenance mode defaults and hints in branding settings`
 4. `feat(maintenance): add admin bypass for under construction mode`
+
+## 21. Finance a členské příspěvky
+
+Účel: Evidence členských příspěvků, poplatků za akce a plateb s automatickým párováním a notifikacemi.
+
+### 21.1 Datový model (Trojvrstvá architektura)
+1. **FinanceCharge (Předpisy):** Co má člen zaplatit (částka, splatnost, typ).
+2. **FinancePayment (Platby):** Co bylo skutečně přijato (bankovní převod, hotovost, VS).
+3. **ChargePaymentAllocation (Alokace):** Vazební tabulka, která definuje, kolik z konkrétní platby bylo použito na konkrétní předpis.
+
+Tento přístup umožňuje:
+- Částečné úhrady předpisů.
+- Jednu platbu rozdělit mezi více předpisů (např. sourozenec nebo více poplatků najednou).
+- Sledování přeplatků a historie úhrad.
+
+### 21.2 Statusy a automatizace
+Status předpisu (`FinanceCharge`) je automaticky synchronizován:
+- `draft`: Rozpracovaný, člen ho nevidí.
+- `open`: K úhradě, dosud nic nealokováno.
+- `partially_paid`: Částečně uhrazeno.
+- `paid`: Plně uhrazeno (součet alokací >= celková částka).
+- `overdue`: Po splatnosti (automaticky přepínáno úlohou `finance:sync`).
+- `cancelled`: Zrušeno adminem.
+
+### 21.3 Členská sekce (Economy)
+Členové vidí ve svém portálu pouze položky s příznakem `is_visible_to_member`:
+- KPI karty (Celkem k úhradě, Po splatnosti, Uhrazeno).
+- Seznam otevřených položek s detaily.
+- Historii plateb a plně uhrazených předpisů.
+- Platební instrukce (bankovní účet).
+
+### 21.4 Notifikace
+- **Nová platba:** Při vytvoření předpisu je členovi odeslána notifikace `NewChargeNotification` (in-app + email).
+- **Upomínky:** Systém je připraven na automatické upomínky před splatností (přes `finance:sync` úlohu).
+
+### 21.5 CLI a operace
+```bash
+# Ruční synchronizace statusů a splatnosti
+php artisan finance:sync
+
+# Sledování finančních KPI v administraci
+# (Widget FinanceOverview na dashboardu)
+```
+
+### 21.6 Doporučené commity
+1) feat(finance): implement charges, payments and allocations data model
+2) feat(admin): add finance management resources and allocation system
+3) feat(member): connect economy section to real financial data and summaries
+4) feat(finance): add automated status sync and new charge notifications

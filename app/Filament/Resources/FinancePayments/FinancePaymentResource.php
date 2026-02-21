@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Filament\Resources\FinancePayments;
+
+use App\Filament\Resources\FinancePayments\Pages\CreateFinancePayment;
+use App\Filament\Resources\FinancePayments\Pages\EditFinancePayment;
+use App\Filament\Resources\FinancePayments\Pages\ListFinancePayments;
+use App\Filament\Resources\FinancePayments\Schemas\FinancePaymentForm;
+use App\Filament\Resources\FinancePayments\Tables\FinancePaymentsTable;
+use App\Models\FinancePayment;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+
+class FinancePaymentResource extends Resource
+{
+    protected static ?string $model = FinancePayment::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function form(Schema $schema): Schema
+    {
+        return FinancePaymentForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return FinancePaymentsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\AllocationsRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListFinancePayments::route('/'),
+            'create' => CreateFinancePayment::route('/create'),
+            'edit' => EditFinancePayment::route('/{record}/edit'),
+        ];
+    }
+}
