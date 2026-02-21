@@ -127,3 +127,29 @@ Aplikace je rozdělena do tří hlavních oblastí:
 1. Přidejte metodu a registraci v `App\Services\Cms\BlockRegistry`.
 2. Vytvořte Blade šablonu v `resources/views/public/blocks/{slug}.blade.php`.
 3. Spusťte `npm run build` (pokud měníte styly).
+
+## 8. Sportovní modul
+Účel: Správa sportovních dat oddílu (týmy, zápasy, tréninky, sezóny).
+
+### Datový model (ER)
+- **Seasons (Sezóny):** Název (např. 2024/25), aktivní stav.
+- **Teams (Týmy):** Kategorie (např. U11, Muži), popis, slug.
+- **Opponents (Soupeři):** Název, město, logo.
+- **BasketballMatches (Zápasy):** Vazba na tým, sezónu a soupeře. Pole: datum, místo, skóre, stav (plánováno, odehráno...), domácí/hosté.
+- **Trainings (Tréninky):** Jednotlivé termíny tréninků pro týmy. Příprava na docházku.
+- **Events (Akce):** Klubové akce mimo běžný režim (soustředění, schůze).
+
+### Vztahy
+- `BasketballMatch` patří pod `Team`, `Season` a `Opponent`.
+- `Training` patří pod `Team`.
+- `Team` má mnoho `BasketballMatch` a `Training`.
+
+### Administrace (Filament)
+- Všechny entity jsou dostupné v navigační skupině **Sportovní agenda**.
+- Formuláře jsou optimalizovány pro rychlé zadávání (výběr z číselníků, automatické stavy).
+- Zápasy mají v přehledu barevně odlišené stavy a výsledky.
+
+### Veřejné zobrazení
+- `/zapasy`: Seznam všech zápasů s paginací.
+- `/zapasy/{id}`: Detail zápasu s výsledkem a veřejnou poznámkou.
+- `/treninky`: Přehled tréninkových informací rozdělený podle týmů.
