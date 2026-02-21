@@ -1,0 +1,18 @@
+<section class="block-hero py-20 bg-gray-900 text-white text-{{ $data['alignment'] ?? 'center' }} relative overflow-hidden">
+    @if($data['image'] ?? null)
+        <div class="absolute inset-0 z-0 opacity-50">
+            <img src="{{ asset('storage/' . $data['image']) }}" alt="" class="w-full h-full object-cover">
+        </div>
+    @endif
+    <div class="container mx-auto px-4 relative z-10">
+        <h1 class="text-5xl font-bold mb-4">{{ $data['headline'] }}</h1>
+        @if($data['subheadline'] ?? null)
+            <p class="text-xl mb-8 text-gray-200">{{ $data['subheadline'] }}</p>
+        @endif
+        @if($data['cta_label'] ?? null)
+            <a href="{{ $data['cta_url'] ?? '#' }}" class="inline-block bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-bold transition">
+                {{ $data['cta_label'] }}
+            </a>
+        @endif
+    </div>
+</section>

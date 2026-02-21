@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\Pages\Schemas;
 
 use App\Filament\Forms\CmsForms;
+use App\Services\Cms\BlockRegistry;
+use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
@@ -32,14 +32,12 @@ class PageForm
                                     ->required()
                                     ->unique('pages', 'slug', ignoreRecord: true),
 
-                                Placeholder::make('blocks_notice')
+                                Builder::make('content')
                                     ->label('Obsahové bloky')
-                                    ->content('Plnohodnotný blokový editor bude implementován v dalším kroku. Nyní můžete použít základní editor níže.')
-                                    ->columnSpanFull(),
-
-                                RichEditor::make('content')
-                                    ->label('Obsah stránky (prozatímní)')
-                                    ->columnSpanFull(),
+                                    ->blocks(BlockRegistry::getBlocks())
+                                    ->columnSpanFull()
+                                    ->collapsible()
+                                    ->collapsed(false),
                             ]),
 
                         Tabs\Tab::make('Nastavení')

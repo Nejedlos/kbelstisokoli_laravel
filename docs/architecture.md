@@ -84,30 +84,36 @@ Aplikace je rozdělena do tří hlavních oblastí:
   - Admin (custom): `routes/admin.php` (prefix `/admin/custom`, route `admin.custom.dashboard`)
 
 
-## 6. CMS jádro (Struktura a správa obsahu)
-- Účel: Univerzální backend správa obsahu (stránky, novinky, kategorie, menu) s připravenou SEO vrstvou a publikovacím workflow.
+## 7. Page Builder (Blokový systém)
+- Účel: Umožnit správcům sestavovat stránky z předdefinovaných vizuálně konzistentních bloků.
 
-### Datový model
-- `post_categories`: název, slug (unikátní), popis, `sort_order`.
-- `posts`: `category_id` (nullable), titul, slug (unikátní), `excerpt`, `content` (longtext), `status` (draft/published), `publish_at` (nullable), `featured_image` (string), `is_visible` (bool).
-- `pages`: titul, slug (unikátní), `content` (JSON) – připraveno na bloky, `status` (draft/published), `is_visible` (bool).
-- `menus`: název, `location` (unikátní, nullable).
-- `menu_items`: `menu_id`, `parent_id` (nullable), `label`, `url` (nullable), `route_name` (nullable), `target` (`_self|_blank`), `sort_order`, `is_visible` (bool).
-- `seo_metadatas`: polymorfní SEO pro `Page` a `Post` (trait `HasSeo`).
+### Technické řešení
+- **Datový model:**
+    - `page_blocks`: tabulka pro ukládání bloků (vazba na `page_id`, připravena pro budoucí polymorfní použití).
+    - `pages.content`: JSON sloupec využívaný pro přímou integraci s Filament Builderem.
+- **JS Knihovny:**
+    - `SortableJS`: zajišťuje drag & drop řazení bloků (integrováno ve Filamentu).
+    - `Tiptap`: moderní core pro rich-text editor (připraveno pro budoucí hlubší integraci, aktuálně využit standardní RichEditor).
+- **Centrální registr:** `App\Services\Cms\BlockRegistry` definuje schémata a ikony pro všech 11 typů bloků.
 
-Pozn.: Tagy lze doplnit následně (`tags`, `post_tag` pivot) bez zásahu do jádra.
+### Podporované typy bloků
+1. **Hero sekce:** nadpis, podnadpis, CTA, obrázek na pozadí, zarovnání.
+2. **Textový blok:** formátovaný text.
+3. **Obrázek:** s popiskem a alt textem.
+4. **CTA:** výrazná výzva k akci s volitelným stylem.
+5. **Mřížka karet:** opakovatelné položky s ikonou, titulkem a popisem.
+6. **Statistické karty:** číselné údaje pro sportovní/ekonomické výstupy.
+7. **Výpis novinek:** napojení na moduly novinek (limit, kategorie).
+8. **Výpis zápasů:** napojení na moduly zápasů (nadcházející/výsledky).
+9. **Galerie:** mřížka obrázků s reorderem.
+10. **Kontakt / Info:** adresa, kontakty, volitelná mapa.
+11. **Vlastní HTML:** pro embed kódy a pokročilé úpravy (raw HTML).
 
-### Publikační workflow a viditelnost
-- `status` (draft/published) + `publish_at` (u příspěvků) definují publikovatelnost.
-- `is_visible` umožní rychle dočasně skrýt objekt bez změny obsahu.
-- Řazení: `sort_order` u kategorií a položek menu; příspěvky primárně dle `publish_at`/vytvoření.
+### Renderování (Frontend)
+- Komponenta `<x-page-blocks :blocks="$page->content" />` prochází pole bloků a inkluduje příslušné Blade šablony z `resources/views/public/blocks/`.
+- Každá šablona má přístup k proměnné `$data` obsahující payload bloku.
 
-### Administrace (Filament)
-- Resource: `Pages\PageResource`, `Posts\PostResource`, `PostCategories\PostCategoryResource`, `Menus\MenuResource`.
-- Formuláře: srozumitelné popisky, helper texty pro slug, přepínače viditelnosti, sekce SEO přes `CmsForms::getSeoSection()`.
-- Menu položky: Relation Manager `ItemsRelationManager` s možností řazení (`reorderable('sort_order')`) a parent-child vazbou.
-
-### Rozšiřitelnost
-- Blokový obsah: `pages.content` (JSON) připraven pro Page Builder/Blocks (další prompt).
-- Média: `featured_image` + SEO `og_image` jsou string reference – snadná pozdější integrace Spatie Media Library.
-- Oprávnění: stávající role/permissions (`manage_content`, `access_admin`) – lze připojit k Resource (policies) bez zásahů do schématu.
+### Jak přidat nový typ bloku
+1. Přidejte metodu a registraci v `App\Services\Cms\BlockRegistry`.
+2. Vytvořte Blade šablonu v `resources/views/public/blocks/{slug}.blade.php`.
+3. Spusťte `npm run build` (pokud měníte styly).
