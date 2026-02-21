@@ -106,8 +106,8 @@
     }
 }
 
-/* Font Awesome Pro */
-@import "@fortawesome/fontawesome-pro/css/all.css";
+/* Font Awesome Pro - Lokální (Vendored) */
+@import "../vendor/fontawesome/css/all.min.css";
 
 @layer utilities {
     .auth-gradient {

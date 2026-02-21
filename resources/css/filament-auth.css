@@ -4,8 +4,8 @@
    ==========================================================================
 */
 
-/* Font Awesome Pro integration */
-@import "@fortawesome/fontawesome-pro/css/all.css";
+/* Font Awesome Pro integration - Lokální (Vendored) */
+@import "../vendor/fontawesome/css/all.min.css";
 
 /* Reset a základní pozadí */
 .fi-simple-layout {
