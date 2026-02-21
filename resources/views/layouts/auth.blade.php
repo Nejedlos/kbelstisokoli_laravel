@@ -14,8 +14,18 @@
 
     @stack('head')
 </head>
-<body class="antialiased">
-    @yield('content')
+<body class="antialiased text-white/90">
+    <div class="auth-gradient">
+        <!-- Floating Background Objects -->
+        <div class="floating-objects pointer-events-none">
+            <div class="floating-ball w-64 h-64 top-[-10%] left-[-5%]"></div>
+            <div class="floating-ball w-96 h-96 bottom-[-15%] right-[-10%] opacity-5"></div>
+        </div>
+
+        <div class="w-full max-w-md relative z-10">
+            @yield('content')
+        </div>
+    </div>
 
     @stack('scripts')
 </body>

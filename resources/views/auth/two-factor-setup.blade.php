@@ -1,13 +1,7 @@
 @extends('layouts.auth')
 
 @section('content')
-<div class="w-full max-w-md relative" x-data="{ showHelp: false }">
-    <!-- Floating Background Objects -->
-    <div class="floating-objects pointer-events-none">
-        <div class="floating-ball w-64 h-64 top-[-10%] right-[-5%] bg-primary opacity-10"></div>
-        <div class="floating-ball w-96 h-96 bottom-[-15%] left-[-10%] opacity-5"></div>
-    </div>
-
+<div x-data="{ showHelp: false }">
     <!-- Help Section (Conditional) -->
     <div x-show="showHelp"
          x-transition:enter="transition ease-out duration-300"
@@ -30,21 +24,21 @@
         <div class="glass-card p-10 space-y-8 border-t-2 border-primary/50">
             <div class="space-y-6">
                 <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-[10px] font-black">1</div>
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">1</div>
                     <div>
                         <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Stáhněte si aplikaci</h3>
                         <p class="text-[11px] text-slate-400 leading-relaxed">Nainstalujte si Google Authenticator, Microsoft Authenticator nebo podobnou aplikaci z App Store nebo Google Play.</p>
                     </div>
                 </div>
                 <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-[10px] font-black">2</div>
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">2</div>
                     <div>
                         <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Naskenujte QR kód</h3>
                         <p class="text-[11px] text-slate-400 leading-relaxed">V aplikaci zvolte "Přidat účet" a naskenujte kód, který vidíte na obrazovce.</p>
                     </div>
                 </div>
                 <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-[10px] font-black">3</div>
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">3</div>
                     <div>
                         <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Zadejte kód</h3>
                         <p class="text-[11px] text-slate-400 leading-relaxed">Aplikace začne generovat 6místné kódy. Ten aktuální zadejte do políčka a potvrďte.</p>

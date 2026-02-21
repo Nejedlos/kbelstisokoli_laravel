@@ -1,28 +1,20 @@
 @extends('layouts.auth')
 
 @section('content')
-<div class="auth-gradient">
-    <!-- Floating Background Objects -->
-    <div class="floating-objects">
-        <div class="floating-ball w-64 h-64 top-[-10%] left-[-5%]"></div>
-        <div class="floating-ball w-96 h-96 bottom-[-15%] right-[-10%] opacity-5"></div>
-    </div>
-
-    <div class="w-full max-w-md relative z-10">
-        <!-- Logo/Header -->
-        <div class="text-center mb-12 animate-fade-in-down">
-            @if($branding['logo_path'] ?? null)
-                <div class="w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
-                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
-                </div>
-            @else
-                <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
-                    <i class="fa-duotone fa-light fa-basketball-hoop text-6xl icon-bounce icon-glow"></i>
-                </div>
-            @endif
-            <h1 class="auth-title">Vítejte zpět</h1>
-            <p class="auth-sub tracking-tight">Vstupte na palubovku {{ $branding['club_name'] }}</p>
+<!-- Logo/Header -->
+<div class="text-center mb-12 animate-fade-in-down">
+    @if($branding['logo_path'] ?? null)
+        <div class="w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
+            <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
         </div>
+    @else
+        <div class="w-20 h-20 mx-auto mb-8 text-primary flex items-center justify-center">
+            <i class="fa-duotone fa-light fa-basketball-hoop text-6xl icon-bounce icon-glow"></i>
+        </div>
+    @endif
+    <h1 class="auth-title">Vítejte zpět</h1>
+    <p class="auth-sub tracking-tight">Vstupte na palubovku {{ $branding['club_name'] }}</p>
+</div>
 
         @if (session('status'))
             <div class="glass-card !bg-emerald-500/10 border-emerald-500/30 text-emerald-200 p-6 mb-8 rounded-3xl flex items-center gap-4 animate-fade-in shadow-lg shadow-emerald-500/5">
@@ -114,6 +106,4 @@
                 <div class="h-px w-8 bg-white/5"></div>
             </div>
         </div>
-    </div>
-</div>
 @endsection

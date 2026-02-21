@@ -162,9 +162,33 @@
     .input-with-icon { @apply pl-12 pr-4 py-4; }
     .input-icon { @apply absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 transition-colors; }
 
-    .auth-link { @apply text-xs font-black uppercase tracking-widest text-primary hover:text-white transition-all duration-300; }
-    .auth-title { @apply text-4xl md:text-5xl font-black uppercase tracking-tighter text-white mb-2; font-family: 'Oswald', sans-serif; }
-    .auth-sub { @apply text-slate-400 font-medium italic text-lg; }
+    .auth-title {
+        @apply font-black uppercase tracking-tighter text-white mb-2;
+        font-family: 'Oswald', sans-serif;
+        font-size: 1.25rem !important; /* text-xl */
+        line-height: 1.75rem !important;
+    }
+
+    @media (min-width: 768px) {
+        .auth-title {
+            font-size: 1.5rem !important; /* text-2xl */
+            line-height: 2rem !important;
+        }
+    }
+
+    .auth-sub {
+        @apply font-medium italic;
+        color: rgba(148, 163, 184, 0.8) !important;
+        font-size: 0.75rem !important; /* text-xs */
+        line-height: 1rem !important;
+    }
+
+    @media (min-width: 768px) {
+        .auth-sub {
+            font-size: 0.875rem !important; /* text-sm */
+            line-height: 1.25rem !important;
+        }
+    }
 
     .btn-glow {
         @apply relative overflow-hidden transition-all duration-500;
