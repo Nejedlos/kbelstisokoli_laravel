@@ -39,6 +39,7 @@ class BlockRegistry
             self::getGalleryBlock(),
             self::getContactInfoBlock(),
             self::getCustomHtmlBlock(),
+            self::getStatsTableBlock(),
         ]);
     }
 
@@ -459,6 +460,34 @@ class BlockRegistry
                     ->label('Přístup odepřen')
                     ->content(new HtmlString('<span class="text-danger-500">Nemáte oprávnění pro vkládání surového HTML kódu. Kontaktujte administrátora.</span>'))
                     ->visible(fn ($get) => $get('mode') === 'raw' && !$canUseRawHtml),
+            ]);
+    }
+
+    protected static function getStatsTableBlock(): Block
+    {
+        return Block::make('stats_table')
+            ->label('Statistická tabulka')
+            ->icon('heroicon-o-table-cells')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Statistická tabulka')
+            ->schema([
+                TextInput::make('title')
+                    ->label('Nadpis tabulky')
+                    ->default('Statistiky'),
+                Select::make('statistic_set_id')
+                    ->label('Vyberte sadu statistik')
+                    ->options(\App\Models\StatisticSet::where('status', 'published')->pluck('name', 'id'))
+                    ->searchable()
+                    ->required(),
+                Grid::make(2)
+                    ->schema([
+                        TextInput::make('limit')
+                            ->label('Počet řádků (limit)')
+                            ->numeric()
+                            ->default(10),
+                        Toggle::make('show_link')
+                            ->label('Zobrazit odkaz na detail')
+                            ->default(true),
+                    ]),
             ]);
     }
 }

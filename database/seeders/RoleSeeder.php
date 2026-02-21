@@ -26,6 +26,8 @@ class RoleSeeder extends Seeder
             'view_member_section',
             'use_raw_html',
             'manage_advanced_settings',
+            'manage_stats',
+            'manage_competitions',
         ];
 
         foreach ($permissions as $permission) {
@@ -51,6 +53,8 @@ class RoleSeeder extends Seeder
             'access_admin',
             'manage_teams',
             'manage_attendance',
+            'manage_stats',
+            'manage_competitions',
             'view_member_section',
         ]);
 

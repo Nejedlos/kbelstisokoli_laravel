@@ -54,22 +54,32 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
 - Vždy udržujeme `.env.example` aktuální se všemi klíči (bez citlivých dat).
 - Pro integraci s AI využíváme `OPENAI_*` proměnné.
 
-## 10. Artisan generátory a CLI příkazy
-- **Preference neinteraktivních příkazů:** Při generování kódu přes Laravel/Filament (např. `make:model`, `make:filament-resource`) preferujeme **plně specifikované příkazy**, aby terminál nečekal na doplňující otázky.
-- **Parametry a příznaky:**
-    - Pokud je příkaz standardně interaktivní, použijte příznak `--no-interaction` nebo `-n`.
-    - Všechny potřebné parametry (názvy modelů, labelů, relací, resources) uvádějte přímo v příkazu.
-- **Postup u nevyhnutelně interaktivních příkazů:** Pokud neinteraktivní režim není možný, Junie musí:
-    1. Předem uvést, jaké otázky budou v terminálu položeny.
-    2. Poskytnout přesné odpovědi (text nebo volbu), které mají být použity.
-    3. Vyhnout se řetězení příkazů (batching), pokud by hrozilo zablokování na skrytém dotazu.
-- **Filament specifika:** Preferujte předvídatelné vzorce příkazů a vyhněte se komplexním dávkám, pokud nejsou všechny odpovědi předem známé a zdokumentované.
-- **Dokumentace příkazů:** Na konci každého úkolu, kde byly použity generátory, stručně zaznamenejte použité příkazy (např. v dokumentaci modulu nebo v popisu úkolu).
+## 10. Artisan generátory a CLI příkazy (Non-interactive Workflow)
+Tato sekce definuje povinný postup pro používání generátorů (Laravel, Filament), aby se předešlo zablokování terminálu.
 
-### Best practices pro CLI generování (Příklady)
-- **Laravel:**
-    - Místo `php artisan make:model Product` (které se ptá na migraci/factory) použijte `php artisan make:model Product -mf`.
-- **Filament:**
-    - Místo `php artisan make:filament-resource Product` (které se ptá na model/soft-deletes/view) použijte `php artisan make:filament-resource Product --model=Product --view --soft-deletes`.
-- **Obecné:**
-    - Vždy používejte `--help` k ověření dostupných parametrů před spuštěním, abyste se vyhnuli interaktivitě.
+### 10.1 Základní pravidla
+- **Non-interactive first (povinné):** Vždy preferujte neinteraktivní příkazy. Používejte příznak `--no-interaction` nebo `-n` jako výchozí pro Artisan a Filament příkazy.
+- **Strategie "Generuj minimálně, doplň v kódu":** Pokud generátor vyžaduje dodatečné informace, spusťte nejbezpečnější neinteraktivní verzi (s výchozími hodnotami) a následně kód upravte ručně v PHP třídách. Nepoužívejte interaktivní wizardy.
+- **Zákaz blokujících řetězců:** Nepoužívejte dlouhé řetězce příkazů (`cmd1 && cmd2 && ...`), pokud hrozí interaktivní dotaz. Spouštějte příkazy po jednom nebo v bezpečné, ověřené neinteraktivní sekvenci.
+- **Bezpečnost terminálu:** Nikdy nenechávejte terminál čekat na odpověď. Pokud se příkaz neočekávaně stane interaktivním, okamžitě proces ukončete a zvolte neinteraktivní variantu nebo manuální editaci kódu.
+
+### 10.2 Filament specifika
+- **Resources & Relation Managers:** Pro `make:filament-resource` a `make:filament-relation-manager` vždy používejte `--no-interaction`.
+- **Atributy a Schémata:** Pokud není znám atribut pro titulek (`recordTitleAttribute`), nechte jej prázdný a nastavte jej později přímo v kódu. Schémata formulářů a tabulek (`form()`, `table()`) doplňujte ručně po vygenerování.
+- **Registrace:** Vztahy (Relation Managers) registrujte v metodě `getRelations()` ručně, pokud nebyly přidány automaticky.
+
+### 10.3 Postup (Pre-flight & Post-generation)
+- **Před generováním:** Ověřte názvy modelů a cílových resources. Identifikujte atributy (např. `name`, `title`) pro neinteraktivní parametry.
+- **Po generování:** Proaktivně doplňte chybějící části (labels, registrace managerů, úprava schémat, autorizační vazby/Policies, vyčištění placeholderů).
+
+### 10.4 Dokumentace úkolu
+Na konci každého úkolu, kde byly použity generátory, musí Junie uvést:
+- Přesné použité příkazy (včetně `--no-interaction`).
+- Co bylo v kódu doplněno manuálně po generování.
+- Případná omezení generátoru.
+
+### 10.5 Příklady (Best Practices)
+- **Laravel Model:** `php artisan make:model Product -mf --no-interaction`
+- **Filament Resource:** `php artisan make:filament-resource Product --generate --no-interaction`
+- **Filament Relation Manager:** `php artisan make:filament-relation-manager CategoryResource products name --no-interaction`
+- **Nápověda:** Vždy používejte `--help` k ověření dostupných parametrů před spuštěním.
