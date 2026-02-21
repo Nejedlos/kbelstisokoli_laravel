@@ -33,6 +33,10 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'is_active',
+        'phone',
+        'last_login_at',
+        'admin_note',
     ];
 
     /**
@@ -55,7 +59,25 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Hráčský profil uživatele (volitelný).
+     */
+    public function playerProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PlayerProfile::class);
+    }
+
+    /**
+     * Scope pro aktivní uživatele.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     /**
@@ -63,6 +85,6 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasAnyRole(['admin', 'editor', 'coach']);
+        return $this->is_active && $this->hasAnyRole(['admin', 'editor', 'coach']);
     }
 }

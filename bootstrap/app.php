@@ -25,15 +25,26 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Vlastní middleware skupiny pro přehlednou správu přístupů
         // Pozn.: Skupina 'web' je již aplikována v bootstrappingu rout výše.
+        // alias pro kontrolu aktivního účtu
+        $middleware->alias([
+            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+        ]);
+
         $middleware->group('member', [
             'auth',
             'verified',
+            'active',
             'permission:view_member_section',
         ]);
 
         $middleware->group('admin', [
             'auth',
+            'active',
             'permission:access_admin',
+        ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\RedirectMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -22,4 +22,14 @@ class Team extends Model
     {
         return $this->hasMany(Training::class);
     }
+
+    /**
+     * Hráči v týmu.
+     */
+    public function players(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(PlayerProfile::class, 'player_profile_team')
+            ->withPivot(['role_in_team', 'is_primary_team', 'active_from', 'active_to'])
+            ->withTimestamps();
+    }
 }

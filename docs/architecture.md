@@ -208,3 +208,107 @@ Všechny tyto části mají definované rozhraní (Interfaces) v `app/Services/S
 - `/zapasy`: Seznam všech zápasů s paginací.
 - `/zapasy/{id}`: Detail zápasu s výsledkem a veřejnou poznámkou.
 - `/treninky`: Přehled tréninkových informací rozdělený podle týmů.
+
+
+
+## 11. User management a hráčské profily
+
+Tato sekce popisuje implementaci správy uživatelů, rolí/oprávnění a hráčských profilů v administraci.
+
+### 11.1 Oddělení User vs PlayerProfile
+- User je primární entita pro přihlášení a autorizaci (Fortify + Spatie Permission).
+- PlayerProfile je volitelný 1:1 profil navázaný na User a slouží k evidenci sportovních údajů hráče.
+- Rozšiřitelnost: Lze přidat další typy profilů (např. CoachProfile, GuardianProfile) bez zásahu do jádra.
+
+### 11.2 Datový model
+- users: rozšířeno o `is_active` (bool), `phone` (string), `last_login_at` (timestamp), `admin_note` (text).
+- player_profiles: `user_id` (unique, FK), `jersey_number`, `position` (PG/SG/SF/PF/C), `public_bio`, `private_note`, `is_active`, `metadata` (JSON).
+- player_profile_team (pivot): `player_profile_id`, `team_id`, `role_in_team` (player/captain/assistant), `is_primary_team`, `active_from`, `active_to`.
+
+### 11.3 Vztahy a využití
+- `User -> playerProfile(): hasOne` (volitelné).
+- `PlayerProfile -> teams(): belongsToMany` s pivot atributy pro týmovou roli a období.
+- `Team -> players(): belongsToMany` pro rychlé dotazy.
+
+### 11.4 Admin (Filament) – CRUD a UX
+- UserResource:
+  - Form: jméno, e‑mail, telefon, role (Spatie), heslo (bez povinnosti při editaci), `is_active`, interní poznámka.
+  - Table: jméno, e‑mail, role (badge), aktivita (boolean), indikátor hráčského profilu, poslední přihlášení.
+  - Filtrování: podle rolí, aktivity, existence hráčského profilu.
+  - Bulk akce: Aktivovat/Deaktivovat (autorizováno přes `manage_users`).
+  - RelationManager: `PlayerProfileRelationManager` (správa 1:1 profilu přímo z uživatele).
+- PlayerProfileResource:
+  - Form: výběr uživatele (pouze bez existujícího profilu), dres #, pozice (řízený výběr), bio, interní poznámka, přiřazení týmů (M:N), aktivita.
+  - Table: uživatel, dres, pozice, týmy (badge), aktivita.
+
+### 11.5 Role & Permissions (read‑only přehled)
+- RoleResource (read‑only přehled): název role, počet uživatelů, seznam oprávnění (badge).
+- PermissionResource (read‑only přehled): název oprávnění, přiřazené role.
+- Policies: přístup vázán na `manage_users`; editace rolí/oprávnění povolena pouze roli `admin` (a omezení mazání systémových rolí).
+
+### 11.6 Autorizace a bezpečnost
+- Policies:
+  - `UserPolicy`: všechny operace chráněny oprávněním `manage_users` (view own výjimka).
+  - `PlayerProfilePolicy`: `manage_users` nebo `manage_teams` (trenéři), hráč vidí vlastní profil.
+  - `RolePolicy`/`PermissionPolicy`: read‑only pro `manage_users`, úpravy rolí jen `admin`.
+- Fortify login hook: `Fortify::authenticateUsing(...)` brání přihlášení deaktivovaným účtům.
+- Middleware `active`: aplikován na skupiny `member` a `admin`; při zjištění neaktivního účtu provede odhlášení.
+- `canAccessPanel()`: zohledňuje `is_active` pro přístup do Filament panelu.
+- Listener `UpdateLastLoginAt`: nastaví `last_login_at` po úspěšném loginu.
+
+### 11.7 Admin Dashboard (KPI shell)
+- Widget `App\Filament\Widgets\AdminKpiOverview` zobrazuje karty: uživatelé (celkem/aktivní), hráčské profily, týmy, zápasy (celkem/nadcházející), tréninky (celkem/nadcházející), docházka (placeholder count).
+- Widget je registrován v `AdminPanelProvider` (sekce `->widgets([...])`).
+
+### 11.8 Přístupová pravidla (shrnutí)
+- admin: plná správa users/roles/profiles, přístup na dashboard.
+- coach: správa/čtení hráčských profilů a týmových informací (přes `manage_teams`), bez plné správy users/roles.
+- editor: bez přístupu do user managementu (správa obsahu CMS).
+- player: bez přístupu do admin user managementu; pouze členská sekce.
+- deaktivovaný user: nepřihlásí se (login blokován) a middleware zamezí přístupu.
+
+### 11.9 Napojení na další moduly
+- Docházka/RSVP: vazba přes `users` (uživatel) a týmové členství přes `player_profiles ↔ teams`.
+- Statistiky/Soutěže: použití `player_profiles` a `teams` pro identifikaci účastníků/řádků.
+- Redirecty: Modul pro správu přesměrování (301/302) a legacy URL migraci.
+
+### 11.10 CLI příkazy (neinteraktivní)
+- Migrace a seed oprávnění:
+```
+php artisan migrate
+php artisan db:seed --class=RoleSeeder
+php artisan optimize:clear
+```
+
+## 12. Redirect manager a legacy migrace
+Účel: Správa přesměrování (301/302) ze starého webu na nový a zajištění moderního UX pro chybové stavy.
+
+### 12.1 Datový model
+- `Redirect`: model pro definici přesměrování.
+    - `source_path`: původní cesta (normalizováno s počátečním lomítkem).
+    - `target_type`: `internal` (cesta na webu) nebo `external` (plná URL).
+    - `status_code`: 301 (trvalé) nebo 302 (dočasné).
+    - `match_type`: `exact` (přesná shoda) nebo `prefix` (začíná na).
+    - `hits_count`: statistika využití přesměrování.
+
+### 12.2 Redirect Resolution
+- Logika je implementována v `RedirectMiddleware`, který běží ve `web` skupině.
+- Vyhodnocuje se před standardním routováním Laravelu (nebo jako fallback před 404).
+- Pokud middleware najde aktivní redirect pro aktuální cestu, provede přesměrování s příslušným kódem a inkrementuje statistiku.
+- Obsahuje anti-loop ochranu (zamezení redirectu na stejnou URL).
+
+### 12.3 Chybové stránky (Error UX)
+- Vytvořeny moderní sportovní šablony v `resources/views/errors/`:
+    - `404.blade.php`: Stránka nenalezena s užitečnými odkazy na sekce webu.
+    - `403.blade.php`: Přístup odepřen (sportovní paralela s faulem).
+    - `410.blade.php`: Obsah trvale odstraněn.
+
+### 12.4 Legacy Migrace
+- Připravena služba `App\Services\Cms\RedirectImporter`, která umožňuje hromadný import redirectů z polí/souborů.
+- Podporuje normalizaci cest a detekci externích URL.
+
+### 11.11 Doporučené commity
+1) feat(users): add is_active/phone/last_login_at/admin_note and enforce active login
+2) feat(players): introduce PlayerProfile + team pivot and Filament resources
+3) feat(admin): add user/profile policies, role/permission overview, KPI dashboard
+4) chore: docs for user management, policies, and dashboard
