@@ -13,18 +13,18 @@
     $colors = $branding['colors'];
 @endphp
 
-<style>
-    :root {
-        --color-primary: {{ $colors['red'] ?? '#e11d48' }};
-        --color-primary-hover: {{ $colors['red_hover'] ?? '#be123c' }};
-    }
-</style>
-
-<div class="fi-simple-layout min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-slate-950">
-    {{-- Animované pozadí --}}
-    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-5%] w-[40rem] h-[40rem] bg-rose-600/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div class="absolute bottom-[-15%] right-[-10%] w-[50rem] h-[50rem] bg-blue-600/5 rounded-full blur-[150px]"></div>
+<div class="auth-gradient fi-simple-layout min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+    <style>
+        :root {
+            --color-primary: {{ $colors['red'] ?? '#e11d48' }};
+            --color-primary-hover: {{ $colors['red_hover'] ?? '#be123c' }};
+            --color-brand-red: {{ $colors['red'] ?? '#e11d48' }};
+        }
+    </style>
+    {{-- Background Objects like in 2FA layout --}}
+    <div class="floating-objects pointer-events-none">
+        <div class="floating-ball w-64 h-64 top-[-10%] left-[-5%]"></div>
+        <div class="floating-ball w-96 h-96 bottom-[-15%] right-[-10%] opacity-5"></div>
     </div>
 
     <div class="w-full {{ $maxWidth }} relative z-10">
