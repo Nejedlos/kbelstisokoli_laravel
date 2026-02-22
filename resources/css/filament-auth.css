@@ -112,6 +112,16 @@
     font-weight: 900 !important;
 }
 
+/* Hide existing icons (i, svg) in error messages to prevent duplicates with ::before */
+.fi-fo-field-wrp-error-message i,
+.fi-fo-field-wrp-error-message svg,
+.fi-fo-field-error-message i,
+.fi-fo-field-error-message svg,
+.fi-error-message i,
+.fi-error-message svg {
+    display: none !important;
+}
+
 /* Reset a základní pozadí + token fallbacky */
 html, body {
     margin: 0 !important;
