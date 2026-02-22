@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
 use App\Enums\Gender;
+use Illuminate\Support\HtmlString;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -29,7 +30,7 @@ class UsersTable
         return $table
             ->columns([
                 SpatieMediaLibraryImageColumn::make('avatar')
-                    ->collection('avatars')
+                    ->collection('avatar')
                     ->circular()
                     ->toggleable(),
                 TextColumn::make('name')
@@ -119,7 +120,7 @@ class UsersTable
             ->actions([
                 Action::make('sendInvitation')
                     ->label(__('user.actions.send_invitation'))
-                    ->icon('fa-light fa-paper-plane')
+                    ->icon(new HtmlString('<i class="fa-light fa-paper-plane"></i>'))
                     ->color('info')
                     ->requiresConfirmation()
                     ->action(function ($record) {
@@ -139,13 +140,13 @@ class UsersTable
                     DeleteBulkAction::make(),
                     BulkAction::make('activate')
                         ->label('Aktivovat vybrané')
-                        ->icon('fa-light fa-circle-check')
+                        ->icon(new HtmlString('<i class="fa-light fa-circle-check"></i>'))
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => true])),
                     BulkAction::make('deactivate')
                         ->label('Deaktivovat vybrané')
-                        ->icon('fa-light fa-circle-xmark')
+                        ->icon(new HtmlString('<i class="fa-light fa-circle-xmark"></i>'))
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false])),

@@ -3,7 +3,7 @@
 namespace App\Http\Responses;
 
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
-use Filament\Http\Responses\Auth\Contracts\LoginResponse as FilamentLoginResponseContract;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 

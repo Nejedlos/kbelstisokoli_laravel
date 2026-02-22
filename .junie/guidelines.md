@@ -32,7 +32,13 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
 - Dodržujeme **PSR-12**.
 - Používáme **Laravel Pint** pro formátování kódu (konfigurace v projektu).
 - Typování: Vždy definujeme návratové typy metod a typy parametrů, kde je to možné.
-- Ikony: Používáme **Font Awesome 7 Pro**. Ikony vkládáme pomocí `<i>` tagů s příslušnými třídami ve stylu **Light** (např. `<i class="fa-light fa-basketball"></i>` nebo `<i class="fa-duotone fa-light fa-basketball"></i>`). V celém projektu striktně dodržujeme variantu **Light**.
+- Ikony: Používáme **Font Awesome 7 Pro**.
+    - Na **frontendu** (Blade/Vite) vkládáme ikony standardně pomocí `<i>` tagů (např. `<i class="fa-light fa-basketball"></i>`).
+    - V **administraci (Filament)** nepoužíváme metodu `->icon('fa-light ...')`, protože Filament očekává SVG název pro `blade-icons`, což u FA webfontů selže (`SvgNotFound`).
+    - **Správný postup pro Filament:** Ikony vkládáme "natvrdo" pomocí `HtmlString` do labelu nebo přímo do metody `icon()` (pokud komponenta podporuje `HtmlString`).
+    - **Příklad (Tab/Section):** `Tab::make(new HtmlString('<i class="fa-light fa-user fa-fw mr-1"></i> ' . __('user.tabs.personal')))`
+    - **Příklad (Action):** `Action::make('generate')->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))`
+    - V celém projektu striktně dodržujeme variantu **Light** (`fa-light`).
 - Pojmenování:
     - Modely: Jednotné číslo, PascalCase (např. `Member`).
     - Kontrolery: PascalCase + přípona `Controller` (např. `MemberController`).

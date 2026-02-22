@@ -213,10 +213,10 @@
         </div>
 
         <div class="max-w-5xl mx-auto mb-6 md:mb-8 space-y-4">
-            <h2 class="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-[0.2em] text-white balance leading-[1.3] italic opacity-95">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-[0.05em] text-white balance leading-tight italic opacity-95">
                 {{ $branding['maintenance_title'] }}
             </h2>
-            <p class="text-base md:text-lg lg:text-xl text-white leading-[1.6] balance tracking-[0.15em] md:tracking-[0.45em] uppercase opacity-75">
+            <p class="text-base md:text-lg lg:text-xl text-white leading-relaxed balance tracking-[0.1em] md:tracking-[0.15em] uppercase opacity-70">
                 {{ $branding['maintenance_text'] }}
             </p>
         </div>

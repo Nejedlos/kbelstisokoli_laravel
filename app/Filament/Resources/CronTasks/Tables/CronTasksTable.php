@@ -11,6 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Support\HtmlString;
 
 class CronTasksTable
 {
@@ -58,7 +59,7 @@ class CronTasksTable
             ->recordActions([
                 Action::make('run_now')
                     ->label('Spustit nyní')
-                    ->icon('heroicon-o-play')
+                    ->icon(new HtmlString('<i class="fa-light fa-play"></i>'))
                     ->color('warning')
                     ->requiresConfirmation()
                     ->action(function ($record) {

@@ -35,26 +35,20 @@ class UserForm
     {
         return $schema
             ->components([
-                Grid::make(3)
-                    ->schema([
-                        Grid::make(1)
-                            ->schema([
-                                static::getSummaryCard(),
-                            ])
-                            ->columnSpan(1),
+                static::getSummaryCard()
+                    ->columnSpanFull(),
 
-                        Tabs::make('User Management')
-                            ->tabs([
-                                static::getOverviewTab(),
-                                static::getPersonalTab(),
-                                static::getClubTab(),
-                                static::getPlayerTab(),
-                                static::getSecurityTab(),
-                                static::getAdminTab(),
-                            ])
-                            ->columnSpan(2)
-                            ->persistTabInQueryString(),
-                    ]),
+                Tabs::make('User Management')
+                    ->tabs([
+                        static::getOverviewTab(),
+                        static::getPersonalTab(),
+                        static::getClubTab(),
+                        static::getPlayerTab(),
+                        static::getSecurityTab(),
+                        static::getAdminTab(),
+                    ])
+                    ->columnSpanFull()
+                    ->persistTabInQueryString(),
             ]);
     }
 
@@ -62,55 +56,74 @@ class UserForm
     {
         return Section::make()
             ->schema([
-                SpatieMediaLibraryFileUpload::make('avatar')
-                    ->collection('avatars')
-                    ->avatar()
-                    ->alignCenter()
-                    ->hiddenLabel(),
+                Grid::make([
+                    'default' => 1,
+                    'md' => 12,
+                ])
+                ->schema([
+                    SpatieMediaLibraryFileUpload::make('avatar')
+                        ->collection('avatar')
+                        ->disk('public')
+                        ->avatar()
+                        ->alignLeft()
+                        ->hiddenLabel()
+                        ->imageEditor()
+                        ->columnSpan([
+                            'default' => 1,
+                            'md' => 2,
+                        ]),
 
-                Placeholder::make('member_info')
-                    ->hiddenLabel()
-                    ->content(fn ($record) => $record ? new HtmlString("
-                        <div class='text-center'>
-                            <h2 class='text-xl font-bold'>{$record->name}</h2>
-                            <div class='flex justify-center gap-1 mt-1'>
-                                " . ($record->roles->map(fn($role) => "<span class='px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 rounded-full'>{$role->name}</span>")->implode('')) . "
-                            </div>
-                            <div class='mt-4 flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-400'>
-                                <div class='flex items-center justify-between'>
-                                    <span>" . __('user.fields.club_member_id') . ":</span>
-                                    <span class='font-mono font-bold text-gray-900 dark:text-gray-100'>{$record->club_member_id}</span>
+                    Placeholder::make('member_info')
+                        ->hiddenLabel()
+                        ->content(fn ($record) => new HtmlString("
+                            <div class='py-2'>
+                                <h2 class='text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-tight'>" . ($record?->name ?? 'Nový člen klubu') . "</h2>
+                                " . ($record ? "
+                                <div class='flex flex-wrap gap-1.5 mt-2'>
+                                    " . ($record->roles->map(fn($role) => "
+                                        <span class='px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-950 dark:text-primary-300 dark:border-primary-800 rounded-lg'>
+                                            {$role->name}
+                                        </span>
+                                    ")->implode('')) . "
                                 </div>
-                                <div class='flex items-center justify-between'>
-                                    <span>" . __('user.fields.payment_vs') . ":</span>
-                                    <span class='font-mono font-bold text-primary-600 dark:text-primary-400'>{$record->payment_vs}</span>
-                                </div>
-                            </div>
-                        </div>
-                    ") : ''),
 
-                Grid::make(2)
-                    ->schema([
-                        Placeholder::make('status_badge')
-                            ->label('Status')
-                            ->content(fn($record) => $record?->membership_status?->getLabel() ?? '-'),
-                        Placeholder::make('active_badge')
-                            ->label('Účet')
-                            ->content(fn($record) => $record?->is_active
-                                ? new HtmlString('<span class="text-success-600 font-bold">Aktivní</span>')
-                                : new HtmlString('<span class="text-danger-600 font-bold">Neaktivní</span>')),
-                    ]),
+                                <div class='mt-6 flex flex-wrap gap-x-12 gap-y-4'>
+                                    <div class='flex flex-col'>
+                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>" . __('user.fields.club_member_id') . "</span>
+                                        <span class='font-mono font-black text-gray-900 dark:text-gray-100 text-xl'>{$record->club_member_id}</span>
+                                    </div>
+                                    <div class='flex flex-col'>
+                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>" . __('user.fields.payment_vs') . "</span>
+                                        <span class='font-mono font-black text-primary-600 dark:text-primary-400 text-xl'>{$record->payment_vs}</span>
+                                    </div>
+                                    <div class='flex flex-col'>
+                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>Status</span>
+                                        <span class='font-black text-gray-900 dark:text-white text-xl uppercase'>" . ($record?->membership_status?->getLabel() ?? '-') . "</span>
+                                    </div>
+                                    <div class='flex flex-col'>
+                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>Účet</span>
+                                        " . ($record?->is_active
+                                            ? "<span class='text-success-600 dark:text-success-400 font-black flex items-center gap-1.5 text-xl uppercase'><i class='fa-light fa-circle-check'></i> Aktivní</span>"
+                                            : "<span class='text-danger-600 dark:text-danger-400 font-black flex items-center gap-1.5 text-xl uppercase'><i class='fa-light fa-circle-xmark'></i> Neaktivní</span>") . "
+                                    </div>
+                                </div>
+                                " : "<p class='text-gray-500 dark:text-gray-400 mt-2'>Vyplňte základní údaje pro vytvoření nového člena.</p>") . "
+                            </div>
+                        "))
+                        ->columnSpan([
+                            'default' => 1,
+                            'md' => 10,
+                        ]),
+                ]),
             ]);
     }
 
     protected static function getOverviewTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('user.tabs.overview'))
-            ->icon('fa-light fa-eye')
+        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-eye fa-fw mr-1"></i> ' . __('user.tabs.overview')))
             ->schema([
-                Section::make(__('user.sections.identity'))
+                Section::make(new HtmlString('<i class="fa-light fa-id-card fa-fw mr-1"></i> ' . __('user.sections.identity')))
                     ->description(__('user.sections.identity_desc'))
-                    ->icon('fa-light fa-id-card')
                     ->compact()
                     ->schema([
                         Grid::make(2)
@@ -134,9 +147,8 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(__('user.sections.contact'))
+                Section::make(new HtmlString('<i class="fa-light fa-phone fa-fw mr-1"></i> ' . __('user.sections.contact')))
                     ->description(__('user.sections.contact_desc'))
-                    ->icon('fa-light fa-phone')
                     ->compact()
                     ->schema([
                         Grid::make(2)
@@ -154,8 +166,7 @@ class UserForm
 
     protected static function getPersonalTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('user.tabs.personal'))
-            ->icon('fa-light fa-user')
+        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-user fa-fw mr-1"></i> ' . __('user.tabs.personal')))
             ->schema([
                 Section::make()
                     ->schema([
@@ -181,9 +192,8 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(__('user.sections.address'))
+                Section::make(new HtmlString('<i class="fa-light fa-location-dot fa-fw mr-1"></i> ' . __('user.sections.address')))
                     ->description(__('user.sections.address_desc'))
-                    ->icon('fa-light fa-location-dot')
                     ->compact()
                     ->schema([
                         TextInput::make('address_street')
@@ -204,8 +214,7 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make('Nouzový kontakt')
-                    ->icon('fa-light fa-truck-medical')
+                Section::make(new HtmlString('<i class="fa-light fa-truck-medical fa-fw mr-1"></i> Nouzový kontakt'))
                     ->compact()
                     ->schema([
                         Grid::make(2)
@@ -222,12 +231,10 @@ class UserForm
 
     protected static function getClubTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('user.tabs.club'))
-            ->icon('fa-light fa-shield-halved')
+        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-building-columns fa-fw mr-1"></i> ' . __('user.tabs.club')))
             ->schema([
-                Section::make(__('user.sections.membership'))
+                Section::make(new HtmlString('<i class="fa-light fa-id-badge fa-fw mr-1"></i> ' . __('user.sections.membership')))
                     ->description(__('user.sections.membership_desc'))
-                    ->icon('fa-light fa-id-badge')
                     ->schema([
                         Grid::make(2)
                             ->schema([
@@ -236,7 +243,7 @@ class UserForm
                                     ->unique(ignoreRecord: true)
                                     ->suffixAction(
                                         Action::make('generate_id')
-                                            ->icon('fa-light fa-arrows-rotate')
+                                            ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                                             ->action(function ($set) {
                                                 $set('club_member_id', app(ClubIdentifierService::class)->generateClubMemberId());
                                             })
@@ -261,9 +268,8 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(__('user.sections.payments'))
+                Section::make(new HtmlString('<i class="fa-light fa-money-bill-transfer fa-fw mr-1"></i> ' . __('user.sections.payments')))
                     ->description(__('user.sections.payments_desc'))
-                    ->icon('fa-light fa-money-bill-transfer')
                     ->schema([
                         Grid::make(2)
                             ->schema([
@@ -272,7 +278,7 @@ class UserForm
                                     ->unique(ignoreRecord: true)
                                     ->suffixAction(
                                         Action::make('generate_vs')
-                                            ->icon('fa-light fa-arrows-rotate')
+                                            ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                                             ->action(function ($set) {
                                                 $set('payment_vs', app(ClubIdentifierService::class)->generatePaymentVs());
                                             })
@@ -293,8 +299,7 @@ class UserForm
 
     protected static function getPlayerTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('user.tabs.player'))
-            ->icon('fa-light fa-basketball')
+        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-basketball fa-fw mr-1"></i> ' . __('user.tabs.player')))
             ->schema([
                 Grid::make(1)
                     ->schema([
@@ -308,7 +313,7 @@ class UserForm
 
                         Grid::make(1)
                             ->schema([
-                                Section::make(__('user.sections.basketball'))
+                                Section::make(new HtmlString('<i class="fa-light fa-basketball fa-fw mr-1"></i> ' . __('user.sections.basketball')))
                                     ->description(__('user.sections.basketball_desc'))
                                     ->relationship('playerProfile')
                                     ->schema([
@@ -342,7 +347,7 @@ class UserForm
                                             ->native(false),
                                     ]),
 
-                                Section::make(__('user.sections.physical'))
+                                Section::make(new HtmlString('<i class="fa-light fa-weight-scale fa-fw mr-1"></i> ' . __('user.sections.physical')))
                                     ->description(__('user.sections.physical_desc'))
                                     ->relationship('playerProfile')
                                     ->schema([
@@ -365,7 +370,7 @@ class UserForm
                                             ]),
                                     ]),
 
-                                Section::make(__('user.sections.internal'))
+                                Section::make(new HtmlString('<i class="fa-light fa-comment-medical fa-fw mr-1"></i> ' . __('user.sections.internal')))
                                     ->description(__('user.sections.internal_desc'))
                                     ->relationship('playerProfile')
                                     ->collapsed()
@@ -385,10 +390,9 @@ class UserForm
 
     protected static function getSecurityTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('user.tabs.security'))
-            ->icon('fa-light fa-shield-check')
+        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-shield-check fa-fw mr-1"></i> ' . __('user.tabs.security')))
             ->schema([
-                Section::make(__('user.sections.security_password'))
+                Section::make(new HtmlString('<i class="fa-light fa-lock fa-fw mr-1"></i> ' . __('user.sections.security_password')))
                     ->description('Správa přístupových údajů.')
                     ->schema([
                         Grid::make(2)
@@ -407,8 +411,7 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(__('user.sections.security_2fa'))
-                    ->icon('fa-light fa-key')
+                Section::make(new HtmlString('<i class="fa-light fa-key fa-fw mr-1"></i> ' . __('user.sections.security_2fa')))
                     ->description('Zabezpečení účtu pomocí druhého faktoru.')
                     ->aside()
                     ->schema([
@@ -427,7 +430,7 @@ class UserForm
                     ->headerActions([
                         Action::make('disable_2fa')
                             ->label(__('user.actions.reset_2fa'))
-                            ->icon('fa-light fa-trash-can')
+                            ->icon(new HtmlString('<i class="fa-light fa-trash-can"></i>'))
                             ->color('danger')
                             ->requiresConfirmation()
                             ->action(function ($record) {
@@ -450,10 +453,9 @@ class UserForm
 
     protected static function getAdminTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('user.tabs.admin'))
-            ->icon('fa-light fa-gears')
+        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-user-gear fa-fw mr-1"></i> ' . __('user.tabs.admin')))
             ->schema([
-                Section::make(__('user.sections.internal'))
+                Section::make(new HtmlString('<i class="fa-light fa-gears fa-fw mr-1"></i> ' . __('user.sections.internal')))
                     ->schema([
                         Select::make('roles')
                             ->label('Role uživatele')
@@ -466,7 +468,7 @@ class UserForm
                             ->rows(5),
                     ]),
 
-                Section::make('Audit')
+                Section::make(new HtmlString('<i class="fa-light fa-clock-rotate-left fa-fw mr-1"></i> Audit'))
                     ->compact()
                     ->schema([
                         Grid::make(3)

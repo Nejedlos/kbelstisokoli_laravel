@@ -45,6 +45,19 @@
                 </span>
             </button>
 
+            <div class="flex items-center justify-center">
+                <label class="flex items-center gap-3 cursor-pointer group/rem">
+                    <div class="relative flex items-center">
+                        <input type="checkbox" name="remember_device" value="1" class="peer sr-only">
+                        <div class="w-5 h-5 border-2 border-white/20 rounded-md bg-white/5 peer-checked:bg-primary peer-checked:border-primary transition-all duration-300"></div>
+                        <i class="fa-solid fa-check absolute text-[10px] text-white opacity-0 peer-checked:opacity-100 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity pointer-events-none"></i>
+                    </div>
+                    <span class="text-[11px] font-black uppercase tracking-widest text-white/50 group-hover/rem:text-white/80 transition-colors">
+                        {{ __('Zapamatovat si toto zařízení na 30 dní') }}
+                    </span>
+                </label>
+            </div>
+
             <div class="text-center pt-2">
                 <button type="button" class="fi-link flex items-center justify-center gap-2 mx-auto"
                         x-show="!recovery" @click="recovery = true; $nextTick(() => { document.getElementById('recovery_code')?.focus() })">

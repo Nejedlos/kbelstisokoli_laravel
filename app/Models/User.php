@@ -19,6 +19,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class User extends Authenticatable implements FilamentUser, HasMedia
 {
@@ -185,6 +186,15 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_active && $this->hasAnyRole(['admin', 'editor', 'coach']);
+    }
+
+    /**
+     * Registrace media kolekcí.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')
+            ->singleFile();
     }
 
     /**

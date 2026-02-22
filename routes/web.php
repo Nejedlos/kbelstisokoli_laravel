@@ -18,6 +18,11 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('web')
     ->name('logout');
 
+// Možnost odhlášení přes admin URL (i přes GET pro pohodlí)
+Route::match(['get', 'post'], '/admin/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware('web')
+    ->name('admin.logout');
+
 // Webový trigger pro cron/scheduler
 Route::get('/system/cron/run', [\App\Http\Controllers\System\CronController::class, 'run'])->name('system.cron.run');
 

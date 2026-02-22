@@ -44,10 +44,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // Vložíme vlastní assety a CSS variables do <head> přes render hook
+            // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
             ->renderHook('panels::head.end', fn (): string => Blade::render(
-                "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>" .
-                "@vite(['resources/css/filament-auth.css', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])"
+                "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>"
             ))
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
@@ -93,6 +92,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 '2fa.required',
+                '2fa.timeout',
             ]);
     }
 }

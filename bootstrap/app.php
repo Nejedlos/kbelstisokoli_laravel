@@ -49,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'public.maintenance' => \App\Http\Middleware\PublicMaintenanceMiddleware::class,
             '2fa.required' => \App\Http\Middleware\EnsureTwoFactorEnabled::class,
+            '2fa.timeout' => \App\Http\Middleware\CheckTwoFactorTimeout::class,
             'minify.html' => \App\Http\Middleware\MinifyHtmlMiddleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
@@ -70,6 +71,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth',
             'active',
             '2fa.required',
+            '2fa.timeout',
             'permission:access_admin',
         ]);
 

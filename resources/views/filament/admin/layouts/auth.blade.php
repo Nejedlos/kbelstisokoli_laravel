@@ -36,6 +36,7 @@
             background-size: cover !important;
         "
     >
+        @vite(['resources/css/filament-auth.css', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
         {{-- Background Elements (Tactical & Atmospheric) --}}
         <div class="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
             {{-- Noise Texture --}}

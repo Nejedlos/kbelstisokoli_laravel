@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Action;
+use Illuminate\Support\HtmlString;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
@@ -62,7 +63,7 @@ class CronLogsTable
             ->recordActions([
                 Action::make('view_output')
                     ->label('Zobrazit výstup')
-                    ->icon('heroicon-o-eye')
+                    ->icon(new HtmlString('<i class="fa-light fa-eye"></i>'))
                     ->modalHeading('Výstup úlohy')
                     ->modalContent(fn ($record) => view('filament.components.cron-output', ['record' => $record]))
                     ->modalSubmitAction(false),
