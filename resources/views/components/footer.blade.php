@@ -5,7 +5,7 @@
     $clubNav = $footerClubMenu ?? [];
 @endphp
 
-<footer class="bg-secondary text-slate-300 relative overflow-hidden mt-12 md:mt-20">
+<footer class="bg-secondary pt-6 text-slate-300 relative overflow-hidden">
     {{-- Accent line --}}
     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
 
@@ -181,24 +181,45 @@
     </div>
 
     {{-- Bottom Bar --}}
-    <div class="bg-black/30 border-t border-white/5 text-slate-500 text-xs md:text-sm">
-        <div class="container py-8 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="bg-black/40 border-t border-white/5 text-slate-500 text-xs md:text-sm">
+        <div class="container py-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="text-center md:text-left">
-                <div class="font-bold text-slate-400 mb-1">
+                <div class="font-bold text-slate-300 mb-2 uppercase tracking-tight">
                     {{ brand_text($branding['footer_text'] ?? ('© ' . date('Y') . ' ' . __('footer.brand_title'))) }}
                 </div>
-                <div class="flex items-center justify-center md:justify-start gap-2">
-                    <span class="w-3 h-px bg-slate-700"></span>
-                    <span>{{ __('footer.bottom_part_of') }}</span>
+                <div class="flex items-center justify-center md:justify-start gap-4">
+                    <div class="w-10 h-px bg-primary/30"></div>
+                    <span class="uppercase tracking-[0.2em] text-[10px] font-black text-slate-500">
+                        {{ __('footer.bottom_part_of') }}
+                    </span>
                 </div>
             </div>
 
-            <div class="flex flex-wrap justify-center gap-x-8 gap-y-3">
-                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-colors uppercase tracking-widest text-[10px] font-black">{{ __('Kontakt') }}</a>
-                <a href="{{ route('login') }}" class="hover:text-primary transition-colors uppercase tracking-widest text-[10px] font-black">{{ __('Členská sekce') }}</a>
-                <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-colors uppercase tracking-widest text-[10px] font-black flex items-center">
+            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-4">
+                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-all uppercase tracking-[0.15em] text-[10px] font-black group flex items-center">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    {{ __('Kontakt') }}
+                </a>
+
+                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+
+                <a href="{{ route('login') }}" class="hover:text-primary transition-all uppercase tracking-[0.15em] text-[10px] font-black group flex items-center">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    {!! str_replace(' ', '&nbsp;', __('Členská sekce')) !!}
+                </a>
+
+                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+
+                <a href="#" class="hover:text-primary transition-all uppercase tracking-[0.15em] text-[10px] font-black group flex items-center">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    {{ __('Ochrana soukromí') }}
+                </a>
+
+                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+
+                <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-all uppercase tracking-[0.15em] text-[10px] font-black flex items-center group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:bg-primary/10 hover:border-primary/20">
                     {{ __('Hlavní oddíl') }}
-                    <i class="fa-light fa-arrow-up-right ml-1.5 text-[8px]"></i>
+                    <i class="fa-light fa-arrow-up-right ml-2 text-[8px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 text-primary"></i>
                 </a>
             </div>
         </div>
