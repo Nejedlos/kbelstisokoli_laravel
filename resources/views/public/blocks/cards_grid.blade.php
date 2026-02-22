@@ -59,7 +59,7 @@
                             </p>
 
                             @if(($card['link'] ?? null) || ($card['secondary_link'] ?? null))
-                                <div class="mt-auto flex flex-wrap gap-x-6 gap-y-4 items-center">
+                                <div class="mt-auto flex flex-wrap gap-x-12 sm:gap-x-16 gap-y-4 items-center">
                                     @if($card['link'] ?? null)
                                         <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest-responsive text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1">
                                             <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
@@ -68,7 +68,7 @@
                                     @endif
 
                                     @if($card['secondary_link'] ?? null)
-                                        <a href="{{ $card['secondary_link'] }}" class="text-[10px] font-bold uppercase tracking-widest-responsive text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1">
+                                        <a href="{{ $card['secondary_link'] }}" class="text-[10px] font-bold uppercase tracking-widest-responsive text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1 ml-auto sm:ml-0">
                                             {{ $card['secondary_link_label'] ?? 'Program' }}
                                         </a>
                                     @endif
