@@ -19,6 +19,11 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('web')
     ->name('logout');
 
+// Změna jazyka (moderní přístup přes session)
+Route::get('/language/{lang}', \App\Http\Controllers\Public\LanguageController::class)
+    ->middleware('web')
+    ->name('language.switch');
+
 // Možnost odhlášení přes admin URL (i přes GET pro pohodlí)
 Route::match(['get', 'post'], '/admin/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('web')

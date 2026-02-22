@@ -17,15 +17,6 @@ class SetLocaleMiddleware
     {
         $locale = session('locale', $request->cookie('filament_language_switch_locale', config('app.locale')));
 
-        if ($request->has('lang')) {
-            $newLocale = $request->get('lang');
-            if (in_array($newLocale, ['cs', 'en'])) {
-                $locale = $newLocale;
-                session(['locale' => $locale]);
-                cookie()->queue(cookie()->forever('filament_language_switch_locale', $locale));
-            }
-        }
-
         app()->setLocale($locale);
 
         return $next($request);

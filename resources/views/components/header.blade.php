@@ -34,11 +34,11 @@
 
             <!-- Language Switcher -->
             <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full text-[10px] font-black tracking-widest shadow-sm border border-slate-200">
-                <a href="{{ request()->fullUrlWithQuery(['lang' => 'cs']) }}"
+                <a href="{{ route('language.switch', ['lang' => 'cs']) }}"
                    class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
                     CZ
                 </a>
-                <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
+                <a href="{{ route('language.switch', ['lang' => 'en']) }}"
                    class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
                     EN
                 </a>

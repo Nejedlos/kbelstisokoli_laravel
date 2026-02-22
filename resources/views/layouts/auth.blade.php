@@ -99,10 +99,10 @@
             <!-- Jazykový přepínač -->
             <div class="fixed top-0 right-0 z-[9999] p-4 md:p-6">
                 <div class="flex items-center gap-1 p-1 bg-white/10 border border-white/20 backdrop-blur-xl rounded-full shadow-2xl">
-                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'cs']) }}"
+                    <a href="{{ route('language.switch', ['lang' => 'cs']) }}"
                        class="px-5 py-3 md:px-4 md:py-2 rounded-full text-[11px] md:text-xs font-black uppercase tracking-widest transition-all {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/20' }}"
                        aria-label="Čeština">CZ</a>
-                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
+                    <a href="{{ route('language.switch', ['lang' => 'en']) }}"
                        class="px-5 py-3 md:px-4 md:py-2 rounded-full text-[11px] md:text-xs font-black uppercase tracking-widest transition-all {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/20' }}"
                        aria-label="English">EN</a>
                 </div>
