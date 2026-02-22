@@ -2,6 +2,16 @@
 
 Tento dokument popisuje, jak správně spravovat a nasazovat CSS a JavaScriptové assety v projektu Kbelští sokoli.
 
+> DŮLEŽITÉ – ZLATÉ PRAVIDLO (PO KAŽDÉ ÚPRAVĚ VZHLEDU)
+>
+> Po jakékoliv změně souborů CSS/JS (úprava stylů, přidání třídy, změna skriptu, nový import atd.) MUSÍTE spustit:
+>
+> ```bash
+> npm run build
+> ```
+>
+> Jinak se změny v prohlížeči NEPROJEVÍ (Vite manifest nebude aktualizován) a může docházet k chybám typu `ViteException` nebo „stránka vypadá stejně“. Platí to i pro úpravy souboru `resources/css/filament-auth.css` a jakékoliv assety načítané ve Filamentu.
+
 ## 1. Vite Konfigurace
 Všechny hlavní vstupní body pro CSS a JS musí být definovány v souboru `vite.config.js`. Pokud přidáte nový samostatný soubor, který chcete vkládat přes `@vite`, musíte ho přidat do pole `input`:
 
@@ -50,6 +60,12 @@ Když přidáte nový soubor do `vite.config.js`, **vždy** musíte spustit buil
 ```bash
 npm run build
 ```
+
+### 4.1 Rychlý checklist po změně vzhledu
+- [ ] Uložil/a jsem změny v CSS/JS (včetně `filament-auth.css`)?
+- [ ] Spustil/a jsem `npm run build`?
+- [ ] Provedl/a jsem „tvrdý refresh“ v prohlížeči (Cmd/Ctrl + Shift + R)?
+- [ ] V případě přetrvávajících potíží: `php artisan view:clear` a `php artisan filament:clear-cached-components`.
 
 ## 5. Časté problémy
 - **ViteException (Manifest):** Znamená, že soubor v manifestu chybí. Spusťte `npm run build`.

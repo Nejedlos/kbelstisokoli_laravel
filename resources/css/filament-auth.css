@@ -81,17 +81,20 @@
     --color-brand-red-rgb: 225, 29, 72;
     --color-brand-red-hover: #be123c;
     --color-ui-bg: #f8fafc;
-    --glass-bg: rgba(255, 255, 255, 0.75);
+    /* Světlejší skleněný povrch pro lepší kontrast na světlejším pozadí */
+    --glass-bg: rgba(255, 255, 255, 0.85);
     --glass-border: rgba(255, 255, 255, 0.5);
     --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
-    background-color: #020617 !important;
+    /* Výrazně světlejší fallback varianta gradientu */
+    background-color: #0f172a !important;
     background-image:
-        radial-gradient(circle at 50% -20%, rgba(var(--color-brand-red-rgb, 225, 29, 72), 0.25) 0%, transparent 50%),
-        radial-gradient(circle at 0% 100%, rgba(var(--color-brand-navy-rgb, 11, 31, 58), 0.6) 0%, transparent 60%),
-        radial-gradient(circle at 100% 100%, rgba(var(--color-brand-blue-rgb, 37, 99, 235), 0.2) 0%, transparent 60%) !important;
+        radial-gradient(circle at 50% -20%, rgba(var(--color-brand-red-rgb, 225, 29, 72), 0.35) 0%, transparent 55%),
+        radial-gradient(circle at 0% 100%, rgba(var(--color-brand-navy-rgb, 11, 31, 58), 0.28) 0%, transparent 65%),
+        radial-gradient(circle at 100% 100%, rgba(var(--color-brand-blue-rgb, 37, 99, 235), 0.24) 0%, transparent 65%),
+        radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.10) 0%, transparent 60%) !important;
     background-attachment: fixed !important;
     min-height: 100vh !important;
     font-family: 'Instrument Sans', sans-serif !important;
@@ -171,7 +174,7 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 /* Background Icon instead of square button */
 .auth-header-visual {
     position: relative;
-    height: 6.5rem; /* více prostoru pro ikonu nad H1 */
+    height: clamp(3rem, 12vw, 6.5rem); /* responzivní výška ikony nad H1 */
 }
 
 .auth-icon-bg {
@@ -179,10 +182,10 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%) rotate(-12deg);
-    font-size: 7rem;
+    font-size: clamp(3.5rem, 14vw, 7rem);
     line-height: 1;
     color: var(--color-brand-red);
-    opacity: 0.12;
+    opacity: 0.2;
     filter: drop-shadow(0 5px 20px rgba(0,0,0,0.25));
     pointer-events: none;
     z-index: 0; /* ikona je opravdu na pozadí */
@@ -305,4 +308,12 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 
 .fi-input-wrp-action:hover {
     color: #64748b !important;
+}
+
+/* Responsivní zúžení a padding karty na mobilu */
+@media (max-width: 640px) {
+    .fi-simple-main, .glass-card {
+        padding: 1.5rem !important;
+        border-radius: 1.25rem !important;
+    }
 }

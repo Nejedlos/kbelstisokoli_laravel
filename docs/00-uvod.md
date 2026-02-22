@@ -2,6 +2,10 @@
 
 Vítejte v technické dokumentaci projektu Kbelští sokoli. Tato složka obsahuje detailní popis modulů, funkcionalit a technických specifikací celého systému.
 
+> DŮLEŽITÉ UPOZORNĚNÍ K ASSETŮM
+>
+> Po KAŽDÉ úpravě vzhledu (změna CSS/JS) je nutné spustit `npm run build`, jinak se změny neprojeví. Podrobnosti viz kapitola „06. Správa assetů (Vite, CSS, JS)“.
+
 ## Zdrojový kód (GitHub)
 Repozitář: [https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.com/Nejedlos/kbelstisokoli_laravel)
 

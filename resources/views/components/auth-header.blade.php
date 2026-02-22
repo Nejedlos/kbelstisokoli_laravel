@@ -10,10 +10,10 @@
     $clubName = $branding['club_name'] ?? 'Kbelští sokoli';
 @endphp
 
-<div class="auth-header-container animate-fade-in-down mb-8">
+<div class="auth-header-container animate-fade-in-down mb-6 md:mb-8">
     {{-- Decorative background icon (always visible, even when logo exists) --}}
     <div class="auth-header-visual mb-8" aria-hidden="true">
-        <i class="fa-duotone fa-light {{ $icon }} auth-icon-bg"></i>
+        <i class="fa-light {{ $icon }} auth-icon-bg"></i>
     </div>
 
     @if($logoPath)

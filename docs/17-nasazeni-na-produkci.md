@@ -2,6 +2,10 @@
 
 Projekt využívá moderní přístup k nasazení, který kombinuje **GitHub** ([https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.com/Nejedlos/kbelstisokoli_laravel)) jako zdrojový repozitář a **SSH konzoli** na hostingu (Webglobe) pro finální kroky.
 
+> KRITICKÉ UPOZORNĚNÍ K ASSETŮM (Vite)
+>
+> Po jakékoliv změně vzhledu (úprava CSS/JS) je NUTNÉ spustit `npm run build`, jinak se změny na produkci/pro náhled NEPROJEVÍ. Týká se to i Filament auth UI (`resources/css/filament-auth.css`, `resources/js/filament-error-handler.js`).
+
 ## Předpoklady na serveru (Webglobe)
 1. **PHP:** Verze 8.4+ (včetně JIT optimalizací).
 2. **SSH Přístup:** Povoleno v administraci Webglobe.
@@ -22,6 +26,8 @@ npm install
 npm run build
 php artisan optimize
 ```
+
+> Tip: Po buildu udělejte „tvrdý refresh“ v prohlížeči (Cmd/Ctrl + Shift + R). V případě potřeby pročistěte cache pohledů: `php artisan view:clear` a `php artisan filament:clear-cached-components`.
 
 ## Automatizace pomocí Laravel Envoy
 V projektu je připraven soubor `Envoy.blade.php`. Po nastavení IP adresy a cesty v tomto souboru můžete nasazovat z lokálního stroje jediným příkazem:

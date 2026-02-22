@@ -5,7 +5,8 @@
     'backLabel' => 'Zpět na přihlášení',
     'backUrl' => '/admin/login',
     'showBack' => true,
-    'maxWidth' => 'max-w-[28rem]',
+    // Responsivní maximální šířka formuláře (užší na mobilu, širší na desktopu)
+    'maxWidth' => 'max-w-[22rem] sm:max-w-[26rem] md:max-w-[28rem]',
 ])
 
 @php
@@ -27,8 +28,19 @@
     };
 @endphp
 
-<div class="auth-gradient min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
-     style="background-color: #020617 !important; background-image: radial-gradient(circle at 50% -20%, rgba({{ $hexToRgb($colors['red'] ?? '#e11d48') }}, 0.25) 0%, transparent 50%), radial-gradient(circle at 0% 100%, rgba({{ $hexToRgb($colors['navy'] ?? '#0b1f3a') }}, 0.6) 0%, transparent 60%), radial-gradient(circle at 100% 100%, rgba({{ $hexToRgb($colors['blue'] ?? '#2563eb') }}, 0.2) 0%, transparent 60%) !important;">
+<div class="auth-gradient min-h-dvh flex items-start md:items-center justify-center py-10 px-4 md:px-6 lg:px-8 relative overflow-hidden"
+     style="
+        /* Výrazně světlejší varianta gradientu inspirovaná 'under-construction' vzhledem */
+        background-color: #0f172a !important; /* slate-900 jako světlejší základ než téměř černá */
+        background-image:
+            radial-gradient(1200px 700px at 50% -10%, rgba({{ $hexToRgb($colors['red'] ?? '#e11d48') }}, 0.50) 0%, rgba({{ $hexToRgb($colors['red'] ?? '#e11d48') }}, 0.18) 40%, transparent 72%),
+            radial-gradient(1400px 900px at 0% 100%, rgba({{ $hexToRgb($colors['navy'] ?? '#0b1f3a') }}, 0.28) 0%, rgba({{ $hexToRgb($colors['navy'] ?? '#0b1f3a') }}, 0.12) 50%, transparent 82%),
+            radial-gradient(1200px 900px at 100% 100%, rgba({{ $hexToRgb($colors['blue'] ?? '#2563eb') }}, 0.26) 0%, rgba({{ $hexToRgb($colors['blue'] ?? '#2563eb') }}, 0.10) 55%, transparent 85%),
+            radial-gradient(1000px 600px at 50% 10%, rgba(255, 255, 255, 0.12) 0%, transparent 70%)
+        !important;
+        background-attachment: fixed !important;
+        background-size: cover !important;
+    ">
     <style>
         :root {
             --color-primary: {{ $colors['red'] ?? '#e11d48' }};
@@ -49,7 +61,7 @@
 
     <div class="w-full {{ $maxWidth }} relative z-10">
         {{-- Language Switcher --}}
-        <div class="flex justify-center mb-8">
+        <div class="flex justify-center mb-6 md:mb-8">
             @if (class_exists('BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch'))
                 <livewire:filament-language-switch />
             @endif
