@@ -24,6 +24,11 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Support\Facades\FilamentView;
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\RequestPasswordReset;
+use App\Filament\Pages\Auth\ResetPassword;
+use App\Filament\Pages\Auth\EmailVerificationPrompt;
+use App\Filament\Pages\Auth\Register;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -32,36 +37,6 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             'panels::head.end',
             fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/filament-auth.css', 'resources/js/filament-error-handler.js'])"),
-        );
-
-        FilamentView::registerRenderHook(
-            'panels::auth.login.form.before',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header subtitle="Vstupte na palubovku vaší arény" />'),
-        );
-
-        FilamentView::registerRenderHook(
-            'panels::auth.password-reset.request.form.before',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header title="Zapomenuté heslo" subtitle="Zašleme vám odkaz pro obnovu přístupu" icon="fa-key-skeleton" />'),
-        );
-
-        FilamentView::registerRenderHook(
-            'panels::auth.password-reset.reset.form.before',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-header title="Nové heslo" subtitle="Nastavte si bezpečné heslo k vašemu účtu" icon="fa-lock-keyhole" />'),
-        );
-
-        FilamentView::registerRenderHook(
-            'panels::auth.login.form.after',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-footer />'),
-        );
-
-        FilamentView::registerRenderHook(
-            'panels::auth.password-reset.request.form.after',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-footer back-label="Zpět na přihlášení" back-url="/admin/login" />'),
-        );
-
-        FilamentView::registerRenderHook(
-            'panels::auth.password-reset.reset.form.after',
-            fn (): string => \Illuminate\Support\Facades\Blade::render('<x-auth-footer back-label="Zpět na přihlášení" back-url="/admin/login" />'),
         );
     }
 
@@ -74,8 +49,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login(\App\Filament\Pages\Auth\Login::class)
-            ->passwordReset()
+            ->login(Login::class)
+            ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
+            ->emailVerification(EmailVerificationPrompt::class)
+            ->registration(Register::class)
             ->brandName($branding['club_name'])
             ->brandLogo($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
             ->favicon($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)

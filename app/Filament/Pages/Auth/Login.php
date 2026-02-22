@@ -10,6 +10,8 @@ use Illuminate\Support\HtmlString;
 
 class Login extends BaseLogin
 {
+    protected string $view = 'filament.admin.auth.login';
+
     /**
      * @return string|Htmlable
      */
