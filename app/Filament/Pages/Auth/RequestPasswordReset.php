@@ -4,8 +4,20 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Auth\Pages\PasswordReset\RequestPasswordReset as BaseRequestPasswordReset;
 
+use Filament\Notifications\Notification;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+
 class RequestPasswordReset extends BaseRequestPasswordReset
 {
+    protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
+    {
+        return Notification::make()
+            ->title(__('Too many login attempts. Please try again in :seconds seconds.', [
+                'seconds' => $exception->secondsUntilAvailable,
+                'minutes' => $exception->minutesUntilAvailable,
+            ]))
+            ->danger();
+    }
     // Override layout to use our custom full auth layout
     protected static string $layout = 'filament.admin.layouts.auth';
 

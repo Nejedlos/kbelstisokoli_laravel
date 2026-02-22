@@ -4,8 +4,20 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Auth\Pages\EmailVerification\EmailVerificationPrompt as BaseEmailVerificationPrompt;
 
+use Filament\Notifications\Notification;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+
 class EmailVerificationPrompt extends BaseEmailVerificationPrompt
 {
+    protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
+    {
+        return Notification::make()
+            ->title(__('Too many login attempts. Please try again in :seconds seconds.', [
+                'seconds' => $exception->secondsUntilAvailable,
+                'minutes' => $exception->minutesUntilAvailable,
+            ]))
+            ->danger();
+    }
     // Override Filament's simple layout with our custom auth layout
     protected static string $layout = 'filament.admin.layouts.auth';
 

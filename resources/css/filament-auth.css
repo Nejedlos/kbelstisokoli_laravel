@@ -89,20 +89,7 @@
 .fi-fo-field-wrp-error-message,
 .fi-fo-field-error-message,
 .fi-error-message {
-    color: #E11D48 !important;
-    font-size: 0.75rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.025em !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    margin-top: 0.75rem !important;
-    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both !important;
-    padding: 0.75rem 1rem !important;
-    background: rgba(225, 29, 72, 0.05) !important;
-    border: 1px solid rgba(225, 29, 72, 0.15) !important;
-    border-left: 4px solid #E11D48 !important;
-    border-radius: 0.75rem !important;
+    display: none !important;
 }
 
 .fi-fo-field-wrp-error-message::before,
