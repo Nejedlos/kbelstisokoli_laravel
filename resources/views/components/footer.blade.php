@@ -5,7 +5,7 @@
     $clubNav = $footerClubMenu ?? [];
 @endphp
 
-<footer class="bg-secondary text-slate-300 relative overflow-hidden">
+<footer class="bg-secondary text-slate-300 relative overflow-hidden mt-12 md:mt-20">
     {{-- Accent line --}}
     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
 
@@ -14,7 +14,7 @@
         <i class="fa-light fa-basketball text-[30rem] translate-x-1/2 -translate-y-1/4"></i>
     </div>
 
-    <div class="container pt-20 pb-16 relative z-10">
+    <div class="container pt-12 md:pt-20 pb-16 relative z-10">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
             {{-- Column 1: Brand & Identity --}}
             <div class="space-y-6">
@@ -76,7 +76,7 @@
                     <li>
                         <a href="{{ route('public.search') }}" class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">
                             <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
-                            <span class="font-medium">{{ __('Hledat') }}</span>
+                            <span class="font-medium">{{ __('Search') }}</span>
                         </a>
                     </li>
                 </ul>
@@ -104,7 +104,7 @@
                             </a>
                         </li>
                     @empty
-                        <li class="text-sm text-slate-500 italic">{{ __('Menu bude doplněno.') }}</li>
+                        <li class="text-sm text-slate-500 italic">{{ __('footer.empty_menu') }}</li>
                     @endforelse
                 </ul>
                 <div class="mt-8 p-4 bg-white/5 rounded-xl border border-white/5">
