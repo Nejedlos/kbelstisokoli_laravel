@@ -15,7 +15,12 @@
     </div>
 
     <div class="container mx-auto px-4 relative z-10">
-        <div class="max-w-4xl mx-auto text-center">
+        <div @class([
+            'max-w-4xl mx-auto',
+            'text-center' => ($data['alignment'] ?? 'center') === 'center',
+            'text-left' => ($data['alignment'] ?? 'center') === 'left',
+            'text-right' => ($data['alignment'] ?? 'center') === 'right',
+        ])>
             @if($data['title'] ?? null)
                 <h2 @class([
                     'text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-8 leading-tight',
@@ -36,16 +41,33 @@
                 </p>
             @endif
 
-            <div class="flex justify-center">
-                <a href="{{ $data['button_url'] ?? '#' }}" @class([
-                    'btn px-12 py-5 text-xl font-black shadow-2xl transition-all duration-300 transform hover:scale-105 group',
-                    'bg-white text-primary hover:bg-slate-50' => $style === 'primary',
-                    'bg-primary text-white hover:bg-primary-hover' => $style === 'secondary',
-                    'btn-primary' => $style === 'outline',
-                ])>
-                    <span>{{ $data['button_text'] ?? 'Zjistit více' }}</span>
-                    <i class="fa-light fa-chevron-right ml-3 group-hover:translate-x-1 transition-transform"></i>
-                </a>
+            <div @class([
+                'flex gap-4 flex-wrap',
+                'justify-center' => ($data['alignment'] ?? 'center') === 'center',
+                'justify-start' => ($data['alignment'] ?? 'center') === 'left',
+                'justify-end' => ($data['alignment'] ?? 'center') === 'right',
+            ])>
+                @if($data['button_text'] ?? null)
+                    <a href="{{ $data['button_url'] ?? '#' }}" @class([
+                        'btn px-12 py-5 text-xl font-black shadow-2xl transition-all duration-300 transform hover:scale-105 group',
+                        'bg-white text-primary hover:bg-slate-50' => $style === 'primary',
+                        'bg-primary text-white hover:bg-primary-hover' => $style === 'secondary',
+                        'btn-primary' => $style === 'outline',
+                    ])>
+                        <span>{{ $data['button_text'] ?? 'Zjistit více' }}</span>
+                        <i class="fa-light fa-chevron-right ml-3 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                @endif
+
+                @if($data['secondary_button_text'] ?? null)
+                    <a href="{{ $data['secondary_button_url'] ?? '#' }}" @class([
+                        'btn px-12 py-5 text-xl font-black transition-all duration-300 transform hover:scale-105 group',
+                        'btn-outline-white' => in_array($style, ['primary', 'secondary']),
+                        'btn-outline-primary' => $style === 'outline',
+                    ])>
+                        <span>{{ $data['secondary_button_text'] }}</span>
+                    </a>
+                @endif
             </div>
         </div>
     </div>
