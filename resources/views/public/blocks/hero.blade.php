@@ -1,6 +1,6 @@
 @php
     $asset = isset($data['media_asset_id']) ? \App\Models\MediaAsset::find($data['media_asset_id']) : null;
-    $imageUrl = $asset ? $asset->getUrl('large') : null;
+    $imageUrl = $asset ? $asset->getUrl('large') : ($data['image_url'] ?? null);
     $variant = $data['variant'] ?? 'standard';
     $alignment = $data['alignment'] ?? ($variant === 'centered' ? 'center' : 'left');
 @endphp
@@ -38,6 +38,13 @@
             'mx-auto text-center max-w-4xl' => $alignment === 'center',
             'ml-auto text-right max-w-3xl' => $alignment === 'right',
         ])>
+            @if($data['eyebrow'] ?? null)
+                <div class="mb-4 inline-flex items-center bg-primary/20 text-primary-light px-4 py-1.5 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] border border-primary/30">
+                    <span class="w-2 h-2 bg-primary rounded-full mr-3 animate-pulse"></span>
+                    {{ $data['eyebrow'] }}
+                </div>
+            @endif
+
             @if($data['headline'] ?? null)
                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight uppercase tracking-tighter">
                     {!! nl2br(e($data['headline'])) !!}
@@ -50,13 +57,33 @@
                 </p>
             @endif
 
-            @if($data['cta_label'] ?? null)
-                <div class="flex flex-wrap gap-4 {{ $alignment === 'center' ? 'justify-center' : ($alignment === 'right' ? 'justify-end' : '') }}">
-                    <a href="{{ $data['cta_url'] ?? '#' }}" class="btn btn-primary btn-glow group">
-                        <span>{{ $data['cta_label'] }}</span>
-                        <i class="fa-light fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                    </a>
+            @if(($data['cta_label'] ?? null) || ($data['cta_secondary_label'] ?? null) || ($data['cta_tertiary_label'] ?? null))
+                <div class="flex flex-wrap items-center gap-6 {{ $alignment === 'center' ? 'justify-center' : ($alignment === 'right' ? 'justify-end' : '') }}">
+                    @if($data['cta_label'] ?? null)
+                        <a href="{{ $data['cta_url'] ?? '#' }}" class="btn btn-primary btn-glow group">
+                            <span>{{ $data['cta_label'] }}</span>
+                            <i class="fa-light fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    @endif
+
+                    @if($data['cta_secondary_label'] ?? null)
+                        <a href="{{ $data['cta_secondary_url'] ?? '#' }}" class="btn btn-outline-white">
+                            <span>{{ $data['cta_secondary_label'] }}</span>
+                        </a>
+                    @endif
+
+                    @if($data['cta_tertiary_label'] ?? null)
+                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" class="text-white hover:text-primary transition-colors font-bold border-b border-white/30 hover:border-primary pb-1">
+                            {{ $data['cta_tertiary_label'] }}
+                        </a>
+                    @endif
                 </div>
+
+                @if($data['microtext'] ?? null)
+                    <div class="mt-6 text-sm text-slate-400 max-w-xl {{ $alignment === 'center' ? 'mx-auto' : ($alignment === 'right' ? 'ml-auto' : '') }}">
+                        {{ $data['microtext'] }}
+                    </div>
+                @endif
             @endif
         </div>
     </div>
