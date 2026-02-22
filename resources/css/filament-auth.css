@@ -114,21 +114,13 @@
     --ui-danger: #ef4444;
     --ui-warning: #f59e0b;
 
-    /* Glass surface -> Modern Box Surface */
-    --glass-bg: var(--ui-surface);
-    --glass-border: rgba(255, 255, 255, 1);
-    --glass-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    /* Glass surface -> Premium Arena Surface */
+    --glass-bg: rgba(15, 23, 42, 0.75); /* Tmavá navy s průhledností */
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout, .ks-auth-page {
-    /* Výrazně světlejší fallback varianta gradientu */
-    background-color: #0f172a !important;
-    background-image:
-        radial-gradient(circle at 50% -20%, rgba(var(--brand-red-rgb, 225, 29, 72), 0.35) 0%, transparent 55%),
-        radial-gradient(circle at 0% 100%, rgba(var(--brand-navy-rgb, 11, 31, 58), 0.28) 0%, transparent 65%),
-        radial-gradient(circle at 100% 100%, rgba(var(--brand-blue-rgb, 37, 99, 235), 0.24) 0%, transparent 65%),
-        radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.10) 0%, transparent 60%) !important;
-    background-attachment: fixed !important;
     min-height: 100vh !important;
     min-height: 100dvh !important;
     font-family: 'Instrument Sans', sans-serif !important;
@@ -137,7 +129,7 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout, .ks-auth-pa
     justify-content: center !important;
     padding: 2rem 1rem !important;
     position: relative !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
 }
 
 @media (max-width: 640px) {
@@ -181,17 +173,32 @@ body.fi-panel-admin .fi-simple-main-ctn {
     }
 }
 
-/* Light Glass Card -> Modern Boxed Card */
+/* Light Glass Card -> Premium Arena Card */
 .fi-simple-main, .glass-card {
-    background: #ffffff !important; /* Solidní bílá pro čistý boxed efekt */
-    border-radius: 1.5rem !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    border-top: 6px solid var(--brand-red) !important; /* Výrazná brandová linka nahoře pro "boxed" pocit */
-    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
-    padding: 3.5rem !important; /* Hodně vzduchu v boxu na desktopu */
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-radius: 2rem !important;
+    border: 1px solid var(--glass-border) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.3) !important; /* Jemný glow nahoře */
+    box-shadow: var(--glass-shadow) !important;
+    padding: 2.5rem !important;
     position: relative !important;
     overflow: hidden !important;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease !important;
+}
+
+/* Accent line inside card */
+.fi-simple-main::after, .glass-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--brand-red), transparent);
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 /* Removal of previous glass effects */
@@ -283,31 +290,38 @@ body.fi-panel-admin .fi-simple-main-ctn {
 
 /* Form Fields */
 .fi-fo-field-label, .fi-fo-field-label-content {
-    color: #1e293b !important; /* Slate 800 */
-    font-size: 0.7rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.15em !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 .fi-input-wrp {
-    background: #f8fafc !important; /* Mírně šedé pozadí inputu pro modernější box */
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 0.75rem !important;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1rem !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
     transition: all 0.3s ease !important;
+}
+
+.fi-input-wrp:hover {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .fi-input-wrp:focus-within {
     border-color: var(--brand-blue) !important;
-    box-shadow: 0 0 0 4px rgba(var(--brand-blue-rgb, 37, 99, 235), 0.18) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+    box-shadow: 0 0 0 4px rgba(var(--brand-blue-rgb, 37, 99, 235), 0.25) !important;
 }
 
 .fi-input {
-    color: #0f172a !important; /* Dark text on light background */
-    font-weight: 600 !important;
-    padding: 0.75rem 1rem !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    padding: 0.875rem 1.25rem !important;
+    font-size: 1rem !important; /* 16px to prevent iOS zoom */
 }
 
 .fi-input::placeholder {
@@ -318,27 +332,25 @@ body.fi-panel-admin .fi-simple-main-ctn {
 .fi-btn-color-primary, .btn-primary {
     background: var(--brand-red) !important;
     color: white !important;
-    border-radius: 0.75rem !important; /* Mírně ostřejší rohy pro moderní look */
-    font-weight: 900 !important;
+    border-radius: 1rem !important;
+    font-weight: 800 !important;
     text-transform: uppercase !important;
-    font-style: italic !important;
-    letter-spacing: 0.1em !important;
-    padding: 1.125rem 2rem !important;
-    box-shadow: 0 20px 40px -15px rgba(var(--brand-red-rgb, 225, 29, 72), 0.5) !important;
+    letter-spacing: 0.15em !important;
+    padding: 1.25rem 2rem !important;
+    box-shadow: 0 15px 35px -10px rgba(var(--brand-red-rgb, 225, 29, 72), 0.5) !important;
     border: none !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0.75rem !important;
 }
 
 .fi-btn-color-primary:hover, .btn-primary:hover {
-    background: #ffffff !important;
-    color: var(--brand-red) !important;
-    transform: translateY(-5px);
-    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 20px 45px -10px rgba(var(--brand-red-rgb, 225, 29, 72), 0.6) !important;
+    background: var(--brand-red-hover) !important;
+}
+
+.fi-btn-color-primary:active, .btn-primary:active {
+    transform: translateY(0) scale(0.98);
 }
 
 /* Loading state for CTA */
@@ -361,31 +373,50 @@ body.fi-panel-admin .fi-simple-main-ctn {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Links & Footer */
-.fi-link {
-    color: #64748b !important;
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    text-transform: none !important;
-    letter-spacing: normal !important;
-    transition: color 0.3s ease !important;
+/* Checkbox Styling */
+.fi-fo-checkbox-input, .fi-checkbox-input {
+    background-color: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 0.375rem !important;
+    color: var(--brand-red) !important;
+    transition: all 0.2s ease !important;
 }
 
-.fi-link:hover {
-    color: var(--brand-red) !important;
+.fi-fo-checkbox-input:checked, .fi-checkbox-input:checked {
+    background-color: var(--brand-red) !important;
+    border-color: var(--brand-red) !important;
+}
+
+.fi-fo-checkbox-input:focus, .fi-checkbox-input:focus {
+    box-shadow: 0 0 0 2px rgba(var(--brand-red-rgb, 225, 29, 72), 0.4) !important;
+}
+
+/* Links & Footer */
+.fi-link {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
     text-decoration: none !important;
 }
 
+.fi-link:hover {
+    color: #ffffff !important;
+    transform: translateX(3px);
+}
+
 .auth-footer-link-primary {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.5) !important;
     font-weight: 700;
     font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     transition: all 0.3s ease;
     text-decoration: none;
 }
 
 .auth-footer-link-primary:hover {
-    color: white;
+    color: #ffffff !important;
 }
 
 /* 2FA Specific */
