@@ -317,3 +317,15 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
         border-radius: 1.25rem !important;
     }
 }
+
+/* Akce formuláře: na auth stránkách nejsou full-width na větších displejích */
+@media (min-width: 768px) {
+    .auth-gradient .fi-ac.fi-width-full {
+        width: auto !important;
+    }
+    .auth-gradient .fi-ac.fi-width-full .fi-btn {
+        width: auto !important;
+        min-width: 12rem;
+        display: inline-flex !important;
+    }
+}
