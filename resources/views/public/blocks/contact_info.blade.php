@@ -2,7 +2,7 @@
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
-                <h2 class="text-3xl font-bold mb-6">{{ $data['title'] }}</h2>
+                <h2 class="text-3xl font-bold mb-6">{{ $data['title'] ?? '' }}</h2>
                 <div class="space-y-4">
                     @if($data['address'] ?? null)
                         <p><strong>Adresa:</strong><br>{{ $data['address'] }}</p>

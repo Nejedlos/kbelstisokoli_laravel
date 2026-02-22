@@ -44,6 +44,11 @@ class CmsContentSeeder extends Seeder
                 'cs' => '© ' . date('Y') . ' Basketbalový klub Kbelští sokoli. Všechna práva vyhrazena.',
                 'en' => '© ' . date('Y') . ' Basketball club Kbely Falcons. All rights reserved.',
             ],
+            'seo_description' => [
+                'cs' => 'Oficiální web basketbalového klubu Kbelští sokoli. Informace o týmech, trénincích, zápasech a náborech pro děti i dospělé v Praze 9.',
+                'en' => 'Official website of the Kbely Falcons basketball club. Information about teams, trainings, matches and recruitment for children and adults in Prague 9.',
+            ],
+            'seo_title_suffix' => ' | Kbelští sokoli',
         ];
 
         foreach ($settings as $key => $value) {
@@ -211,29 +216,76 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'hero',
                     'data' => [
-                        'headline' => 'Budoucnost basketbalu v Kbelích',
-                        'subheadline' => 'Přidejte se k rodině Sokolů. Rozvíjíme talenty, stavíme na týmovém duchu.',
-                        'cta_label' => 'Chci se přidat',
+                        'headline' => "Srdce basketbalu\nv pražských Kbelích",
+                        'subheadline' => 'Budujeme silnou komunitu, rozvíjíme talenty a sdílíme radost z každého koše. Přidejte se k Sokolům!',
+                        'cta_label' => 'Chci začít hrát',
                         'cta_url' => '/nabor',
-                        'variant' => 'centered',
+                        'variant' => 'standard',
+                        'alignment' => 'left',
                         'overlay' => true,
                     ]
                 ],
                 [
                     'type' => 'stats_cards',
                     'data' => [
+                        'variant' => 'dark',
                         'stats' => [
-                            ['label' => 'Členů', 'value' => '250+'],
-                            ['label' => 'Týmů', 'value' => '12'],
-                            ['label' => 'Trenérů', 'value' => '15'],
-                            ['label' => 'Let tradice', 'value' => '10+'],
+                            ['label' => 'Aktivních členů', 'value' => '250+', 'icon' => 'users'],
+                            ['label' => 'Soutěžních týmů', 'value' => '12', 'icon' => 'user-group'],
+                            ['label' => 'Kvalifikovaných trenérů', 'value' => '15', 'icon' => 'graduation-cap'],
+                            ['label' => 'Let tradice', 'value' => '10+', 'icon' => 'calendar-star'],
                         ]
+                    ]
+                ],
+                [
+                    'type' => 'cards_grid',
+                    'data' => [
+                        'title' => 'Proč hrát za Sokoly?',
+                        'subtitle' => 'Naše pilíře',
+                        'columns' => 3,
+                        'cards' => [
+                            [
+                                'title' => 'Rodinná atmosféra',
+                                'description' => 'Nejsme jen klub, jsme komunita. Podporujeme se na hřišti i mimo něj. U nás najdete přátele na celý život.',
+                                'icon' => 'house-heart',
+                            ],
+                            [
+                                'title' => 'Špičkoví trenéři',
+                                'description' => 'Naši trenéři mají licenci a srdce pro hru. Zaměřujeme se na individuální rozvoj i týmovou chemii.',
+                                'icon' => 'whistle',
+                            ],
+                            [
+                                'title' => 'Moderní zázemí',
+                                'description' => 'Trénujeme v moderní hale v Kbelích s veškerým vybavením, které mladý basketbalista potřebuje.',
+                                'icon' => 'court-basketball',
+                            ],
+                        ]
+                    ]
+                ],
+                [
+                    'type' => 'cta',
+                    'data' => [
+                        'style' => 'primary',
+                        'title' => "Staň se součástí\nnašeho týmu!",
+                        'text' => 'Pořádáme nábory pro děti od 6 let i pro zkušené hráče. První tři tréninky jsou na zkoušku zdarma.',
+                        'button_text' => 'Více o náboru',
+                        'button_url' => '/nabor',
                     ]
                 ],
                 [
                     'type' => 'rich_text',
                     'data' => [
-                        'content' => '<h2>Vítejte v basketbalovém klubu Kbelští sokoli</h2><p>Jsme dynamicky se rozvíjející klub v srdci Prahy 9. Naším cílem není jen sportovní výkon, ale především radost z pohybu a výchova mladých sportovců v duchu fair play.</p>',
+                        'style' => 'default',
+                        'content' => '<h2>O našem klubu</h2><p>Basketbalový klub <strong>Kbelští sokoli</strong> byl založen s cílem přivést basketbal do pražských Kbel a okolí. Od té doby jsme se rozrostli v jeden z nejvýznamnějších sportovních oddílů v městské části.</p><p>Věnujeme se všem věkovým kategoriím – od přípravek (U9) až po týmy dospělých. Naše filozofie stojí na třech pilířích: <strong>Sportovní růst</strong>, <strong>Charakter</strong> a <strong>Zábava</strong>.</p>',
+                    ]
+                ],
+                [
+                    'type' => 'news_listing',
+                    'data' => [
+                        'title' => 'Co je u nás nového?',
+                        'subtitle' => 'Aktuality z klubu',
+                        'limit' => 3,
+                        'layout' => 'grid',
                     ]
                 ],
             ],
@@ -241,29 +293,76 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'hero',
                     'data' => [
-                        'headline' => 'Future of Basketball in Kbely',
-                        'subheadline' => 'Join the Falcons family. We develop talents, we build on team spirit.',
-                        'cta_label' => 'Join us',
+                        'headline' => "The Heart of Basketball\nin Prague's Kbely",
+                        'subheadline' => 'We build a strong community, develop talents, and share the joy of every basket. Join the Falcons!',
+                        'cta_label' => 'Start playing',
                         'cta_url' => '/nabor',
-                        'variant' => 'centered',
+                        'variant' => 'standard',
+                        'alignment' => 'left',
                         'overlay' => true,
                     ]
                 ],
                 [
                     'type' => 'stats_cards',
                     'data' => [
+                        'variant' => 'dark',
                         'stats' => [
-                            ['label' => 'Members', 'value' => '250+'],
-                            ['label' => 'Teams', 'value' => '12'],
-                            ['label' => 'Coaches', 'value' => '15'],
-                            ['label' => 'Years of tradition', 'value' => '10+'],
+                            ['label' => 'Active Members', 'value' => '250+', 'icon' => 'users'],
+                            ['label' => 'Competitive Teams', 'value' => '12', 'icon' => 'user-group'],
+                            ['label' => 'Qualified Coaches', 'value' => '15', 'icon' => 'graduation-cap'],
+                            ['label' => 'Years of Tradition', 'value' => '10+', 'icon' => 'calendar-star'],
                         ]
+                    ]
+                ],
+                [
+                    'type' => 'cards_grid',
+                    'data' => [
+                        'title' => 'Why play for Falcons?',
+                        'subtitle' => 'Our pillars',
+                        'columns' => 3,
+                        'cards' => [
+                            [
+                                'title' => 'Family Atmosphere',
+                                'description' => "We are not just a club, we are a community. We support each other on and off the court. You'll find friends for life here.",
+                                'icon' => 'house-heart',
+                            ],
+                            [
+                                'title' => 'Top Coaches',
+                                'description' => 'Our coaches have a license and a heart for the game. We focus on individual development and team chemistry.',
+                                'icon' => 'whistle',
+                            ],
+                            [
+                                'title' => 'Modern Facilities',
+                                'description' => 'We train in a modern hall in Kbely with all the equipment a young basketball player needs.',
+                                'icon' => 'court-basketball',
+                            ],
+                        ]
+                    ]
+                ],
+                [
+                    'type' => 'cta',
+                    'data' => [
+                        'style' => 'primary',
+                        'title' => "Become part\nof our team!",
+                        'text' => 'We organize recruitments for children from 6 years old and for experienced players. The first three trainings are for free trial.',
+                        'button_text' => 'More about recruitment',
+                        'button_url' => '/nabor',
                     ]
                 ],
                 [
                     'type' => 'rich_text',
                     'data' => [
-                        'content' => '<h2>Welcome to Kbely Falcons Basketball Club</h2><p>We are a dynamically growing club in the heart of Prague 9. Our goal is not only sports performance, but primarily the joy of movement and education of young athletes in the spirit of fair play.</p>',
+                        'style' => 'default',
+                        'content' => '<h2>About our club</h2><p>Basketball club <strong>Kbely Falcons</strong> was founded with the goal of bringing basketball to Prague\'s Kbely and surrounding areas. Since then, we have grown into one of the most important sports clubs in the district.</p><p>We cater to all age categories – from preparation classes (U9) to adult teams. Our philosophy stands on three pillars: <strong>Sports Growth</strong>, <strong>Character</strong>, and <strong>Fun</strong>.</p>',
+                    ]
+                ],
+                [
+                    'type' => 'news_listing',
+                    'data' => [
+                        'title' => 'What\'s new?',
+                        'subtitle' => 'Club news',
+                        'limit' => 3,
+                        'layout' => 'grid',
                     ]
                 ],
             ],

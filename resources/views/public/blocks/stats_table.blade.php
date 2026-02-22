@@ -1,9 +1,10 @@
 @php
-    $statisticSet = \App\Models\StatisticSet::with(['rows' => function($q) use ($data) {
+    $statisticSetId = $data['statistic_set_id'] ?? null;
+    $statisticSet = $statisticSetId ? \App\Models\StatisticSet::with(['rows' => function($q) use ($data) {
         $q->where('is_visible', true)->limit($data['limit'] ?? 10);
-    }])->find($data['statistic_set_id']);
+    }])->find($statisticSetId) : null;
 
-    $columns = $statisticSet->column_config ?? [];
+    $columns = $statisticSet?->column_config ?? [];
 @endphp
 
 <section class="stats-table-block py-12 bg-white dark:bg-gray-900">

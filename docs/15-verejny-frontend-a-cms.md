@@ -29,7 +29,15 @@ Stylové zobrazení informace o přípravě webu s basketbalovou tématikou.
 - **SEO vztah:** Většina modelů (Page, News) má vazbu na SEO metadata.
 - **Fallbacky:** Pokud metadata chybí, použijí se hodnoty z brandingu.
 
-## 6. Klíčové komponenty
+## 6. Stránka Úvod (Homepage)
+Úvodní stránka je plně řízena Page Builderem a obsahuje bohatý, moderně stylovaný obsah:
+- **Hero sekce:** Velké nadpisy s podporou pro basketbalové grafické prvky a animované CTA.
+- **Statistiky:** Animované číselné karty s ikonami Font Awesome Pro.
+- **Grid karet:** Přehled hlavních pilířů klubu s moderními hover efekty.
+- **Výzva k akci (CTA):** Výrazné sekce pro nábor a kontakt.
+- **SEO optimalizace:** Každá sekce je navržena pro maximální indexovatelnost a obsahuje reálný, bilingvní obsah z klubu.
+
+## 7. Klíčové komponenty
 - `x-header` / `x-footer`: Globální navigace a patička.
 - `x-section-heading`: Sjednocené nadpisy sekcí.
 - `x-news-card` / `x-match-card`: Karty pro výpisy.

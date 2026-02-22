@@ -2,7 +2,7 @@
 
 @section('content')
     @if($page)
-        <x-page-blocks :blocks="$page->content ?? []" />
+        <x-page-blocks :blocks="$page->content ?? []" animate="true" />
     @else
         <div class="container py-20 text-center">
             <h1 class="text-4xl font-bold mb-4">Vítejte na webu Kbelští sokoli</h1>

@@ -1,4 +1,4 @@
-@props(['blocks' => []])
+@props(['blocks' => [], 'animate' => false])
 
 <div class="page-blocks">
     @forelse($blocks as $block)
@@ -21,12 +21,17 @@
                     $attributesString .= ' ' . e($attr['name']) . '="' . e($attr['value'] ?? '') . '"';
                 }
             }
+
+            // Animace (AOS)
+            if ($animate) {
+                $attributesString .= ' data-aos="fade-up"';
+            }
         @endphp
 
         @if($type && $visible)
             <div
                 @if($customId) id="{{ $customId }}" @endif
-                class="block-wrapper block-{{ $type }} {{ $customClass }} section-padding"
+                class="block-wrapper block-{{ $type }} {{ $customClass }}"
                 {!! $attributesString !!}
             >
                 @includeFirst(["public.blocks.{$type}", "public.blocks.fallback"], ['data' => $data, 'type' => $type, 'block' => $block])
