@@ -37,7 +37,7 @@ class ClubEventResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_calendar-star';
+        return 'fal_calendar_star';
     }
 
     public static function getNavigationSort(): ?int

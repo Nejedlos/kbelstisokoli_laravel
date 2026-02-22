@@ -30,10 +30,24 @@ Ikony vkládáme výhradně ve stylu **Light** (např. pomocí tříd `fa-light`
 
 ## Použití v administraci (Filament)
 
-Ve Filamentu používáme dva způsoby vkládání ikon:
+Ve Filamentu používáme systém aliasů registrovaných v `AppServiceProvider.php` přes `FilamentIcon::register()`. Tento přístup zamezuje chybám `SvgNotFound` (ze strany Blade Icons) a zároveň brání Filamentu v chybném renderování HTML ikon jako obrázků (tag `<img>`) v sidebaru.
 
-1. **Sidebar (Navigace):** V `AppServiceProvider.php` jsou zaregistrovány aliasy ikon (metoda `FilamentIcon::register()`), které vrací `HtmlString`. Pro aliasy používáme prefix `fal_` (např. `fal_users`), abychom zabránili kolizím s `blade-icons`. V Resource se pak na ně odkazujeme v `getNavigationIcon()`.
-   
+1. **Registrace aliasů (`AppServiceProvider.php`):**
+   Všechny ikony pro administraci registrujeme v metodě `boot()` pod prefixem `fal_` (Font Awesome Light).
+
+   ```php
+   use Filament\Support\Facades\FilamentIcon;
+   use Illuminate\Support\HtmlString;
+
+   FilamentIcon::register([
+       'fal_users' => new HtmlString('<i class="fa-light fa-users fa-fw"></i>'),
+       'fal_basketball' => new HtmlString('<i class="fa-light fa-basketball fa-fw"></i>'),
+       // ... další ikony
+   ]);
+   ```
+
+2. **Sidebar (Navigace):** V Resource nebo Page vracíme v metodě `getNavigationIcon()` pouze název aliasu jako prostý řetězec.
+
    *Příklad v Resource:*
    ```php
    public static function getNavigationIcon(): ?string {
@@ -41,9 +55,11 @@ Ve Filamentu používáme dva způsoby vkládání ikon:
    }
    ```
 
-2. **Ostatní komponenty (Actions, Tabs, Sections):** Používáme `HtmlString` přímo v metodě `icon()`:
+3. **Ostatní komponenty (Actions, Tabs, Sections):** Používáme `HtmlString` přímo v metodě `icon()`, pokud to komponenta podporuje, nebo opět registrovaný alias:
    ```php
-   Action::make('edit')->icon(new HtmlString('<i class="fa-light fa-pencil"></i>'))
+   Action::make('edit')->icon('fal_users')
+   // nebo
+   Action::make('edit')->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-pencil"></i>'))
    ```
 
 Díky verzi Pro jsou k dispozici všechny styly, ale v tomto projektu používáme pouze:

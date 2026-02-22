@@ -20,7 +20,7 @@ class PlayerProfileResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_id-card';
+        return 'fal_id_card';
     }
 
     public static function getNavigationGroup(): ?string

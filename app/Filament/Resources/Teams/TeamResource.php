@@ -35,7 +35,7 @@ class TeamResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_user-group';
+        return 'fal_user_group';
     }
 
     public static function getNavigationSort(): ?int
