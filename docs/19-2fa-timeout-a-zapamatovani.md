@@ -31,7 +31,7 @@ Nově je také k dispozici globální odhlašovací URL **/admin/logout**, kter�
 - **Middleware:** `CheckTwoFactorTimeout` (registrovaný jako `2fa.timeout`).
     - *Novinka:* Automaticky ukládá zamýšlenou URL (`intended`), aby se uživatel po potvrzení 2FA vrátil přesně tam, kam směřoval.
 - **Response:** `TwoFactorLoginResponse` a `LoginResponse` (přetěžují výchozí Fortify/Filament chování).
-    - *Zlepšení:* Robustní detekce adminů (oprávnění + role) a automatické přesměrování do `/admin` po přihlášení, pokud není určeno jinak.
+    - *Zlepšení:* Robustní detekce adminů (oprávnění + role) a automatické přesměrování do `/admin` po přihlášení. Pokud admin směřuje na obecný dashboard členské sekce, je tento záměr přebit administrací.
 - **View:** Upravený `auth.two-factor-challenge` s checkboxem.
 - **Chybové stránky:** Vlastní `419.blade.php` pro elegantní zvládnutí vypršené relace.
 
