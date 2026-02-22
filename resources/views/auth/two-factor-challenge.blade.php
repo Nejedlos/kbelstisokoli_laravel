@@ -18,7 +18,7 @@
                 <div class="relative group/input">
                     <input id="code" type="text" name="code" inputmode="numeric" autofocus autocomplete="one-time-code"
                            placeholder="000 000"
-                           class="fi-input-wrp w-full bg-white border {{ $errors->has('code') ? 'border-rose-500' : 'border-slate-200' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.5em] text-center text-3xl py-6">
+                           class="fi-input-wrp w-full bg-white border {{ $errors->has('code') ? 'border-rose-500' : 'border-slate-200' }} rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.5em] text-center text-3xl py-6">
                 </div>
                 @if ($errors->has('code'))
                     <p class="fi-error-message block text-center" style="display: block !important;">{{ $errors->first('code') }}</p>
@@ -31,14 +31,14 @@
                 <div class="relative group/input">
                     <input id="recovery_code" type="text" name="recovery_code" autocomplete="one-time-code"
                            placeholder="abcde-fghij"
-                           class="fi-input-wrp w-full bg-white border {{ $errors->has('recovery_code') ? 'border-rose-500' : 'border-slate-200' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-mono font-bold text-slate-900 placeholder-slate-300 outline-none text-center text-xl py-6 uppercase">
+                           class="fi-input-wrp w-full bg-white border {{ $errors->has('recovery_code') ? 'border-rose-500' : 'border-slate-200' }} rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-mono font-bold text-slate-900 placeholder-slate-300 outline-none text-center text-xl py-6 uppercase">
                 </div>
                 @if ($errors->has('recovery_code'))
                     <p class="fi-error-message block text-center" style="display: block !important;">{{ $errors->first('recovery_code') }}</p>
                 @endif
             </div>
 
-            <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
+            <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">
                 <span class="relative z-10 flex items-center justify-center gap-3">
                     {{ __('Vstoupit na palubovku') }}
                     <i class="fa-light fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>

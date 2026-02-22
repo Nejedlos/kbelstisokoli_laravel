@@ -34,7 +34,7 @@
             @enderror
         </div>
 
-        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
+        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">
             <span class="relative z-10 flex items-center justify-center gap-3">
                 {{ __('Odeslat instrukce') }}
                 <i class="fa-light fa-chevron-right group-hover/btn:translate-x-1 transition-transform"></i>

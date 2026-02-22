@@ -40,6 +40,9 @@ class UserResource extends Resource
     {
         return [
             RelationManagers\PlayerProfileRelationManager::class,
+            RelationManagers\ParentsRelationManager::class,
+            RelationManagers\ChildrenRelationManager::class,
+            RelationManagers\ConsentsRelationManager::class,
         ];
     }
 

@@ -360,12 +360,24 @@ body.fi-panel-admin .fi-simple-main-ctn {
 }
 
 .fi-input-wrp {
-    background: rgba(255, 255, 255, 0.9) !important;
+    display: flex !important;
+    align-items: center !important;
+    background: #ffffff !important;
     border: 1px solid rgba(var(--brand-blue-rgb, 37, 99, 235), 0.3) !important;
-    border-radius: 1rem !important;
+    border-radius: 9999px !important;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
     transition: all 0.3s ease !important;
     position: relative !important;
+}
+
+.fi-input-wrp-content-ctn {
+    flex: 1 1 0% !important;
+}
+
+.fi-input-wrp-suffix {
+    display: flex !important;
+    align-items: center !important;
+    padding-right: 0.75rem !important;
 }
 
 .fi-input-wrp:hover {
@@ -386,6 +398,17 @@ body.fi-panel-admin .fi-simple-main-ctn {
     font-size: 1rem !important; /* 16px to prevent iOS zoom */
 }
 
+/* Safari/Chrome Autofill Fix */
+.fi-input:-webkit-autofill,
+.fi-input:-webkit-autofill:hover,
+.fi-input:-webkit-autofill:focus,
+.fi-input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--brand-navy) !important;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+    border-radius: 9999px !important;
+}
+
 .fi-input::placeholder {
     color: rgba(var(--brand-navy-rgb), 0.45) !important;
 }
@@ -400,6 +423,12 @@ body.fi-panel-admin .fi-simple-main-ctn {
     border: none !important;
     box-shadow: none !important;
     transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 9999px !important;
 }
 
 .fi-input-wrp-suffix .fi-reveal-btn:hover,
@@ -408,6 +437,10 @@ body.fi-panel-admin .fi-simple-main-ctn {
     color: var(--brand-red) !important;
     opacity: 1 !important;
     background-color: rgba(var(--brand-blue-rgb), 0.1) !important;
+}
+
+.fi-input-wrp:has(.fi-input-wrp-suffix) .fi-input {
+    padding-right: 0.5rem !important;
 }
 
 /* Primary Button - Premium Style */
@@ -420,7 +453,7 @@ button[type="submit"].fi-btn {
     background-color: var(--brand-red) !important;
     background: var(--brand-red) !important;
     color: white !important;
-    border-radius: 1rem !important; /* stejný radius jako inputy */
+    border-radius: 9999px !important; /* stejný radius jako inputy */
     font-weight: 900 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.15em !important;

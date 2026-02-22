@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <button @click="showHelp = false" class="fi-btn fi-color-primary w-full py-4 rounded-2xl text-sm group/btn">
+            <button @click="showHelp = false" class="fi-btn fi-color-primary w-full py-4 rounded-full text-sm group/btn">
                 <span class="relative z-10 flex items-center justify-center gap-3">
                     <i class="fa-light fa-arrow-left"></i>
                     {{ __('Zpět k nastavení') }}
@@ -91,7 +91,7 @@
 
                     <form method="POST" action="{{ route('two-factor.enable') }}">
                         @csrf
-                        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
+                        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">
                             <span class="relative z-10 flex items-center justify-center gap-3">
                                 {{ __('Aktivovat obranu (2FA)') }}
                                 <i class="fa-light fa-shield-check group-hover/btn:scale-110 transition-transform duration-500"></i>
@@ -117,7 +117,7 @@
 
                     <div class="flex flex-col items-center justify-center gap-4">
                         <div class="p-6 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-primary/20 relative group/qr">
-                             <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover/qr:opacity-100 transition-opacity rounded-2xl"></div>
+                             <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover/qr:opacity-100 transition-opacity rounded-full"></div>
                              @php
                                  $svg = $user->twoFactorQrCodeSvg();
                                  $base64Qr = base64_encode($svg);
@@ -139,7 +139,7 @@
                                 setTimeout(() => this.copied = false, 2000);
                             }
                          }"
-                         class="bg-white/5 rounded-2xl p-5 border border-white/10 text-center relative overflow-hidden group/key">
+                         class="bg-white/5 rounded-full p-5 border border-white/10 text-center relative overflow-hidden group/key">
                         <div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 blur-2xl -mr-8 -mt-8"></div>
                         <p class="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">{{ __('Nelze naskenovat? Zadejte klíč:') }}</p>
                         <div @click="copy()" class="cursor-pointer relative">
@@ -169,14 +169,14 @@
                             <div class="relative group/input">
                                 <input id="code" type="text" name="code" inputmode="numeric" autofocus required autocomplete="one-time-code"
                                        placeholder="000 000"
-                                       class="fi-input-wrp w-full bg-white/5 border {{ $errors->has('code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all duration-300 font-black text-white focus:text-slate-900 placeholder-white/20 outline-none tracking-[0.4em] text-center text-3xl py-6">
+                                       class="fi-input-wrp w-full bg-white border {{ $errors->has('code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.4em] text-center text-3xl py-6">
                             </div>
                             @if($errors->has('code'))
                                 <p class="fi-error-message block text-center" style="display: block !important;">{{ $errors->first('code') }}</p>
                             @endif
                         </div>
 
-                        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
+                        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">
                             <span class="relative z-10 flex items-center justify-center gap-3">
                                 {{ __('Potvrdit nahrávku') }}
                                 <i class="fa-light fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>
@@ -254,7 +254,7 @@
                     </div>
 
                     <div class="pt-4">
-                        <a href="{{ session('url.intended') ?? route('filament.admin.pages.dashboard') }}" class="fi-btn fi-color-primary w-full !py-5 rounded-2xl text-base group/btn flex items-center justify-center gap-3">
+                        <a href="{{ session('url.intended') ?? route('filament.admin.pages.dashboard') }}" class="fi-btn fi-color-primary w-full !py-5 rounded-full text-base group/btn flex items-center justify-center gap-3">
                             {{ __('Vstoupit do kabiny') }}
                             <i class="fa-light fa-arrow-right-long group-hover/btn:translate-x-2 transition-transform duration-500"></i>
                         </a>
