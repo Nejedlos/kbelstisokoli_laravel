@@ -226,7 +226,7 @@ class CmsContentSeeder extends Seeder
             ['label' => ['cs' => 'Muži C', 'en' => 'Men C'], 'url' => '/tym/muzi-c', 'sort' => 10],
             ['label' => ['cs' => 'Muži E', 'en' => 'Men E'], 'url' => '/tym/muzi-e', 'sort' => 20],
             ['label' => ['cs' => 'Hlavní web TJ Sokol Kbely Basketbal', 'en' => 'Main Club Website'], 'url' => 'https://www.basketkbely.cz/', 'sort' => 30, 'is_external' => true],
-            ['label' => ['cs' => 'Nábor / Začni hrát', 'en' => 'Recruitment'], 'url' => 'https://www.basketkbely.cz/nabor', 'sort' => 40, 'is_external' => true],
+            ['label' => ['cs' => 'Nábor/Začni hrát', 'en' => 'Recruitment'], 'url' => 'https://www.basketkbely.cz/nabor', 'sort' => 40, 'is_external' => true],
             ['label' => ['cs' => 'Družstva a mládež', 'en' => 'Teams & Youth'], 'url' => 'https://www.basketkbely.cz/druzstva', 'sort' => 50, 'is_external' => true],
         ];
 
@@ -461,7 +461,7 @@ class CmsContentSeeder extends Seeder
                         'text' => 'If you are looking for basketball for children, youth or want to start sporting within the Kbely basketball community, visit the main TJ Sokol Kbely Basketbal website.',
                         'button_text' => 'Go to main club website',
                         'button_url' => 'https://www.basketkbely.cz/',
-                        'secondary_button_text' => 'Contact / Recruitment',
+                        'secondary_button_text' => 'Contact/Recruitment',
                         'secondary_button_url' => '/kontakt',
                     ]
                 ],

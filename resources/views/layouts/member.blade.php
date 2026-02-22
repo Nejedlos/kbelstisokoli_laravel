@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="cs" class="h-full bg-bg">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Členská sekce' }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
+    <title>{{ $title ?? __('Členská sekce') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

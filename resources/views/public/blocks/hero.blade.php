@@ -39,7 +39,7 @@
             'ml-auto text-right max-w-3xl' => $alignment === 'right',
         ])>
             @if($data['eyebrow'] ?? null)
-                <div class="mb-4 inline-flex items-center bg-primary/20 text-primary-light px-3 sm:px-4 py-1.5 rounded-full text-[min(3.2vw,0.875rem)] sm:text-xs md:text-sm font-black uppercase tracking-tight sm:tracking-[0.2em] border border-primary/30 whitespace-nowrap max-w-full overflow-hidden">
+                <div class="mb-4 inline-flex items-center bg-primary/20 text-primary-light px-3 sm:px-4 py-1.5 rounded-full text-[min(3.2vw,0.875rem)] sm:text-xs md:text-sm font-black uppercase tracking-widest-responsive sm:tracking-[0.2em] border border-primary/30 whitespace-nowrap max-w-full overflow-hidden leading-none">
                     <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full mr-2 sm:mr-3 animate-pulse shrink-0"></span>
                     {{ $data['eyebrow'] }}
                 </div>
@@ -73,17 +73,19 @@
                     @endif
 
                     @if($data['cta_tertiary_label'] ?? null)
-                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2.5 text-[min(3.8vw,0.875rem)] sm:text-xs font-black uppercase tracking-normal sm:tracking-[0.2em] text-white/80 hover:text-white transition-all group py-2">
-                            <span class="relative border-b border-white/20 group-hover:border-primary transition-colors pb-1 leading-none">
+                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" target="_blank" rel="noopener" class="inline-flex items-center gap-4 text-[min(4.2vw,0.875rem)] sm:text-sm font-black uppercase tracking-widest-responsive text-white hover:text-white transition-all group py-4 px-5 sm:py-3 sm:px-6 bg-secondary/80 sm:bg-secondary/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl mt-4 sm:mt-0 leading-tight">
+                            <span class="relative border-b border-white/30 group-hover:border-primary transition-colors pb-1 leading-tight text-balance">
                                 {{ $data['cta_tertiary_label'] }}
                             </span>
-                            <i class="fa-solid fa-arrow-up-right text-xs sm:text-xs text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300"></i>
+                            <span class="w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-primary/40">
+                                <i class="fa-solid fa-arrow-up-right text-lg sm:text-sm text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300"></i>
+                            </span>
                         </a>
                     @endif
                 </div>
 
                 @if($data['microtext'] ?? null)
-                    <div class="mt-6 text-sm text-white/60 max-w-xl {{ $alignment === 'center' ? 'mx-auto' : ($alignment === 'right' ? 'ml-auto' : '') }}">
+                    <div class="mt-6 text-sm text-white/60 max-w-xl {{ $alignment === 'center' ? 'mx-auto' : ($alignment === 'right' ? 'ml-auto' : '') }} leading-snug">
                         {{ $data['microtext'] }}
                     </div>
                 @endif

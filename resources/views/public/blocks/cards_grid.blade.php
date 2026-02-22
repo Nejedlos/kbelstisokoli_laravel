@@ -26,7 +26,7 @@
                                 <img src="{{ asset($card['image_url']) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $card['title'] ?? '' }}">
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
                                 @if($card['badge'] ?? null)
-                                    <div class="absolute top-4 left-4 bg-primary text-white text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest px-2.5 sm:px-3 py-1 rounded badge-nowrap max-w-[calc(100%-2rem)] overflow-hidden">
+                                    <div class="absolute top-4 left-4 bg-primary text-white text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive px-2.5 sm:px-3 py-1 rounded badge-nowrap max-w-[calc(100%-2rem)] overflow-hidden">
                                         {{ $card['badge'] }}
                                     </div>
                                 @endif
@@ -61,14 +61,14 @@
                             @if(($card['link'] ?? null) || ($card['secondary_link'] ?? null))
                                 <div class="mt-auto flex flex-wrap gap-x-6 gap-y-4 items-center">
                                     @if($card['link'] ?? null)
-                                        <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1">
+                                        <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest-responsive text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1">
                                             <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
                                             <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                         </a>
                                     @endif
 
                                     @if($card['secondary_link'] ?? null)
-                                        <a href="{{ $card['secondary_link'] }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1">
+                                        <a href="{{ $card['secondary_link'] }}" class="text-[10px] font-bold uppercase tracking-widest-responsive text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1">
                                             {{ $card['secondary_link_label'] ?? 'Program' }}
                                         </a>
                                     @endif
