@@ -33,13 +33,13 @@
             </button>
 
             <!-- Language Switcher -->
-            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full text-[10px] font-black tracking-tighter shadow-sm border border-slate-200">
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full text-[10px] font-black tracking-widest shadow-sm border border-slate-200">
                 <a href="{{ request()->fullUrlWithQuery(['lang' => 'cs']) }}"
-                   class="px-3 py-2 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
+                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
                     CZ
                 </a>
                 <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
-                   class="px-3 py-2 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
+                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
                     EN
                 </a>
             </div>
@@ -96,7 +96,7 @@
             @endauth
 
             <!-- Mobile Toggle -->
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-slate-700 hover:text-primary focus:outline-none transition-colors">
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-3 -mr-2 text-slate-700 hover:text-primary focus:outline-none transition-colors" aria-label="Menu">
                 <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
                 <i x-show="mobileMenuOpen" class="fa-light fa-xmark text-2xl"></i>
             </button>
@@ -118,9 +118,9 @@
                 <input type="text"
                        name="q"
                        placeholder="{{ __('search.placeholder') }}"
-                       class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-6 py-3 text-lg focus:border-primary focus:ring-0 transition-all outline-none pr-12"
+                       class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 md:py-3 text-base md:text-lg focus:border-primary focus:ring-0 transition-all outline-none pr-14"
                        x-init="$watch('searchOpen', value => value && $el.focus())">
-                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
+                <button type="submit" class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors p-2" aria-label="Search">
                     <i class="fa-light fa-magnifying-glass text-xl"></i>
                 </button>
             </form>
@@ -137,14 +137,14 @@
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-4"
          class="lg:hidden bg-white border-t border-slate-100 py-4 absolute w-full shadow-xl">
-        <div class="container flex flex-col gap-4">
+        <div class="container flex flex-col gap-2 py-6">
             @foreach($navigation as $item)
                 <a href="{{ route($item['route']) }}"
-                   class="font-bold uppercase text-base tracking-wide py-2 border-b border-slate-50 {{ request()->routeIs($item['route']) ? 'text-primary' : 'text-slate-700' }}">
+                   class="font-bold uppercase text-base tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 {{ request()->routeIs($item['route']) ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
                     {{ $item['title'] }}
                 </a>
             @endforeach
-            <a href="{{ route('login') }}" class="btn btn-primary mt-4">
+            <a href="{{ route('login') }}" class="btn btn-primary mt-6 py-4">
                 {{ __('Přihlášení pro členy') }}
             </a>
         </div>

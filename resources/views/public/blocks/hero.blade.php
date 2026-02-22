@@ -11,7 +11,7 @@
     'bg-white text-secondary' => $variant === 'minimal',
     'hero-gradient' => $variant === 'standard' && !$imageUrl,
     'py-20 md:py-32' => $variant === 'centered',
-    'py-12 md:py-20' => $variant !== 'centered',
+    'py-16 md:py-24' => $variant !== 'centered',
 ])>
     {{-- Background Image / Overlay --}}
     @if($imageUrl && $variant !== 'minimal')
@@ -39,35 +39,35 @@
             'ml-auto text-right max-w-3xl' => $alignment === 'right',
         ])>
             @if($data['eyebrow'] ?? null)
-                <div class="mb-4 inline-flex items-center bg-primary/20 text-primary-light px-4 py-1.5 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] border border-primary/30">
-                    <span class="w-2 h-2 bg-primary rounded-full mr-3 animate-pulse"></span>
+                <div class="mb-4 inline-flex items-center bg-primary/20 text-primary-light px-3 sm:px-4 py-1.5 rounded-full text-[min(3.2vw,0.875rem)] sm:text-xs md:text-sm font-black uppercase tracking-tight sm:tracking-[0.2em] border border-primary/30 whitespace-nowrap max-w-full overflow-hidden">
+                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full mr-2 sm:mr-3 animate-pulse shrink-0"></span>
                     {{ $data['eyebrow'] }}
                 </div>
             @endif
 
             @if($data['headline'] ?? null)
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight uppercase tracking-tighter">
+                <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.1] uppercase tracking-tighter text-balance">
                     {!! nl2br(e($data['headline'])) !!}
                 </h1>
             @endif
 
             @if($data['subheadline'] ?? null)
-                <p class="text-lg md:text-2xl mb-10 text-slate-300 font-medium leading-relaxed italic border-l-4 border-primary pl-6 py-2">
+                <p class="text-base sm:text-lg md:text-xl lg:text-2xl mb-10 text-slate-300 font-medium leading-relaxed italic border-l-4 border-primary pl-4 md:pl-6 py-2 text-balance">
                     {{ $data['subheadline'] }}
                 </p>
             @endif
 
             @if(($data['cta_label'] ?? null) || ($data['cta_secondary_label'] ?? null) || ($data['cta_tertiary_label'] ?? null))
-                <div class="flex flex-wrap items-center gap-6 {{ $alignment === 'center' ? 'justify-center' : ($alignment === 'right' ? 'justify-end' : '') }}">
+                <div class="flex flex-wrap items-center gap-4 sm:gap-6 {{ $alignment === 'center' ? 'justify-center' : ($alignment === 'right' ? 'justify-end' : '') }}">
                     @if($data['cta_label'] ?? null)
-                        <a href="{{ $data['cta_url'] ?? '#' }}" class="btn btn-primary btn-glow group">
+                        <a href="{{ $data['cta_url'] ?? '#' }}" class="btn btn-primary btn-glow group w-full sm:w-auto">
                             <span>{{ $data['cta_label'] }}</span>
                             <i class="fa-light fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                         </a>
                     @endif
 
                     @if($data['cta_secondary_label'] ?? null)
-                        <a href="{{ $data['cta_secondary_url'] ?? '#' }}" class="btn btn-outline-white">
+                        <a href="{{ $data['cta_secondary_url'] ?? '#' }}" class="btn btn-outline-white w-full sm:w-auto">
                             <span>{{ $data['cta_secondary_label'] }}</span>
                         </a>
                     @endif

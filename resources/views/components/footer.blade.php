@@ -42,8 +42,8 @@
                     </p>
                 </div>
 
-                <div class="inline-flex items-center bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <span class="w-1.5 h-1.5 bg-primary rounded-full mr-2 animate-pulse"></span>
+                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest text-slate-400 badge-nowrap max-w-full overflow-hidden">
+                    <span class="w-1.5 h-1.5 bg-primary rounded-full mr-2 animate-pulse shrink-0"></span>
                     {{ __('footer.brand_badge') }}
                 </div>
             </div>
@@ -125,19 +125,19 @@
                     <ul class="space-y-4 text-sm">
                         @if(data_get($branding, 'contact.email'))
                             <li class="flex items-center gap-4 group">
-                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                <a href="mailto:{{ $branding['contact']['email'] }}" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
                                     <i class="fa-light fa-envelope"></i>
-                                </div>
-                                <a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary transition-colors font-bold break-all">{{ $branding['contact']['email'] }}</a>
+                                </a>
+                                <a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary transition-colors font-bold break-all py-2">{{ $branding['contact']['email'] }}</a>
                             </li>
                         @endif
 
                         @if(data_get($branding, 'contact.phone'))
                             <li class="flex items-center gap-4 group">
-                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
                                     <i class="fa-light fa-phone"></i>
-                                </div>
-                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="hover:text-primary transition-colors font-bold">{{ $branding['contact']['phone'] }}</a>
+                                </a>
+                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="hover:text-primary transition-colors font-bold py-2">{{ $branding['contact']['phone'] }}</a>
                             </li>
                         @endif
 
@@ -182,22 +182,22 @@
 
     {{-- Bottom Bar --}}
     <div class="bg-black/40 border-t border-white/5 text-slate-500 text-xs md:text-sm">
-        <div class="container py-10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="container py-10 md:py-8 flex flex-col md:flex-row items-center justify-between gap-10 md:gap-8">
             <div class="text-center md:text-left">
-                <div class="font-bold text-slate-300 mb-2 uppercase tracking-tight">
+                <div class="font-bold text-slate-300 mb-2 uppercase tracking-tight text-balance">
                     {{ brand_text($branding['footer_text'] ?? ('© ' . date('Y') . ' ' . __('footer.brand_title'))) }}
                 </div>
                 <div class="flex items-center justify-center md:justify-start gap-4">
-                    <div class="w-10 h-px bg-primary/30"></div>
-                    <span class="uppercase tracking-[0.2em] text-[10px] font-black text-slate-500">
+                    <div class="w-10 h-px bg-primary/30 hidden xs:block"></div>
+                    <span class="uppercase tracking-[0.2em] text-[10px] font-black text-slate-500 badge-nowrap">
                         {{ __('footer.bottom_part_of') }}
                     </span>
                 </div>
             </div>
 
-            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-4">
-                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-all uppercase tracking-[0.15em] text-[10px] font-black group flex items-center">
-                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-8 gap-y-6 md:gap-x-6 md:gap-y-4">
+                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-all uppercase tracking-[0.15em] text-[10px] font-black group flex items-center py-2">
+                    <span class="w-1.5 h-1.5 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Kontakt') }}
                 </a>
 

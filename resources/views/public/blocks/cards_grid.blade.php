@@ -26,22 +26,22 @@
                                 <img src="{{ asset($card['image_url']) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $card['title'] ?? '' }}">
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
                                 @if($card['badge'] ?? null)
-                                    <div class="absolute top-4 left-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded">
+                                    <div class="absolute top-4 left-4 bg-primary text-white text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest px-2.5 sm:px-3 py-1 rounded badge-nowrap max-w-[calc(100%-2rem)] overflow-hidden">
                                         {{ $card['badge'] }}
                                     </div>
                                 @endif
                             </div>
                         @endif
-                        <div class="p-8 flex flex-col h-full flex-grow">
+                        <div class="p-6 md:p-8 flex flex-col h-full flex-grow">
                             <div class="mb-6 flex items-center justify-between">
                                 @if($card['icon'] ?? null)
-                                    <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all duration-300">
                                         {{-- Pokud je to cesta k souboru z FileUpload --}}
                                         @if(str_contains($card['icon'], '/'))
-                                            <img src="{{ asset('storage/' . $card['icon']) }}" class="w-10 h-10 object-contain" alt="">
+                                            <img src="{{ asset('storage/' . $card['icon']) }}" class="w-8 h-8 md:w-10 md:h-10 object-contain" alt="">
                                         @else
                                             {{-- Pokud je to název FontAwesome ikony --}}
-                                            <i class="fa-light fa-{{ $card['icon'] }} text-3xl"></i>
+                                            <i class="fa-light fa-{{ $card['icon'] }} text-2xl md:text-3xl"></i>
                                         @endif
                                     </div>
                                 @endif
@@ -59,16 +59,16 @@
                             </p>
 
                             @if(($card['link'] ?? null) || ($card['secondary_link'] ?? null))
-                                <div class="mt-auto flex flex-wrap gap-4 items-center">
+                                <div class="mt-auto flex flex-wrap gap-x-6 gap-y-4 items-center">
                                     @if($card['link'] ?? null)
-                                        <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest text-[10px] text-slate-400 group-hover:text-primary transition-colors">
+                                        <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1">
                                             <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
-                                            <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8"></div>
+                                            <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                         </a>
                                     @endif
 
                                     @if($card['secondary_link'] ?? null)
-                                        <a href="{{ $card['secondary_link'] }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4">
+                                        <a href="{{ $card['secondary_link'] }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1">
                                             {{ $card['secondary_link_label'] ?? 'Program' }}
                                         </a>
                                     @endif

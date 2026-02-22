@@ -44,7 +44,7 @@
         ])>
             @if($data['title'] ?? null)
                 <h2 @class([
-                    'text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-8 leading-tight',
+                    'text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-8 leading-[1.1] text-balance',
                     'text-white' => in_array($style, ['primary', 'secondary']),
                     'text-secondary' => in_array($style, ['outline', 'light']),
                 ])>
@@ -70,7 +70,7 @@
             ])>
                 @if($data['button_text'] ?? null)
                     <a href="{{ $data['button_url'] ?? '#' }}" @class([
-                        'btn px-12 py-5 text-xl font-black shadow-2xl transition-all duration-300 transform hover:scale-105 group',
+                        'btn px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl font-black shadow-2xl transition-all duration-300 transform hover:scale-105 group w-full sm:w-auto',
                         'bg-white text-primary hover:bg-slate-50' => $style === 'primary',
                         'bg-primary text-white hover:bg-primary-hover' => in_array($style, ['secondary', 'light']),
                         'btn-primary' => $style === 'outline',
@@ -82,7 +82,7 @@
 
                 @if($data['secondary_button_text'] ?? null)
                     <a href="{{ $data['secondary_button_url'] ?? '#' }}" @class([
-                        'btn px-12 py-5 text-xl font-black transition-all duration-300 transform hover:scale-105 group',
+                        'btn px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl font-black transition-all duration-300 transform hover:scale-105 group w-full sm:w-auto',
                         'btn-outline-white' => in_array($style, ['primary', 'secondary']),
                         'btn-outline-primary' => in_array($style, ['outline', 'light']),
                     ])>
