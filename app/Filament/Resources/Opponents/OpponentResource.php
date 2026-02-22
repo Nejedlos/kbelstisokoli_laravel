@@ -33,7 +33,10 @@ class OpponentResource extends Resource
         return __('admin.navigation.resources.opponent.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-shield-check';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-shield';
+    }
 
     public static function getNavigationSort(): ?int
     {

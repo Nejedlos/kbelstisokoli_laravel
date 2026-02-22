@@ -18,7 +18,10 @@ class ExternalStatSourceResource extends Resource
 {
     protected static ?string $model = ExternalStatSource::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-cloud-arrow-down';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-cloud-arrow-down';
+    }
 
     public static function getNavigationGroup(): ?string
     {

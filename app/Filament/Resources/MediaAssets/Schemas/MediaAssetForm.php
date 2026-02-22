@@ -10,6 +10,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class MediaAssetForm
@@ -18,11 +19,12 @@ class MediaAssetForm
     {
         return $schema
             ->components([
-                Section::make('Soubor')
+                Section::make(new HtmlString('<i class="fa-light fa-file-arrow-up fa-fw mr-1"></i> Soubor'))
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('file')
                             ->label('Nahrát soubor')
                             ->collection('default')
+                            ->image()
                             // Dynamický disk podle úrovně přístupu
                             ->disk(fn ($get) => $get('access_level') === 'public' ? 'media_public' : 'media_private')
                             // Čištění názvu souboru při nahrávání
@@ -39,7 +41,7 @@ class MediaAssetForm
                             ->hint('Podporovány jsou obrázky a dokumenty (PDF).'),
                     ]),
 
-                Section::make('Metadata')
+                Section::make(new HtmlString('<i class="fa-light fa-info-circle fa-fw mr-1"></i> Metadata'))
                     ->description('Popisné informace o médiu pro SEO a přístupnost.')
                     ->schema([
                         Grid::make(2)
@@ -65,7 +67,7 @@ class MediaAssetForm
                             ->rows(3),
                     ]),
 
-                Section::make('Nastavení')
+                Section::make(new HtmlString('<i class="fa-light fa-gear fa-fw mr-1"></i> Nastavení'))
                     ->schema([
                         Grid::make(3)
                             ->schema([

@@ -17,14 +17,14 @@ class AuditLogResource extends Resource
 {
     protected static ?string $model = AuditLog::class;
 
-    public static function getNavigationIcon(): ?string
-    {
-        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-clipboard-list fa-fw"></i>');
-    }
-
     public static function getNavigationLabel(): string
     {
         return 'Audit Log';
+    }
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-clipboard-list';
     }
 
     public static function getNavigationSort(): ?int

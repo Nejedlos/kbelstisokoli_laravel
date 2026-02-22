@@ -35,7 +35,10 @@ class ClubEventResource extends Resource
         return __('admin.navigation.resources.club_event.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-ticket';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-calendar-star';
+    }
 
     public static function getNavigationSort(): ?int
     {

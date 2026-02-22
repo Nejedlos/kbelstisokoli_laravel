@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class PostForm
 {
@@ -23,10 +24,9 @@ class PostForm
             ->components([
                 Tabs::make('Post Tabs')
                     ->tabs([
-                        Tabs\Tab::make('Obsah')
-                            ->icon('heroicon-o-document-text')
+                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-file-lines fa-fw mr-1"></i> Obsah'))
                             ->schema([
-                                Section::make('Základní informace')
+                                Section::make(new HtmlString('<i class="fa-light fa-info-circle fa-fw mr-1"></i> Základní informace'))
                                     ->schema([
                                         TextInput::make('title')
                                             ->label('Titulek novinky')
@@ -47,7 +47,7 @@ class PostForm
                                             ->preload(),
                                     ])->columns(2),
 
-                                Section::make('Text článku')
+                                Section::make(new HtmlString('<i class="fa-light fa-pen-nib fa-fw mr-1"></i> Text článku'))
                                     ->schema([
                                         Textarea::make('excerpt')
                                             ->label('Perex (stručný výtah)')
@@ -61,10 +61,9 @@ class PostForm
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Publikace a média')
-                            ->icon('heroicon-o-paper-airplane')
+                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-photo-film fa-fw mr-1"></i> Publikace a média'))
                             ->schema([
-                                Section::make('Stav publikace')
+                                Section::make(new HtmlString('<i class="fa-light fa-bullhorn fa-fw mr-1"></i> Stav publikace'))
                                     ->schema([
                                         Grid::make(2)
                                             ->schema([
@@ -89,7 +88,7 @@ class PostForm
                                             ->default(true),
                                     ]),
 
-                                Section::make('Média')
+                                Section::make(new HtmlString('<i class="fa-light fa-image fa-fw mr-1"></i> Média'))
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
@@ -108,17 +107,15 @@ class PostForm
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('SEO')
-                            ->icon('heroicon-o-globe-alt')
+                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-magnifying-glass-chart fa-fw mr-1"></i> SEO'))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
-                        Tabs\Tab::make('Vývojář')
-                            ->icon('heroicon-o-code-bracket')
+                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-code fa-fw mr-1"></i> Vývojář'))
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
                             ->schema([
-                                Section::make('Vlastní kódy a skripty')
+                                Section::make(new HtmlString('<i class="fa-light fa-terminal fa-fw mr-1"></i> Vlastní kódy a skripty'))
                                     ->description('Vložte kód, který se provede pouze pro tuto novinku.')
                                     ->schema([
                                         Textarea::make('head_code')

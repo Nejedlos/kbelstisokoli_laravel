@@ -24,6 +24,11 @@ class PostCategoryResource extends Resource
         return __('admin.navigation.groups.content');
     }
 
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-tags';
+    }
+
     public static function getModelLabel(): string
     {
         return __('admin.navigation.resources.post_category.label');

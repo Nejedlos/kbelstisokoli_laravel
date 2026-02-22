@@ -17,9 +17,14 @@ use Filament\Notifications\Notification;
 
 class BrandingSettings extends Page
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.navigation.pages.branding');
+    }
+
     public static function getNavigationIcon(): ?string
     {
-        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-palette fa-fw"></i>');
+        return 'fa-light-palette';
     }
 
     public static function getNavigationGroup(): ?string
@@ -30,11 +35,6 @@ class BrandingSettings extends Page
     public static function getNavigationSort(): ?int
     {
         return 1;
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('admin.navigation.pages.branding');
     }
 
     public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable

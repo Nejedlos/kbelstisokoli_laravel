@@ -18,7 +18,10 @@ class StatisticSetResource extends Resource
 {
     protected static ?string $model = StatisticSet::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-presentation-chart-bar';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-chart-column';
+    }
 
     public static function getNavigationGroup(): ?string
     {

@@ -17,7 +17,10 @@ class MenuResource extends Resource
 {
     protected static ?string $model = Menu::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-bars-3';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-bars';
+    }
 
     public static function getNavigationGroup(): ?string
     {

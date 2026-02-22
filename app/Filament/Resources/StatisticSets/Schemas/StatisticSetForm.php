@@ -21,7 +21,7 @@ class StatisticSetForm
                 Tabs::make('StatisticSet Tabs')
                     ->tabs([
                         Tabs\Tab::make('Základní informace')
-                            ->icon('heroicon-o-information-circle')
+                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-circle-info fa-fw"></i>'))
                             ->schema([
                                 Section::make('Metadata')
                                     ->schema([
@@ -81,7 +81,7 @@ class StatisticSetForm
                             ]),
 
                         Tabs\Tab::make('Konfigurace sloupců')
-                            ->icon('heroicon-o-table-cells')
+                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-table-cells fa-fw"></i>'))
                             ->schema([
                                 Section::make('Definice tabulky')
                                     ->description('Definujte sloupce, které se budou v této tabulce zobrazovat.')
@@ -114,7 +114,7 @@ class StatisticSetForm
                             ]),
 
                         Tabs\Tab::make('Rozsah (Scope)')
-                            ->icon('heroicon-o-funnel')
+                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-filter fa-fw"></i>'))
                             ->schema([
                                 Section::make('Filtry a vazby')
                                     ->description('K čemu se tato sada statistik vztahuje (vazby jsou informativní pro renderování).')

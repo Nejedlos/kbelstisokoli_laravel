@@ -35,7 +35,10 @@ class TrainingResource extends Resource
         return __('admin.navigation.resources.training.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-clock';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-basketball';
+    }
 
     public static function getNavigationSort(): ?int
     {

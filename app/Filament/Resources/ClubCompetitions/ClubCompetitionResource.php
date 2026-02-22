@@ -18,7 +18,10 @@ class ClubCompetitionResource extends Resource
 {
     protected static ?string $model = ClubCompetition::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-trophy';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-trophy';
+    }
 
     public static function getNavigationGroup(): ?string
     {

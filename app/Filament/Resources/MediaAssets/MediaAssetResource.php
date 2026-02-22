@@ -33,7 +33,10 @@ class MediaAssetResource extends Resource
         return __('admin.navigation.resources.media_asset.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-photo';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-images';
+    }
 
     public static function getNavigationSort(): ?int
     {

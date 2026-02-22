@@ -22,7 +22,7 @@ class PageForm
                 Tabs::make('Page Tabs')
                     ->tabs([
                         Tabs\Tab::make('Obsah')
-                            ->icon('heroicon-o-document-duplicate')
+                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-copy fa-fw"></i>'))
                             ->schema([
                                 Section::make('Základní informace')
                                     ->schema([
@@ -52,7 +52,7 @@ class PageForm
                             ]),
 
                         Tabs\Tab::make('Nastavení')
-                            ->icon('heroicon-o-cog-6-tooth')
+                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-gear fa-fw"></i>'))
                             ->schema([
                                 Section::make('Stav a viditelnost')
                                     ->schema([
@@ -76,13 +76,13 @@ class PageForm
                             ]),
 
                         Tabs\Tab::make('SEO')
-                            ->icon('heroicon-o-globe-alt')
+                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-globe fa-fw"></i>'))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
                         Tabs\Tab::make('Vývojář')
-                            ->icon('heroicon-o-code-bracket')
+                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-code fa-fw"></i>'))
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
                             ->schema([
                                 Section::make('Vlastní kódy a skripty')

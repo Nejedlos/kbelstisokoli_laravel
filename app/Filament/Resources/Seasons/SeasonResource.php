@@ -33,7 +33,10 @@ class SeasonResource extends Resource
         return __('admin.navigation.resources.season.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-calendar';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-calendar-days';
+    }
 
     public static function getNavigationSort(): ?int
     {

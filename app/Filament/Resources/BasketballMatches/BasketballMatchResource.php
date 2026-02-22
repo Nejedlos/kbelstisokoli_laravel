@@ -35,7 +35,10 @@ class BasketballMatchResource extends Resource
         return __('admin.navigation.resources.basketball_match.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-trophy';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-basketball-hoop';
+    }
 
     public static function getNavigationSort(): ?int
     {

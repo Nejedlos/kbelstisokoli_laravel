@@ -18,9 +18,14 @@ class CronTaskResource extends Resource
 {
     protected static ?string $model = CronTask::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.navigation.resources.cron_task.plural_label');
+    }
+
     public static function getNavigationIcon(): ?string
     {
-        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-clock fa-fw"></i>');
+        return 'fa-light-clock';
     }
 
     public static function getNavigationGroup(): ?string

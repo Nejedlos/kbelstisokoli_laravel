@@ -33,7 +33,10 @@ class TeamResource extends Resource
         return __('admin.navigation.resources.team.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-users';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-user-group';
+    }
 
     public static function getNavigationSort(): ?int
     {

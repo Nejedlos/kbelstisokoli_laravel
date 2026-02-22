@@ -28,6 +28,24 @@ Ikony vkládáme výhradně ve stylu **Light** (např. pomocí tříd `fa-light`
 <i class="fa-duotone fa-light fa-user"></i>
 ```
 
+## Použití v administraci (Filament)
+
+Ve Filamentu používáme dva způsoby vkládání ikon:
+
+1. **Sidebar (Navigace):** V `AdminPanelProvider.php` jsou zaregistrovány aliasy ikon (metoda `->icons()`), které vrací `HtmlString`. V Resource se pak na ně odkazujeme v `getNavigationIcon()`.
+   
+   *Příklad v Resource:*
+   ```php
+   public static function getNavigationIcon(): ?string {
+       return 'fa-light-users';
+   }
+   ```
+
+2. **Ostatní komponenty (Actions, Tabs, Sections):** Používáme `HtmlString` přímo v metodě `icon()`:
+   ```php
+   Action::make('edit')->icon(new HtmlString('<i class="fa-light fa-pencil"></i>'))
+   ```
+
 Díky verzi Pro jsou k dispozici všechny styly, ale v tomto projektu používáme pouze:
 - Light (`fa-light`)
 - Duotone Light (`fa-duotone fa-light`)

@@ -33,7 +33,10 @@ class GalleryResource extends Resource
         return __('admin.navigation.resources.gallery.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-photo';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-film';
+    }
 
     public static function getNavigationSort(): ?int
     {

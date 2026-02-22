@@ -18,9 +18,14 @@ class CronLogResource extends Resource
 {
     protected static ?string $model = CronLog::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.navigation.resources.cron_log.plural_label');
+    }
+
     public static function getNavigationIcon(): ?string
     {
-        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-history fa-fw"></i>');
+        return 'fa-light-history';
     }
 
     public static function getNavigationGroup(): ?string

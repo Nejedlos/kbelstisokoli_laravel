@@ -23,14 +23,14 @@ class RedirectResource extends Resource
         return __('admin.navigation.groups.admin_tools');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationLabel(): string
     {
-        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-shuffle fa-fw"></i>');
+        return __('admin.navigation.resources.redirect.plural_label');
     }
 
-    public static function getModelLabel(): string
+    public static function getNavigationIcon(): ?string
     {
-        return __('admin.navigation.resources.redirect.label');
+        return 'fa-light-shuffle';
     }
 
     public static function getPluralModelLabel(): string

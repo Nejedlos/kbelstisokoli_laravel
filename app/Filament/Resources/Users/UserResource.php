@@ -21,9 +21,9 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): ?string
     {
-        return new HtmlString('<i class="fa-light fa-users fa-fw"></i>');
+        return 'fa-light-users';
     }
 
     public static function getNavigationGroup(): ?string

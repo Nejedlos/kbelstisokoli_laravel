@@ -12,7 +12,10 @@ class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-lock-closed';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-key';
+    }
 
     public static function getNavigationGroup(): ?string
     {

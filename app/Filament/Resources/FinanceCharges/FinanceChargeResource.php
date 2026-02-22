@@ -18,7 +18,10 @@ class FinanceChargeResource extends Resource
 {
     protected static ?string $model = FinanceCharge::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-file-invoice-dollar';
+    }
 
     public static function getNavigationGroup(): ?string
     {

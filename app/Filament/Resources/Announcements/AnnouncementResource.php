@@ -18,7 +18,10 @@ class AnnouncementResource extends Resource
 {
     protected static ?string $model = Announcement::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-megaphone';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-bullhorn';
+    }
 
     public static function getNavigationGroup(): ?string
     {

@@ -13,7 +13,10 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-shield-check';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-user-shield';
+    }
 
     public static function getNavigationGroup(): ?string
     {

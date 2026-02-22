@@ -21,6 +21,11 @@ class PostResource extends Resource
         return __('admin.navigation.groups.content');
     }
 
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-newspaper';
+    }
+
     public static function getModelLabel(): string
     {
         return __('admin.navigation.resources.post.label');

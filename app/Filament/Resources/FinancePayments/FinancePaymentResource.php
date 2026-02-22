@@ -18,7 +18,10 @@ class FinancePaymentResource extends Resource
 {
     protected static ?string $model = FinancePayment::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-money-bill-transfer';
+    }
 
     public static function getNavigationGroup(): ?string
     {

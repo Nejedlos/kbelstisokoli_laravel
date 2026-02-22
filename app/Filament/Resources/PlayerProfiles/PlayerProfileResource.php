@@ -18,7 +18,10 @@ class PlayerProfileResource extends Resource
 {
     protected static ?string $model = PlayerProfile::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-user-circle';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'fa-light-id-card';
+    }
 
     public static function getNavigationGroup(): ?string
     {
