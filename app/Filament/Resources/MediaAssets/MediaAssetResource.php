@@ -35,6 +35,11 @@ class MediaAssetResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-photo';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return \App\Filament\Resources\MediaAssets\Schemas\MediaAssetForm::configure($schema);

@@ -35,6 +35,11 @@ class ClubCompetitionResource extends Resource
         return __('admin.navigation.resources.club_competition.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ClubCompetitionForm::configure($schema);

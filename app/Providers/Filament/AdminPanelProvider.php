@@ -75,6 +75,26 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->navigationGroups([
+                \Filament\Navigation\NavigationGroup::make()
+                     ->label(fn (): string => __('admin.navigation.groups.sports_agenda')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.communication')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.user_management')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.statistics')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.content')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.media')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.finance')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.settings')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.system_settings')),
+            ])
             ->widgets([
                 AccountWidget::class,
                 \App\Filament\Widgets\AdminKpiOverview::class,

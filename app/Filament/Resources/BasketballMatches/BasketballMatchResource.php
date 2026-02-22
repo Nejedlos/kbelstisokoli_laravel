@@ -37,6 +37,11 @@ class BasketballMatchResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-trophy';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BasketballMatchForm::configure($schema);

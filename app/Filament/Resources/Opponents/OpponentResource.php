@@ -35,6 +35,11 @@ class OpponentResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-shield-check';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 6;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return OpponentForm::configure($schema);

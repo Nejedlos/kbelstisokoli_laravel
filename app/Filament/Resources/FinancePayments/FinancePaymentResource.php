@@ -35,6 +35,11 @@ class FinancePaymentResource extends Resource
         return __('admin.navigation.resources.finance_payment.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return FinancePaymentForm::configure($schema);

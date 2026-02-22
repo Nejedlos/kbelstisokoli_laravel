@@ -35,6 +35,11 @@ class RedirectResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-arrow-path';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return RedirectForm::configure($schema);

@@ -35,6 +35,11 @@ class ExternalStatSourceResource extends Resource
         return __('admin.navigation.resources.external_stat_source.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 3;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ExternalStatSourceForm::configure($schema);

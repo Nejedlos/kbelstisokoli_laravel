@@ -35,6 +35,11 @@ class CronTaskResource extends Resource
         return __('admin.navigation.resources.cron_task.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CronTaskForm::configure($schema);

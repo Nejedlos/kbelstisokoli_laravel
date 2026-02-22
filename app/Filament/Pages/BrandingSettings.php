@@ -24,6 +24,11 @@ class BrandingSettings extends Page
         return __('admin.navigation.groups.settings');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('admin.navigation.pages.branding');

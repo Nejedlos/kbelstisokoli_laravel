@@ -34,6 +34,11 @@ class MenuResource extends Resource
         return __('admin.navigation.resources.menu.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 4;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return MenuForm::configure($schema);

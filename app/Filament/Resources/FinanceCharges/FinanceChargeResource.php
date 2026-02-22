@@ -35,6 +35,11 @@ class FinanceChargeResource extends Resource
         return __('admin.navigation.resources.finance_charge.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return FinanceChargeForm::configure($schema);

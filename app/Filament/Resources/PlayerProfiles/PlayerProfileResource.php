@@ -35,6 +35,11 @@ class PlayerProfileResource extends Resource
         return __('admin.navigation.resources.player_profile.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PlayerProfileForm::configure($schema);

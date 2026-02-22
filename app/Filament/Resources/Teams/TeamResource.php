@@ -35,6 +35,11 @@ class TeamResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-users';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 3;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return TeamForm::configure($schema);

@@ -39,6 +39,11 @@ class UserResource extends Resource
         return __('admin.navigation.resources.user.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);

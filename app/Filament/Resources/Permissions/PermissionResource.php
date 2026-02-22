@@ -29,6 +29,11 @@ class PermissionResource extends Resource
         return __('admin.navigation.resources.permission.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 4;
+    }
+
     public static function table(Table $table): Table
     {
         return $table

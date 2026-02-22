@@ -35,6 +35,11 @@ class GalleryResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-photo';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return \App\Filament\Resources\Galleries\Schemas\GalleryForm::configure($schema);

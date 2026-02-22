@@ -30,6 +30,11 @@ class RoleResource extends Resource
         return __('admin.navigation.resources.role.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 3;
+    }
+
     public static function table(Table $table): Table
     {
         return $table

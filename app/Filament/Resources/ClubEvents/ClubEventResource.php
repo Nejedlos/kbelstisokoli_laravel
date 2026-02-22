@@ -37,6 +37,11 @@ class ClubEventResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-ticket';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 4;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ClubEventForm::configure($schema);

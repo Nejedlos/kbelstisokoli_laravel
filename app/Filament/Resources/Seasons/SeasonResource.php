@@ -35,6 +35,11 @@ class SeasonResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-calendar';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 5;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SeasonForm::configure($schema);

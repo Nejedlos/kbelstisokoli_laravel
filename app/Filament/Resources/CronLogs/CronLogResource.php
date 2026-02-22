@@ -35,6 +35,11 @@ class CronLogResource extends Resource
         return __('admin.navigation.resources.cron_log.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CronLogForm::configure($schema);

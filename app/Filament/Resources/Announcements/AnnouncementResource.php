@@ -35,6 +35,11 @@ class AnnouncementResource extends Resource
         return __('admin.navigation.resources.announcement.plural_label');
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AnnouncementForm::configure($schema);
