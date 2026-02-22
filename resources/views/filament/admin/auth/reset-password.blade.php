@@ -1,6 +1,6 @@
 @component('filament.admin.auth.partials.shell', [
     'title' => 'Nové heslo',
-    'subtitle' => 'Nastavte si bezpečné heslo k vašemu účtu',
+    'subtitle' => 'Zavažte tkaničky – nastavíme nové heslo a jde se zpátky do hry.',
     'icon' => 'fa-lock-keyhole',
     'showBack' => true,
     'backLabel' => 'Zpět na přihlášení',

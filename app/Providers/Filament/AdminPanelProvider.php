@@ -28,7 +28,6 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RequestPasswordReset;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Auth\EmailVerificationPrompt;
-use App\Filament\Pages\Auth\Register;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -55,7 +54,6 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
-            ->registration(Register::class)
             ->brandName($branding['club_name'])
             ->brandLogo($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
             ->favicon($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)

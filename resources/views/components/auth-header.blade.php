@@ -11,13 +11,14 @@
 @endphp
 
 <div class="auth-header-container animate-fade-in-down mb-8">
+    {{-- Decorative background icon (always visible, even when logo exists) --}}
+    <div class="auth-header-visual mb-8" aria-hidden="true">
+        <i class="fa-duotone fa-light {{ $icon }} auth-icon-bg"></i>
+    </div>
+
     @if($logoPath)
         <div class="auth-logo-wrapper mb-6">
             <img src="{{ asset('storage/' . $logoPath) }}" class="auth-logo-img" alt="{{ $clubName }}">
-        </div>
-    @else
-        <div class="auth-icon-container mb-6">
-            <i class="fa-duotone fa-light {{ $icon }} text-5xl text-primary icon-bounce icon-glow"></i>
         </div>
     @endif
 

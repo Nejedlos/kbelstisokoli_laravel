@@ -1,6 +1,6 @@
 @component('filament.admin.auth.partials.shell', [
     'title' => 'Zapomenuté heslo',
-    'subtitle' => 'Zašleme vám odkaz pro obnovu přístupu',
+    'subtitle' => 'Stává se i nejlepším střelcům. Pošleme přihrávku na nový start.',
     'icon' => 'fa-key-skeleton',
     'showBack' => true,
     'backLabel' => 'Zpět na přihlášení',
