@@ -36,7 +36,10 @@ class AdminPanelProvider extends PanelProvider
     {
         FilamentView::registerRenderHook(
             'panels::head.end',
-            fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/filament-auth.css', 'resources/js/filament-error-handler.js'])"),
+            fn (): string => \Illuminate\Support\Facades\Blade::render(
+                "<style>{!! app(\App\Services\BrandingService::class)->getCssVariables() !!}</style>" .
+                "@vite(['resources/css/filament-auth.css', 'resources/js/filament-error-handler.js'])"
+            ),
         );
     }
 

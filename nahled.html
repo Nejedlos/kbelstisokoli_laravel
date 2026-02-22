@@ -14,7 +14,7 @@
 
 
     <title>
-        Přihlášení
+        Obnovení hesla
         -
         Kbelští sokoli C &amp; E
     </title>
@@ -109,65 +109,6 @@
 <body
     class="fi-body fi-panel-admin"
 >
-<div wire:key="fls-outside-panels" wire:snapshot="{&quot;data&quot;:[],&quot;memo&quot;:{&quot;id&quot;:&quot;AamxzHnjDEwrNLtJWz8y&quot;,&quot;name&quot;:&quot;language-switch-component&quot;,&quot;path&quot;:&quot;admin\/login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;cs&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;bea7c490acb6214f7a68e370991f577b268ca7b2e816883ac2d7af520cac47eb&quot;}" wire:effects="{&quot;partials&quot;:[],&quot;listeners&quot;:[&quot;language-switched&quot;]}" wire:id="AamxzHnjDEwrNLtJWz8y" wire:name="language-switch-component">
-    <!--[if BLOCK]><![endif]-->        <div class="fls-display-on fixed w-fit flex p-4 z-50 top-0 justify-end">
-    <div class="rounded-lg bg-gray-50 dark:bg-gray-950">
-        <div
-            x-data="filamentDropdown"
-            class="fi-dropdown fi-dropdown fi-user-menu" data-nosnippet="true"
-        >
-            <div
-                x-on:keyup.enter="toggle($event)"
-                x-on:keyup.space="toggle($event)"
-                x-on:mousedown="if ($event.button === 0) toggle($event)"
-                class="fi-dropdown-trigger"
-            >
-                <div
-                    class="flex items-center justify-center w-9 h-9 language-switch-trigger text-primary-600 bg-primary-500/10 rounded-lg"
-                    x-tooltip="{
-                content: '\u010ce\u0161tina',
-                theme: $store.theme,
-                placement: 'right'
-            }"
-                >
-                    <!--[if BLOCK]><![endif]-->                <span class="font-semibold text-md">CS</span>
-                    <!--[if ENDBLOCK]><![endif]-->        </div>
-            </div>
-
-            <!--[if BLOCK]><![endif]-->        <div
-            x-cloak
-            x-float.placement.bottom-end.flip.teleport.offset="{ offset: 8,  }"
-            x-ref="panel"
-            x-transition:enter-start="fi-opacity-0"
-            x-transition:leave-end="fi-opacity-0"
-            class="fi-dropdown-panel w-fit fls-dropdown-width fi-scrollable"
-            style="max-height: max-content;"
-        >
-            <div class="fi-dropdown-list !border-t-0 space-y-1 !p-2.5">
-                <!--[if BLOCK]><![endif]-->            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <button
-                type="button"
-                wire:click="changeLocale('en')"
-
-                class="flex items-center w-full transition-colors duration-75 rounded-md outline-none fi-dropdown-list-item whitespace-nowrap disabled:pointer-events-none disabled:opacity-70 fi-dropdown-list-item-color-gray hover:bg-gray-950/5 focus:bg-gray-950/5 dark:hover:bg-white/5 dark:focus:bg-white/5 justify-start space-x-2 rtl:space-x-reverse p-1"
-            >
-
-                <!--[if BLOCK]><![endif]-->                        <!--[if BLOCK]><![endif]-->                            <span
-                class="flex items-center justify-center flex-shrink-0 w-7 h-7 p-2 text-xs font-semibold group-hover:bg-white group-hover:text-primary-600 group-hover:border group-hover:border-primary-500/10 group-focus:text-white bg-primary-500/10 text-primary-600 rounded-lg"
-            >
-                                EN
-                            </span>
-                <!--[if ENDBLOCK]><![endif]-->                        <span class="text-sm font-medium text-gray-600 hover:bg-transparent dark:text-gray-200">
-                            Angličtina
-                        </span>
-
-                <!--[if ENDBLOCK]><![endif]-->                </button>
-                <!--[if ENDBLOCK]><![endif]-->        <!--[if ENDBLOCK]><![endif]-->
-            </div>
-        </div>
-            <!--[if ENDBLOCK]><![endif]--></div>
-    </div>
-</div>
-    <!--[if ENDBLOCK]><![endif]--></div>
 
 
 <div class="fi-simple-layout">
@@ -178,18 +119,23 @@
         <main
             class="fi-simple-main fi-width-lg"
         >
-            <div wire:snapshot="{&quot;data&quot;:{&quot;data&quot;:[{&quot;email&quot;:null,&quot;password&quot;:null,&quot;remember&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],&quot;userUndertakingMultiFactorAuthentication&quot;:null,&quot;mountedActions&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;defaultAction&quot;:null,&quot;defaultActionArguments&quot;:null,&quot;defaultActionContext&quot;:null,&quot;defaultTableAction&quot;:null,&quot;defaultTableActionRecord&quot;:null,&quot;defaultTableActionArguments&quot;:null,&quot;componentFileAttachments&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;areSchemaStateUpdateHooksDisabledForTesting&quot;:false,&quot;discoveredSchemaNames&quot;:[[&quot;form&quot;,&quot;content&quot;],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;q0SAqqkabZJoJ7Z3PmYS&quot;,&quot;name&quot;:&quot;App\\Filament\\Pages\\Auth\\Login&quot;,&quot;path&quot;:&quot;admin\/login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;cs&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;444e7d2261684df94bf6e24e2cb00b324c47aa785fb5a0c3c6b6d2130fc2927d&quot;}" wire:effects="{&quot;partials&quot;:[],&quot;url&quot;:{&quot;defaultAction&quot;:{&quot;as&quot;:&quot;action&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionArguments&quot;:{&quot;as&quot;:&quot;actionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionContext&quot;:{&quot;as&quot;:&quot;actionContext&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableAction&quot;:{&quot;as&quot;:&quot;tableAction&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionRecord&quot;:{&quot;as&quot;:&quot;tableActionRecord&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionArguments&quot;:{&quot;as&quot;:&quot;tableActionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null}},&quot;listeners&quot;:[&quot;refresh-page&quot;]}" wire:id="q0SAqqkabZJoJ7Z3PmYS" wire:name="App\Filament\Pages\Auth\Login" class="auth-gradient fi-simple-layout min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+            <div wire:snapshot="{&quot;data&quot;:{&quot;data&quot;:[{&quot;email&quot;:null},{&quot;s&quot;:&quot;arr&quot;}],&quot;mountedActions&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;defaultAction&quot;:null,&quot;defaultActionArguments&quot;:null,&quot;defaultActionContext&quot;:null,&quot;defaultTableAction&quot;:null,&quot;defaultTableActionRecord&quot;:null,&quot;defaultTableActionArguments&quot;:null,&quot;componentFileAttachments&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;areSchemaStateUpdateHooksDisabledForTesting&quot;:false,&quot;discoveredSchemaNames&quot;:[[&quot;form&quot;,&quot;content&quot;],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;MlKLQQ9tqhKgi9igPo93&quot;,&quot;name&quot;:&quot;App\\Filament\\Pages\\Auth\\RequestPasswordReset&quot;,&quot;path&quot;:&quot;admin\/password-reset\/request&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;cs&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;6ea68650cee815046f1f4a66de75ce07d16f18e3e9eff042691d927ea7d98262&quot;}" wire:effects="{&quot;partials&quot;:[],&quot;url&quot;:{&quot;defaultAction&quot;:{&quot;as&quot;:&quot;action&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionArguments&quot;:{&quot;as&quot;:&quot;actionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionContext&quot;:{&quot;as&quot;:&quot;actionContext&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableAction&quot;:{&quot;as&quot;:&quot;tableAction&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionRecord&quot;:{&quot;as&quot;:&quot;tableActionRecord&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionArguments&quot;:{&quot;as&quot;:&quot;tableActionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null}},&quot;listeners&quot;:[&quot;refresh-page&quot;]}" wire:id="MlKLQQ9tqhKgi9igPo93" wire:name="App\Filament\Pages\Auth\RequestPasswordReset" class="auth-gradient min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
                 <style>
                     :root {
                         --color-primary: #E11D48;
-                        --color-primary-hover: #be123c;
+                        --color-primary-rgb: 225, 29, 72;
                         --color-brand-red: #E11D48;
+                        --color-brand-red-rgb: 225, 29, 72;
+                        --color-brand-navy: #0B1F3A;
+                        --color-brand-navy-rgb: 11, 31, 58;
+                        --color-brand-blue: #2563EB;
+                        --color-brand-blue-rgb: 37, 99, 235;
                     }
                 </style>
 
                 <div class="floating-objects pointer-events-none">
                     <div class="floating-ball w-64 h-64 top-[-10%] left-[-5%]"></div>
-                    <div class="floating-ball w-96 h-96 bottom-[-15%] right-[-10%] opacity-5"></div>
+                    <div class="floating-ball w-96 h-96 bottom-[-15%] right-[-10%]"></div>
                 </div>
 
                 <div class="w-full max-w-[28rem] relative z-10">
@@ -200,17 +146,17 @@
 
                     <div class="auth-header-container animate-fade-in-down mb-8">
                         <!--[if BLOCK]><![endif]-->        <div class="auth-icon-container mb-6">
-                        <i class="fa-duotone fa-light fa-basketball-hoop text-5xl text-primary icon-bounce icon-glow"></i>
+                        <i class="fa-duotone fa-light fa-key-skeleton text-5xl text-primary icon-bounce icon-glow"></i>
                     </div>
                         <!--[if ENDBLOCK]><![endif]-->
-                        <h1 class="auth-title">Vítejte zpět</h1>
-                        <!--[if BLOCK]><![endif]-->        <p class="auth-sub tracking-tight">Vstupte na palubovku vaší arény</p>
+                        <h1 class="auth-title">Zapomenuté heslo</h1>
+                        <!--[if BLOCK]><![endif]-->        <p class="auth-sub tracking-tight">Zašleme vám odkaz pro obnovu přístupu</p>
                         <!--[if ENDBLOCK]><![endif]--></div>
 
 
                     <div class="glass-card animate-fade-in-down" style="animation-delay: 0.1s">
                         <div class="relative">
-                            <div class="fi-sc  fi-sc-has-gap fi-grid" style="--cols-default: repeat(1, minmax(0, 1fr));" x-data="filamentSchema({ livewireId: 'q0SAqqkabZJoJ7Z3PmYS' })" x-on:form-validation-error.window="handleFormValidationError">
+                            <div class="fi-sc  fi-sc-has-gap fi-grid" style="--cols-default: repeat(1, minmax(0, 1fr));" x-data="filamentSchema({ livewireId: 'MlKLQQ9tqhKgi9igPo93' })" x-on:form-validation-error.window="handleFormValidationError">
 
                                 <div
                                     x-data="filamentSchemaComponent({
@@ -223,7 +169,7 @@
                                         class="fi-sc-component"
                                     >
                                         <form
-                                            class="fi-sc-form" id="form" wire:submit="authenticate"
+                                            class="fi-sc-form" id="form" wire:submit="request"
                                         >
 
 
@@ -241,7 +187,7 @@
                                                         class="fi-sc-component"
                                                     >
 
-                                                        <div class="fi-sc  fi-sc-has-gap fi-grid" style="--cols-default: repeat(1, minmax(0, 1fr));" x-data="filamentSchema({ livewireId: 'q0SAqqkabZJoJ7Z3PmYS' })" x-on:form-validation-error.window="handleFormValidationError">
+                                                        <div class="fi-sc  fi-sc-has-gap fi-grid" style="--cols-default: repeat(1, minmax(0, 1fr));" x-data="filamentSchema({ livewireId: 'MlKLQQ9tqhKgi9igPo93' })" x-on:form-validation-error.window="handleFormValidationError">
 
                                                             <div
                                                                 wire:partial="schema-component::form.email"
@@ -250,7 +196,7 @@
                     containerPath: 'data',
                     $wire,
                 })"
-                                                                class="fi-grid-col" style="--col-span-default: span 1 / span 1;" wire:key="q0SAqqkabZJoJ7Z3PmYS.form.email"        >
+                                                                class="fi-grid-col" style="--col-span-default: span 1 / span 1;" wire:key="MlKLQQ9tqhKgi9igPo93.form.email"        >
                                                                 <div
                                                                     class="fi-sc-component"
                                                                 >
@@ -276,7 +222,7 @@
 
 
                                                                             <!--[if BLOCK]><![endif]-->                            <span class="fi-fo-field-label-content">
-                                Emailová adresa<!--[if BLOCK]><![endif]--><sup class="fi-fo-field-label-required-mark">*</sup>
+                                E-mailová adresa<!--[if BLOCK]><![endif]--><sup class="fi-fo-field-label-required-mark">*</sup>
                                                                             <!--[if ENDBLOCK]><![endif]-->                            </span>
                                                                             <!--[if ENDBLOCK]><![endif]-->
 
@@ -299,7 +245,7 @@
                                                                             class="fi-input-wrp-content-ctn"
                                                                         >
                                                                             <input
-                                                                                class="fi-input" autocomplete="on" autofocus="autofocus" id="form.email" required="required" type="email" wire:model.live.debounce.500="data.email"
+                                                                                class="fi-input" autocomplete="on" autofocus="autofocus" id="form.email" required="required" type="email" wire:model="data.email"
                                                                             />
                                                                         </div>
 
@@ -311,192 +257,6 @@
 
                                                                         <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
                                                                         <!--[if ENDBLOCK]><![endif]--></div>
-                                                                </div>
-                                                            </div>
-
-
-                                                            <div
-                                                                wire:partial="schema-component::form.password"
-                                                                x-data="filamentSchemaComponent({
-                    path: 'data.password',
-                    containerPath: 'data',
-                    $wire,
-                })"
-                                                                class="fi-grid-col" style="--col-span-default: span 1 / span 1;" wire:key="q0SAqqkabZJoJ7Z3PmYS.form.password"        >
-                                                                <div
-                                                                    class="fi-sc-component"
-                                                                >
-                                                                    <div
-                                                                        data-field-wrapper
-                                                                        class="fi-fo-field"
-                                                                    >
-                                                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
-                                                                        <!--[if BLOCK]><![endif]-->        <div
-                                                                        class="fi-fo-field-label-col"
-                                                                    >
-
-
-                                                                        <div
-                                                                            class="fi-fo-field-label-ctn "
-                                                                        >
-
-
-                                                                            <!--[if BLOCK]><![endif]-->                    <label
-                                                                            for="form.password"
-                                                                            class="fi-fo-field-label"
-                                                                        >
-
-
-                                                                            <!--[if BLOCK]><![endif]-->                            <span class="fi-fo-field-label-content">
-                                Heslo<!--[if BLOCK]><![endif]--><sup class="fi-fo-field-label-required-mark">*</sup>
-                                                                            <!--[if ENDBLOCK]><![endif]-->                            </span>
-                                                                            <!--[if ENDBLOCK]><![endif]-->
-
-                                                                        </label>
-                                                                            <!--[if ENDBLOCK]><![endif]-->
-
-                                                                            <div class="fi-sc fi-inline fi-align-end fi-sc-has-gap fi-sc-dense">
-
-                                                                                <div
-                                                                                    x-data="filamentSchemaComponent({
-                    path: 'data.password',
-                    containerPath: 'data',
-                    $wire,
-                })"
-                                                                                    class=""        >
-                                                                                    <div
-                                                                                        class="fi-sc-component"
-                                                                                    >
-                                                                                        <!--[if BLOCK]><![endif]-->    <span
-                                                                                        class="fi-sc-text"
-                                                                                    >
-        <a
-            href="https://kbelstisokoli.test/admin/password-reset/request"
-            class="fi-color fi-color-primary fi-text-color-700 dark:fi-text-color-400 fi-link fi-size-md"
-        >
-
-
-            Zapomněli jste heslo?
-
-
-    </a>
-    </span>
-                                                                                        <!--[if ENDBLOCK]><![endif]-->                </div>
-                                                                                </div>
-
-                                                                            </div>
-
-
-                                                                        </div>
-
-
-                                                                    </div>
-                                                                        <!--[if ENDBLOCK]><![endif]-->
-                                                                        <!--[if BLOCK]><![endif]-->        <div class="fi-fo-field-content-col">
-
-
-                                                                        <!--[if BLOCK]><![endif]-->                <div
-                                                                        class="fi-input-wrp fi-fo-text-input" x-data="{ isPasswordRevealed: false }" x-on:focus-input.stop="$el.querySelector('input')?.focus()"
-                                                                    >
-                                                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
-                                                                        <div
-                                                                            class="fi-input-wrp-content-ctn"
-                                                                        >
-                                                                            <input
-                                                                                class="fi-input fi-revealable" autocomplete="current-password" id="form.password" required="required" wire:model.live.debounce.500="data.password" x-bind:type="isPasswordRevealed ? 'text' : 'password'"
-                                                                            />
-                                                                        </div>
-
-                                                                        <!--[if BLOCK]><![endif]-->        <div
-                                                                        class="fi-input-wrp-suffix"
-                                                                    >
-                                                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
-
-
-                                                                        <!--[if BLOCK]><![endif]-->                <div
-                                                                        class="fi-input-wrp-actions"
-                                                                    >
-                                                                        <!--[if BLOCK]><![endif]-->
-
-                                                                        <button                                                class="fi-icon-btn fi-size-sm fi-ac-icon-btn-action" title="Zobrazit heslo" aria-label="Zobrazit heslo" type="button" wire:loading.attr="disabled" x-show="! isPasswordRevealed" x-on:click="isPasswordRevealed = true"        >
-                                                                            <svg class="fi-icon fi-size-md" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                                                                <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
-                                                                                <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd"/>
-                                                                            </svg>
-                                                                        </button>
-
-
-
-
-
-                                                                        <button                                                class="fi-icon-btn fi-size-sm fi-ac-icon-btn-action" title="Skrýt heslo" aria-label="Skrýt heslo" type="button" wire:loading.attr="disabled" x-cloak="x-cloak" x-show="isPasswordRevealed" x-on:click="isPasswordRevealed = false"        >
-                                                                            <svg class="fi-icon fi-size-md" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                                                                <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.029 10.029 0 0 0 3.3-4.38 1.651 1.651 0 0 0 0-1.185A10.004 10.004 0 0 0 9.999 3a9.956 9.956 0 0 0-4.744 1.194L3.28 2.22ZM7.752 6.69l1.092 1.092a2.5 2.5 0 0 1 3.374 3.373l1.091 1.092a4 4 0 0 0-5.557-5.557Z" clip-rule="evenodd"/>
-                                                                                <path d="m10.748 13.93 2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a1.651 1.651 0 0 1 0-1.186A10.007 10.007 0 0 1 2.839 6.02L6.07 9.252a4 4 0 0 0 4.678 4.678Z"/>
-                                                                            </svg>
-                                                                        </button>
-
-
-
-                                                                        <!--[if ENDBLOCK]><![endif]-->                </div>
-                                                                        <!--[if ENDBLOCK]><![endif]-->        </div>
-                                                                        <!--[if ENDBLOCK]><![endif]--></div>
-
-                                                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
-                                                                        <!--[if ENDBLOCK]><![endif]-->
-
-
-                                                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
-                                                                        <!--[if ENDBLOCK]><![endif]--></div>
-                                                                </div>
-                                                            </div>
-
-
-                                                            <div
-                                                                wire:partial="schema-component::form.remember"
-                                                                x-data="filamentSchemaComponent({
-                    path: 'data.remember',
-                    containerPath: 'data',
-                    $wire,
-                })"
-                                                                class="fi-grid-col" style="--col-span-default: span 1 / span 1;" wire:key="q0SAqqkabZJoJ7Z3PmYS.form.remember"        >
-                                                                <div
-                                                                    class="fi-sc-component"
-                                                                >
-                                                                    <div
-                                                                        data-field-wrapper
-                                                                        class="fi-fo-field"
-                                                                    >
-                                                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
-                                                                        <!--[if BLOCK]><![endif]-->        <div
-                                                                        class="fi-fo-field-label-col"
-                                                                    >
-
-
-                                                                        <div
-                                                                            class="fi-fo-field-label-ctn "
-                                                                        >
-
-
-                                                                            <!--[if BLOCK]><![endif]-->                    <label
-                                                                            for="form.remember"
-                                                                            class="fi-fo-field-label"
-                                                                        >
-                                                                            <input type="checkbox" class="fi-checkbox-input fi-valid" id="form.remember" wire:loading.attr="disabled" wire:model="data.remember" />
-
-                                                                            <!--[if BLOCK]><![endif]-->                            <span class="fi-fo-field-label-content">
-                                Zapamatovat si mě<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                            </span>
-                                                                            <!--[if ENDBLOCK]><![endif]-->
-
-                                                                        </label>
-                                                                            <!--[if ENDBLOCK]><![endif]-->
-
-                                                                        </div>
-
-
-                                                                    </div>
-                                                                        <!--[if ENDBLOCK]><![endif]-->
-                                                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
                                                                 </div>
                                                             </div>
 
@@ -519,7 +279,7 @@
                     containerPath: '',
                     $wire,
                 })"
-                                                    class="fi-grid-col" style="--col-span-default: span 1 / span 1;" wire:key="q0SAqqkabZJoJ7Z3PmYS.content.form-actions"        >
+                                                    class="fi-grid-col" style="--col-span-default: span 1 / span 1;" wire:key="MlKLQQ9tqhKgi9igPo93.content.form-actions"        >
                                                     <div
                                                         class="fi-sc-component"
                                                     >
@@ -536,12 +296,12 @@
 
                                                             <button                                                                x-data="filamentFormButton"
                                                                                                                                    x-bind:class="{ 'fi-processing': isProcessing }"
-                                                                                                                                   class="fi-color fi-color-primary fi-bg-color-400 hover:fi-bg-color-300 dark:fi-bg-color-600 dark:hover:fi-bg-color-700 fi-text-color-950 hover:fi-text-color-800 dark:fi-text-color-0 dark:hover:fi-text-color-0 fi-btn fi-size-md  fi-ac-btn-action" type="submit" wire:loading.attr="disabled" wire:target="authenticate" x-bind:disabled="isProcessing"        >
+                                                                                                                                   class="fi-color fi-color-primary fi-bg-color-400 hover:fi-bg-color-300 dark:fi-bg-color-600 dark:hover:fi-bg-color-700 fi-text-color-950 hover:fi-text-color-800 dark:fi-text-color-0 dark:hover:fi-text-color-0 fi-btn fi-size-md  fi-ac-btn-action" type="submit" wire:loading.attr="disabled" wire:target="request" x-bind:disabled="isProcessing"        >
                                                                 <svg
                                                                     fill="none"
                                                                     viewBox="0 0 24 24"
                                                                     xmlns="http://www.w3.org/2000/svg"
-                                                                    class="fi-icon fi-loading-indicator fi-size-md" wire:loading.delay.default="" wire:target="authenticate"
+                                                                    class="fi-icon fi-loading-indicator fi-size-md" wire:loading.delay.default="" wire:target="request"
                                                                 >
                                                                     <path
                                                                         clip-rule="evenodd"
@@ -573,7 +333,7 @@
                                                                 ></path>
                                                             </svg>
                                                                 <span x-show="! isProcessing">
-                        Přihlásit se                    </span>
+                        Odeslat odkaz na obnovení hesla                    </span>
 
                                                                 <span
                                                                     x-cloak
@@ -599,35 +359,17 @@
                                     </div>
                                 </div>
 
-
-                                <div
-                                    class="fi-grid-col fi-hidden" style="--col-span-default: span 1 / span 1;"        >
-                                </div>
-
                             </div>
-
-
-
-                            <!--[if BLOCK]><![endif]-->        <div class="mt-6 text-center text-sm text-slate-500">
-                            nebo
-
-
-                            <a                            href="https://kbelstisokoli.test/admin/register"                                                class="fi-color fi-color-primary fi-text-color-700 dark:fi-text-color-400 fi-link fi-size-md  fi-ac-link-action"        >
-
-                                se zaregistrujte
-
-                            </a>
-
-
-
-                        </div>
-                            <!--[if ENDBLOCK]><![endif]-->
                         </div>
                     </div>
 
 
                     <!--[if BLOCK]><![endif]-->            <div class="mt-12 text-center animate-fade-in space-y-8" style="animation-delay: 0.4s">
-                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    <!--[if BLOCK]><![endif]-->        <a href="https://kbelstisokoli.test/admin/login" class="auth-footer-link-primary flex items-center justify-center gap-2 mx-auto group">
+                    <i class="fa-light fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                    Zpět na přihlášení
+                </a>
+                    <!--[if ENDBLOCK]><![endif]-->
                     <div class="flex items-center justify-center gap-6 text-slate-400">
                         <div class="h-px w-10 bg-gradient-to-r from-transparent to-white/10"></div>
                         <p class="text-[10px] font-black uppercase tracking-[0.4em] italic opacity-40">
@@ -646,7 +388,7 @@
 
 </div>
 
-<div wire:key="lw-1482003686-0-2" wire:snapshot="{&quot;data&quot;:{&quot;isFilamentNotificationsComponent&quot;:true,&quot;notifications&quot;:[[],{&quot;class&quot;:&quot;Filament\\Notifications\\Collection&quot;,&quot;s&quot;:&quot;wrbl&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;Ik28U7TRB6Gqll1acqcL&quot;,&quot;name&quot;:&quot;Filament\\Livewire\\Notifications&quot;,&quot;path&quot;:&quot;admin\/login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;cs&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;950cd34bbcdc864e1e51efe4d294c30ee5c0e349aba721ca93558aec7f03ff24&quot;}" wire:effects="{&quot;partials&quot;:[],&quot;listeners&quot;:[&quot;notificationsSent&quot;,&quot;notificationSent&quot;,&quot;notificationClosed&quot;]}" wire:id="Ik28U7TRB6Gqll1acqcL" wire:name="Filament\Livewire\Notifications">
+<div wire:key="lw-1482003686-0-0" wire:snapshot="{&quot;data&quot;:{&quot;isFilamentNotificationsComponent&quot;:true,&quot;notifications&quot;:[[],{&quot;class&quot;:&quot;Filament\\Notifications\\Collection&quot;,&quot;s&quot;:&quot;wrbl&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;gD9w4oqqAX2MSsGiMivD&quot;,&quot;name&quot;:&quot;Filament\\Livewire\\Notifications&quot;,&quot;path&quot;:&quot;admin\/password-reset\/request&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;cs&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;d1c7304f311ece9c49aef45201899b6306fa32eff486adff18a7bd10cdf106aa&quot;}" wire:effects="{&quot;partials&quot;:[],&quot;listeners&quot;:[&quot;notificationsSent&quot;,&quot;notificationSent&quot;,&quot;notificationClosed&quot;]}" wire:id="gD9w4oqqAX2MSsGiMivD" wire:name="Filament\Livewire\Notifications">
     <div
         class="fi-no fi-align-right fi-vertical-align-start"
         role="status"
