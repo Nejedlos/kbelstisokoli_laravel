@@ -23,7 +23,7 @@
 @endphp
 
 <x-filament-panels::layout.base :livewire="$livewire">
-    <div class="ks-auth-page auth-gradient min-h-dvh flex items-start md:items-center justify-center py-10 px-4 md:px-6 lg:px-8 relative overflow-hidden"
+    <div class="ks-auth-page auth-gradient w-full min-h-dvh flex items-center justify-center py-6 px-4 md:px-6 lg:px-8 relative overflow-x-hidden"
          style="
             background-color: #0f172a !important;
             background-image:
@@ -42,15 +42,15 @@
 
             {{-- Tactical SVG Lines (Simplified Court) --}}
             <svg class="absolute inset-0 w-full h-full opacity-[0.05]" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
-                <circle cx="500" cy="500" r="150" fill="none" stroke="white" stroke-width="2" />
-                <line x1="0" y1="500" x2="1000" y2="500" stroke="white" stroke-width="2" />
-                <rect x="250" y="0" width="500" height="200" fill="none" stroke="white" stroke-width="2" />
-                <rect x="250" y="800" width="500" height="200" fill="none" stroke="white" stroke-width="2" />
+                <circle cx="500" cy="500" r="150" fill="none" stroke="white" stroke-width="1.5" />
+                <line x1="0" y1="500" x2="1000" y2="500" stroke="white" stroke-width="1.5" />
+                <rect x="250" y="0" width="500" height="200" fill="none" stroke="white" stroke-width="1.5" />
+                <rect x="250" y="800" width="500" height="200" fill="none" stroke="white" stroke-width="1.5" />
 
                 {{-- Tactic markers (X and O) --}}
                 <g class="animate-pulse" style="animation-duration: 8s;">
-                    <text x="220" y="270" fill="white" font-size="60" font-family="Instrument Sans" font-weight="900" opacity="0.4">X</text>
-                    <text x="730" y="730" fill="white" font-size="60" font-family="Instrument Sans" font-weight="900" opacity="0.4">O</text>
+                    <text x="220" y="270" fill="white" font-size="40" font-family="Instrument Sans" font-weight="900" opacity="0.3">X</text>
+                    <text x="730" y="730" fill="white" font-size="40" font-family="Instrument Sans" font-weight="900" opacity="0.3">O</text>
                 </g>
             </svg>
 
@@ -85,7 +85,7 @@
         </style>
 
 
-        <div class="ks-auth-container w-full max-w-[22rem] sm:max-w-[28rem] md:max-w-[32rem] relative z-10">
+        <div class="ks-auth-container w-full max-w-[22rem] sm:max-w-[28rem] md:max-w-[32rem] relative z-10 py-10">
         <!-- Jazykový přepínač (projektový styl, fixní vpravo nahoře) -->
         <div class="fixed top-0 right-0 z-[9999] p-4 md:p-6">
             <div class="flex items-center gap-1 p-1 bg-white/10 border border-white/20 backdrop-blur-xl rounded-full shadow-2xl">
@@ -107,15 +107,14 @@
                     {{ $slot }}
                 </div>
 
-                <!-- Links under form -->
-                <div class="mt-6 flex items-center justify-between gap-4 text-sm">
+    <!-- Links under form -->
+                <div class="mt-6 flex items-center justify-center gap-4 text-sm">
                     @if (Route::has('filament.admin.auth.password-reset.request'))
-                        <a href="{{ route('filament.admin.auth.password-reset.request') }}" class="fi-link inline-flex items-center gap-2" aria-label="Zapomněli jste heslo?">
-                            <i class="fa-light fa-key"></i>
-                            <span>Zapomněli jste heslo?</span>
+                        <a href="{{ route('filament.admin.auth.password-reset.request') }}" class="fi-link inline-flex items-center gap-2 group hover:text-white transition-colors" aria-label="{{ __('Zapomněli jste heslo?') }}">
+                            <i class="fa-light fa-key opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                            <span class="opacity-70 group-hover:opacity-100">{{ __('Zapomněli jste heslo?') }}</span>
                         </a>
                     @endif
-                    <span class="text-slate-400/80 text-xs">&nbsp;</span>
                 </div>
             </div>
 

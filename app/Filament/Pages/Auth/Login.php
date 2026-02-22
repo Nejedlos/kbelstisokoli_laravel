@@ -7,6 +7,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 
 use Illuminate\Support\HtmlString;
+use Filament\Schemas\Components\Component;
 
 class Login extends BaseLogin
 {
@@ -21,7 +22,7 @@ class Login extends BaseLogin
      */
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return 'Zpátky do hry';
+        return __('Zpátky do hry.');
     }
 
     /**
@@ -29,7 +30,16 @@ class Login extends BaseLogin
      */
     public function getSubheading(): string|Htmlable
     {
-        return 'Přihlaste se a aréna je vaše.';
+        return __('Přihlaste se a aréna je vaše.');
+    }
+
+    protected function getPasswordFormComponent(): Component
+    {
+        // Přepisujeme původní metodu, abychom odstranili helper link "Zapomněli jste heslo?",
+        // který Filament automaticky přidává, protože ho máme v custom layoutu.
+        return parent::getPasswordFormComponent()
+            ->helperText(null)
+            ->hint(null);
     }
 
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema

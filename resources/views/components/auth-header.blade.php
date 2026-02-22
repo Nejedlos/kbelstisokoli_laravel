@@ -13,7 +13,8 @@
 <div class="auth-header-container animate-fade-in-down mb-6 md:mb-8">
     {{-- Decorative background icon (always visible, even when logo exists) --}}
     <div class="auth-header-visual mb-8" aria-hidden="true">
-        <i class="fa-light {{ $icon }} auth-icon-bg"></i>
+        <div class="auth-icon-aura"></div>
+        <i class="fa-light {{ $icon }} auth-icon-bg animate-icon-drift"></i>
     </div>
 
     @if($logoPath)

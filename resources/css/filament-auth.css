@@ -56,6 +56,26 @@
     50% { filter: drop-shadow(0 0 25px rgba(225, 29, 72, 0.6)); }
 }
 
+@keyframes aura-pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 0.25;
+    }
+}
+
+@keyframes icon-drift {
+    0%, 100% {
+        transform: translate(-50%, -50%) rotate(-12deg) translateY(0);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(-8deg) translateY(-10px);
+    }
+}
+
 .animate-fade-in-down {
     animation: fade-in-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
@@ -93,6 +113,19 @@
 }
 
 /* Reset a základní pozadí + token fallbacky */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+}
+
+body.fi-body:has(.ks-auth-page) {
+    background-color: #0f172a !important; /* Základní barva arény pro eliminaci bílých pruhů */
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    display: block !important;
+}
+
 :root {
     /* Brand tokens (fallback, skutečné hodnoty vkládá BrandingService + shell) */
     --brand-navy: #0b1f3a;
@@ -105,24 +138,25 @@
     --brand-white: #ffffff;
 
     /* UI tokens */
-    --ui-text: rgba(15, 23, 42, 0.95);
-    --ui-text-muted: rgba(71, 85, 105, 0.85);
-    --ui-border: rgba(226, 232, 240, 0.8);
-    --ui-surface: rgba(255, 255, 255, 0.98); /* Solidnější moderní bílá */
+    --ui-text: rgba(255, 255, 255, 0.95);
+    --ui-text-muted: rgba(255, 255, 255, 0.65);
+    --ui-border: rgba(255, 255, 255, 0.15);
+    --ui-surface: rgba(255, 255, 255, 0.9);
     --ui-surface-elevated: #ffffff;
     --ui-success: #22c55e;
     --ui-danger: #ef4444;
     --ui-warning: #f59e0b;
 
     /* Glass surface -> Premium Arena Surface */
-    --glass-bg: rgba(15, 23, 42, 0.75); /* Tmavá navy s průhledností */
+    --glass-bg: rgba(15, 23, 42, 0.45); /* Více průhledná pro moderní "arena" pocit */
     --glass-border: rgba(255, 255, 255, 0.12);
     --glass-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
-body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout, .ks-auth-page {
+.ks-auth-page, .auth-gradient, .fi-simple-layout {
     min-height: 100vh !important;
     min-height: 100dvh !important;
+    width: 100% !important;
     font-family: 'Instrument Sans', sans-serif !important;
     display: flex !important;
     align-items: center !important;
@@ -133,9 +167,9 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout, .ks-auth-pa
 }
 
 @media (max-width: 640px) {
-    body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout, .ks-auth-page {
-        align-items: flex-start !important;
-        padding: 6rem 1rem 2rem 1rem !important;
+    .ks-auth-page, .auth-gradient, .fi-simple-layout {
+        align-items: center !important;
+        padding: 4rem 1rem 2rem 1rem !important;
     }
 }
 
@@ -260,7 +294,27 @@ body.fi-panel-admin .fi-simple-main-ctn {
     opacity: 0.2;
     filter: drop-shadow(0 5px 20px rgba(0,0,0,0.25));
     pointer-events: none;
-    z-index: 0; /* ikona je opravdu na pozadí */
+    z-index: 5; /* Zvýšeno nad auru */
+}
+
+.auth-icon-aura {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8rem;
+    height: 8rem;
+    background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0.15;
+    filter: blur(25px);
+    animation: aura-pulse 4s infinite ease-in-out;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.animate-icon-drift {
+    animation: icon-drift 6s infinite ease-in-out;
 }
 
 .auth-title {
@@ -273,10 +327,10 @@ body.fi-panel-admin .fi-simple-main-ctn {
     background: linear-gradient(to bottom, #ffffff, rgba(255, 255, 255, 0.4)) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
-    font-size: clamp(2.5rem, 8vw, 4.5rem) !important; /* Výraznější nadpis jako v under-construction */
+    font-size: clamp(2.5rem, 8vw, 3.8rem) !important; /* Mírně zmenšeno pro lepší fit na menší obrazovky */
     line-height: 0.9 !important;
     margin-top: 1rem !important;
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 .auth-sub {
@@ -336,7 +390,7 @@ body.fi-panel-admin .fi-simple-main-ctn {
     font-weight: 800 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.15em !important;
-    padding: 1.25rem 2rem !important;
+    padding: 1rem 2rem !important; /* Mírně menší padding pro lepší fit */
     box-shadow: 0 15px 35px -10px rgba(var(--brand-red-rgb, 225, 29, 72), 0.5) !important;
     border: none !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
