@@ -30,36 +30,22 @@ Ikony vkládáme výhradně ve stylu **Light** (např. pomocí tříd `fa-light`
 
 ## Použití v administraci (Filament)
 
-Ve Filamentu používáme systém aliasů registrovaných v `AppServiceProvider.php` přes `FilamentIcon::register()`. Tento přístup zamezuje chybám `SvgNotFound` (ze strany Blade Icons) a zároveň brání Filamentu v chybném renderování HTML ikon jako obrázků (tag `<img>`) v sidebaru.
+Ve Filamentu používáme systém **Icon Aliases** registrovaných v `AppServiceProvider.php` přes `FilamentIcon::register()`. Tento přístup zamezuje chybám v renderování a zajišťuje správné zobrazení Light ikon.
 
-1. **Registrace aliasů (`AppServiceProvider.php`):**
-   Všechny ikony pro administraci registrujeme v metodě `boot()` pod prefixem `fal_` (Font Awesome Light).
-
+1. **Centrální správa (`IconHelper.php`):** Veškeré názvy ikon definujeme jako konstanty v této třídě. Metoda `get()` vrací název aliasu (např. `app::fal-users`).
+2. **Registrace aliasů:** Všechny ikony se automaticky registrují v `AppServiceProvider::boot()` a odkazují na `HtmlString` s příslušným tagem `<i>`.
+3. **Použití:**
    ```php
-   use Filament\Support\Facades\FilamentIcon;
-   use Illuminate\Support\HtmlString;
-
-   FilamentIcon::register([
-       'fal_users' => new HtmlString('<i class="fa-light fa-users fa-fw"></i>'),
-       'fal_basketball' => new HtmlString('<i class="fa-light fa-basketball fa-fw"></i>'),
-       // ... další ikony
-   ]);
-   ```
-
-2. **Sidebar (Navigace):** V Resource nebo Page vracíme v metodě `getNavigationIcon()` pouze název aliasu jako prostý řetězec.
-
-   *Příklad v Resource:*
-   ```php
+   // V Resource (pro navigaci)
    public static function getNavigationIcon(): ?string {
-       return 'fal_users';
+       return IconHelper::get(IconHelper::USERS);
    }
-   ```
 
-3. **Ostatní komponenty (Actions, Tabs, Sections):** Používáme `HtmlString` přímo v metodě `icon()`, pokud to komponenta podporuje, nebo opět registrovaný alias:
-   ```php
-   Action::make('edit')->icon('fal_users')
-   // nebo
-   Action::make('edit')->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-pencil"></i>'))
+   // V ostatních komponentách (Actions, Tabs, Sections)
+   Action::make('edit')->icon(IconHelper::get(IconHelper::EDIT))
+
+   // Ve vlastním HTML
+   new HtmlString('<span>' . IconHelper::render(IconHelper::USERS) . '</span>')
    ```
 
 Díky verzi Pro jsou k dispozici všechny styly, ale v tomto projektu používáme pouze:

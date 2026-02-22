@@ -20,7 +20,7 @@ class ExternalStatSourceResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::STAT_SOURCES);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::STAT_SOURCES);
     }
 
     public static function getNavigationGroup(): ?string

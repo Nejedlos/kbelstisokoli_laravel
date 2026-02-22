@@ -1,13 +1,16 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="container">
-    <h1>Vítejte na webu Kbelští sokoli</h1>
-    <p>Toto je veřejná úvodní stránka (placeholder). Obsah bude doplněn později.</p>
-    <p>
-        <a href="{{ route('login') }}">Přihlásit se</a> |
-        <a href="/admin">Administrace</a> |
-        <a href="/clenska-sekce/dashboard">Členská sekce</a>
-    </p>
-</div>
+    @if($page)
+        <x-page-blocks :blocks="$page->content ?? []" />
+    @else
+        <div class="container py-20 text-center">
+            <h1 class="text-4xl font-bold mb-4">Vítejte na webu Kbelští sokoli</h1>
+            <p class="text-xl text-gray-600 mb-8">Obsah úvodní stránky zatím nebyl vytvořen v administraci.</p>
+            <div class="flex justify-center gap-4">
+                <a href="{{ route('login') }}" class="btn btn-primary">Přihlásit se</a>
+                <a href="/admin" class="btn btn-secondary">Administrace</a>
+            </div>
+        </div>
+    @endif
 @endsection

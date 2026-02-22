@@ -25,7 +25,7 @@ class CronTaskResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CRON_TASKS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::CRON_TASKS);
     }
 
     public static function getNavigationGroup(): ?string

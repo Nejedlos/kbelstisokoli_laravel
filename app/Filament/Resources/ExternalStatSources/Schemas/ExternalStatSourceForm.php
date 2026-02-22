@@ -46,13 +46,11 @@ class ExternalStatSourceForm
                         Textarea::make('extractor_config')
                             ->label('Extractor Config (JSON)')
                             ->helperText('Definujte CSS selektory nebo indexy tabulek.')
-                            ->rows(5)
-                            ->fontFamily('monospace'),
+                            ->rows(5),
                         Textarea::make('mapping_config')
                             ->label('Mapping Config (JSON)')
                             ->helperText('Definujte mapování polí z externího zdroje na naše klíče.')
-                            ->rows(5)
-                            ->fontFamily('monospace'),
+                            ->rows(5),
                     ]),
 
                 Section::make('Stav a logy')

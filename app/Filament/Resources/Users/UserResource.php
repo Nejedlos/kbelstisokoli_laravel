@@ -23,7 +23,7 @@ class UserResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::USERS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::USERS);
     }
 
     public static function getNavigationGroup(): ?string

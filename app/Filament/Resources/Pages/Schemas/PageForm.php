@@ -8,6 +8,7 @@ use Filament\Forms\Components\Builder;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -22,7 +23,7 @@ class PageForm
                 Tabs::make('Page Tabs')
                     ->tabs([
                         Tabs\Tab::make('Obsah')
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::COPY))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::COPY))
                             ->schema([
                                 Section::make('Základní informace')
                                     ->schema([
@@ -52,7 +53,7 @@ class PageForm
                             ]),
 
                         Tabs\Tab::make('Nastavení')
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SETTINGS))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SETTINGS))
                             ->schema([
                                 Section::make('Stav a viditelnost')
                                     ->schema([
@@ -76,13 +77,13 @@ class PageForm
                             ]),
 
                         Tabs\Tab::make('SEO')
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::GLOBE))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::GLOBE))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
                         Tabs\Tab::make('Vývojář')
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CODE))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CODE))
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
                             ->schema([
                                 Section::make('Vlastní kódy a skripty')
@@ -91,14 +92,12 @@ class PageForm
                                         Textarea::make('head_code')
                                             ->label('Kód do <head>')
                                             ->helperText('Např. vlastní CSS <style> nebo meta tagy.')
-                                            ->rows(10)
-                                            ->fontFamily('monospace'),
+                                            ->rows(10),
 
                                         Textarea::make('footer_code')
                                             ->label('Kód před </body>')
                                             ->helperText('Např. měřící kódy nebo vlastní JavaScript <script>.')
-                                            ->rows(10)
-                                            ->fontFamily('monospace'),
+                                            ->rows(10),
                                     ]),
                             ]),
                     ])

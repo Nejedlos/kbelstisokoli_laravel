@@ -24,18 +24,28 @@ class HomeController extends Controller
             ]);
         }
 
-        // 2. Priorita: Automatický režim přípravy, pokud neexistují žádné publikované stránky (bypass pro adminy)
-        $hasContent = Page::where('status', 'published')->where('is_visible', true)->exists();
+        // 2. Priorita: Načtení homepage z CMS
+        $homePage = Page::with('seo')
+            ->where('slug', 'home')
+            ->where('status', 'published')
+            ->where('is_visible', true)
+            ->first();
 
-        if (!$hasContent && !$isAdmin) {
-            return view('public.under-construction', [
-                'branding' => $branding,
-                'branding_css' => $brandingService->getCssVariables(),
-                'title' => brand_text('Web v přípravě'),
-                'text' => brand_text('Aktuálně pro ###TEAM_NAME### připravujeme obsah. Brzy se tu objeví něco velkého!'),
-            ]);
+        // 3. Priorita: Automatický režim přípravy, pokud neexistují žádné publikované stránky (bypass pro adminy)
+        if (!$homePage && !$isAdmin) {
+            $hasAnyContent = Page::where('status', 'published')->where('is_visible', true)->exists();
+            if (!$hasAnyContent) {
+                return view('public.under-construction', [
+                    'branding' => $branding,
+                    'branding_css' => $brandingService->getCssVariables(),
+                    'title' => brand_text('Web v přípravě'),
+                    'text' => brand_text('Aktuálně pro ###TEAM_NAME### připravujeme obsah. Brzy se tu objeví něco velkého!'),
+                ]);
+            }
         }
 
-        return view('public.home');
+        return view('public.home', [
+            'page' => $homePage,
+        ]);
     }
 }

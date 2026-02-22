@@ -91,8 +91,7 @@ class CmsForms
                         Textarea::make('structured_data_override')
                             ->label('Vlastní strukturovaná data (JSON-LD)')
                             ->helperText('Vložte validní JSON pole. Bude přidáno k automaticky generovaným datům.')
-                            ->rows(5)
-                            ->fontFamily('monospace'),
+                            ->rows(5),
                     ]),
             ])
             ->collapsible()

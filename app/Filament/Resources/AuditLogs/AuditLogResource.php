@@ -24,7 +24,7 @@ class AuditLogResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::AUDIT_LOGS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::AUDIT_LOGS);
     }
 
     public static function getNavigationSort(): ?int

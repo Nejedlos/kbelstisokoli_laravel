@@ -11,6 +11,8 @@ class SeoMetadata extends Model
 {
     use HasTranslations;
 
+    protected $table = 'seo_metadatas';
+
     protected $fillable = [
         'seoable_type',
         'seoable_id',

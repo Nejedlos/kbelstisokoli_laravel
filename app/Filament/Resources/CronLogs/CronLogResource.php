@@ -25,7 +25,7 @@ class CronLogResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CRON_LOGS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::CRON_LOGS);
     }
 
     public static function getNavigationGroup(): ?string

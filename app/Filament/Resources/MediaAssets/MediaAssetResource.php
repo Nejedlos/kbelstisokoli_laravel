@@ -35,7 +35,7 @@ class MediaAssetResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::MEDIA_LIBRARY);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::MEDIA_LIBRARY);
     }
 
     public static function getNavigationSort(): ?int

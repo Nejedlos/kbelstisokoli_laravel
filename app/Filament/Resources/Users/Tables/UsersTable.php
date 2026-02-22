@@ -120,7 +120,7 @@ class UsersTable
             ->actions([
                 Action::make('sendInvitation')
                     ->label(__('user.actions.send_invitation'))
-                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PAPER_PLANE))
+                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAPER_PLANE))
                     ->color('info')
                     ->requiresConfirmation()
                     ->action(function ($record) {
@@ -140,13 +140,13 @@ class UsersTable
                     DeleteBulkAction::make(),
                     BulkAction::make('activate')
                         ->label('Aktivovat vybrané')
-                        ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::ACTIVATE))
+                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::ACTIVATE))
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => true])),
                     BulkAction::make('deactivate')
                         ->label('Deaktivovat vybrané')
-                        ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::DEACTIVATE))
+                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::DEACTIVATE))
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false])),

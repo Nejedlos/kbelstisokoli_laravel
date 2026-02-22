@@ -20,7 +20,7 @@ class FinancePaymentResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::FINANCE_PAYMENTS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::FINANCE_PAYMENTS);
     }
 
     public static function getNavigationGroup(): ?string

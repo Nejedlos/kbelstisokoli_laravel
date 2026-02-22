@@ -17,15 +17,15 @@ class FinanceOverview extends StatsOverviewWidget
         return [
             Stat::make('Pohledávky celkem', number_format($summary['total_receivables'], 0, ',', ' ') . ' Kč')
                 ->description('Otevřené a částečně zaplacené předpisy')
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::BANKNOTES))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::BANKNOTES))
                 ->color('info'),
             Stat::make('Po splatnosti', number_format($summary['total_overdue'], 0, ',', ' ') . ' Kč')
                 ->description('Předpisy po termínu splatnosti')
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CLOCK))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CLOCK))
                 ->color('danger'),
             Stat::make('Příjmy (tento měsíc)', number_format($summary['payments_received_month'], 0, ',', ' ') . ' Kč')
                 ->description('Celkem přijaté platby v tomto měsíci')
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CHECK_CIRCLE))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CHECK_CIRCLE))
                 ->color('success'),
         ];
     }

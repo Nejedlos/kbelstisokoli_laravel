@@ -25,10 +25,10 @@ class PostForm
                 Tabs::make('Post Tabs')
                     ->tabs([
                         Tabs\Tab::make('Obsah')
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PAGES))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAGES))
                             ->schema([
                                 Section::make('Základní informace')
-                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::INFO))
+                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::INFO))
                                     ->schema([
                                         TextInput::make('title')
                                             ->label('Titulek novinky')
@@ -50,7 +50,7 @@ class PostForm
                                     ])->columns(2),
 
                                 Section::make('Text článku')
-                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PEN_NIB))
+                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PEN_NIB))
                                     ->schema([
                                         Textarea::make('excerpt')
                                             ->label('Perex (stručný výtah)')
@@ -65,10 +65,10 @@ class PostForm
                             ]),
 
                         Tabs\Tab::make('Publikace a média')
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PHOTO_FILM))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PHOTO_FILM))
                             ->schema([
                                 Section::make('Stav publikace')
-                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::ANNOUNCEMENTS))
+                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::ANNOUNCEMENTS))
                                     ->schema([
                                         Grid::make(2)
                                             ->schema([
@@ -94,7 +94,7 @@ class PostForm
                                     ]),
 
                                 Section::make('Média')
-                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::IMAGE))
+                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMAGE))
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
@@ -114,28 +114,26 @@ class PostForm
                             ]),
 
                         Tabs\Tab::make('SEO')
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SEO))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SEO))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
                         Tabs\Tab::make('Vývojář')
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
-                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CODE))
+                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CODE))
                             ->schema([
                                 Section::make('Vlastní kódy a skripty')
-                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::TERMINAL))
+                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TERMINAL))
                                     ->description('Vložte kód, který se provede pouze pro tuto novinku.')
                                     ->schema([
                                         Textarea::make('head_code')
                                             ->label('Kód do <head>')
-                                            ->rows(10)
-                                            ->fontFamily('monospace'),
+                                            ->rows(10),
 
                                         Textarea::make('footer_code')
                                             ->label('Kód před </body>')
-                                            ->rows(10)
-                                            ->fontFamily('monospace'),
+                                            ->rows(10),
                                     ]),
                             ]),
                     ])

@@ -35,7 +35,7 @@ class GalleryResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::GALLERIES);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::GALLERIES);
     }
 
     public static function getNavigationSort(): ?int

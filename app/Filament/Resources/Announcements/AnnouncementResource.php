@@ -20,7 +20,7 @@ class AnnouncementResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::ANNOUNCEMENTS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::ANNOUNCEMENTS);
     }
 
     public static function getNavigationGroup(): ?string

@@ -19,7 +19,7 @@ class MenuResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::MENUS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::MENUS);
     }
 
     public static function getNavigationGroup(): ?string

@@ -20,7 +20,7 @@ class PlayerProfileResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PLAYER_PROFILES);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::PLAYER_PROFILES);
     }
 
     public static function getNavigationGroup(): ?string

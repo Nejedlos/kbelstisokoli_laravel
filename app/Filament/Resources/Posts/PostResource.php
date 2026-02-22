@@ -23,7 +23,7 @@ class PostResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::POSTS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::POSTS);
     }
 
     public static function getModelLabel(): string

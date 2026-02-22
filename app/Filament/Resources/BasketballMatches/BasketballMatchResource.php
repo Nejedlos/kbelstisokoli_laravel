@@ -37,7 +37,7 @@ class BasketballMatchResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::MATCHES);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::MATCHES);
     }
 
     public static function getNavigationSort(): ?int

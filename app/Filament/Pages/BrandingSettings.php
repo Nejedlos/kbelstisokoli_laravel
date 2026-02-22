@@ -28,7 +28,7 @@ class BrandingSettings extends Page implements HasForms
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::BRANDING);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::BRANDING);
     }
 
     public static function getNavigationGroup(): ?string

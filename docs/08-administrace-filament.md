@@ -13,16 +13,16 @@ Při vývoji administrace striktně dodržujeme následující pravidla:
 
 ### 1. Ikony a UI
 - Používáme **Font Awesome 7 Pro** (varianta **Light**).
-- **Sidebar (Navigace):** Ikony v sidebaru se vkládají pomocí registrovaných aliasů přes `FilamentIcon::register()` v `AppServiceProvider.php`. V metodě `getNavigationIcon()` u každého Resource nebo Page pak vracíme pouze název aliasu (např. `fal_users`). Tento přístup obchází automatickou detekci ikon ve Filamentu/Blade Icons a zaručuje stabilitu.
+- **Systém aliasů:** Veškeré ikony v administraci (navigace, akce, taby, sekce) vkládáme pomocí **aliasů** registrovaných ve Filamentu. Třída `App\Support\IconHelper::get()` vrací název aliasu (např. `app::fal-users`). Tento přístup zamezuje chybám v renderování (např. nechtěné `<img>` tagy v sidebaru).
   
   *Příklad v Resource:*
   ```php
   public static function getNavigationIcon(): ?string {
-      return 'fal_users';
+      return IconHelper::get(IconHelper::USERS);
   }
   ```
 
-- **Formuláře a tabulky:** V ostatních částech (akce, záložky, sekce) vkládáme ikony buď pomocí aliasu nebo "natvrdo" pomocí `HtmlString`: `->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-users"></i>'))`.
+- **Vlastní HTML:** Pokud vkládáte ikonu do vlastního HTML řetězce (např. v Placeholderu), použijte `IconHelper::render(IconHelper::USERS)`, která vrátí skutečný `HtmlString` s tagem `<i>`.
 
 ### 2. Lokalizace
 - Administrace podporuje češtinu (`cs`) a angličtinu (`en`).

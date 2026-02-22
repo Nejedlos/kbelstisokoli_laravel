@@ -35,7 +35,7 @@ class TeamResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::TEAMS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::TEAMS);
     }
 
     public static function getNavigationSort(): ?int

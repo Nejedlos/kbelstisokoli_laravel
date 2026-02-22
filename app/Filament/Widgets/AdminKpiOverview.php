@@ -28,25 +28,25 @@ class AdminKpiOverview extends BaseWidget
         return [
             Stat::make('Uživatelé (celkem)', $users)
                 ->description("Aktivních: {$activeUsers}")
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::USERS))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::USERS))
                 ->color('primary'),
             Stat::make('Hráčské profily', $players)
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PLAYER_PROFILES))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PLAYER_PROFILES))
                 ->color('success'),
             Stat::make('Týmy', $teams)
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::TEAMS))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TEAMS))
                 ->color('warning'),
             Stat::make('Zápasy', $matchesTotal)
                 ->description("Nadcházející: {$matchesUpcoming}")
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::MATCHES))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::MATCHES))
                 ->color('info'),
             Stat::make('Tréninky', $trainingsTotal)
                 ->description("Nadcházející: {$trainingsUpcoming}")
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::TRAININGS))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TRAININGS))
                 ->color('info'),
             Stat::make('RSVP/Docházka', $attendanceTotal)
                 ->description('Počet záznamů (placeholder)')
-                ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CHECK_CIRCLE))
+                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CHECK_CIRCLE))
                 ->color('gray'),
         ];
     }

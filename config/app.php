@@ -84,6 +84,8 @@ return [
 
     'supported_locales' => ['cs', 'en'],
 
+    'fontawesome_pro' => env('FONTAWESOME_PRO', false),
+
     'faker_locale' => env('APP_FAKER_LOCALE', 'cs_CZ'),
 
     /*

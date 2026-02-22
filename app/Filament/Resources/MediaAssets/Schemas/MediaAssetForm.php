@@ -20,7 +20,7 @@ class MediaAssetForm
         return $schema
             ->components([
                 Section::make('Soubor')
-                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::UPLOAD))
+                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::UPLOAD))
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('file')
                             ->label('Nahrát soubor')
@@ -43,7 +43,7 @@ class MediaAssetForm
                     ]),
 
                 Section::make('Metadata')
-                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::METADATA))
+                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::METADATA))
                     ->description('Popisné informace o médiu pro SEO a přístupnost.')
                     ->schema([
                         Grid::make(2)
@@ -70,7 +70,7 @@ class MediaAssetForm
                     ]),
 
                 Section::make('Nastavení')
-                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SETTINGS))
+                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SETTINGS))
                     ->schema([
                         Grid::make(3)
                             ->schema([

@@ -61,11 +61,11 @@ class AdminPanelProvider extends PanelProvider
                 'profile' => MenuItem::make()
                     ->label(fn (): string => __('admin.navigation.pages.member_section'))
                     ->url(fn (): string => route('member.dashboard'))
-                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::USERS_GROUP)),
+                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::USERS_GROUP)),
                 MenuItem::make()
                     ->label(fn (): string => __('admin.navigation.pages.public_web'))
                     ->url(fn (): string => route('public.home'))
-                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::GLOBE)),
+                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::GLOBE)),
             ])
             ->colors([
                 'primary' => Color::hex($colors['red']),

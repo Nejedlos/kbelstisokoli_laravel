@@ -20,7 +20,7 @@ class StatisticSetResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::STAT_SETS);
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::STAT_SETS);
     }
 
     public static function getNavigationGroup(): ?string

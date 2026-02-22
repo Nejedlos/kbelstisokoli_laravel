@@ -1,6 +1,6 @@
 <?php
 
-use App\Support\FilamentIcon as Icons;
+use App\Support\IconHelper as Icons;
 
 return [
 

@@ -9,12 +9,12 @@ V projektu používáme balíček **owenvoke/blade-fontawesome**, který integru
 ### Klíčové zásady:
 - **NEPOUŽÍVEJTE** `new HtmlString('<i class="..."></i>')` v navigaci ani v akcích.
 - **NEPOUŽÍVEJTE** podtržítka v názvech ikon (např. `fal_users`).
-- **POUŽÍVEJTE** centrální třídu `App\Support\FilamentIcon` a její konstanty.
+- **POUŽÍVEJTE** centrální třídu `App\Support\IconHelper` a její konstanty.
 - **POUŽÍVEJTE** formát Blade Icons s pomlčkami (např. `fas-users`).
 
-## 2. Centrální správa (`FilamentIcon`)
+## 2. Centrální správa (`IconHelper`)
 
-Všechny ikony jsou definovány v třídě `App\Support\FilamentIcon`. Tato třída zajišťuje:
+Všechny ikony jsou definovány v třídě `App\Support\IconHelper`. Tato třída zajišťuje:
 1. **Konzistenci:** Celá aplikace používá stejné ikony pro stejné akce/moduly.
 2. **Robustnost:** Automaticky řeší fallbacky a normalizaci názvů.
 3. **Udržovatelnost:** Pokud se rozhodneme změnit ikonu pro "Uživatele", změníme ji na jednom místě.
@@ -22,37 +22,61 @@ Všechny ikony jsou definovány v třídě `App\Support\FilamentIcon`. Tato tř�
 ### Příklad použití v Resource:
 
 ```php
-use App\Support\FilamentIcon;
+use App\Support\IconHelper;
 
 public static function getNavigationIcon(): ?string
 {
-    return FilamentIcon::get(FilamentIcon::USERS);
+    return IconHelper::get(IconHelper::USERS);
 }
 ```
 
 ### Příklad použití v Akcích/Schématech:
 
 ```php
-use App\Support\FilamentIcon;
+use App\Support\IconHelper;
 
 Action::make('edit')
-    ->icon(FilamentIcon::get(FilamentIcon::EDIT))
+    ->icon(IconHelper::get(IconHelper::EDIT))
 ```
 
-## 3. Mapování ikon (`config/app-icons.php`)
+## 3. Registrace aliasů (Filament Icon Aliases)
 
-Pro pokročilé mapování a možnost globální výměny ikon (např. přechod z Font Awesome na Heroicons) existuje konfigurační soubor `config/app-icons.php`.
+Aby ikony v administraci vypadaly moderně (Light styl) a zároveň nezpůsobovaly problémy s renderováním, používáme systém **Icon Aliases**.
+
+1. **Registrace:** Všechny ikony se automaticky registrují v `AppServiceProvider::boot()` pod prefixem `app::fal-`.
+2. **Hodnota:** Každý alias odkazuje na `HtmlString` s tagem `<i class="fa-light ..."></i>`.
+3. **Použití:** Metoda `IconHelper::get()` vrací název aliasu (string). Filament pak při renderování tento alias automaticky vyřeší.
+
+Tento přístup je nejrobustnější, protože:
+1. **Zamezuje chybám:** String aliasu neobsahuje lomítka, takže Filament negeneruje nechtěné `<img>` tagy v sidebaru.
+2. **Univerzálnost:** Funguje ve všech komponentách Filamentu (navigace, akce, taby, sekce).
+3. **Bezpečnost:** Zamezuje chybám `SvgNotFound`, protože Blade Icons se nepokouší hledat SVG pro alias, který Filament vyřeší na `HtmlString`.
+
+### Přímý render HTML (`IconHelper::render()`)
+
+Pokud potřebujete vložit ikonu do vlastního HTML řetězce (např. v `Placeholder` komponentě), použijte metodu `render()`:
+
+```php
+new HtmlString('<div>' . IconHelper::render(IconHelper::CIRCLE_CHECK) . ' Aktivní</div>')
+```
 
 ## 4. Font Awesome Pro vs Free
 
 Aktuálně projekt využívá:
-- **Webfont:** Font Awesome 7 Pro (Light) pro frontend a obecné UI.
-- **SVG (Blade Icons):** Font Awesome Free (Solid/Regular) pro administraci. Aby SVG ikony v administraci (např. v sidebaru a taby) fungovaly spolehlivě, musí být jejich názvy v konstantách `FilamentIcon` dostupné v této bezplatné sadě. Pokud použijete název, který je pouze v Pro verzi (např. `shield-check`), administrace vyhodí chybu `SvgNotFound`.
+- **Webfont:** Font Awesome 7 Pro (Light) pro frontend a celou administraci.
+- **SVG (Blade Icons):** Font Awesome Free (Solid/Regular) slouží jako technický základ pro ověřování existence ikon, ale v UI administrace (Filament) preferujeme **Light** variantu přes webfont.
 
-**Důležité pravidlo:** V `App\Support\FilamentIcon.php` vždy definujte konstanty s názvy ikon, které existují ve verzi Font Awesome Free Solid. Tím zajistíte funkční SVG fallback. Webfont verze ikon budou i nadále moci používat Light styl tam, kde je to podporováno.
+**Jak funguje Light styl v administraci?**
+Aby ikony v administraci vypadaly moderně (Light styl), používáme výše zmíněný systém aliasů. Metoda `IconHelper::get()` vrací název aliasu, který Filament vyřeší na `HtmlString`.
 
-**Proč `fal-` nefunguje v administraci?**
-Bez explicitního nahrání SVG souborů z Pro verze do složky `resources/svg` nebo syncu s KITem nemá Blade Icons přístup k Light variantám. Naše Support třída `FilamentIcon` automaticky přepíná styl na `fas-` (Solid), pokud je vyžadován styl, který není dostupný.
+Tento přístup je nejrobustnější, protože:
+1. **Univerzálnost:** Funguje ve všech komponentách Filamentu (navigace, akce, taby, sekce), i v těch, které měly problémy s přímým vkládáním HTML.
+2. **Bezpečnost:** Zamezuje chybám `SvgNotFound`, protože Filament najde registrovaný alias a nevyužívá Blade Icons pro vyhledávání souboru.
+3. **Kvalita:** Využívá plný potenciál Font Awesome Pro webfontu.
+
+Pokud potřebujete skutečný `HtmlString` objekt (např. pro vložení do jiného řetězce), použijte `IconHelper::render()`.
+
+**Důležité pravidlo:** V `App\Support\IconHelper.php` vždy definujte konstanty s názvy ikon, které existují ve verzi Font Awesome Free Solid. Tím zajistíte, že diagnostický nástroj bude moci ikonu ověřit (protože ten testuje existenci SVG fallbacku).
 
 ### Jak v budoucnu zapnout Pro verze SVG:
 1. Stáhněte SVG ikony z Font Awesome Pro.
@@ -70,8 +94,8 @@ php artisan app:icons:doctor
 
 Tento příkaz provede automatickou kontrolu:
 - Instalaci balíčku `owenvoke/blade-fontawesome`.
-- **Existenci všech SVG ikon** definovaných v `FilamentIcon` konstantách proti nainstalovaným sadám.
-- Detekci zakázaného přímého vkládání HTML (`<i class="...">`) do PHP kódu administrace.
+- **Existenci všech SVG ikon** definovaných v `IconHelper` konstantách proti nainstalovaným sadám.
+- **Správnou registraci aliasů** ve Filamentu.
 - Formát názvů ikon (pomlčky vs. podtržítka).
 
 ## 6. Časté chyby (Troubleshooting)
