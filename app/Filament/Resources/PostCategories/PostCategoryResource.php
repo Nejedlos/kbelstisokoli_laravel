@@ -26,7 +26,7 @@ class PostCategoryResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_tags';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CATEGORIES);
     }
 
     public static function getModelLabel(): string

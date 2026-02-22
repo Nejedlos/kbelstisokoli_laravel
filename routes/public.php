@@ -47,6 +47,10 @@ Route::name('public.')->middleware(['public.maintenance'])->group(function (): v
 
     // Kontakt
     Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
+    Route::post('/kontakt', [\App\Http\Controllers\PublicLeadController::class, 'storeContact'])->name('contact.store')->middleware('throttle:5,1');
+
+    // Nábor
+    Route::post('/nabor', [\App\Http\Controllers\PublicLeadController::class, 'storeRecruitment'])->name('recruitment.store')->middleware('throttle:5,1');
 
     // Vyhledávání
     Route::get('/hledat', [\App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');

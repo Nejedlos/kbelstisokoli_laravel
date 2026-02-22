@@ -59,7 +59,7 @@ class CronTasksTable
             ->recordActions([
                 Action::make('run_now')
                     ->label('Spustit nyní')
-                    ->icon(new HtmlString('<i class="fa-light fa-play"></i>'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PLAY))
                     ->color('warning')
                     ->requiresConfirmation()
                     ->action(function ($record) {

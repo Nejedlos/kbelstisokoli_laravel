@@ -37,7 +37,7 @@ class TrainingResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_basketball';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::TRAININGS);
     }
 
     public static function getNavigationSort(): ?int

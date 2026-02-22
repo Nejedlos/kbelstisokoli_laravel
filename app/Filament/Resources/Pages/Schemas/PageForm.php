@@ -22,7 +22,7 @@ class PageForm
                 Tabs::make('Page Tabs')
                     ->tabs([
                         Tabs\Tab::make('Obsah')
-                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-copy fa-fw"></i>'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::COPY))
                             ->schema([
                                 Section::make('Základní informace')
                                     ->schema([
@@ -52,7 +52,7 @@ class PageForm
                             ]),
 
                         Tabs\Tab::make('Nastavení')
-                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-gear fa-fw"></i>'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SETTINGS))
                             ->schema([
                                 Section::make('Stav a viditelnost')
                                     ->schema([
@@ -76,13 +76,13 @@ class PageForm
                             ]),
 
                         Tabs\Tab::make('SEO')
-                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-globe fa-fw"></i>'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::GLOBE))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
                         Tabs\Tab::make('Vývojář')
-                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-code fa-fw"></i>'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CODE))
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
                             ->schema([
                                 Section::make('Vlastní kódy a skripty')

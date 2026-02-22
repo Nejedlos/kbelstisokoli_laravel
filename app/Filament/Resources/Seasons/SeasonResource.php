@@ -35,7 +35,7 @@ class SeasonResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_calendar_days';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SEASONS);
     }
 
     public static function getNavigationSort(): ?int

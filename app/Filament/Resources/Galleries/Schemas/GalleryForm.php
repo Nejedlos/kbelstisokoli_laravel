@@ -22,7 +22,7 @@ class GalleryForm
                 Tabs::make('Gallery Tabs')
                     ->tabs([
                         Tabs\Tab::make('Obsah')
-                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-image fa-fw"></i>'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::IMAGE))
                             ->schema([
                                 Section::make('Základní informace')
                                     ->schema([
@@ -85,7 +85,7 @@ class GalleryForm
                             ]),
 
                         Tabs\Tab::make('SEO')
-                            ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-globe fa-fw"></i>'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::GLOBE))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),

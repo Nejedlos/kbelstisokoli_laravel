@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Traits\Auditable;
 use App\Traits\HasSeo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
 
 class Page extends Model
 {
-    use HasSeo, HasTranslations, Auditable;
+    use HasSeo, HasTranslations, Auditable, HasFactory;
 
     protected $fillable = [
         'title',

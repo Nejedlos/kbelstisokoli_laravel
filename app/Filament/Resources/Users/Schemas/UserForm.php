@@ -124,9 +124,11 @@ class UserForm
 
     protected static function getOverviewTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-eye fa-fw mr-1"></i> ' . __('user.tabs.overview')))
+        return Tabs\Tab::make(__('user.tabs.overview'))
+            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::VIEW))
             ->schema([
-                Section::make(new HtmlString('<i class="fa-light fa-id-card fa-fw mr-1"></i> ' . __('user.sections.identity')))
+                Section::make(__('user.sections.identity'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::IDENTITY))
                     ->description(__('user.sections.identity_desc'))
                     ->compact()
                     ->schema([
@@ -151,7 +153,8 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-phone fa-fw mr-1"></i> ' . __('user.sections.contact')))
+                Section::make(__('user.sections.contact'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PHONE))
                     ->description(__('user.sections.contact_desc'))
                     ->compact()
                     ->schema([
@@ -170,7 +173,8 @@ class UserForm
 
     protected static function getPersonalTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-user fa-fw mr-1"></i> ' . __('user.tabs.personal')))
+        return Tabs\Tab::make(__('user.tabs.personal'))
+            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::USER))
             ->schema([
                 Section::make()
                     ->schema([
@@ -196,7 +200,8 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-location-dot fa-fw mr-1"></i> ' . __('user.sections.address')))
+                Section::make(__('user.sections.address'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::LOCATION))
                     ->description(__('user.sections.address_desc'))
                     ->compact()
                     ->schema([
@@ -218,7 +223,8 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-truck-medical fa-fw mr-1"></i> Nouzový kontakt'))
+                Section::make('Nouzový kontakt')
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::EMERGENCY))
                     ->compact()
                     ->schema([
                         Grid::make(2)
@@ -235,9 +241,11 @@ class UserForm
 
     protected static function getClubTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-building-columns fa-fw mr-1"></i> ' . __('user.tabs.club')))
+        return Tabs\Tab::make(__('user.tabs.club'))
+            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CLUB))
             ->schema([
-                Section::make(new HtmlString('<i class="fa-light fa-id-badge fa-fw mr-1"></i> ' . __('user.sections.membership')))
+                Section::make(__('user.sections.membership'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::BADGE))
                     ->description(__('user.sections.membership_desc'))
                     ->schema([
                         Grid::make(2)
@@ -247,7 +255,7 @@ class UserForm
                                     ->unique(ignoreRecord: true)
                                     ->suffixAction(
                                         Action::make('generate_id')
-                                            ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::REFRESH))
                                             ->action(function ($set) {
                                                 $set('club_member_id', app(ClubIdentifierService::class)->generateClubMemberId());
                                             })
@@ -272,7 +280,8 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-money-bill-transfer fa-fw mr-1"></i> ' . __('user.sections.payments')))
+                Section::make(__('user.sections.payments'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::FINANCE_PAYMENTS))
                     ->description(__('user.sections.payments_desc'))
                     ->schema([
                         Grid::make(2)
@@ -282,7 +291,7 @@ class UserForm
                                     ->unique(ignoreRecord: true)
                                     ->suffixAction(
                                         Action::make('generate_vs')
-                                            ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::REFRESH))
                                             ->action(function ($set) {
                                                 $set('payment_vs', app(ClubIdentifierService::class)->generatePaymentVs());
                                             })
@@ -303,7 +312,8 @@ class UserForm
 
     protected static function getPlayerTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-basketball fa-fw mr-1"></i> ' . __('user.tabs.player')))
+        return Tabs\Tab::make(__('user.tabs.player'))
+            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::BASKETBALL))
             ->schema([
                 Grid::make(1)
                     ->schema([
@@ -317,7 +327,8 @@ class UserForm
 
                         Grid::make(1)
                             ->schema([
-                                Section::make(new HtmlString('<i class="fa-light fa-basketball fa-fw mr-1"></i> ' . __('user.sections.basketball')))
+                                Section::make(__('user.sections.basketball'))
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::BASKETBALL))
                                     ->description(__('user.sections.basketball_desc'))
                                     ->relationship('playerProfile')
                                     ->schema([
@@ -351,7 +362,8 @@ class UserForm
                                             ->native(false),
                                     ]),
 
-                                Section::make(new HtmlString('<i class="fa-light fa-weight-scale fa-fw mr-1"></i> ' . __('user.sections.physical')))
+                                Section::make(__('user.sections.physical'))
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PHYSICAL))
                                     ->description(__('user.sections.physical_desc'))
                                     ->relationship('playerProfile')
                                     ->schema([
@@ -374,7 +386,8 @@ class UserForm
                                             ]),
                                     ]),
 
-                                Section::make(new HtmlString('<i class="fa-light fa-comment-medical fa-fw mr-1"></i> ' . __('user.sections.internal')))
+                                Section::make(__('user.sections.internal'))
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::NOTE))
                                     ->description(__('user.sections.internal_desc'))
                                     ->relationship('playerProfile')
                                     ->collapsed()
@@ -394,9 +407,11 @@ class UserForm
 
     protected static function getSecurityTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-shield-check fa-fw mr-1"></i> ' . __('user.tabs.security')))
+        return Tabs\Tab::make(__('user.tabs.security'))
+            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SHIELD_CHECK))
             ->schema([
-                Section::make(new HtmlString('<i class="fa-light fa-lock fa-fw mr-1"></i> ' . __('user.sections.security_password')))
+                Section::make(__('user.sections.security_password'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SECURITY))
                     ->description('Správa přístupových údajů.')
                     ->schema([
                         Grid::make(2)
@@ -415,16 +430,17 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-key fa-fw mr-1"></i> ' . __('user.sections.security_2fa')))
+                Section::make(__('user.sections.security_2fa'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PERMISSIONS))
                     ->description('Zabezpečení účtu pomocí druhého faktoru.')
                     ->aside()
                     ->schema([
                         Placeholder::make('2fa_status_detailed')
                             ->label('Aktuální stav')
                             ->content(fn ($record) => match (true) {
-                                !$record?->two_factor_secret => new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-medium"><i class="fa-light fa-circle-xmark"></i> Neaktivní</div>'),
-                                !$record->two_factor_confirmed_at => new HtmlString('<div class="flex items-center gap-2 text-warning-600 dark:text-warning-400 font-medium"><i class="fa-light fa-circle-exclamation"></i> Čeká na potvrzení</div>'),
-                                default => new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-medium"><i class="fa-light fa-circle-check"></i> Aktivní a ověřeno</div>'),
+                                !$record?->two_factor_secret => new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-medium">' . svg(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CIRCLE_XMARK))->toHtml() . ' Neaktivní</div>'),
+                                !$record->two_factor_confirmed_at => new HtmlString('<div class="flex items-center gap-2 text-warning-600 dark:text-warning-400 font-medium">' . svg(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::INFO))->toHtml() . ' Čeká na potvrzení</div>'),
+                                default => new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-medium">' . svg(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CIRCLE_CHECK))->toHtml() . ' Aktivní a ověřeno</div>'),
                             }),
                         Placeholder::make('2fa_confirmed_at')
                             ->label('Datum aktivace')
@@ -434,7 +450,7 @@ class UserForm
                     ->headerActions([
                         Action::make('disable_2fa')
                             ->label(__('user.actions.reset_2fa'))
-                            ->icon(new HtmlString('<i class="fa-light fa-trash-can"></i>'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::TRASH))
                             ->color('danger')
                             ->requiresConfirmation()
                             ->action(function ($record) {
@@ -457,9 +473,11 @@ class UserForm
 
     protected static function getAdminTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(new HtmlString('<i class="fa-light fa-user-gear fa-fw mr-1"></i> ' . __('user.tabs.admin')))
+        return Tabs\Tab::make(__('user.tabs.admin'))
+            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::USER_GEAR))
             ->schema([
-                Section::make(new HtmlString('<i class="fa-light fa-gears fa-fw mr-1"></i> ' . __('user.sections.internal')))
+                Section::make(__('user.sections.internal'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::GEARS))
                     ->schema([
                         Select::make('roles')
                             ->label('Role uživatele')
@@ -472,7 +490,8 @@ class UserForm
                             ->rows(5),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-clock-rotate-left fa-fw mr-1"></i> Audit'))
+                Section::make('Audit')
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::AUDIT))
                     ->compact()
                     ->schema([
                         Grid::make(3)

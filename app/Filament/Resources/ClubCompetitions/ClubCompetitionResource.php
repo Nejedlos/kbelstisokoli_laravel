@@ -20,7 +20,7 @@ class ClubCompetitionResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_trophy';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::COMPETITIONS);
     }
 
     public static function getNavigationGroup(): ?string

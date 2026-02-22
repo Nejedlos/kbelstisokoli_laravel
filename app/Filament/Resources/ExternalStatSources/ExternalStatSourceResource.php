@@ -20,7 +20,7 @@ class ExternalStatSourceResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_cloud_arrow_down';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::STAT_SOURCES);
     }
 
     public static function getNavigationGroup(): ?string

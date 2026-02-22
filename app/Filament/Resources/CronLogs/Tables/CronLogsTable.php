@@ -63,7 +63,7 @@ class CronLogsTable
             ->recordActions([
                 Action::make('view_output')
                     ->label('Zobrazit výstup')
-                    ->icon(new HtmlString('<i class="fa-light fa-eye"></i>'))
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::VIEW))
                     ->modalHeading('Výstup úlohy')
                     ->modalContent(fn ($record) => view('filament.components.cron-output', ['record' => $record]))
                     ->modalSubmitAction(false),

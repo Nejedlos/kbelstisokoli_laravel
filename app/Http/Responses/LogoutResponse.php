@@ -22,7 +22,7 @@ class LogoutResponse implements LogoutResponseContract, FilamentLogoutResponseCo
         // Vymažeme 2FA remember cookie
         $cookie = Cookie::forget('2fa_remember');
 
-        return redirect()->to(config('fortify.home', '/'))
+        return redirect()->to('/')
             ->withCookie($cookie);
     }
 }

@@ -30,7 +30,7 @@ class RedirectResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_shuffle';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::REDIRECTS);
     }
 
     public static function getPluralModelLabel(): string

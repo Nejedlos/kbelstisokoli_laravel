@@ -20,7 +20,7 @@ class StatisticSetResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_chart_column';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::STAT_SETS);
     }
 
     public static function getNavigationGroup(): ?string

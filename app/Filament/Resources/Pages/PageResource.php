@@ -23,7 +23,7 @@ class PageResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_file_lines';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PAGES);
     }
 
     public static function getModelLabel(): string

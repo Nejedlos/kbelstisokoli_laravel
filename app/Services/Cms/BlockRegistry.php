@@ -22,12 +22,7 @@ class BlockRegistry
      */
     public static function getBlocks(): array
     {
-        return array_map(function (Block $block) {
-            return $block->schema(array_merge(
-                $block->getChildComponents(),
-                [self::getAdvancedSettingsSection()]
-            ));
-        }, [
+        return [
             self::getHeroBlock(),
             self::getRichTextBlock(),
             self::getImageBlock(),
@@ -40,7 +35,12 @@ class BlockRegistry
             self::getContactInfoBlock(),
             self::getCustomHtmlBlock(),
             self::getStatsTableBlock(),
-        ]);
+        ];
+    }
+
+    protected static function withAdvancedSettings(array $schema): array
+    {
+        return array_merge($schema, [self::getAdvancedSettingsSection()]);
     }
 
     protected static function getAdvancedSettingsSection(): Section
@@ -86,8 +86,8 @@ class BlockRegistry
         return Block::make('hero')
             ->label('Hero sekce')
             ->icon('heroicon-o-sparkles')
-            ->itemLabel(fn (array $state): ?string => $state['headline'] ?? 'Hero sekce')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['headline'] ?? 'Hero sekce')
+            ->schema(self::withAdvancedSettings([
                 Section::make('Hlavní obsah')
                     ->schema([
                         TextInput::make('headline')
@@ -147,7 +147,7 @@ class BlockRegistry
                             ->helperText('Zlepší čitelnost textu na světlém obrázku.')
                             ->default(true),
                     ]),
-            ]);
+            ]));
     }
 
     protected static function getRichTextBlock(): Block
@@ -155,13 +155,13 @@ class BlockRegistry
         return Block::make('rich_text')
             ->label('Textový blok')
             ->icon('heroicon-o-document-text')
-            ->itemLabel(fn (array $state): ?string => strip_tags($state['content'] ?? 'Textový blok'))
-            ->schema([
+            ->label(fn (array $state): ?string => strip_tags($state['content'] ?? 'Textový blok'))
+            ->schema(self::withAdvancedSettings([
                 RichEditor::make('content')
                     ->label('Formátovaný text')
                     ->helperText('Používejte nadpisy H2 nebo H3 pro strukturu obsahu.')
                     ->required(),
-            ]);
+            ]));
     }
 
     protected static function getImageBlock(): Block
@@ -169,8 +169,8 @@ class BlockRegistry
         return Block::make('image')
             ->label('Obrázek')
             ->icon('heroicon-o-photo')
-            ->itemLabel(fn (array $state): ?string => $state['caption'] ?? 'Obrázek')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['caption'] ?? 'Obrázek')
+            ->schema(self::withAdvancedSettings([
                 Grid::make(2)
                     ->schema([
                         Select::make('media_asset_id')
@@ -195,7 +195,7 @@ class BlockRegistry
                                     ->default('max-w-full'),
                             ]),
                     ]),
-            ]);
+            ]));
     }
 
     protected static function getCallToActionBlock(): Block
@@ -203,8 +203,8 @@ class BlockRegistry
         return Block::make('cta')
             ->label('Výzva k akci (CTA)')
             ->icon('heroicon-o-megaphone')
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'CTA blok')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['title'] ?? 'CTA blok')
+            ->schema(self::withAdvancedSettings([
                 Grid::make(2)
                     ->schema([
                         TextInput::make('title')
@@ -228,7 +228,7 @@ class BlockRegistry
                             ])
                             ->default('primary'),
                     ]),
-            ]);
+            ]));
     }
 
     protected static function getCardsGridBlock(): Block
@@ -236,8 +236,8 @@ class BlockRegistry
         return Block::make('cards_grid')
             ->label('Mřížka karet')
             ->icon('heroicon-o-squares-2x2')
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Mřížka karet')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['title'] ?? 'Mřížka karet')
+            ->schema(self::withAdvancedSettings([
                 TextInput::make('title')
                     ->label('Nadpis celé sekce')
                     ->placeholder('Naše přednosti'),
@@ -272,7 +272,7 @@ class BlockRegistry
                     ->collapsible()
                     ->collapsed()
                     ->grid(2),
-            ]);
+            ]));
     }
 
     protected static function getStatsCardsBlock(): Block
@@ -280,8 +280,8 @@ class BlockRegistry
         return Block::make('stats_cards')
             ->label('Statistické údaje')
             ->icon('heroicon-o-chart-bar')
-            ->itemLabel(fn (array $state): ?string => 'Statistické údaje (' . count($state['stats'] ?? []) . ')')
-            ->schema([
+            ->label(fn (array $state): ?string => 'Statistické údaje (' . count($state['stats'] ?? []) . ')')
+            ->schema(self::withAdvancedSettings([
                 Repeater::make('stats')
                     ->label('Statistiky')
                     ->schema([
@@ -299,7 +299,7 @@ class BlockRegistry
                     ])
                     ->itemLabel(fn (array $state): ?string => ($state['value'] ?? '') . ' ' . ($state['label'] ?? ''))
                     ->grid(3),
-            ]);
+            ]));
     }
 
     protected static function getNewsListingBlock(): Block
@@ -307,8 +307,8 @@ class BlockRegistry
         return Block::make('news_listing')
             ->label('Výpis novinek')
             ->icon('heroicon-o-newspaper')
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Výpis novinek')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['title'] ?? 'Výpis novinek')
+            ->schema(self::withAdvancedSettings([
                 Grid::make(2)
                     ->schema([
                         TextInput::make('title')
@@ -335,7 +335,7 @@ class BlockRegistry
                             ])
                             ->default('grid'),
                     ]),
-            ]);
+            ]));
     }
 
     protected static function getMatchesListingBlock(): Block
@@ -343,8 +343,8 @@ class BlockRegistry
         return Block::make('matches_listing')
             ->label('Výpis zápasů')
             ->icon('heroicon-o-trophy')
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Výpis zápasů')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['title'] ?? 'Výpis zápasů')
+            ->schema(self::withAdvancedSettings([
                 Grid::make(3)
                     ->schema([
                         TextInput::make('title')
@@ -362,7 +362,7 @@ class BlockRegistry
                             ->numeric()
                             ->default(5),
                     ]),
-            ]);
+            ]));
     }
 
     protected static function getGalleryBlock(): Block
@@ -370,8 +370,8 @@ class BlockRegistry
         return Block::make('gallery')
             ->label('Galerie')
             ->icon('heroicon-o-rectangle-group')
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Galerie')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['title'] ?? 'Galerie')
+            ->schema(self::withAdvancedSettings([
                 TextInput::make('title')
                     ->label('Nadpis sekce')
                     ->placeholder('Fotky z turnaje'),
@@ -389,7 +389,7 @@ class BlockRegistry
                         'masonry' => 'Mozaika (původní poměry)',
                     ])
                     ->default('grid'),
-            ]);
+            ]));
     }
 
     protected static function getContactInfoBlock(): Block
@@ -397,8 +397,8 @@ class BlockRegistry
         return Block::make('contact_info')
             ->label('Kontakt / Info')
             ->icon('heroicon-o-information-circle')
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Kontakt')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['title'] ?? 'Kontakt')
+            ->schema(self::withAdvancedSettings([
                 TextInput::make('title')
                     ->label('Nadpis')
                     ->default('Kontaktujte nás'),
@@ -416,10 +416,10 @@ class BlockRegistry
                                     ->label('Telefonní číslo'),
                             ]),
                     ]),
-                Toggle::make('show_map')
+                        Toggle::make('show_map')
                     ->label('Zobrazit interaktivní mapu')
                     ->default(false),
-            ]);
+            ]));
     }
 
     protected static function getCustomHtmlBlock(): Block
@@ -429,8 +429,8 @@ class BlockRegistry
         return Block::make('custom_html')
             ->label('Vlastní HTML / Embed')
             ->icon('heroicon-o-code-bracket')
-            ->itemLabel(fn (array $state): ?string => ($state['mode'] ?? '') === 'raw' ? 'Vlastní HTML (Raw)' : 'Bezpečný Embed')
-            ->schema([
+            ->label(fn (array $state): ?string => ($state['mode'] ?? '') === 'raw' ? 'Vlastní HTML (Raw)' : 'Bezpečný Embed')
+            ->schema(self::withAdvancedSettings([
                 Select::make('mode')
                     ->label('Režim vkládání')
                     ->options([
@@ -459,7 +459,7 @@ class BlockRegistry
                     ->label('Přístup odepřen')
                     ->content(new HtmlString('<span class="text-danger-500">Nemáte oprávnění pro vkládání surového HTML kódu. Kontaktujte administrátora.</span>'))
                     ->visible(fn ($get) => $get('mode') === 'raw' && !$canUseRawHtml),
-            ]);
+            ]));
     }
 
     protected static function getStatsTableBlock(): Block
@@ -467,8 +467,8 @@ class BlockRegistry
         return Block::make('stats_table')
             ->label('Statistická tabulka')
             ->icon('heroicon-o-table-cells')
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Statistická tabulka')
-            ->schema([
+            ->label(fn (array $state): ?string => $state['title'] ?? 'Statistická tabulka')
+            ->schema(self::withAdvancedSettings([
                 TextInput::make('title')
                     ->label('Nadpis tabulky')
                     ->default('Statistiky'),
@@ -487,6 +487,6 @@ class BlockRegistry
                             ->label('Zobrazit odkaz na detail')
                             ->default(true),
                     ]),
-            ]);
+            ]));
     }
 }

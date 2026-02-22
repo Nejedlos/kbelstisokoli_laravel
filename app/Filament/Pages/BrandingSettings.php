@@ -11,12 +11,16 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Grid;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 
-class BrandingSettings extends Page
+class BrandingSettings extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     public static function getNavigationLabel(): string
     {
         return __('admin.navigation.pages.branding');
@@ -24,7 +28,7 @@ class BrandingSettings extends Page
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_palette';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::BRANDING);
     }
 
     public static function getNavigationGroup(): ?string
@@ -59,11 +63,11 @@ class BrandingSettings extends Page
         $this->data = array_merge($configDefaults, $dbData);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->statePath('data')
-            ->schema([
+            ->components([
                 Section::make('Téma a barvy')
                     ->description('Vyberte barevný motiv webu. Každý motiv je navržen tak, aby byl vizuálně konzistentní.')
                     ->schema([

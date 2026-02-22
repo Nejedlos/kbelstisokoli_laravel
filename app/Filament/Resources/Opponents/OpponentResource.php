@@ -35,7 +35,7 @@ class OpponentResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_shield';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::OPPONENTS);
     }
 
     public static function getNavigationSort(): ?int

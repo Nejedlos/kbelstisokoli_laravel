@@ -20,7 +20,7 @@ class PlayerProfileResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_id_card';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PLAYER_PROFILES);
     }
 
     public static function getNavigationGroup(): ?string

@@ -90,6 +90,14 @@ return [
                 'label' => 'Kategorie',
                 'plural_label' => 'Kategorie novinek',
             ],
+            'lead' => [
+                'label' => 'Lead / Zájemce',
+                'plural_label' => 'Leady / Zájemci',
+            ],
+            'audit_log' => [
+                'label' => 'Auditní log',
+                'plural_label' => 'Auditní logy',
+            ],
             'redirect' => [
                 'label' => 'Přesměrování',
                 'plural_label' => 'Přesměrování',

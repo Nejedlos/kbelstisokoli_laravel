@@ -15,7 +15,7 @@ class RoleResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_user_shield';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::ROLES);
     }
 
     public static function getNavigationGroup(): ?string

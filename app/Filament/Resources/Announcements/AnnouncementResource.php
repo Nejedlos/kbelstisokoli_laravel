@@ -20,7 +20,7 @@ class AnnouncementResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_announcement';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::ANNOUNCEMENTS);
     }
 
     public static function getNavigationGroup(): ?string

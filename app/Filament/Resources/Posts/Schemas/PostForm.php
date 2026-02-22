@@ -24,9 +24,11 @@ class PostForm
             ->components([
                 Tabs::make('Post Tabs')
                     ->tabs([
-                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-file-lines fa-fw mr-1"></i> Obsah'))
+                        Tabs\Tab::make('Obsah')
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PAGES))
                             ->schema([
-                                Section::make(new HtmlString('<i class="fa-light fa-info-circle fa-fw mr-1"></i> Základní informace'))
+                                Section::make('Základní informace')
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::INFO))
                                     ->schema([
                                         TextInput::make('title')
                                             ->label('Titulek novinky')
@@ -47,7 +49,8 @@ class PostForm
                                             ->preload(),
                                     ])->columns(2),
 
-                                Section::make(new HtmlString('<i class="fa-light fa-pen-nib fa-fw mr-1"></i> Text článku'))
+                                Section::make('Text článku')
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PEN_NIB))
                                     ->schema([
                                         Textarea::make('excerpt')
                                             ->label('Perex (stručný výtah)')
@@ -61,9 +64,11 @@ class PostForm
                                     ]),
                             ]),
 
-                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-photo-film fa-fw mr-1"></i> Publikace a média'))
+                        Tabs\Tab::make('Publikace a média')
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::PHOTO_FILM))
                             ->schema([
-                                Section::make(new HtmlString('<i class="fa-light fa-bullhorn fa-fw mr-1"></i> Stav publikace'))
+                                Section::make('Stav publikace')
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::ANNOUNCEMENTS))
                                     ->schema([
                                         Grid::make(2)
                                             ->schema([
@@ -88,7 +93,8 @@ class PostForm
                                             ->default(true),
                                     ]),
 
-                                Section::make(new HtmlString('<i class="fa-light fa-image fa-fw mr-1"></i> Média'))
+                                Section::make('Média')
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::IMAGE))
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
@@ -107,15 +113,18 @@ class PostForm
                                     ]),
                             ]),
 
-                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-magnifying-glass-chart fa-fw mr-1"></i> SEO'))
+                        Tabs\Tab::make('SEO')
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SEO))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
-                        Tabs\Tab::make(new HtmlString('<i class="fa-light fa-code fa-fw mr-1"></i> Vývojář'))
+                        Tabs\Tab::make('Vývojář')
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
+                            ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::CODE))
                             ->schema([
-                                Section::make(new HtmlString('<i class="fa-light fa-terminal fa-fw mr-1"></i> Vlastní kódy a skripty'))
+                                Section::make('Vlastní kódy a skripty')
+                                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::TERMINAL))
                                     ->description('Vložte kód, který se provede pouze pro tuto novinku.')
                                     ->schema([
                                         Textarea::make('head_code')

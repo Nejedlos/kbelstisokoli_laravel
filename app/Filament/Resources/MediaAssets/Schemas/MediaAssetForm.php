@@ -19,7 +19,8 @@ class MediaAssetForm
     {
         return $schema
             ->components([
-                Section::make(new HtmlString('<i class="fa-light fa-file-arrow-up fa-fw mr-1"></i> Soubor'))
+                Section::make('Soubor')
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::UPLOAD))
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('file')
                             ->label('Nahrát soubor')
@@ -41,7 +42,8 @@ class MediaAssetForm
                             ->hint('Podporovány jsou obrázky a dokumenty (PDF).'),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-info-circle fa-fw mr-1"></i> Metadata'))
+                Section::make('Metadata')
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::METADATA))
                     ->description('Popisné informace o médiu pro SEO a přístupnost.')
                     ->schema([
                         Grid::make(2)
@@ -67,7 +69,8 @@ class MediaAssetForm
                             ->rows(3),
                     ]),
 
-                Section::make(new HtmlString('<i class="fa-light fa-gear fa-fw mr-1"></i> Nastavení'))
+                Section::make('Nastavení')
+                    ->icon(\App\Support\FilamentIcon::get(\App\Support\FilamentIcon::SETTINGS))
                     ->schema([
                         Grid::make(3)
                             ->schema([

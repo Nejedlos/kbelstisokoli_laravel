@@ -23,7 +23,7 @@ class PostResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_newspaper';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::POSTS);
     }
 
     public static function getModelLabel(): string

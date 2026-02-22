@@ -20,7 +20,7 @@ class FinancePaymentResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_money_bill_transfer';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::FINANCE_PAYMENTS);
     }
 
     public static function getNavigationGroup(): ?string

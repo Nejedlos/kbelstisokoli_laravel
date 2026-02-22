@@ -37,7 +37,7 @@ class ClubEventResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fal_calendar_star';
+        return \App\Support\FilamentIcon::get(\App\Support\FilamentIcon::EVENTS);
     }
 
     public static function getNavigationSort(): ?int

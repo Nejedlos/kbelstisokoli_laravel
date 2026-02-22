@@ -34,36 +34,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Filament\Support\Facades\FilamentIcon::register([
-            'fal_announcement' => new HtmlString('<i class="fa-light fa-bullhorn fa-fw"></i>'),
-            'fal_basketball' => new HtmlString('<i class="fa-light fa-basketball fa-fw"></i>'),
-            'fal_basketball_hoop' => new HtmlString('<i class="fa-light fa-basketball-hoop fa-fw"></i>'),
-            'fal_trophy' => new HtmlString('<i class="fa-light fa-trophy fa-fw"></i>'),
-            'fal_calendar_star' => new HtmlString('<i class="fa-light fa-calendar-star fa-fw"></i>'),
-            'fal_history' => new HtmlString('<i class="fa-light fa-history fa-fw"></i>'),
-            'fal_clock' => new HtmlString('<i class="fa-light fa-clock fa-fw"></i>'),
-            'fal_cloud_arrow_down' => new HtmlString('<i class="fa-light fa-cloud-arrow-down fa-fw"></i>'),
-            'fal_file_invoice_dollar' => new HtmlString('<i class="fa-light fa-file-invoice-dollar fa-fw"></i>'),
-            'fal_money_bill_transfer' => new HtmlString('<i class="fa-light fa-money-bill-transfer fa-fw"></i>'),
-            'fal_film' => new HtmlString('<i class="fa-light fa-film fa-fw"></i>'),
-            'fal_images' => new HtmlString('<i class="fa-light fa-images fa-fw"></i>'),
-            'fal_bars' => new HtmlString('<i class="fa-light fa-bars fa-fw"></i>'),
-            'fal_shield' => new HtmlString('<i class="fa-light fa-shield fa-fw"></i>'),
-            'fal_file_lines' => new HtmlString('<i class="fa-light fa-file-lines fa-fw"></i>'),
-            'fal_key' => new HtmlString('<i class="fa-light fa-key fa-fw"></i>'),
-            'fal_id_card' => new HtmlString('<i class="fa-light fa-id-card fa-fw"></i>'),
-            'fal_tags' => new HtmlString('<i class="fa-light fa-tags fa-fw"></i>'),
-            'fal_newspaper' => new HtmlString('<i class="fa-light fa-newspaper fa-fw"></i>'),
-            'fal_shuffle' => new HtmlString('<i class="fa-light fa-shuffle fa-fw"></i>'),
-            'fal_user_shield' => new HtmlString('<i class="fa-light fa-user-shield fa-fw"></i>'),
-            'fal_calendar_days' => new HtmlString('<i class="fa-light fa-calendar-days fa-fw"></i>'),
-            'fal_chart_column' => new HtmlString('<i class="fa-light fa-chart-column fa-fw"></i>'),
-            'fal_user_group' => new HtmlString('<i class="fa-light fa-user-group fa-fw"></i>'),
-            'fal_users' => new HtmlString('<i class="fa-light fa-users fa-fw"></i>'),
-            'fal_palette' => new HtmlString('<i class="fa-light fa-palette fa-fw"></i>'),
-            'fal_clipboard_list' => new HtmlString('<i class="fa-light fa-clipboard-list fa-fw"></i>'),
-        ]);
-
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
                 ->locales(config('app.supported_locales', ['cs', 'en']))
