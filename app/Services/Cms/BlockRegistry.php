@@ -136,12 +136,19 @@ class BlockRegistry
                                     ])
                                     ->default('left'),
                             ]),
-                        Select::make('media_asset_id')
-                            ->label('Obrázek / Pozadí z knihovny')
-                            ->relationship('mediaAsset', 'title', fn ($query) => $query->where('type', 'image'))
-                            ->searchable()
-                            ->preload()
-                            ->helperText('Vyberte obrázek z centrální knihovny.'),
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('media_asset_id')
+                                    ->label('Obrázek / Fallback')
+                                    ->relationship('mediaAsset', 'title', fn ($query) => $query->where('type', 'image'))
+                                    ->searchable()
+                                    ->preload()
+                                    ->helperText('Obrázek z knihovny (nebo fallback pro video).'),
+                                TextInput::make('video_url')
+                                    ->label('Video pozadí (URL)')
+                                    ->placeholder('assets/video/hero.mp4')
+                                    ->helperText('Cesta k MP4 souboru (relativně k public/).'),
+                            ]),
                         Toggle::make('overlay')
                             ->label('Tmavý překryv obrázku')
                             ->helperText('Zlepší čitelnost textu na světlém obrázku.')

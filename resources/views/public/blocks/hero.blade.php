@@ -1,6 +1,7 @@
 @php
     $asset = isset($data['media_asset_id']) ? \App\Models\MediaAsset::find($data['media_asset_id']) : null;
     $imageUrl = $asset ? $asset->getUrl('large') : ($data['image_url'] ?? null);
+    $videoUrl = $data['video_url'] ?? null;
     $variant = $data['variant'] ?? 'standard';
     $alignment = $data['alignment'] ?? ($variant === 'centered' ? 'center' : 'left');
 @endphp
@@ -9,14 +10,28 @@
     'block-hero relative overflow-hidden min-h-[60vh] flex items-center',
     'bg-secondary text-white' => $variant !== 'minimal',
     'bg-white text-secondary' => $variant === 'minimal',
-    'hero-gradient' => $variant === 'standard' && !$imageUrl,
+    'hero-gradient' => $variant === 'standard' && !$imageUrl && !$videoUrl,
     'py-20 md:py-32' => $variant === 'centered',
     'py-16 md:py-24' => $variant !== 'centered',
 ])>
-    {{-- Background Image / Overlay --}}
-    @if($imageUrl && $variant !== 'minimal')
+    {{-- Background Image / Video / Overlay --}}
+    @if(($imageUrl || $videoUrl) && $variant !== 'minimal')
         <div class="absolute inset-0 z-0">
-            <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover">
+            @if($videoUrl)
+                <video
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    poster="{{ $imageUrl }}"
+                    class="w-full h-full object-cover"
+                >
+                    <source src="{{ asset($videoUrl) }}" type="video/mp4">
+                </video>
+            @else
+                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover">
+            @endif
+
             @if($data['overlay'] ?? true)
                 <div class="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent"></div>
             @endif
@@ -39,8 +54,15 @@
             'ml-auto text-right max-w-3xl' => $alignment === 'right',
         ])>
             @if($data['eyebrow'] ?? null)
-                <div class="mb-4 inline-flex items-center bg-primary/20 text-primary-light px-3 sm:px-4 py-1.5 rounded-full text-[min(3.2vw,0.875rem)] sm:text-xs md:text-sm font-black uppercase tracking-widest-responsive sm:tracking-[0.2em] border border-primary/30 whitespace-nowrap max-w-full overflow-hidden leading-none">
-                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full mr-2 sm:mr-3 animate-pulse shrink-0"></span>
+                <div @class([
+                    'mb-6 inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-display font-bold uppercase tracking-[0.3em] whitespace-nowrap max-w-full overflow-hidden leading-none shadow-2xl',
+                    'bg-white/5 backdrop-blur-md text-primary-light border border-white/10 shadow-black/20' => $variant !== 'minimal',
+                    'bg-secondary/5 text-secondary border border-secondary/10 shadow-secondary/5' => $variant === 'minimal',
+                ])>
+                    <span class="relative flex h-2 w-2 mr-4 shrink-0">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
                     {{ $data['eyebrow'] }}
                 </div>
             @endif

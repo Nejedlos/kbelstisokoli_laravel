@@ -14,7 +14,7 @@
         <i class="fa-light fa-basketball text-[30rem] translate-x-1/2 -translate-y-1/4"></i>
     </div>
 
-    <div class="container pt-12 md:pt-20 pb-16 relative z-10">
+    <div class="container pt-12 md:pt-20 pb-6 relative z-10">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
             {{-- Column 1: Brand & Identity --}}
             <div class="space-y-6">
@@ -43,7 +43,10 @@
                 </div>
 
                 <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive text-white/50 badge-nowrap max-w-full overflow-hidden">
-                    <span class="w-1.5 h-1.5 bg-primary rounded-full mr-2 animate-pulse shrink-0"></span>
+                    <span class="relative flex h-2 w-2 mr-3 shrink-0">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
                     {{ __('footer.brand_badge') }}
                 </div>
             </div>
@@ -158,23 +161,6 @@
                         </a>
                     </div>
 
-                    <div class="flex items-center gap-3 pt-6">
-                        @if(data_get($branding, 'socials.facebook'))
-                            <a href="{{ $branding['socials']['facebook'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
-                                <i class="fa-brands fa-facebook-f text-lg"></i>
-                            </a>
-                        @endif
-                        @if(data_get($branding, 'socials.instagram'))
-                            <a href="{{ $branding['socials']['instagram'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
-                                <i class="fa-brands fa-instagram text-lg"></i>
-                            </a>
-                        @endif
-                        @if(data_get($branding, 'socials.youtube'))
-                            <a href="{{ $branding['socials']['youtube'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
-                                <i class="fa-brands fa-youtube text-lg"></i>
-                            </a>
-                        @endif
-                    </div>
                 </div>
             </div>
         </div>
