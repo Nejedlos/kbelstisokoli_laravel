@@ -8,8 +8,9 @@ Zajištění, aby administrátoři museli periodicky potvrzovat svou identitu po
 ## Technický popis
 
 ### 1. 2FA Timeout
-V administraci je zaveden povinný timeout pro 2FA potvrzení. Výchozí hodnota je **2 hodiny** (120 minut).
-- Pokud je uživatel neaktivní déle než tento limit, nebo pokud uplyne tento limit od posledního 2FA ověření, bude při pokusu o přístup do administrace znovu vyzván k zadání 2FA kódu.
+V administraci je zaveden povinný timeout pro 2FA potvrzení. Výchozí hodnota je **24 hodin**.
+- Pokud uplyne tento limit od posledního 2FA ověření, bude při pokusu o přístup do administrace znovu vyzván k zadání 2FA kódu.
+- Samotná relace (1. faktor) má nastavený timeout na **3 hodiny** (180 minut).
 - Toto chování zajišťuje middleware `CheckTwoFactorTimeout`.
 
 ### 2. Zapamatování zařízení (Remember Device)
@@ -28,13 +29,16 @@ Nově je také k dispozici globální odhlašovací URL **/admin/logout**, kter�
 
 ## Implementované komponenty
 - **Middleware:** `CheckTwoFactorTimeout` (registrovaný jako `2fa.timeout`).
-- **Response:** `TwoFactorLoginResponse` a `LogoutResponse` (přetěžují výchozí Fortify/Filament chování).
+    - *Novinka:* Automaticky ukládá zamýšlenou URL (`intended`), aby se uživatel po potvrzení 2FA vrátil přesně tam, kam směřoval.
+- **Response:** `TwoFactorLoginResponse` a `LoginResponse` (přetěžují výchozí Fortify/Filament chování).
+    - *Zlepšení:* Robustní detekce adminů (oprávnění + role) a automatické přesměrování do `/admin` po přihlášení, pokud není určeno jinak.
 - **View:** Upravený `auth.two-factor-challenge` s checkboxem.
 - **Chybové stránky:** Vlastní `419.blade.php` pro elegantní zvládnutí vypršené relace.
 
 ## Konfigurace
 V souboru `.env` lze (volitelně, po přidání do configu) nastavit:
-- `2FA_TIMEOUT` (v sekundách, výchozí 7200).
+- `AUTH_2FA_TIMEOUT` (v sekundách, výchozí 86400).
+- `SESSION_LIFETIME` (v minutách, výchozí 180).
 
 ## Správa pro administrátory
 Pokud uživatel ztratí zařízení, stačí se odhlásit na všech zařízeních, nebo počkat na vypršení 30denní lhůty. Cookie je vázána na ID uživatele.

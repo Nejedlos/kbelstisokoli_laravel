@@ -20,7 +20,9 @@ class EnsureTwoFactorEnabled
         // A ZÁROVEŇ se pokouší přistoupit k admin sekci (včetně Filamentu)
         $isAdminRoute = $request->is('admin*') || $request->routeIs('admin.*') || $request->routeIs('filament.admin.*');
 
-        if ($user && $user->can('access_admin') && $isAdminRoute) {
+        $isAdmin = $user && ($user->can('access_admin') || $user->hasRole('admin'));
+
+        if ($isAdmin && $isAdminRoute) {
             // A nemá AKTIVOVANÉ (potvrzené) 2FA
             // Fortify používá two_factor_confirmed_at pokud je zapnuté 'confirm' v configu
             $isConfirmed = $user->two_factor_confirmed_at !== null;

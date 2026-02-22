@@ -21,6 +21,8 @@ use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Fortify;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as FilamentLogoutResponseContract;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,10 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
         $this->app->singleton(LogoutResponseContract::class, LogoutResponse::class);
         $this->app->singleton(TwoFactorLoginResponseContract::class, TwoFactorLoginResponse::class);
+
+        // Také registrujeme pro Filament kontrakty
+        $this->app->singleton(FilamentLoginResponseContract::class, LoginResponse::class);
+        $this->app->singleton(FilamentLogoutResponseContract::class, LogoutResponse::class);
     }
 
     /**

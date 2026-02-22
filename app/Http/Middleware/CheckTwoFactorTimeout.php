@@ -27,9 +27,9 @@ class CheckTwoFactorTimeout
             return $next($request);
         }
 
-        // Kontrola 2FA potvrzení v session (např. timeout 2 hodiny)
+        // Kontrola 2FA potvrzení v session (např. timeout 24 hodin)
         $confirmedAt = $request->session()->get('auth.2fa_confirmed_at');
-        $timeout = config('auth.2fa_timeout', 120 * 60); // Výchozí 2 hodiny
+        $timeout = config('auth.2fa_timeout', 86400); // Výchozí 24 hodin
 
         if ($confirmedAt && (now()->timestamp - $confirmedAt) < $timeout) {
             return $next($request);
@@ -58,6 +58,9 @@ class CheckTwoFactorTimeout
         // Vynutíme 2FA challenge (Fortify mechanismus)
         // Fortify přesměruje na challenge, pokud je user přihlášen, ale 2FA není v session potvrzeno
         // Musíme ale zneplatnit Fortify 2FA příznak, pokud vypršel náš timeout
+
+        // Uložíme zamýšlenou URL pro návrat po úspěšném 2FA
+        session()->put('url.intended', $request->fullUrl());
 
         return redirect()->route('two-factor.login');
     }
