@@ -13,11 +13,16 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Zapomenuté heslo');
     }
 
     public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Stává se i nejlepším střelcům. Pošleme přihrávku na nový start.');
+    }
+
+    public function getIcon(): string
+    {
+        return 'fa-key';
     }
 }

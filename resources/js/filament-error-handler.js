@@ -43,11 +43,8 @@ const showClientError = (input, message) => {
     if (message) {
         const errorDiv = document.createElement("div");
         errorDiv.className = "fi-error-message";
-        const icon = document.createElement("i");
-        icon.className = "fa-light fa-circle-exclamation";
         const span = document.createElement("span");
         span.textContent = message;
-        errorDiv.appendChild(icon);
         errorDiv.appendChild(span);
         container.appendChild(errorDiv);
     }

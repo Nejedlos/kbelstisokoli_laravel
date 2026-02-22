@@ -20,6 +20,7 @@
     // Titulek / podtitulek – použijeme z Livewire stránky, případně brand fallback
     $heading = method_exists($livewire, 'getHeading') ? ($livewire->getHeading() ?: ($branding['club_name'] ?? 'Kbelští sokoli')) : ($branding['club_name'] ?? 'Kbelští sokoli');
     $subheading = method_exists($livewire, 'getSubheading') ? ($livewire->getSubheading() ?: __('Přihlaste se a aréna je vaše.')) : __('Přihlaste se a aréna je vaše.');
+    $icon = method_exists($livewire, 'getIcon') ? ($livewire->getIcon() ?: 'fa-basketball-hoop') : 'fa-basketball-hoop';
 @endphp
 
 <x-filament-panels::layout.base :livewire="$livewire">
@@ -99,7 +100,7 @@
         </div>
 
             <!-- Header -->
-            <x-auth-header :title="$heading" :subtitle="$subheading" icon="fa-basketball-hoop" />
+            <x-auth-header :title="$heading" :subtitle="$subheading" :icon="$icon" />
 
             <!-- Form Surface -->
             <div class="glass-card animate-fade-in-down" style="animation-delay: 0.1s">

@@ -22,7 +22,7 @@ class Login extends BaseLogin
      */
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return __('Zpátky do hry.');
+        return __('Vstup do kabiny');
     }
 
     /**
@@ -30,7 +30,12 @@ class Login extends BaseLogin
      */
     public function getSubheading(): string|Htmlable
     {
-        return __('Přihlaste se a aréna je vaše.');
+        return __('Z palubovky rovnou k taktické tabuli.');
+    }
+
+    public function getIcon(): string
+    {
+        return 'fa-basketball-hoop';
     }
 
     protected function getPasswordFormComponent(): Component

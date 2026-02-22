@@ -13,11 +13,16 @@ class ResetPassword extends BaseResetPassword
 
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Nové heslo');
     }
 
     public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Resetujte si nastavení a naskočte zpět do hry.');
+    }
+
+    public function getIcon(): string
+    {
+        return 'fa-lock-open';
     }
 }

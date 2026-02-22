@@ -13,11 +13,16 @@ class EmailVerificationPrompt extends BaseEmailVerificationPrompt
 
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Ověření e-mailu');
     }
 
     public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Ještě jeden krok před výkopem. Potvrďte svůj e-mail.');
+    }
+
+    public function getIcon(): string
+    {
+        return 'fa-envelope-dot';
     }
 }

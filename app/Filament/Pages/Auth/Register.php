@@ -13,11 +13,16 @@ class Register extends BaseRegister
 
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Registrace nového hráče');
     }
 
     public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return __('Staň se součástí týmu a vyběhni na palubovku.');
+    }
+
+    public function getIcon(): string
+    {
+        return 'fa-user-plus';
     }
 }

@@ -20,7 +20,7 @@
     <div class="flex items-center justify-center gap-6 text-slate-400">
         <div class="h-px w-10 bg-gradient-to-r from-transparent to-white/10"></div>
         <p class="text-[10px] font-black uppercase tracking-[0.4em] italic opacity-40">
-            {{ $clubShortName }} Arena
+            {{ $branding['club_name'] ?? 'Kbelští sokoli' }}
         </p>
         <div class="h-px w-10 bg-gradient-to-l from-transparent to-white/10"></div>
     </div>
