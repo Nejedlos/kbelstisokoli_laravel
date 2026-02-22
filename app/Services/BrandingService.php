@@ -109,15 +109,15 @@ class BrandingService
     protected function getDbSettings(): array
     {
         return Cache::remember('global_branding_settings_' . app()->getLocale(), 3600, function () {
-            // Pokud tabulka ještě neexistuje (např. během prvních migrací / v testech), vrať prázdné nastavení
-            if (!Schema::hasTable('settings')) {
-                return [];
-            }
-
             try {
+                // Pokud tabulka ještě neexistuje (např. během prvních migrací / v testech), vrať prázdné nastavení
+                if (!Schema::hasTable('settings')) {
+                    return [];
+                }
+
                 $settings = Setting::all();
             } catch (\Throwable $e) {
-                // Bezpečný fallback v případě, že DB ještě není připravena
+                // Bezpečný fallback v případě, že DB ještě není připravena (např. chybí sqlite soubor v CI)
                 return [];
             }
 
