@@ -13,7 +13,8 @@ class Login extends BaseLogin
     // Use a fully custom layout to replace Filament's default simple layout
     protected static string $layout = 'filament.admin.layouts.auth';
 
-    protected string $view = 'filament.admin.auth.login';
+    // IMPORTANT: Filament expects a static $view property
+    protected static string $view = 'filament.admin.auth.login';
 
     /**
      * @return string|Htmlable

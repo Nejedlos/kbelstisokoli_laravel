@@ -71,19 +71,31 @@
     font-weight: 900 !important;
 }
 
-/* Reset a základní pozadí */
+/* Reset a základní pozadí + token fallbacky */
 :root {
-    --color-brand-navy: #0b1f3a;
-    --color-brand-navy-rgb: 11, 31, 58;
-    --color-brand-blue: #2563eb;
-    --color-brand-blue-rgb: 37, 99, 235;
-    --color-brand-red: #e11d48;
-    --color-brand-red-rgb: 225, 29, 72;
-    --color-brand-red-hover: #be123c;
-    --color-ui-bg: #f8fafc;
-    /* Světlejší skleněný povrch pro lepší kontrast na světlejším pozadí */
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.5);
+    /* Brand tokens (fallback, skutečné hodnoty vkládá BrandingService + shell) */
+    --brand-navy: #0b1f3a;
+    --brand-navy-rgb: 11, 31, 58;
+    --brand-blue: #2563eb;
+    --brand-blue-rgb: 37, 99, 235;
+    --brand-red: #e11d48;
+    --brand-red-rgb: 225, 29, 72;
+    --brand-red-hover: #be123c;
+    --brand-white: #ffffff;
+
+    /* UI tokens */
+    --ui-text: rgba(15, 23, 42, 0.92);
+    --ui-text-muted: rgba(15, 23, 42, 0.65);
+    --ui-border: rgba(2, 6, 23, 0.12);
+    --ui-surface: rgba(255, 255, 255, 0.86);
+    --ui-surface-elevated: rgba(255, 255, 255, 0.92);
+    --ui-success: #22c55e;
+    --ui-danger: #ef4444;
+    --ui-warning: #f59e0b;
+
+    /* Glass surface */
+    --glass-bg: var(--ui-surface);
+    --glass-border: rgba(255, 255, 255, 0.50);
     --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
@@ -91,9 +103,9 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
     /* Výrazně světlejší fallback varianta gradientu */
     background-color: #0f172a !important;
     background-image:
-        radial-gradient(circle at 50% -20%, rgba(var(--color-brand-red-rgb, 225, 29, 72), 0.35) 0%, transparent 55%),
-        radial-gradient(circle at 0% 100%, rgba(var(--color-brand-navy-rgb, 11, 31, 58), 0.28) 0%, transparent 65%),
-        radial-gradient(circle at 100% 100%, rgba(var(--color-brand-blue-rgb, 37, 99, 235), 0.24) 0%, transparent 65%),
+        radial-gradient(circle at 50% -20%, rgba(var(--brand-red-rgb, 225, 29, 72), 0.35) 0%, transparent 55%),
+        radial-gradient(circle at 0% 100%, rgba(var(--brand-navy-rgb, 11, 31, 58), 0.28) 0%, transparent 65%),
+        radial-gradient(circle at 100% 100%, rgba(var(--brand-blue-rgb, 37, 99, 235), 0.24) 0%, transparent 65%),
         radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.10) 0%, transparent 60%) !important;
     background-attachment: fixed !important;
     min-height: 100vh !important;
@@ -108,7 +120,7 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
     z-index: 0;
     pointer-events: none;
     opacity: 0.35;
-    background: var(--color-brand-red);
+    background: var(--brand-red);
 }
 
 /* Auth Card Wrapper */
@@ -184,7 +196,7 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
     transform: translate(-50%, -50%) rotate(-12deg);
     font-size: clamp(3.5rem, 14vw, 7rem);
     line-height: 1;
-    color: var(--color-brand-red);
+    color: var(--brand-red);
     opacity: 0.2;
     filter: drop-shadow(0 5px 20px rgba(0,0,0,0.25));
     pointer-events: none;
@@ -230,8 +242,8 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 }
 
 .fi-input-wrp:focus-within {
-    border-color: var(--color-brand-red) !important;
-    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1) !important;
+    border-color: var(--brand-blue) !important;
+    box-shadow: 0 0 0 4px rgba(var(--brand-blue-rgb, 37, 99, 235), 0.18) !important;
 }
 
 .fi-input {
@@ -246,14 +258,14 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 
 /* Primary Button - Premium Style */
 .fi-btn-color-primary, .btn-primary {
-    background: #E11D48 !important;
+    background: var(--brand-red) !important;
     color: white !important;
     border-radius: 1rem !important;
     font-weight: 800 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
     padding: 0.875rem 1.5rem !important;
-    box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.3) !important;
+    box-shadow: 0 10px 20px -5px rgba(var(--brand-red-rgb, 225, 29, 72), 0.3) !important;
     border: none !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     cursor: pointer !important;
@@ -264,10 +276,30 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 }
 
 .fi-btn-color-primary:hover, .btn-primary:hover {
-    background: #be123c !important;
+    background: var(--brand-red-hover) !important;
     transform: translateY(-3px);
-    box-shadow: 0 15px 25px -5px rgba(225, 29, 72, 0.4) !important;
+    box-shadow: 0 15px 25px -5px rgba(var(--brand-red-rgb, 225, 29, 72), 0.4) !important;
 }
+
+/* Loading state for CTA */
+.btn-primary.is-loading,
+.fi-btn-color-primary.is-loading {
+    position: relative !important;
+    pointer-events: none !important;
+    opacity: 0.8 !important;
+    transform: none !important;
+}
+.btn-primary.is-loading::after,
+.fi-btn-color-primary.is-loading::after {
+    content: '';
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2px solid rgba(255,255,255,0.6);
+    border-top-color: white;
+    border-radius: 9999px;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Links & Footer */
 .fi-link {
@@ -280,7 +312,7 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 }
 
 .fi-link:hover {
-    color: var(--color-brand-red) !important;
+    color: var(--brand-red) !important;
     text-decoration: none !important;
 }
 
@@ -308,6 +340,44 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 
 .fi-input-wrp-action:hover {
     color: #64748b !important;
+}
+
+/* Success & error visual states (added by JS) */
+.ks-valid .fi-input-wrp {
+    border-color: var(--ui-success) !important;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-success) 20%, transparent) !important;
+}
+.ks-valid .fi-input-wrp::after {
+    content: "\f00c"; /* fa-check */
+    font-family: "Font Awesome 7 Pro";
+    font-weight: 900;
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ui-success);
+}
+.ks-invalid .fi-input-wrp {
+    border-color: var(--ui-danger) !important;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-danger) 18%, transparent) !important;
+}
+
+/* Keyboard focus visibility */
+.fi-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.fi-input-wrp:has(.fi-input:focus-visible) {
+    border-color: var(--brand-blue) !important;
+    box-shadow: 0 0 0 4px rgba(var(--brand-blue-rgb, 37, 99, 235), 0.25) !important;
+}
+
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
 }
 
 /* Responsivní zúžení a padding karty na mobilu */

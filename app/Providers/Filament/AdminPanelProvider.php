@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Services\BrandingService;
+use Illuminate\Support\Facades\Blade;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -31,16 +32,8 @@ use App\Filament\Pages\Auth\EmailVerificationPrompt;
 
 class AdminPanelProvider extends PanelProvider
 {
-    public function boot(): void
-    {
-        FilamentView::registerRenderHook(
-            'panels::head.end',
-            fn (): string => \Illuminate\Support\Facades\Blade::render(
-                "<style>{!! app(\App\Services\BrandingService::class)->getCssVariables() !!}</style>" .
-                "@vite(['resources/css/filament-auth.css', 'resources/js/filament-error-handler.js'])"
-            ),
-        );
-    }
+    // Pozn.: Hooky a assety registrujeme přímo na panelu v metodě panel(),
+    // aby se spolehlivě vykreslily i na auth stránkách.
 
     public function panel(Panel $panel): Panel
     {
@@ -51,6 +44,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            // Vložíme vlastní assety a CSS variables do <head> přes render hook
+            ->renderHook('panels::head.end', fn (): string => Blade::render(
+                "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>" .
+                "@vite(['resources/css/filament-auth.css', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])"
+            ))
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)

@@ -1,8 +1,9 @@
 @component('filament.admin.auth.partials.shell', [
-    'title' => 'Vítejte zpět',
-    'subtitle' => 'Přihlaste se a pojďme na rozcvičku – zápas právě začíná.',
+    'title' => 'Zpátky do hry',
+    'subtitle' => 'Přihlaste se a aréna je vaše.',
     'icon' => 'fa-basketball-hoop',
-    'showBack' => false
+    'showBack' => true,
+    'backUrl' => route('public.home'),
 ])
     {{ $this->content }}
 @endcomponent
