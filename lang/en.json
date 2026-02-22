@@ -92,5 +92,18 @@
     "email_verify_heading": "Welcome to the locker room!",
     "email_verify_body": "One more step before tip-off. To make sure it's you, please confirm your email by clicking the button below.",
     "email_verify_button": "Confirm participation (email)",
-    "email_regards": "Best regards,\nKbelští sokoli Team"
+    "email_regards": "Best regards,\nKbelští sokoli Team",
+    "footer.brand_title": "Kbely Falcons",
+    "footer.brand_text": "Website for Men C and Men E teams within TJ Sokol Kbely Basketball.",
+    "footer.brand_subtext": "Information about teams, matches, events, and member section – with links to the wider Kbely basketball community and youth recruitment.",
+    "footer.brand_badge": "Prague-Kbely • basketball • community",
+    "footer.nav_title": "Navigation",
+    "footer.club_title": "Teams & Club",
+    "footer.club_text": "Looking for basketball for kids or youth? Continue to the main Kbely basketball website.",
+    "footer.contact_title": "Contact & Connect",
+    "footer.contact_page_cta": "Contact Men C/E team",
+    "footer.contact_club_cta": "Main Club Contact",
+    "footer.contact_placeholder_text": "Contact us via the contact page.",
+    "footer.contact_club_info": "For general club information, visit the main club website.",
+    "footer.bottom_part_of": "Part of TJ Sokol Kbely Basketball"
 }

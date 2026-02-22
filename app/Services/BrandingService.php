@@ -43,6 +43,8 @@ class BrandingService
                 'url' => $dbSettings['cta_url'] ?? $cfg['default_cta']['url'] ?? null,
             ],
             'footer_text' => $dbSettings['footer_text'] ?? $cfg['footer_text'] ?? null,
+            'main_club_url' => $dbSettings['main_club_url'] ?? $cfg['main_club_url'] ?? 'https://www.basketkbely.cz/',
+            'recruitment_url' => $dbSettings['recruitment_url'] ?? $cfg['recruitment_url'] ?? 'https://www.basketkbely.cz/nabor',
             'maintenance_mode' => filter_var($dbSettings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'maintenance_title' => $dbSettings['maintenance_title'] ?? __('Trenér právě kreslí vítěznou taktiku pro náš nový web.'),
             'maintenance_text' => $dbSettings['maintenance_text'] ?? __('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),

@@ -1,89 +1,206 @@
-@props(['branding', 'navigation'])
+@props(['branding'])
 
-<footer class="bg-secondary text-slate-200 mt-16">
-    <div class="container section-padding grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Brand / About -->
-        <div>
-            @if($branding['logo_path'])
-                <div class="flex items-center gap-3 mb-4">
-                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ brand_text($branding['club_name'] ?? 'Klub') }}" class="h-10 w-auto">
-                    <span class="font-display font-bold uppercase tracking-wide">{{ brand_text($branding['club_name'] ?? config('app.name')) }}</span>
+@php
+    $footerNav = $footerMenu ?? [];
+    $clubNav = $footerClubMenu ?? [];
+@endphp
+
+<footer class="bg-secondary text-slate-300 relative overflow-hidden">
+    {{-- Accent line --}}
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
+
+    {{-- Decor --}}
+    <div class="absolute top-0 right-0 w-1/3 h-full pointer-events-none opacity-[0.03]">
+        <i class="fa-light fa-basketball text-[30rem] translate-x-1/2 -translate-y-1/4"></i>
+    </div>
+
+    <div class="container pt-20 pb-16 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+            {{-- Column 1: Brand & Identity --}}
+            <div class="space-y-6">
+                @if($branding['logo_path'])
+                    <a href="{{ route('public.home') }}" class="inline-flex items-center gap-4 group">
+                        <div class="p-2 bg-white rounded-xl">
+                            <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ $branding['club_name'] }}" class="h-10 w-auto">
+                        </div>
+                        <span class="text-xl font-black uppercase tracking-tighter text-white group-hover:text-primary transition-colors">
+                            {{ __('footer.brand_title') }}
+                        </span>
+                    </a>
+                @else
+                    <div class="text-2xl font-black uppercase tracking-tighter text-white">
+                        {{ __('footer.brand_title') }}
+                    </div>
+                @endif
+
+                <div class="space-y-4">
+                    <p class="font-bold text-white leading-snug">
+                        {{ __('footer.brand_text') }}
+                    </p>
+                    <p class="text-sm leading-relaxed text-slate-400">
+                        {{ __('footer.brand_subtext') }}
+                    </p>
                 </div>
-            @endif
-            @if(!empty($branding['slogan']))
-                <p class="text-slate-400">{{ brand_text($branding['slogan']) }}</p>
-            @endif
-        </div>
 
-        <!-- Navigation -->
-        @if(!($branding['maintenance_mode'] ?? false))
-        <div>
-            <h3 class="text-white font-bold uppercase mb-4">{{ __('Navigace') }}</h3>
-            <ul class="space-y-2">
-                @forelse($navigation as $item)
+                <div class="inline-flex items-center bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span class="w-1.5 h-1.5 bg-primary rounded-full mr-2 animate-pulse"></span>
+                    {{ __('footer.brand_badge') }}
+                </div>
+            </div>
+
+            {{-- Column 2: Navigation --}}
+            <div>
+                <h3 class="text-white font-black uppercase tracking-widest text-sm mb-8 flex items-center">
+                    <span class="w-8 h-px bg-primary mr-3"></span>
+                    {{ __('footer.nav_title') }}
+                </h3>
+                <ul class="space-y-4">
+                    @forelse($footerNav as $item)
+                        <li>
+                            <a href="{{ $item->url }}" class="hover:text-primary transition-all flex items-center group {{ request()->url() === $item->url ? 'text-primary' : '' }}">
+                                <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                <span class="font-medium">{{ $item->label }}</span>
+                            </a>
+                        </li>
+                    @empty
+                        {{-- Fallback na statickou navigaci z configu, pokud menu v DB není --}}
+                        @foreach(config('navigation.public', []) as $item)
+                            <li>
+                                <a href="{{ route($item['route']) }}" class="hover:text-primary transition-all flex items-center group {{ request()->routeIs($item['route']) ? 'text-primary' : '' }}">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">{{ $item['title'] }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    @endforelse
                     <li>
-                        <a href="{{ route($item['route']) }}" class="hover:text-primary transition {{ request()->routeIs($item['route']) ? 'text-primary' : '' }}">{{ $item['title'] }}</a>
+                        <a href="{{ route('public.search') }}" class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('Hledat') }}</span>
+                        </a>
                     </li>
-                @empty
-                    <li class="text-slate-400">{{ __('Menu bude doplněno.') }}</li>
-                @endforelse
-                <li>
-                    <a href="{{ route('public.search') }}" class="hover:text-primary transition {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">{{ __('Hledat') }}</a>
-                </li>
-            </ul>
-        </div>
-        @endif
+                </ul>
+            </div>
 
-        <!-- Contact / Socials -->
-        <div>
-            <h3 class="text-white font-bold uppercase mb-4">Kontakt</h3>
-            <ul class="space-y-3 text-slate-300">
-                @if(data_get($branding, 'contact.address'))
-                    <li class="flex items-start gap-3">
-                        <i class="fa-light fa-location-dot mt-1 text-primary"></i>
-                        <span>{{ $branding['contact']['address'] }}</span>
-                    </li>
-                @endif
-                @if(data_get($branding, 'contact.email'))
-                    <li class="flex items-center gap-3">
-                        <i class="fa-light fa-envelope text-primary"></i>
-                        <a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary transition-colors">{{ $branding['contact']['email'] }}</a>
-                    </li>
-                @endif
-                @if(data_get($branding, 'contact.phone'))
-                    <li class="flex items-center gap-3">
-                        <i class="fa-light fa-phone text-primary"></i>
-                        <a href="tel:{{ $branding['contact']['phone'] }}" class="hover:text-primary transition-colors">{{ $branding['contact']['phone'] }}</a>
-                    </li>
-                @endif
-            </ul>
+            {{-- Column 3: Teams & Club --}}
+            <div>
+                <h3 class="text-white font-black uppercase tracking-widest text-sm mb-8 flex items-center">
+                    <span class="w-8 h-px bg-primary mr-3"></span>
+                    {{ __('footer.club_title') }}
+                </h3>
+                <ul class="space-y-4">
+                    @forelse($clubNav as $item)
+                        <li>
+                            @php $isExternal = str_starts_with($item->url, 'http'); @endphp
+                            <a href="{{ $item->url }}"
+                               @if($isExternal) target="_blank" rel="noopener" @endif
+                               class="hover:text-primary transition-all flex items-center justify-between group">
+                                <span class="font-medium">{{ $item->label }}</span>
+                                @if($isExternal)
+                                    <i class="fa-light fa-arrow-up-right text-xs opacity-30 group-hover:opacity-100 transition-opacity"></i>
+                                @else
+                                    <i class="fa-light fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                @endif
+                            </a>
+                        </li>
+                    @empty
+                        <li class="text-sm text-slate-500 italic">{{ __('Menu bude doplněno.') }}</li>
+                    @endforelse
+                </ul>
+                <div class="mt-8 p-4 bg-white/5 rounded-xl border border-white/5">
+                    <p class="text-xs leading-relaxed text-slate-400">
+                        {{ __('footer.club_text') }}
+                    </p>
+                </div>
+            </div>
 
-            <div class="mt-6 flex items-center gap-4">
-                @if(data_get($branding, 'socials.facebook'))
-                    <a href="{{ $branding['socials']['facebook'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
-                        <i class="fa-brands fa-facebook-f text-lg"></i>
-                    </a>
-                @endif
-                @if(data_get($branding, 'socials.instagram'))
-                    <a href="{{ $branding['socials']['instagram'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
-                        <i class="fa-brands fa-instagram text-lg"></i>
-                    </a>
-                @endif
-                @if(data_get($branding, 'socials.youtube'))
-                    <a href="{{ $branding['socials']['youtube'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
-                        <i class="fa-brands fa-youtube text-lg"></i>
-                    </a>
-                @endif
+            {{-- Column 4: Contact & Socials --}}
+            <div>
+                <h3 class="text-white font-black uppercase tracking-widest text-sm mb-8 flex items-center">
+                    <span class="w-8 h-px bg-primary mr-3"></span>
+                    {{ __('footer.contact_title') }}
+                </h3>
+
+                <div class="space-y-6">
+                    <ul class="space-y-4 text-sm">
+                        @if(data_get($branding, 'contact.email'))
+                            <li class="flex items-center gap-4 group">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                    <i class="fa-light fa-envelope"></i>
+                                </div>
+                                <a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary transition-colors font-bold break-all">{{ $branding['contact']['email'] }}</a>
+                            </li>
+                        @endif
+
+                        @if(data_get($branding, 'contact.phone'))
+                            <li class="flex items-center gap-4 group">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                    <i class="fa-light fa-phone"></i>
+                                </div>
+                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="hover:text-primary transition-colors font-bold">{{ $branding['contact']['phone'] }}</a>
+                            </li>
+                        @endif
+
+                        @if(!data_get($branding, 'contact.email') && !data_get($branding, 'contact.phone'))
+                            <li class="text-slate-400 italic text-xs flex items-start gap-3">
+                                <i class="fa-light fa-circle-info mt-0.5 text-primary"></i>
+                                {{ __('footer.contact_placeholder_text') }}
+                            </li>
+                        @endif
+                    </ul>
+
+                    <div class="flex flex-wrap gap-4 pt-4 border-t border-white/5">
+                        <a href="{{ route('public.contact.index') }}" class="btn btn-primary btn-sm px-6">
+                            <span>{{ __('footer.contact_page_cta') }}</span>
+                        </a>
+                        <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-white btn-sm px-6">
+                            <span>{{ __('footer.contact_club_cta') }}</span>
+                        </a>
+                    </div>
+
+                    <div class="flex items-center gap-3 pt-6">
+                        @if(data_get($branding, 'socials.facebook'))
+                            <a href="{{ $branding['socials']['facebook'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
+                                <i class="fa-brands fa-facebook-f text-lg"></i>
+                            </a>
+                        @endif
+                        @if(data_get($branding, 'socials.instagram'))
+                            <a href="{{ $branding['socials']['instagram'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
+                                <i class="fa-brands fa-instagram text-lg"></i>
+                            </a>
+                        @endif
+                        @if(data_get($branding, 'socials.youtube'))
+                            <a href="{{ $branding['socials']['youtube'] }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300" target="_blank" rel="noopener">
+                                <i class="fa-brands fa-youtube text-lg"></i>
+                            </a>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-dark text-slate-400 text-sm">
-        <div class="container py-4 flex items-center justify-between">
-            <span>{{ brand_text($branding['footer_text'] ?? (__('Všechna práva vyhrazena'))) }}</span>
-            @if(!($branding['maintenance_mode'] ?? false))
-                <a href="{{ route('public.contact.index') }}" class="hover:text-primary">Kontakt</a>
-            @endif
+    {{-- Bottom Bar --}}
+    <div class="bg-black/30 border-t border-white/5 text-slate-500 text-xs md:text-sm">
+        <div class="container py-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left">
+                <div class="font-bold text-slate-400 mb-1">
+                    {{ brand_text($branding['footer_text'] ?? ('© ' . date('Y') . ' ' . __('footer.brand_title'))) }}
+                </div>
+                <div class="flex items-center justify-center md:justify-start gap-2">
+                    <span class="w-3 h-px bg-slate-700"></span>
+                    <span>{{ __('footer.bottom_part_of') }}</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-3">
+                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-colors uppercase tracking-widest text-[10px] font-black">{{ __('Kontakt') }}</a>
+                <a href="{{ route('login') }}" class="hover:text-primary transition-colors uppercase tracking-widest text-[10px] font-black">{{ __('Členská sekce') }}</a>
+                <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-colors uppercase tracking-widest text-[10px] font-black flex items-center">
+                    {{ __('Hlavní oddíl') }}
+                    <i class="fa-light fa-arrow-up-right ml-1.5 text-[8px]"></i>
+                </a>
+            </div>
         </div>
     </div>
 </footer>

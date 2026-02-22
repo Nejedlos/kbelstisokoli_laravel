@@ -34,11 +34,13 @@ class CmsContentSeeder extends Seeder
                 'cs' => 'Více než jen basketbal. Jsme rodina.',
                 'en' => 'More than just basketball. We are family.',
             ],
-            'contact_email' => 'info@kbelstisokoli.cz',
-            'contact_phone' => '+420 123 456 789',
+            'contact_email' => null,
+            'contact_phone' => null,
             'contact_address' => 'Toužimská 700, Praha 9 - Kbely',
             'social_facebook' => 'https://facebook.com/kbelstisokoli',
             'social_instagram' => 'https://instagram.com/kbelstisokoli',
+            'main_club_url' => 'https://www.basketkbely.cz/',
+            'recruitment_url' => 'https://www.basketkbely.cz/nabor',
             'maintenance_mode' => 'false',
             'footer_text' => [
                 'cs' => '© ' . date('Y') . ' Basketbalový klub Kbelští sokoli. Všechna práva vyhrazena.',
@@ -210,6 +212,32 @@ class CmsContentSeeder extends Seeder
                     'label' => $item['label'],
                     'sort_order' => $item['sort'],
                     'is_visible' => true,
+                ]
+            );
+        }
+
+        // Footer Club menu
+        $footerClubMenu = Menu::updateOrCreate(
+            ['location' => 'footer_club'],
+            ['name' => 'Patička - Týmy a klub']
+        );
+
+        $footerClubItems = [
+            ['label' => ['cs' => 'Muži C', 'en' => 'Men C'], 'url' => '/tym/muzi-c', 'sort' => 10],
+            ['label' => ['cs' => 'Muži E', 'en' => 'Men E'], 'url' => '/tym/muzi-e', 'sort' => 20],
+            ['label' => ['cs' => 'Hlavní web TJ Sokol Kbely Basketbal', 'en' => 'Main Club Website'], 'url' => 'https://www.basketkbely.cz/', 'sort' => 30, 'is_external' => true],
+            ['label' => ['cs' => 'Nábor / Začni hrát', 'en' => 'Recruitment'], 'url' => 'https://www.basketkbely.cz/nabor', 'sort' => 40, 'is_external' => true],
+            ['label' => ['cs' => 'Družstva a mládež', 'en' => 'Teams & Youth'], 'url' => 'https://www.basketkbely.cz/druzstva', 'sort' => 50, 'is_external' => true],
+        ];
+
+        foreach ($footerClubItems as $item) {
+            MenuItem::updateOrCreate(
+                ['menu_id' => $footerClubMenu->id, 'url' => $item['url']],
+                [
+                    'label' => $item['label'],
+                    'sort_order' => $item['sort'],
+                    'is_visible' => true,
+                    // 'is_external' => $item['is_external'] ?? false, // Pokud existuje sloupec, jinak to vyřešíme v Blade
                 ]
             );
         }

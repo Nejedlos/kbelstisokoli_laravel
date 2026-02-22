@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
                 ->outsidePanelPlacement(\BezhanSalleh\LanguageSwitch\Enums\Placement::TopRight);
         });
 
-        \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {
+        \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'components.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {
             $brandingService = app(\App\Services\BrandingService::class);
             $seoService = app(\App\Services\SeoService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);
@@ -58,6 +58,12 @@ class AppServiceProvider extends ServiceProvider
             $view->with('branding', $branding);
             $view->with('branding_css', $brandingService->getCssVariables());
             $view->with('announcements', $communicationService->getActiveAnnouncements($audience));
+
+            // Menus for Public Footer
+            if ($audience === 'public') {
+                $view->with('footerMenu', \App\Models\Menu::where('location', 'footer')->first()?->items ?? []);
+                $view->with('footerClubMenu', \App\Models\Menu::where('location', 'footer_club')->first()?->items ?? []);
+            }
 
             // Přidání SEO metadat pro public layout, pokud už nejsou nastaveny
             if ($audience === 'public' && !isset($view->seo)) {

@@ -92,5 +92,18 @@
     "email_verify_heading": "Vítej v kabině!",
     "email_verify_body": "Ještě jeden krok před výkopem. Abychom věděli, že jsi to ty, potvrď prosím svůj e-mail kliknutím na tlačítko níže.",
     "email_verify_button": "Potvrdit účast (e-mail)",
-    "email_regards": "S pozdravem,\nTým Kbelští sokoli"
+    "email_regards": "S pozdravem,\nTým Kbelští sokoli",
+    "footer.brand_title": "Kbelští sokoli",
+    "footer.brand_text": "Web týmů Muži C a Muži E v rámci TJ Sokol Kbely Basketbal.",
+    "footer.brand_subtext": "Informace o týmech, zápasech, dění a členské sekci – s návazností na širší kbelský basket a nábor mládeže.",
+    "footer.brand_badge": "Praha-Kbely • basketbal • komunita",
+    "footer.nav_title": "Navigace",
+    "footer.club_title": "Týmy a klub",
+    "footer.club_text": "Hledáte basket pro děti nebo mládež? Pokračujte na hlavní stránky kbelského basketu.",
+    "footer.contact_title": "Kontakt a spojení",
+    "footer.contact_page_cta": "Kontaktovat tým C/E",
+    "footer.contact_club_cta": "Hlavní klubový kontakt",
+    "footer.contact_placeholder_text": "Kontaktujte nás přes kontaktní stránku.",
+    "footer.contact_club_info": "Pro obecné informace o klubu navštivte hlavní web oddílu.",
+    "footer.bottom_part_of": "Součást TJ Sokol Kbely Basketbal"
 }
