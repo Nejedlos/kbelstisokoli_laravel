@@ -1,3 +1,47 @@
+/**
+ * KBELŠTÍ SOKOLI - Advanced Auth Validation & Password Strength
+ */
+
+const getLocale = () => document.documentElement.lang || 'cs';
+
+const translations = {
+    cs: {
+        required: "Tohle pole musíte vyplnit, bez toho to nepůjde.",
+        email: "Tahle adresa nevypadá jako správný e-mail.",
+        capslock: "Caps Lock je zapnutý",
+        strength: {
+            title: "Heslo není dostatečně silné.",
+            length: "Minimálně 8 znaků",
+            upper: "Alespoň jedno velké písmeno",
+            number: "Alespoň jedno číslo",
+            special: "Alespoň jeden speciální znak"
+        }
+    },
+    en: {
+        required: "This field is required, we can't go further without it.",
+        email: "This doesn't look like a valid email address.",
+        capslock: "Caps Lock is ON",
+        strength: {
+            title: "Password is not strong enough.",
+            length: "At least 8 characters",
+            upper: "At least one uppercase letter",
+            number: "At least one number",
+            special: "At least one special character"
+        }
+    }
+};
+
+const t = (key) => {
+    const locale = getLocale();
+    const keys = key.split('.');
+    let obj = translations[locale] || translations.cs;
+    for (const k of keys) {
+        if (!obj[k]) return key;
+        obj = obj[k];
+    }
+    return obj;
+};
+
 const disableNativeValidation = () => {
     document.querySelectorAll("form").forEach(form => {
         if (!form.hasAttribute("novalidate")) {
@@ -6,109 +50,172 @@ const disableNativeValidation = () => {
     });
 };
 
-const updateErrorStates = () => {
-    document.querySelectorAll(".fi-fo-field").forEach(field => {
-        const hasError = field.querySelector(".fi-fo-field-wrp-error-message, .fi-fo-field-error-message, .text-danger-600, [id*='-error'], .fi-error-message, .fi-fo-field-error");
-        const inputWrp = field.querySelector(".fi-input-wrp");
-        const input = field.querySelector("input, select, textarea");
-        const label = field.querySelector(".fi-fo-field-label, .fi-fo-field-label-content");
+const checkStrength = (val) => {
+    return {
+        length: val.length >= 8,
+        upper: /[A-Z]/.test(val),
+        number: /[0-9]/.test(val),
+        special: /[^A-Za-z0-9]/.test(val)
+    };
+};
 
-        if (hasError) {
-            field.classList.add("fi-invalid-field");
-            if (inputWrp) inputWrp.classList.add("fi-is-invalid");
-            if (input) input.classList.add("fi-is-invalid");
-            if (label) {
-                label.classList.add("fi-is-invalid");
-                label.style.setProperty('color', '#E11D48', 'important');
-            }
-        } else {
-            field.classList.remove("fi-invalid-field");
-            if (inputWrp) inputWrp.classList.remove("fi-is-invalid");
-            if (input) input.classList.remove("fi-is-invalid");
-            if (label) {
-                label.classList.remove("fi-is-invalid");
-                label.style.color = "";
-            }
-        }
-    });
+const isValid = (input) => {
+    const val = input.value.trim();
+    if (!val) return false;
+    if (input.type === 'email') return !!val.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+
+    // Password strength for new passwords
+    if (input.type === 'password' && (document.querySelector('[name*="passwordConfirmation"]') || window.location.pathname.includes('reset'))) {
+        const s = checkStrength(val);
+        return s.length && s.upper && s.number && s.special;
+    }
+
+    return true;
 };
 
 const showClientError = (input, message) => {
-    const container = input.closest(".fi-fo-field-content-col");
-    if (!container) return;
+    const field = input.closest(".fi-fo-field") || input.closest(".fi-fo-field-wrp");
+    if (!field) return;
 
-    const existing = container.querySelector(".fi-error-message");
-    if (existing) existing.remove();
+    const container = field.querySelector(".fi-fo-field-content-col") || field;
+    let errorDiv = container.querySelector(".fi-error-message");
 
-    if (message) {
-        const errorDiv = document.createElement("div");
+    if (!message) {
+        if (errorDiv) errorDiv.remove();
+        field.classList.remove('ks-invalid');
+        return;
+    }
+
+    if (!errorDiv) {
+        errorDiv = document.createElement("div");
         errorDiv.className = "fi-error-message";
         const span = document.createElement("span");
-        span.textContent = message;
         errorDiv.appendChild(span);
         container.appendChild(errorDiv);
     }
-    updateErrorStates();
+
+    errorDiv.querySelector("span").textContent = message;
+    field.classList.add('ks-invalid');
+    field.classList.remove('ks-valid');
 };
 
-const validateInput = (input) => {
-    if (input.type === "checkbox" || input.type === "hidden" || input.type === "submit") return;
-    let message = "";
-    if (input.hasAttribute("required") && !input.value.trim()) {
-        message = "Tohle pole musíte vyplnit, bez toho to nepůjde.";
-    } else if (input.type === "email" && input.value && !input.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        message = "Tahle adresa nevypadá jako správný e-mail.";
+const renderPasswordStrength = (field) => {
+    if (field.querySelector('.ks-password-strength')) return;
+
+    const container = field.querySelector(".fi-fo-field-content-col") || field;
+    const strengthDiv = document.createElement('div');
+    strengthDiv.className = 'ks-password-strength animate-fade-in';
+
+    const rules = ['length', 'upper', 'number', 'special'];
+    rules.forEach(rule => {
+        const ruleDiv = document.createElement('div');
+        ruleDiv.className = `strength-rule rule-${rule}`;
+        ruleDiv.innerHTML = `<i class="fa-light fa-circle"></i><span>${t('strength.' + rule)}</span>`;
+        strengthDiv.appendChild(ruleDiv);
+    });
+
+    container.appendChild(strengthDiv);
+};
+
+const updatePasswordStrength = (input) => {
+    const field = input.closest('.fi-fo-field') || input.closest('.fi-fo-field-wrp');
+    if (!field) return;
+
+    const isNewPassword = document.querySelector('[name*="passwordConfirmation"]') || window.location.pathname.includes('reset');
+    if (!isNewPassword) return;
+
+    renderPasswordStrength(field);
+    const s = checkStrength(input.value);
+
+    Object.keys(s).forEach(rule => {
+        const el = field.querySelector(`.rule-${rule}`);
+        if (!el) return;
+        if (s[rule]) {
+            el.classList.add('is-valid');
+            el.querySelector('i').className = 'fa-light fa-circle-check';
+        } else {
+            el.classList.remove('is-valid');
+            el.querySelector('i').className = 'fa-light fa-circle';
+        }
+    });
+};
+
+const validateInput = (input, isSubmit = false) => {
+    if (!input || input.type === 'hidden' || input.type === 'submit') return;
+
+    const field = input.closest('.fi-fo-field') || input.closest('.fi-fo-field-wrp');
+    if (!field) return;
+
+    const val = input.value.trim();
+    const isPassword = input.type === 'password' || input.classList.contains('fi-revealable');
+
+    if (isPassword) {
+        field.classList.add('ks-password-field');
+        updatePasswordStrength(input);
     }
-    showClientError(input, message);
+
+    // Success logic (always on input/change)
+    if (isValid(input)) {
+        field.classList.add('ks-valid');
+        if (!isSubmit) showClientError(input, null);
+    } else {
+        // Once valid, keep it until explicit error on submit
+    }
+
+    // Error logic (only on submit)
+    if (isSubmit) {
+        let message = "";
+        if (input.hasAttribute("required") && !val) {
+            message = t('required');
+        } else if (input.type === "email" && val && !val.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            message = t('email');
+        } else if (isPassword && !val) {
+            message = t('required');
+        } else if (isPassword && !isValid(input) && (document.querySelector('[name*="passwordConfirmation"]') || window.location.pathname.includes('reset'))) {
+            message = t('strength.title');
+        }
+
+        if (message) showClientError(input, message);
+    }
 };
 
-// Global handlers
-window.handleFormValidationError = () => {
-    setTimeout(updateErrorStates, 50);
+const init = () => {
+    disableNativeValidation();
+    document.querySelectorAll('input, select, textarea').forEach(input => {
+        if (input.value) validateInput(input);
+    });
 };
 
-// Event Listeners
-document.addEventListener("focusout", (e) => {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT") {
+document.addEventListener('input', (e) => {
+    if (e.target.matches('input, select, textarea')) {
         validateInput(e.target);
     }
-}, true);
+});
 
-document.addEventListener("input", (e) => {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT") {
-        const container = e.target.closest(".fi-fo-field-content-col");
-        if (container?.querySelector(".fi-error-message")) {
-            validateInput(e.target);
-        }
-        updateErrorStates();
+document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (form.tagName === 'FORM') {
+        form.querySelectorAll('input, select, textarea').forEach(input => {
+            validateInput(input, true);
+        });
+
+        const firstError = form.querySelector('.ks-invalid input');
+        if (firstError) firstError.focus();
     }
-});
-
-document.addEventListener("submit", (e) => {
-    e.target.querySelectorAll("input, select, textarea").forEach(input => validateInput(input));
-    updateErrorStates();
 }, true);
 
-// Filament / Livewire integration
-const initErrorHandler = () => {
-    disableNativeValidation();
-    updateErrorStates();
-};
+document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("livewire:navigated", init);
 
-document.addEventListener("DOMContentLoaded", initErrorHandler);
-document.addEventListener("livewire:navigated", initErrorHandler);
+if (window.Livewire) {
+    Livewire.hook("request.processed", init);
+}
 
-window.addEventListener("livewire:initialized", () => {
-    Livewire.hook("request.processed", () => {
-        initErrorHandler();
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+        if (mutation.addedNodes.length) init();
     });
-});
-
-// Mutation Observer for dynamic fields
-const observer = new MutationObserver(() => {
-    initErrorHandler();
 });
 observer.observe(document.body, { childList: true, subtree: true });
 
-// First run
-initErrorHandler();
+init();

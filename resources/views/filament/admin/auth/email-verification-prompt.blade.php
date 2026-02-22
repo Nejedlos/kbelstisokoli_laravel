@@ -1,1 +1,1 @@
-{{ $this->form }}
+{{ $this->content }}

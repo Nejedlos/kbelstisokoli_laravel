@@ -54,7 +54,8 @@ class AdminPanelProvider extends PanelProvider
             ->emailVerification(EmailVerificationPrompt::class)
             ->brandName($branding['club_name'])
             ->brandLogo($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
-            ->favicon($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
+            ->favicon($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : asset('favicon.ico'))
+            ->font('Instrument Sans')
             ->userMenuItems([
                 'profile' => MenuItem::make()
                     ->label('Členská sekce')

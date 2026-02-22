@@ -4,6 +4,7 @@
    ==========================================================================
 */
 
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -373,6 +374,7 @@ body.fi-panel-admin .fi-simple-main-ctn {
     border-radius: 1rem !important;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
     transition: all 0.3s ease !important;
+    position: relative !important;
 }
 
 .fi-input-wrp:hover {
@@ -418,40 +420,64 @@ body.fi-panel-admin .fi-simple-main-ctn {
 }
 
 /* Primary Button - Premium Style */
-.fi-btn-color-primary, .btn-primary {
+.fi-btn.fi-color-primary,
+.fi-btn-color-primary,
+.fi-ac-btn-action,
+.fi-ac-btn-action .fi-btn,
+.btn-primary,
+button[type="submit"].fi-btn {
+    background-color: var(--brand-red) !important;
     background: var(--brand-red) !important;
     color: white !important;
-    border-radius: 1rem !important;
-    font-weight: 800 !important;
+    border-radius: 1rem !important; /* stejný radius jako inputy */
+    font-weight: 900 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.15em !important;
-    padding: 1rem 2rem !important; /* Mírně menší padding pro lepší fit */
-    box-shadow: 0 15px 35px -10px rgba(var(--brand-red-rgb, 225, 29, 72), 0.5) !important;
+    font-size: 1rem !important; /* stejná velikost jako inputy */
+    padding: 0.875rem 2.5rem !important; /* stejná výška jako inputy */
+    box-shadow: 0 10px 25px -5px rgba(var(--brand-red-rgb, 225, 29, 72), 0.5) !important;
     border: none !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     cursor: pointer !important;
+    width: 100% !important;
 }
 
-.fi-btn-color-primary:hover, .btn-primary:hover {
-    transform: translateY(-3px) scale(1.02);
+.fi-btn.fi-color-primary:hover,
+.fi-btn-color-primary:hover,
+.fi-ac-btn-action:hover,
+.fi-ac-btn-action .fi-btn:hover,
+.btn-primary:hover,
+button[type="submit"].fi-btn:hover {
+    transform: translateY(-3px) scale(1.02) !important;
     box-shadow: 0 20px 45px -10px rgba(var(--brand-red-rgb, 225, 29, 72), 0.6) !important;
+    background-color: var(--brand-red-hover) !important;
     background: var(--brand-red-hover) !important;
 }
 
-.fi-btn-color-primary:active, .btn-primary:active {
-    transform: translateY(0) scale(0.98);
+.fi-btn.fi-color-primary:active,
+.fi-btn-color-primary:active,
+.fi-ac-btn-action:active,
+.btn-primary:active,
+button[type="submit"].fi-btn:active {
+    transform: translateY(0) scale(0.98) !important;
 }
 
 /* Loading state for CTA */
 .btn-primary.is-loading,
-.fi-btn-color-primary.is-loading {
+.fi-ac-btn-action.is-loading,
+.fi-btn.fi-color-primary.is-loading,
+.fi-btn-color-primary.is-loading,
+button[type="submit"].fi-btn.fi-processing {
     position: relative !important;
     pointer-events: none !important;
     opacity: 0.8 !important;
     transform: none !important;
 }
 .btn-primary.is-loading::after,
-.fi-btn-color-primary.is-loading::after {
+.fi-ac-btn-action.is-loading::after,
+.fi-btn.fi-color-primary.is-loading::after,
+.fi-btn-color-primary.is-loading::after,
+button[type="submit"].fi-btn.fi-processing::after {
     content: '';
     width: 1.1rem;
     height: 1.1rem;
@@ -549,19 +575,67 @@ body.fi-panel-admin > [wire\:key="fls-outside-panels"] {
     border-color: var(--ui-success) !important;
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-success) 20%, transparent) !important;
 }
-.ks-valid .fi-input-wrp::after {
+.ks-valid:not(.ks-password-field) .fi-input-wrp::after {
     content: "\f00c"; /* fa-check */
     font-family: "Font Awesome 7 Pro";
     font-weight: 900;
     position: absolute;
-    right: 0.75rem;
+    right: 1rem;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) scale(0.5);
     color: var(--ui-success);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+.ks-valid:not(.ks-password-field) .fi-input-wrp::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+.ks-valid:not(.ks-password-field) .fi-input {
+    padding-right: 3rem !important;
+}
+
 .ks-invalid .fi-input-wrp {
     border-color: var(--ui-danger) !important;
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-danger) 18%, transparent) !important;
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
+}
+
+/* Password Strength Meter Styling */
+.ks-password-strength {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+    .ks-password-strength {
+        grid-template-columns: 1fr;
+    }
+}
+
+.strength-rule {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.strength-rule.is-valid {
+    color: var(--ui-success);
+}
+
+.strength-rule i {
+    font-size: 0.875rem;
 }
 
 /* Keyboard focus visibility */
@@ -597,7 +671,7 @@ body.fi-panel-admin > [wire\:key="fls-outside-panels"] {
     }
     .auth-gradient .fi-ac.fi-width-full .fi-btn {
         width: auto !important;
-        min-width: 12rem;
+        min-width: 10rem;
         display: inline-flex !important;
     }
 }

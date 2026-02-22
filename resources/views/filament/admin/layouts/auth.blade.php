@@ -110,10 +110,17 @@
 
     <!-- Links under form -->
                 <div class="mt-6 flex items-center justify-center gap-4 text-sm">
-                    @if (Route::has('filament.admin.auth.password-reset.request'))
-                        <a href="{{ route('filament.admin.auth.password-reset.request') }}" class="fi-link inline-flex items-center gap-2 group hover:text-white transition-colors" aria-label="{{ __('Zapomněli jste heslo?') }}">
-                            <i class="fa-light fa-key opacity-50 group-hover:opacity-100 transition-opacity"></i>
-                            <span class="opacity-70 group-hover:opacity-100">{{ __('Zapomněli jste heslo?') }}</span>
+                    @if (request()->routeIs('filament.admin.auth.login'))
+                        @if (Route::has('filament.admin.auth.password-reset.request'))
+                            <a href="{{ route('filament.admin.auth.password-reset.request') }}" class="fi-link inline-flex items-center gap-2 group hover:text-white transition-colors" aria-label="{{ __('Zapomněli jste heslo?') }}">
+                                <i class="fa-light fa-key opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                                <span class="opacity-70 group-hover:opacity-100">{{ __('Zapomněli jste heslo?') }}</span>
+                            </a>
+                        @endif
+                    @elseif (Route::has('filament.admin.auth.login'))
+                        <a href="{{ route('filament.admin.auth.login') }}" class="fi-link inline-flex items-center gap-2 group hover:text-white transition-colors" aria-label="{{ __('Zpět na přihlášení') }}">
+                            <i class="fa-light fa-arrow-left opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                            <span class="opacity-70 group-hover:opacity-100">{{ __('Zpět na přihlášení') }}</span>
                         </a>
                     @endif
                 </div>
