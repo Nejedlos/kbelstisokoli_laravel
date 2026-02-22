@@ -223,10 +223,10 @@ class CmsContentSeeder extends Seeder
                     'type' => 'stats_cards',
                     'data' => [
                         'stats' => [
-                            ['name' => 'Členů', 'value' => '250+'],
-                            ['name' => 'Týmů', 'value' => '12'],
-                            ['name' => 'Trenérů', 'value' => '15'],
-                            ['name' => 'Let tradice', 'value' => '10+'],
+                            ['label' => 'Členů', 'value' => '250+'],
+                            ['label' => 'Týmů', 'value' => '12'],
+                            ['label' => 'Trenérů', 'value' => '15'],
+                            ['label' => 'Let tradice', 'value' => '10+'],
                         ]
                     ]
                 ],
@@ -253,10 +253,10 @@ class CmsContentSeeder extends Seeder
                     'type' => 'stats_cards',
                     'data' => [
                         'stats' => [
-                            ['name' => 'Members', 'value' => '250+'],
-                            ['name' => 'Teams', 'value' => '12'],
-                            ['name' => 'Coaches', 'value' => '15'],
-                            ['name' => 'Years of tradition', 'value' => '10+'],
+                            ['label' => 'Members', 'value' => '250+'],
+                            ['label' => 'Teams', 'value' => '12'],
+                            ['label' => 'Coaches', 'value' => '15'],
+                            ['label' => 'Years of tradition', 'value' => '10+'],
                         ]
                     ]
                 ],
@@ -311,11 +311,11 @@ class CmsContentSeeder extends Seeder
                     ]
                 ],
                 [
-                    'type' => 'call_to_action',
+                    'type' => 'cta',
                     'data' => [
-                        'headline' => 'Máš dotaz k náboru?',
+                        'title' => 'Máš dotaz k náboru?',
                         'text' => 'Neváhej nám napsat nebo zavolat. Rádi ti vše vysvětlíme.',
-                        'button_label' => 'Kontaktovat',
+                        'button_text' => 'Kontaktovat',
                         'button_url' => '/kontakt',
                     ]
                 ],
@@ -336,11 +336,11 @@ class CmsContentSeeder extends Seeder
                     ]
                 ],
                 [
-                    'type' => 'call_to_action',
+                    'type' => 'cta',
                     'data' => [
-                        'headline' => 'Do you have a question about recruitment?',
+                        'title' => 'Do you have a question about recruitment?',
                         'text' => 'Do not hesitate to write or call us. We will be happy to explain everything to you.',
-                        'button_label' => 'Contact Us',
+                        'button_text' => 'Contact Us',
                         'button_url' => '/kontakt',
                     ]
                 ],

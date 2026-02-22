@@ -10,7 +10,7 @@
         </div>
     @endif
     <div class="container relative z-10">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ $data['headline'] }}</h1>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ $data['headline'] ?? '' }}</h1>
         @if($data['subheadline'] ?? null)
             <p class="text-lg md:text-xl mb-8 text-slate-200">{{ $data['subheadline'] }}</p>
         @endif

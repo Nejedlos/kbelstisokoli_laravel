@@ -108,25 +108,38 @@ class BrandingService
      */
     protected function getDbSettings(): array
     {
-        return Cache::remember('global_branding_settings_' . app()->getLocale(), 3600, function () {
-            try {
-                // Pokud tabulka ještě neexistuje (např. během prvních migrací / v testech), vrať prázdné nastavení
+        try {
+            // Pokud jsme v konzoli a běží příkaz, který by neměl sahat do DB (např. package:discover)
+            // nebo pokud soubor s SQLite databází neexistuje, vrátíme prázdné pole.
+            if (app()->runningInConsole()) {
+                $dbConnection = config('database.default');
+                $dbConfig = config("database.connections.{$dbConnection}");
+
+                if (($dbConfig['driver'] ?? '') === 'sqlite') {
+                    $database = $dbConfig['database'] ?? '';
+                    // V CI prostředí nemusí absolutní cesta k DB existovat při buildu/lintu
+                    if ($database !== ':memory:' && !empty($database) && !file_exists($database)) {
+                        return [];
+                    }
+                }
+            }
+
+            return Cache::remember('global_branding_settings_' . app()->getLocale(), 3600, function () {
                 if (!Schema::hasTable('settings')) {
                     return [];
                 }
 
                 $settings = Setting::all();
-            } catch (\Throwable $e) {
-                // Bezpečný fallback v případě, že DB ještě není připravena (např. chybí sqlite soubor v CI)
-                return [];
-            }
-
-            $mapped = [];
-            foreach ($settings as $setting) {
-                $mapped[$setting->key] = $setting->value;
-            }
-            return $mapped;
-        });
+                $mapped = [];
+                foreach ($settings as $setting) {
+                    $mapped[$setting->key] = $setting->value;
+                }
+                return $mapped;
+            });
+        } catch (\Throwable $e) {
+            // Bezpečný fallback v případě jakékoliv chyby (např. chybějící tabulka cache nebo settings)
+            return [];
+        }
     }
 
     /**
