@@ -375,7 +375,7 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'cta',
                     'data' => [
-                        'style' => 'secondary',
+                        'style' => 'light',
                         'title' => 'Hrajeme pro radost ze hry, tým a Kbely',
                         'text' => 'Sledujte dění kolem týmů Muži C a Muži E, fanděte s námi a pokud hledáte basket pro děti nebo mládež, navštivte hlavní stránky kbelského basketu.',
                         'button_text' => 'Naše týmy',
@@ -510,7 +510,7 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'cta',
                     'data' => [
-                        'style' => 'secondary',
+                        'style' => 'light',
                         'title' => 'We play for the joy of the game, the team and Kbely',
                         'text' => 'Follow the events around the Men C and Men E teams, cheer with us and if you are looking for basketball for children or youth, visit the main Kbely basketball website.',
                         'button_text' => 'Our teams',
