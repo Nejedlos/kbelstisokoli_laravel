@@ -10,18 +10,18 @@ use Illuminate\Support\HtmlString;
 
 class Login extends BaseLogin
 {
-    // Use a fully custom layout to replace Filament's default simple layout
+    // Použij vlastní layout místo výchozího jednoduchého layoutu Filamentu
     protected static string $layout = 'filament.admin.layouts.auth';
 
-    // IMPORTANT: Filament expects a static $view property
-    protected static string $view = 'filament.admin.auth.login';
+    // DŮLEŽITÉ: `$view` musí být NEstatická vlastnost, aby odpovídala `Filament\Pages\SimplePage`
+    protected string $view = 'filament.admin.auth.login';
 
     /**
      * @return string|Htmlable
      */
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return '';
+        return 'Zpátky do hry';
     }
 
     /**
@@ -29,7 +29,7 @@ class Login extends BaseLogin
      */
     public function getSubheading(): string|Htmlable
     {
-        return new HtmlString('&nbsp;');
+        return 'Přihlaste se a aréna je vaše.';
     }
 
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema

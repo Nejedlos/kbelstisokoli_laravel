@@ -4,6 +4,27 @@
    ==========================================================================
 */
 
+@import "tailwindcss";
+
+@theme {
+    /* Design Tokens - Hypermoderní Sportovní Styl */
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Oswald', 'Inter', sans-serif;
+
+    /* Barvy navázané na Branding Tokens */
+    --color-primary: var(--brand-red, #e11d48);
+    --color-primary-hover: var(--brand-red-hover, #be123c);
+    --color-secondary: var(--brand-navy, #0b1f3a);
+    --color-accent: var(--brand-blue, #2563eb);
+    --color-dark: #020617;
+    --color-light: var(--brand-white, #ffffff);
+}
+
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../../storage/framework/views/*.php';
+
 /* Font Awesome Pro integration */
 @import "../vendor/fontawesome/css/all.min.css";
 
@@ -84,22 +105,22 @@
     --brand-white: #ffffff;
 
     /* UI tokens */
-    --ui-text: rgba(15, 23, 42, 0.92);
-    --ui-text-muted: rgba(15, 23, 42, 0.65);
-    --ui-border: rgba(2, 6, 23, 0.12);
-    --ui-surface: rgba(255, 255, 255, 0.86);
-    --ui-surface-elevated: rgba(255, 255, 255, 0.92);
+    --ui-text: rgba(15, 23, 42, 0.95);
+    --ui-text-muted: rgba(71, 85, 105, 0.85);
+    --ui-border: rgba(226, 232, 240, 0.8);
+    --ui-surface: rgba(255, 255, 255, 0.98); /* Solidnější moderní bílá */
+    --ui-surface-elevated: #ffffff;
     --ui-success: #22c55e;
     --ui-danger: #ef4444;
     --ui-warning: #f59e0b;
 
-    /* Glass surface */
+    /* Glass surface -> Modern Box Surface */
     --glass-bg: var(--ui-surface);
-    --glass-border: rgba(255, 255, 255, 0.50);
-    --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    --glass-border: rgba(255, 255, 255, 1);
+    --glass-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
-body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
+body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout, .ks-auth-page {
     /* Výrazně světlejší fallback varianta gradientu */
     background-color: #0f172a !important;
     background-image:
@@ -109,7 +130,21 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
         radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.10) 0%, transparent 60%) !important;
     background-attachment: fixed !important;
     min-height: 100vh !important;
+    min-height: 100dvh !important;
     font-family: 'Instrument Sans', sans-serif !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2rem 1rem !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+@media (max-width: 640px) {
+    body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout, .ks-auth-page {
+        align-items: flex-start !important;
+        padding: 6rem 1rem 2rem 1rem !important;
+    }
 }
 
 /* Floating Objects */
@@ -124,26 +159,44 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 }
 
 /* Auth Card Wrapper */
-.fi-simple-main-ctn {
+.ks-auth-container,
+.fi-simple-main-ctn,
+body.fi-panel-admin .fi-simple-main-ctn {
     width: 100% !important;
-    max-width: 28rem !important;
-    margin: 0 auto !important;
+    max-width: 32rem !important; /* Mírně širší pro modernější "box" pocit */
+    margin-left: auto !important;
+    margin-right: auto !important;
     z-index: 10 !important;
     padding: 0 !important;
+    display: block !important;
 }
 
-/* Light Glass Card */
+@media (max-width: 640px) {
+    .ks-auth-container,
+    .fi-simple-main-ctn,
+    body.fi-panel-admin .fi-simple-main-ctn {
+        max-width: 24rem !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+/* Light Glass Card -> Modern Boxed Card */
 .fi-simple-main, .glass-card {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid var(--glass-border) !important;
-    box-shadow: var(--glass-shadow) !important;
-    border-radius: 2rem !important;
-    padding: 2.5rem !important;
+    background: #ffffff !important; /* Solidní bílá pro čistý boxed efekt */
+    border-radius: 1.5rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-top: 6px solid var(--brand-red) !important; /* Výrazná brandová linka nahoře pro "boxed" pocit */
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+    padding: 3.5rem !important; /* Hodně vzduchu v boxu na desktopu */
     position: relative !important;
     overflow: hidden !important;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease !important;
+}
+
+/* Removal of previous glass effects */
+.fi-simple-main::before, .glass-card::before {
+    display: none !important;
 }
 
 .fi-simple-main:hover {
@@ -207,37 +260,42 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
     font-family: 'Oswald', sans-serif !important;
     font-weight: 900 !important;
     text-transform: uppercase !important;
-    letter-spacing: -0.02em !important;
-    color: #ffffff !important;
-    font-size: 1.5rem !important; /* menší H1 dle zadání */
-    line-height: 1.2 !important;
-    margin-top: 0.75rem !important; /* víc místa po ikoně */
-    margin-bottom: 0.5rem !important;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+    font-style: italic !important;
+    letter-spacing: -0.05em !important;
+    color: transparent !important;
+    background: linear-gradient(to bottom, #ffffff, rgba(255, 255, 255, 0.4)) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    font-size: clamp(2.5rem, 8vw, 4.5rem) !important; /* Výraznější nadpis jako v under-construction */
+    line-height: 0.9 !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.75rem !important;
 }
 
 .auth-sub {
-    color: rgba(255, 255, 255, 0.6) !important;
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    font-style: italic !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.2em !important;
+    opacity: 0.8 !important;
 }
 
 /* Form Fields */
 .fi-fo-field-label, .fi-fo-field-label-content {
-    color: #475569 !important; /* Slate 600 */
-    font-size: 0.65rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.1em !important;
+    color: #1e293b !important; /* Slate 800 */
+    font-size: 0.7rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.15em !important;
     text-transform: uppercase !important;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
 }
 
 .fi-input-wrp {
-    background: white !important;
+    background: #f8fafc !important; /* Mírně šedé pozadí inputu pro modernější box */
     border: 1px solid #e2e8f0 !important;
-    border-radius: 1rem !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
     transition: all 0.3s ease !important;
 }
 
@@ -260,12 +318,13 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 .fi-btn-color-primary, .btn-primary {
     background: var(--brand-red) !important;
     color: white !important;
-    border-radius: 1rem !important;
-    font-weight: 800 !important;
+    border-radius: 0.75rem !important; /* Mírně ostřejší rohy pro moderní look */
+    font-weight: 900 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    padding: 0.875rem 1.5rem !important;
-    box-shadow: 0 10px 20px -5px rgba(var(--brand-red-rgb, 225, 29, 72), 0.3) !important;
+    font-style: italic !important;
+    letter-spacing: 0.1em !important;
+    padding: 1.125rem 2rem !important;
+    box-shadow: 0 20px 40px -15px rgba(var(--brand-red-rgb, 225, 29, 72), 0.5) !important;
     border: none !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     cursor: pointer !important;
@@ -276,9 +335,10 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 }
 
 .fi-btn-color-primary:hover, .btn-primary:hover {
-    background: var(--brand-red-hover) !important;
-    transform: translateY(-3px);
-    box-shadow: 0 15px 25px -5px rgba(var(--brand-red-rgb, 225, 29, 72), 0.4) !important;
+    background: #ffffff !important;
+    color: var(--brand-red) !important;
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Loading state for CTA */
@@ -331,6 +391,21 @@ body.fi-body:has(.auth-gradient), .auth-gradient, .fi-simple-layout {
 /* 2FA Specific */
 .icon-glow {
     animation: icon-glow 2.5s infinite ease-in-out;
+}
+
+/* Hide Filament Language Switcher plugin's UI on auth page */
+.ks-auth-page .fls-display-on,
+.ks-auth-page [wire\:key="fls-outside-panels"],
+.fi-panel-admin .fls-display-on,
+body.fi-panel-admin > [wire\:key="fls-outside-panels"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Project Language Switcher adjustments */
+.ks-auth-page .bg-primary {
+    background-color: var(--brand-red) !important;
 }
 
 /* Reveal Password Icon */
