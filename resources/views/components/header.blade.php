@@ -7,8 +7,8 @@
             @if($branding['logo_path'])
                 <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-12 w-auto">
                 <div class="hidden md:block">
-                    <span class="block font-display font-bold text-xl leading-none uppercase">{{ brand_text($branding['club_name']) }}</span>
-                    <span class="block text-xs text-slate-500 font-medium tracking-wider uppercase">{{ brand_text($branding['slogan']) }}</span>
+                    <span class="block font-display font-bold text-xl leading-tight uppercase">{{ brand_text($branding['club_name']) }}</span>
+                    <span class="block text-xs text-slate-500 font-medium tracking-wider uppercase leading-snug">{{ brand_text($branding['slogan']) }}</span>
                 </div>
             @endif
         </a>
@@ -19,7 +19,7 @@
             @foreach($navigation as $item)
                 <a href="{{ route($item['route']) }}"
                    class="font-bold uppercase text-sm tracking-wide text-slate-700 hover:text-primary transition {{ request()->routeIs($item['route']) ? 'text-primary border-b-2 border-primary' : '' }}">
-                    {{ $item['title'] }}
+                    {{ __($item['title']) }}
                 </a>
             @endforeach
         </nav>
@@ -62,19 +62,19 @@
                          class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-slate-100 py-2 z-50">
 
                         <div class="px-4 py-2 border-b border-slate-50 mb-1">
-                            <span class="block text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Uživatel') }}</span>
+                            <span class="block text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('nav.user') }}</span>
                             <span class="block text-sm font-bold text-slate-900 truncate">{{ auth()->user()->email }}</span>
                         </div>
 
                         <a href="{{ route('member.dashboard') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
                             <i class="fa-light fa-user-gear w-5 text-center"></i>
-                            {{ __('Členská sekce') }}
+                            {{ __('nav.member_section') }}
                         </a>
 
                         @can('access_admin')
                             <a href="/admin" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
                                 <i class="fa-light fa-lock-keyhole w-5 text-center"></i>
-                                {{ __('Administrace') }}
+                                {{ __('nav.administration') }}
                             </a>
                         @endcan
 
@@ -83,7 +83,7 @@
                                 @csrf
                                 <button type="submit" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors">
                                     <i class="fa-light fa-arrow-right-from-bracket w-5 text-center"></i>
-                                    {{ __('Odhlásit se') }}
+                                    {{ __('nav.logout') }}
                                 </button>
                             </form>
                         </div>
@@ -91,7 +91,7 @@
                 </div>
             @else
                 <a href="{{ route('login') }}" class="btn btn-primary hidden sm:inline-flex py-2 px-4 text-xs">
-                    {{ __('Členská sekce') }}
+                    {{ __('nav.member_section') }}
                 </a>
             @endauth
 
@@ -141,11 +141,11 @@
             @foreach($navigation as $item)
                 <a href="{{ route($item['route']) }}"
                    class="font-bold uppercase text-base tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 {{ request()->routeIs($item['route']) ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
-                    {{ $item['title'] }}
+                    {{ __($item['title']) }}
                 </a>
             @endforeach
             <a href="{{ route('login') }}" class="btn btn-primary mt-6 py-4">
-                {{ __('Přihlášení pro členy') }}
+                {{ __('nav.login_member') }}
             </a>
         </div>
     </div>

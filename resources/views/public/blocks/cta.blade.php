@@ -44,7 +44,7 @@
         ])>
             @if($data['title'] ?? null)
                 <h2 @class([
-                    'text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-8 leading-[1.1] text-balance',
+                    'text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-8 leading-display text-balance',
                     'text-white' => in_array($style, ['primary', 'secondary']),
                     'text-secondary' => in_array($style, ['outline', 'light']),
                 ])>

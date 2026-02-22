@@ -50,7 +50,7 @@
 
             {{-- Column 2: Navigation --}}
             <div>
-                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-none">
+                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.nav_title') }}
                 </h3>
@@ -68,7 +68,7 @@
                             <li>
                                 <a href="{{ route($item['route']) }}" class="hover:text-primary transition-all flex items-center group {{ request()->routeIs($item['route']) ? 'text-primary' : '' }}">
                                     <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
-                                    <span class="font-medium">{{ $item['title'] }}</span>
+                                    <span class="font-medium">{{ __($item['title']) }}</span>
                                 </a>
                             </li>
                         @endforeach
@@ -84,7 +84,7 @@
 
             {{-- Column 3: Teams & Club --}}
             <div>
-                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-none">
+                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.club_title') }}
                 </h3>
@@ -116,7 +116,7 @@
 
             {{-- Column 4: Contact & Socials --}}
             <div>
-                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-none">
+                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.contact_title') }}
                 </h3>

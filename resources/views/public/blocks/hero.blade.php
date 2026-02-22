@@ -46,7 +46,7 @@
             @endif
 
             @if($data['headline'] ?? null)
-                <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.1] uppercase tracking-tighter text-balance">
+                <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-display uppercase tracking-tighter text-balance">
                     {!! nl2br(e($data['headline'])) !!}
                 </h1>
             @endif
