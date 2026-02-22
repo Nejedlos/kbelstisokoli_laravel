@@ -7,6 +7,6 @@
         'backLabel' => 'Zpět na přihlášení',
         'backUrl' => filament()->getLoginUrl()
     ])
-        {{ $this->getFormContentComponent() }}
+        {{ $this->content }}
     @endinclude
 </x-filament-panels::layout.base>

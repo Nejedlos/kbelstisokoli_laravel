@@ -7,6 +7,6 @@
         'backLabel' => 'Už máte účet? Přihlaste se',
         'backUrl' => filament()->getLoginUrl()
     ])
-        {{ $this->getFormContentComponent() }}
+        {{ $this->content }}
     @endinclude
 </x-filament-panels::layout.base>

@@ -5,7 +5,7 @@
         'icon' => 'fa-basketball-hoop',
         'showBack' => false
     ])
-        {{ $this->getFormContentComponent() }}
+        {{ $this->content }}
 
         @if (filament()->hasRegistration())
             <div class="mt-6 text-center text-sm text-slate-500">
