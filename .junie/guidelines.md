@@ -95,3 +95,23 @@ Na konci každého úkolu, kde byly použity generátory, musí Junie uvést:
 - **Filament Resource:** `php artisan make:filament-resource Product --generate --no-interaction`
 - **Filament Relation Manager:** `php artisan make:filament-relation-manager CategoryResource products name --no-interaction`
 - **Nápověda:** Vždy používejte `--help` k ověření dostupných parametrů před spuštěním.
+
+## 11. Custom Auth UI a Assety (Tailwind v4)
+Tato sekce definuje kritická pravidla pro úpravy přihlašovacích stránek a práci s assety v Tailwind v4, aby se předešlo problémům s renderováním.
+
+### 11.1 Tailwind v4 a CSS Entrypointy
+- **Explicitní importy:** Každý nový CSS entrypoint (např. `filament-auth.css`) **musí** obsahovat `@import "tailwindcss";` na začátku souboru. Bez toho nebudou Tailwind utility fungovat.
+- **Source direktivy:** V CSS souboru musí být definovány `@source` cesty k Blade souborům, které tyto utility používají (např. `@source '../**/*.blade.php';`).
+
+### 11.2 Registrace Assetů v Filamentu
+- **Render Hooky:** Assety pro administraci (zejména pro auth stránky) registrujte přímo v `AdminPanelProvider.php` v metodě `panel()` pomocí `->renderHook('panels::head.end', ...)`.
+- **Vite direktiva:** Pro vkládání assetů v hooku používejte `@vite(['resources/css/...', 'resources/js/...'])` zabalené do `Blade::render()`.
+
+### 11.3 Stabilita Auth Layoutu
+- **Custom Layout:** Pro vlastní vzhled auth stránek používejte dedikovaný layout (např. `resources/views/filament/admin/layouts/auth.blade.php`).
+- **Přiřazení:** V PHP třídě stránky (např. `App\Filament\Pages\Auth\Login`) explicitně definujte `protected static string $layout = 'filament.admin.layouts.auth';`.
+- **Vyhýbejte se double-wrappingu:** Pokud je shell (gradient, karta) součástí layoutu, nepoužívejte jej znovu jako komponentu uvnitř `$view`.
+
+### 11.4 Verifikace (Snapshoty)
+- **Vždy testujte výsledné HTML:** Pokud se změny neprojevují, vygenerujte statický snapshot stránky pomocí `curl` (viz `docs/18-renderovani-html.md`) a zkontrolujte, zda jsou přítomny správné CSS třídy a linky na assety s hashem.
+- **Manifest:** Po každé změně v CSS/JS spusťte `npm run build`, aby se aktualizoval Vite manifest.

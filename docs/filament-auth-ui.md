@@ -1,52 +1,54 @@
-# Custom Filament Auth UI
+# Custom Filament Auth UI (Kbelští sokoli Arena)
 
-Tento modul nahrazuje výchozí Filament auth stránky (Login, Reset Password atd.) plně vlastním UI sjednoceným s designem 2FA stránky.
+Tento modul nahrazuje výchozí Filament auth stránky (Login, Reset Password atd.) plně vlastním UI sjednoceným s designem stránek v přípravě.
 
-## Architektura
+## Architektura (Stabilní stav)
 
-Řešení je postaveno na rozšíření základních Livewire komponent (Pages) Filamentu a přiřazení vlastních Blade views v `AdminPanelProvider`.
+Od verze únor 2026 je řešení postaveno na vlastním layoutu panelu, což zajišťuje maximální stabilitu a konzistenci bez nutnosti "double-wrappingu" v každém view.
 
-### Soubory
+### Klíčové soubory
 
 - **PHP Třídy (Logic):**
-    - `app/Filament/Pages/Auth/Login.php`: Rozšiřuje `Filament\Auth\Pages\Login`.
+    - `app/Filament/Pages/Auth/Login.php`: Rozšiřuje `Filament\Auth\Pages\Login`. Nastavuje `$layout` na `filament.admin.layouts.auth`.
     - `app/Filament/Pages/Auth/RequestPasswordReset.php`: Rozšiřuje `Filament\Auth\Pages\PasswordReset\RequestPasswordReset`.
     - `app/Filament/Pages/Auth/ResetPassword.php`: Rozšiřuje `Filament\Auth\Pages\PasswordReset\ResetPassword`.
-    - `app/Filament/Pages/Auth/EmailVerificationPrompt.php`: Rozšiřuje `Filament\Auth\Pages\EmailVerification\EmailVerificationPrompt`.
-    - `app/Filament/Pages/Auth/Register.php`: Rozšiřuje `Filament\Auth\Pages\Register`.
 
 - **Blade Views (UI):**
-    - `resources/views/filament/admin/auth/login.blade.php`
-    - `resources/views/filament/admin/auth/request-password-reset.blade.php`
-    - `resources/views/filament/admin/auth/reset-password.blade.php`
-    - `resources/views/filament/admin/auth/email-verification-prompt.blade.php`
-    - `resources/views/filament/admin/auth/register.blade.php`
-    - `resources/views/filament/admin/auth/partials/shell.blade.php`: Hlavní layout (wrapper) pro všechny auth stránky.
+    - `resources/views/filament/admin/layouts/auth.blade.php`: **Hlavní layout.** Obsahuje arena gradienty, dekorativní objekty, skleněnou kartu a fixní language switcher.
+    - `resources/views/filament/admin/auth/login.blade.php`: Obsahuje pouze `{{ $this->form }}`. Shell je dodáván layoutem.
 
-- **Komponenty:**
-    - `resources/views/components/auth-header.blade.php`: Hlavička s ikonou a brandingem.
-    - `resources/views/components/auth-footer.blade.php`: Patička s odkazy.
+- **Styly a JS:**
+    - `resources/css/filament-auth.css`: Všechny designové overridy, animace a utility Tailwind v4.
+    - `resources/js/filament-auth.js`: Mikrointerakce (Caps Lock indikátor, shake efekt při chybě, loading stav tlačítka).
 
-- **Styly:**
-    - `resources/css/filament-auth.css`: Obsahuje všechny override pro auth stránky (glass-card, animace, formulářové prvky).
+## Design Systém (Modern Boxed Style)
+- **Pozadí:** Světlejší navy gradient se zářemi (brand red/blue) a plovoucími objekty.
+- **Karta (Box):** Solidní bílý box (`#ffffff`) s výraznou horní brandovou linkou (6px) a hlubokými stíny (`shadow-2xl`).
+- **Typografie:**
+    - Nadpisy: `Oswald` (Italic, 900, uppercase).
+    - Texty: `Instrument Sans`.
+- **Akcent:** Brandová červená (`--brand-red`) a modrá (`--brand-blue`) pro focus stavy.
 
-## Jak přidat další auth stránku
+## Troubleshooting a časté chyby
 
-1. Vytvořte novou PHP třídu v `app/Filament/Pages/Auth/` rozšiřující příslušnou Filament base page.
-2. Nastavte `$view` na vaši novou Blade šablonu.
-3. V Blade šabloně použijte `<x-filament-panels::layout.base :livewire="$this">` a vložte `@include('filament.admin.auth.partials.shell', [...])`.
-4. Zaregistrujte novou stránku v `app/Providers/Filament/AdminPanelProvider.php` pomocí příslušné metody v `panel()` (např. `->login(...)`, `->registration(...)`).
+### 1. Změny se neprojevují v HTML
+**Příčina:** Špatně zaregistrovaný render hook nebo chybějící `@import "tailwindcss"` v entrypointu.
+**Řešení:**
+- Ověřte `app/Providers/Filament/AdminPanelProvider.php`, zda je hook registrován přes `->renderHook('panels::head.end', ...)`.
+- Zkontrolujte, zda `filament-auth.css` obsahuje `@import "tailwindcss";` a `@source` direktivy.
 
-## Co zkontrolovat po upgradu Filamentu
+### 2. Formulář je přes celou šířku obrazovky
+**Příčina:** Tailwind utility nebyly zkompilovány (chybějící `@import`) nebo jsou přebity výchozím stylem Filamentu.
+**Řešení:** V `filament-auth.css` použijte třídu `.ks-auth-container` s `max-width: 32rem !important;`.
 
-Při major updatu Filamentu zkontrolujte:
-1. Namespace základních tříd, které rozšiřujeme (base classes).
-2. Podpisy metod v base classes (zejména `form()` nebo akce, pokud jsme je přepisovali).
-3. Názvy Livewire akcí volaných z Blade (např. `wire:submit="authenticate"`).
-4. Strukturu `filament-panels::layout.base`, pokud by došlo k velkým změnám v layoutu Filamentu.
+### 3. Jazykový přepínač je duplicitní
+**Příčina:** Plugin pro lokalizaci vkládá vlastní přepínač.
+**Řešení:** Původní přepínač je skryt v `filament-auth.css` pomocí `.fls-display-on { display: none !important; }`. Náš custom přepínač je fixně umístěn v pravém horním rohu v layoutu.
 
-## Design Systém
-- **Pozadí:** Tmavý gradient s animovanými "floating objects".
-- **Karta (Surface):** Glass-card s 85% bílým pozadím (nebo dynamicky dle CSS proměnných), blur efektem a jemným borderem.
-- **Akcent:** Brandová barva (výchozí růžovo-červená `#E11D48`) z `BrandingService`.
-- **Typografie:** Oswald pro nadpisy, Instrument Sans pro texty.
+## Verifikace
+Pro ověření aktuálního stavu vyrenderovaného HTML použijte příkaz:
+```bash
+npm run build
+curl -sSL -H "Accept: text/html" https://kbelstisokoli.test/admin/login -o login.html
+```
+Následně zkontrolujte `login.html`, zda obsahuje očekávané třídy (`ks-auth-page`, `ks-auth-container`, `glass-card`).
