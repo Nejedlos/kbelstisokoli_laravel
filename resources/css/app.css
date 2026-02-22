@@ -48,6 +48,11 @@
 
     /* Stíny */
     --shadow-club: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-glow-red: 0 0 25px -5px rgba(225, 29, 72, 0.4);
+
+    /* Vzory */
+    --pattern-mesh: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23ffffff' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    --pattern-basketball: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0a30 30 0 1 1 0 60 30 30 0 0 1 0-60zm0 2a28 28 0 1 0 0 56 28 28 0 0 0 0-56zm0 2a26 26 0 1 1 0 52 26 26 0 0 1 0-52zm0 2a24 24 0 1 0 0 48 24 24 0 0 0 0-48z' fill='%23ffffff' fill-opacity='.02'/%3E%3C/svg%3E");
 
     /* Animace */
     --animate-shake: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
@@ -123,6 +128,20 @@
     .section-title::after {
         content: '';
         @apply absolute bottom-0 left-0 w-12 h-1 bg-primary;
+    }
+
+    /* Hero vylepšení */
+    .hero-mesh {
+        background-image: var(--pattern-mesh);
+    }
+
+    .hero-gradient {
+        background: radial-gradient(circle at 70% 30%, rgba(var(--color-brand-red-rgb), 0.15) 0%, transparent 60%),
+                    linear-gradient(135deg, var(--color-brand-navy) 0%, #05101d 100%);
+    }
+
+    .sport-skew {
+        clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
     }
 }
 

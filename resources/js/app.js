@@ -1,5 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 import { Spinner } from 'spin.js';
@@ -7,6 +9,15 @@ import 'spin.js/spin.css';
 
 window.Alpine = Alpine;
 Alpine.start();
+
+// Initialize AOS (Animate On Scroll)
+AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 50,
+    delay: 50,
+});
 
 // NProgress - Sexy top bar loader
 NProgress.configure({ showSpinner: false, trickleSpeed: 200 });

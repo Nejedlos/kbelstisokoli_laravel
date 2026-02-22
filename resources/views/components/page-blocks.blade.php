@@ -24,7 +24,7 @@
 
             // Animace (AOS)
             if ($animate) {
-                $attributesString .= ' data-aos="fade-up"';
+                $attributesString .= ' data-aos="fade-up" data-aos-delay="' . ($loop->index * 100) . '"';
             }
         @endphp
 

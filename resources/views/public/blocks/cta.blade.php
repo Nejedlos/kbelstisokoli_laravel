@@ -9,7 +9,7 @@
     'bg-white border-y border-slate-100' => $style === 'outline',
 ])>
     {{-- Decorative elements --}}
-    <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+    <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none hero-mesh">
         <div class="absolute top-0 right-0 w-64 h-64 border-t-8 border-r-8 border-white -mr-12 -mt-12"></div>
         <div class="absolute bottom-0 left-0 w-64 h-64 border-b-8 border-l-8 border-white -ml-12 -mb-12"></div>
     </div>

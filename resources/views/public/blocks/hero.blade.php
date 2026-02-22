@@ -9,6 +9,7 @@
     'block-hero relative overflow-hidden min-h-[60vh] flex items-center',
     'bg-secondary text-white' => $variant !== 'minimal',
     'bg-white text-secondary' => $variant === 'minimal',
+    'hero-gradient' => $variant === 'standard' && !$imageUrl,
     'py-20 md:py-32' => $variant === 'centered',
     'py-12 md:py-20' => $variant !== 'centered',
 ])>
@@ -20,12 +21,15 @@
                 <div class="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent"></div>
             @endif
         </div>
+    @elseif($variant === 'standard')
+        <div class="absolute inset-0 z-0 hero-mesh opacity-20"></div>
     @endif
 
     {{-- Decor elements for "sexy" look --}}
     @if($variant !== 'minimal')
-        <div class="absolute top-0 right-0 w-1/3 h-full bg-primary/10 -skew-x-12 translate-x-1/2 pointer-events-none z-0"></div>
-        <div class="absolute bottom-0 right-0 w-1/4 h-1/2 border-r-8 border-b-8 border-primary/20 mr-12 mb-12 pointer-events-none z-0"></div>
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-primary/5 -skew-x-12 translate-x-1/3 pointer-events-none z-0"></div>
+        <div class="absolute bottom-0 right-0 w-1/4 h-1/2 border-r-[16px] border-b-[16px] border-primary/10 mr-8 mb-8 pointer-events-none z-0"></div>
+        <div class="absolute top-1/2 left-0 w-64 h-64 bg-primary/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
     @endif
 
     <div class="container relative z-10">
@@ -59,8 +63,8 @@
 
     {{-- Basketball graphic element --}}
     @if($variant === 'standard')
-        <div class="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-1/3 opacity-10 pointer-events-none">
-            <i class="fa-light fa-basketball text-[20rem] rotate-12"></i>
+        <div class="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 w-1/3 opacity-20 pointer-events-none group-hover:rotate-45 transition-transform duration-1000">
+            <i class="fa-light fa-basketball text-[25rem] rotate-12 text-primary/20"></i>
         </div>
     @endif
 </section>
