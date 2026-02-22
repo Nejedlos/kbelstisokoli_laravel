@@ -73,8 +73,11 @@
                     @endif
 
                     @if($data['cta_tertiary_label'] ?? null)
-                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" class="text-white hover:text-primary transition-colors font-bold border-b border-white/30 hover:border-primary pb-1">
-                            {{ $data['cta_tertiary_label'] }}
+                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2.5 text-[min(3.2vw,0.75rem)] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all group py-2">
+                            <span class="relative border-b border-white/10 group-hover:border-primary/50 transition-colors pb-1 leading-none">
+                                {{ $data['cta_tertiary_label'] }}
+                            </span>
+                            <i class="fa-light fa-arrow-up-right text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300"></i>
                         </a>
                     @endif
                 </div>
