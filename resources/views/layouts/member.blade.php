@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? __('Členská sekce') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
+    <title>{{ $title ?? __('nav.member_section') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,7 +35,7 @@
                         </div>
                         <div class="flex flex-col leading-tight hidden sm:flex">
                             <span class="text-sm font-black uppercase tracking-tight">{{ $branding['club_short_name'] ?? 'Sokoli' }}</span>
-                            <span class="text-[10px] uppercase tracking-widest text-primary font-bold">Členská zóna</span>
+                            <span class="text-[10px] uppercase tracking-widest text-primary font-bold">{{ __('nav.member_zone') }}</span>
                         </div>
                     @endif
                 </a>
@@ -93,10 +93,7 @@
                                             <i class="fa-light @if($key === 'omluva') fa-calendar-xmark @elseif($key === 'zapas') fa-basketball @elseif($key === 'platba') fa-wallet @else fa-key @endif"></i>
                                         </div>
                                         <span class="text-[11px] font-bold text-slate-700 leading-tight">
-                                            @if($key === 'omluva') Omluva z tréninku @endif
-                                            @if($key === 'zapas') Další zápas @endif
-                                            @if($key === 'platba') QR kód k platbě @endif
-                                            @if($key === 'heslo') Změna hesla @endif
+                                            {{ __('search.ai_tips.' . $key) }}
                                         </span>
                                     </button>
                                 @endforeach
@@ -145,7 +142,7 @@
 
                 <div class="hidden sm:flex flex-col text-right leading-none">
                     <span class="text-sm font-bold">{{ auth()->user()->name }}</span>
-                    <span class="text-[10px] uppercase tracking-widest text-white/50">{{ auth()->user()->roles->pluck('name')->first() ?? 'Člen' }}</span>
+                    <span class="text-[10px] uppercase tracking-widest text-white/50">{{ auth()->user()->roles->pluck('name')->first() ?? __('nav.member') }}</span>
                 </div>
 
                 <div class="relative" x-data="{ userOpen: false }">
@@ -158,17 +155,17 @@
                          x-transition:enter-start="opacity-0 scale-95"
                          x-transition:enter-end="opacity-100 scale-100"
                          class="absolute right-0 mt-2 w-48 bg-white rounded-club shadow-xl border border-slate-100 py-2 text-slate-700 z-50">
-                        <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors font-bold">Můj profil</a>
+                        <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors font-bold">{{ __('nav.my_profile') }}</a>
                         @can('access_admin')
                             <a href="{{ url(config('filament.panels.admin.path', 'admin')) }}" class="block px-4 py-2 text-sm text-primary hover:bg-primary/5 transition-colors font-bold">
-                                <i class="fa-light fa-shield-check mr-2"></i> Administrace
+                                <i class="fa-light fa-shield-check mr-2"></i> {{ __('nav.administration') }}
                             </a>
                         @endcan
-                        <a href="{{ route('public.home') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors">Veřejný web</a>
+                        <a href="{{ route('public.home') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors">{{ __('nav.public_web') }}</a>
                         <hr class="my-2 border-slate-100">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 transition-colors font-bold">Odhlásit se</button>
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 transition-colors font-bold">{{ __('nav.logout') }}</button>
                         </form>
                     </div>
                 </div>
@@ -186,19 +183,19 @@
                         @if($item['icon'] ?? null)
                             <x-dynamic-component :component="$item['icon']" class="w-5 h-5 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
                         @endif
-                        {{ $item['title'] }}
+                        {{ __($item['title']) }}
                     </a>
                 @endforeach
 
                 @if(auth()->user()->can('manage_teams') && !empty(config('navigation.member.coach')))
-                    <div class="mt-8 mb-2 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Pro trenéry</div>
+                    <div class="mt-8 mb-2 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{{ __('nav.for_coaches') }}</div>
                     @foreach (config('navigation.member.coach', []) as $item)
                         <a href="{{ route($item['route']) }}"
                            class="flex items-center gap-3 px-4 py-3 rounded-club text-sm font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-md' : 'text-slate-600 hover:bg-slate-50 hover:text-secondary' }}">
                             @if($item['icon'] ?? null)
                                 <x-dynamic-component :component="$item['icon']" class="w-5 h-5 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
                             @endif
-                            {{ $item['title'] }}
+                            {{ __($item['title']) }}
                         </a>
                     @endforeach
                 @endif
@@ -207,8 +204,8 @@
             <!-- Bottom Action / Help -->
             <div class="p-4 border-t border-slate-100">
                 <a href="{{ route('public.contact.index') }}" class="block p-4 rounded-club bg-slate-50 text-xs text-slate-500 hover:bg-slate-100 transition-colors">
-                    <span class="font-bold text-slate-700 block mb-1">Potřebujete pomoc?</span>
-                    Máte problém s přístupem nebo profilem? Kontaktujte nás.
+                    <span class="font-bold text-slate-700 block mb-1">{{ __('nav.need_help') }}</span>
+                    {{ __('nav.help_text') }}
                 </a>
             </div>
         </aside>
@@ -234,7 +231,7 @@
              x-transition:leave-end="-translate-x-full"
              class="fixed inset-y-0 left-0 w-72 bg-white z-50 lg:hidden shadow-2xl flex flex-col">
             <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100">
-                <span class="font-black uppercase tracking-tight text-secondary">Menu sekce</span>
+                <span class="font-black uppercase tracking-tight text-secondary">{{ __('nav.section_menu') }}</span>
                 <button @click="sidebarOpen = false" class="p-2 text-slate-400 hover:text-rose-500 transition-colors">
                     <i class="fa-light fa-xmark text-2xl"></i>
                 </button>
@@ -247,12 +244,12 @@
                         @if($item['icon'] ?? null)
                             <x-dynamic-component :component="$item['icon']" class="w-6 h-6 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
                         @endif
-                        {{ $item['title'] }}
+                        {{ __($item['title']) }}
                     </a>
                 @endforeach
 
                 @if(auth()->user()->can('manage_teams'))
-                    <div class="mt-8 mb-2 px-4 text-xs font-black uppercase tracking-[0.2em] text-slate-400">Pro trenéry</div>
+                    <div class="mt-8 mb-2 px-4 text-xs font-black uppercase tracking-[0.2em] text-slate-400">{{ __('nav.for_coaches') }}</div>
                     @foreach (config('navigation.member.coach', []) as $item)
                         <a href="{{ route($item['route']) }}"
                            @click="sidebarOpen = false"
@@ -260,7 +257,7 @@
                             @if($item['icon'] ?? null)
                                 <x-dynamic-component :component="$item['icon']" class="w-6 h-6 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
                             @endif
-                            {{ $item['title'] }}
+                            {{ __($item['title']) }}
                         </a>
                     @endforeach
                 @endif
@@ -274,7 +271,7 @@
                 <div class="max-w-6xl mx-auto flex items-center justify-between">
                     <div>
                         <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight text-secondary">
-                            {{ $title ?? 'Členská sekce' }}
+                            {{ $title ?? __('nav.member_section') }}
                         </h1>
                         @if(isset($subtitle))
                             <p class="text-xs md:text-sm text-slate-500 font-medium">{{ $subtitle }}</p>
@@ -313,19 +310,19 @@
     <nav class="lg:hidden h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-30 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
         <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.dashboard') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
             <i class="fa-light fa-grid-2 text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">Dashboard</span>
+            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.dashboard') }}</span>
         </a>
         <a href="{{ route('member.attendance.index') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.attendance.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
             <i class="fa-light fa-calendar-star text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">Program</span>
+            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.program') }}</span>
         </a>
         <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.profile.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
             <i class="fa-light fa-user-gear text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">Profil</span>
+            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.profile') }}</span>
         </a>
         <button @click="sidebarOpen = true" class="flex flex-col items-center gap-1.5 text-slate-400 hover:text-primary transition-colors duration-300">
             <i class="fa-light fa-circle-nodes text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">Více</span>
+            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.more') }}</span>
         </button>
     </nav>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Administrace') }} - {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
+    <title>{{ __('nav.administration') }} - {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
@@ -12,7 +12,7 @@
             <ul>
                 @foreach (config('navigation.admin', []) as $item)
                     <li>
-                        <a href="{{ route($item['route']) }}">{{ $item['title'] }}</a>
+                        <a href="{{ route($item['route']) }}">{{ __($item['title']) }}</a>
                     </li>
                 @endforeach
             </ul>

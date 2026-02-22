@@ -144,5 +144,14 @@
     "nav.profile": "Profil",
     "nav.more": "Více",
     "nav.section_menu": "Menu sekce",
-    "nav.member_zone": "Členská zóna"
+    "nav.member_zone": "Členská zóna",
+    "nav.help_text": "Máte problém s přístupem nebo profilem? Kontaktujte nás.",
+    "search.ai_hint": "Zeptejte se naší umělé inteligence...",
+    "search.ai_suggestion": "Návrh pro vás",
+    "search.ai_search_placeholder": "Zeptejte se Sokola...",
+    "search.ai_try_asking": "Zkuste se zeptat na",
+    "search.ai_tips.omluva": "Omluva z tréninku",
+    "search.ai_tips.zapas": "Další zápas",
+    "search.ai_tips.platba": "QR kód k platbě",
+    "search.ai_tips.heslo": "Změna hesla"
 }

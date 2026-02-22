@@ -144,5 +144,14 @@
     "nav.profile": "Profile",
     "nav.more": "More",
     "nav.section_menu": "Section Menu",
-    "nav.member_zone": "Member Zone"
+    "nav.member_zone": "Member Zone",
+    "nav.help_text": "Having issues with access or your profile? Contact us.",
+    "search.ai_hint": "Ask our AI...",
+    "search.ai_suggestion": "Suggested for you",
+    "search.ai_search_placeholder": "Ask Falcon...",
+    "search.ai_try_asking": "Try asking about",
+    "search.ai_tips.omluva": "Absence from training",
+    "search.ai_tips.zapas": "Next match",
+    "search.ai_tips.platba": "QR code for payment",
+    "search.ai_tips.heslo": "Password change"
 }

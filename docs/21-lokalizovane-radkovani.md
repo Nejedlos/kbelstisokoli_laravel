@@ -13,12 +13,12 @@ V souboru `resources/css/app.css` byla definována pravidla využívající sele
 **Upravené hodnoty:**
 | Prvek / Třída | Výchozí (EN) | Česká verze (CS) |
 | :--- | :--- | :--- |
-| `h1`, `h2` | `1.1` (md: `1.05`) | `1.2` (md: `1.15`) |
-| `h3` - `h6` | `1.25` (tight) | `1.35` |
-| `.leading-display` | `1.1` (md: `1.05`) | `1.2` (md: `1.15`) |
-| `.leading-tight` | `1.25` | `1.35` |
-| `.leading-snug` | `1.375` | `1.45` |
-| `.leading-relaxed` | `1.625` | `1.7` |
+| `h1`, `h2` | `1.1` (md: `1.05`) | `1.6` (md: `1.5`) |
+| `h3` - `h6` | `1.25` (tight) | `1.5` |
+| `.leading-display` | `1.1` (md: `1.05`) | `1.6` (md: `1.5`) |
+| `.leading-tight` | `1.25` | `1.5` |
+| `.leading-snug` | `1.375` | `1.6` |
+| `.leading-relaxed` | `1.625` | `1.85` |
 
 ### 2. Implementace v komponentách
 Všechny komponenty, které dříve používaly napevno zapsané třídy jako `leading-[1.1]`, byly upraveny tak, aby využívaly novou utilitu `.leading-display`.
