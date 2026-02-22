@@ -17,11 +17,14 @@ use Filament\Notifications\Notification;
 
 class BrandingSettings extends Page
 {
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-paint-brush';
+    public static function getNavigationIcon(): ?string
+    {
+        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-palette fa-fw"></i>');
+    }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.settings');
+        return __('admin.navigation.groups.admin_tools');
     }
 
     public static function getNavigationSort(): ?int

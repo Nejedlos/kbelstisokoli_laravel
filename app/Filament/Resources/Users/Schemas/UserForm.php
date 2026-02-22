@@ -63,11 +63,15 @@ class UserForm
                 ->schema([
                     SpatieMediaLibraryFileUpload::make('avatar')
                         ->collection('avatar')
-                        ->disk('public')
+                        ->disk('media_public')
                         ->avatar()
                         ->alignLeft()
                         ->hiddenLabel()
                         ->imageEditor()
+                        ->getUploadedFileNameForStorageUsing(function ($file, $get) {
+                            $name = $get('last_name') ? \Illuminate\Support\Str::slug($get('last_name')) : 'avatar';
+                            return $name . '-' . time() . '.' . $file->getClientOriginalExtension();
+                        })
                         ->columnSpan([
                             'default' => 1,
                             'md' => 2,

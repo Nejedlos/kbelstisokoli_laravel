@@ -14,7 +14,7 @@ return [
         'navigation' => 'Navigation',
     ],
     'ai_suggestion' => 'AI Suggestion',
-    'ai_hint' => 'What do you want to do? (e.g., excuse from training)',
+    'ai_hint' => 'How can I help you?',
     'ai_search_placeholder' => 'Enter your query...',
     'ai_try_asking' => 'Try asking:',
     'ai_tips' => [

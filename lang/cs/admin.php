@@ -10,8 +10,7 @@ return [
             'communication' => 'Komunikace',
             'user_management' => 'Správa uživatelů',
             'finance' => 'Finance',
-            'settings' => 'Nastavení',
-            'system_settings' => 'Nastavení systému',
+            'admin_tools' => 'Admin nástroje',
         ],
         'pages' => [
             'dashboard' => 'Nástěnka',

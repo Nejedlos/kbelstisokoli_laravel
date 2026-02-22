@@ -79,8 +79,8 @@ Pro administraci a členskou sekci je k dispozici sémantické vyhledávání ("
     - **Member:** Vyhledává v sekcích členské zóny (docházka, platby, profil, týmy).
 
 ### Integrace
-- **Administrace:** Integrováno do globálního vyhledávání Filamentu (přes `Dashboard` stránku). V horní liště je navíc umístěno výrazné AI vyhledávací pole s nápovědou a tipy.
-- **Členská sekce:** Výrazné vyhledávací pole v horní liště (na desktopu) s nápovědou a rychlými tipy v overlayi. Na mobilu dostupný přes ikonu lupy.
+- **Administrace:** Integrováno do globálního vyhledávání Filamentu (přes `Dashboard` stránku). V horní liště je navíc umístěno výrazné, moderní AI vyhledávací pole s animovanými prvky, nápovědou a interaktivními rychlými tipy.
+- **Členská sekce:** Výrazné, vizuálně sladěné vyhledávací pole v horní liště (na desktopu) s nápovědou a "Superhuman-style" overlayem obsahujícím ikony a rychlé tipy. Na mobilu dostupný přes ikonu lupy.
 
 ### Oprávnění
 BackendSearchService automaticky filtruje výsledky podle oprávnění aktuálně přihlášeného uživatele (`$user->can()`), takže uživatel nikdy neuvidí cíle, ke kterým nemá přístup.

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Filament\Forms\CmsForms;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Section;
@@ -91,11 +91,20 @@ class PostForm
 
                                 Section::make('Média')
                                     ->schema([
-                                        FileUpload::make('featured_image')
+                                        SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
                                             ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku.')
+                                            ->collection('featured_image')
+                                            ->disk('media_public') // Veřejný prostor pro články
                                             ->image()
-                                            ->directory('posts'),
+                                            ->getUploadedFileNameForStorageUsing(function ($file, $get) {
+                                                $title = $get('title');
+                                                $ext = $file->getClientOriginalExtension();
+                                                if ($title) {
+                                                    return \Illuminate\Support\Str::slug($title) . '.' . $ext;
+                                                }
+                                                return \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+                                            }),
                                     ]),
                             ]),
 

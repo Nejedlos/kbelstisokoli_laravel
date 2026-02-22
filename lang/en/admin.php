@@ -10,8 +10,7 @@ return [
             'communication' => 'Communication',
             'user_management' => 'User Management',
             'finance' => 'Finance',
-            'settings' => 'Settings',
-            'system_settings' => 'System Settings',
+            'admin_tools' => 'Admin Tools',
         ],
         'pages' => [
             'dashboard' => 'Dashboard',

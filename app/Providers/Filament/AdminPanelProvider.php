@@ -92,9 +92,7 @@ class AdminPanelProvider extends PanelProvider
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.finance')),
                 \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.settings')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.system_settings')),
+                    ->label(fn (): string => __('admin.navigation.groups.admin_tools')),
             ])
             ->widgets([
                 AccountWidget::class,

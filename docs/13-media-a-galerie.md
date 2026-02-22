@@ -24,6 +24,12 @@ Bloky využívají vazbu na ID z knihovny médií:
     - `media_alt($id)` – získá alternativní text pro SEO.
 - **Fallbacky:** Pokud asset nebo galerie neexistuje, systém zobrazí sjednocený prázdný stav (`x-empty-state`).
 
-## 5. Přístup a bezpečnost
-- **Úrovně přístupu:** Každý asset má definovaný `access_level`.
+## 5. Přístup, bezpečnost a úložiště
+- **Úrovně přístupu:** Každý asset má definovaný `access_level` (public, member, private).
+- **Úložiště (Disky):**
+    - `media_public` (`storage/app/public/media`) – pro veřejné soubory, dostupné přes přímou URL `/storage/media/...`.
+    - `media_private` (`storage/app/private/media`) – pro neveřejné soubory, nedostupné zvenčí.
+- **Zabezpečené stahování:** Pokud je soubor privátní, helper `media_url()` automaticky vrací trasu `/media/download/{uuid}`, která kontroluje oprávnění uživatele před odesláním souboru.
+- **Struktura na disku:** Pro přehlednost na FTP/SSH je použit formát `{kolekce}/{rok}/{mesic}/{media_id}/název-souboru.ext`.
+- **SEO a Přejmenování:** Při změně `title` v administraci se automaticky přejmenuje i fyzický soubor na disku (SEO friendly slug), aby byla zachována konzistence.
 - **Validace:** Při nahrávání jsou vynuceny limity na velikost a typy souborů (obrázky, PDF).

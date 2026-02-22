@@ -20,7 +20,12 @@ class RedirectResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.system_settings');
+        return __('admin.navigation.groups.admin_tools');
+    }
+
+    public static function getNavigationIcon(): ?string
+    {
+        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-shuffle fa-fw"></i>');
     }
 
     public static function getModelLabel(): string
@@ -33,11 +38,9 @@ class RedirectResource extends Resource
         return __('admin.navigation.resources.redirect.plural_label');
     }
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-arrow-path';
-
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 90;
     }
 
     public static function form(Schema $schema): Schema

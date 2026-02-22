@@ -14,7 +14,7 @@ return [
         'navigation' => 'Navigace',
     ],
     'ai_suggestion' => 'AI Doporučení',
-    'ai_hint' => 'Co chcete udělat? (např. omluvit z tréninku)',
+    'ai_hint' => 'Co chcete udělat?',
     'ai_search_placeholder' => 'Zadejte svůj dotaz...',
     'ai_try_asking' => 'Zkuste se zeptat:',
     'ai_tips' => [

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use App\Http\Controllers\MediaDownloadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,3 +31,7 @@ Route::get('/system/cron/run', [\App\Http\Controllers\System\CronController::cla
 Route::get('/auth/two-factor-setup', \App\Http\Controllers\Auth\TwoFactorSetupController::class)
     ->middleware(['auth', 'active'])
     ->name('auth.two-factor-setup');
+
+// Zabezpečené stahování médií
+Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'])
+    ->name('media.download');

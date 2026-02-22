@@ -18,11 +18,14 @@ class CronLogResource extends Resource
 {
     protected static ?string $model = CronLog::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-list-bullet';
+    public static function getNavigationIcon(): ?string
+    {
+        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-history fa-fw"></i>');
+    }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.settings');
+        return __('admin.navigation.groups.admin_tools');
     }
 
     public static function getModelLabel(): string
@@ -37,7 +40,7 @@ class CronLogResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 81;
     }
 
     public static function form(Schema $schema): Schema

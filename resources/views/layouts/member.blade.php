@@ -44,14 +44,12 @@
             <!-- Search & User Menu -->
             <div class="flex items-center gap-2 sm:gap-4">
                 <!-- AI Search (Desktop) -->
-                <div x-data="{ searchOpen: false }" class="hidden md:block flex-1 max-w-sm lg:max-w-md mx-8 relative">
+                <div x-data="{ searchOpen: false }" class="hidden md:block flex-1 max-w-[280px] mx-8 relative">
                     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-                            class="w-full flex items-center gap-3 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:bg-white/15 hover:border-white/30 transition-all text-sm group text-left">
-                        <i class="fa-light fa-magnifying-glass text-primary group-hover:scale-110 transition-transform"></i>
-                        <span class="truncate">{{ __('search.ai_hint') }}</span>
-                        <span class="ml-auto flex items-center gap-1.5 text-[10px] font-bold bg-primary/20 text-white px-2 py-0.5 rounded-full border border-primary/30 shrink-0">
-                            <i class="fa-light fa-sparkles text-[8px]"></i> AI
-                        </span>
+                            class="w-full flex items-center gap-3 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white/50 hover:bg-white/10 hover:border-white/20 transition-all group text-left">
+                        <i class="fa-light fa-sparkles text-primary/60 group-hover:text-primary transition-colors text-[10px]"></i>
+                        <span class="text-[11px] truncate font-medium group-hover:text-white transition-colors">{{ __('search.ai_hint') }}</span>
+                        <span class="ml-auto text-[9px] font-black text-white/20 group-hover:text-primary transition-colors">AI</span>
                     </button>
 
                     <div x-show="searchOpen"
@@ -59,32 +57,47 @@
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="absolute inset-x-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 p-3 z-50 overflow-hidden">
+                         class="absolute inset-x-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50 overflow-hidden ring-1 ring-black/5"
+                         style="display: none;">
+
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)]"></div>
+                            <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-900">{{ __('search.ai_suggestion') }}</h3>
+                        </div>
+
                         <form action="{{ route('member.search') }}" method="GET" class="relative">
+                            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-light fa-sparkles text-sm animate-pulse"></i>
+                            </div>
                             <input type="text"
                                    name="q"
                                    x-ref="searchInput"
                                    placeholder="{{ __('search.ai_search_placeholder') }}"
-                                   class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
-                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
-                                <i class="fa-light fa-arrow-right text-base"></i>
+                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-10 pr-12 py-3 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none transition-all">
+                            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform">
+                                <i class="fa-light fa-arrow-right text-xs"></i>
                             </button>
                         </form>
-                        <div class="mt-3 px-1">
-                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-2">
-                                <i class="fa-light fa-sparkles text-primary"></i> {{ __('search.ai_try_asking') }}
+
+                        <div class="mt-4 space-y-3">
+                            <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                <span class="w-4 h-px bg-slate-100"></span>
+                                {{ __('search.ai_try_asking') }}
+                                <span class="flex-1 h-px bg-slate-100"></span>
                             </div>
-                            <div class="flex flex-wrap gap-2">
+                            <div class="grid grid-cols-2 gap-2">
                                 @foreach(['omluva', 'zapas', 'platba', 'heslo'] as $key)
-                                    <button @click="$refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.submit()"
-                                            class="text-[11px] bg-slate-100 hover:bg-primary/10 hover:text-primary px-2.5 py-1.5 rounded-lg transition-colors border border-slate-200">
-                                        {{ explode('?', explode('syna ', str_replace('Chci si ', '', str_replace('Chci ', '', __('search.ai_tips.' . $key))))[0])[0] }}
-                                        {{-- Pozn.: Toto je jen pro zkrácení labelu na tlačítku, v produkci by bylo lepší mít extra překladové klíče pro labels --}}
-                                        {{-- Pro účely ukázky to nechám srozumitelné: --}}
-                                        @if($key === 'omluva') Omluvit z tréninku @endif
-                                        @if($key === 'zapas') Další zápas @endif
-                                        @if($key === 'platba') QR kód k platbě @endif
-                                        @if($key === 'heslo') Změna hesla @endif
+                                    <button @click.stop="$refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.submit()"
+                                            class="flex items-start gap-2 text-left p-2.5 rounded-xl bg-slate-50 hover:bg-primary/5 border border-slate-100 hover:border-primary/20 transition-all group/tip">
+                                        <div class="w-5 h-5 rounded bg-white flex items-center justify-center shadow-sm text-[10px] text-primary group-hover/tip:bg-primary group-hover/tip:text-white transition-colors">
+                                            <i class="fa-light @if($key === 'omluva') fa-calendar-xmark @elseif($key === 'zapas') fa-basketball @elseif($key === 'platba') fa-wallet @else fa-key @endif"></i>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-slate-700 leading-tight">
+                                            @if($key === 'omluva') Omluva z tréninku @endif
+                                            @if($key === 'zapas') Další zápas @endif
+                                            @if($key === 'platba') QR kód k platbě @endif
+                                            @if($key === 'heslo') Změna hesla @endif
+                                        </span>
                                     </button>
                                 @endforeach
                             </div>
@@ -105,14 +118,15 @@
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[320px] bg-white rounded-xl shadow-2xl border border-slate-100 p-2 z-50 overflow-hidden">
+                         class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[320px] bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
+                         style="display: none;">
                         <form action="{{ route('member.search') }}" method="GET" class="relative">
                             <input type="text"
                                    name="q"
                                    x-ref="searchInputMobile"
                                    placeholder="{{ __('search.ai_hint') }}"
-                                   class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
-                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
+                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary">
                                 <i class="fa-light fa-arrow-right text-sm"></i>
                             </button>
                         </form>

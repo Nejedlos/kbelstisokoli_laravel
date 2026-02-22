@@ -59,9 +59,11 @@ Tento trait automaticky:
 3. **Předmět logu:** Ukládá se `subject_label`, aby byl log čitelný i po smazání subjektu.
 
 ## Administrace (Filament)
-
-Administrátoři mají k dispozici přehled v sekci **Systém > Audit Log**.
-
+    
+Administrátoři mají k dispozici přehled v sekci **Admin nástroje > Audit Log**.
+    
+- **Umístění:** Modul je součástí sjednocených administrativních nástrojů na konci menu.
+- **Ikona:** <i class="fa-light fa-clipboard-list"></i> (Font Awesome Light).
 - **Přehled:** Tabulka s možností fulltextového vyhledávání a řazením.
 - **Filtry:** Filtrování podle kategorie, závažnosti, zdroje (web/admin/console) a časového rozmezí.
 - **Detail:** Zobrazení všech metadat a detailního diffu změn v čitelném JSON formátu.

@@ -10,6 +10,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class MediaAssetForm
 {
@@ -22,6 +23,17 @@ class MediaAssetForm
                         SpatieMediaLibraryFileUpload::make('file')
                             ->label('Nahrát soubor')
                             ->collection('default')
+                            // Dynamický disk podle úrovně přístupu
+                            ->disk(fn ($get) => $get('access_level') === 'public' ? 'media_public' : 'media_private')
+                            // Čištění názvu souboru při nahrávání
+                            ->getUploadedFileNameForStorageUsing(function ($file, $get) {
+                                $title = $get('title');
+                                $ext = $file->getClientOriginalExtension();
+                                if ($title) {
+                                    return Str::slug($title) . '.' . $ext;
+                                }
+                                return Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+                            })
                             ->required()
                             ->columnSpanFull()
                             ->hint('Podporovány jsou obrázky a dokumenty (PDF).'),

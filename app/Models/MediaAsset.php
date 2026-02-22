@@ -26,9 +26,35 @@ class MediaAsset extends Model implements HasMedia
         'is_public' => 'boolean',
     ];
 
+    protected static function booted()
+    {
+        // Automatické přejmenování fyzického souboru při změně názvu
+        static::updating(function (MediaAsset $asset) {
+            if ($asset->isDirty('title') && $asset->title) {
+                foreach ($asset->getMedia('default') as $media) {
+                    $newFileName = \Illuminate\Support\Str::slug($asset->title) . '.' . $media->extension;
+                    if ($media->file_name !== $newFileName) {
+                        $media->file_name = $newFileName;
+                        $media->save();
+                    }
+                }
+            }
+        });
+    }
+
     public function uploadedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by_id');
+    }
+
+    /**
+     * Zaregistruje kolekce médií.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('default')
+            ->useDisk($this->access_level === 'public' ? 'media_public' : 'media_private')
+            ->singleFile();
     }
 
     /**

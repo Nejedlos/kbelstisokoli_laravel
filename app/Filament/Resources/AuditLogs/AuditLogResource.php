@@ -19,12 +19,17 @@ class AuditLogResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return null;
+        return new \Illuminate\Support\HtmlString('<i class="fa-light fa-clipboard-list fa-fw"></i>');
     }
 
     public static function getNavigationLabel(): string
     {
         return 'Audit Log';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 100;
     }
 
     public static function getModelLabel(): string
@@ -39,7 +44,7 @@ class AuditLogResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Systém';
+        return __('admin.navigation.groups.admin_tools');
     }
 
     public static function form(Schema $schema): Schema
