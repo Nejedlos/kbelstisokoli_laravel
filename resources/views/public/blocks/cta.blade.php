@@ -6,7 +6,7 @@
     'block-cta py-20 relative overflow-hidden',
     'bg-primary text-white shadow-[inset_0_0_100px_rgba(0,0,0,0.2)]' => $style === 'primary',
     'bg-secondary text-white shadow-[inset_0_0_100px_rgba(255,255,255,0.05)]' => $style === 'secondary',
-    'bg-slate-50 text-secondary border-y border-slate-200' => $style === 'light',
+    'bg-white text-secondary border-y border-slate-100' => $style === 'light',
     'bg-white border-y border-slate-100' => $style === 'outline',
 ])>
     {{-- Decorative elements --}}
@@ -18,20 +18,20 @@
         <div @class([
             'absolute top-0 right-0 w-64 h-64 border-t-8 border-r-8 -mr-12 -mt-12',
             'border-white' => $style !== 'light',
-            'border-primary/10' => $style === 'light',
+            'border-primary/5' => $style === 'light',
         ])></div>
         <div @class([
             'absolute bottom-0 left-0 w-64 h-64 border-b-8 border-l-8 -ml-12 -mb-12',
             'border-white' => $style !== 'light',
-            'border-primary/10' => $style === 'light',
+            'border-primary/5' => $style === 'light',
         ])></div>
     </div>
 
     @if($style === 'light')
-        <div class="absolute inset-0 z-0 pointer-events-none opacity-40">
-            <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
-            <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 blur-[120px] rounded-full"></div>
-            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-accent/10 blur-[120px] rounded-full"></div>
+        <div class="absolute inset-0 z-0 pointer-events-none opacity-60">
+            <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/[0.03] via-transparent to-accent/[0.03]"></div>
+            <div class="absolute -top-24 -left-24 w-[30rem] h-[30rem] bg-primary/5 blur-[100px] rounded-full"></div>
+            <div class="absolute -bottom-24 -right-24 w-[30rem] h-[30rem] bg-accent/5 blur-[100px] rounded-full"></div>
         </div>
     @endif
 

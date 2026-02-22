@@ -37,12 +37,12 @@
                     <p class="font-bold text-white leading-snug">
                         {{ __('footer.brand_text') }}
                     </p>
-                    <p class="text-sm leading-relaxed text-slate-400">
+                    <p class="text-sm leading-relaxed text-white/60">
                         {{ __('footer.brand_subtext') }}
                     </p>
                 </div>
 
-                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest text-slate-400 badge-nowrap max-w-full overflow-hidden">
+                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest text-white/50 badge-nowrap max-w-full overflow-hidden">
                     <span class="w-1.5 h-1.5 bg-primary rounded-full mr-2 animate-pulse shrink-0"></span>
                     {{ __('footer.brand_badge') }}
                 </div>

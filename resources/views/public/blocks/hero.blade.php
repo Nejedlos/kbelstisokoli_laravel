@@ -52,7 +52,7 @@
             @endif
 
             @if($data['subheadline'] ?? null)
-                <p class="text-base sm:text-lg md:text-xl lg:text-2xl mb-10 text-slate-300 font-medium leading-relaxed italic border-l-4 border-primary pl-4 md:pl-6 py-2 text-balance">
+                <p class="text-base sm:text-lg md:text-xl lg:text-2xl mb-10 text-white/80 font-medium leading-relaxed italic border-l-4 border-primary pl-4 md:pl-6 py-2 text-balance">
                     {{ $data['subheadline'] }}
                 </p>
             @endif
@@ -73,17 +73,17 @@
                     @endif
 
                     @if($data['cta_tertiary_label'] ?? null)
-                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2.5 text-[min(3.2vw,0.75rem)] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all group py-2">
-                            <span class="relative border-b border-white/10 group-hover:border-primary/50 transition-colors pb-1 leading-none">
+                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2.5 text-[min(3.8vw,0.875rem)] sm:text-xs font-black uppercase tracking-normal sm:tracking-[0.2em] text-white/80 hover:text-white transition-all group py-2">
+                            <span class="relative border-b border-white/20 group-hover:border-primary transition-colors pb-1 leading-none">
                                 {{ $data['cta_tertiary_label'] }}
                             </span>
-                            <i class="fa-light fa-arrow-up-right text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300"></i>
+                            <i class="fa-solid fa-arrow-up-right text-xs sm:text-xs text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300"></i>
                         </a>
                     @endif
                 </div>
 
                 @if($data['microtext'] ?? null)
-                    <div class="mt-6 text-sm text-slate-400 max-w-xl {{ $alignment === 'center' ? 'mx-auto' : ($alignment === 'right' ? 'ml-auto' : '') }}">
+                    <div class="mt-6 text-sm text-white/60 max-w-xl {{ $alignment === 'center' ? 'mx-auto' : ($alignment === 'right' ? 'ml-auto' : '') }}">
                         {{ $data['microtext'] }}
                     </div>
                 @endif
