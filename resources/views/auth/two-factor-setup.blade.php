@@ -14,42 +14,43 @@
          style="display: none;">
 
         <div class="text-center mb-10">
-            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fa-light fa-circle-info text-primary text-4xl icon-glow"></i>
+            <div class="auth-header-visual mb-8" aria-hidden="true">
+                <div class="auth-icon-aura"></div>
+                <i class="fa-light fa-circle-info auth-icon-bg animate-icon-drift"></i>
             </div>
-            <h1 class="auth-title">Nápověda k zabezpečení</h1>
-            <p class="auth-sub">Jak nastavit dvoufázové ověření</p>
+            <h1 class="auth-title">{{ __('Taktická příručka') }}</h1>
+            <p class="auth-sub">{{ __('Jak nastavit dvoufázové ověření') }}</p>
         </div>
 
-        <div class="glass-card p-10 space-y-8 border-t-2 border-primary/50">
+        <div class="glass-card space-y-8 border-t-2 border-primary/50">
             <div class="space-y-6">
                 <div class="flex gap-4">
                     <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">1</div>
                     <div>
-                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Stáhněte si aplikaci</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">Nainstalujte si Google Authenticator, Microsoft Authenticator nebo podobnou aplikaci z App Store nebo Google Play.</p>
+                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">{{ __('Stáhněte si aplikaci') }}</h3>
+                        <p class="text-[11px] text-white/50 leading-relaxed">{{ __('Nainstalujte si Google Authenticator, Microsoft Authenticator nebo podobnou aplikaci z App Store nebo Google Play.') }}</p>
                     </div>
                 </div>
                 <div class="flex gap-4">
                     <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">2</div>
                     <div>
-                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Naskenujte QR kód</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">V aplikaci zvolte "Přidat účet" a naskenujte kód, který vidíte na obrazovce.</p>
+                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">{{ __('Naskenujte QR kód') }}</h3>
+                        <p class="text-[11px] text-white/50 leading-relaxed">{{ __('V aplikaci zvolte "Přidat účet" a naskenujte kód, který vidíte na obrazovce.') }}</p>
                     </div>
                 </div>
                 <div class="flex gap-4">
                     <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 border border-primary/20 text-[11px] font-black text-white shadow-[0_0_15px_rgba(225,29,72,0.3)]">3</div>
                     <div>
-                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">Zadejte kód</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">Aplikace začne generovat 6místné kódy. Ten aktuální zadejte do políčka a potvrďte.</p>
+                        <h3 class="text-sm font-black uppercase tracking-tight text-white mb-1">{{ __('Zadejte kód') }}</h3>
+                        <p class="text-[11px] text-white/50 leading-relaxed">{{ __('Aplikace začne generovat 6místné kódy. Ten aktuální zadejte do políčka a potvrďte.') }}</p>
                     </div>
                 </div>
             </div>
 
-            <button @click="showHelp = false" class="btn btn-primary w-full py-4 rounded-2xl text-sm btn-glow group/btn">
+            <button @click="showHelp = false" class="fi-btn fi-color-primary w-full py-4 rounded-2xl text-sm group/btn">
                 <span class="relative z-10 flex items-center justify-center gap-3">
                     <i class="fa-light fa-arrow-left"></i>
-                    Zpět na nastavení
+                    {{ __('Zpět k nastavení') }}
                 </span>
             </button>
         </div>
@@ -58,23 +59,16 @@
     <!-- Main Content (Setup) -->
     <div x-show="!showHelp" x-transition class="relative z-10">
         <!-- Header -->
-        <div class="text-center mb-12 animate-fade-in-down">
-            @if($branding['logo_path'] ?? null)
-                <div class="w-24 h-24 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 p-4 transition-transform hover:scale-105 duration-500">
-                    <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain filter drop-shadow-lg" alt="{{ $branding['club_name'] }}">
-                </div>
-            @else
-                <div class="auth-icon-container">
-                    <i class="fa-duotone fa-light fa-shield-plus text-5xl text-primary icon-bounce icon-glow"></i>
-                </div>
-            @endif
-            <h1 class="auth-title">Zabezpečení účtu</h1>
-            <p class="auth-sub tracking-tight">Pro přístup do administrace je vyžadováno 2FA</p>
-        </div>
+        <x-auth-header
+            :title="__('Taktická porada')"
+            :subtitle="__('Bezpečný driblink vyžaduje dvoufázové ověření.')"
+            icon="fa-shield-plus"
+        />
 
-        <div class="glass-card p-10 border-t-2 border-primary/50 relative overflow-hidden group">
+        <div class="glass-card relative overflow-hidden group">
             <!-- Decorative corner accent -->
             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
+
             @if(! $user->two_factor_secret)
                 {{-- Krok 1: Aktivace --}}
                 <div class="text-center space-y-8">
@@ -82,17 +76,17 @@
                         <i class="fa-light fa-lock-hashtag text-primary text-3xl icon-glow"></i>
                     </div>
                     <div class="space-y-3">
-                        <h2 class="text-xl font-black uppercase tracking-tight text-white italic">Maximální bezpečnost</h2>
-                        <p class="text-xs text-slate-400 font-medium leading-relaxed">
-                            Jako správce týmu máte přístup k citlivým datům a interní strategii. **Dvoufázové ověření (2FA)** je povinné k ochraně vašeho účtu i celého klubu.
+                        <h2 class="text-xl font-black uppercase tracking-tight text-white italic">{{ __('Neprůstřelná obrana') }}</h2>
+                        <p class="text-xs text-white/50 font-medium leading-relaxed">
+                            {{ __('Jako člen realizačního týmu máš přístup k taktice celého klubu. Musíme tvůj účet bránit jako koš v poslední vteřině.') }}
                         </p>
                     </div>
 
                     <form method="POST" action="{{ route('two-factor.enable') }}">
                         @csrf
-                        <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
+                        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
                             <span class="relative z-10 flex items-center justify-center gap-3">
-                                Povolit dvoufázové ověření
+                                {{ __('Aktivovat obranu (2FA)') }}
                                 <i class="fa-light fa-shield-check group-hover/btn:scale-110 transition-transform duration-500"></i>
                             </span>
                         </button>
@@ -102,10 +96,16 @@
                 {{-- Krok 2: Konfigurace a potvrzení --}}
                 <div class="space-y-8">
                     <div class="text-center space-y-3">
-                        <h2 class="text-xl font-black uppercase tracking-tight text-white italic">Propojení aplikace</h2>
-                        <p class="text-xs text-slate-400 font-medium leading-relaxed">
-                            Naskenujte tento kód ve vaší autentizační aplikaci.
+                        <h2 class="text-xl font-black uppercase tracking-tight text-white italic">{{ __('Sehranost s aplikací') }}</h2>
+                        <p class="text-xs text-white/50 font-medium leading-relaxed">
+                            {{ __('Naskenuj tenhle kód do své aplikace, ať jsme v jednom týmu.') }}
                         </p>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" @click="showHelp = true" class="text-[10px] font-black uppercase tracking-widest text-primary/60 hover:text-primary transition-colors flex items-center justify-center gap-2 mx-auto">
+                            <i class="fa-light fa-circle-question"></i> {{ __('Potřebujete pomoci?') }}
+                        </button>
                     </div>
 
                     <div class="flex justify-center">
@@ -117,7 +117,7 @@
 
                     <div class="bg-white/5 rounded-2xl p-5 border border-white/10 text-center relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 blur-2xl -mr-8 -mt-8"></div>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Nelze naskenovat? Zadejte klíč:</p>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">{{ __('Nelze naskenovat? Zadejte klíč:') }}</p>
                         <code class="text-[11px] font-bold text-primary bg-white/5 px-4 py-2 rounded-xl block border border-white/5 tracking-wider select-all">
                             {{ decrypt($user->two_factor_secret) }}
                         </code>
@@ -126,26 +126,20 @@
                     <form method="POST" action="{{ route('two-factor.confirm') }}" class="space-y-6">
                         @csrf
                         <div class="space-y-3">
-                            <label for="code" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center block">Zadejte 6místný kód z aplikace</label>
+                            <label for="code" class="fi-fo-field-label text-center block">{{ __('Zadejte 6místný kód z aplikace') }}</label>
                             <div class="relative group/input">
-                                <div class="input-icon group-focus-within/input:text-primary">
-                                    <i class="fa-light fa-fingerprint text-xl"></i>
-                                </div>
                                 <input id="code" type="text" name="code" inputmode="numeric" autofocus required autocomplete="one-time-code"
                                        placeholder="000 000"
-                                       class="w-full input-with-icon bg-white/5 border {{ $errors->has('code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white/10 transition-all duration-300 font-black text-white placeholder-slate-700 outline-none tracking-[0.4em] text-center text-3xl py-6">
+                                       class="fi-input-wrp w-full bg-white/5 border {{ $errors->has('code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all duration-300 font-black text-white focus:text-slate-900 placeholder-white/20 outline-none tracking-[0.4em] text-center text-3xl py-6">
                             </div>
-                            @error('code')
-                                <div class="flex items-center gap-2 text-rose-400 mt-2 ml-1 animate-shake">
-                                    <i class="fa-light fa-circle-exclamation text-[10px]"></i>
-                                    <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
-                                </div>
-                            @enderror
+                            @if($errors->has('code'))
+                                <p class="fi-error-message block text-center" style="display: block !important;">{{ $errors->first('code') }}</p>
+                            @endif
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
+                        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
                             <span class="relative z-10 flex items-center justify-center gap-3">
-                                Ověřit a aktivovat
+                                {{ __('Potvrdit nahrávku') }}
                                 <i class="fa-light fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>
                             </span>
                         </button>
@@ -158,16 +152,16 @@
                         <i class="fa-light fa-circle-check text-emerald-500 text-4xl icon-bounce"></i>
                     </div>
                     <div class="space-y-3">
-                        <h2 class="text-2xl font-black uppercase tracking-tight text-white italic">Zabezpečeno</h2>
-                        <p class="text-xs text-slate-400 font-medium leading-relaxed">
-                            Dvoufázové ověření bylo úspěšně aktivováno. Níže jsou vaše **záchranné kódy**.
+                        <h2 class="text-2xl font-black uppercase tracking-tight text-white italic">{{ __('Zabezpečeno') }}</h2>
+                        <p class="text-xs text-white/50 font-medium leading-relaxed">
+                            {{ __('Obrana je postavená! Dvoufázové ověření bylo úspěšně aktivováno. Níže jsou tvoje záchranné kódy.') }}
                         </p>
                     </div>
 
                     <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-6 space-y-4">
                         <div class="flex items-center gap-3 mb-2">
                              <div class="h-px flex-1 bg-emerald-500/20"></div>
-                             <span class="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400">Důležité: Uložte si tyto kódy</span>
+                             <span class="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400">{{ __('Důležité: Ulož si tyto kódy') }}</span>
                              <div class="h-px flex-1 bg-emerald-500/20"></div>
                         </div>
 
@@ -178,13 +172,13 @@
                                 </div>
                             @endforeach
                         </div>
-                        <p class="text-[10px] text-slate-500 italic font-medium">Kódy použijte v případě, že ztratíte přístup k aplikaci v telefonu.</p>
+                        <p class="text-[10px] text-white/40 italic font-medium">{{ __('Kódy použij v případě, že ztratíš přístup k telefonu. Bez nich se do kabiny nedostaneš.') }}</p>
                     </div>
 
                     <div class="pt-4">
-                        <a href="{{ session('url.intended') ?? route('filament.admin.pages.dashboard') }}" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
+                        <a href="{{ session('url.intended') ?? route('filament.admin.pages.dashboard') }}" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
                             <span class="relative z-10 flex items-center justify-center gap-3">
-                                Vstoupit do administrace
+                                {{ __('Vstoupit do kabiny') }}
                                 <i class="fa-light fa-arrow-right-long group-hover/btn:translate-x-2 transition-transform duration-500"></i>
                             </span>
                         </a>
@@ -193,29 +187,21 @@
             @endif
         </div>
 
-<div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
-    <button @click="showHelp = true" class="auth-footer-link">
-        <i class="fa-light fa-circle-question mr-2"></i> Potřebujete nápovědu?
-    </button>
+        <div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
+            <div class="flex flex-col gap-4">
+                <a href="{{ route('member.dashboard') }}" class="auth-footer-link-primary flex items-center justify-center gap-2">
+                    <i class="fa-light fa-arrow-left-long"></i> {{ __('Přejít do členské sekce') }}
+                </a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="text-rose-500/60 hover:text-rose-500 text-xs font-black uppercase tracking-widest transition-colors">
+                        {{ __('Odhlásit se') }}
+                    </button>
+                </form>
+            </div>
+        </div>
 
-    <div class="flex flex-col gap-4">
-        <a href="{{ route('member.dashboard') }}" class="auth-footer-link-primary">
-            <i class="fa-light fa-arrow-left-long mr-2"></i> Přejít do členské sekce
-        </a>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="auth-footer-link-danger">
-                Odhlásit se
-            </button>
-        </form>
-    </div>
-
-    <div class="flex items-center justify-center gap-4 text-slate-600 mt-8">
-        <div class="h-px w-8 bg-white/5"></div>
-        <p class="text-[9px] font-black uppercase tracking-[0.3em] italic opacity-40">{{ $branding['club_short_name'] }} Arena</p>
-        <div class="h-px w-8 bg-white/5"></div>
-    </div>
-</div>
+        <x-auth-footer :show-back="false" />
     </div>
 </div>
 @endsection

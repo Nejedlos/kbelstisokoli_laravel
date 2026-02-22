@@ -12,7 +12,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            \Filament\Auth\Notifications\ResetPassword::class,
+            \App\Notifications\Auth\ResetPasswordNotification::class
+        );
+
+        $this->app->bind(
+            \Filament\Auth\Notifications\VerifyEmail::class,
+            \App\Notifications\Auth\VerifyEmailNotification::class
+        );
     }
 
     /**

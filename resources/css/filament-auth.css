@@ -557,37 +557,51 @@ body.fi-panel-admin > [wire\:key="fls-outside-panels"] {
     color: #94a3b8 !important;
 }
 
-/* Success & error visual states (added by JS) */
-.ks-valid .fi-input-wrp {
-    border-color: var(--ui-success) !important;
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-success) 20%, transparent) !important;
-}
-.ks-valid:not(.ks-password-field) .fi-input-wrp::after {
-    content: "\f00c"; /* fa-check */
-    font-family: "Font Awesome 7 Pro";
-    font-weight: 900;
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%) scale(0.5);
-    color: var(--ui-success);
-    pointer-events: none;
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.ks-valid:not(.ks-password-field) .fi-input-wrp::after {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
-}
-.ks-valid:not(.ks-password-field) .fi-input {
-    padding-right: 3rem !important;
+
+/* Password Match Progress Styling */
+.ks-match-progress {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.ks-invalid .fi-input-wrp {
-    border-color: var(--ui-danger) !important;
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-danger) 18%, transparent) !important;
-    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
+.ks-match-progress .match-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.3s ease;
 }
+
+.ks-match-progress .match-bar-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.ks-match-progress .match-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--brand-blue);
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s ease;
+}
+
+/* States for Match Progress */
+.ks-match-progress.state-empty .match-bar { background: rgba(255, 255, 255, 0.2); }
+.ks-match-progress.state-partial .match-text { color: var(--brand-blue); }
+.ks-match-progress.state-partial .match-bar { background: var(--brand-blue); }
+.ks-match-progress.state-mismatch .match-text { color: var(--ui-danger); }
+.ks-match-progress.state-mismatch .match-bar { background: var(--ui-danger); width: 100% !important; }
+.ks-match-progress.state-full .match-text { color: var(--ui-success); }
+.ks-match-progress.state-full .match-bar { background: var(--ui-success); }
 
 /* Password Strength Meter Styling */
 .ks-password-strength {
@@ -631,6 +645,53 @@ body.fi-panel-admin > [wire\:key="fls-outside-panels"] {
     box-shadow: none !important;
 }
 .fi-input-wrp:has(.fi-input:focus-visible) {
+    border-color: var(--brand-blue) !important;
+    box-shadow: 0 0 0 4px rgba(var(--brand-blue-rgb, 37, 99, 235), 0.25) !important;
+}
+
+/* Success & error visual states (added by JS) - DEFINED LAST TO OVERRIDE FOCUS */
+.ks-valid .fi-input-wrp {
+    border-color: var(--ui-success) !important;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-success) 20%, transparent) !important;
+}
+.ks-valid:not(.ks-password-field) .fi-input-wrp::after {
+    content: "\f00c"; /* fa-check */
+    font-family: "Font Awesome 7 Pro";
+    font-weight: 900;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%) scale(0.5);
+    color: var(--ui-success);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.ks-valid:not(.ks-password-field) .fi-input-wrp::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+.ks-valid:not(.ks-password-field) .fi-input {
+    padding-right: 3rem !important;
+}
+
+.ks-invalid .fi-input-wrp,
+.ks-mismatch .fi-input-wrp,
+.ks-partial .fi-input-wrp {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.ks-invalid .fi-input-wrp,
+.ks-mismatch .fi-input-wrp {
+    border-color: var(--ui-danger) !important;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ui-danger) 18%, transparent) !important;
+}
+
+.ks-invalid .fi-input-wrp {
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
+}
+
+.ks-partial .fi-input-wrp {
     border-color: var(--brand-blue) !important;
     box-shadow: 0 0 0 4px rgba(var(--brand-blue-rgb, 37, 99, 235), 0.25) !important;
 }
