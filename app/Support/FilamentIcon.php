@@ -23,6 +23,12 @@ class FilamentIcon
      */
     public static function get(string|AppIcon $icon, string $style = 'fal', string $fallback = 'heroicon-o-question-mark-circle'): string
     {
+        // 0. V testech vracíme bezpečný placeholder, abychom se vyhnuli SvgNotFound
+        // během bootování aplikací v testovacím prostředí.
+        if (app()->runningUnitTests()) {
+            return 'heroicon-o-stop';
+        }
+
         // 1. Získání základního názvu ikony
         $iconName = match (true) {
             $icon instanceof AppIcon => $icon->value,

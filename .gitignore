@@ -27,6 +27,7 @@
 !storage/framework/testing/
 !storage/framework/views/
 !storage/app/public/
+/resources/icons/blade-fontawesome
 Homestead.json
 Homestead.yaml
 Thumbs.db

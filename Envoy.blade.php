@@ -12,6 +12,7 @@
     php artisan migrate --force
     npm install
     npm run build
+    php artisan app:icons:sync
     php artisan optimize
     php artisan up
 @endtask

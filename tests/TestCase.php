@@ -15,11 +15,6 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
-
-        \Filament\Support\Facades\FilamentIcon::register([
-            'fal_basketball' => 'heroicon-o-cake',
-            'fal_basketball_hoop' => 'heroicon-o-cake',
-        ]);
     }
 
     /**

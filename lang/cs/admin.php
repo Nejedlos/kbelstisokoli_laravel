@@ -16,6 +16,7 @@ return [
             'dashboard' => 'Nástěnka',
             'branding' => 'Branding a vzhled',
             'member_section' => 'Členská sekce',
+            'public_web' => 'Veřejný web',
         ],
         'resources' => [
             'announcement' => [

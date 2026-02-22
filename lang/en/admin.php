@@ -16,6 +16,7 @@ return [
             'dashboard' => 'Dashboard',
             'branding' => 'Branding & Appearance',
             'member_section' => 'Member Section',
+            'public_web' => 'Public Website',
         ],
         'resources' => [
             'announcement' => [
