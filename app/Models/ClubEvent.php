@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+use App\Traits\Auditable;
 use Spatie\Translatable\HasTranslations;
 
 class ClubEvent extends Model
 {
-    use HasTranslations;
+    use HasTranslations, Auditable;
 
     protected $table = 'club_events';
 

@@ -21,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
             \Filament\Auth\Notifications\VerifyEmail::class,
             \App\Notifications\Auth\VerifyEmailNotification::class
         );
+
+        $this->app->singleton(\App\Services\AuditLogService::class, function ($app) {
+            return new \App\Services\AuditLogService();
+        });
     }
 
     /**

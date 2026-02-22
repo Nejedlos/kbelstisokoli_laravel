@@ -65,3 +65,22 @@ public function show(Page $page, BreadcrumbService $breadcrumbService)
 ## 5. Výkon
 - Vyhledávání používá jednoduché `LIKE` dotazy s limitem výsledků, což je dostatečné pro MVP.
 - Navigace a breadcrumbs jsou generovány efektivně bez zbytečných DB dotazů (pokud není vyžadována hluboká hierarchie).
+
+## 6. AI Vyhledávání (Backend Search)
+
+Pro administraci a členskou sekci je k dispozici sémantické vyhledávání ("AI-powered"), které umožňuje uživatelům popsat, co chtějí v systému udělat.
+
+### Technické řešení
+- **Služba:** `App\Services\BackendSearchService`
+- **AI Model:** OpenAI `gpt-4o-mini` (vyžaduje nastavení `SERVICES_OPENAI_KEY` v `.env`).
+- **Fallback:** Pokud není AI klíč k dispozici, vyhledává se v popisech a klíčových slovech cílů.
+- **Kontexty:**
+    - **Admin:** Vyhledává v dostupných Filament Resources a administrátorských akcích.
+    - **Member:** Vyhledává v sekcích členské zóny (docházka, platby, profil, týmy).
+
+### Integrace
+- **Administrace:** Integrováno do globálního vyhledávání Filamentu (přes `Dashboard` stránku). V horní liště je navíc umístěno výrazné AI vyhledávací pole s nápovědou a tipy.
+- **Členská sekce:** Výrazné vyhledávací pole v horní liště (na desktopu) s nápovědou a rychlými tipy v overlayi. Na mobilu dostupný přes ikonu lupy.
+
+### Oprávnění
+BackendSearchService automaticky filtruje výsledky podle oprávnění aktuálně přihlášeného uživatele (`$user->can()`), takže uživatel nikdy neuvidí cíle, ke kterým nemá přístup.

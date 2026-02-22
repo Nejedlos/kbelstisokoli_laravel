@@ -43,6 +43,9 @@ Route::middleware(['member'])
         Route::post('/notifikace/mark-all-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
         Route::post('/notifikace/{id}/mark-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAsRead'])->name('notifications.markRead');
 
+        // Vyhledávání
+        Route::get('/hledat', \App\Http\Controllers\Member\SearchController::class)->name('search');
+
         // Trenérské přehledy
         Route::get('/tymove-prehledy', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/tymove-prehledy/{team}', [TeamController::class, 'show'])->name('teams.show');

@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 use Spatie\Translatable\HasTranslations;
 
 class Post extends Model
 {
-    use HasSeo, HasTranslations;
+    use HasSeo, HasTranslations, Auditable;
 
     protected $fillable = [
         'category_id',

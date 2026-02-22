@@ -41,8 +41,84 @@
                 </a>
             </div>
 
-            <!-- User Menu -->
+            <!-- Search & User Menu -->
             <div class="flex items-center gap-2 sm:gap-4">
+                <!-- AI Search (Desktop) -->
+                <div x-data="{ searchOpen: false }" class="hidden md:block flex-1 max-w-sm lg:max-w-md mx-8 relative">
+                    <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
+                            class="w-full flex items-center gap-3 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:bg-white/15 hover:border-white/30 transition-all text-sm group text-left">
+                        <i class="fa-light fa-magnifying-glass text-primary group-hover:scale-110 transition-transform"></i>
+                        <span class="truncate">{{ __('search.ai_hint') }}</span>
+                        <span class="ml-auto flex items-center gap-1.5 text-[10px] font-bold bg-primary/20 text-white px-2 py-0.5 rounded-full border border-primary/30 shrink-0">
+                            <i class="fa-light fa-sparkles text-[8px]"></i> AI
+                        </span>
+                    </button>
+
+                    <div x-show="searchOpen"
+                         @click.away="searchOpen = false"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         class="absolute inset-x-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 p-3 z-50 overflow-hidden">
+                        <form action="{{ route('member.search') }}" method="GET" class="relative">
+                            <input type="text"
+                                   name="q"
+                                   x-ref="searchInput"
+                                   placeholder="{{ __('search.ai_search_placeholder') }}"
+                                   class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
+                                <i class="fa-light fa-arrow-right text-base"></i>
+                            </button>
+                        </form>
+                        <div class="mt-3 px-1">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-2">
+                                <i class="fa-light fa-sparkles text-primary"></i> {{ __('search.ai_try_asking') }}
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach(['omluva', 'zapas', 'platba', 'heslo'] as $key)
+                                    <button @click="$refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.submit()"
+                                            class="text-[11px] bg-slate-100 hover:bg-primary/10 hover:text-primary px-2.5 py-1.5 rounded-lg transition-colors border border-slate-200">
+                                        {{ explode('?', explode('syna ', str_replace('Chci si ', '', str_replace('Chci ', '', __('search.ai_tips.' . $key))))[0])[0] }}
+                                        {{-- Pozn.: Toto je jen pro zkrácení labelu na tlačítku, v produkci by bylo lepší mít extra překladové klíče pro labels --}}
+                                        {{-- Pro účely ukázky to nechám srozumitelné: --}}
+                                        @if($key === 'omluva') Omluvit z tréninku @endif
+                                        @if($key === 'zapas') Další zápas @endif
+                                        @if($key === 'platba') QR kód k platbě @endif
+                                        @if($key === 'heslo') Změna hesla @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Search (Mobile Trigger) -->
+                <div x-data="{ searchOpen: false }" class="md:hidden relative">
+                    <button @click="searchOpen = !searchOpen; $nextTick(() => $refs.searchInputMobile.focus())"
+                            class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none"
+                            title="{{ __('search.title') }}">
+                        <i class="fa-light fa-magnifying-glass text-xl"></i>
+                    </button>
+
+                    <div x-show="searchOpen"
+                         @click.away="searchOpen = false"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[320px] bg-white rounded-xl shadow-2xl border border-slate-100 p-2 z-50 overflow-hidden">
+                        <form action="{{ route('member.search') }}" method="GET" class="relative">
+                            <input type="text"
+                                   name="q"
+                                   x-ref="searchInputMobile"
+                                   placeholder="{{ __('search.ai_hint') }}"
+                                   class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
+                                <i class="fa-light fa-arrow-right text-sm"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Notifications -->
                 <a href="{{ route('member.notifications.index') }}" class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors mr-2">
                     <i class="fa-light fa-bell text-xl"></i>

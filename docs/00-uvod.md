@@ -28,6 +28,7 @@ Repozitář: [https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.
 15. [Veřejný frontend a CMS](15-verejny-frontend-a-cms.md)
 16. [Systémová automatizace a Redirecty](16-systemova-automatizace-a-redirecty.md)
 17. [Nasazení na produkční server (Deployment)](17-nasazeni-na-produkci.md)
+18. [Audit Log a bezpečnost](21-audit-log.md)
 
 ## Rychlý start
 Projekt je postaven na Laravelu 12. Pro lokální vývoj se doporučuje používat **Laravel Sail**.

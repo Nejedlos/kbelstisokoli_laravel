@@ -48,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook('panels::head.end', fn (): string => Blade::render(
                 "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>"
             ))
+            ->renderHook('panels::global-search.before', fn (): string => view('filament.components.ai-search'))
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
