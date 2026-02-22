@@ -6,6 +6,9 @@ use Filament\Auth\Pages\Register as BaseRegister;
 
 class Register extends BaseRegister
 {
+    // Use custom full-page auth layout instead of Filament's simple layout
+    protected static string $layout = 'filament.admin.layouts.auth';
+
     protected string $view = 'filament.admin.auth.register';
 
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable

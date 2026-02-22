@@ -6,6 +6,9 @@ use Filament\Auth\Pages\EmailVerification\EmailVerificationPrompt as BaseEmailVe
 
 class EmailVerificationPrompt extends BaseEmailVerificationPrompt
 {
+    // Override Filament's simple layout with our custom auth layout
+    protected static string $layout = 'filament.admin.layouts.auth';
+
     protected string $view = 'filament.admin.auth.email-verification-prompt';
 
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
