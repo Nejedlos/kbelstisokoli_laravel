@@ -16,9 +16,20 @@ class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
 
-    protected static ?string $modelLabel = 'Stránka';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.content');
+    }
 
-    protected static ?string $pluralModelLabel = 'Stránky';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.page.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.page.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

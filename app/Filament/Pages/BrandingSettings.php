@@ -19,11 +19,20 @@ class BrandingSettings extends Page
 {
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-paint-brush';
 
-    protected static ?string $navigationLabel = 'Branding a vzhled';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.settings');
+    }
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Nastavení';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.navigation.pages.branding');
+    }
 
-    protected static ?string $title = 'Branding a vzhled';
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('admin.navigation.pages.branding');
+    }
 
     protected string $view = 'filament.pages.branding-settings';
 

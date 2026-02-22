@@ -18,15 +18,18 @@
         <!-- Navigation -->
         @if(!($branding['maintenance_mode'] ?? false))
         <div>
-            <h3 class="text-white font-bold uppercase mb-4">Navigace</h3>
+            <h3 class="text-white font-bold uppercase mb-4">{{ __('Navigace') }}</h3>
             <ul class="space-y-2">
                 @forelse($navigation as $item)
                     <li>
-                        <a href="{{ route($item['route']) }}" class="hover:text-primary transition">{{ $item['title'] }}</a>
+                        <a href="{{ route($item['route']) }}" class="hover:text-primary transition {{ request()->routeIs($item['route']) ? 'text-primary' : '' }}">{{ $item['title'] }}</a>
                     </li>
                 @empty
-                    <li class="text-slate-400">Menu bude doplněno.</li>
+                    <li class="text-slate-400">{{ __('Menu bude doplněno.') }}</li>
                 @endforelse
+                <li>
+                    <a href="{{ route('public.search') }}" class="hover:text-primary transition {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">{{ __('Hledat') }}</a>
+                </li>
             </ul>
         </div>
         @endif

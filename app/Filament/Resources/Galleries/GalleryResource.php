@@ -18,11 +18,20 @@ class GalleryResource extends Resource
 {
     protected static ?string $model = Gallery::class;
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Média';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.media');
+    }
 
-    protected static ?string $modelLabel = 'Galerie';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.gallery.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Galerie';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.gallery.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-photo';
 

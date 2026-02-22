@@ -20,13 +20,20 @@ class CronLogResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-list-bullet';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Nastavení';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.settings');
+    }
 
-    protected static ?string $modelLabel = 'Log plánované úlohy';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.cron_log.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Logy cronu';
-
-    protected static ?string $navigationLabel = 'Cron logy';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.cron_log.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

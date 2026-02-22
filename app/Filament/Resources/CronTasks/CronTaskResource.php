@@ -20,13 +20,20 @@ class CronTaskResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-clock';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Nastavení';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.settings');
+    }
 
-    protected static ?string $modelLabel = 'Plánovaná úloha';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.cron_task.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Plánované úlohy';
-
-    protected static ?string $navigationLabel = 'Cron tabulka';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.cron_task.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

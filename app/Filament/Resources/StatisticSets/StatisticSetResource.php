@@ -20,11 +20,20 @@ class StatisticSetResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-presentation-chart-bar';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Statistiky';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.statistics');
+    }
 
-    protected static ?string $modelLabel = 'Sada statistik';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.statistic_set.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Sady statistik';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.statistic_set.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

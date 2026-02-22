@@ -8,7 +8,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
+use App\Filament\Pages\Dashboard;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -57,9 +57,13 @@ class AdminPanelProvider extends PanelProvider
             ->font('Instrument Sans')
             ->userMenuItems([
                 'profile' => MenuItem::make()
-                    ->label('Členská sekce')
+                    ->label(fn (): string => __('admin.navigation.pages.member_section'))
                     ->url(fn (): string => route('member.dashboard'))
                     ->icon('heroicon-o-user-group'),
+                MenuItem::make()
+                    ->label(fn (): string => __('admin.navigation.pages.public_web'))
+                    ->url(fn (): string => route('public.home'))
+                    ->icon('heroicon-o-globe-alt'),
             ])
             ->colors([
                 'primary' => Color::hex($colors['red']),

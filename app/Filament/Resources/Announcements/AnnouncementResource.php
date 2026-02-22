@@ -20,11 +20,20 @@ class AnnouncementResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-megaphone';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Komunikace';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.communication');
+    }
 
-    protected static ?string $modelLabel = 'Oznámení';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.announcement.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Oznámení';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.announcement.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

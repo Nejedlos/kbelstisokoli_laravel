@@ -18,11 +18,20 @@ class TeamResource extends Resource
 {
     protected static ?string $model = Team::class;
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Sportovní agenda';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.sports_agenda');
+    }
 
-    protected static ?string $modelLabel = 'Tým';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.team.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Týmy';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.team.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-users';
 

@@ -10,7 +10,7 @@ use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function show(string $slug): View
+    public function show(string $slug, \App\Services\BreadcrumbService $breadcrumbService): View
     {
         $page = Page::with('seo')
             ->where('slug', $slug)
@@ -22,6 +22,7 @@ class PageController extends Controller
             'page' => $page,
             'head_code' => $page->head_code,
             'footer_code' => $page->footer_code,
+            'breadcrumbs' => $breadcrumbService->generateForPage($page)->get(),
         ]);
     }
 }

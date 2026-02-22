@@ -20,11 +20,20 @@ class ClubCompetitionResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-trophy';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Statistiky';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.statistics');
+    }
 
-    protected static ?string $modelLabel = 'Klubová soutěž';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.club_competition.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Klubové soutěže';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.club_competition.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

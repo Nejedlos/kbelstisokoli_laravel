@@ -20,11 +20,20 @@ class TrainingResource extends Resource
 {
     protected static ?string $model = Training::class;
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Sportovní agenda';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.sports_agenda');
+    }
 
-    protected static ?string $modelLabel = 'Trénink';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.training.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Tréninky';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.training.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-clock';
 

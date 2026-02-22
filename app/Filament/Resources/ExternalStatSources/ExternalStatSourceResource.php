@@ -20,11 +20,20 @@ class ExternalStatSourceResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-cloud-arrow-down';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Statistiky';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.statistics');
+    }
 
-    protected static ?string $modelLabel = 'Externí zdroj';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.external_stat_source.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Externí zdroje';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.external_stat_source.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

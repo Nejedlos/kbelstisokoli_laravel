@@ -18,11 +18,20 @@ class SeasonResource extends Resource
 {
     protected static ?string $model = Season::class;
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Sportovní agenda';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.sports_agenda');
+    }
 
-    protected static ?string $modelLabel = 'Sezóna';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.season.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Sezóny';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.season.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-calendar';
 

@@ -18,13 +18,22 @@ class RedirectResource extends Resource
 {
     protected static ?string $model = Redirect::class;
 
-    protected static ?string $modelLabel = 'Přesměrování';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.system_settings');
+    }
 
-    protected static ?string $pluralModelLabel = 'Přesměrování';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.redirect.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.redirect.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-arrow-path';
-
-    protected static null|string|\UnitEnum $navigationGroup = 'Nastavení systému';
 
     public static function form(Schema $schema): Schema
     {

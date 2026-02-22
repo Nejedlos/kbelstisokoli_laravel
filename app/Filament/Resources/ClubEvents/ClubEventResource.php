@@ -20,11 +20,20 @@ class ClubEventResource extends Resource
 {
     protected static ?string $model = ClubEvent::class;
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Sportovní agenda';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.sports_agenda');
+    }
 
-    protected static ?string $modelLabel = 'Klubová akce';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.club_event.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Klubové akce';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.club_event.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-ticket';
 

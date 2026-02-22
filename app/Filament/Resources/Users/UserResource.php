@@ -9,6 +9,7 @@ use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
+use Illuminate\Support\HtmlString;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,13 +19,25 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-users';
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        return new HtmlString('<i class="fa-light fa-users fa-fw"></i>');
+    }
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Správa uživatelů';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.user_management');
+    }
 
-    protected static ?string $modelLabel = 'Uživatel';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.user.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Uživatelé';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.user.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -14,11 +14,20 @@ class PermissionResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-lock-closed';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Správa uživatelů';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.user_management');
+    }
 
-    protected static ?string $modelLabel = 'Oprávnění';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.permission.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Oprávnění';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.permission.plural_label');
+    }
 
     public static function table(Table $table): Table
     {

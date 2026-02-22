@@ -48,6 +48,9 @@ Route::name('public.')->middleware(['public.maintenance'])->group(function (): v
     // Kontakt
     Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
 
+    // Vyhledávání
+    Route::get('/hledat', [\App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');
+
     // Sitemap & Robots
     Route::get('/sitemap.xml', [\App\Http\Controllers\Public\SitemapController::class, 'index'])->name('sitemap');
     Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class, 'robots'])->name('robots');

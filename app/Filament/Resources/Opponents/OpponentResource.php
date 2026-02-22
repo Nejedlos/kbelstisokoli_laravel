@@ -18,11 +18,20 @@ class OpponentResource extends Resource
 {
     protected static ?string $model = Opponent::class;
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Sportovní agenda';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.sports_agenda');
+    }
 
-    protected static ?string $modelLabel = 'Soupeř';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.opponent.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Soupeři';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.opponent.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-shield-check';
 

@@ -20,11 +20,20 @@ class PlayerProfileResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-user-circle';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Správa uživatelů';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.user_management');
+    }
 
-    protected static ?string $modelLabel = 'Hráčský profil';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.player_profile.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Hráčské profily';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.player_profile.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {

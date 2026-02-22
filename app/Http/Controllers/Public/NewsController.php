@@ -7,7 +7,7 @@ use Illuminate\View\View;
 
 class NewsController extends Controller
 {
-    public function index(): View
+    public function index(\App\Services\BreadcrumbService $breadcrumbService): View
     {
         $posts = \App\Models\Post::with('category')
             ->where('status', 'published')
@@ -20,10 +20,12 @@ class NewsController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
-        return view('public.news.index', compact('posts'));
+        $breadcrumbs = $breadcrumbService->addHome()->add(__('nav.news'))->get();
+
+        return view('public.news.index', compact('posts', 'breadcrumbs'));
     }
 
-    public function show(string $slug): View
+    public function show(string $slug, \App\Services\BreadcrumbService $breadcrumbService): View
     {
         $post = \App\Models\Post::with(['category', 'seo'])
             ->where('slug', $slug)
@@ -35,6 +37,7 @@ class NewsController extends Controller
             'post' => $post,
             'head_code' => $post->head_code,
             'footer_code' => $post->footer_code,
+            'breadcrumbs' => $breadcrumbService->generateForPost($post)->get(),
         ]);
     }
 }

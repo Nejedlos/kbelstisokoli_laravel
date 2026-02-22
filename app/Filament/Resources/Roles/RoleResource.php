@@ -15,11 +15,20 @@ class RoleResource extends Resource
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Správa uživatelů';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.user_management');
+    }
 
-    protected static ?string $modelLabel = 'Role';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.role.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Role';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.role.plural_label');
+    }
 
     public static function table(Table $table): Table
     {

@@ -18,13 +18,20 @@ class MediaAssetResource extends Resource
 {
     protected static ?string $model = MediaAsset::class;
 
-    protected static null|string|\UnitEnum $navigationGroup = 'Média';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.media');
+    }
 
-    protected static ?string $modelLabel = 'Asset v knihovně';
+    public static function getModelLabel(): string
+    {
+        return __('admin.navigation.resources.media_asset.label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Knihovna médií';
-
-    protected static ?string $navigationLabel = 'Knihovna médií';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.media_asset.plural_label');
+    }
 
     protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-photo';
 
