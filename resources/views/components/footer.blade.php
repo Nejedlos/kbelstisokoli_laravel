@@ -5,7 +5,7 @@
     $clubNav = $footerClubMenu ?? [];
 @endphp
 
-<footer class="bg-secondary pt-6 text-slate-300 relative overflow-hidden">
+<footer class="bg-secondary pt-6 pb-6 text-slate-300 relative overflow-hidden">
     {{-- Accent line --}}
     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
 

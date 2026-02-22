@@ -171,6 +171,9 @@ class CmsContentSeeder extends Seeder
             ['name' => 'Hlavní navigace']
         );
 
+        // Vyčistit existující položky hlavního menu pro zamezení duplicitám
+        $headerMenu->items()->delete();
+
         $items = [
             ['label' => ['cs' => 'Domů', 'en' => 'Home'], 'url' => '/', 'sort' => 10],
             ['label' => ['cs' => 'O klubu', 'en' => 'About'], 'url' => '/o-klubu', 'sort' => 20],
@@ -198,6 +201,9 @@ class CmsContentSeeder extends Seeder
             ['name' => 'Patička']
         );
 
+        // Vyčistit existující položky menu pro zamezení duplicitám
+        $footerMenu->items()->delete();
+
         $footerItems = [
             ['label' => ['cs' => 'O klubu', 'en' => 'About'], 'url' => '/o-klubu', 'sort' => 10],
             ['label' => ['cs' => 'Nábor', 'en' => 'Join us'], 'url' => '/nabor', 'sort' => 20],
@@ -221,6 +227,9 @@ class CmsContentSeeder extends Seeder
             ['location' => 'footer_club'],
             ['name' => 'Patička - Týmy a klub']
         );
+
+        // Vyčistit existující položky menu pro zamezení duplicitám
+        $footerClubMenu->items()->delete();
 
         $footerClubItems = [
             ['label' => ['cs' => 'Muži C', 'en' => 'Men C'], 'url' => '/tym/muzi-c', 'sort' => 10],
