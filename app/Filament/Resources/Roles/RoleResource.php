@@ -15,7 +15,7 @@ class RoleResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-user-shield';
+        return 'fal_user-shield';
     }
 
     public static function getNavigationGroup(): ?string

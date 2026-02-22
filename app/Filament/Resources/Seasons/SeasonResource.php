@@ -35,7 +35,7 @@ class SeasonResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-calendar-days';
+        return 'fal_calendar-days';
     }
 
     public static function getNavigationSort(): ?int

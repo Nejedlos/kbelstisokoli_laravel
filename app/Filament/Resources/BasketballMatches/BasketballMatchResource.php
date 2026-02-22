@@ -37,7 +37,7 @@ class BasketballMatchResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-basketball-hoop';
+        return 'fal_basketball-hoop';
     }
 
     public static function getNavigationSort(): ?int

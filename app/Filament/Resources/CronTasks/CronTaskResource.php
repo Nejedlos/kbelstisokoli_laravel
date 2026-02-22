@@ -25,7 +25,7 @@ class CronTaskResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-clock';
+        return 'fal_clock';
     }
 
     public static function getNavigationGroup(): ?string

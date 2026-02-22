@@ -23,7 +23,7 @@ class PageResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-file-lines';
+        return 'fal_file-lines';
     }
 
     public static function getModelLabel(): string

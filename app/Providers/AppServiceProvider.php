@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Support\HtmlString;
 
 class AppServiceProvider extends ServiceProvider
 {

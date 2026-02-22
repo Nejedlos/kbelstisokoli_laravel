@@ -37,7 +37,7 @@ class TrainingResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-basketball';
+        return 'fal_basketball';
     }
 
     public static function getNavigationSort(): ?int

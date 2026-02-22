@@ -20,7 +20,7 @@ class StatisticSetResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-chart-column';
+        return 'fal_chart-column';
     }
 
     public static function getNavigationGroup(): ?string

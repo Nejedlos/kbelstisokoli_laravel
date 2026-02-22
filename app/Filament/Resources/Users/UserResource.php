@@ -23,7 +23,7 @@ class UserResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-users';
+        return 'fal_users';
     }
 
     public static function getNavigationGroup(): ?string

@@ -23,7 +23,7 @@ class PostResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-newspaper';
+        return 'fal_newspaper';
     }
 
     public static function getModelLabel(): string

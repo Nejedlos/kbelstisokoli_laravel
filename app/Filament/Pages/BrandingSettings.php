@@ -24,7 +24,7 @@ class BrandingSettings extends Page
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-palette';
+        return 'fal_palette';
     }
 
     public static function getNavigationGroup(): ?string

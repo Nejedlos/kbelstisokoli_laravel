@@ -35,7 +35,7 @@ class OpponentResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-shield';
+        return 'fal_shield';
     }
 
     public static function getNavigationSort(): ?int

@@ -32,12 +32,12 @@ Ikony vkládáme výhradně ve stylu **Light** (např. pomocí tříd `fa-light`
 
 Ve Filamentu používáme dva způsoby vkládání ikon:
 
-1. **Sidebar (Navigace):** V `AdminPanelProvider.php` jsou zaregistrovány aliasy ikon (metoda `->icons()`), které vrací `HtmlString`. V Resource se pak na ně odkazujeme v `getNavigationIcon()`.
+1. **Sidebar (Navigace):** V `AppServiceProvider.php` jsou zaregistrovány aliasy ikon (metoda `FilamentIcon::register()`), které vrací `HtmlString`. Pro aliasy používáme prefix `fal_` (např. `fal_users`), abychom zabránili kolizím s `blade-icons`. V Resource se pak na ně odkazujeme v `getNavigationIcon()`.
    
    *Příklad v Resource:*
    ```php
    public static function getNavigationIcon(): ?string {
-       return 'fa-light-users';
+       return 'fal_users';
    }
    ```
 

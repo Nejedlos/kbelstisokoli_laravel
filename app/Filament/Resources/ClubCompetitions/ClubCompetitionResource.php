@@ -20,7 +20,7 @@ class ClubCompetitionResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-trophy';
+        return 'fal_trophy';
     }
 
     public static function getNavigationGroup(): ?string

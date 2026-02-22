@@ -26,7 +26,7 @@ class PostCategoryResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-tags';
+        return 'fal_tags';
     }
 
     public static function getModelLabel(): string

@@ -35,7 +35,7 @@ class GalleryResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-film';
+        return 'fal_film';
     }
 
     public static function getNavigationSort(): ?int

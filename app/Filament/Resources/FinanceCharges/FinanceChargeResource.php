@@ -20,7 +20,7 @@ class FinanceChargeResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-file-invoice-dollar';
+        return 'fal_file-invoice-dollar';
     }
 
     public static function getNavigationGroup(): ?string

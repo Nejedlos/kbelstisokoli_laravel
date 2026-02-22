@@ -20,7 +20,7 @@ class AnnouncementResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-bullhorn';
+        return 'fal_bullhorn';
     }
 
     public static function getNavigationGroup(): ?string

@@ -13,7 +13,7 @@ Při vývoji administrace striktně dodržujeme následující pravidla:
 
 ### 1. Ikony a UI
 - Používáme **Font Awesome 7 Pro** (varianta **Light**).
-- **Sidebar (Navigace):** Ikony v sidebaru se definují přes aliasy v `app/Providers/Filament/AdminPanelProvider.php` (metoda `->icons()`). V Resource/Page pak vracíme pouze název aliasu (např. `return 'fa-light-users';`) v metodě `getNavigationIcon()`.
+- **Sidebar (Navigace):** Ikony v sidebaru se definují přes aliasy v `app/Providers/AppServiceProvider.php` (metoda `FilamentIcon::register()`). Používáme prefix `fal_` (např. `fal_users`) pro aliasy, abychom předešli konfliktům s automatickou detekcí sad v Blade Icons. V Resource/Page pak vracíme název aliasu (např. `return 'fal_users';`) v metodě `getNavigationIcon()`.
 - **Formuláře a tabulky:** V ostatních částech (akce, záložky, sekce) vkládáme ikony pomocí `HtmlString`: `->icon(new HtmlString('<i class="fa-light fa-users"></i>'))`.
 
 ### 2. Lokalizace

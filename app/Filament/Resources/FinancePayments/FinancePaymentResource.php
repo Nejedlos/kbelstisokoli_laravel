@@ -20,7 +20,7 @@ class FinancePaymentResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-money-bill-transfer';
+        return 'fal_money-bill-transfer';
     }
 
     public static function getNavigationGroup(): ?string

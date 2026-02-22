@@ -25,7 +25,7 @@ class CronLogResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-history';
+        return 'fal_history';
     }
 
     public static function getNavigationGroup(): ?string

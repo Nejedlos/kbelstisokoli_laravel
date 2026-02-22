@@ -35,7 +35,7 @@ class MediaAssetResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-images';
+        return 'fal_images';
     }
 
     public static function getNavigationSort(): ?int

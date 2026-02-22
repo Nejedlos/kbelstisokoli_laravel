@@ -30,7 +30,7 @@ class RedirectResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-shuffle';
+        return 'fal_shuffle';
     }
 
     public static function getPluralModelLabel(): string

@@ -14,7 +14,7 @@ class PermissionResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-key';
+        return 'fal_key';
     }
 
     public static function getNavigationGroup(): ?string

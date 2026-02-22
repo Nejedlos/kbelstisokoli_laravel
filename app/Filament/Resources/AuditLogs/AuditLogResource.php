@@ -24,7 +24,7 @@ class AuditLogResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-clipboard-list';
+        return 'fal_clipboard-list';
     }
 
     public static function getNavigationSort(): ?int

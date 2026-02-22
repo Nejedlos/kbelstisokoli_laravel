@@ -19,7 +19,7 @@ class MenuResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-bars';
+        return 'fal_bars';
     }
 
     public static function getNavigationGroup(): ?string

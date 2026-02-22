@@ -20,7 +20,7 @@ class ExternalStatSourceResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'fa-light-cloud-arrow-down';
+        return 'fal_cloud-arrow-down';
     }
 
     public static function getNavigationGroup(): ?string
