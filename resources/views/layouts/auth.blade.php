@@ -28,7 +28,7 @@
 
     <meta name="theme-color" content="{{ $colors['red'] ?? '#e11d48' }}">
     <style>{!! app(\App\Services\BrandingService::class)->getCssVariables() !!}</style>
-    @vite(['resources/css/filament-auth.css', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
+    @vite(['resources/css/filament-auth.css', 'resources/js/app.js', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
 
     @stack('head')
 </head>

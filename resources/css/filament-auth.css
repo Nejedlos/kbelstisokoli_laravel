@@ -85,6 +85,10 @@
     animation: fade-in 1s ease-out forwards !important;
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
 /* Custom Validations & Error States */
 .fi-fo-field-wrp-error-message,
 .fi-fo-field-error-message,

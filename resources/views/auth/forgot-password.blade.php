@@ -21,26 +21,22 @@
         @csrf
 
         <div class="space-y-3">
-            <label for="email" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Vaše e‑mailová adresa</label>
-            <div class="relative group/input">
-                <div class="input-icon group-focus-within/input:text-primary">
-                    <i class="fa-light fa-envelope text-lg"></i>
-                </div>
+            <label for="email" class="fi-fo-field-label ml-1">{{ __('Vaše e‑mailová adresa') }}</label>
+            <div class="fi-input-wrp">
                 <input id="email" type="email" name="email" value="{{ old('email') }}" autofocus
                        placeholder="jmeno@klub.cz"
-                       class="w-full input-with-icon bg-white border {{ $errors->has('email') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-slate-200' }} rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-bold text-slate-900 placeholder-slate-400 outline-none">
+                       class="fi-input">
             </div>
             @error('email')
-                <div class="flex items-center gap-2 text-rose-400 mt-2 ml-1 animate-shake">
-                    <i class="fa-light fa-circle-exclamation text-[10px]"></i>
-                    <p class="text-[10px] font-bold tracking-wide">{{ $message }}</p>
+                <div class="fi-error-message" style="display: block !important;">
+                    <span>{{ $message }}</span>
                 </div>
             @enderror
         </div>
 
-        <button type="submit" class="btn btn-primary w-full py-5 rounded-2xl text-base btn-glow group/btn">
-            <span class="relative z-10 flex items-center justify-center gap-3 font-black">
-                Odeslat instrukce
+        <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-2xl text-base group/btn">
+            <span class="relative z-10 flex items-center justify-center gap-3">
+                {{ __('Odeslat instrukce') }}
                 <i class="fa-light fa-chevron-right group-hover/btn:translate-x-1 transition-transform"></i>
             </span>
         </button>
