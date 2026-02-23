@@ -1,12 +1,21 @@
-@servers(['web' => $user . '@' . $host])
+@servers(['web' => $user . '@' . $host . ($port ? ' -p ' . $port : '') . ' -o StrictHostKeyChecking=no'])
 
 @setup
     $repository = 'https://' . $token . '@github.com/Nejedlos/kbelstisokoli_laravel.git';
     $path = $path ?? '/www/kbelstisokoli';
+    $php = $php ?? 'php';
+    $node = $node ?? 'node';
+    $npm = $npm ?? 'npm';
 @endsetup
 
 @task('setup', ['on' => 'web'])
     echo "🚀 Starting setup on {{ $host }}..."
+
+    PHP_VERSION=$({{ $php }} -r 'echo PHP_VERSION;')
+    if [ "$(printf '%s\n' "8.4.0" "$PHP_VERSION" | sort -V | head -n1)" != "8.4.0" ]; then
+        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using {{ $php }})"
+        exit 1
+    fi
 
     if [ ! -d "{{ $path }}" ]; then
         echo "Creating directory {{ $path }}..."
@@ -21,79 +30,138 @@
     else
         echo "Repository already exists, updating URL with token..."
         git remote set-url origin {{ $repository }}
-        git pull origin main
+        if [ -f ".git/gc.log" ]; then
+            echo "Removing .git/gc.log..."
+            rm .git/gc.log
+        fi
+        git prune
+        git fetch origin main
+        git reset --hard origin/main
+        git clean -df
     fi
 
-    echo "Running composer install..."
-    composer install --no-interaction --prefer-dist --optimize-autoloader
-
+    echo "Preparing .env file..."
     if [ ! -f ".env" ]; then
         echo "Creating .env from .env.example..."
         cp .env.example .env
-        php artisan key:generate
+        {{ $php }} artisan key:generate --no-interaction
 
-        if [ ! -z "{{ $db_host ?? '' }}" ]; then
-            sed -i "s/DB_HOST=.*/DB_HOST={{ $db_host }}/" .env
+        if [ ! -z "{{ $db_database ?? '' }}" ]; then
+            sed -i "s/DB_CONNECTION=.*/DB_CONNECTION={{ $db_connection ?? 'mysql' }}/" .env
+            sed -i "s/DB_HOST=.*/DB_HOST={{ $db_host ?? '127.0.0.1' }}/" .env
+            sed -i "s/DB_PORT=.*/DB_PORT={{ $db_port ?? '3306' }}/" .env
             sed -i "s/DB_DATABASE=.*/DB_DATABASE={{ $db_database }}/" .env
             sed -i "s/DB_USERNAME=.*/DB_USERNAME={{ $db_username }}/" .env
             sed -i "s/DB_PASSWORD=.*/DB_PASSWORD={{ $db_password }}/" .env
+            if [ ! -z "{{ $db_prefix ?? '' }}" ]; then
+                if grep -q "^DB_PREFIX=" .env; then
+                    sed -i "s/DB_PREFIX=.*/DB_PREFIX={{ $db_prefix }}/" .env
+                else
+                    echo "DB_PREFIX={{ $db_prefix }}" >> .env
+                fi
+            fi
+            echo "✅ Database configured in .env."
         fi
 
-        echo "✅ .env configured."
+        sed -i "s/APP_ENV=.*/APP_ENV=production/" .env
+        sed -i "s/APP_DEBUG=.*/APP_DEBUG=false/" .env
+        echo "✅ .env environment set to production."
     fi
+
+    echo "Running composer install..."
+    COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
+    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
         echo "Configuring custom public path: {{ $public_path }}"
-        if [ -d "{{ $public_path }}" ] && [ ! -L "{{ $public_path }}" ]; then
-             echo "Backing up existing public directory..."
-             mv "{{ $public_path }}" "{{ $public_path }}_backup_$(date +%Y%m%d_%H%M%S)"
+        if [ ! -d "{{ $public_path }}" ]; then
+            mkdir -p "{{ $public_path }}"
         fi
-        ln -sfn "{{ $path }}/public" "{{ $public_path }}"
-        echo "✅ Symlink created: {{ $public_path }} -> {{ $path }}/public"
+
+        echo "Syncing public directory to {{ $public_path }}..."
+        cp -rt "{{ $public_path }}" public/*
+
+        echo "Patching index.php in {{ $public_path }}..."
+        # Update paths in index.php to point to the functional path
+        {{ $php }} -r "
+            \$indexContent = file_get_contents('{{ $public_path }}/index.php');
+            \$indexContent = str_replace(
+                ['__DIR__.\'/../vendor/autoload.php\'', '__DIR__.\'/../bootstrap/app.php\'', 'file_exists(\$maintenance = __DIR__.\'/../storage/framework/maintenance.php\')'],
+                ['\'{{ $path }}/vendor/autoload.php\'', '\'{{ $path }}/bootstrap/app.php\'', 'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')'],
+                \$indexContent
+            );
+            file_put_contents('{{ $public_path }}/index.php', \$indexContent);
+        "
+        echo "✅ index.php patched."
     fi
 
     echo "Installing NPM dependencies..."
-    npm install
+    {{ $npm }} install
 
     echo "Building assets..."
-    npm run build
+    {{ $npm }} run build
 
     echo "Running database migrations..."
-    php artisan migrate --force
+    {{ $php }} artisan migrate --force
 
     echo "Syncing icons..."
-    php artisan app:icons:sync
+    {{ $php }} artisan app:icons:sync
 
     echo "Optimizing application..."
-    php artisan optimize
+    {{ $php }} artisan optimize
 
     echo "✅ Setup finished successfully!"
 @endtask
 
 @task('deploy', ['on' => 'web'])
     echo "🚀 Deploying to {{ $host }}..."
-    cd {{ $path }}
 
-    git pull origin main
-
-    composer install --no-interaction --prefer-dist --optimize-autoloader
-    php artisan migrate --force
-
-    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path symlink: {{ $public_path }}"
-        ln -sfn "{{ $path }}/public" "{{ $public_path }}"
+    PHP_VERSION=$({{ $php }} -r 'echo PHP_VERSION;')
+    if [ "$(printf '%s\n' "8.4.0" "$PHP_VERSION" | sort -V | head -n1)" != "8.4.0" ]; then
+        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using {{ $php }})"
+        exit 1
     fi
 
-    npm install
-    npm run build
-    php artisan app:icons:sync
-    php artisan optimize
+    cd {{ $path }}
+
+    git fetch origin main
+    git reset --hard origin/main
+    git clean -df
+    if [ -f ".git/gc.log" ]; then
+        rm .git/gc.log
+    fi
+    git prune
+
+    COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
+    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader
+    {{ $php }} artisan migrate --force
+
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+        echo "Ensuring custom public path is synced: {{ $public_path }}"
+        cp -rt "{{ $public_path }}" public/*
+
+        echo "Patching index.php in {{ $public_path }}..."
+        {{ $php }} -r "
+            \$indexContent = file_get_contents('{{ $public_path }}/index.php');
+            \$indexContent = str_replace(
+                ['__DIR__.\'/../vendor/autoload.php\'', '__DIR__.\'/../bootstrap/app.php\'', 'file_exists(\$maintenance = __DIR__.\'/../storage/framework/maintenance.php\')'],
+                ['\'{{ $path }}/vendor/autoload.php\'', '\'{{ $path }}/bootstrap/app.php\'', 'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')'],
+                \$indexContent
+            );
+            file_put_contents('{{ $public_path }}/index.php', \$indexContent);
+        "
+    fi
+
+    {{ $npm }} install
+    {{ $npm }} run build
+    {{ $php }} artisan app:icons:sync
+    {{ $php }} artisan optimize
 
     echo "✅ Deployment finished successfully!"
 @endtask
 
 @task('status', ['on' => 'web'])
     cd {{ $path }}
-    php artisan --version
+    {{ $php }} artisan --version
     git log -1
 @endtask

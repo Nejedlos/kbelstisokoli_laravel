@@ -30,7 +30,11 @@ class ProductionDeployCommand extends Command
     public function handle()
     {
         $host = env('PROD_HOST');
+        $port = env('PROD_PORT', '22');
         $user = env('PROD_USER');
+        $phpBinary = env('PROD_PHP_BINARY', 'php');
+        $nodeBinary = env('PROD_NODE_BINARY', 'node');
+        $npmBinary = env('PROD_NPM_BINARY', 'npm');
         $path = env('PROD_PATH');
         $token = env('PROD_GIT_TOKEN');
         $publicPath = env('PROD_PUBLIC_PATH');
@@ -40,30 +44,40 @@ class ProductionDeployCommand extends Command
             return self::FAILURE;
         }
 
-        info("🚀 Nasazuji na {$user}@{$host}...");
+        while (true) {
+            info("🚀 Nasazuji na {$user}@{$host}:{$port}...");
 
-        $params = [
-            "--host={$host}",
-            "--user={$user}",
-            "--path={$path}",
-            "--token={$token}",
-        ];
+            $params = [
+                "--host={$host}",
+                "--port={$port}",
+                "--user={$user}",
+                "--php={$phpBinary}",
+                "--node={$nodeBinary}",
+                "--npm={$npmBinary}",
+                "--path={$path}",
+                "--token={$token}",
+            ];
 
-        if ($publicPath) {
-            $params[] = "--public_path={$publicPath}";
-        }
+            if ($publicPath) {
+                $params[] = "--public_path={$publicPath}";
+            }
 
-        $command = "envoy run deploy " . implode(' ', $params);
+            $command = base_path('vendor/bin/envoy') . " run deploy " . implode(' ', $params);
 
-        $process = Process::forever()->run($command, function (string $type, string $output) {
-            echo $output;
-        });
+            $process = Process::forever()->run($command, function (string $type, string $output) {
+                echo $output;
+            });
 
-        if ($process->successful()) {
-            info('🎉 Nasazení bylo úspěšně dokončeno!');
-        } else {
-            error('❌ Nasazení selhalo. Zkontrolujte prosím chybové hlášky výše.');
-            return self::FAILURE;
+            if ($process->successful()) {
+                info('🎉 Nasazení bylo úspěšně dokončeno!');
+                break;
+            } else {
+                error('❌ Nasazení selhalo. Zkontrolujte prosím chybové hlášky výše.');
+
+                if (!confirm('Chcete zkusit nasazení spustit znovu se stejným nastavením?', true)) {
+                    return self::FAILURE;
+                }
+            }
         }
 
         return self::SUCCESS;

@@ -28,17 +28,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withSchedule(function (Schedule $schedule) {
         // Dynamická registrace úloh z databáze
-        if (!app()->runningInConsole() || Schema::hasTable('cron_tasks')) {
-            try {
+        try {
+            if (Schema::hasTable('cron_tasks')) {
                 CronTask::where('is_active', true)->each(function ($task) use ($schedule) {
                     $schedule->job(new RunCronTaskJob($task))
                         ->cron($task->expression)
                         ->name($task->name)
                         ->withoutOverlapping();
                 });
-            } catch (\Exception $e) {
-                // Tichý fail, pokud DB není připravena (např. při první migraci)
             }
+        } catch (\Throwable $e) {
+            // Tichý fail, pokud DB není připravena (např. při první migraci nebo chybějícím .env)
         }
     })
     ->withMiddleware(function (Middleware $middleware): void {
