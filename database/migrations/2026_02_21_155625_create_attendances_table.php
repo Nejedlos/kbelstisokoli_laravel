@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->morphs('attendable'); // trénink, zápas, klubová akce
-            $table->string('status')->default('pending'); // pending, confirmed, declined, maybe
-            $table->text('note')->nullable(); // poznámka člena (omluvenka)
-            $table->text('internal_note')->nullable(); // poznámka trenéra
-            $table->timestamp('responded_at')->nullable(); // čas poslední odpovědi
-            $table->timestamps();
+        if (!Schema::hasTable('attendances')) {
+            Schema::create('attendances', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->morphs('attendable'); // trénink, zápas, klubová akce
+                $table->string('status')->default('pending'); // pending, confirmed, declined, maybe
+                $table->text('note')->nullable(); // poznámka člena (omluvenka)
+                $table->text('internal_note')->nullable(); // poznámka trenéra
+                $table->timestamp('responded_at')->nullable(); // čas poslední odpovědi
+                $table->timestamps();
 
-            // Unikátní index pro user + událost
-            $table->unique(['user_id', 'attendable_id', 'attendable_type'], 'user_attendance_unique');
-        });
+                // Unikátní index pro user + událost
+                $table->unique(['user_id', 'attendable_id', 'attendable_type'], 'user_attendance_unique');
+            });
+        }
     }
 
     /**

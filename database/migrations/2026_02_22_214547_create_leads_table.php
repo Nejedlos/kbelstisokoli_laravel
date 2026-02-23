@@ -11,21 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leads', function (Blueprint $table) {
-            $table->id();
-            $table->string('type')->default('contact'); // contact, recruitment
-            $table->string('status')->default('new'); // new, in_progress, processed, rejected
-            $table->string('name');
-            $table->string('email');
-            $table->string('phone')->nullable();
-            $table->string('subject')->nullable();
-            $table->text('message')->nullable();
-            $table->json('payload')->nullable();
-            $table->string('ip_address')->nullable();
-            $table->string('user_agent')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('leads')) {
+            Schema::create('leads', function (Blueprint $table) {
+                $table->id();
+                $table->string('type')->default('contact'); // contact, recruitment
+                $table->string('status')->default('new'); // new, in_progress, processed, rejected
+                $table->string('name');
+                $table->string('email');
+                $table->string('phone')->nullable();
+                $table->string('subject')->nullable();
+                $table->text('message')->nullable();
+                $table->json('payload')->nullable();
+                $table->string('ip_address')->nullable();
+                $table->string('user_agent')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
     }
 
     /**

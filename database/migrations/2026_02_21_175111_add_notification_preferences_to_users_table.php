@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->json('notification_preferences')->nullable()->after('admin_note');
+            if (!Schema::hasColumn('users', 'notification_preferences')) {
+                $table->json('notification_preferences')->nullable()->after('admin_note');
+            }
         });
     }
 

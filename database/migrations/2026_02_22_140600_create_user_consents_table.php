@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_consents', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('consent_type'); // gdpr, photos, transport, medical
-            $table->boolean('is_granted')->default(false);
-            $table->timestamp('granted_at')->nullable();
-            $table->string('version')->nullable();
-            $table->text('note')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('user_consents')) {
+            Schema::create('user_consents', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->string('consent_type'); // gdpr, photos, transport, medical
+                $table->boolean('is_granted')->default(false);
+                $table->timestamp('granted_at')->nullable();
+                $table->string('version')->nullable();
+                $table->text('note')->nullable();
+                $table->timestamps();
 
-            $table->unique(['user_id', 'consent_type']);
-        });
+                $table->unique(['user_id', 'consent_type']);
+            });
+        }
     }
 
     /**

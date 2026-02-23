@@ -12,7 +12,10 @@ class GlobalSeeder extends Seeder
      */
     public const SEEDERS = [
         RoleSeeder::class,
+        UserSeeder::class,
         CronTaskSeeder::class,
+        SportSeeder::class,
+        PostSeeder::class,
         CmsContentSeeder::class,
     ];
 
@@ -25,6 +28,11 @@ class GlobalSeeder extends Seeder
         'model_has_roles',
         'model_has_permissions',
         'role_has_permissions',
+        'users',
+        'seasons',
+        'teams',
+        'post_categories',
+        'posts',
         'cron_tasks',
         'settings',
         'pages',

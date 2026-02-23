@@ -18,7 +18,6 @@ class PostSeeder extends Seeder
             ['slug' => 'obecne'],
             [
                 'name' => ['cs' => 'Obecné', 'en' => 'General'],
-                'is_active' => true,
             ]
         );
 
@@ -26,7 +25,6 @@ class PostSeeder extends Seeder
             ['slug' => 'tymove-info'],
             [
                 'name' => ['cs' => 'Týmové informace', 'en' => 'Team Info'],
-                'is_active' => true,
             ]
         );
 

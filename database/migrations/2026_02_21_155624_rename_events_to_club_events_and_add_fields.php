@@ -11,12 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::rename('events', 'club_events');
+        if (Schema::hasTable('events') && !Schema::hasTable('club_events')) {
+            Schema::rename('events', 'club_events');
+        }
 
         Schema::table('club_events', function (Blueprint $table) {
-            $table->string('event_type')->default('other')->after('title'); // social, meeting, camp, volunteer, other
-            $table->foreignId('team_id')->nullable()->after('event_type')->constrained()->onDelete('set null');
-            $table->boolean('rsvp_enabled')->default(true)->after('is_public');
+            if (!Schema::hasColumn('club_events', 'event_type')) {
+                $table->string('event_type')->default('other')->after('title'); // social, meeting, camp, volunteer, other
+            }
+            if (!Schema::hasColumn('club_events', 'team_id')) {
+                $table->foreignId('team_id')->nullable()->after('event_type')->constrained()->onDelete('set null');
+            }
+            if (!Schema::hasColumn('club_events', 'rsvp_enabled')) {
+                $table->boolean('rsvp_enabled')->default(true)->after('is_public');
+            }
         });
     }
 

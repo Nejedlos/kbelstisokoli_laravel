@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gallery_media', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('gallery_id')->constrained()->onDelete('cascade');
-            $table->foreignId('media_asset_id')->constrained('media_assets')->onDelete('cascade');
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->string('caption_override')->nullable();
-            $table->boolean('is_visible')->default(true);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('gallery_media')) {
+            Schema::create('gallery_media', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('gallery_id')->constrained()->onDelete('cascade');
+                $table->foreignId('media_asset_id')->constrained('media_assets')->onDelete('cascade');
+                $table->unsignedInteger('sort_order')->default(0);
+                $table->string('caption_override')->nullable();
+                $table->boolean('is_visible')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

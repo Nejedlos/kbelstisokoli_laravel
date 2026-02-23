@@ -17,6 +17,7 @@ class AppSeedCommand extends Command
      */
     protected $signature = 'app:seed
                             {--fresh : Smaže všechna data v dotčených tabulkách před seedováním}
+                            {--force : Vynutí spuštění na produkci}
                             {--class=Database\\Seeders\\GlobalSeeder : Třída seederu, který se má spustit}';
 
     /**
@@ -64,6 +65,10 @@ class AppSeedCommand extends Command
         $params = [
             '--class' => $class,
         ];
+
+        if ($this->option('force')) {
+            $params['--force'] = true;
+        }
 
         // Propagujeme no-interaction
         if ($this->option('no-interaction')) {

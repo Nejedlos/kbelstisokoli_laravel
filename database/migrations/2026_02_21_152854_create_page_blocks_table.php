@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('page_blocks', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('page_id')->constrained()->onDelete('cascade');
-            $table->string('block_type');
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->boolean('is_visible')->default(true);
-            $table->json('data')->nullable();
-            $table->string('variant')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('page_blocks')) {
+            Schema::create('page_blocks', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('page_id')->constrained()->onDelete('cascade');
+                $table->string('block_type');
+                $table->unsignedInteger('sort_order')->default(0);
+                $table->boolean('is_visible')->default(true);
+                $table->json('data')->nullable();
+                $table->string('variant')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

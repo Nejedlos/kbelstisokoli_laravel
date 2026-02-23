@@ -11,20 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('seo_metadatas', function (Blueprint $table) {
-            // Změna existujících polí na JSON pro spatie/laravel-translatable
-            $table->json('title')->nullable()->change();
-            $table->json('description')->nullable()->change();
-            $table->json('og_title')->nullable()->change();
-            $table->json('og_description')->nullable()->change();
+        if (Schema::hasTable('seo_metadatas')) {
+            Schema::table('seo_metadatas', function (Blueprint $table) {
+                // Změna existujících polí na JSON pro spatie/laravel-translatable
+                $table->json('title')->nullable()->change();
+                $table->json('description')->nullable()->change();
+                $table->json('og_title')->nullable()->change();
+                $table->json('og_description')->nullable()->change();
 
-            // Nová pole
-            $table->string('canonical_url')->nullable();
-            $table->boolean('robots_index')->default(true);
-            $table->boolean('robots_follow')->default(true);
-            $table->string('twitter_card')->nullable()->default('summary_large_image');
-            $table->json('structured_data_override')->nullable();
-        });
+                // Nová pole
+                if (!Schema::hasColumn('seo_metadatas', 'canonical_url')) {
+                    $table->string('canonical_url')->nullable();
+                }
+                if (!Schema::hasColumn('seo_metadatas', 'robots_index')) {
+                    $table->boolean('robots_index')->default(true);
+                }
+                if (!Schema::hasColumn('seo_metadatas', 'robots_follow')) {
+                    $table->boolean('robots_follow')->default(true);
+                }
+                if (!Schema::hasColumn('seo_metadatas', 'twitter_card')) {
+                    $table->string('twitter_card')->nullable()->default('summary_large_image');
+                }
+                if (!Schema::hasColumn('seo_metadatas', 'structured_data_override')) {
+                    $table->json('structured_data_override')->nullable();
+                }
+            });
+        }
     }
 
     /**

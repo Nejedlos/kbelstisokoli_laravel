@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cron_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('cron_task_id')->constrained()->onDelete('cascade');
-            $table->dateTime('started_at');
-            $table->dateTime('finished_at')->nullable();
-            $table->string('status'); // running, success, failed
-            $table->longText('output')->nullable();
-            $table->text('error_message')->nullable();
-            $table->integer('duration_ms')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('cron_logs')) {
+            Schema::create('cron_logs', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('cron_task_id')->constrained()->onDelete('cascade');
+                $table->dateTime('started_at');
+                $table->dateTime('finished_at')->nullable();
+                $table->string('status'); // running, success, failed
+                $table->longText('output')->nullable();
+                $table->text('error_message')->nullable();
+                $table->integer('duration_ms')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
