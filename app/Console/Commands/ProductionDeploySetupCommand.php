@@ -369,6 +369,20 @@ class ProductionDeploySetupCommand extends Command
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
                     if (version_compare($matches[1] ?? '0', '18.0', '>=')) {
                         $node = $candidate;
+
+                        // Try to find matching npm (e.g., node20 -> npm20)
+                        $npmCandidates = ['npm'];
+                        if (preg_match('/node(\d+)/', $node, $m)) {
+                            array_unshift($npmCandidates, 'npm' . $m[1]);
+                        }
+
+                        foreach ($npmCandidates as $npmCandidate) {
+                            $npmProc = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
+                            if ($npmProc->successful()) {
+                                $npm = $npmCandidate;
+                                break;
+                            }
+                        }
                         break;
                     }
                 }
@@ -491,8 +505,23 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // 5. NPM Check
-            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmBinary} -v 2>/dev/null'");
-            if ($process->successful() && !empty($process->output())) {
+            $npmCandidates = [$npmBinary, 'npm'];
+            if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
+                array_unshift($npmCandidates, 'npm' . $m[1]);
+            }
+            $npmCandidates = array_unique($npmCandidates);
+
+            $bestNpm = null;
+            foreach ($npmCandidates as $candidate) {
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                if ($process->successful() && !empty($process->output())) {
+                    $bestNpm = $candidate;
+                    $npmBinary = $candidate;
+                    break;
+                }
+            }
+
+            if ($bestNpm) {
                 $results[] = "<fg=green>✓</> NPM ({$npmBinary}): Verze " . trim($process->output());
             } else {
                 $results[] = "<fg=red>✗</> NPM ({$npmBinary}): Nenalezeno";

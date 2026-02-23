@@ -61,6 +61,8 @@ Když přidáte nový soubor do `vite.config.js`, **vždy** musíte spustit buil
 npm run build
 ```
 
+> **Kritické pro produkci (Webglobe):** Pokud `npm run build` selže s chybou `SyntaxError: Unexpected token '??='`, znamená to, že se používá příliš stará verze Node.js. Na Webglobe musíte před spuštěním buildu zajistit verzi 18+ (typicky `node20`). Viz podrobný postup v [17-nasazeni-na-produkci.md](17-nasazeni-na-produkci.md).
+
 ### 4.1 Rychlý checklist po změně vzhledu
 - [ ] Uložil/a jsem změny v CSS/JS (včetně `filament-auth.css`)?
 - [ ] Spustil/a jsem `npm run build`?

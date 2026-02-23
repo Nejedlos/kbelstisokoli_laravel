@@ -103,8 +103,8 @@ Navíc je bootstrap aplikace v `bootstrap/app.php` zabezpečen tak, aby selhán�
 4. **Composer:** Globálně dostupný nebo jako `composer.phar` v rootu.
 5. **Node.js & NPM:** Pro buildování assetů (Vite 6 vyžaduje Node 18.0+).
 
-## Postup nasazení (Manuální přes SSH - příklad pro php8.4)
-Pokud chcete nasadit novou verzi ručně, připojte se přes SSH a proveďte:
+## Postup nasazení (Manuální přes SSH - příklad pro php8.4 a node20)
+Pokud chcete nasadit novou verzi ručně, připojte se přes SSH a proveďte (postup je optimalizován pro **Fish shell**, který Webglobe používá):
 
 ```bash
 cd /cesta/k/projektu
@@ -112,13 +112,41 @@ git fetch origin main
 git reset --hard origin/main
 git clean -df
 git prune
-php8.4 $(which composer) install --no-interaction --optimize-autoloader --no-dev
+php8.4 (which composer) install --no-interaction --optimize-autoloader --no-dev
 php8.4 artisan migrate --force
+
+# --- KRITICKÝ KROK: Zajištění správné verze Node.js (Vite vyžaduje 18+) ---
+# Pokud používáte Fish shell, proveďte přesně tyto kroky:
+mkdir -p .node_bin
+ln -sf (which node20) .node_bin/node
+ln -sf (which npm20 || which npm) .node_bin/npm
+
+# Přidání do PATH pro aktuální session (včetně subprocesů)
+if functions -q fish_add_path
+    fish_add_path -m (pwd)/.node_bin
+else
+    set -gx PATH (pwd)/.node_bin $PATH
+end
+
+# OVĚŘENÍ: Musí vypsat verzi v20.x.x a cestu k vašemu .node_bin/node
+node -v
+which node
+
+# Nyní již můžete bezpečně sestavit assety
 npm install
 npm run build
+# ------------------------------------------------------------------------
+
 php8.4 artisan app:icons:sync
 php8.4 artisan optimize
 ```
+
+### Řešení potíží (Troubleshooting)
+**Chyba: `SyntaxError: Unexpected token '??='`**
+Tato chyba znamená, že se k sestavení assetů (Vite) používá příliš stará verze Node.js. Webglobe má jako výchozí `node` verzi 12 nebo 14, ale moderní nástroje vyžadují 18+.
+- Ujistěte se, že jste provedli kroky v sekci „KRITICKÝ KROK“ výše.
+- Zkontrolujte výstup `node -v`. Pokud vypíše cokoliv nižšího než 18, PATH není správně nastaven.
+- V krajním případě zkuste spustit build přímo pomocí node20: `node20 (which npm) run build`.
 
 > Tip: Po buildu udělejte „tvrdý refresh“ v prohlížeči (Cmd/Ctrl + Shift + R). V případě potřeby pročistěte cache pohledů: `php artisan view:clear` a `php artisan filament:clear-cached-components`.
 
