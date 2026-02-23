@@ -12,21 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            if (!Schema::hasColumn('posts', 'is_visible')) {
-                $table->boolean('is_visible')->default(true)->after('status');
-            }
+            $table->boolean('is_visible')->default(true)->after('status');
         });
 
         Schema::table('pages', function (Blueprint $table) {
-            if (!Schema::hasColumn('pages', 'is_visible')) {
-                $table->boolean('is_visible')->default(true)->after('status');
-            }
+            $table->boolean('is_visible')->default(true)->after('status');
         });
 
         Schema::table('menu_items', function (Blueprint $table) {
-            if (!Schema::hasColumn('menu_items', 'is_visible')) {
-                $table->boolean('is_visible')->default(true)->after('target');
-            }
+            $table->boolean('is_visible')->default(true)->after('target');
         });
     }
 

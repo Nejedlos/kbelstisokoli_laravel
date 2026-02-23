@@ -81,11 +81,11 @@ return new class extends Migration
             Schema::create('seo_metadatas', function (Blueprint $table) {
                 $table->id();
                 $table->morphs('seoable');
-                $table->string('title')->nullable();
-                $table->text('description')->nullable();
+                $table->json('title')->nullable();
+                $table->json('description')->nullable();
                 $table->string('keywords')->nullable();
-                $table->string('og_title')->nullable();
-                $table->text('og_description')->nullable();
+                $table->json('og_title')->nullable();
+                $table->json('og_description')->nullable();
                 $table->string('og_image')->nullable();
                 $table->timestamps();
             });

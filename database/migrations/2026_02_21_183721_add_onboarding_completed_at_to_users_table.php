@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'onboarding_completed_at')) {
-                $table->timestamp('onboarding_completed_at')->nullable()->after('notification_preferences');
-            }
+            $table->timestamp('onboarding_completed_at')->nullable()->after('notification_preferences');
         });
     }
 

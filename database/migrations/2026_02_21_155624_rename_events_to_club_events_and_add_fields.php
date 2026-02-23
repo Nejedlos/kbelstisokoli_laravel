@@ -16,15 +16,9 @@ return new class extends Migration
         }
 
         Schema::table('club_events', function (Blueprint $table) {
-            if (!Schema::hasColumn('club_events', 'event_type')) {
-                $table->string('event_type')->default('other')->after('title'); // social, meeting, camp, volunteer, other
-            }
-            if (!Schema::hasColumn('club_events', 'team_id')) {
-                $table->foreignId('team_id')->nullable()->after('event_type')->constrained()->onDelete('set null');
-            }
-            if (!Schema::hasColumn('club_events', 'rsvp_enabled')) {
-                $table->boolean('rsvp_enabled')->default(true)->after('is_public');
-            }
+            $table->string('event_type')->default('other')->after('title'); // social, meeting, camp, volunteer, other
+            $table->foreignId('team_id')->nullable()->after('event_type')->constrained()->onDelete('set null');
+            $table->boolean('rsvp_enabled')->default(true)->after('is_public');
         });
     }
 

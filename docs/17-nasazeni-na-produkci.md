@@ -75,7 +75,17 @@ Je to ideální volba pro rychlé promítnutí změn v kódu, které jste práv�
 
 ---
 
-### Odolnost proti chybám
+### Odolnost proti chybám a kompatibilita databáze (DŮLEŽITÉ)
+Vzhledem k tomu, že hosting Webglobe využívá starší verze MySQL/MariaDB (bez podpory sloupce `generation_expression` v `information_schema.columns`), je v projektu **zakázáno** používat v migracích následující metody Laravelu 12:
+- `Schema::hasColumn` / `Schema::hasColumns`
+- `->change()` (např. `$table->string('name')->nullable()->change()`)
+
+Tyto metody vyžadují hloubkovou introspekci schématu, která na tomto hostingu selhává. Místo nich:
+1. **Přidávání sloupců:** Provádějte přímo v `Schema::table` bez předchozí kontroly existence sloupce.
+2. **Změna typu sloupce:** Pokud je změna nezbytná, upravte původní `create` migraci (pokud ještě neproběhla na produkci) nebo použijte `DB::statement("ALTER TABLE ... MODIFY ...")`.
+
+Všechny stávající migrace byly k 23. 2. 2026 upraveny tak, aby byly s tímto omezením kompatibilní.
+
 Oba příkazy (`app:production:setup` i `app:deploy`) jsou vybaveny **automatickým opakováním**. 
 - Pokud selže SSH spojení během setupu, systém vám umožní upravit údaje nebo zkusit znovu nahrát SSH klíč (včetně nového dotazu na heslo).
 - Veškeré zadané údaje o serveru se ukládají do `.env` ihned po potvrzení, takže i při přerušení setupu si je systém pro příště pamatuje.
