@@ -1,7 +1,7 @@
 @servers(['web' => $user . '@' . $host . ($port ? ' -p ' . $port : '') . ' -o StrictHostKeyChecking=no'])
 
 @setup
-    $repository = 'https://' . $token . '@github.com/Nejedlos/kbelstisokoli_laravel.git';
+    $repository = $repository ?? 'https://' . $token . '@github.com/Nejedlos/kbelstisokoli_laravel.git';
     $path = $path ?? '/www/kbelstisokoli';
     $php = $php ?? 'php';
     $node = $node ?? 'node';
@@ -85,25 +85,66 @@
         cp -rt "{{ $public_path }}" public/*
 
         echo "Patching index.php in {{ $public_path }}..."
-        # Update paths in index.php to point to the functional path
+        # Update paths in index.php to point to the functional path using regex for better detection
         {{ $php }} -r "
-            \$indexContent = file_get_contents('{{ $public_path }}/index.php');
-            \$indexContent = str_replace(
-                ['__DIR__.\'/../vendor/autoload.php\'', '__DIR__.\'/../bootstrap/app.php\'', 'file_exists(\$maintenance = __DIR__.\'/../storage/framework/maintenance.php\')'],
-                ['\'{{ $path }}/vendor/autoload.php\'', '\'{{ $path }}/bootstrap/app.php\'', 'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')'],
-                \$indexContent
+            \$path = '{{ $public_path }}/index.php';
+            \$content = file_get_contents(\$path);
+
+            // Register the Composer autoloader...
+            \$content = preg_replace(
+                '/require\s+__DIR__\s*\.\s*\'\/..\/vendor\/autoload.php\'\s*;/',
+                'require \'{{ $path }}/vendor/autoload.php\';',
+                \$content
             );
-            file_put_contents('{{ $public_path }}/index.php', \$indexContent);
+
+            // Bootstrap Laravel...
+            \$content = preg_replace(
+                '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
+                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';',
+                \$content
+            );
+
+            // Maintenance mode...
+            \$content = preg_replace(
+                '/file_exists\(\s*\$maintenance\s*=\s*__DIR__\s*\.\s*\'\/..\/storage\/framework\/maintenance.php\'\s*\)/',
+                'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')',
+                \$content
+            );
+
+            file_put_contents(\$path, \$content);
         "
         echo "✅ index.php patched."
     fi
 
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
-    ln -sf $(which {{ $node }}) .node_bin/node
-    ln -sf $(which {{ $npm }}) .node_bin/npm
+
+    # Symlink node
+    if [[ "{{ $node }}" == /* ]]; then
+        ln -sf "{{ $node }}" .node_bin/node
+    else
+        ln -sf $(which "{{ $node }}") .node_bin/node
+    fi
+
+    # Symlink npm
+    if [[ "{{ $npm }}" == /* ]]; then
+        ln -sf "{{ $npm }}" .node_bin/npm
+    else
+        ln -sf $(which "{{ $npm }}") .node_bin/npm
+    fi
+
     export PATH="{{ $path }}/.node_bin:$PATH"
-    node -v
+
+    # Node.js version check
+    NODE_VERSION=$(node -v | sed 's/v//')
+    echo "Current Node version: $NODE_VERSION (from $(which node))"
+
+    if [ "$(printf '%s\n' "18.0.0" "$NODE_VERSION" | sort -V | head -n1)" != "18.0.0" ]; then
+        echo "❌ Error: Node.js version 18.0.0 or higher is required for Vite 6. Found: $NODE_VERSION"
+        echo "Please re-run 'php artisan app:production:setup' to find a suitable Node.js binary."
+        exit 1
+    fi
+
     npm install
 
     echo "Building assets..."
@@ -150,22 +191,60 @@
 
         echo "Patching index.php in {{ $public_path }}..."
         {{ $php }} -r "
-            \$indexContent = file_get_contents('{{ $public_path }}/index.php');
-            \$indexContent = str_replace(
-                ['__DIR__.\'/../vendor/autoload.php\'', '__DIR__.\'/../bootstrap/app.php\'', 'file_exists(\$maintenance = __DIR__.\'/../storage/framework/maintenance.php\')'],
-                ['\'{{ $path }}/vendor/autoload.php\'', '\'{{ $path }}/bootstrap/app.php\'', 'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')'],
-                \$indexContent
+            \$path = '{{ $public_path }}/index.php';
+            \$content = file_get_contents(\$path);
+
+            \$content = preg_replace(
+                '/require\s+__DIR__\s*\.\s*\'\/..\/vendor\/autoload.php\'\s*;/',
+                'require \'{{ $path }}/vendor/autoload.php\';',
+                \$content
             );
-            file_put_contents('{{ $public_path }}/index.php', \$indexContent);
+
+            \$content = preg_replace(
+                '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
+                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';',
+                \$content
+            );
+
+            \$content = preg_replace(
+                '/file_exists\(\s*\$maintenance\s*=\s*__DIR__\s*\.\s*\'\/..\/storage\/framework\/maintenance.php\'\s*\)/',
+                'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')',
+                \$content
+            );
+
+            file_put_contents(\$path, \$content);
         "
     fi
 
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
-    ln -sf $(which {{ $node }}) .node_bin/node
-    ln -sf $(which {{ $npm }}) .node_bin/npm
+
+    # Symlink node
+    if [[ "{{ $node }}" == /* ]]; then
+        ln -sf "{{ $node }}" .node_bin/node
+    else
+        ln -sf $(which "{{ $node }}") .node_bin/node
+    fi
+
+    # Symlink npm
+    if [[ "{{ $npm }}" == /* ]]; then
+        ln -sf "{{ $npm }}" .node_bin/npm
+    else
+        ln -sf $(which "{{ $npm }}") .node_bin/npm
+    fi
+
     export PATH="{{ $path }}/.node_bin:$PATH"
-    node -v
+
+    # Node.js version check
+    NODE_VERSION=$(node -v | sed 's/v//')
+    echo "Current Node version: $NODE_VERSION (from $(which node))"
+
+    if [ "$(printf '%s\n' "18.0.0" "$NODE_VERSION" | sort -V | head -n1)" != "18.0.0" ]; then
+        echo "❌ Error: Node.js version 18.0.0 or higher is required for Vite 6. Found: $NODE_VERSION"
+        echo "Please re-run 'php artisan app:production:setup' to find a suitable Node.js binary."
+        exit 1
+    fi
+
     npm install
 
     echo "Building assets..."
@@ -228,13 +307,28 @@
 
         echo "Patching index.php in {{ $public_path }}..."
         {{ $php }} -r "
-            \$indexContent = file_get_contents('{{ $public_path }}/index.php');
-            \$indexContent = str_replace(
-                ['__DIR__.\'/../vendor/autoload.php\'', '__DIR__.\'/../bootstrap/app.php\'', 'file_exists(\$maintenance = __DIR__.\'/../storage/framework/maintenance.php\')'],
-                ['\'{{ $path }}/vendor/autoload.php\'', '\'{{ $path }}/bootstrap/app.php\'', 'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')'],
-                \$indexContent
+            \$path = '{{ $public_path }}/index.php';
+            \$content = file_get_contents(\$path);
+
+            \$content = preg_replace(
+                '/require\s+__DIR__\s*\.\s*\'\/..\/vendor\/autoload.php\'\s*;/',
+                'require \'{{ $path }}/vendor/autoload.php\';',
+                \$content
             );
-            file_put_contents('{{ $public_path }}/index.php', \$indexContent);
+
+            \$content = preg_replace(
+                '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
+                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';',
+                \$content
+            );
+
+            \$content = preg_replace(
+                '/file_exists\(\s*\$maintenance\s*=\s*__DIR__\s*\.\s*\'\/..\/storage\/framework\/maintenance.php\'\s*\)/',
+                'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')',
+                \$content
+            );
+
+            file_put_contents(\$path, \$content);
         "
         echo "✅ index.php patched."
     fi

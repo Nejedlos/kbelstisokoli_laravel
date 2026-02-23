@@ -44,6 +44,20 @@ class ProductionDeployCommand extends Command
             return self::FAILURE;
         }
 
+        // Ověření dostupnosti binárek na serveru před spuštěním
+        info("🔍 Ověřuji dostupnost binárek na serveru...");
+        $checkPhp = Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
+        if (!$checkPhp->successful()) {
+            error("❌ PHP binárka '{$phpBinary}' není na serveru dostupná nebo nefunguje.");
+            return self::FAILURE;
+        }
+
+        $checkNode = Process::run("ssh -p {$port} {$user}@{$host} '{$nodeBinary} -v'");
+        if (!$checkNode->successful()) {
+            error("❌ Node.js binárka '{$nodeBinary}' není na serveru dostupná.");
+            return self::FAILURE;
+        }
+
         while (true) {
             info("🚀 Nasazuji na {$user}@{$host}:{$port}...");
 

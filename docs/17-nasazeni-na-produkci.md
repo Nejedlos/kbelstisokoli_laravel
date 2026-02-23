@@ -28,7 +28,7 @@ Příkaz se vás interaktivně zeptá na následující údaje (které se pokus�
 - **SSH port** (výchozí `22`, u Webglobe často `20001`). Specifická „brána“, přes kterou se SSH připojuje.
 - **SSH uživatele** (např. `ssh-588875`). Jméno, pod kterým se budou na serveru spouštět všechny instalační a aktualizační příkazy.
 - **PHP binárka:** *Vylepšeno:* Systém se nejprve připojí k serveru a automaticky se pokusí najít nejvhodnější verzi PHP (8.4+). Tuto verzi vám pak nabídne jako výchozí hodnotu, kterou stačí potvrdit.
-- **Node.js binárka:** *Vylepšeno:* Podobně jako u PHP, systém automaticky prohledá server a najde verzi Node.js (18.0+), která je potřeba pro Vite 6 a Tailwind v4. Na Webglobe typicky najde `node20` nebo `node18`.
+- **Node.js binárka:** *Vylepšeno:* Systém se nejprve připojí k serveru a automaticky se pokusí najít nejvhodnější verzi Node.js (18.0+), která je potřeba pro Vite 6 a Tailwind v4. Na Webglobe typicky najde `node20`, `node18` nebo použije výchozí `node`.
 - **Kontrola spojení a klíčů:** Příkaz automaticky otestuje, zda se lze k serveru připojit bez hesla. Pokud ne, nabídne vám automatické vygenerování a nahrání SSH klíče na server. K tomu budete jednou vyzváni k zadání hesla k serveru.
 - **Kontrola požadavků:** Po potvrzení binárek systém provede finální revizi a potvrdí dostupnost Gitu, Composeru a NPM.
 - **Adresáře projektu (Interaktivní prohlížeč):** *Novinka:* Příkaz obsahuje vestavěný prohlížeč souborů na serveru.
@@ -103,7 +103,7 @@ Navíc je bootstrap aplikace v `bootstrap/app.php` zabezpečen tak, aby selhán�
 4. **Composer:** Globálně dostupný nebo jako `composer.phar` v rootu.
 5. **Node.js & NPM:** Pro buildování assetů (Vite 6 vyžaduje Node 18.0+).
 
-## Postup nasazení (Manuální přes SSH - příklad pro php8.4 a node20)
+## Postup nasazení (Manuální přes SSH - příklad pro PHP 8.4)
 Pokud chcete nasadit novou verzi ručně, připojte se přes SSH a proveďte (postup je optimalizován pro **Fish shell**, který Webglobe používá):
 
 ```bash
@@ -116,19 +116,30 @@ php8.4 (which composer) install --no-interaction --optimize-autoloader --no-dev
 php8.4 artisan migrate --force
 
 # --- KRITICKÝ KROK: Zajištění správné verze Node.js (Vite vyžaduje 18+) ---
-# Pokud používáte Fish shell, proveďte přesně tyto kroky:
+# Pokud používáte Fish shell, proveďte přesně tyto kroky k nalezení a použití správné verze:
+
+# 1. Najděte dostupnou verzi Node.js (18 nebo vyšší)
+# Zkuste: node -v, node20 -v, node18 -v atd.
+# Pokud 'node -v' vypíše 18+, můžete použít přímo 'node'.
+# Na Webglobe často existují binárky jako node20, node18, ale mohou být skryté (např. v /opt/alt/node*/usr/bin/).
+
+# Tip pro důkladné vyhledání všech dostupných Node binárek:
+# which -a node; or whereis -b node; or ls -1 /opt/alt/node*/usr/bin/node
+
+# Příklad pro automatické nalezení a uložení cesty k binárce:
+set -l NODE_BIN (which node20; or which node18; or which /opt/alt/node*/usr/bin/node | head -n1; or which node)
+
+# 2. Vytvořte lokální binářky (symlinky) pro konzistenci
 mkdir -p .node_bin
-ln -sf (which node20) .node_bin/node
-ln -sf (which npm20 || which npm) .node_bin/npm
+ln -sf $NODE_BIN .node_bin/node
+# Podobně pro NPM (pokud existuje npm20/npm18, jinak zkusit odvodit od cesty k Node)
+set -l NPM_BIN (which npm20; or which npm18; or which (string replace "node" "npm" $NODE_BIN); or which npm)
+ln -sf $NPM_BIN .node_bin/npm
 
-# Přidání do PATH pro aktuální session (včetně subprocesů)
-if functions -q fish_add_path
-    fish_add_path -m (pwd)/.node_bin
-else
-    set -gx PATH (pwd)/.node_bin $PATH
-end
+# 3. Přidejte do PATH (absolutní cestou)
+set -gx PATH (realpath .node_bin) $PATH
 
-# OVĚŘENÍ: Musí vypsat verzi v20.x.x a cestu k vašemu .node_bin/node
+# 4. OVĚŘENÍ: Musí vypsat verzi v18.x.x+ a cestu k vašemu .node_bin/node
 node -v
 which node
 
@@ -146,7 +157,7 @@ php8.4 artisan optimize
 Tato chyba znamená, že se k sestavení assetů (Vite) používá příliš stará verze Node.js. Webglobe má jako výchozí `node` verzi 12 nebo 14, ale moderní nástroje vyžadují 18+.
 - Ujistěte se, že jste provedli kroky v sekci „KRITICKÝ KROK“ výše.
 - Zkontrolujte výstup `node -v`. Pokud vypíše cokoliv nižšího než 18, PATH není správně nastaven.
-- V krajním případě zkuste spustit build přímo pomocí node20: `node20 (which npm) run build`.
+- V krajním případě zkuste spustit build přímo pomocí konkrétní verze, např.: `node20 (which npm) run build`.
 
 > Tip: Po buildu udělejte „tvrdý refresh“ v prohlížeči (Cmd/Ctrl + Shift + R). V případě potřeby pročistěte cache pohledů: `php artisan view:clear` a `php artisan filament:clear-cached-components`.
 

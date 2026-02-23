@@ -96,7 +96,7 @@ class ProductionDeploySetupCommand extends Command
 
         // --- Automatická detekce binárek po úspěšném připojení ---
         $detectedPhp = env('PROD_PHP_BINARY', 'php');
-        $detectedNode = env('PROD_NODE_BINARY', 'node20');
+        $detectedNode = env('PROD_NODE_BINARY', 'node');
         $detectedNpm = env('PROD_NPM_BINARY', 'npm');
 
         $this->discoverBinaries($host, $port, $user, $detectedPhp, $detectedNode, $detectedNpm);
@@ -111,9 +111,9 @@ class ProductionDeploySetupCommand extends Command
 
         $nodeBinary = text(
             label: 'Node.js binárka na serveru?',
-            placeholder: 'node20',
+            placeholder: 'node',
             default: $detectedNode,
-            hint: 'Vite 6 vyžaduje Node.js 18+. Na Webglobe zkuste "node20" nebo "node18".',
+            hint: 'Vite 6 vyžaduje Node.js 18+. Systém se pokusí automaticky najít nejlepší verzi.',
             required: true
         );
 
@@ -138,11 +138,14 @@ class ProductionDeploySetupCommand extends Command
             }
         }
 
+        $detectedPaths = $this->detectPaths($host, $port, $user);
+        $defaultPublic = !empty($detectedPaths) ? $detectedPaths[0] : '.';
+
         // 1. Funkční adresář (vše kromě public)
         $path = $this->browseServerPath($host, $port, $user, 'Zvolte FUNKČNÍ ADRESÁŘ (kam přijde jádro aplikace)');
 
         // 2. Veřejný adresář (kam přijde obsah public)
-        $publicPath = $this->browseServerPath($host, $port, $user, 'Zvolte VEŘEJNÝ ADRESÁŘ (kam přijdou veřejné soubory, obvykle www, public_html)');
+        $publicPath = $this->browseServerPath($host, $port, $user, 'Zvolte VEŘEJNÝ ADRESÁŘ (kam přijdou veřejné soubory, obvykle www, public_html)', $defaultPublic);
 
         $token = password(
             label: 'GitHub Personal Access Token (pro Git autentikaci)?',
@@ -345,12 +348,61 @@ class ProductionDeploySetupCommand extends Command
         }
     }
 
+    protected function findBinariesOnServer(string $host, string $port, string $user, string $pattern): array
+    {
+        // 1. Standard paths and common shared hosting paths (CloudLinux, etc.)
+        $extraPaths = "/opt/alt/node*/usr/bin/{$pattern} /opt/nodes/node*/bin/{$pattern} /usr/local/nodejs/bin/{$pattern} /opt/alt/php*/usr/bin/{$pattern}";
+        $lsCmd = "ls -1 /usr/bin/{$pattern} /usr/local/bin/{$pattern} /bin/{$pattern} {$extraPaths} 2>/dev/null";
+
+        // 2. which -a (all in PATH)
+        $cleanPattern = str_replace('*', '', $pattern);
+        $whichCmd = "which -a {$cleanPattern} 2>/dev/null";
+
+        // 3. whereis
+        $whereisCmd = "whereis -b {$cleanPattern} 2>/dev/null | cut -d: -f2- | tr ' ' '\\n'";
+
+        $fullCmd = "ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$lsCmd}; {$whichCmd}; {$whereisCmd}'";
+        $process = Process::run($fullCmd);
+
+        $binaries = [];
+        if ($process->successful()) {
+            $lines = array_filter(explode("\n", trim($process->output())));
+            foreach ($lines as $line) {
+                $path = trim($line);
+                if (empty($path)) continue;
+
+                // If it's in a standard path, we can just use the basename
+                $standardPaths = ['/usr/bin/', '/usr/local/bin/', '/bin/'];
+                $isStandard = false;
+                foreach ($standardPaths as $std) {
+                    if (str_starts_with($path, $std)) {
+                        $binaries[] = basename($path);
+                        $isStandard = true;
+                        break;
+                    }
+                }
+
+                if (!$isStandard) {
+                    // Keep full path for non-standard locations
+                    $binaries[] = $path;
+                }
+            }
+        }
+
+        return array_unique($binaries);
+    }
+
     protected function discoverBinaries(string $host, string $port, string $user, string &$php, string &$node, string &$npm): void
     {
         spin(function () use ($host, $port, $user, &$php, &$node, &$npm) {
             // PHP discovery
-            $phpCandidates = array_unique([$php, 'php8.4', 'php8.3', 'php8.2', 'php']);
+            $remotePhpBinaries = $this->findBinariesOnServer($host, $port, $user, 'php*');
+            $phpCandidates = array_unique(array_merge([$php, 'php8.4', 'php8.3', 'php8.2', 'php'], $remotePhpBinaries));
+
             foreach ($phpCandidates as $candidate) {
+                // Ignore some obvious non-php binaries if any
+                if (!preg_match('/^php[\d\.]*$/', $candidate) && $candidate !== 'php') continue;
+
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
@@ -362,8 +414,13 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // Node discovery
-            $nodeCandidates = array_unique([$node, 'node22', 'node20', 'node18', 'node']);
+            $remoteNodeBinaries = $this->findBinariesOnServer($host, $port, $user, 'node*');
+            $nodeCandidates = array_unique(array_merge([$node, 'node22', 'node20', 'node18', 'node'], $remoteNodeBinaries));
+
             foreach ($nodeCandidates as $candidate) {
+                // Only look for node or node digits
+                if (!preg_match('/^node[\d]*$/', $candidate) && $candidate !== 'node') continue;
+
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
@@ -371,12 +428,17 @@ class ProductionDeploySetupCommand extends Command
                         $node = $candidate;
 
                         // Try to find matching npm (e.g., node20 -> npm20)
-                        $npmCandidates = ['npm'];
+                        $remoteNpmBinaries = $this->findBinariesOnServer($host, $port, $user, 'npm*');
+                        $npmCandidates = array_unique(array_merge(['npm'], $remoteNpmBinaries));
+
                         if (preg_match('/node(\d+)/', $node, $m)) {
                             array_unshift($npmCandidates, 'npm' . $m[1]);
                         }
+                        $npmCandidates = array_unique($npmCandidates);
 
                         foreach ($npmCandidates as $npmCandidate) {
+                            if (!preg_match('/^npm[\d]*$/', $npmCandidate) && $npmCandidate !== 'npm') continue;
+
                             $npmProc = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
                             if ($npmProc->successful()) {
                                 $npm = $npmCandidate;
@@ -425,11 +487,14 @@ class ProductionDeploySetupCommand extends Command
             $allOk = true;
 
             // 1. PHP Discovery & Check
-            $phpCandidates = array_unique([$phpBinary, 'php8.4', 'php8.3', 'php8.2', 'php']);
+            $remotePhpBinaries = $this->findBinariesOnServer($host, $port, $user, 'php*');
+            $phpCandidates = array_unique(array_merge([$phpBinary, 'php8.4', 'php8.3', 'php8.2', 'php'], $remotePhpBinaries));
             $bestPhp = null;
             $bestPhpVer = null;
 
             foreach ($phpCandidates as $candidate) {
+                if (!preg_match('/^php[\d\.]*$/', $candidate) && $candidate !== 'php') continue;
+
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
@@ -475,11 +540,14 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // 4. Node Discovery & Check
-            $nodeCandidates = array_unique([$nodeBinary, 'node22', 'node20', 'node18', 'node']);
+            $remoteNodeBinaries = $this->findBinariesOnServer($host, $port, $user, 'node*');
+            $nodeCandidates = array_unique(array_merge([$nodeBinary, 'node22', 'node20', 'node18', 'node'], $remoteNodeBinaries));
             $bestNode = null;
             $bestNodeVer = null;
 
             foreach ($nodeCandidates as $candidate) {
+                if (!preg_match('/^node[\d]*$/', $candidate) && $candidate !== 'node') continue;
+
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
@@ -505,7 +573,9 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // 5. NPM Check
-            $npmCandidates = [$npmBinary, 'npm'];
+            $remoteNpmBinaries = $this->findBinariesOnServer($host, $port, $user, 'npm*');
+            $npmCandidates = array_unique(array_merge([$npmBinary, 'npm'], $remoteNpmBinaries));
+
             if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
                 array_unshift($npmCandidates, 'npm' . $m[1]);
             }
@@ -513,6 +583,8 @@ class ProductionDeploySetupCommand extends Command
 
             $bestNpm = null;
             foreach ($npmCandidates as $candidate) {
+                if (!preg_match('/^npm[\d]*$/', $candidate) && $candidate !== 'npm') continue;
+
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     $bestNpm = $candidate;
@@ -557,8 +629,33 @@ class ProductionDeploySetupCommand extends Command
         file_put_contents($path, $content);
     }
 
+    protected function detectRepositoryUrl(string $token): string
+    {
+        $process = Process::run('git remote get-url origin');
+        $url = trim($process->output());
+
+        if (empty($url)) {
+            // Fallback na výchozí, pokud se nepodaří detekovat
+            return "https://{$token}@github.com/Nejedlos/kbelstisokoli_laravel.git";
+        }
+
+        // Pokud je URL v SSH formátu (git@github.com:...), převedeme na HTTPS s tokenem
+        if (str_starts_with($url, 'git@')) {
+            $url = str_replace(['git@', ':'], ['https://', '/'], $url);
+        }
+
+        // Vložíme token do HTTPS URL
+        if (str_starts_with($url, 'https://')) {
+            $url = str_replace('https://', "https://{$token}@", $url);
+        }
+
+        return $url;
+    }
+
     protected function runEnvoySetup(string $host, string $port, string $user, string $phpBinary, string $path, string $token, ?string $publicPath, array $dbConfig, string $nodeBinary = 'node', string $npmBinary = 'npm'): void
     {
+        $repository = $this->detectRepositoryUrl($token);
+
         while (true) {
             info("🚀 Spouštím Envoy setup na {$user}@{$host}:{$port}...");
 
@@ -571,6 +668,7 @@ class ProductionDeploySetupCommand extends Command
                 "--npm={$npmBinary}",
                 "--path={$path}",
                 "--token={$token}",
+                "--repository={$repository}",
             ];
 
             if ($publicPath) {

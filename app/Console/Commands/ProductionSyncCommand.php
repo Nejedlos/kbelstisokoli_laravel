@@ -48,6 +48,14 @@ class ProductionSyncCommand extends Command
             return self::FAILURE;
         }
 
+        // Ověření dostupnosti PHP na serveru
+        \Laravel\Prompts\info("🔍 Ověřuji dostupnost PHP na serveru...");
+        $checkPhp = \Illuminate\Support\Facades\Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
+        if (!$checkPhp->successful()) {
+            $this->error("❌ PHP binárka '{$phpBinary}' není na serveru dostupná nebo nefunguje.");
+            return self::FAILURE;
+        }
+
         while (true) {
             \Laravel\Prompts\info("🚀 Synchronizuji konfiguraci na {$user}@{$host}:{$port}...");
 
