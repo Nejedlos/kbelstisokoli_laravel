@@ -48,6 +48,16 @@
     @endif
 
     <div class="container relative z-10">
+        @if(isset($breadcrumbs) && $breadcrumbs)
+            <div @class([
+                'mb-4',
+                'flex justify-center' => $alignment === 'center',
+                'flex justify-end' => $alignment === 'right',
+            ])>
+                <x-breadcrumbs :breadcrumbs="$breadcrumbs" variant="light" />
+            </div>
+        @endif
+
         <div @class([
             'max-w-3xl' => $alignment === 'left',
             'mx-auto text-center max-w-4xl' => $alignment === 'center',

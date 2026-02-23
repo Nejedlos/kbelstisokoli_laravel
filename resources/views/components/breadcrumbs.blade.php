@@ -1,32 +1,71 @@
-@props(['breadcrumbs'])
+@props(['breadcrumbs', 'variant' => 'dark'])
 
-@if($breadcrumbs && $breadcrumbs->isNotEmpty())
-    <nav class="flex items-center gap-2 text-sm text-slate-500 overflow-x-auto whitespace-nowrap py-4 no-scrollbar" aria-label="Breadcrumb">
-        @foreach($breadcrumbs as $breadcrumb)
+@php
+    $isHome = request()->routeIs('public.home');
+    if ($isHome || empty($breadcrumbs)) {
+        return;
+    }
+
+    // Normalizace vstupu (pole vs kolekce)
+    $items = collect();
+    if (is_array($breadcrumbs)) {
+        foreach($breadcrumbs as $label => $url) {
+            $items->push((object)[
+                'title' => is_string($label) ? $label : $url,
+                'url' => is_string($label) ? $url : null
+            ]);
+        }
+    } else {
+        $items = $breadcrumbs;
+    }
+@endphp
+
+<div @class([
+    'breadcrumbs-container py-2',
+    'text-slate-400' => $variant === 'dark',
+    'text-white/60' => $variant === 'light',
+])>
+    <nav class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-bold overflow-x-auto whitespace-nowrap no-scrollbar" aria-label="Breadcrumb">
+        @foreach($items as $breadcrumb)
             <div class="flex items-center gap-2">
                 @if($breadcrumb->url && !$loop->last)
-                    <a href="{{ $breadcrumb->url }}" class="hover:text-primary transition-colors">
+                    <a href="{{ $breadcrumb->url }}" @class([
+                        'transition-colors',
+                        'hover:text-primary' => $variant === 'dark',
+                        'hover:text-white' => $variant === 'light',
+                    ])>
                         {{ $breadcrumb->title }}
                     </a>
                 @else
-                    <span class="font-medium text-slate-900 line-clamp-1">
+                    <span @class([
+                        'truncate max-w-[200px]',
+                        'text-slate-600' => $variant === 'dark' && $loop->last,
+                        'text-white' => $variant === 'light' && $loop->last,
+                    ])>
                         {{ $breadcrumb->title }}
                     </span>
                 @endif
 
                 @if(!$loop->last)
-                    <i class="fa-light fa-chevron-right text-[10px] text-slate-300"></i>
+                    <span @class([
+                        'font-light opacity-40',
+                        'text-slate-300' => $variant === 'dark',
+                        'text-white' => $variant === 'light',
+                    ])>/</span>
                 @endif
             </div>
         @endforeach
     </nav>
-    {{-- JSON-LD pro SEO --}}
+</div>
+
+{{-- JSON-LD pro SEO (ponecháváme původní logiku pro kolekci objektů) --}}
+@if($items instanceof \Illuminate\Support\Collection)
     <script type="application/ld+json">
     {
       "{{ '@' }}context": "https://schema.org",
       "{{ '@' }}type": "BreadcrumbList",
       "itemListElement": [
-        @foreach($breadcrumbs as $index => $breadcrumb)
+        @foreach($items as $index => $breadcrumb)
         {
           "{{ '@' }}type": "ListItem",
           "position": {{ $index + 1 }},

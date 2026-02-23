@@ -5,6 +5,8 @@
 @section('content')
     <div class="bg-slate-50 border-b border-slate-200 py-12">
         <div class="container">
+            <x-breadcrumbs :breadcrumbs="$breadcrumbs ?? null" />
+
             <h1 class="font-display font-black text-4xl md:text-5xl uppercase tracking-tighter mb-6">
                 {{ __('search.results_for') }}: <span class="text-primary italic">"{{ $query }}"</span>
             </h1>

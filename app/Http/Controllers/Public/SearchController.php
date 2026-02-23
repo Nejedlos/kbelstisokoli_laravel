@@ -13,7 +13,7 @@ class SearchController extends Controller
         protected SearchService $searchService
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, \App\Services\BreadcrumbService $breadcrumbService): View
     {
         $query = $request->input('q', '');
         $results = collect();
@@ -22,9 +22,12 @@ class SearchController extends Controller
             $results = $this->searchService->search($query);
         }
 
+        $breadcrumbs = $breadcrumbService->addHome()->add(__('search.title'))->get();
+
         return view('public.search.results', [
             'query' => $query,
             'results' => $results,
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
 }

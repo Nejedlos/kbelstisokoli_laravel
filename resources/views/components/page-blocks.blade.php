@@ -1,4 +1,4 @@
-@props(['blocks' => [], 'animate' => false])
+@props(['blocks' => [], 'animate' => false, 'breadcrumbs' => null])
 
 <div class="page-blocks">
     @forelse($blocks as $block)
@@ -34,7 +34,12 @@
                 class="block-wrapper block-{{ $type }} {{ $customClass }}"
                 {!! $attributesString !!}
             >
-                @includeFirst(["public.blocks.{$type}", "public.blocks.fallback"], ['data' => $data, 'type' => $type, 'block' => $block])
+                @includeFirst(["public.blocks.{$type}", "public.blocks.fallback"], [
+                    'data' => $data,
+                    'type' => $type,
+                    'block' => $block,
+                    'breadcrumbs' => ($loop->first && $type === 'hero') ? $breadcrumbs : null
+                ])
             </div>
         @elseif(!$type)
             @include('public.blocks.fallback', ['data' => [], 'type' => 'unknown'])

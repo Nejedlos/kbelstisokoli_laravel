@@ -1,13 +1,21 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Tréninkové informace</h1>
+    <x-page-header
+        title="Tréninkové informace"
+        subtitle="Přehled tréninkových časů a míst pro jednotlivé věkové kategorie."
+        :breadcrumbs="['Tréninky' => null]"
+    />
 
-    @if($teams->isEmpty())
-        <p class="text-gray-600">Aktuálně nejsou k dispozici žádné informace o trénincích.</p>
-    @else
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="section-padding bg-bg">
+        <div class="container">
+            @if($teams->isEmpty())
+                <x-empty-state
+                    title="Zatím žádné informace o trénincích"
+                    subtitle="Aktuálně připravujeme rozpis tréninků pro nadcházející období."
+                />
+            @else
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             @foreach($teams as $team)
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                     <h2 class="text-2xl font-bold mb-4 text-primary border-b pb-2">{{ $team->name }}</h2>
@@ -47,5 +55,6 @@
             @endforeach
         </div>
     @endif
-</div>
+        </div>
+    </div>
 @endsection

@@ -15,17 +15,9 @@
 
     <div class="container relative z-10 text-{{ $alignment }}">
         @if(!empty($breadcrumbs))
-            <nav class="mb-4 flex items-center justify-{{ $alignment === 'center' ? 'center' : ($alignment === 'right' ? 'end' : 'start') }} space-x-2 text-sm opacity-80 uppercase tracking-widest font-bold">
-                <a href="{{ route('public.home') }}" class="hover:text-primary transition-colors">Úvod</a>
-                @foreach($breadcrumbs as $label => $link)
-                    <span>/</span>
-                    @if($link)
-                        <a href="{{ $link }}" class="hover:text-primary transition-colors">{{ $label }}</a>
-                    @else
-                        <span class="text-white">{{ $label }}</span>
-                    @endif
-                @endforeach
-            </nav>
+            <div class="mb-4 flex justify-{{ $alignment === 'center' ? 'center' : ($alignment === 'right' ? 'end' : 'start') }}">
+                <x-breadcrumbs :breadcrumbs="array_merge(['Úvod' => route('public.home')], $breadcrumbs)" variant="light" />
+            </div>
         @endif
 
         <h1 class="text-4xl md:text-6xl font-black mb-4 uppercase tracking-tighter leading-none">{{ $title }}</h1>
