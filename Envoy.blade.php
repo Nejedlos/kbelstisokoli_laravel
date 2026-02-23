@@ -44,28 +44,31 @@
     if [ ! -f ".env" ]; then
         echo "Creating .env from .env.example..."
         cp .env.example .env
-        {{ $php }} artisan key:generate --no-interaction
+    fi
 
-        if [ ! -z "{{ $db_database ?? '' }}" ]; then
-            sed -i "s/DB_CONNECTION=.*/DB_CONNECTION={{ $db_connection ?? 'mysql' }}/" .env
-            sed -i "s/DB_HOST=.*/DB_HOST={{ $db_host ?? '127.0.0.1' }}/" .env
-            sed -i "s/DB_PORT=.*/DB_PORT={{ $db_port ?? '3306' }}/" .env
-            sed -i "s/DB_DATABASE=.*/DB_DATABASE={{ $db_database }}/" .env
-            sed -i "s/DB_USERNAME=.*/DB_USERNAME={{ $db_username }}/" .env
-            sed -i "s/DB_PASSWORD=.*/DB_PASSWORD={{ $db_password }}/" .env
-            if [ ! -z "{{ $db_prefix ?? '' }}" ]; then
-                if grep -q "^DB_PREFIX=" .env; then
-                    sed -i "s/DB_PREFIX=.*/DB_PREFIX={{ $db_prefix }}/" .env
-                else
-                    echo "DB_PREFIX={{ $db_prefix }}" >> .env
-                fi
+    if [ ! -z "{{ $db_database ?? '' }}" ]; then
+        sed -i "s|DB_CONNECTION=.*|DB_CONNECTION={{ $db_connection ?? 'mysql' }}|" .env
+        sed -i "s|DB_HOST=.*|DB_HOST={{ $db_host ?? '127.0.0.1' }}|" .env
+        sed -i "s|DB_PORT=.*|DB_PORT={{ $db_port ?? '3306' }}|" .env
+        sed -i "s|DB_DATABASE=.*|DB_DATABASE={{ $db_database }}|" .env
+        sed -i "s|DB_USERNAME=.*|DB_USERNAME={{ $db_username }}|" .env
+        sed -i "s|DB_PASSWORD=.*|DB_PASSWORD={{ $db_password }}|" .env
+        if [ ! -z "{{ $db_prefix ?? '' }}" ]; then
+            if grep -q "^DB_PREFIX=" .env; then
+                sed -i "s|DB_PREFIX=.*|DB_PREFIX={{ $db_prefix }}|" .env
+            else
+                echo "DB_PREFIX={{ $db_prefix }}" >> .env
             fi
-            echo "✅ Database configured in .env."
         fi
+        echo "✅ Database configured in .env."
+    fi
 
-        sed -i "s/APP_ENV=.*/APP_ENV=production/" .env
-        sed -i "s/APP_DEBUG=.*/APP_DEBUG=false/" .env
-        echo "✅ .env environment set to production."
+    sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
+    sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
+
+    if ! grep -q "APP_KEY=base64" .env; then
+        echo "Generating APP_KEY..."
+        {{ $php }} artisan key:generate --no-interaction
     fi
 
     echo "Running composer install..."
@@ -158,6 +161,80 @@
     {{ $php }} artisan optimize
 
     echo "✅ Deployment finished successfully!"
+@endtask
+
+@task('sync', ['on' => 'web'])
+    echo "🚀 Syncing configuration and running migrations on {{ $host }}..."
+
+    PHP_VERSION=$({{ $php }} -r 'echo PHP_VERSION;')
+    if [ "$(printf '%s\n' "8.4.0" "$PHP_VERSION" | sort -V | head -n1)" != "8.4.0" ]; then
+        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using {{ $php }})"
+        exit 1
+    fi
+
+    cd {{ $path }}
+
+    echo "Preparing .env file..."
+    if [ ! -f ".env" ]; then
+        echo "Creating .env from .env.example..."
+        cp .env.example .env
+    fi
+
+    if [ ! -z "{{ $db_database ?? '' }}" ]; then
+        sed -i "s|DB_CONNECTION=.*|DB_CONNECTION={{ $db_connection ?? 'mysql' }}|" .env
+        sed -i "s|DB_HOST=.*|DB_HOST={{ $db_host ?? '127.0.0.1' }}|" .env
+        sed -i "s|DB_PORT=.*|DB_PORT={{ $db_port ?? '3306' }}|" .env
+        sed -i "s|DB_DATABASE=.*|DB_DATABASE={{ $db_database }}|" .env
+        sed -i "s|DB_USERNAME=.*|DB_USERNAME={{ $db_username }}|" .env
+        sed -i "s|DB_PASSWORD=.*|DB_PASSWORD={{ $db_password }}|" .env
+        if [ ! -z "{{ $db_prefix ?? '' }}" ]; then
+            if grep -q "^DB_PREFIX=" .env; then
+                sed -i "s|DB_PREFIX=.*|DB_PREFIX={{ $db_prefix }}|" .env
+            else
+                echo "DB_PREFIX={{ $db_prefix }}" >> .env
+            fi
+        fi
+        echo "✅ Database configured in .env."
+    fi
+
+    sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
+    sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
+
+    if ! grep -q "APP_KEY=base64" .env; then
+        echo "Generating APP_KEY..."
+        {{ $php }} artisan key:generate --no-interaction
+    fi
+
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+        echo "Ensuring custom public path is synced: {{ $public_path }}"
+        if [ ! -d "{{ $public_path }}" ]; then
+            mkdir -p "{{ $public_path }}"
+        fi
+        cp -rt "{{ $public_path }}" public/*
+
+        echo "Patching index.php in {{ $public_path }}..."
+        {{ $php }} -r "
+            \$indexContent = file_get_contents('{{ $public_path }}/index.php');
+            \$indexContent = str_replace(
+                ['__DIR__.\'/../vendor/autoload.php\'', '__DIR__.\'/../bootstrap/app.php\'', 'file_exists(\$maintenance = __DIR__.\'/../storage/framework/maintenance.php\')'],
+                ['\'{{ $path }}/vendor/autoload.php\'', '\'{{ $path }}/bootstrap/app.php\'', 'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')'],
+                \$indexContent
+            );
+            file_put_contents('{{ $public_path }}/index.php', \$indexContent);
+        "
+        echo "✅ index.php patched."
+    fi
+
+    echo "Running database migrations..."
+    {{ $php }} artisan migrate --force
+
+    echo "Syncing icons..."
+    {{ $php }} artisan app:icons:sync
+
+    echo "Optimizing application..."
+    {{ $php }} artisan optimize
+
+    echo "✅ Sync finished successfully!"
 @endtask
 
 @task('status', ['on' => 'web'])

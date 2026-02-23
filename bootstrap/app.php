@@ -27,6 +27,14 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withSchedule(function (Schedule $schedule) {
+        // Zabezpečení pro případy, kdy DB není dostupná (např. při setupu nebo migracích)
+        if (app()->runningInConsole()) {
+            $argv = $_SERVER['argv'] ?? [];
+            if (count(array_intersect(['migrate', 'key:generate', 'package:discover', 'optimize', 'filament:upgrade'], $argv)) > 0) {
+                return;
+            }
+        }
+
         // Dynamická registrace úloh z databáze
         try {
             if (Schema::hasTable('cron_tasks')) {

@@ -56,6 +56,22 @@ Tento příkaz automaticky:
 6. Nainstaluje NPM balíčky a sestaví assety (`npm run build`).
 7. Synchronizuje ikony a optimalizuje cache aplikace.
 
+### 3. Rychlá synchronizace po FTP (Sync)
+Pokud soubory na server nahráváte ručně (např. přes FTP klienta nebo automatickou synchronizaci v IDE), můžete následně spustit pouze konfigurační a databázové kroky:
+
+```bash
+php artisan app:sync
+```
+
+Tento příkaz:
+1. Ověří verzi PHP na serveru.
+2. Vytvoří nebo aktualizuje `.env` soubor podle vašeho lokálního nastavení.
+3. Synchronizuje obsah složky `public` do veřejného adresáře a opraví cesty v `index.php`.
+4. Spustí migrace databáze (`migrate --force`).
+5. Provede synchronizaci ikon a optimalizaci mezipaměti (`optimize`).
+
+Je to ideální volba pro rychlé promítnutí změn v kódu, které jste právě nahráli, aniž byste museli spouštět celý proces nasazení s Gitem a NPM.
+
 ---
 
 ### Odolnost proti chybám
