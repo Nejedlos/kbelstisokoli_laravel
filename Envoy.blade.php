@@ -99,6 +99,9 @@
     fi
 
     echo "Installing NPM dependencies..."
+    mkdir -p .node_bin
+    ln -sf $(which {{ $node }}) .node_bin/node
+    export PATH="{{ $path }}/.node_bin:$PATH"
     {{ $npm }} install
 
     echo "Building assets..."
@@ -155,8 +158,15 @@
         "
     fi
 
+    echo "Installing NPM dependencies..."
+    mkdir -p .node_bin
+    ln -sf $(which {{ $node }}) .node_bin/node
+    export PATH="{{ $path }}/.node_bin:$PATH"
     {{ $npm }} install
+
+    echo "Building assets..."
     {{ $npm }} run build
+
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan optimize
 

@@ -73,41 +73,14 @@ class ProductionDeploySetupCommand extends Command
                 required: true
             );
 
-            $phpBinary = text(
-                label: 'PHP binárka na serveru?',
-                placeholder: 'php8.4',
-                default: env('PROD_PHP_BINARY', 'php'),
-                hint: 'Na některých hostinzích (např. Webglobe) je potřeba volat konkrétní verzi, např. php8.4.',
-                required: true
-            );
-
-            $nodeBinary = text(
-                label: 'Node.js binárka na serveru?',
-                placeholder: 'node',
-                default: env('PROD_NODE_BINARY', 'node'),
-                hint: 'Vite 6 vyžaduje Node.js 18+. Pokud máte na serveru více verzí, zadejte cestu k té správné.',
-                required: true
-            );
-
-            $npmBinary = text(
-                label: 'NPM binárka na serveru?',
-                placeholder: 'npm',
-                default: env('PROD_NPM_BINARY', 'npm'),
-                hint: 'Většinou stačí "npm", ale měla by odpovídat zvolené Node.js binárce.',
-                required: true
-            );
-
-            // Uložit základní nastavení hned pro případ selhání v dalším kroku (zapamatovat nastavení)
+            // Uložit základní nastavení spojení ihned pro případ selhání (zapamatovat nastavení)
             $this->updateEnv([
                 'PROD_HOST' => $host,
                 'PROD_PORT' => $port,
                 'PROD_USER' => $user,
-                'PROD_PHP_BINARY' => $phpBinary,
-                'PROD_NODE_BINARY' => $nodeBinary,
-                'PROD_NPM_BINARY' => $npmBinary,
             ]);
 
-            info("🔍 Pokouším se o skenování adresářů na serveru {$user}@{$host}:{$port}...");
+            info("🔍 Pokouším se o navázání SSH spojení se serverem {$user}@{$host}:{$port}...");
 
             if ($this->ensureSshConnection($host, $port, $user)) {
                 break;
@@ -120,6 +93,44 @@ class ProductionDeploySetupCommand extends Command
             // Vyčistit parsované údaje pro další pokus, aby se použily ty z .env
             $parsed = [];
         }
+
+        // --- Automatická detekce binárek po úspěšném připojení ---
+        $detectedPhp = env('PROD_PHP_BINARY', 'php');
+        $detectedNode = env('PROD_NODE_BINARY', 'node20');
+        $detectedNpm = env('PROD_NPM_BINARY', 'npm');
+
+        $this->discoverBinaries($host, $port, $user, $detectedPhp, $detectedNode, $detectedNpm);
+
+        $phpBinary = text(
+            label: 'PHP binárka na serveru?',
+            placeholder: 'php8.4',
+            default: $detectedPhp,
+            hint: 'Na některých hostinzích (např. Webglobe) je potřeba volat konkrétní verzi, např. php8.4.',
+            required: true
+        );
+
+        $nodeBinary = text(
+            label: 'Node.js binárka na serveru?',
+            placeholder: 'node20',
+            default: $detectedNode,
+            hint: 'Vite 6 vyžaduje Node.js 18+. Na Webglobe zkuste "node20" nebo "node18".',
+            required: true
+        );
+
+        $npmBinary = text(
+            label: 'NPM binárka na serveru?',
+            placeholder: 'npm',
+            default: $detectedNpm,
+            hint: 'Zadejte "npm". Pokud používáte konkrétní verzi Node, systém by měl automaticky vybrat správné NPM.',
+            required: true
+        );
+
+        // Uložit aktualizované binárky do .env
+        $this->updateEnv([
+            'PROD_PHP_BINARY' => $phpBinary,
+            'PROD_NODE_BINARY' => $nodeBinary,
+            'PROD_NPM_BINARY' => $npmBinary,
+        ]);
 
         if (!$this->checkServerRequirements($host, $port, $user, $phpBinary, $nodeBinary, $npmBinary)) {
             if (!confirm('Server nesplňuje některé požadavky. Chcete přesto pokračovat?', false)) {
@@ -334,6 +345,37 @@ class ProductionDeploySetupCommand extends Command
         }
     }
 
+    protected function discoverBinaries(string $host, string $port, string $user, string &$php, string &$node, string &$npm): void
+    {
+        spin(function () use ($host, $port, $user, &$php, &$node, &$npm) {
+            // PHP discovery
+            $phpCandidates = array_unique([$php, 'php8.4', 'php8.3', 'php8.2', 'php']);
+            foreach ($phpCandidates as $candidate) {
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                if ($process->successful() && !empty($process->output())) {
+                    preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
+                    if (version_compare($matches[1] ?? '0', '8.4', '>=')) {
+                        $php = $candidate;
+                        break;
+                    }
+                }
+            }
+
+            // Node discovery
+            $nodeCandidates = array_unique([$node, 'node22', 'node20', 'node18', 'node']);
+            foreach ($nodeCandidates as $candidate) {
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                if ($process->successful() && !empty($process->output())) {
+                    preg_match('/v([\d\.]+)/', $process->output(), $matches);
+                    if (version_compare($matches[1] ?? '0', '18.0', '>=')) {
+                        $node = $candidate;
+                        break;
+                    }
+                }
+            }
+        }, 'Hledám optimální verze PHP a Node.js na serveru...');
+    }
+
     protected function detectPaths(string $host, string $port, string $user): array
     {
         return spin(function () use ($host, $port, $user) {
@@ -362,39 +404,99 @@ class ProductionDeploySetupCommand extends Command
         }, 'Skenuji server...');
     }
 
-    protected function checkServerRequirements(string $host, string $port, string $user, string $phpBinary, string $nodeBinary = 'node', string $npmBinary = 'npm'): bool
+    protected function checkServerRequirements(string $host, string $port, string $user, string &$phpBinary, string &$nodeBinary, string &$npmBinary): bool
     {
-        return spin(function () use ($host, $port, $user, $phpBinary, $nodeBinary, $npmBinary) {
-            $requirements = [
-                'php' => ['cmd' => "{$phpBinary} -v", 'label' => "PHP ({$phpBinary}) 8.4+", 'regex' => '/PHP ([\d\.]+)/', 'min' => '8.4'],
-                'git' => ['cmd' => 'git --version', 'label' => 'Git', 'regex' => '/git version ([\d\.]+)/'],
-                'composer' => ['cmd' => 'composer --version', 'label' => 'Composer', 'regex' => '/Composer version ([\d\.]+)/'],
-                'node' => ['cmd' => "{$nodeBinary} -v", 'label' => "Node.js ({$nodeBinary}) 18.0+", 'regex' => '/v([\d\.]+)/', 'min' => '18.0'],
-                'npm' => ['cmd' => "{$npmBinary} -v", 'label' => "NPM ({$npmBinary})", 'regex' => '/([\d\.]+)/'],
-            ];
-
-            $allOk = true;
+        return spin(function () use ($host, $port, $user, &$phpBinary, &$nodeBinary, &$npmBinary) {
             $results = [];
+            $allOk = true;
 
-            foreach ($requirements as $key => $req) {
-                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$req['cmd']} 2>/dev/null'");
-                $output = trim($process->output());
+            // 1. PHP Discovery & Check
+            $phpCandidates = array_unique([$phpBinary, 'php8.4', 'php8.3', 'php8.2', 'php']);
+            $bestPhp = null;
+            $bestPhpVer = null;
 
-                if (!$process->successful() || empty($output)) {
-                    $results[] = "<fg=red>✗</> {$req['label']}: <fg=red>Nenalezeno</>";
-                    $allOk = false;
-                    continue;
+            foreach ($phpCandidates as $candidate) {
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                if ($process->successful() && !empty($process->output())) {
+                    preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
+                    $version = $matches[1] ?? '0';
+                    if (version_compare($version, '8.4', '>=')) {
+                        $bestPhp = $candidate;
+                        $bestPhpVer = $version;
+                        break;
+                    }
                 }
+            }
 
-                preg_match($req['regex'], $output, $matches);
-                $version = $matches[1] ?? 'neznámá';
-
-                if (isset($req['min']) && version_compare($version, $req['min'], '<')) {
-                    $results[] = "<fg=red>✗</> {$req['label']}: <fg=red>Verze {$version}</> (Vyžadováno {$req['min']})";
-                    $allOk = false;
+            if ($bestPhp) {
+                if ($bestPhp !== $phpBinary) {
+                    $results[] = "<fg=yellow>ℹ</> PHP: Původní ({$phpBinary}) nevyhovuje, automaticky nalezeno <fg=green>{$bestPhp}</> (v{$bestPhpVer})";
+                    $phpBinary = $bestPhp;
                 } else {
-                    $results[] = "<fg=green>✓</> {$req['label']}: Verze {$version}";
+                    $results[] = "<fg=green>✓</> PHP ({$phpBinary}): Verze {$bestPhpVer}";
                 }
+            } else {
+                $results[] = "<fg=red>✗</> PHP: Žádná z verzí (8.4+) nebyla nalezena.";
+                $allOk = false;
+            }
+
+            // 2. Git Check
+            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'git --version 2>/dev/null'");
+            if ($process->successful() && !empty($process->output())) {
+                preg_match('/git version ([\d\.]+)/', $process->output(), $matches);
+                $results[] = "<fg=green>✓</> Git: Verze " . ($matches[1] ?? 'neznámá');
+            } else {
+                $results[] = "<fg=red>✗</> Git: Nenalezeno";
+                $allOk = false;
+            }
+
+            // 3. Composer Check
+            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'composer --version 2>/dev/null'");
+            if ($process->successful() && !empty($process->output())) {
+                preg_match('/Composer version ([\d\.]+)/', $process->output(), $matches);
+                $results[] = "<fg=green>✓</> Composer: Verze " . ($matches[1] ?? 'neznámá');
+            } else {
+                $results[] = "<fg=red>✗</> Composer: Nenalezeno";
+                $allOk = false;
+            }
+
+            // 4. Node Discovery & Check
+            $nodeCandidates = array_unique([$nodeBinary, 'node22', 'node20', 'node18', 'node']);
+            $bestNode = null;
+            $bestNodeVer = null;
+
+            foreach ($nodeCandidates as $candidate) {
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                if ($process->successful() && !empty($process->output())) {
+                    preg_match('/v([\d\.]+)/', $process->output(), $matches);
+                    $version = $matches[1] ?? '0';
+                    if (version_compare($version, '18.0', '>=')) {
+                        $bestNode = $candidate;
+                        $bestNodeVer = $version;
+                        break;
+                    }
+                }
+            }
+
+            if ($bestNode) {
+                if ($bestNode !== $nodeBinary) {
+                    $results[] = "<fg=yellow>ℹ</> Node.js: Původní ({$nodeBinary}) nevyhovuje, automaticky nalezeno <fg=green>{$bestNode}</> (v{$bestNodeVer})";
+                    $nodeBinary = $bestNode;
+                } else {
+                    $results[] = "<fg=green>✓</> Node.js ({$nodeBinary}): Verze {$bestNodeVer}";
+                }
+            } else {
+                $results[] = "<fg=red>✗</> Node.js: Žádná z verzí (18.0+) nebyla nalezena.";
+                $allOk = false;
+            }
+
+            // 5. NPM Check
+            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmBinary} -v 2>/dev/null'");
+            if ($process->successful() && !empty($process->output())) {
+                $results[] = "<fg=green>✓</> NPM ({$npmBinary}): Verze " . trim($process->output());
+            } else {
+                $results[] = "<fg=red>✗</> NPM ({$npmBinary}): Nenalezeno";
+                $allOk = false;
             }
 
             foreach ($results as $res) {

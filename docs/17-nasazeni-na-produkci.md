@@ -27,9 +27,10 @@ Příkaz se vás interaktivně zeptá na následující údaje (které se pokus�
 - **Hostitele** (IP adresa nebo doména, např. `dw191.webglobe.com`). Slouží k nalezení serveru v síti.
 - **SSH port** (výchozí `22`, u Webglobe často `20001`). Specifická „brána“, přes kterou se SSH připojuje.
 - **SSH uživatele** (např. `ssh-588875`). Jméno, pod kterým se budou na serveru spouštět všechny instalační a aktualizační příkazy.
-- **PHP binárka:** Možnost specifikovat cestu k PHP (např. `php8.4`). Důležité pro hostingy s více verzemi PHP.
-- **Kontrola spojení a klíčů:** *Novinka:* Příkaz automaticky otestuje, zda se lze k serveru připojit bez hesla. Pokud ne, nabídne vám automatické vygenerování a nahrání SSH klíče na server. K tomu budete jednou vyzváni k zadání hesla k serveru. Tím se zajistí, že následné deploje budou probíhat zcela automaticky bez ptaní na heslo.
-- **Kontrola požadavků:** Příkaz automaticky prověří verze PHP (vyžadováno 8.4+), Gitu, Composeru, Node.js (vyžadováno 18.0+) a NPM na serveru přes zadaný port a s využitím zvolené PHP binárky.
+- **PHP binárka:** *Vylepšeno:* Systém se nejprve připojí k serveru a automaticky se pokusí najít nejvhodnější verzi PHP (8.4+). Tuto verzi vám pak nabídne jako výchozí hodnotu, kterou stačí potvrdit.
+- **Node.js binárka:** *Vylepšeno:* Podobně jako u PHP, systém automaticky prohledá server a najde verzi Node.js (18.0+), která je potřeba pro Vite 6 a Tailwind v4. Na Webglobe typicky najde `node20` nebo `node18`.
+- **Kontrola spojení a klíčů:** Příkaz automaticky otestuje, zda se lze k serveru připojit bez hesla. Pokud ne, nabídne vám automatické vygenerování a nahrání SSH klíče na server. K tomu budete jednou vyzváni k zadání hesla k serveru.
+- **Kontrola požadavků:** Po potvrzení binárek systém provede finální revizi a potvrdí dostupnost Gitu, Composeru a NPM.
 - **Adresáře projektu (Interaktivní prohlížeč):** *Novinka:* Příkaz obsahuje vestavěný prohlížeč souborů na serveru.
   - **Funkční adresář:** Kam se nainstaluje jádro aplikace (včetně `.git`, `vendor`, `.env`). Doporučujeme umístit mimo veřejně přístupnou složku pro maximální bezpečnost (např. `/private` nebo `/app`).
   - **Veřejný adresář:** Kam se synchronizuje obsah složky `public` (např. `/www` nebo `/public_html`).
