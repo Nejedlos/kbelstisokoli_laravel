@@ -60,11 +60,11 @@ Tento příkaz automaticky:
 ### 3. Nasazení přes FTP Sync (Alternativa)
 Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na serveru** (např. při potížích s verzemi) nebo pokud preferujete nahrávání souborů přes FTP.
 
-1. **Lokálně** ve svém počítači sestavte assety a synchronizujte ikony:
+1. **Lokálně** ve svém počítači připravte vše potřebné jedním příkazem:
    ```bash
-   npm run build
-   php artisan app:icons:sync
+   php artisan app:local:prepare
    ```
+   *Tento příkaz automaticky nainstaluje NPM balíčky, sestaví assety (Vite build), synchronizuje ikony a pročistí lokální cache.*
 2. Přes **FTP klienta** (např. FileZilla, WinSCP nebo IDE) nahrajte změněné soubory na server do **funkčního adresáře**. Nezapomeňte nahrát i složky `public/build/` a `public/webfonts/`.
 3. Následně ve svém počítači spusťte příkaz:
    ```bash
