@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\CronTask;
 use App\Jobs\RunCronTaskJob;
 
-return Application::configure(basePath: dirname(__DIR__))
-    ->usePublicPath(realpath(env('APP_PUBLIC_PATH', base_path('public'))))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -92,3 +91,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
+
+// Oprava kompatibility: usePublicPath voláme až na instanci Application,
+// protože ApplicationBuilder ji v této verzi frameworku nemusí podporovat.
+$app->usePublicPath(realpath(env('APP_PUBLIC_PATH', base_path('public'))));
+
+return $app;
