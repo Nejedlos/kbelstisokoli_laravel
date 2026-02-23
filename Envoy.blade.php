@@ -81,7 +81,8 @@
 
     echo "Running composer install..."
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
-    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader
+    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
+    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
         echo "Configuring custom public path: {{ $public_path }}"
@@ -93,34 +94,39 @@
         cp -rt "{{ $public_path }}" public/*
 
         echo "Patching index.php in {{ $public_path }}..."
-        # Update paths in index.php to point to the functional path using regex for better detection
-        {{ $php }} -r "
-            \$path = '{{ $public_path }}/index.php';
-            \$content = file_get_contents(\$path);
+        # Update paths in index.php to point to the functional path using robust regex
+        {{ $php }} -r '
+            $path = "{{ $public_path }}/index.php";
+            if (!file_exists($path)) { exit(0); }
+            $content = file_get_contents($path);
+            $base = "{{ $path }}";
 
-            // Register the Composer autoloader...
-            \$content = preg_replace(
-                '/require\s+__DIR__\s*\.\s*\'\/..\/vendor\/autoload.php\'\s*;/',
-                'require \'{{ $path }}/vendor/autoload.php\';',
-                \$content
+            // 1. Fix autoload.php reference
+            $content = preg_replace(
+                "/require\s+[^;]+vendor\/autoload\.php[\"\']\s*;/",
+                "require \"$base/vendor/autoload.php\";",
+                $content
             );
 
-            // Bootstrap Laravel...
-            \$content = preg_replace(
-                '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
-                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';' . PHP_EOL . '            \$app->usePublicPath(__DIR__);',
-                \$content
+            // 2. Fix bootstrap/app.php and ensure usePublicPath(__DIR__)
+            // First clean up any existing usePublicPath call to avoid duplicates
+            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
+
+            $content = preg_replace(
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\"\']\s*;/",
+                "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
+                $content
             );
 
-            // Maintenance mode...
-            \$content = preg_replace(
-                '/file_exists\(\s*\$maintenance\s*=\s*__DIR__\s*\.\s*\'\/..\/storage\/framework\/maintenance.php\'\s*\)/',
-                'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')',
-                \$content
+            // 3. Fix maintenance mode path
+            $content = preg_replace(
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\"\']\s*\)/",
+                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
+                $content
             );
 
-            file_put_contents(\$path, \$content);
-        "
+            file_put_contents($path, $content);
+        '
         echo "✅ index.php patched."
     fi
 
@@ -160,6 +166,9 @@
     echo "Building assets..."
     npm run build
 
+    echo "Cleaning up cache..."
+    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
+
     echo "Running database migrations..."
     {{ $php }} artisan migrate --force
 
@@ -191,8 +200,11 @@
     fi
     git prune
 
+    echo "Cleaning up cache..."
+    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
+
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
-    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader
+    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
     {{ $php }} artisan migrate --force
 
     if [ ! -z "{{ $public_path ?? '' }}" ]; then
@@ -208,30 +220,34 @@
         cp -rt "{{ $public_path }}" public/*
 
         echo "Patching index.php in {{ $public_path }}..."
-        {{ $php }} -r "
-            \$path = '{{ $public_path }}/index.php';
-            \$content = file_get_contents(\$path);
+        {{ $php }} -r '
+            $path = "{{ $public_path }}/index.php";
+            if (!file_exists($path)) { exit(0); }
+            $content = file_get_contents($path);
+            $base = "{{ $path }}";
 
-            \$content = preg_replace(
-                '/require\s+__DIR__\s*\.\s*\'\/..\/vendor\/autoload.php\'\s*;/',
-                'require \'{{ $path }}/vendor/autoload.php\';',
-                \$content
+            $content = preg_replace(
+                "/require\s+[^;]+vendor\/autoload\.php[\"\']\s*;/",
+                "require \"$base/vendor/autoload.php\";",
+                $content
             );
 
-            \$content = preg_replace(
-                '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
-                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';' . PHP_EOL . '            \$app->usePublicPath(__DIR__);',
-                \$content
+            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
+
+            $content = preg_replace(
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\"\']\s*;/",
+                "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
+                $content
             );
 
-            \$content = preg_replace(
-                '/file_exists\(\s*\$maintenance\s*=\s*__DIR__\s*\.\s*\'\/..\/storage\/framework\/maintenance.php\'\s*\)/',
-                'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')',
-                \$content
+            $content = preg_replace(
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\"\']\s*\)/",
+                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
+                $content
             );
 
-            file_put_contents(\$path, \$content);
-        "
+            file_put_contents($path, $content);
+        '
     fi
 
     echo "Installing NPM dependencies..."
@@ -334,32 +350,39 @@
         cp -rt "{{ $public_path }}" public/*
 
         echo "Patching index.php in {{ $public_path }}..."
-        {{ $php }} -r "
-            \$path = '{{ $public_path }}/index.php';
-            \$content = file_get_contents(\$path);
+        {{ $php }} -r '
+            $path = "{{ $public_path }}/index.php";
+            if (!file_exists($path)) { exit(0); }
+            $content = file_get_contents($path);
+            $base = "{{ $path }}";
 
-            \$content = preg_replace(
-                '/require\s+__DIR__\s*\.\s*\'\/..\/vendor\/autoload.php\'\s*;/',
-                'require \'{{ $path }}/vendor/autoload.php\';',
-                \$content
+            $content = preg_replace(
+                "/require\s+[^;]+vendor\/autoload\.php[\"\']\s*;/",
+                "require \"$base/vendor/autoload.php\";",
+                $content
             );
 
-            \$content = preg_replace(
-                '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
-                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';' . PHP_EOL . '            \$app->usePublicPath(__DIR__);',
-                \$content
+            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
+
+            $content = preg_replace(
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\"\']\s*;/",
+                "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
+                $content
             );
 
-            \$content = preg_replace(
-                '/file_exists\(\s*\$maintenance\s*=\s*__DIR__\s*\.\s*\'\/..\/storage\/framework\/maintenance.php\'\s*\)/',
-                'file_exists(\$maintenance = \'{{ $path }}/storage/framework/maintenance.php\')',
-                \$content
+            $content = preg_replace(
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\"\']\s*\)/",
+                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
+                $content
             );
 
-            file_put_contents(\$path, \$content);
-        "
+            file_put_contents($path, $content);
+        '
         echo "✅ index.php patched."
     fi
+
+    echo "Cleaning up cache..."
+    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
     echo "Running database migrations..."
     {{ $php }} artisan migrate --force

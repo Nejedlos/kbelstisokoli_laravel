@@ -94,6 +94,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
 // Oprava kompatibility: usePublicPath voláme až na instanci Application,
 // protože ApplicationBuilder ji v této verzi frameworku nemusí podporovat.
-$app->usePublicPath(realpath(env('APP_PUBLIC_PATH', base_path('public'))));
+$publicPath = env('APP_PUBLIC_PATH');
+if ($publicPath) {
+    $app->usePublicPath(realpath($publicPath) ?: $publicPath);
+}
 
 return $app;

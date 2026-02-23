@@ -21,7 +21,6 @@
 /vendor
 !/resources/vendor
 !composer.lock
-!bootstrap/cache/
 !storage/framework/cache/data/
 !storage/framework/sessions/
 !storage/framework/testing/
