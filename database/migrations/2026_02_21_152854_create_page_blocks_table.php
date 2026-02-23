@@ -18,7 +18,7 @@ return new class extends Migration
                 $table->string('block_type');
                 $table->unsignedInteger('sort_order')->default(0);
                 $table->boolean('is_visible')->default(true);
-                $table->json('data')->nullable();
+                $table->longText('data')->nullable();
                 $table->string('variant')->nullable();
                 $table->timestamps();
             });

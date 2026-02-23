@@ -14,9 +14,9 @@ return new class extends Migration
         if (!Schema::hasTable('announcements')) {
             Schema::create('announcements', function (Blueprint $table) {
                 $table->id();
-                $table->string('title')->nullable();
-                $table->text('message');
-                $table->string('cta_label')->nullable();
+                $table->longText('title')->nullable();
+                $table->longText('message');
+                $table->longText('cta_label')->nullable();
                 $table->string('cta_url')->nullable();
                 $table->boolean('is_active')->default(true);
                 $table->string('audience')->default('both'); // public, member, both

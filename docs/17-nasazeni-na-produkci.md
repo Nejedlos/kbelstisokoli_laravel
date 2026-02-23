@@ -76,7 +76,8 @@ Je to ideální volba pro rychlé promítnutí změn v kódu, které jste práv�
 ---
 
 ### Odolnost proti chybám a kompatibilita databáze (DŮLEŽITÉ)
-Vzhledem k tomu, že hosting Webglobe využívá starší verze MySQL/MariaDB (bez podpory sloupce `generation_expression` v `information_schema.columns`), je v projektu **zakázáno** používat v migracích následující metody Laravelu 12:
+Vzhledem k tomu, že hosting Webglobe využívá starší verze MySQL/MariaDB (bez podpory nativního typu `JSON` a bez sloupce `generation_expression` v `information_schema.columns`), je v projektu **zakázáno** používat v migracích následující metody Laravelu 12:
+- `$table->json('column_name')` – místo toho používejte `$table->longText('column_name')`. Laravel automaticky zvládne přetypování v modelech (casts).
 - `Schema::hasColumn` / `Schema::hasColumns`
 - `->change()` (např. `$table->string('name')->nullable()->change()`)
 

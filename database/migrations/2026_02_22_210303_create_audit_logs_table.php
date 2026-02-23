@@ -34,8 +34,8 @@ return new class extends Migration
                 $table->text('user_agent_summary')->nullable();
                 $table->string('request_id')->nullable()->index();
 
-                $table->json('metadata')->nullable();
-                $table->json('changes')->nullable();
+                $table->longText('metadata')->nullable();
+                $table->longText('changes')->nullable();
 
                 $table->boolean('is_system_event')->default(false)->index();
                 $table->string('source')->default('web')->index();

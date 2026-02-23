@@ -14,9 +14,9 @@ return new class extends Migration
         if (!Schema::hasTable('galleries')) {
             Schema::create('galleries', function (Blueprint $table) {
                 $table->id();
-                $table->string('title');
+                $table->longText('title');
                 $table->string('slug')->unique();
-                $table->text('description')->nullable();
+                $table->longText('description')->nullable();
                 $table->boolean('is_public')->default(true);
                 $table->boolean('is_visible')->default(true);
                 $table->string('variant')->default('grid'); // grid, masonry

@@ -25,10 +25,10 @@ return new class extends Migration
         if (!Schema::hasTable('teams')) {
             Schema::create('teams', function (Blueprint $table) {
                 $table->id();
-                $table->string('name'); // např. U14 Kluci
+                $table->longText('name'); // např. U14 Kluci
                 $table->string('slug')->unique();
                 $table->string('category')->nullable(); // např. youth, senior
-                $table->text('description')->nullable();
+                $table->longText('description')->nullable();
                 $table->timestamps();
             });
         }
@@ -58,7 +58,7 @@ return new class extends Migration
                 $table->integer('score_home')->nullable();
                 $table->integer('score_away')->nullable();
                 $table->text('notes_internal')->nullable();
-                $table->text('notes_public')->nullable();
+                $table->longText('notes_public')->nullable();
                 $table->timestamps();
             });
         }
@@ -80,8 +80,8 @@ return new class extends Migration
         if (!Schema::hasTable('events') && !Schema::hasTable('club_events')) {
             Schema::create('events', function (Blueprint $table) {
                 $table->id();
-                $table->string('title');
-                $table->text('description')->nullable();
+                $table->longText('title');
+                $table->longText('description')->nullable();
                 $table->string('location')->nullable();
                 $table->dateTime('starts_at');
                 $table->dateTime('ends_at');

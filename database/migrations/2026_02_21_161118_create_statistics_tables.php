@@ -22,9 +22,9 @@ return new class extends Migration
                 $table->boolean('is_visible')->default(true);
                 $table->unsignedInteger('sort_order')->default(0);
                 $table->string('source_type')->default('manual'); // manual, external_import, hybrid
-                $table->json('scope')->nullable(); // season_id, team_id, match_id, etc.
-                $table->json('column_config')->nullable(); // Definice sloupců (key, label, type, sortable, etc.)
-                $table->json('settings')->nullable(); // Rendering/formatting settings
+                $table->longText('scope')->nullable(); // season_id, team_id, match_id, etc.
+                $table->longText('column_config')->nullable(); // Definice sloupců (key, label, type, sortable, etc.)
+                $table->longText('settings')->nullable(); // Rendering/formatting settings
                 $table->string('status')->default('draft'); // draft, published, archived
                 $table->timestamps();
             });
@@ -42,8 +42,8 @@ return new class extends Migration
                 $table->string('row_label')->nullable(); // Fallback label (např. název týmu, který není v DB)
                 $table->unsignedInteger('row_order')->default(0);
                 $table->boolean('is_visible')->default(true);
-                $table->json('values'); // Samotná data statistik (JSON payload)
-                $table->json('source_metadata')->nullable(); // Provenance: manual/imported/ai-normalized
+                $table->longText('values'); // Samotná data statistik (JSON payload)
+                $table->longText('source_metadata')->nullable(); // Provenance: manual/imported/ai-normalized
                 $table->timestamps();
             });
         }
@@ -55,8 +55,8 @@ return new class extends Migration
                 $table->string('name');
                 $table->string('source_url');
                 $table->string('source_type')->default('html_table'); // html_table, page_extract, api
-                $table->json('extractor_config')->nullable(); // Pravidla pro extrakci (např. CSS selector, table index)
-                $table->json('mapping_config')->nullable(); // Mapování na naše StatisticSet/Rows
+                $table->longText('extractor_config')->nullable(); // Pravidla pro extrakci (např. CSS selector, table index)
+                $table->longText('mapping_config')->nullable(); // Mapování na naše StatisticSet/Rows
                 $table->boolean('is_active')->default(true);
                 $table->timestamp('last_run_at')->nullable();
                 $table->string('last_status')->nullable();

@@ -15,7 +15,7 @@ return new class extends Migration
         if (!Schema::hasTable('post_categories')) {
             Schema::create('post_categories', function (Blueprint $table) {
                 $table->id();
-                $table->string('name');
+                $table->longText('name');
                 $table->string('slug')->unique();
                 $table->text('description')->nullable();
                 $table->unsignedInteger('sort_order')->default(0);
@@ -28,7 +28,7 @@ return new class extends Migration
             Schema::create('posts', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('category_id')->nullable()->constrained('post_categories')->onDelete('set null');
-                $table->string('title');
+                $table->longText('title');
                 $table->string('slug')->unique();
                 $table->text('excerpt')->nullable(); // Perex
                 $table->longText('content')->nullable(); // Bude později využívat bloky
@@ -43,9 +43,9 @@ return new class extends Migration
         if (!Schema::hasTable('pages')) {
             Schema::create('pages', function (Blueprint $table) {
                 $table->id();
-                $table->string('title');
+                $table->longText('title');
                 $table->string('slug')->unique();
-                $table->json('content')->nullable(); // Připraveno na blokový obsah
+                $table->longText('content')->nullable(); // Připraveno na blokový obsah
                 $table->string('status')->default('draft'); // draft, published
                 $table->timestamps();
             });
@@ -67,7 +67,7 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('menu_id')->constrained()->onDelete('cascade');
                 $table->foreignId('parent_id')->nullable()->constrained('menu_items')->onDelete('cascade');
-                $table->string('label');
+                $table->longText('label');
                 $table->string('url')->nullable();
                 $table->string('route_name')->nullable();
                 $table->string('target')->default('_self'); // _self, _blank
@@ -81,11 +81,11 @@ return new class extends Migration
             Schema::create('seo_metadatas', function (Blueprint $table) {
                 $table->id();
                 $table->morphs('seoable');
-                $table->json('title')->nullable();
-                $table->json('description')->nullable();
+                $table->longText('title')->nullable();
+                $table->longText('description')->nullable();
                 $table->string('keywords')->nullable();
-                $table->json('og_title')->nullable();
-                $table->json('og_description')->nullable();
+                $table->longText('og_title')->nullable();
+                $table->longText('og_description')->nullable();
                 $table->string('og_image')->nullable();
                 $table->timestamps();
             });

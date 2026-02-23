@@ -20,7 +20,7 @@ return new class extends Migration
                 $table->text('public_bio')->nullable();
                 $table->text('private_note')->nullable(); // pouze pro trenéry/adminy
                 $table->boolean('is_active')->default(true);
-                $table->json('metadata')->nullable();
+                $table->longText('metadata')->nullable();
                 $table->timestamps();
             });
         }

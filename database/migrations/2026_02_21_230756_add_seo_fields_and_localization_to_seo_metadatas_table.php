@@ -18,7 +18,7 @@ return new class extends Migration
                 $table->boolean('robots_index')->default(true);
                 $table->boolean('robots_follow')->default(true);
                 $table->string('twitter_card')->nullable()->default('summary_large_image');
-                $table->json('structured_data_override')->nullable();
+                $table->longText('structured_data_override')->nullable();
             });
         }
     }
@@ -29,10 +29,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('seo_metadatas', function (Blueprint $table) {
-            $table->string('title')->nullable()->change();
-            $table->text('description')->nullable()->change();
-            $table->string('og_title')->nullable()->change();
-            $table->text('og_description')->nullable()->change();
+            // Metoda change() je zakázána kvůli kompatibilitě s Webglobe
+            // Sloupce title, description atd. zůstanou jako longText, což ničemu nevadí.
 
             $table->dropColumn([
                 'canonical_url',

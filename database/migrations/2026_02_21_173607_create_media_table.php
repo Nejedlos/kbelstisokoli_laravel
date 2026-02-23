@@ -21,10 +21,10 @@ return new class extends Migration
                 $table->string('disk');
                 $table->string('conversions_disk')->nullable();
                 $table->unsignedBigInteger('size');
-                $table->json('manipulations');
-                $table->json('custom_properties');
-                $table->json('generated_conversions');
-                $table->json('responsive_images');
+                $table->longText('manipulations');
+                $table->longText('custom_properties');
+                $table->longText('generated_conversions');
+                $table->longText('responsive_images');
                 $table->unsignedInteger('order_column')->nullable()->index();
 
                 $table->nullableTimestamps();

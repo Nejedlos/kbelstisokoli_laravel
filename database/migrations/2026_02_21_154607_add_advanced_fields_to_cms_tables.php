@@ -24,7 +24,7 @@ return new class extends Migration
         Schema::table('page_blocks', function (Blueprint $table) {
             $table->string('custom_id')->nullable();
             $table->string('custom_class')->nullable();
-            $table->json('custom_attributes')->nullable();
+            $table->longText('custom_attributes')->nullable();
         });
     }
 

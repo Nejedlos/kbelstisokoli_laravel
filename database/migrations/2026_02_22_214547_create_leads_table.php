@@ -21,7 +21,7 @@ return new class extends Migration
                 $table->string('phone')->nullable();
                 $table->string('subject')->nullable();
                 $table->text('message')->nullable();
-                $table->json('payload')->nullable();
+                $table->longText('payload')->nullable();
                 $table->string('ip_address')->nullable();
                 $table->string('user_agent')->nullable();
                 $table->timestamps();

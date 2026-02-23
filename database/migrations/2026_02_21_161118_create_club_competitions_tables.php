@@ -39,7 +39,7 @@ return new class extends Migration
                 $table->string('value_type')->default('incremental'); // incremental, absolute
                 $table->string('source_note')->nullable(); // Poznámka k původu (z jakého zápasu/akce)
                 $table->foreignId('basketball_match_id')->nullable()->constrained('matches')->onDelete('set null');
-                $table->json('metadata')->nullable(); // Libovolná doplňující metadata
+                $table->longText('metadata')->nullable(); // Libovolná doplňující metadata
                 $table->timestamps();
             });
         }
