@@ -119,19 +119,21 @@
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
 
-    # Symlink node
+    # Symlink node (using absolute path to avoid circularity)
     if [[ "{{ $node }}" == /* ]]; then
-        ln -sf "{{ $node }}" .node_bin/node
+        NODE_BIN_PATH="{{ $node }}"
     else
-        ln -sf $(which "{{ $node }}") .node_bin/node
+        NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
     fi
+    ln -sf "$NODE_BIN_PATH" .node_bin/node
 
-    # Symlink npm
+    # Symlink npm (using absolute path to avoid circularity)
     if [[ "{{ $npm }}" == /* ]]; then
-        ln -sf "{{ $npm }}" .node_bin/npm
+        NPM_BIN_PATH="{{ $npm }}"
     else
-        ln -sf $(which "{{ $npm }}") .node_bin/npm
+        NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
     fi
+    ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
     export PATH="{{ $path }}/.node_bin:$PATH"
 
@@ -219,19 +221,21 @@
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
 
-    # Symlink node
+    # Symlink node (using absolute path to avoid circularity)
     if [[ "{{ $node }}" == /* ]]; then
-        ln -sf "{{ $node }}" .node_bin/node
+        NODE_BIN_PATH="{{ $node }}"
     else
-        ln -sf $(which "{{ $node }}") .node_bin/node
+        NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
     fi
+    ln -sf "$NODE_BIN_PATH" .node_bin/node
 
-    # Symlink npm
+    # Symlink npm (using absolute path to avoid circularity)
     if [[ "{{ $npm }}" == /* ]]; then
-        ln -sf "{{ $npm }}" .node_bin/npm
+        NPM_BIN_PATH="{{ $npm }}"
     else
-        ln -sf $(which "{{ $npm }}") .node_bin/npm
+        NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
     fi
+    ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
     export PATH="{{ $path }}/.node_bin:$PATH"
 

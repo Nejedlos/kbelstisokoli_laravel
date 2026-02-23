@@ -57,21 +57,28 @@ Tento příkaz automaticky:
 6. Nainstaluje NPM balíčky a sestaví assety (`npm run build`).
 7. Synchronizuje ikony a optimalizuje cache aplikace.
 
-### 3. Rychlá synchronizace po FTP (Sync)
-Pokud soubory na server nahráváte ručně (např. přes FTP klienta nebo automatickou synchronizaci v IDE), můžete následně spustit pouze konfigurační a databázové kroky:
+### 3. Nasazení přes FTP Sync (Alternativa)
+Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na serveru** (např. při potížích s verzemi) nebo pokud preferujete nahrávání souborů přes FTP.
 
-```bash
-php artisan app:sync
-```
+1. **Lokálně** ve svém počítači sestavte assety a synchronizujte ikony:
+   ```bash
+   npm run build
+   php artisan app:icons:sync
+   ```
+2. Přes **FTP klienta** (např. FileZilla, WinSCP nebo IDE) nahrajte změněné soubory na server do **funkčního adresáře**. Nezapomeňte nahrát i složky `public/build/` a `public/webfonts/`.
+3. Následně ve svém počítači spusťte příkaz:
+   ```bash
+   php artisan app:sync
+   ```
 
-Tento příkaz:
+Tento příkaz na serveru automaticky:
 1. Ověří verzi PHP na serveru.
 2. Vytvoří nebo aktualizuje `.env` soubor podle vašeho lokálního nastavení.
 3. Synchronizuje obsah složky `public` do veřejného adresáře a opraví cesty v `index.php`.
 4. Spustí migrace databáze (`migrate --force`).
 5. Provede synchronizaci ikon a optimalizaci mezipaměti (`optimize`).
 
-Je to ideální volba pro rychlé promítnutí změn v kódu, které jste právě nahráli, aniž byste museli spouštět celý proces nasazení s Gitem a NPM.
+Je to **nejjednodušší a nejrobustnější cesta**, pokud nechcete na serveru řešit Git, NPM nebo verze Node.js.
 
 ---
 
@@ -98,10 +105,10 @@ Navíc je bootstrap aplikace v `bootstrap/app.php` zabezpečen tak, aby selhán�
 
 ## Předpoklady na serveru (Webglobe)
 1. **PHP:** Verze 8.4+ (včetně JIT optimalizací).
-2. **SSH Přístup:** Povoleno v administraci Webglobe.
-3. **Git:** Musí být nainstalován.
-4. **Composer:** Globálně dostupný nebo jako `composer.phar` v rootu.
-5. **Node.js & NPM:** Pro buildování assetů (Vite 6 vyžaduje Node 18.0+).
+2. **SSH Přístup:** Povoleno v administraci Webglobe (nutné pro příkazy `app:deploy` i `app:sync`).
+3. **Git:** Musí být nainstalován (pro `app:deploy`).
+4. **Composer:** Globálně dostupný (pro `app:deploy`).
+5. **Node.js & NPM:** Pro buildování assetů přímo na serveru (pro `app:deploy`). **Při použití metody FTP Sync (bod 3) není na serveru potřeba.**
 
 ## Postup nasazení (Manuální přes SSH - příklad pro PHP 8.4)
 Pokud chcete nasadit novou verzi ručně, připojte se přes SSH a proveďte (postup je optimalizován pro **Fish shell**, který Webglobe používá):
@@ -123,18 +130,20 @@ php8.4 artisan migrate --force
 # Pokud 'node -v' vypíše 18+, můžete použít přímo 'node'.
 # Na Webglobe často existují binárky jako node20, node18, ale mohou být skryté (např. v /opt/alt/node*/usr/bin/).
 
-# Tip pro důkladné vyhledání všech dostupných Node binárek:
-# which -a node; or whereis -b node; or ls -1 /opt/alt/node*/usr/bin/node
+# Tip pro důkladné vyhledání všech dostupných Node binárek (mimo naši složku .node_bin):
+# which -a node20 node18 node | grep -v ".node_bin"
 
 # Příklad pro automatické nalezení a uložení cesty k binárce:
-set -l NODE_BIN (which node20; or which node18; or which /opt/alt/node*/usr/bin/node | head -n1; or which node)
+set -l NODE_BIN (which -a node20 node18 node | grep -v ".node_bin" | head -n1; or which /opt/alt/node*/usr/bin/node | head -n1)
 
 # 2. Vytvořte lokální binářky (symlinky) pro konzistenci
 mkdir -p .node_bin
-ln -sf $NODE_BIN .node_bin/node
+# Použijeme realpath, aby symlink mířil na skutečný soubor, ne na jiný symlink
+ln -sf (realpath $NODE_BIN) .node_bin/node
+
 # Podobně pro NPM (pokud existuje npm20/npm18, jinak zkusit odvodit od cesty k Node)
-set -l NPM_BIN (which npm20; or which npm18; or which (string replace "node" "npm" $NODE_BIN); or which npm)
-ln -sf $NPM_BIN .node_bin/npm
+set -l NPM_BIN (which -a npm20 npm18 npm | grep -v ".node_bin" | head -n1; or which (string replace "node" "npm" $NODE_BIN))
+ln -sf (realpath $NPM_BIN) .node_bin/npm
 
 # 3. Přidejte do PATH (absolutní cestou)
 set -gx PATH (realpath .node_bin) $PATH
@@ -153,6 +162,11 @@ php8.4 artisan optimize
 ```
 
 ### Řešení potíží (Troubleshooting)
+**Chyba: `Too many levels of symbolic links`**
+Tato chyba znamená, že se symlinky v `.node_bin` zacyklily (např. `node` ukazuje na `node`). To se může stát, pokud příkazy pro nastavení PATH spustíte opakovaně v téže session a nepoužijete filtrující `grep`.
+- Smažte složku `.node_bin` a začněte znovu: `rm -rf .node_bin`.
+- Ujistěte se, že při hledání binárek používáte `grep -v ".node_bin"`.
+
 **Chyba: `SyntaxError: Unexpected token '??='`**
 Tato chyba znamená, že se k sestavení assetů (Vite) používá příliš stará verze Node.js. Webglobe má jako výchozí `node` verzi 12 nebo 14, ale moderní nástroje vyžadují 18+.
 - Ujistěte se, že jste provedli kroky v sekci „KRITICKÝ KROK“ výše.

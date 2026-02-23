@@ -32,13 +32,26 @@ class IconsSyncCommand extends Command
 
         if ($isPro) {
             $this->info('Synchronizuji Font Awesome Pro ikony z node_modules...');
-            try {
-                $this->call('blade-fontawesome:sync-icons', ['--pro' => true]);
-                $this->info('✓ Pro ikony byly synchronizovány.');
-            } catch (\Exception $e) {
-                $this->error('✗ Chyba při synchronizaci: ' . $e->getMessage());
-                $this->warn('Ujistěte se, že máte nainstalován balíček @fortawesome/fontawesome-pro (npm install).');
-                return 1;
+
+            // Kontrola existence node_modules pro Pro ikony
+            if (!is_dir(base_path('node_modules/@fortawesome/fontawesome-pro'))) {
+                $this->warn('! Adresář node_modules/@fortawesome/fontawesome-pro nebyl nalezen.');
+                $this->line('Na produkci je to v pořádku, pokud jste ikony synchronizovali lokálně před nahráním.');
+                $this->info('Přeskakuji fyzickou synchronizaci souborů, pouze čistím a generuji cache.');
+            } else {
+                try {
+                    $this->call('blade-fontawesome:sync-icons', ['--pro' => true]);
+                    $this->info('✓ Pro ikony byly synchronizovány.');
+                } catch (\Exception $e) {
+                    $this->error('✗ Chyba při synchronizaci: ' . $e->getMessage());
+                    $this->warn('Ujistěte se, že máte nainstalován balíček @fortawesome/fontawesome-pro (npm install).');
+                    // Na produkci nechceme, aby toto shodilo celý deploy, pokud už ikony máme
+                    if (app()->environment('production')) {
+                        $this->warn('Pokračuji dál (produkční režim)...');
+                    } else {
+                        return 1;
+                    }
+                }
             }
         } else {
             $this->warn('Režim Free: Synchronizace Pro ikon přeskočena.');

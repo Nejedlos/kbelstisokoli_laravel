@@ -371,21 +371,7 @@ class ProductionDeploySetupCommand extends Command
                 $path = trim($line);
                 if (empty($path)) continue;
 
-                // If it's in a standard path, we can just use the basename
-                $standardPaths = ['/usr/bin/', '/usr/local/bin/', '/bin/'];
-                $isStandard = false;
-                foreach ($standardPaths as $std) {
-                    if (str_starts_with($path, $std)) {
-                        $binaries[] = basename($path);
-                        $isStandard = true;
-                        break;
-                    }
-                }
-
-                if (!$isStandard) {
-                    // Keep full path for non-standard locations
-                    $binaries[] = $path;
-                }
+                $binaries[] = $path;
             }
         }
 
@@ -397,11 +383,12 @@ class ProductionDeploySetupCommand extends Command
         spin(function () use ($host, $port, $user, &$php, &$node, &$npm) {
             // PHP discovery
             $remotePhpBinaries = $this->findBinariesOnServer($host, $port, $user, 'php*');
-            $phpCandidates = array_unique(array_merge([$php, 'php8.4', 'php8.3', 'php8.2', 'php'], $remotePhpBinaries));
+            $phpCandidates = array_unique(array_merge($remotePhpBinaries, [$php, 'php8.4', 'php8.3', 'php8.2', 'php']));
 
             foreach ($phpCandidates as $candidate) {
                 // Ignore some obvious non-php binaries if any
-                if (!preg_match('/^php[\d\.]*$/', $candidate) && $candidate !== 'php') continue;
+                $bn = basename($candidate);
+                if (!preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') continue;
 
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
@@ -415,11 +402,12 @@ class ProductionDeploySetupCommand extends Command
 
             // Node discovery
             $remoteNodeBinaries = $this->findBinariesOnServer($host, $port, $user, 'node*');
-            $nodeCandidates = array_unique(array_merge([$node, 'node22', 'node20', 'node18', 'node'], $remoteNodeBinaries));
+            $nodeCandidates = array_unique(array_merge($remoteNodeBinaries, [$node, 'node22', 'node20', 'node18', 'node']));
 
             foreach ($nodeCandidates as $candidate) {
                 // Only look for node or node digits
-                if (!preg_match('/^node[\d]*$/', $candidate) && $candidate !== 'node') continue;
+                $bn = basename($candidate);
+                if (!preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') continue;
 
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
@@ -429,7 +417,7 @@ class ProductionDeploySetupCommand extends Command
 
                         // Try to find matching npm (e.g., node20 -> npm20)
                         $remoteNpmBinaries = $this->findBinariesOnServer($host, $port, $user, 'npm*');
-                        $npmCandidates = array_unique(array_merge(['npm'], $remoteNpmBinaries));
+                        $npmCandidates = array_unique(array_merge($remoteNpmBinaries, ['npm']));
 
                         if (preg_match('/node(\d+)/', $node, $m)) {
                             array_unshift($npmCandidates, 'npm' . $m[1]);
@@ -437,7 +425,8 @@ class ProductionDeploySetupCommand extends Command
                         $npmCandidates = array_unique($npmCandidates);
 
                         foreach ($npmCandidates as $npmCandidate) {
-                            if (!preg_match('/^npm[\d]*$/', $npmCandidate) && $npmCandidate !== 'npm') continue;
+                            $bn = basename($npmCandidate);
+                            if (!preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') continue;
 
                             $npmProc = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
                             if ($npmProc->successful()) {
@@ -488,12 +477,13 @@ class ProductionDeploySetupCommand extends Command
 
             // 1. PHP Discovery & Check
             $remotePhpBinaries = $this->findBinariesOnServer($host, $port, $user, 'php*');
-            $phpCandidates = array_unique(array_merge([$phpBinary, 'php8.4', 'php8.3', 'php8.2', 'php'], $remotePhpBinaries));
+            $phpCandidates = array_unique(array_merge($remotePhpBinaries, [$phpBinary, 'php8.4', 'php8.3', 'php8.2', 'php']));
             $bestPhp = null;
             $bestPhpVer = null;
 
             foreach ($phpCandidates as $candidate) {
-                if (!preg_match('/^php[\d\.]*$/', $candidate) && $candidate !== 'php') continue;
+                $bn = basename($candidate);
+                if (!preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') continue;
 
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
@@ -541,12 +531,13 @@ class ProductionDeploySetupCommand extends Command
 
             // 4. Node Discovery & Check
             $remoteNodeBinaries = $this->findBinariesOnServer($host, $port, $user, 'node*');
-            $nodeCandidates = array_unique(array_merge([$nodeBinary, 'node22', 'node20', 'node18', 'node'], $remoteNodeBinaries));
+            $nodeCandidates = array_unique(array_merge($remoteNodeBinaries, [$nodeBinary, 'node22', 'node20', 'node18', 'node']));
             $bestNode = null;
             $bestNodeVer = null;
 
             foreach ($nodeCandidates as $candidate) {
-                if (!preg_match('/^node[\d]*$/', $candidate) && $candidate !== 'node') continue;
+                $bn = basename($candidate);
+                if (!preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') continue;
 
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
@@ -574,7 +565,7 @@ class ProductionDeploySetupCommand extends Command
 
             // 5. NPM Check
             $remoteNpmBinaries = $this->findBinariesOnServer($host, $port, $user, 'npm*');
-            $npmCandidates = array_unique(array_merge([$npmBinary, 'npm'], $remoteNpmBinaries));
+            $npmCandidates = array_unique(array_merge($remoteNpmBinaries, [$npmBinary, 'npm']));
 
             if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
                 array_unshift($npmCandidates, 'npm' . $m[1]);
@@ -583,7 +574,8 @@ class ProductionDeploySetupCommand extends Command
 
             $bestNpm = null;
             foreach ($npmCandidates as $candidate) {
-                if (!preg_match('/^npm[\d]*$/', $candidate) && $candidate !== 'npm') continue;
+                $bn = basename($candidate);
+                if (!preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') continue;
 
                 $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {

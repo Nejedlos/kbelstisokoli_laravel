@@ -58,6 +58,7 @@ class ProductionSyncCommand extends Command
 
         while (true) {
             \Laravel\Prompts\info("🚀 Synchronizuji konfiguraci na {$user}@{$host}:{$port}...");
+            \Laravel\Prompts\info("💡 Nezapomeňte před nahráním na FTP spustit lokálně: npm run build && php artisan app:icons:sync");
 
             $params = [
                 "--host={$host}",
