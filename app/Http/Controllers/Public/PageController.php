@@ -10,8 +10,13 @@ use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function show(string $slug, \App\Services\BreadcrumbService $breadcrumbService): View
+    public function show(string $slug, \App\Services\BreadcrumbService $breadcrumbService): View|\Illuminate\Http\RedirectResponse
     {
+        // Homepage by měla být dostupná pouze na kořenové URL
+        if ($slug === 'home') {
+            return redirect()->route('public.home');
+        }
+
         $page = Page::with('seo')
             ->where('slug', $slug)
             ->where('status', 'published')

@@ -20,22 +20,19 @@
             </div>
         @endforeach
     </nav>
-
     {{-- JSON-LD pro SEO --}}
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
+      "{{ '@' }}context": "https://schema.org",
+      "{{ '@' }}type": "BreadcrumbList",
       "itemListElement": [
         @foreach($breadcrumbs as $index => $breadcrumb)
         {
-          "@type": "ListItem",
+          "{{ '@' }}type": "ListItem",
           "position": {{ $index + 1 }},
-          "name": "{{ $breadcrumb->title }}",
-          @if($breadcrumb->url)
-          "item": "{{ $breadcrumb->url }}"
-          @endif
-        }{{ !$loop->last ? ',' : '' }}
+          "name": "{{ $breadcrumb->title }}"@if($breadcrumb->url),
+          "item": "{{ str_starts_with($breadcrumb->url, 'http') ? $breadcrumb->url : url($breadcrumb->url) }}"@endif
+        }{{ $loop->last ? '' : ',' }}
         @endforeach
       ]
     }

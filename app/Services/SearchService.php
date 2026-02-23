@@ -35,9 +35,9 @@ class SearchService
 
         foreach ($pages as $page) {
             $results->push(new SearchResult(
-                title: $page->title,
-                snippet: $this->makeSnippet($page->content),
-                url: route('public.page', $page->slug),
+                title: $page->getTranslation('title', app()->getLocale()),
+                snippet: $this->makeSnippet($page->getTranslation('content', app()->getLocale())),
+                url: $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug),
                 type: __('search.types.page'),
                 date: $page->updated_at->format('d.m.Y'),
             ));
@@ -57,9 +57,9 @@ class SearchService
 
         foreach ($posts as $post) {
             $results->push(new SearchResult(
-                title: $post->title,
-                snippet: $this->makeSnippet($post->excerpt ?: $post->content),
-                url: route('public.post.show', $post->slug),
+                title: $post->getTranslation('title', app()->getLocale()),
+                snippet: $this->makeSnippet($post->getTranslation('excerpt', app()->getLocale()) ?: $post->getTranslation('content', app()->getLocale())),
+                url: route('public.news.show', $post->slug),
                 type: __('search.types.post'),
                 image: $post->featured_image,
                 date: $post->publish_at?->format('d.m.Y') ?: $post->created_at->format('d.m.Y'),
@@ -69,12 +69,52 @@ class SearchService
         return $results->take($limit);
     }
 
-    private function makeSnippet(?string $content): string
+    private function makeSnippet(string|array|null $content): string
     {
-        if (!$content) return '';
+        if (!$content) {
+            return '';
+        }
+
+        if (is_array($content)) {
+            $content = $this->flattenBlocks($content);
+        }
 
         // Odstranění HTML tagů a zkrácení
-        $text = strip_tags($content);
-        return Str::limit($text, 160);
+        $text = strip_tags((string) $content);
+        $text = preg_replace('/\s+/', ' ', $text); // Odstranění nadbytečných bílých znaků
+
+        return Str::limit(trim($text), 160);
+    }
+
+    /**
+     * Převede pole bloků na prostý text.
+     */
+    private function flattenBlocks(array $blocks): string
+    {
+        $text = [];
+        foreach ($blocks as $block) {
+            if (isset($block['data']) && is_array($block['data'])) {
+                $text[] = $this->extractStrings($block['data']);
+            }
+        }
+
+        return implode(' ', array_filter($text));
+    }
+
+    /**
+     * Rekurzivně vyextrahuje všechny řetězce z pole.
+     */
+    private function extractStrings(array $data): string
+    {
+        $strings = [];
+        foreach ($data as $value) {
+            if (is_string($value)) {
+                $strings[] = $value;
+            } elseif (is_array($value)) {
+                $strings[] = $this->extractStrings($value);
+            }
+        }
+
+        return implode(' ', array_filter($strings));
     }
 }
