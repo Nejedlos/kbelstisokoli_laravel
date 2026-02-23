@@ -10,6 +10,7 @@ use App\Models\CronTask;
 use App\Jobs\RunCronTaskJob;
 
 return Application::configure(basePath: dirname(__DIR__))
+    ->usePublicPath(realpath(env('APP_PUBLIC_PATH', base_path('public'))))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',

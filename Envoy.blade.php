@@ -66,6 +66,14 @@
     sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
     sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
 
+    if [ ! -z "{{ $public_path ?? '' }}" ]; then
+        if grep -q "^APP_PUBLIC_PATH=" .env; then
+            sed -i "s|APP_PUBLIC_PATH=.*|APP_PUBLIC_PATH={{ $public_path }}|" .env
+        else
+            echo "APP_PUBLIC_PATH={{ $public_path }}" >> .env
+        fi
+    fi
+
     if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
@@ -100,7 +108,7 @@
             // Bootstrap Laravel...
             \$content = preg_replace(
                 '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
-                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';',
+                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';' . PHP_EOL . '            \$app->usePublicPath(__DIR__);',
                 \$content
             );
 
@@ -187,6 +195,14 @@
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader
     {{ $php }} artisan migrate --force
 
+    if [ ! -z "{{ $public_path ?? '' }}" ]; then
+        if grep -q "^APP_PUBLIC_PATH=" .env; then
+            sed -i "s|APP_PUBLIC_PATH=.*|APP_PUBLIC_PATH={{ $public_path }}|" .env
+        else
+            echo "APP_PUBLIC_PATH={{ $public_path }}" >> .env
+        fi
+    fi
+
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
         echo "Ensuring custom public path is synced: {{ $public_path }}"
         cp -rt "{{ $public_path }}" public/*
@@ -204,7 +220,7 @@
 
             \$content = preg_replace(
                 '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
-                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';',
+                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';' . PHP_EOL . '            \$app->usePublicPath(__DIR__);',
                 \$content
             );
 
@@ -297,6 +313,14 @@
     sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
     sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
 
+    if [ ! -z "{{ $public_path ?? '' }}" ]; then
+        if grep -q "^APP_PUBLIC_PATH=" .env; then
+            sed -i "s|APP_PUBLIC_PATH=.*|APP_PUBLIC_PATH={{ $public_path }}|" .env
+        else
+            echo "APP_PUBLIC_PATH={{ $public_path }}" >> .env
+        fi
+    fi
+
     if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
@@ -322,7 +346,7 @@
 
             \$content = preg_replace(
                 '/\$app\s*=\s*require_once\s+__DIR__\s*\.\s*\'\/..\/bootstrap\/app.php\'\s*;/',
-                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';',
+                '\$app = require_once \'{{ $path }}/bootstrap/app.php\';' . PHP_EOL . '            \$app->usePublicPath(__DIR__);',
                 \$content
             );
 
