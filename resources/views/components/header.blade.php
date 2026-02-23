@@ -71,12 +71,12 @@
                             {{ __('nav.member_section') }}
                         </a>
 
-                        @can('access_admin')
-                            <a href="/admin" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
+                        @if(auth()->user()?->canAccessAdmin())
+                            <a href="{{ config('filament.panels.admin.path', 'admin') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
                                 <i class="fa-light fa-lock-keyhole w-5 text-center"></i>
                                 {{ __('nav.administration') }}
                             </a>
-                        @endcan
+                        @endif
 
                         <div class="border-t border-slate-50 mt-1 pt-1">
                             <form method="POST" action="{{ route('logout') }}">
@@ -137,7 +137,7 @@
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-4"
          class="lg:hidden bg-white border-t border-slate-100 py-4 absolute w-full shadow-xl">
-        <div class="container flex flex-col gap-2 py-6">
+         <div class="container flex flex-col gap-2 py-6">
             @foreach($navigation as $item)
                 <a href="{{ route($item['route']) }}"
                    class="font-bold uppercase text-base tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 {{ request()->routeIs($item['route']) ? 'text-primary bg-primary/5' : 'text-slate-700' }}">

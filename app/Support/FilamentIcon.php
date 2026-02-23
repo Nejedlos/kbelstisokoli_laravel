@@ -25,7 +25,9 @@ class FilamentIcon
     {
         // 0. V testech vracíme bezpečný placeholder, abychom se vyhnuli SvgNotFound
         // během bootování aplikací v testovacím prostředí.
-        if (app()->runningUnitTests()) {
+        // Avoid container calls during early config bootstrap.
+        // Detect tests in a container-agnostic way (without app()).
+        if ((PHP_SAPI === 'cli' && (getenv('APP_ENV') === 'testing' || getenv('RUNNING_PHPUNIT') === '1'))) {
             return 'heroicon-o-stop';
         }
 
@@ -37,7 +39,7 @@ class FilamentIcon
         };
 
         // 2. Pokud už má prefix (např. heroicon-), vrátíme ji přímo
-        if (Str::contains($iconName, ['-'])) {
+        if (\Illuminate\Support\Str::contains($iconName, ['-'])) {
              $parts = explode('-', $iconName);
              $prefix = $parts[0];
              if (in_array($prefix, ['heroicon', 'fas', 'far', 'fab', 'fal', 'fad', 'fat', 'app'])) {
@@ -69,9 +71,10 @@ class FilamentIcon
         $proStyles = ['fal', 'fad', 'fat'];
 
         // Pokud je vyžadován Pro styl, ale nemáme Pro (zde detekujeme absenci KIT nebo PRO balíčku)
-        // V tomto projektu předpokládáme Free, dokud není v configu/env řečeno jinak.
+        // V tomto projektu předpokládáme Free, dokud není v env řečeno jinak.
         if (in_array($style, $proStyles)) {
-            if (!config('app.fontawesome_pro', false)) {
+            // Používáme přímo getenv, abychom se vyhnuli volání config() během bootstrapu konfigurace.
+            if (getenv('FONTAWESOME_PRO') !== 'true') {
                 // Fallback na Solid, který je vždy dostupný ve Free
                 return 'fas';
             }

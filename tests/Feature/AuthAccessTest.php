@@ -54,7 +54,7 @@ class AuthAccessTest extends TestCase
 
         // Admin má přístup do admin sekce
         // Použijeme /admin/ aby se předešlo 301/302 trailing slash redirectu
-        $response = $this->get('/admin/');
+        $response = $this->get('/admin');
         if ($response->status() !== 200) {
             dump($response->status());
             dump($response->headers->all());
@@ -110,9 +110,40 @@ class AuthAccessTest extends TestCase
             'password' => 'password',
         ]);
 
-        // Default redirect pro membera by měl být na dashboard členské sekce
-        // Fortify používá home config, nebo redirectPath() v LoginResponse.
-        // Musím zjistit, jak je to implementováno.
+        // Běžní členové jsou po 1. fázi přihlášení vedení do členské sekce
         $response->assertRedirect(route('member.dashboard'));
+    }
+
+    /**
+     * 7) Admin + Member scénáře (Kombinované role).
+     */
+    public function test_admin_and_member_access(): void
+    {
+        $user = $this->createAdmin();
+        $user->assignRole('player');
+        $this->with2FA($user);
+
+        $this->actingAs($user);
+        session(['auth.2fa_confirmed_at' => now()->timestamp]);
+
+        // Má přístup do obou sekcí
+        $this->get('/admin/')->assertStatus(200);
+        $this->get(route('member.dashboard'))->assertStatus(200);
+    }
+
+    /**
+     * 8) Inactive user scénáře.
+     */
+    public function test_inactive_user_cannot_access(): void
+    {
+        $user = $this->createMember(['is_active' => false]);
+
+        $this->actingAs($user);
+
+        // Middleware 'active' odhlásí uživatele a přesměruje na login s chybou
+        $response = $this->get(route('member.dashboard'));
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors(['email' => 'Účet je deaktivován. Kontaktujte správce.']);
+        $this->assertGuest();
     }
 }

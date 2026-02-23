@@ -84,19 +84,24 @@
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-        echo "Configuring custom public path: {{ $public_path }}"
-        if [ ! -d "{{ $public_path }}" ]; then
-            mkdir -p "{{ $public_path }}"
+        echo "Ensuring custom public path is linked: {{ $public_path }}"
+        if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
+            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public..."
+            # Prevent moving public files if they are already there (e.g., if paths are same)
+            if [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+                cp -rn "{{ $public_path }}"/* public/ 2>/dev/null || true
+                rm -rf "{{ $public_path }}"
+            fi
         fi
 
-        echo "Syncing public directory to {{ $public_path }}..."
-        cp -rt "{{ $public_path }}" public/*
+        if [ ! -L "{{ $public_path }}" ]; then
+            ln -sf "{{ $path }}/public" "{{ $public_path }}"
+            echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
+        fi
 
-        echo "Patching index.php in {{ $public_path }}..."
-        # Update paths in index.php to point to the functional path using robust regex
+        echo "Patching index.php in project root for absolute paths..."
         {{ $php }} -r '
-            $path = "{{ $public_path }}/index.php";
+            $path = "{{ $path }}/public/index.php";
             if (!file_exists($path)) { exit(0); }
             $content = file_get_contents($path);
             $base = "{{ $path }}";
@@ -108,8 +113,7 @@
                 $content
             );
 
-            // 2. Fix bootstrap/app.php and ensure usePublicPath(__DIR__)
-            // First clean up any existing usePublicPath call to avoid duplicates
+            // 2. Fix bootstrap/app.php reference and ensure usePublicPath(__DIR__)
             $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
 
             $content = preg_replace(
@@ -127,7 +131,7 @@
 
             file_put_contents($path, $content);
         '
-        echo "✅ index.php patched."
+        echo "✅ index.php patched with absolute paths."
     fi
 
     echo "Installing NPM dependencies..."
@@ -163,10 +167,17 @@
 
     npm install
 
-    echo "Building assets..."
-    npm run build
+        echo "Building assets..."
+        npm run build
 
-    echo "Cleaning up cache..."
+        # Zajištění, aby build byl v subdoméně, ale i pro PHP dostupné v public_path()
+        if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+            echo "Copying build to custom public path: {{ $public_path }}/build"
+            mkdir -p "{{ $public_path }}/build"
+            cp -r public/build/* "{{ $public_path }}/build/"
+        fi
+
+        echo "Cleaning up cache..."
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
     echo "Running database migrations..."
@@ -216,12 +227,21 @@
     fi
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path is synced: {{ $public_path }}"
-        cp -rt "{{ $public_path }}" public/*
+        echo "Ensuring custom public path is linked: {{ $public_path }}"
+        if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
+            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public..."
+            cp -rn "{{ $public_path }}"/* public/ 2>/dev/null || true
+            rm -rf "{{ $public_path }}"
+        fi
 
-        echo "Patching index.php in {{ $public_path }}..."
+        if [ ! -L "{{ $public_path }}" ]; then
+            ln -sf "{{ $path }}/public" "{{ $public_path }}"
+            echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
+        fi
+
+        echo "Patching index.php in project root for absolute paths..."
         {{ $php }} -r '
-            $path = "{{ $public_path }}/index.php";
+            $path = "{{ $path }}/public/index.php";
             if (!file_exists($path)) { exit(0); }
             $content = file_get_contents($path);
             $base = "{{ $path }}";
@@ -285,6 +305,13 @@
 
     echo "Building assets..."
     npm run build
+
+    # Zajištění, aby build byl v subdoméně
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+        echo "Copying build to custom public path: {{ $public_path }}/build"
+        mkdir -p "{{ $public_path }}/build"
+        cp -r public/build/* "{{ $public_path }}/build/"
+    fi
 
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan optimize
@@ -343,15 +370,21 @@
     fi
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path is synced: {{ $public_path }}"
-        if [ ! -d "{{ $public_path }}" ]; then
-            mkdir -p "{{ $public_path }}"
+        echo "Ensuring custom public path is linked: {{ $public_path }}"
+        if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
+            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public..."
+            cp -rn "{{ $public_path }}"/* public/ 2>/dev/null || true
+            rm -rf "{{ $public_path }}"
         fi
-        cp -rt "{{ $public_path }}" public/*
 
-        echo "Patching index.php in {{ $public_path }}..."
+        if [ ! -L "{{ $public_path }}" ]; then
+            ln -sf "{{ $path }}/public" "{{ $public_path }}"
+            echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
+        fi
+
+        echo "Patching index.php in project root for absolute paths..."
         {{ $php }} -r '
-            $path = "{{ $public_path }}/index.php";
+            $path = "{{ $path }}/public/index.php";
             if (!file_exists($path)) { exit(0); }
             $content = file_get_contents($path);
             $base = "{{ $path }}";

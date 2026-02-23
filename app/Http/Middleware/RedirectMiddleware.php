@@ -42,6 +42,14 @@ class RedirectMiddleware
         }
 
         if ($redirect) {
+            \Illuminate\Support\Facades\Log::info('RedirectMiddleware.match', [
+                'path' => $path,
+                'source' => $redirect->source_path,
+                'target_path' => $redirect->target_path,
+                'target_url' => $redirect->target_url,
+                'target_type' => $redirect->target_type,
+            ]);
+
             $target = $redirect->target_type === 'internal'
                 ? url($redirect->target_path)
                 : $redirect->target_url;

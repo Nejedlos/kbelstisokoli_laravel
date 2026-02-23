@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::name('public.')->middleware(['public.maintenance'])->group(function (): void {
+Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(function (): void {
     // Úvod
     Route::get('/', HomeController::class)->name('home');
 
@@ -60,5 +60,7 @@ Route::name('public.')->middleware(['public.maintenance'])->group(function (): v
     Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class, 'robots'])->name('robots');
 
     // Generické stránky (vždy na konci skupiny)
-    Route::get('/{slug}', [PageController::class, 'show'])->name('pages.show');
+    Route::get('/{slug}', [PageController::class, 'show'])
+        ->name('pages.show')
+        ->where('slug', '^(?!admin|clenska-sekce|login|logout|two-factor|auth|user|api|up|system).*$');
 });

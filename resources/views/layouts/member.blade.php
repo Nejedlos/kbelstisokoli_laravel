@@ -156,11 +156,11 @@
                          x-transition:enter-end="opacity-100 scale-100"
                          class="absolute right-0 mt-2 w-48 bg-white rounded-club shadow-xl border border-slate-100 py-2 text-slate-700 z-50">
                         <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors font-bold">{{ __('nav.my_profile') }}</a>
-                        @can('access_admin')
+                        @if(auth()->user()?->canAccessAdmin())
                             <a href="{{ url(config('filament.panels.admin.path', 'admin')) }}" class="block px-4 py-2 text-sm text-primary hover:bg-primary/5 transition-colors font-bold">
                                 <i class="fa-light fa-shield-check mr-2"></i> {{ __('nav.administration') }}
                             </a>
-                        @endcan
+                        @endif
                         <a href="{{ route('public.home') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors">{{ __('nav.public_web') }}</a>
                         <hr class="my-2 border-slate-100">
                         <form method="POST" action="{{ route('logout') }}">

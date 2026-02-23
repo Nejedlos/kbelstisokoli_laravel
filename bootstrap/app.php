@@ -17,13 +17,13 @@ $app = Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             Route::middleware('web')
-                ->group(base_path('routes/public.php'));
-
-            Route::middleware('web')
                 ->group(base_path('routes/member.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/admin.php'));
+
+            Route::middleware('web')
+                ->group(base_path('routes/public.php'));
         },
     )
     ->withSchedule(function (Schedule $schedule) {
@@ -62,6 +62,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'redirects' => \App\Http\Middleware\RedirectMiddleware::class,
         ]);
 
         $middleware->appendToGroup('web', [
@@ -84,19 +85,25 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\RedirectMiddleware::class,
+
             \App\Http\Middleware\SetLocaleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
+            if ($e->getStatusCode() === 419 && $request->is('logout')) {
+                return redirect()->to('/');
+            }
+        });
     })->create();
 
 // Oprava kompatibility: usePublicPath voláme až na instanci Application,
 // protože ApplicationBuilder ji v této verzi frameworku nemusí podporovat.
 $publicPath = env('APP_PUBLIC_PATH');
 if ($publicPath) {
-    $app->usePublicPath(realpath($publicPath) ?: $publicPath);
+    // Na některých hostinzích může realpath selhat kvůli open_basedir, proto fallback na původní hodnotu
+    $resolvedPath = realpath($publicPath) ?: $publicPath;
+    $app->usePublicPath($resolvedPath);
 }
 
 return $app;

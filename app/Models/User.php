@@ -185,7 +185,15 @@ class User extends Authenticatable implements FilamentUser, HasMedia
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->is_active && $this->hasAnyRole(['admin', 'editor', 'coach']);
+        return $this->canAccessAdmin();
+    }
+
+    /**
+     * Zkontroluje, zda má uživatel přístup k administraci (Filament nebo custom).
+     */
+    public function canAccessAdmin(): bool
+    {
+        return $this->is_active && ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach']));
     }
 
     /**

@@ -12,7 +12,7 @@ class HomeController extends Controller
     public function __invoke(BrandingService $brandingService): View
     {
         $branding = $brandingService->getSettings();
-        $isAdmin = auth()->check() && auth()->user()->can('access_admin');
+        $isAdmin = auth()->check() && auth()->user()->canAccessAdmin();
 
         // 1. Priorita: Manuálně zapnutý režim přípravy v administraci (bypass pro adminy)
         if (data_get($branding, 'maintenance_mode') && !$isAdmin) {

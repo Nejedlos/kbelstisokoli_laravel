@@ -17,7 +17,7 @@ class PublicMaintenanceMiddleware
         $branding = app(BrandingService::class)->getSettings();
 
         // Bypass pro adminy a oprávněné osoby (vidí web i během údržby)
-        if (auth()->check() && auth()->user()->can('access_admin')) {
+        if (auth()->check() && auth()->user()->canAccessAdmin()) {
             return $next($request);
         }
 
@@ -25,6 +25,12 @@ class PublicMaintenanceMiddleware
         if (data_get($branding, 'maintenance_mode') &&
             $request->routeIs('public.*') &&
             !$request->routeIs('public.home')) {
+
+            \Illuminate\Support\Facades\Log::info('PublicMaintenanceMiddleware.redirect', [
+                'path' => $request->path(),
+                'route' => optional($request->route())->getName(),
+            ]);
+
             return redirect()->route('public.home');
         }
 

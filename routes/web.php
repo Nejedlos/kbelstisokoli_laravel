@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 use App\Http\Controllers\MediaDownloadController;
 
 /*
@@ -18,6 +19,9 @@ use App\Http\Controllers\MediaDownloadController;
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('web')
     ->name('logout');
+
+// Sjednocení přihlašovací stránky na admin/login (Filament)
+Route::get('/login', fn () => redirect()->to('/admin/login'))->name('login');
 
 // Změna jazyka (moderní přístup přes session)
 Route::get('/language/{lang}', \App\Http\Controllers\Public\LanguageController::class)
@@ -40,3 +44,17 @@ Route::get('/auth/two-factor-setup', \App\Http\Controllers\Auth\TwoFactorSetupCo
 // Zabezpečené stahování médií
 Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'])
     ->name('media.download');
+
+
+
+// --- Override Fortify two-factor challenge routes to allow authenticated users ---
+// Důvod: standardní Fortify route používá 'guest' (RedirectIfAuthenticated),
+// což u našeho flow (uživatel je přihlášen a vyžádána 2FA) způsobí redirect na HOME.
+// Přeregistrujeme GET/POST se stejnou cestou a jménem, ale bez 'guest' middleware.
+Route::get('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'create'])
+    ->middleware(['web'])
+    ->name('two-factor.login');
+
+Route::post('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'store'])
+    ->middleware(['web', 'throttle:two-factor'])
+    ->name('two-factor.login.store');

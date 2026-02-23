@@ -4,6 +4,9 @@
         public function getHeading() { return __('Relace vypršela'); }
         public function getSubheading() { return __('Vaše přihlášení již není platné. Prosím, přihlaste se znovu.'); }
         public function getIcon() { return 'fa-clock-rotate-left'; }
+        public function getRenderHookScopes(): array { return []; }
+        public function getTitle(): string { return __('Relace vypršela'); }
+        public function getExtraBodyAttributes(): array { return []; }
     };
 @endphp
 

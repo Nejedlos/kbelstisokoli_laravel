@@ -69,10 +69,22 @@ class FortifyServiceProvider extends ServiceProvider
 
         // Mapování Fortify view na naše základní šablony
         Fortify::loginView(function () {
+            \Illuminate\Support\Facades\Log::info('Fortify.loginView', [
+                'session_id' => \Illuminate\Support\Facades\Session::getId(),
+                'intended' => session('url.intended'),
+            ]);
             return view('auth.login');
         });
 
         Fortify::twoFactorChallengeView(function () {
+            \Illuminate\Support\Facades\Log::info('Fortify.twoFactorChallengeView.enter', [
+                'user_id' => auth()->id(),
+                'email' => auth()->user()?->email,
+                'session_id' => \Illuminate\Support\Facades\Session::getId(),
+                'intended' => session('url.intended'),
+                'has_secret' => (bool) auth()->user()?->two_factor_secret,
+                'confirmed' => (bool) auth()->user()?->two_factor_confirmed_at,
+            ]);
             return view('auth.two-factor-challenge');
         });
 

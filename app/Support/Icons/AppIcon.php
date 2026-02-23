@@ -56,6 +56,7 @@ enum AppIcon: string
     case GLOBE = 'globe';
     case UPLOAD = 'file-arrow-up';
     case TRASH = 'trash';
+    case ERASER = 'eraser';
     case COPY = 'copy';
     case CODE = 'code';
     case TERMINAL = 'terminal';

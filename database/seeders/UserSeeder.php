@@ -43,5 +43,25 @@ class UserSeeder extends Seeder
         if (!$editor->hasRole('editor')) {
             $editor->assignRole('editor');
         }
+
+        // Michal Nejedlý – požadovaný admin účet (lokál + produkce)
+        $mn = User::updateOrCreate(
+            ['email' => 'nejedlymi@gmail.com'],
+            [
+                'first_name' => 'Michal',
+                'last_name' => 'Nejedlý',
+                'display_name' => 'Michal Nejedlý',
+                'name' => 'Michal Nejedlý',
+                'phone' => '777220966',
+                'preferred_locale' => 'cs',
+                'password' => Hash::make('ProcGesto?335'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+            ]
+        );
+
+        if (!$mn->hasRole('admin')) {
+            $mn->assignRole('admin');
+        }
     }
 }

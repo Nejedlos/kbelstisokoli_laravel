@@ -81,19 +81,11 @@
     }
 
     h1, h2 {
-        @apply font-display font-black uppercase tracking-tighter leading-[1.1] md:leading-[1.05];
-    }
-
-    html[lang="cs"] h1, html[lang="cs"] h2 {
-        @apply leading-[1.6] md:leading-[1.5];
+        @apply font-display font-black uppercase tracking-wide leading-[1.2] md:leading-[1.15];
     }
 
     h3, h4, h5, h6 {
-        @apply font-display font-bold uppercase tracking-tight leading-tight;
-    }
-
-    html[lang="cs"] h3, html[lang="cs"] h4, html[lang="cs"] h5, html[lang="cs"] h6 {
-        @apply leading-[1.5];
+        @apply font-display font-bold uppercase tracking-wide leading-snug;
     }
 }
 
@@ -282,24 +274,11 @@
 }
 
 .leading-display {
-    @apply leading-[1.1] md:leading-[1.05];
+    @apply leading-[1.2] md:leading-[1.15];
 }
 
-html[lang="cs"] .leading-display {
-    @apply leading-[1.6] md:leading-[1.5];
-}
 
-html[lang="cs"] .leading-relaxed {
-    @apply leading-[1.85];
-}
 
-html[lang="cs"] .leading-snug {
-    @apply leading-[1.6];
-}
-
-html[lang="cs"] .leading-tight {
-    @apply leading-[1.5];
-}
 
 @media (max-width: 640px) {
     .section-padding {

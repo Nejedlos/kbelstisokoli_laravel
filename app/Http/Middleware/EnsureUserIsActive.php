@@ -16,6 +16,11 @@ class EnsureUserIsActive
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check() && !auth()->user()->is_active) {
+            \Illuminate\Support\Facades\Log::warning('EnsureUserIsActive.deactivated', [
+                'user_id' => auth()->id(),
+                'email' => auth()->user()->email,
+            ]);
+
             auth()->logout();
 
             return redirect()->route('login')
