@@ -101,11 +101,13 @@
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
     ln -sf $(which {{ $node }}) .node_bin/node
+    ln -sf $(which {{ $npm }}) .node_bin/npm
     export PATH="{{ $path }}/.node_bin:$PATH"
-    {{ $npm }} install
+    node -v
+    npm install
 
     echo "Building assets..."
-    {{ $npm }} run build
+    npm run build
 
     echo "Running database migrations..."
     {{ $php }} artisan migrate --force
@@ -161,11 +163,13 @@
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
     ln -sf $(which {{ $node }}) .node_bin/node
+    ln -sf $(which {{ $npm }}) .node_bin/npm
     export PATH="{{ $path }}/.node_bin:$PATH"
-    {{ $npm }} install
+    node -v
+    npm install
 
     echo "Building assets..."
-    {{ $npm }} run build
+    npm run build
 
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan optimize
