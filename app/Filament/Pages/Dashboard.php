@@ -13,6 +13,14 @@ class Dashboard extends BaseDashboard
         return __('admin.navigation.pages.dashboard');
     }
 
+    public function getColumns(): int|array
+    {
+        return [
+            'md' => 2,
+            'xl' => 2,
+        ];
+    }
+
     public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
     {
         return __('admin.navigation.pages.dashboard');

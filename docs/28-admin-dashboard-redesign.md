@@ -11,7 +11,9 @@ Tento dokument shrnuje provedené úpravy hlavní nástěnky administrace (Filam
 - WelcomeBannerWidget
   - Umístění: `app/Filament/Widgets/WelcomeBannerWidget.php`
   - Šablona: `resources/views/filament/widgets/welcome-banner-widget.blade.php`
-  - Funkce: uvítací hlavička s počtem aktivních hráčů a rychlými akcemi (nový zápas, nový člen, novinka).
+  - Funkce: uvítací hlavička s počtem aktivních hráčů a rychlými akcemi pod sebou (s "hinty").
+    - Akce: Nový zápas, Nový člen, Napsat novinku, Nový trénink, Nová akce, Multimédia, Auditní log, Finance.
+    - Responzivita: na mobilu 1 sloupec, od `md` 2 sloupce pro lepší využití prostoru.
 
 - AdminKpiOverview (upraveno – lokalizace)
   - Umístění: `app/Filament/Widgets/AdminKpiOverview.php`

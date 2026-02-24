@@ -3,16 +3,34 @@
 namespace App\Filament\Widgets;
 
 use App\Services\BrandingService;
+use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Mail;
 
 class ContactAdminWidget extends Widget
 {
     protected string $view = 'filament.widgets.contact-admin-widget';
 
+    // Priorita řazení widgetů na dashboardu (nižší = výš). Chceme druhý hned vedle uvítacího.
+    protected static ?int $sort = -199;
+
     // Na menších displejích přes celou šířku, od md vedle sebe (poloviční šířka)
     protected int|string|array $columnSpan = [
         'md' => 1,
     ];
+
+    // Vstupy formuláře (stack pod sebou)
+    public ?string $senderName = null;
+    public ?string $senderEmail = null;
+    public ?string $senderPhone = null;
+    public ?string $messageText = null;
+
+    public function mount(): void
+    {
+        $user = auth()->user();
+        $this->senderName = $user?->name;
+        $this->senderEmail = $user?->email;
+    }
 
     protected function getViewData(): array
     {
@@ -33,5 +51,60 @@ class ContactAdminWidget extends Widget
         $contactUrl = route('member.contact.admin.form');
 
         return compact('contact', 'contactUrl');
+    }
+
+    public function send(): void
+    {
+        $branding = app(BrandingService::class)->getSettings();
+        $to = $branding['admin_contact_email'] ?? ($branding['contact']['email'] ?? null);
+
+        if (!$to) {
+            Notification::make()
+                ->title('Kontakt administrátora není nastaven')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        if (!filled($this->messageText)) {
+            Notification::make()
+                ->title('Prosím, napište zprávu.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $subject = 'Zpráva z administrace';
+        $body = sprintf(
+            "Odesílatel: %s <%s>\nTelefon: %s\n\nZpráva:\n%s",
+            $this->senderName ?? '-',
+            $this->senderEmail ?? '-',
+            $this->senderPhone ?? '-',
+            $this->messageText ?? ''
+        );
+
+        try {
+            Mail::raw($body, function ($message) use ($to, $subject) {
+                $message->to($to)
+                    ->subject($subject);
+
+                if ($this->senderEmail) {
+                    $message->replyTo($this->senderEmail, $this->senderName ?? null);
+                }
+            });
+
+            Notification::make()
+                ->title('Zpráva byla odeslána')
+                ->success()
+                ->send();
+
+            $this->reset(['messageText']);
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('Zprávu se nepodařilo odeslat')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 }

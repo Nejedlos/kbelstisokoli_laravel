@@ -16,7 +16,7 @@
                 {{ __('admin/dashboard.contact_admin.text') }}
             </p>
 
-            <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div class="mt-3 space-y-2 text-xs">
                 <div class="px-3 py-2 rounded-club bg-slate-50 border border-slate-200 flex items-center gap-2">
                     <i class="fa-light fa-user fa-fw"></i>
                     <span class="font-bold text-secondary">{{ $contact['name'] }}</span>
@@ -31,18 +31,34 @@
                 </div>
             </div>
 
-            <div class="mt-4 flex flex-col sm:flex-row gap-2">
-                <a href="{{ $contactUrl }}" class="btn btn-primary w-full sm:w-auto">
-                    <i class="fa-light fa-paper-plane-top mr-1.5"></i>
-                    {{ __('admin/dashboard.contact_admin.cta') }}
-                </a>
-                @if(!empty($contact['email']))
-                    <a href="mailto:{{ $contact['email'] }}" class="btn btn-outline w-full sm:w-auto">
-                        <i class="fa-light fa-envelope mr-1.5"></i>
-                        {{ __('admin/dashboard.contact_admin.mailto') }}
+            <form wire:submit.prevent="send" class="mt-4 space-y-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Vaše jméno</label>
+                    <input type="text" wire:model.defer="senderName" class="w-full border border-slate-200 rounded-club px-3 py-2 text-sm" placeholder="Jméno a příjmení">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Váš e‑mail</label>
+                    <input type="email" wire:model.defer="senderEmail" class="w-full border border-slate-200 rounded-club px-3 py-2 text-sm" placeholder="email@domena.cz">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Telefon (volitelné)</label>
+                    <input type="tel" wire:model.defer="senderPhone" class="w-full border border-slate-200 rounded-club px-3 py-2 text-sm" placeholder="+420 123 456 789">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Zpráva pro administrátora</label>
+                    <textarea wire:model.defer="messageText" class="w-full border border-slate-200 rounded-club px-3 py-2 text-sm min-h-32" placeholder="Popište prosím, s čím potřebujete pomoci..."></textarea>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <button type="submit" class="btn btn-primary w-full sm:w-auto">
+                        <i class="fa-light fa-paper-plane-top mr-1.5"></i>
+                        Odeslat zprávu
+                    </button>
+                    <a href="{{ $contactUrl }}" class="btn btn-outline w-full sm:w-auto">
+                        <i class="fa-light fa-life-ring mr-1.5"></i>
+                        Otevřít stránku Kontakt admina
                     </a>
-                @endif
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
