@@ -139,7 +139,7 @@
                         </button>
                         <!-- AI Search Mobile -->
                         <button @click="searchOpen = 'ai'; $nextTick(() => $refs.searchInputMobileAi.focus())"
-                                class="p-2 text-accent hover:bg-white/10 rounded-full transition-colors focus:outline-none">
+                                class="p-2 text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none">
                             <i class="fa-light fa-sparkles text-xl"></i>
                         </button>
                     </div>

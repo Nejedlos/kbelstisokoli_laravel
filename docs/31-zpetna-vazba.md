@@ -53,3 +53,31 @@ Tento modul umožňuje členům rychle kontaktovat své trenéry (pro týmová t
 #### Poznámky
 - UI i e-maily jsou bilingvní – používá se aktuální `locale` v čase odeslání.
 - Pokud má člen více týmů, je k dispozici výběr týmu. Pokud nemá žádný, upozorníme a pošleme na admina.
+
+
+#### Dropzona (nahrávání příloh)
+- Pro nahrávání příloh je použita jednoduchá projektová dropzona jako Blade komponenta `x-member.dropzone` (postavena na Alpine.js, bez externí JS knihovny).
+- Vlastnosti:
+  - Single upload (1 soubor), velikost do 10 MB.
+  - Povolené typy: `pdf, jpg, jpeg, png, doc, docx, xls, xlsx`.
+  - Náhled obrázků, možnost odebrání souboru před odesláním, validace velikosti a typu na klientu.
+- Použití v šabloně:
+```
+<x-member.dropzone name="attachment" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" :max-size-mb="10" />
+```
+- Nasazení:
+  - Bez nových Vite entrypointů (používá se existující Alpine v app.js); není potřeba `npm run build` pouze kvůli této změně.
+  - Po nasazení vyčistěte cache a zkompilované pohledy, pokud by se komponenta neprojevila okamžitě.
+- Pozn.: Pokud v systému existuje již jiná interní „dropzona“ pod odlišným názvem, lze komponentu snadno přepnout.
+
+
+#### Karta kontaktu (Admin/Trenér)
+- Na stránkách formulářů je v pravém sloupci zobrazena karta kontaktu cílové osoby:
+  - Kontakt administrátora bere údaje z nastavení v administraci (Branding → Kontakty):
+    - `admin_contact_email` (s fallbackem na `.env:ERROR_REPORT_EMAIL`)
+    - `admin_contact_name` (volitelné; výchozí „Administrátor“)
+    - `admin_contact_phone` (volitelné; fallback na `contact_phone`)
+    - `admin_contact_photo_path` (volitelné; doporučeno bílé pozadí)
+  - Kontakt trenéra se zobrazuje, pokud je uživatel v jednom týmu – vypíše všechny trenéry daného týmu (jméno, e‑mail z pivotu nebo uživatele, telefon, avatar pokud existuje v kolekci `avatar`).
+  - Pokud uživatel není v žádném týmu nebo má více týmů, zobrazí se informatívní hint a použije se admin fallback.
+- UI je plně dvojjazyčné (cs/en) – viz `lang/*/member.php` → `feedback.contact_card.*`.

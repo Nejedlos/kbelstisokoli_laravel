@@ -9,14 +9,14 @@
             </p>
         </div>
 
-        <div class="flex items-center gap-3">
-            <a href="{{ $actions['match'] }}" class="btn btn-primary">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <a href="{{ $actions['match'] }}" class="btn btn-primary w-full sm:w-auto">
                 <i class="fa-light fa-trophy mr-2"></i> {{ __('admin/dashboard.welcome.quick_actions.new_match') }}
             </a>
-            <a href="{{ $actions['user'] }}" class="btn btn-outline">
+            <a href="{{ $actions['user'] }}" class="btn btn-outline w-full sm:w-auto">
                 <i class="fa-light fa-user-plus mr-2"></i> {{ __('admin/dashboard.welcome.quick_actions.new_user') }}
             </a>
-            <a href="{{ $actions['post'] }}" class="btn btn-outline">
+            <a href="{{ $actions['post'] }}" class="btn btn-outline w-full sm:w-auto">
                 <i class="fa-light fa-pen-nib mr-2"></i> {{ __('admin/dashboard.welcome.quick_actions.new_post') }}
             </a>
         </div>

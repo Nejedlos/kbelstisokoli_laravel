@@ -200,5 +200,19 @@ return [
         'send_to_admin' => 'Odeslat administrátorovi',
         'no_team_warning' => 'Nejste přiřazeni k žádnému týmu. Zpráva bude doručena administrátorovi.',
         'sent_success' => 'Zpráva byla úspěšně odeslána. Děkujeme za zpětnou vazbu!',
+        'hints' => [
+            'economy' => 'S platbami vám nejlépe poradí trenér vašeho týmu. Napište mu prosím nejprve přes tento formulář. Administrátora kontaktujte až pokud trenér neodpoví.',
+        ],
+        'contact_card' => [
+            'admin_title' => 'Kontakt na administrátora',
+            'coach_title' => 'Kontakt na trenéra',
+            'coaches_title' => 'Trenéři týmu',
+            'email' => 'E‑mail',
+            'phone' => 'Telefon',
+            'not_available' => 'Není k dispozici',
+            'fallback_admin' => 'Pokud není uveden trenér, zpráva bude doručena administrátorovi.',
+            'choose_team_hint' => 'Vyberte tým pro zobrazení trenérů.',
+            'admin_name_default' => 'Administrátor',
+        ],
     ],
 ];

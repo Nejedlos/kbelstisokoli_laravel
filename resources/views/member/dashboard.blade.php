@@ -30,12 +30,12 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="flex flex-wrap gap-2">
-                            <a href="{{ route('member.profile.edit') }}" class="btn btn-outline text-xs"><i class="fa-light fa-user-gear mr-1.5"></i> {{ __('member.dashboard.actions.edit_profile') }}</a>
-                            <a href="{{ route('member.attendance.index') }}" class="btn btn-outline text-xs"><i class="fa-light fa-calendar-star mr-1.5"></i> {{ __('member.dashboard.actions.my_program') }}</a>
-                            <a href="{{ route('member.economy.index') }}" class="btn btn-primary text-xs"><i class="fa-light fa-credit-card mr-1.5"></i> {{ __('member.dashboard.actions.payments') }}</a>
-                            <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline text-xs"><i class="fa-light fa-whistle mr-1.5"></i> {{ __('member.feedback.contact_coach_title') }}</a>
-                            <a href="{{ route('member.contact.admin.form') }}" class="btn btn-outline text-xs"><i class="fa-light fa-envelope mr-1.5"></i> {{ __('member.feedback.contact_admin_title') }}</a>
+                        <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
+                            <a href="{{ route('member.profile.edit') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-user-gear mr-1.5"></i> {{ __('member.dashboard.actions.edit_profile') }}</a>
+                            <a href="{{ route('member.attendance.index') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-calendar-star mr-1.5"></i> {{ __('member.dashboard.actions.my_program') }}</a>
+                            <a href="{{ route('member.economy.index') }}" class="btn btn-primary text-xs w-full sm:w-auto"><i class="fa-light fa-credit-card mr-1.5"></i> {{ __('member.dashboard.actions.payments') }}</a>
+                            <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-whistle mr-1.5"></i> {{ __('member.feedback.contact_coach_title') }}</a>
+                            <a href="{{ route('member.contact.admin.form') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-envelope mr-1.5"></i> {{ __('member.feedback.contact_admin_title') }}</a>
                         </div>
                     </div>
 
@@ -139,7 +139,7 @@
                 <!-- Economy Summary -->
                 <section class="space-y-4">
                     <h3 class="text-lg font-black uppercase tracking-tight text-secondary">{{ __('member.dashboard.economy.title') }}</h3>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="p-4 rounded-club bg-slate-50 border border-slate-200">
                             <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.economy.kpi.total_to_pay') }}</div>
                             <div class="text-xl font-black text-secondary">{{ number_format($economySummary['total_to_pay'] ?? 0, 0, ',', ' ') }} Kč</div>
@@ -150,6 +150,21 @@
                         </div>
                     </div>
                     <a href="{{ route('member.economy.index') }}" class="btn btn-outline w-full py-2 text-xs">{{ __('member.dashboard.economy.cta') }}</a>
+
+                    <div class="rounded-club bg-slate-50 border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div class="text-xs text-slate-600 flex-1">
+                            <span class="font-bold text-secondary"><i class="fa-light fa-whistle mr-1.5"></i> {{ __('member.feedback.contact_coach_title') }}</span>
+                            <span class="ml-1">{{ __('member.feedback.hints.economy') }}</span>
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline text-xs w-full sm:w-auto">
+                                {{ __('member.feedback.contact_coach_title') }}
+                            </a>
+                            <a href="{{ route('member.contact.admin.form') }}" class="btn btn-ghost text-xs w-full sm:w-auto">
+                                {{ __('member.feedback.contact_admin_title') }}
+                            </a>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Coach Tools (if applicable) -->

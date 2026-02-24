@@ -200,5 +200,19 @@ return [
         'send_to_admin' => 'Send to Admin',
         'no_team_warning' => 'You are not assigned to any team. The message will be delivered to the administrator.',
         'sent_success' => 'Your message has been sent successfully. Thank you for the feedback!',
+        'hints' => [
+            'economy' => 'For payments, your team coach is the best first contact. Please write to them using this form. Contact the administrator only if the coach does not respond.',
+        ],
+        'contact_card' => [
+            'admin_title' => 'Administrator Contact',
+            'coach_title' => 'Coach Contact',
+            'coaches_title' => 'Team Coaches',
+            'email' => 'Email',
+            'phone' => 'Phone',
+            'not_available' => 'Not available',
+            'fallback_admin' => 'If no coach is listed, the message will be delivered to the administrator.',
+            'choose_team_hint' => 'Choose a team to display coaches.',
+            'admin_name_default' => 'Administrator',
+        ],
     ],
 ];

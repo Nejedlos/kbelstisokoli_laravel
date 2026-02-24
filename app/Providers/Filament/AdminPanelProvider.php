@@ -104,6 +104,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->widgets([
                 \App\Filament\Widgets\WelcomeBannerWidget::class,
+                \App\Filament\Widgets\ContactAdminWidget::class,
                 \App\Filament\Widgets\AdminKpiOverview::class,
                 \App\Filament\Widgets\SystemHealthWidget::class,
                 \App\Filament\Widgets\RecentActivityWidget::class,

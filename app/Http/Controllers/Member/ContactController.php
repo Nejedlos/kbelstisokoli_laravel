@@ -21,9 +21,34 @@ class ContactController extends Controller
         $user = $request->user();
         $teams = $user->playerProfile?->teams()->with('coaches')->get() ?? collect();
 
+        // Admin fallback contact (used when no coach is available)
+        $settings = \App\Models\Setting::pluck('value', 'key')->toArray();
+        $adminFallback = [
+            'name' => $settings['admin_contact_name'] ?? __('member.feedback.contact_card.admin_name_default'),
+            'email' => $settings['admin_contact_email'] ?? env('ERROR_REPORT_EMAIL'),
+            'phone' => $settings['admin_contact_phone'] ?? ($settings['contact_phone'] ?? null),
+            'photo' => $settings['admin_contact_photo_path'] ?? null,
+        ];
+
+        // Prepare coach contacts only when a single team is clearly selected
+        $coachContacts = [];
+        if ($teams->count() === 1) {
+            $team = $teams->first();
+            foreach ($team->coaches as $coach) {
+                $coachContacts[] = [
+                    'name' => $coach->display_name ?? $coach->name,
+                    'email' => $coach->pivot->email ?: $coach->email,
+                    'phone' => $coach->phone ?? null,
+                    'photo' => method_exists($coach, 'getFirstMediaUrl') ? ($coach->getFirstMediaUrl('avatar') ?: null) : null,
+                ];
+            }
+        }
+
         return view('member.contact.coach', [
             'teams' => $teams,
             'user' => $user,
+            'coachContacts' => $coachContacts,
+            'adminFallback' => $adminFallback,
         ]);
     }
 
@@ -110,8 +135,19 @@ class ContactController extends Controller
 
     public function adminForm(Request $request): View
     {
+        $user = $request->user();
+        $settings = \App\Models\Setting::pluck('value', 'key')->toArray();
+
+        $adminContact = [
+            'name' => $settings['admin_contact_name'] ?? __('member.feedback.contact_card.admin_name_default'),
+            'email' => $settings['admin_contact_email'] ?? env('ERROR_REPORT_EMAIL'),
+            'phone' => $settings['admin_contact_phone'] ?? ($settings['contact_phone'] ?? null),
+            'photo' => $settings['admin_contact_photo_path'] ?? null,
+        ];
+
         return view('member.contact.admin', [
-            'user' => $request->user(),
+            'user' => $user,
+            'adminContact' => $adminContact,
         ]);
     }
 

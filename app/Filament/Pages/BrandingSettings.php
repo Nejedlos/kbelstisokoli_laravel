@@ -151,6 +151,15 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.admin_contact_email'))
                                     ->helperText(__('admin/branding-settings.fields.admin_contact_email_help'))
                                     ->email(),
+                                TextInput::make('admin_contact_name')
+                                    ->label(__('admin/branding-settings.fields.admin_contact_name')),
+                                TextInput::make('admin_contact_phone')
+                                    ->label(__('admin/branding-settings.fields.admin_contact_phone')),
+                                FileUpload::make('admin_contact_photo_path')
+                                    ->label(__('admin/branding-settings.fields.admin_contact_photo'))
+                                    ->image()
+                                    ->directory('branding')
+                                    ->helperText(__('admin/branding-settings.fields.admin_contact_photo_help')),
                             ]),
                     ]),
 

@@ -15,6 +15,13 @@ return [
         'title' => 'Club Health',
     ],
 
+    'contact_admin' => [
+        'title' => 'Need help from the administrator?',
+        'text' => 'For technical issues or system configuration, please contact the administrator directly. Coaches work in the admin, but the system is managed by the admin.',
+        'cta' => 'Write to Admin',
+        'mailto' => 'Send Email',
+    ],
+
     'system' => [
         'title' => 'System Status',
         'cron' => [

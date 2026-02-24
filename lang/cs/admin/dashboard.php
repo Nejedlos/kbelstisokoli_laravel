@@ -15,6 +15,13 @@ return [
         'title' => 'Stav oddílu',
     ],
 
+    'contact_admin' => [
+        'title' => 'Potřebujete pomoc od administrátora?',
+        'text' => 'S technickými problémy nebo nastavením systému se prosím obracejte přímo na administrátora. Trenéři pracují v administraci, ale správu systému garantuje admin.',
+        'cta' => 'Napsat administrátorovi',
+        'mailto' => 'Odeslat e‑mail',
+    ],
+
     'system' => [
         'title' => 'Stav systému',
         'cron' => [
