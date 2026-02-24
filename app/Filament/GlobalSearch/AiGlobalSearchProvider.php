@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Filament\GlobalSearch;
+
+use App\Models\AiDocument;
+use Filament\GlobalSearch\Providers\Contracts\GlobalSearchProvider;
+use Filament\GlobalSearch\GlobalSearchResult;
+use Filament\GlobalSearch\GlobalSearchResults;
+use Illuminate\Support\Facades\App;
+
+class AiGlobalSearchProvider implements GlobalSearchProvider
+{
+    public function getResults(string $query): ?GlobalSearchResults
+    {
+        $locale = App::getLocale();
+        $results = GlobalSearchResults::make();
+
+        // Vyhledávání v AiDocument
+        // Priorita: Title (LIKE %) > Keywords (JSON) > Content (LIKE %)
+        // Omezíme na admin dokumenty
+        $documents = AiDocument::where('locale', $locale)
+            ->where('type', 'like', 'admin.%')
+            ->where(function ($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                  ->orWhere('content', 'like', "%{$query}%")
+                  ->orWhere('keywords', 'like', "%{$query}%")
+                  ->orWhereJsonContains('keywords', $query);
+            })
+            ->limit(10)
+            ->get();
+
+        $categories = [];
+
+        foreach ($documents as $doc) {
+            $category = $this->getCategoryName($doc->type);
+
+            if (! array_key_exists($category, $categories)) {
+                $categories[$category] = [];
+            }
+
+            $categories[$category][] = new GlobalSearchResult(
+                title: $doc->title,
+                url: $doc->url ?? '#',
+                details: $this->getDetails($doc),
+            );
+        }
+
+        foreach ($categories as $name => $items) {
+            $results->category($name, $items);
+        }
+
+        return $results;
+    }
+
+    protected function getCategoryName(string $type): string
+    {
+        return match ($type) {
+            'admin.page' => __('admin.search.categories.pages'),
+            'admin.resource' => __('admin.search.categories.resources'),
+            'admin.navigation' => __('admin.search.categories.navigation'),
+            default => __('admin.search.categories.other'),
+        };
+    }
+
+    protected function getDetails(AiDocument $doc): array
+    {
+        $details = [];
+
+        // Pokud je v metadatech uložena skupina v menu, přidáme ji
+        if (isset($doc->metadata['group'])) {
+            $details[__('admin.search.details.group')] = $doc->metadata['group'];
+        }
+
+        // Náhled obsahu (zkrácený)
+        $excerpt = mb_substr(strip_tags($doc->content), 0, 100) . '...';
+        $details[__('admin.search.details.content')] = $excerpt;
+
+        return $details;
+    }
+}
