@@ -10,7 +10,10 @@ class WelcomeBannerWidget extends Widget
 {
     protected string $view = 'filament.widgets.welcome-banner-widget';
 
-    protected int|string|array $columnSpan = 'full';
+    // Na menších displejích přes celou šířku, od md vedle sebe (poloviční šířka)
+    protected int|string|array $columnSpan = [
+        'md' => 1,
+    ];
 
     protected function getViewData(): array
     {

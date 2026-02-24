@@ -55,6 +55,19 @@
                     </a>
                 </div>
 
+                <!-- Standard Search (Desktop) -->
+                <div class="hidden md:block flex-1 max-w-[320px] relative group">
+                    <form action="{{ route('member.search') }}" method="GET" class="relative">
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/40 group-focus-within:text-accent transition-colors">
+                            <i class="fa-light fa-magnifying-glass text-[13px]"></i>
+                        </div>
+                        <input type="text"
+                               name="q"
+                               placeholder="{{ __('Search') }}..."
+                               class="w-full bg-black/20 border border-white/10 rounded-lg pl-9 pr-4 py-1.5 text-[12px] text-white placeholder:text-white/60 focus:bg-black/30 focus:border-primary/50 focus:ring-0 outline-none transition-all shadow-inner">
+                    </form>
+                </div>
+
                 <!-- AI Search (Desktop) -->
                 <div x-data="{ searchOpen: false, loading: false }" class="hidden md:block relative">
                     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
@@ -115,19 +128,6 @@
                     </div>
                 </div>
 
-                <!-- Standard Search (Desktop) -->
-                <div class="hidden md:block flex-1 max-w-[320px] relative group">
-                    <form action="{{ route('member.search') }}" method="GET" class="relative">
-                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/40 group-focus-within:text-accent transition-colors">
-                            <i class="fa-light fa-magnifying-glass text-[13px]"></i>
-                        </div>
-                        <input type="text"
-                               name="q"
-                               placeholder="{{ __('Search') }}..."
-                               class="w-full bg-black/20 border border-white/10 rounded-lg pl-9 pr-4 py-1.5 text-[12px] text-white placeholder:text-white/60 focus:bg-black/30 focus:border-primary/50 focus:ring-0 outline-none transition-all shadow-inner">
-                    </form>
-                </div>
-
                 <!-- AI Search (Mobile Trigger) -->
                 <div x-data="{ searchOpen: false, loading: false }" class="md:hidden relative">
                     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
@@ -150,7 +150,7 @@
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[320px] bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
+                         class="fixed inset-x-0 top-16 w-screen bg-white rounded-none shadow-2xl border-t border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
                          style="display: none;">
                         <form action="{{ route('member.search') }}" method="GET" class="relative">
                             <input type="text"
@@ -170,7 +170,7 @@
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[320px] bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
+                         class="fixed inset-x-0 top-16 w-screen bg-white rounded-none shadow-2xl border-t border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
                          style="display: none;">
                         <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInputMobileAi.value)">
                             <input type="text"
