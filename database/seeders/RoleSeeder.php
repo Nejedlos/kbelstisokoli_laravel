@@ -29,6 +29,7 @@ class RoleSeeder extends Seeder
             'manage_stats',
             'manage_competitions',
             'manage_redirects',
+            'manage_ai_settings',
         ];
 
         foreach ($permissions as $permission) {

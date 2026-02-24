@@ -15,16 +15,16 @@ class FinanceOverview extends StatsOverviewWidget
         $summary = $service->getAdminSummary();
 
         return [
-            Stat::make('Pohledávky celkem', number_format($summary['total_receivables'], 0, ',', ' ') . ' Kč')
-                ->description('Otevřené a částečně zaplacené předpisy')
+            Stat::make(__('admin/dashboard.finance.total_receivables'), number_format($summary['total_receivables'], 0, ',', ' ') . ' Kč')
+                ->description(__('admin/dashboard.finance.total_receivables_desc'))
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::BANKNOTES))
                 ->color('info'),
-            Stat::make('Po splatnosti', number_format($summary['total_overdue'], 0, ',', ' ') . ' Kč')
-                ->description('Předpisy po termínu splatnosti')
+            Stat::make(__('admin/dashboard.finance.overdue'), number_format($summary['total_overdue'], 0, ',', ' ') . ' Kč')
+                ->description(__('admin/dashboard.finance.overdue_desc'))
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CLOCK))
                 ->color('danger'),
-            Stat::make('Příjmy (tento měsíc)', number_format($summary['payments_received_month'], 0, ',', ' ') . ' Kč')
-                ->description('Celkem přijaté platby v tomto měsíci')
+            Stat::make(__('admin/dashboard.finance.payments_month'), number_format($summary['payments_received_month'], 0, ',', ' ') . ' Kč')
+                ->description(__('admin/dashboard.finance.payments_month_desc'))
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CHECK_CIRCLE))
                 ->color('success'),
         ];

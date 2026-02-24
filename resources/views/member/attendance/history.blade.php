@@ -1,6 +1,6 @@
 @extends('layouts.member', [
-    'title' => 'Historie docházky',
-    'subtitle' => 'Přehled všech vašich dosavadních odpovědí a účastí.'
+    'title' => __('member.attendance.history_title'),
+    'subtitle' => __('member.attendance.history_subtitle')
 ])
 
 @section('content')
@@ -10,11 +10,11 @@
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Událost</th>
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Datum</th>
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Stav</th>
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Poznámka</th>
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Odpovězeno</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.attendance.table.event') }}</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.attendance.table.date') }}</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">{{ __('member.attendance.table.status') }}</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.attendance.table.note') }}</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">{{ __('member.attendance.table.responded') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
@@ -26,9 +26,9 @@
                                         @if($attendance->attendable_type === 'App\Models\BasketballMatch')
                                             {{ $item->team->name }} vs {{ $item->opponent->name }}
                                         @elseif($attendance->attendable_type === 'App\Models\Training')
-                                            Trénink - {{ $item->team->name }}
+                                            {{ __('member.attendance.event_types.training') }} - {{ $item->team->name }}
                                         @else
-                                            {{ $item->title ?? 'Neznámá akce' }}
+                                            {{ $item->title ?? __('member.attendance.event_types.unknown') }}
                                         @endif
                                     </div>
                                     <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-0.5">
@@ -47,10 +47,10 @@
                                             'maybe' => 'bg-warning-100 text-warning-700',
                                         ];
                                         $labels = [
-                                            'pending' => 'Čeká',
-                                            'confirmed' => 'Přijdu',
-                                            'declined' => 'Omluven',
-                                            'maybe' => 'Možná',
+                                            'pending' => __('member.attendance.status.pending'),
+                                            'confirmed' => __('member.attendance.status.confirmed'),
+                                            'declined' => __('member.attendance.status.declined'),
+                                            'maybe' => __('member.attendance.status.maybe'),
                                         ];
                                     @endphp
                                     <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $colors[$attendance->status] ?? 'bg-slate-100' }}">
@@ -67,7 +67,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="px-6 py-12 text-center text-slate-400 italic">
-                                    Zatím nemáte žádnou historii docházky.
+                                    {{ __('member.attendance.no_history') }}
                                 </td>
                             </tr>
                         @endforelse

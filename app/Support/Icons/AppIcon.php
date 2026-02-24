@@ -37,6 +37,7 @@ enum AppIcon: string
     case CRON_TASKS = 'clock';
     case CRON_LOGS = 'history';
     case BRANDING = 'palette';
+    case AI = 'sparkles';
     case SETTINGS = 'gear';
 
     // --- UI Akce a Stavy ---

@@ -13,8 +13,10 @@ class BackendSearchService
 {
     protected array $searchTargets = [];
 
-    public function __construct()
-    {
+    public function __construct(
+        protected AiIndexService $aiIndexService,
+        protected AiSettingsService $aiSettingsService
+    ) {
         $this->initializeTargets();
     }
 
@@ -128,13 +130,33 @@ class BackendSearchService
             return collect();
         }
 
-        // Pokud máme API klíč, zkusíme AI vyhledávání
-        if (config('services.openai.key')) {
-            return $this->aiSearch($query, $context);
+        $locale = app()->getLocale();
+        $aiResults = $this->aiIndexService->search($query, $locale, 10, $context);
+
+        if ($aiResults->isNotEmpty()) {
+            return $aiResults->map(function ($doc) {
+                return new SearchResult(
+                    title: $doc->title,
+                    snippet: mb_substr(strip_tags($doc->content), 0, 160) . '...',
+                    url: $doc->url ?? '#',
+                    type: $this->getDocTypeLabel($doc->type)
+                );
+            });
         }
 
-        // Jinak fallback na jednoduché vyhledávání v targetech
+        // Fallback na statické targety, pokud AI index nic nenašel
         return $this->fallbackSearch($query, $context);
+    }
+
+    protected function getDocTypeLabel(string $type): string
+    {
+        return match ($type) {
+            'admin.page', 'member.page' => __('admin.search.categories.pages'),
+            'admin.resource' => __('admin.search.categories.resources'),
+            'admin.navigation' => __('admin.search.categories.navigation'),
+            'docs' => 'Dokumentace',
+            default => __('admin.search.categories.other'),
+        };
     }
 
     /**

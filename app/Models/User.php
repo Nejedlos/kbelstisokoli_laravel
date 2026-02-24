@@ -154,6 +154,16 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     }
 
     /**
+     * Týmy, které uživatel trénuje.
+     */
+    public function teamsCoached(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'coach_team')
+            ->withPivot(['email'])
+            ->withTimestamps();
+    }
+
+    /**
      * Souhlasy uživatele.
      */
     public function consents(): HasMany

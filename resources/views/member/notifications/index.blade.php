@@ -4,15 +4,15 @@
     <div class="container-fluid px-4 py-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-black uppercase tracking-tight text-secondary">Notifikace</h1>
-                <p class="text-slate-500">Přehled vašich upozornění a zpráv.</p>
+                <h1 class="text-3xl font-black uppercase tracking-tight text-secondary">{{ __('member.notifications.title') }}</h1>
+                <p class="text-slate-500">{{ __('member.notifications.subtitle') }}</p>
             </div>
 
             @if($notifications->where('read_at', null)->count() > 0)
                 <form action="{{ route('member.notifications.markAllRead') }}" method="POST">
                     @csrf
                     <button type="submit" class="btn btn-outline py-2 px-4 text-xs">
-                        Označit vše jako přečtené
+                        {{ __('member.notifications.mark_all_read') }}
                     </button>
                 </form>
             @endif
@@ -44,7 +44,7 @@
                         <div>
                             <div class="flex items-center gap-2 mb-1">
                                 <h3 class="font-bold text-secondary leading-tight">
-                                    {{ $notification->data['title'] ?? 'Upozornění' }}
+                                    {{ $notification->data['title'] ?? __('member.notifications.default_title') }}
                                 </h3>
                                 @if($notification->unread())
                                     <span class="w-2 h-2 bg-primary rounded-full"></span>
@@ -59,7 +59,7 @@
 
                             @if(isset($notification->data['action_url']))
                                 <a href="{{ $notification->data['action_url'] }}" class="inline-block mt-3 text-xs font-black uppercase tracking-widest text-primary hover:text-secondary transition-colors">
-                                    {{ $notification->data['action_label'] ?? 'Zobrazit detail' }} &rarr;
+                                    {{ $notification->data['action_label'] ?? __('member.notifications.default_action_label') }} &rarr;
                                 </a>
                             @endif
                         </div>
@@ -68,7 +68,7 @@
                     @if($notification->unread())
                         <form action="{{ route('member.notifications.markRead', $notification->id) }}" method="POST" class="shrink-0">
                             @csrf
-                            <button type="submit" class="p-2 text-slate-400 hover:text-primary transition-colors" title="Označit jako přečtené">
+                            <button type="submit" class="p-2 text-slate-400 hover:text-primary transition-colors" title="{{ __('member.notifications.mark_read') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -83,8 +83,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-secondary mb-1">Žádné nové notifikace</h3>
-                    <p class="text-slate-500 text-sm">Aktuálně nemáte žádná neřešená upozornění.</p>
+                    <h3 class="text-lg font-bold text-secondary mb-1">{{ __('member.notifications.no_notifications') }}</h3>
+                    <p class="text-slate-500 text-sm">{{ __('member.notifications.no_notifications_text') }}</p>
                 </div>
             @endforelse
         </div>

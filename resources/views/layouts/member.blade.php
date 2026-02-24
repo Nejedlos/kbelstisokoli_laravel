@@ -19,7 +19,7 @@
     <x-announcement-bar :announcements="$announcements ?? []" />
 
     <!-- Top Bar -->
-    <header class="bg-secondary text-white sticky top-0 z-30 shadow-md">
+    <header class="member-topbar sticky top-0 z-30 shadow-md">
         <div class="container-fluid px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <!-- Mobile Menu Trigger -->
@@ -42,14 +42,27 @@
             </div>
 
             <!-- Search & User Menu -->
-            <div class="flex items-center gap-2 sm:gap-4">
+            <div class="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-1 bg-white/10 p-1 rounded-lg text-[10px] font-black tracking-widest shadow-sm border border-white/10">
+                    <a href="{{ route('language.switch', ['lang' => 'cs']) }}"
+                       class="px-2.5 py-1 rounded-md transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-accent text-white shadow-sm' : 'text-white/50 hover:text-white hover:bg-white/10' }}">
+                        CZ
+                    </a>
+                    <a href="{{ route('language.switch', ['lang' => 'en']) }}"
+                       class="px-2.5 py-1 rounded-md transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-accent text-white shadow-sm' : 'text-white/50 hover:text-white hover:bg-white/10' }}">
+                        EN
+                    </a>
+                </div>
+
                 <!-- AI Search (Desktop) -->
-                <div x-data="{ searchOpen: false }" class="hidden md:block flex-1 max-w-[280px] mx-8 relative">
+                <div x-data="{ searchOpen: false, loading: false }" class="hidden md:block relative">
+                    <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
                     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-                            class="w-full flex items-center gap-3 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white/50 hover:bg-white/10 hover:border-white/20 transition-all group text-left">
-                        <i class="fa-light fa-sparkles text-primary/60 group-hover:text-primary transition-colors text-[10px]"></i>
-                        <span class="text-[11px] truncate font-medium group-hover:text-white transition-colors">{{ __('search.ai_hint') }}</span>
-                        <span class="ml-auto text-[9px] font-black text-white/20 group-hover:text-primary transition-colors">AI</span>
+                            class="flex items-center gap-3 px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white/70 hover:bg-white/15 hover:border-accent/50 transition-all group text-left shadow-inner">
+                        <i class="fa-light fa-sparkles text-accent group-hover:scale-110 transition-transform text-[10px]"></i>
+                        <span class="text-[11px] truncate font-bold group-hover:text-white transition-colors">{{ __('search.ai_hint') }}</span>
+                        <span class="ml-auto text-[9px] font-black text-white/30 group-hover:text-accent transition-colors">AI</span>
                     </button>
 
                     <div x-show="searchOpen"
@@ -57,24 +70,24 @@
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="absolute inset-x-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50 overflow-hidden ring-1 ring-black/5"
+                         class="absolute right-0 mt-3 w-full min-w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50 overflow-hidden ring-1 ring-black/5"
                          style="display: none;">
 
                         <div class="flex items-center gap-2 mb-3">
-                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)]"></div>
+                            <div class="w-2 h-2 rounded-full bg-accent shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
                             <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-900">{{ __('search.ai_suggestion') }}</h3>
                         </div>
 
-                        <form action="{{ route('member.search') }}" method="GET" class="relative">
+                        <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInput.value)">
                             <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                                <i class="fa-light fa-sparkles text-sm animate-pulse"></i>
+                                <i class="fa-light fa-sparkles text-sm animate-pulse text-accent"></i>
                             </div>
                             <input type="text"
                                    name="q"
                                    x-ref="searchInput"
                                    placeholder="{{ __('search.ai_search_placeholder') }}"
-                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-10 pr-12 py-3 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none transition-all">
-                            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform">
+                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-10 pr-12 py-3 text-sm text-slate-700 focus:border-accent focus:ring-0 outline-none transition-all">
+                            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-accent text-white flex items-center justify-center hover:scale-105 transition-transform">
                                 <i class="fa-light fa-arrow-right text-xs"></i>
                             </button>
                         </form>
@@ -87,9 +100,9 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach(['omluva', 'zapas', 'platba', 'heslo'] as $key)
-                                    <button @click.stop="$refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.submit()"
-                                            class="flex items-start gap-2 text-left p-2.5 rounded-xl bg-slate-50 hover:bg-primary/5 border border-slate-100 hover:border-primary/20 transition-all group/tip">
-                                        <div class="w-5 h-5 rounded bg-white flex items-center justify-center shadow-sm text-[10px] text-primary group-hover/tip:bg-primary group-hover/tip:text-white transition-colors">
+                                    <button @click.stop="loading = true; $refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
+                                            class="flex items-start gap-2 text-left p-2.5 rounded-xl bg-slate-50 hover:bg-accent/5 border border-slate-100 hover:border-accent/20 transition-all group/tip">
+                                        <div class="w-5 h-5 rounded bg-white flex items-center justify-center shadow-sm text-[10px] text-accent group-hover/tip:bg-accent group-hover/tip:text-white transition-colors">
                                             <i class="fa-light @if($key === 'omluva') fa-calendar-xmark @elseif($key === 'zapas') fa-basketball @elseif($key === 'platba') fa-wallet @else fa-key @endif"></i>
                                         </div>
                                         <span class="text-[11px] font-bold text-slate-700 leading-tight">
@@ -102,15 +115,37 @@
                     </div>
                 </div>
 
-                <!-- AI Search (Mobile Trigger) -->
-                <div x-data="{ searchOpen: false }" class="md:hidden relative">
-                    <button @click="searchOpen = !searchOpen; $nextTick(() => $refs.searchInputMobile.focus())"
-                            class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none"
-                            title="{{ __('search.title') }}">
-                        <i class="fa-light fa-magnifying-glass text-xl"></i>
-                    </button>
+                <!-- Standard Search (Desktop) -->
+                <div class="hidden md:block flex-1 max-w-[320px] relative group">
+                    <form action="{{ route('member.search') }}" method="GET" class="relative">
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/40 group-focus-within:text-accent transition-colors">
+                            <i class="fa-light fa-magnifying-glass text-[13px]"></i>
+                        </div>
+                        <input type="text"
+                               name="q"
+                               placeholder="{{ __('Search') }}..."
+                               class="w-full bg-white/10 border border-white/20 rounded-lg pl-9 pr-4 py-1.5 text-[12px] text-white placeholder:text-white/40 focus:bg-white/15 focus:border-accent/50 focus:ring-0 outline-none transition-all shadow-inner">
+                    </form>
+                </div>
 
-                    <div x-show="searchOpen"
+                <!-- AI Search (Mobile Trigger) -->
+                <div x-data="{ searchOpen: false, loading: false }" class="md:hidden relative">
+                    <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
+                    <div class="flex items-center gap-1">
+                        <!-- Standard Search Mobile -->
+                        <button @click="searchOpen = 'standard'; $nextTick(() => $refs.searchInputMobileStandard.focus())"
+                                class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none">
+                            <i class="fa-light fa-magnifying-glass text-xl"></i>
+                        </button>
+                        <!-- AI Search Mobile -->
+                        <button @click="searchOpen = 'ai'; $nextTick(() => $refs.searchInputMobileAi.focus())"
+                                class="p-2 text-accent hover:bg-white/10 rounded-full transition-colors focus:outline-none">
+                            <i class="fa-light fa-sparkles text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Standard Search Mobile Overlay -->
+                    <div x-show="searchOpen === 'standard'"
                          @click.away="searchOpen = false"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
@@ -120,10 +155,30 @@
                         <form action="{{ route('member.search') }}" method="GET" class="relative">
                             <input type="text"
                                    name="q"
-                                   x-ref="searchInputMobile"
+                                   x-ref="searchInputMobileStandard"
+                                   placeholder="{{ __('Search') }}..."
+                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-accent focus:ring-0 outline-none pr-10">
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-accent">
+                                <i class="fa-light fa-arrow-right text-sm"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- AI Search Mobile Overlay -->
+                    <div x-show="searchOpen === 'ai'"
+                         @click.away="searchOpen = false"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[320px] bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
+                         style="display: none;">
+                        <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInputMobileAi.value)">
+                            <input type="text"
+                                   name="q"
+                                   x-ref="searchInputMobileAi"
                                    placeholder="{{ __('search.ai_hint') }}"
-                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
-                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary">
+                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-accent focus:ring-0 outline-none pr-10">
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-accent">
                                 <i class="fa-light fa-arrow-right text-sm"></i>
                             </button>
                         </form>
@@ -134,7 +189,7 @@
                 <a href="{{ route('member.notifications.index') }}" class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors mr-2">
                     <i class="fa-light fa-bell text-xl"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
-                        <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-secondary animate-pulse">
+                        <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-accent text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-secondary animate-pulse">
                             {{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}
                         </span>
                     @endif
@@ -157,7 +212,7 @@
                          class="absolute right-0 mt-2 w-48 bg-white rounded-club shadow-xl border border-slate-100 py-2 text-slate-700 z-50">
                         <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors font-bold">{{ __('nav.my_profile') }}</a>
                         @if(auth()->user()?->canAccessAdmin())
-                            <a href="{{ url(config('filament.panels.admin.path', 'admin')) }}" class="block px-4 py-2 text-sm text-primary hover:bg-primary/5 transition-colors font-bold">
+                            <a href="{{ url(config('filament.panels.admin.path', 'admin')) }}" class="block px-4 py-2 text-sm text-accent hover:bg-accent/5 transition-colors font-bold">
                                 <i class="fa-light fa-shield-check mr-2"></i> {{ __('nav.administration') }}
                             </a>
                         @endif
@@ -307,7 +362,8 @@
     </div>
 
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="lg:hidden h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-30 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
+    <nav class="lg:hidden h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-30 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] relative">
+        <span class="absolute top-0 left-0 right-0 brand-stripe"></span>
         <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.dashboard') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
             <i class="fa-light fa-grid-2 text-xl"></i>
             <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.dashboard') }}</span>

@@ -1,6 +1,7 @@
-<div x-data="{ searchOpen: false }" class="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50/50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-800 max-w-[280px] transition-all hover:bg-white dark:hover:bg-gray-950 hover:border-primary/30 group cursor-pointer relative mr-4" @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())">
-    <div class="flex items-center justify-center w-6 h-6 rounded bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-        <i class="fa-light fa-sparkles text-[10px]"></i>
+<div x-data="{ searchOpen: false, loading: false }" class="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50/50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-800 max-w-[280px] transition-all hover:bg-white dark:hover:bg-gray-950 hover:border-primary/30 group cursor-pointer relative mr-4" @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())">
+    <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
+    <div class="flex items-center justify-center w-6 h-6 rounded bg-primary/10 text-primary group-hover:bg-primary transition-all duration-300">
+        <i class="fa-light fa-sparkles text-[10px] group-hover:!text-white"></i>
     </div>
 
     <span class="text-[11px] text-gray-400 dark:text-gray-500 truncate font-medium group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
@@ -26,7 +27,11 @@
                 <h3 class="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white">{{ __('search.ai_suggestion') }}</h3>
             </div>
 
-            <form action="{{ route('member.search') }}" method="GET" class="relative" @submit.prevent="window.location.href = '{{ route('member.search') }}?q=' + encodeURIComponent($refs.searchInput.value)">
+            @php
+                $currentPanel = \Filament\Facades\Filament::getCurrentPanel()?->getId();
+                $aiRoute = $currentPanel === 'admin' ? route('filament.admin.pages.ai-search') : route('member.ai');
+            @endphp
+            <form action="{{ $aiRoute }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ $aiRoute }}?q=' + encodeURIComponent($refs.searchInput.value)">
                 <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
                     <i class="fa-light fa-sparkles text-sm animate-pulse"></i>
                 </div>
@@ -53,16 +58,13 @@
                     $tips = ['branding', 'cleny', 'omluva', 'zapas'];
                 @endphp
                 @foreach($tips as $key)
-                    <button @click.stop="$refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
+                    <button @click.stop="loading = true; $refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
                             class="flex items-start gap-2 text-left p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/30 hover:bg-primary/5 dark:hover:bg-primary/10 border border-gray-100 dark:border-gray-800 hover:border-primary/20 transition-all group/tip">
                         <div class="w-5 h-5 rounded bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm text-[10px] text-primary group-hover/tip:bg-primary group-hover/tip:text-white transition-colors">
                             <i class="fa-light @if($key === 'branding') fa-palette @elseif($key === 'cleny') fa-user-gear @elseif($key === 'omluva') fa-calendar-xmark @else fa-basketball @endif"></i>
                         </div>
                         <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 leading-tight">
-                            @if($key === 'branding') Logo a barvy @endif
-                            @if($key === 'cleny') Reset hesla @endif
-                            @if($key === 'omluva') Omluva z tréninku @endif
-                            @if($key === 'zapas') Další zápas @endif
+                            {{ __('search.ai_tips.' . $key) }}
                         </span>
                     </button>
                 @endforeach

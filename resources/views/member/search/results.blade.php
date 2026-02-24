@@ -5,10 +5,10 @@
     <div class="max-w-4xl mx-auto">
         <header class="mb-8">
             <h1 class="text-3xl font-black uppercase tracking-tight text-secondary">
-                {{ __('Výsledky vyhledávání') }}
+                {{ __('member.search.title') }}
             </h1>
             <p class="text-slate-500 mt-2">
-                Hledaný výraz: <span class="font-bold text-slate-900">"{{ $query }}"</span>
+                {{ __('member.search.query_label') }} <span class="font-bold text-slate-900">"{{ $query }}"</span>
             </p>
         </header>
 
@@ -18,13 +18,13 @@
                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i class="fa-light fa-magnifying-glass text-3xl text-slate-300"></i>
                     </div>
-                    <h2 class="text-xl font-bold text-slate-900 mb-2">Nebyly nalezeny žádné relevantní cíle</h2>
+                    <h2 class="text-xl font-bold text-slate-900 mb-2">{{ __('member.search.no_results') }}</h2>
                     <p class="text-slate-500 max-w-md mx-auto">
-                        Zkuste svůj dotaz popsat jinými slovy nebo zkontrolujte, zda nemáte v dotazu překlep.
+                        {{ __('member.search.no_results_text') }}
                     </p>
                     <div class="mt-8">
                         <a href="{{ route('member.dashboard') }}" class="btn btn-outline">
-                            Zpět na nástěnku
+                            {{ __('member.search.back_to_dashboard') }}
                         </a>
                     </div>
                 </div>
@@ -34,8 +34,8 @@
                         <i class="fa-light fa-sparkles"></i>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black uppercase tracking-widest text-primary">AI Doporučení</h3>
-                        <p class="text-xs text-slate-600">Na základě vašeho dotazu jsme vybrali nejpravděpodobnější místa, kam byste se mohli chtít dostat.</p>
+                        <h3 class="text-sm font-black uppercase tracking-widest text-primary">{{ __('member.search.ai_recommendation') }}</h3>
+                        <p class="text-xs text-slate-600">{{ __('member.search.ai_recommendation_text') }}</p>
                     </div>
                 </div>
 
@@ -60,11 +60,11 @@
 
         <div class="mt-12 p-8 bg-slate-900 rounded-2xl text-white relative overflow-hidden">
             <div class="relative z-10">
-                <h3 class="text-xl font-black uppercase tracking-tight mb-2">Nenašli jste, co jste hledali?</h3>
+                <h3 class="text-xl font-black uppercase tracking-tight mb-2">{{ __('member.search.not_found_title') }}</h3>
                 <p class="text-white/60 text-sm max-w-xl mb-6">
-                    Systém se neustále učí. Pokud máte pocit, že by vyhledávání mělo na váš dotaz reagovat lépe, dejte nám vědět.
+                    {{ __('member.search.not_found_text') }}
                 </p>
-                <a href="#" class="btn btn-primary">Poslat zpětnou vazbu</a>
+                <a href="#" class="btn btn-primary">{{ __('member.search.send_feedback') }}</a>
             </div>
             <i class="fa-light fa-comment-dots absolute -bottom-4 -right-4 text-9xl text-white/5 -rotate-12"></i>
         </div>

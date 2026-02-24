@@ -26,26 +26,26 @@ class AdminKpiOverview extends BaseWidget
         $attendanceTotal = class_exists(Attendance::class) ? Attendance::count() : 0;
 
         return [
-            Stat::make('Uživatelé (celkem)', $users)
-                ->description("Aktivních: {$activeUsers}")
+            Stat::make(__('admin/dashboard.kpi.users_total'), $users)
+                ->description(__('admin/dashboard.kpi.users_active_desc', ['count' => $activeUsers]))
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::USERS))
                 ->color('primary'),
-            Stat::make('Hráčské profily', $players)
+            Stat::make(__('admin/dashboard.kpi.players_total'), $players)
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PLAYER_PROFILES))
                 ->color('success'),
-            Stat::make('Týmy', $teams)
+            Stat::make(__('admin/dashboard.kpi.teams_total'), $teams)
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TEAMS))
                 ->color('warning'),
-            Stat::make('Zápasy', $matchesTotal)
-                ->description("Nadcházející: {$matchesUpcoming}")
+            Stat::make(__('admin/dashboard.kpi.matches_total'), $matchesTotal)
+                ->description(__('admin/dashboard.kpi.matches_upcoming_desc', ['count' => $matchesUpcoming]))
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::MATCHES))
                 ->color('info'),
-            Stat::make('Tréninky', $trainingsTotal)
-                ->description("Nadcházející: {$trainingsUpcoming}")
+            Stat::make(__('admin/dashboard.kpi.trainings_total'), $trainingsTotal)
+                ->description(__('admin/dashboard.kpi.trainings_upcoming_desc', ['count' => $trainingsUpcoming]))
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TRAININGS))
                 ->color('info'),
-            Stat::make('RSVP/Docházka', $attendanceTotal)
-                ->description('Počet záznamů (placeholder)')
+            Stat::make(__('admin/dashboard.kpi.attendance_total'), $attendanceTotal)
+                ->description(__('admin/dashboard.kpi.attendance_desc'))
                 ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CHECK_CIRCLE))
                 ->color('gray'),
         ];

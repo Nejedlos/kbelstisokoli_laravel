@@ -84,6 +84,10 @@
                                             })
                                             .finally(() => loading = false);
                                     "
+                                    @output-updated.window="
+                                        const outputEl = document.getElementById('console-output');
+                                        if (outputEl) outputEl.scrollTop = outputEl.scrollHeight;
+                                    "
                                     color="{{ $config['color'] ?? 'primary' }}"
                                     class="w-full text-[11px] font-bold py-1.5 shadow-sm rounded-lg"
                                     x-bind:disabled="loading"
@@ -173,6 +177,7 @@
                 <div
                     id="console-output"
                     class="p-6 text-[#c9d1d9] font-mono text-[11px] leading-[1.6] min-h-[500px] md:min-h-[600px] max-h-[80vh] overflow-y-auto whitespace-pre-wrap shadow-inner custom-scrollbar selection:bg-primary-500/40 selection:text-white"
+                    wire:stream="output"
                 >
                     @if(empty($output))
                         <div class="flex flex-col items-center justify-center h-[400px] text-gray-700 select-none">

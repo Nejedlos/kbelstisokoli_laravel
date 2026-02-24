@@ -73,3 +73,8 @@ npm run build
 - **ViteException (Manifest):** Znamená, že soubor v manifestu chybí. Spusťte `npm run build`.
 - **Nefunkční styly/skripty v Adminu:** Zkontrolujte, zda není aktivní agresivní HTML minifikace, která může rozbít dynamické prvky (např. odstraňováním uvozovek). V administraci by měla být minifikace vypnutá.
 - **Pořadí načítání:** Pokud váš skript závisí na jiných knihovnách (např. Font Awesome), ujistěte se, že jsou buď importovány v CSS/JS, nebo načteny dříve.
+
+## 6. Globální loader (KS)
+- CSS loaderu je součástí `resources/css/filament-admin.css`, který se vkládá přes `AdminPanelProvider` do hooku `panels::head.end` pomocí `@vite`.
+- Komponenta loaderu je `resources/views/components/loader/basketball.blade.php` a je připravena pro okamžité použití na libovolné Livewire/Filament stránce.
+- Po každé změně vzhledu loaderu proveďte `npm run build` a tvrdý refresh (Cmd/Ctrl + Shift + R).

@@ -41,6 +41,7 @@ class IconHelper
     public const CRON_TASKS = AppIcon::CRON_TASKS;
     public const CRON_LOGS = AppIcon::CRON_LOGS;
     public const BRANDING = AppIcon::BRANDING;
+    public const AI = AppIcon::AI;
     public const DASHBOARD = AppIcon::DASHBOARD;
     public const SETTINGS = AppIcon::SETTINGS;
 

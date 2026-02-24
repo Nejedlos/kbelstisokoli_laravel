@@ -490,8 +490,7 @@ button[type="submit"].fi-btn:active {
 .btn-primary.is-loading,
 .fi-ac-btn-action.is-loading,
 .fi-btn.fi-color-primary.is-loading,
-.fi-btn-color-primary.is-loading,
-button[type="submit"].fi-btn.fi-processing {
+.fi-btn-color-primary.is-loading {
     position: relative !important;
     pointer-events: none !important;
     opacity: 0.8 !important;
@@ -500,8 +499,7 @@ button[type="submit"].fi-btn.fi-processing {
 .btn-primary.is-loading::after,
 .fi-ac-btn-action.is-loading::after,
 .fi-btn.fi-color-primary.is-loading::after,
-.fi-btn-color-primary.is-loading::after,
-button[type="submit"].fi-btn.fi-processing::after {
+.fi-btn-color-primary.is-loading::after {
     content: '';
     width: 1.1rem;
     height: 1.1rem;
@@ -759,4 +757,89 @@ body.fi-panel-admin > [wire\:key="fls-outside-panels"] {
         min-width: 10rem;
         display: inline-flex !important;
     }
+}
+
+/* --- Globální barevné Filament notifikace s vysokou prioritou --- */
+body .fi-no-notification {
+    border-radius: 12px !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(12px) !important;
+    ring-width: 0 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+/* Success - Zelená */
+body .fi-no-notification.fi-color-success,
+body .fi-no-notification[class*="fi-status-success"] {
+    background-color: #f0fdf4 !important; /* green-50 */
+    border-color: #bbf7d0 !important;     /* green-200 */
+}
+body .fi-no-notification.fi-color-success .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-success"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-success .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-success"] .fi-no-notification-body {
+    color: #166534 !important; /* green-800 */
+}
+body .fi-no-notification.fi-color-success .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-success"] .fi-no-notification-icon {
+    color: #22c55e !important; /* green-500 */
+}
+
+/* Danger - Červená */
+body .fi-no-notification.fi-color-danger,
+body .fi-no-notification[class*="fi-status-danger"] {
+    background-color: #fef2f2 !important; /* red-50 */
+    border-color: #fecaca !important;     /* red-200 */
+}
+body .fi-no-notification.fi-color-danger .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-danger"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-danger .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-danger"] .fi-no-notification-body {
+    color: #991b1b !important; /* red-800 */
+}
+body .fi-no-notification.fi-color-danger .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-danger"] .fi-no-notification-icon {
+    color: #ef4444 !important; /* red-500 */
+}
+
+/* Warning - Oranžová */
+body .fi-no-notification.fi-color-warning,
+body .fi-no-notification[class*="fi-status-warning"] {
+    background-color: #fffbeb !important; /* amber-50 */
+    border-color: #fef3c7 !important;     /* amber-100 */
+}
+body .fi-no-notification.fi-color-warning .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-warning"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-warning .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-warning"] .fi-no-notification-body {
+    color: #92400e !important; /* amber-800 */
+}
+body .fi-no-notification.fi-color-warning .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-warning"] .fi-no-notification-icon {
+    color: #f59e0b !important; /* amber-500 */
+}
+
+/* Info - Modrá */
+body .fi-no-notification.fi-color-info,
+body .fi-no-notification[class*="fi-status-info"] {
+    background-color: #eff6ff !important; /* blue-50 */
+    border-color: #dbeafe !important;     /* blue-100 */
+}
+body .fi-no-notification.fi-color-info .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-info .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-body {
+    color: #1e40af !important; /* blue-800 */
+}
+body .fi-no-notification.fi-color-info .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
+    color: #3b82f6 !important; /* blue-500 */
+}
+
+/* Dark mode overrides */
+.dark body .fi-no-notification {
+    background-color: rgba(15, 23, 42, 0.95) !important;
 }

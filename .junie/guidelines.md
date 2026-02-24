@@ -121,3 +121,10 @@ Tato sekce definuje kritická pravidla pro úpravy přihlašovacích stránek a 
 ### 11.4 Verifikace (Snapshoty)
 - **Vždy testujte výsledné HTML:** Pokud se změny neprojevují, vygenerujte statický snapshot stránky pomocí `curl` (viz `docs/18-renderovani-html.md`) a zkontrolujte, zda jsou přítomny správné CSS třídy a linky na assety s hashem.
 - **Manifest:** Po každé změně v CSS/JS spusťte `npm run build`, aby se aktualizoval Vite manifest.
+
+### 11.5 Loading stavy a prevence duplicity
+- **Projektový loader:** Pro custom komponenty a auth stránky používáme třídu `.is-loading` (definováno v `filament-auth.css`).
+- **Nativní loader:** Framework Filament (Livewire) přidává třídu `.fi-processing`.
+- **Globální basketbalový loader (KS):** Pro dlouhé operace (AI, importy) používáme overlay loader s Glassmorphism designem a animovaným míčem v branding barvách (definováno v `filament-admin.css`).
+- **Kritické pravidlo:** V CSS souborech s vlastním designem (auth stránky) **nesmí** být definován loader pro `.fi-processing`. Všechny vizuální indikátory běhu musí být navázány na třídu `.is-loading` nebo na globální overlay, aby se předešlo zdvojení loaderů při odeslání formuláře.
+- **Detaily:** Více informací naleznete v `docs/25-loading-stavy-tlacitek.md` a `docs/26-globalni-loader.md`.

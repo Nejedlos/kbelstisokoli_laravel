@@ -15,8 +15,10 @@ return [
         'pages' => [
             'dashboard' => 'Nástěnka',
             'branding' => 'Branding a vzhled',
+            'ai_settings' => 'AI Nastavení',
             'member_section' => 'Členská sekce',
             'public_web' => 'Veřejný web',
+            'system_console' => 'Systémová konzole',
         ],
         'resources' => [
             'announcement' => [
@@ -127,6 +129,21 @@ return [
                 'label' => 'Uživatel',
                 'plural_label' => 'Uživatelé',
             ],
+        ],
+    ],
+    'loader' => [
+        'ai_thinking' => 'Asistent přemýšlí…',
+    ],
+    'search' => [
+        'categories' => [
+            'pages' => 'Stránky',
+            'resources' => 'Sekce (Resources)',
+            'navigation' => 'Navigace',
+            'other' => 'Ostatní',
+        ],
+        'details' => [
+            'group' => 'Sekce v menu',
+            'content' => 'Obsah',
         ],
     ],
 ];

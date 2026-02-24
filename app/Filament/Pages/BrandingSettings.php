@@ -68,11 +68,11 @@ class BrandingSettings extends Page implements HasForms
         return $schema
             ->statePath('data')
             ->components([
-                Section::make('Téma a barvy')
-                    ->description('Vyberte barevný motiv webu. Každý motiv je navržen tak, aby byl vizuálně konzistentní.')
+                Section::make(__('admin/branding-settings.sections.theme'))
+                    ->description(__('admin/branding-settings.sections.theme_desc'))
                     ->schema([
                         Select::make('theme_preset')
-                            ->label('Barevné téma (Preset)')
+                            ->label(__('admin/branding-settings.fields.theme_preset'))
                             ->options(
                                 collect(config('branding.themes'))->mapWithKeys(fn ($item, $key) => [$key => $item['label']])->toArray()
                             )
@@ -82,149 +82,153 @@ class BrandingSettings extends Page implements HasForms
                         Grid::make(3)
                             ->schema([
                                 Select::make('header_variant')
-                                    ->label('Varianta hlavičky')
+                                    ->label(__('admin/branding-settings.fields.header_variant'))
                                     ->options([
-                                        'light' => 'Světlá',
-                                        'dark' => 'Tmavá (Navy)',
-                                        'sticky' => 'Sticky (při scrollu)',
+                                        'light' => __('admin/branding-settings.options.header.light'),
+                                        'dark' => __('admin/branding-settings.options.header.dark'),
+                                        'sticky' => __('admin/branding-settings.options.header.sticky'),
                                     ])
                                     ->default('light'),
                                 Select::make('footer_variant')
-                                    ->label('Varianta patičky')
+                                    ->label(__('admin/branding-settings.fields.footer_variant'))
                                     ->options([
-                                        'simple' => 'Jednoduchá',
-                                        'full' => 'Kompletní s odkazy',
+                                        'simple' => __('admin/branding-settings.options.footer.simple'),
+                                        'full' => __('admin/branding-settings.options.footer.full'),
                                     ])
                                     ->default('full'),
                                 Select::make('button_radius')
-                                    ->label('Zaoblení tlačítek')
+                                    ->label(__('admin/branding-settings.fields.button_radius'))
                                     ->options([
-                                        'none' => 'Ostré rohy',
-                                        'sm' => 'Malé',
-                                        'md' => 'Střední (výchozí)',
-                                        'lg' => 'Velké',
-                                        'full' => 'Kulatá',
+                                        'none' => __('admin/branding-settings.options.radius.none'),
+                                        'sm' => __('admin/branding-settings.options.radius.sm'),
+                                        'md' => __('admin/branding-settings.options.radius.md'),
+                                        'lg' => __('admin/branding-settings.options.radius.lg'),
+                                        'full' => __('admin/branding-settings.options.radius.full'),
                                     ])
                                     ->default('md'),
                             ]),
                     ]),
 
-                Section::make('Základní identita')
-                    ->description('Zde nastavte názvy klubu. V textu můžete používat zástupné symboly ###TEAM_NAME### nebo ###TEAM_SHORT###, které budou automaticky nahrazeny těmito hodnotami.')
+                Section::make(__('admin/branding-settings.sections.identity'))
+                    ->description(__('admin/branding-settings.sections.identity_desc'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('club_name')
-                                    ->label('Název klubu')
+                                    ->label(__('admin/branding-settings.fields.club_name'))
                                     ->required(),
                                 TextInput::make('club_short_name')
-                                    ->label('Zkrácený název'),
+                                    ->label(__('admin/branding-settings.fields.club_short_name')),
                                 TextInput::make('slogan')
-                                    ->label('Slogan klubu')
+                                    ->label(__('admin/branding-settings.fields.slogan'))
                                     ->columnSpanFull(),
                             ]),
                         Grid::make(2)
                             ->schema([
                                 FileUpload::make('logo_path')
-                                    ->label('Hlavní logo')
+                                    ->label(__('admin/branding-settings.fields.logo'))
                                     ->image()
                                     ->directory('branding'),
                                 FileUpload::make('alt_logo_path')
-                                    ->label('Alternativní logo (světlé/tmavé)')
+                                    ->label(__('admin/branding-settings.fields.alt_logo'))
                                     ->image()
                                     ->directory('branding'),
                             ]),
                     ]),
 
-                Section::make('Kontaktní údaje (Patička)')
+                Section::make(__('admin/branding-settings.sections.contact'))
                     ->schema([
                         Grid::make(3)
                             ->schema([
                                 TextInput::make('contact_email')
-                                    ->label('Kontaktní E-mail')
+                                    ->label(__('admin/branding-settings.fields.email'))
                                     ->email(),
                                 TextInput::make('contact_phone')
-                                    ->label('Kontaktní telefon'),
+                                    ->label(__('admin/branding-settings.fields.phone')),
                                 TextInput::make('contact_address')
-                                    ->label('Adresa / Sídlo'),
+                                    ->label(__('admin/branding-settings.fields.address')),
+                                TextInput::make('admin_contact_email')
+                                    ->label(__('admin/branding-settings.fields.admin_contact_email'))
+                                    ->helperText(__('admin/branding-settings.fields.admin_contact_email_help'))
+                                    ->email(),
                             ]),
                     ]),
 
-                Section::make('Sociální sítě')
+                Section::make(__('admin/branding-settings.sections.social'))
                     ->schema([
                         Grid::make(3)
                             ->schema([
                                 TextInput::make('social_facebook')
-                                    ->label('Facebook URL'),
+                                    ->label(__('admin/branding-settings.fields.facebook')),
                                 TextInput::make('social_instagram')
-                                    ->label('Instagram URL'),
+                                    ->label(__('admin/branding-settings.fields.instagram')),
                                 TextInput::make('social_youtube')
-                                    ->label('YouTube URL'),
+                                    ->label(__('admin/branding-settings.fields.youtube')),
                             ]),
                     ]),
 
-                Section::make('Výzva k akci (Globální CTA)')
+                Section::make(__('admin/branding-settings.sections.cta'))
                     ->schema([
                         Toggle::make('cta_enabled')
-                            ->label('Povolit globální CTA tlačítko v hlavičce')
+                            ->label(__('admin/branding-settings.fields.cta_enabled'))
                             ->live(),
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('cta_label')
-                                    ->label('Text tlačítka')
+                                    ->label(__('admin/branding-settings.fields.cta_label'))
                                     ->required(fn ($get) => $get('cta_enabled')),
                                 TextInput::make('cta_url')
-                                    ->label('Odkaz (URL)')
+                                    ->label(__('admin/branding-settings.fields.cta_url'))
                                     ->required(fn ($get) => $get('cta_enabled')),
                             ])
                             ->visible(fn ($get) => $get('cta_enabled')),
                     ]),
 
-                Section::make('Právní informace')
+                Section::make(__('admin/branding-settings.sections.legal'))
                     ->schema([
                         TextInput::make('footer_text')
-                            ->label('Copyright text (patička)')
-                            ->placeholder('© ' . date('Y') . ' Kbelští sokoli. Všechna práva vyhrazena.'),
+                            ->label(__('admin/branding-settings.fields.footer_text'))
+                            ->placeholder(__('admin/branding-settings.placeholders.footer_copyright', ['year' => date('Y'), 'club' => config('branding.club_name')])),
                     ]),
-                Section::make('Režim přípravy (Under Construction)')
-                    ->description('Aktivujte, pokud web teprve připravujete. Návštěvníkům se zobrazí stylová a vtipná stránka s basketbalovou tématikou.')
+                Section::make(__('admin/branding-settings.sections.maintenance'))
+                    ->description(__('admin/branding-settings.sections.maintenance_desc'))
                     ->schema([
                         Toggle::make('maintenance_mode')
-                            ->label('Aktivovat režim přípravy')
-                            ->helperText('Pokud je zapnuto, veřejný web bude nahrazen taktickou tabulí trenéra.')
+                            ->label(__('admin/branding-settings.fields.maintenance_mode'))
+                            ->helperText(__('admin/branding-settings.fields.maintenance_mode_help'))
                             ->default(false),
                         TextInput::make('maintenance_title')
-                            ->label('Hlavní nadpis')
-                            ->placeholder('Kreslíme vítěznou taktiku')
-                            ->default('Kreslíme vítěznou taktiku'),
+                            ->label(__('admin/branding-settings.fields.maintenance_title'))
+                            ->placeholder(__('admin/branding-settings.placeholders.maintenance_title'))
+                            ->default(__('admin/branding-settings.placeholders.maintenance_title')),
                         Textarea::make('maintenance_text')
-                            ->label('Text zprávy')
-                            ->placeholder('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky...')
-                            ->default('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),
+                            ->label(__('admin/branding-settings.fields.maintenance_text'))
+                            ->placeholder(__('admin/branding-settings.placeholders.maintenance_text'))
+                            ->default(__('admin/branding-settings.placeholders.maintenance_text')),
                     ]),
 
-                Section::make('Globální SEO nastavení')
-                    ->description('Výchozí hodnoty pro vyhledávače a sociální sítě, které se použijí, pokud nejsou vyplněny u konkrétní stránky.')
+                Section::make(__('admin/branding-settings.sections.seo'))
+                    ->description(__('admin/branding-settings.sections.seo_desc'))
                     ->schema([
                         TextInput::make('seo_title_suffix')
-                            ->label('Přípona titulku (Title Suffix)')
-                            ->placeholder(' | Název klubu')
-                            ->helperText('Bude přidáno za titulek stránky (např. "O nás | Kbelští sokoli").'),
+                            ->label(__('admin/branding-settings.fields.seo_title_suffix'))
+                            ->placeholder(__('admin/branding-settings.placeholders.seo_title_suffix'))
+                            ->helperText(__('admin/branding-settings.fields.seo_title_suffix_help')),
                         Textarea::make('seo_description')
-                            ->label('Výchozí meta popis')
-                            ->helperText('Použije se jako fallback, pokud stránka nemá vlastní popis.'),
+                            ->label(__('admin/branding-settings.fields.seo_description'))
+                            ->helperText(__('admin/branding-settings.fields.seo_description_help')),
                         FileUpload::make('seo_og_image_path')
-                            ->label('Výchozí OG obrázek')
+                            ->label(__('admin/branding-settings.fields.seo_og_image'))
                             ->image()
                             ->directory('branding')
-                            ->helperText('Obrázek, který se zobrazí při sdílení na sociálních sítích (doporučeno 1200x630px).'),
+                            ->helperText(__('admin/branding-settings.fields.seo_og_image_help')),
                         Grid::make(2)
                             ->schema([
                                 Toggle::make('seo_robots_index')
-                                    ->label('Indexovat web (Robots Index)')
+                                    ->label(__('admin/branding-settings.fields.seo_robots_index'))
                                     ->default(true),
                                 Toggle::make('seo_robots_follow')
-                                    ->label('Sledovat odkazy (Robots Follow)')
+                                    ->label(__('admin/branding-settings.fields.seo_robots_follow'))
                                     ->default(true),
                             ]),
                     ]),
@@ -244,13 +248,17 @@ class BrandingSettings extends Page implements HasForms
             app(BrandingService::class)->clearCache();
 
             Notification::make()
-                ->title('Nastavení uloženo')
+                ->title(__('admin/branding-settings.notifications.saved'))
                 ->success()
+                ->seconds(3)
                 ->send();
+
+            $this->dispatch('branding-saved');
         } catch (\Exception $e) {
             Notification::make()
-                ->title('Chyba při ukládání')
+                ->title(__('admin/branding-settings.notifications.error'))
                 ->danger()
+                ->seconds(4)
                 ->send();
         }
     }

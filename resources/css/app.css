@@ -151,6 +151,46 @@
     .sport-skew {
         clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
     }
+
+    /* Členská sekce – brandované komponenty */
+    .member-topbar {
+        @apply relative text-white; /* Barva textu v liště */
+        background:
+            radial-gradient(circle at 20% -80%, rgba(225, 29, 72, 0.2) 0%, transparent 55%),
+            radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.3) 0%, transparent 55%),
+            linear-gradient(135deg, var(--color-brand-navy) 0%, #061529 100%);
+    }
+    .member-topbar:after {
+        content: '';
+        @apply absolute bottom-0 left-0 right-0 h-[3px];
+        background: linear-gradient(90deg, var(--color-brand-red), var(--color-brand-blue) 70%);
+        opacity: .9;
+    }
+
+    .brand-stripe {
+        @apply h-[3px] w-full;
+        background: linear-gradient(90deg, var(--color-brand-red), var(--color-brand-blue));
+    }
+
+    .sport-card-accent {
+        @apply border relative overflow-hidden;
+        background:
+            radial-gradient(1200px 400px at -10% -20%, rgba(225, 29, 72, 0.06) 0%, transparent 60%),
+            radial-gradient(800px 300px at 120% 120%, rgba(37, 99, 235, 0.08) 0%, transparent 70%),
+            var(--color-surface);
+        border-color: rgba(225, 29, 72, 0.15);
+    }
+    .sport-card-accent:before {
+        content: '';
+        @apply absolute inset-0 pointer-events-none;
+        background-image: var(--pattern-basketball);
+        opacity: .06;
+    }
+
+    .kpi-icon-ring {
+        @apply ring-2 ring-primary/20 shadow-md;
+        box-shadow: 0 10px 20px -12px rgba(225, 29, 72, 0.35);
+    }
 }
 
 /* Font Awesome Pro - Lokální (Vendored) */
@@ -288,4 +328,89 @@
     .container {
         @apply px-5;
     }
+}
+
+/* --- Globální barevné Filament notifikace s vysokou prioritou --- */
+body .fi-no-notification {
+    border-radius: 12px !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(12px) !important;
+    ring-width: 0 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+/* Success - Zelená */
+body .fi-no-notification.fi-color-success,
+body .fi-no-notification[class*="fi-status-success"] {
+    background-color: #f0fdf4 !important; /* green-50 */
+    border-color: #bbf7d0 !important;     /* green-200 */
+}
+body .fi-no-notification.fi-color-success .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-success"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-success .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-success"] .fi-no-notification-body {
+    color: #166534 !important; /* green-800 */
+}
+body .fi-no-notification.fi-color-success .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-success"] .fi-no-notification-icon {
+    color: #22c55e !important; /* green-500 */
+}
+
+/* Danger - Červená */
+body .fi-no-notification.fi-color-danger,
+body .fi-no-notification[class*="fi-status-danger"] {
+    background-color: #fef2f2 !important; /* red-50 */
+    border-color: #fecaca !important;     /* red-200 */
+}
+body .fi-no-notification.fi-color-danger .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-danger"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-danger .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-danger"] .fi-no-notification-body {
+    color: #991b1b !important; /* red-800 */
+}
+body .fi-no-notification.fi-color-danger .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-danger"] .fi-no-notification-icon {
+    color: #ef4444 !important; /* red-500 */
+}
+
+/* Warning - Oranžová */
+body .fi-no-notification.fi-color-warning,
+body .fi-no-notification[class*="fi-status-warning"] {
+    background-color: #fffbeb !important; /* amber-50 */
+    border-color: #fef3c7 !important;     /* amber-100 */
+}
+body .fi-no-notification.fi-color-warning .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-warning"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-warning .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-warning"] .fi-no-notification-body {
+    color: #92400e !important; /* amber-800 */
+}
+body .fi-no-notification.fi-color-warning .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-warning"] .fi-no-notification-icon {
+    color: #f59e0b !important; /* amber-500 */
+}
+
+/* Info - Modrá */
+body .fi-no-notification.fi-color-info,
+body .fi-no-notification[class*="fi-status-info"] {
+    background-color: #eff6ff !important; /* blue-50 */
+    border-color: #dbeafe !important;     /* blue-100 */
+}
+body .fi-no-notification.fi-color-info .fi-no-notification-title,
+body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-title,
+body .fi-no-notification.fi-color-info .fi-no-notification-body,
+body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-body {
+    color: #1e40af !important; /* blue-800 */
+}
+body .fi-no-notification.fi-color-info .fi-no-notification-icon,
+body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
+    color: #3b82f6 !important; /* blue-500 */
+}
+
+/* Dark mode overrides */
+.dark body .fi-no-notification {
+    background-color: rgba(15, 23, 42, 0.95) !important;
 }

@@ -15,8 +15,10 @@ return [
         'pages' => [
             'dashboard' => 'Dashboard',
             'branding' => 'Branding & Appearance',
+            'ai_settings' => 'AI Settings',
             'member_section' => 'Member Section',
             'public_web' => 'Public Website',
+            'system_console' => 'System Console',
         ],
         'resources' => [
             'announcement' => [
@@ -91,6 +93,14 @@ return [
                 'label' => 'Category',
                 'plural_label' => 'News Categories',
             ],
+            'lead' => [
+                'label' => 'Lead / Prospect',
+                'plural_label' => 'Leads / Prospects',
+            ],
+            'audit_log' => [
+                'label' => 'Audit Log',
+                'plural_label' => 'Audit Logs',
+            ],
             'redirect' => [
                 'label' => 'Redirect',
                 'plural_label' => 'Redirects',
@@ -119,6 +129,21 @@ return [
                 'label' => 'User',
                 'plural_label' => 'Users',
             ],
+        ],
+    ],
+    'loader' => [
+        'ai_thinking' => 'Assistant is thinking…',
+    ],
+    'search' => [
+        'categories' => [
+            'pages' => 'Pages',
+            'resources' => 'Resources',
+            'navigation' => 'Navigation',
+            'other' => 'Other',
+        ],
+        'details' => [
+            'group' => 'Menu Group',
+            'content' => 'Content',
         ],
     ],
 ];

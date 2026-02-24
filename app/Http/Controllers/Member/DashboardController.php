@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BasketballMatch;
 use App\Models\ClubEvent;
 use App\Models\Training;
+use App\Services\Finance\FinanceService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,6 +19,11 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $now = now();
+
+        // Doplňková data pro moderní nástěnku
+        $economySummary = app(FinanceService::class)->getMemberSummary($user);
+        $notifications = $user->notifications()->latest()->limit(5)->get();
+        $avatarUrl = method_exists($user, 'getFirstMediaUrl') ? ($user->getFirstMediaUrl('avatar') ?: null) : null;
 
         // 1. Nejbližší akce (limit 3)
         $trainings = Training::with(['team', 'attendances' => fn($q) => $q->where('user_id', $user->id)])
@@ -65,6 +71,10 @@ class DashboardController extends Controller
             'pendingCount' => $pendingCount,
             'myTeams' => $myTeams,
             'coachTeams' => $coachTeams,
+            'economySummary' => $economySummary,
+            'notifications' => $notifications,
+            'avatarUrl' => $avatarUrl,
+            'user' => $user,
         ]);
     }
 }

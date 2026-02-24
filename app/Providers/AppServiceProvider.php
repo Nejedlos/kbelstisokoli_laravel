@@ -38,11 +38,7 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-            $switch
-                ->locales(config('app.supported_locales', ['cs', 'en']))
-                ->visible(insidePanels: true, outsidePanels: true)
-                ->renderHook('panels::global-search.after')
-                ->outsidePanelPlacement(\BezhanSalleh\LanguageSwitch\Enums\Placement::TopRight);
+            $switch->visible(false);
         });
 
         \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'components.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {

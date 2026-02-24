@@ -189,6 +189,9 @@
     echo "Optimizing application..."
     {{ $php }} artisan optimize
 
+    echo "Reindexing AI..."
+    {{ $php }} artisan ai:index --no-interaction
+
     echo "✅ Setup finished successfully!"
 @endtask
 
@@ -316,6 +319,9 @@
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan optimize
 
+    echo "Reindexing AI..."
+    {{ $php }} artisan ai:index --no-interaction
+
     echo "✅ Deployment finished successfully!"
 @endtask
 
@@ -425,6 +431,9 @@
 
     echo "Optimizing application..."
     {{ $php }} artisan optimize
+
+    echo "Reindexing AI..."
+    {{ $php }} artisan ai:index --no-interaction
 
     echo "✅ Sync finished successfully!"
 @endtask

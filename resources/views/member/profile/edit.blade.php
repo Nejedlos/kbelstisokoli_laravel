@@ -1,6 +1,6 @@
 @extends('layouts.member', [
-    'title' => 'Můj profil',
-    'subtitle' => 'Zde si můžete upravit své kontaktní údaje a nastavení účtu.'
+    'title' => __('member.profile.title'),
+    'subtitle' => __('member.profile.subtitle')
 ])
 
 @section('content')
@@ -12,26 +12,26 @@
 
                 <!-- Basic Info -->
                 <section class="card p-6 md:p-8 space-y-6">
-                    <h3 class="text-lg font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-4">Základní údaje</h3>
+                    <h3 class="text-lg font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-4">{{ __('member.profile.basic_info') }}</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <label for="name" class="text-xs font-black uppercase tracking-widest text-slate-400">Jméno a příjmení</label>
+                            <label for="name" class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.name') }}</label>
                             <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}"
                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary">
                             @error('name') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">E-mailová adresa</label>
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.email') }}</label>
                             <div class="px-4 py-3 bg-slate-100 border border-slate-200 rounded-club font-bold text-slate-500 cursor-not-allowed">
                                 {{ $user->email }}
                             </div>
-                            <p class="text-[10px] text-slate-400 font-medium italic">E-mail nelze v profilu měnit. Kontaktujte administrátora.</p>
+                            <p class="text-[10px] text-slate-400 font-medium italic">{{ __('member.profile.email_help') }}</p>
                         </div>
 
                         <div class="space-y-2">
-                            <label for="phone" class="text-xs font-black uppercase tracking-widest text-slate-400">Telefonní číslo</label>
+                            <label for="phone" class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.phone') }}</label>
                             <input type="tel" name="phone" id="phone" value="{{ old('phone', $user->phone) }}" placeholder="+420 ..."
                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary">
                             @error('phone') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
@@ -39,7 +39,7 @@
 
                         @if($profile)
                             <div class="space-y-2">
-                                <label for="jersey_number" class="text-xs font-black uppercase tracking-widest text-slate-400">Číslo dresu</label>
+                                <label for="jersey_number" class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.jersey_number') }}</label>
                                 <input type="text" name="jersey_number" id="jersey_number" value="{{ old('jersey_number', $profile->jersey_number) }}"
                                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary">
                                 @error('jersey_number') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
@@ -49,10 +49,10 @@
 
                     @if($profile)
                         <div class="space-y-2">
-                            <label for="public_bio" class="text-xs font-black uppercase tracking-widest text-slate-400">Veřejné Bio / O mně</label>
+                            <label for="public_bio" class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.bio') }}</label>
                             <textarea name="public_bio" id="public_bio" rows="4"
                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-secondary">{{ old('public_bio', $profile->public_bio) }}</textarea>
-                            <p class="text-[10px] text-slate-400 font-medium">Tento text se může zobrazit na webu u vašeho profilu.</p>
+                            <p class="text-[10px] text-slate-400 font-medium">{{ __('member.profile.bio_help') }}</p>
                             @error('public_bio') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
                         </div>
                     @endif
@@ -60,12 +60,12 @@
 
                 <!-- Password Change -->
                 <section class="card p-6 md:p-8 space-y-6">
-                    <h3 class="text-lg font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-4">Změna hesla</h3>
-                    <p class="text-xs text-slate-500 font-medium">Pokud si nepřejete měnit heslo, ponechte tato pole prázdná.</p>
+                    <h3 class="text-lg font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-4">{{ __('member.profile.password_change') }}</h3>
+                    <p class="text-xs text-slate-500 font-medium">{{ __('member.profile.password_help') }}</p>
 
                     <div class="space-y-6">
                         <div class="space-y-2">
-                            <label for="current_password" class="text-xs font-black uppercase tracking-widest text-slate-400">Stávající heslo</label>
+                            <label for="current_password" class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.current_password') }}</label>
                             <input type="password" name="current_password" id="current_password"
                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
                             @error('current_password') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
@@ -73,13 +73,13 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
-                                <label for="new_password" class="text-xs font-black uppercase tracking-widest text-slate-400">Nové heslo</label>
+                                <label for="new_password" class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.new_password') }}</label>
                                 <input type="password" name="new_password" id="new_password"
                                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
                                 @error('new_password') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div class="space-y-2">
-                                <label for="new_password_confirmation" class="text-xs font-black uppercase tracking-widest text-slate-400">Potvrzení nového hesla</label>
+                                <label for="new_password_confirmation" class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.confirm_new_password') }}</label>
                                 <input type="password" name="new_password_confirmation" id="new_password_confirmation"
                                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none">
                             </div>
@@ -90,17 +90,17 @@
                 <!-- Two Factor Authentication -->
                 <section class="card p-6 md:p-8 space-y-6 border-l-4 {{ $user->two_factor_secret ? 'border-l-success' : 'border-l-warning' }}">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <h3 class="text-lg font-black uppercase tracking-tight text-secondary">Dvoufázové ověření (2FA)</h3>
+                        <h3 class="text-lg font-black uppercase tracking-tight text-secondary">{{ __('member.profile.two_factor.title') }}</h3>
                         <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $user->two_factor_secret ? 'bg-success-100 text-success-700' : 'bg-warning-100 text-warning-700' }}">
-                            {{ $user->two_factor_secret ? 'Aktivní' : 'Neaktivní' }}
+                            {{ $user->two_factor_secret ? __('member.profile.two_factor.active') : __('member.profile.two_factor.inactive') }}
                         </span>
                     </div>
 
                     <div class="space-y-4">
                         <p class="text-sm text-slate-600 font-medium leading-relaxed">
-                            Dvoufázové ověření přidává další vrstvu zabezpečení k vašemu účtu. Při přihlášení budete muset zadat ověřovací kód z mobilní aplikace.
+                            {{ __('member.profile.two_factor.help') }}
                             @if($user->can('access_admin'))
-                                <span class="text-danger-600 font-bold block mt-2">Důležité: Jako administrátor musíte mít 2FA aktivní pro přístup do správy klubu.</span>
+                                <span class="text-danger-600 font-bold block mt-2">{{ __('member.profile.two_factor.admin_warning') }}</span>
                             @endif
                         </p>
 
@@ -109,7 +109,7 @@
                             <form method="POST" action="{{ route('two-factor.enable') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-secondary py-2 px-6 text-sm">
-                                    Aktivovat 2FA
+                                    {{ __('member.profile.two_factor.enable') }}
                                 </button>
                             </form>
                         @else
@@ -121,7 +121,7 @@
                                         <form method="POST" action="{{ route('two-factor.recovery-codes') }}">
                                             @csrf
                                             <button type="submit" class="btn btn-outline py-2 px-4 text-xs">
-                                                Regenerovat záchranné kódy
+                                                {{ __('member.profile.two_factor.regenerate_codes') }}
                                             </button>
                                         </form>
 
@@ -129,15 +129,15 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn bg-danger-50 text-danger-600 hover:bg-danger-100 py-2 px-4 text-xs uppercase tracking-widest font-black">
-                                                Deaktivovat 2FA
+                                                {{ __('member.profile.two_factor.disable') }}
                                             </button>
                                         </form>
                                     </div>
 
                                     @if(session('status') == 'two-factor-authentication-enabled' || session('status') == 'recovery-codes-generated')
                                         <div class="bg-slate-900 rounded-club p-6 mt-4">
-                                            <p class="text-xs font-black uppercase tracking-widest text-primary mb-4">Vaše záchranné kódy</p>
-                                            <p class="text-[10px] text-slate-400 mb-4 font-medium italic">Uložte si tyto kódy na bezpečné místo. Pomohou vám se přihlásit, pokud ztratíte přístup k aplikaci.</p>
+                                            <p class="text-xs font-black uppercase tracking-widest text-primary mb-4">{{ __('member.profile.two_factor.recovery_codes_title') }}</p>
+                                            <p class="text-[10px] text-slate-400 mb-4 font-medium italic">{{ __('member.profile.two_factor.recovery_codes_help') }}</p>
                                             <div class="grid grid-cols-2 gap-2 font-mono text-sm text-white">
                                                 @foreach ($user->recoveryCodes() as $code)
                                                     <div class="bg-white/5 px-3 py-1 rounded">{{ $code }}</div>
@@ -154,14 +154,14 @@
                                             {!! $user->twoFactorQrCodeSvg() !!}
                                         </div>
                                         <div class="space-y-4 flex-1">
-                                            <h4 class="font-black uppercase tracking-tight text-secondary text-sm">Dokončení nastavení</h4>
+                                            <h4 class="font-black uppercase tracking-tight text-secondary text-sm">{{ __('member.profile.two_factor.setup_title') }}</h4>
                                             <ol class="text-xs text-slate-600 space-y-2 list-decimal list-inside font-medium">
-                                                <li>Nainstalujte si aplikaci (např. Google Authenticator).</li>
-                                                <li>Naskenujte tento QR kód ve vaší aplikaci.</li>
-                                                <li>Opište 6místný kód, který se vám v aplikaci zobrazil.</li>
+                                                <li>{{ __('member.profile.two_factor.setup_step_1') }}</li>
+                                                <li>{{ __('member.profile.two_factor.setup_step_2') }}</li>
+                                                <li>{{ __('member.profile.two_factor.setup_step_3') }}</li>
                                             </ol>
                                             <div class="pt-2">
-                                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Ruční klíč:</p>
+                                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{{ __('member.profile.two_factor.manual_key') }}:</p>
                                                 <code class="text-xs font-bold text-secondary bg-slate-200 px-2 py-1 rounded break-all">{{ decrypt($user->two_factor_secret) }}</code>
                                             </div>
                                         </div>
@@ -170,12 +170,12 @@
                                     <form method="POST" action="{{ route('two-factor.confirm') }}" class="flex items-end gap-4 max-w-sm border-t border-slate-200 pt-6">
                                         @csrf
                                         <div class="flex-1 space-y-2">
-                                            <label for="code" class="text-[10px] font-black uppercase tracking-widest text-slate-400">Ověřovací kód</label>
+                                            <label for="code" class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.profile.two_factor.code_label') }}</label>
                                             <input id="code" type="text" name="code" inputmode="numeric" required autofocus autocomplete="one-time-code"
                                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-club focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold text-secondary outline-none tracking-widest text-center">
                                         </div>
                                         <button type="submit" class="btn btn-primary py-2 px-6 text-sm uppercase tracking-widest">
-                                            Potvrdit
+                                            {{ __('member.profile.two_factor.confirm_button') }}
                                         </button>
                                     </form>
                                     @error('code') <p class="text-xs text-danger-600 font-bold mt-1">{{ $message }}</p> @enderror
@@ -187,7 +187,7 @@
 
                 <div class="flex items-center justify-end">
                     <button type="submit" class="btn btn-primary px-12">
-                        Uložit změny
+                        {{ __('member.profile.save_changes') }}
                     </button>
                 </div>
             </form>
@@ -203,16 +203,16 @@
                             {{ $profile->jersey_number ?: '#' }}
                         </div>
                         <h4 class="text-2xl font-black uppercase tracking-tight">{{ $user->name }}</h4>
-                        <span class="text-xs font-black uppercase tracking-[0.2em] text-primary">{{ $profile->position ?: 'Hráč' }}</span>
+                        <span class="text-xs font-black uppercase tracking-[0.2em] text-primary">{{ $profile->position ?: __('member.profile.player_card.position_player') }}</span>
                     </div>
                     <div class="p-6 space-y-4">
                         <div class="flex justify-between text-xs border-b border-white/10 pb-2">
-                            <span class="font-black uppercase tracking-widest text-white/40 text-[9px]">Moje týmy</span>
+                            <span class="font-black uppercase tracking-widest text-white/40 text-[9px]">{{ __('member.profile.player_card.my_teams') }}</span>
                             <span class="font-bold">{{ $profile->teams->pluck('name')->implode(', ') ?: '-' }}</span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span class="font-black uppercase tracking-widest text-white/40 text-[9px]">Status</span>
-                            <span class="font-bold text-success-400">Aktivní člen</span>
+                            <span class="font-black uppercase tracking-widest text-white/40 text-[9px]">{{ __('member.profile.player_card.status') }}</span>
+                            <span class="font-bold text-success-400">{{ __('member.profile.player_card.active_member') }}</span>
                         </div>
                     </div>
                 </div>
@@ -220,9 +220,9 @@
 
             <!-- Help box -->
             <div class="bg-white rounded-club p-6 border border-slate-200 shadow-sm">
-                <h4 class="text-sm font-black uppercase tracking-tight text-secondary mb-4">Potřebujete pomoc?</h4>
+                <h4 class="text-sm font-black uppercase tracking-tight text-secondary mb-4">{{ __('member.profile.help.title') }}</h4>
                 <p class="text-xs text-slate-500 leading-relaxed font-medium">
-                    Pokud potřebujete změnit citlivé údaje (jako je role v klubu nebo přiřazení k týmu), obraťte se prosím na své trenéry nebo vedení klubu.
+                    {{ __('member.profile.help.text') }}
                 </p>
             </div>
         </div>

@@ -43,10 +43,19 @@ Route::middleware(['member'])
         Route::post('/notifikace/mark-all-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
         Route::post('/notifikace/{id}/mark-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAsRead'])->name('notifications.markRead');
 
-        // Vyhledávání
+        // Vyhledávání (klasické)
         Route::get('/hledat', \App\Http\Controllers\Member\SearchController::class)->name('search');
+
+        // AI vyhledávání
+        Route::get('/ai', \App\Http\Controllers\Member\AiController::class)->name('ai');
 
         // Trenérské přehledy
         Route::get('/tymove-prehledy', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/tymove-prehledy/{team}', [TeamController::class, 'show'])->name('teams.show');
+
+        // Zpětná vazba / Kontakt
+        Route::get('/kontakt-trenera', [\App\Http\Controllers\Member\ContactController::class, 'coachForm'])->name('contact.coach.form');
+        Route::post('/kontakt-trenera', [\App\Http\Controllers\Member\ContactController::class, 'sendCoach'])->name('contact.coach.send');
+        Route::get('/kontakt-admina', [\App\Http\Controllers\Member\ContactController::class, 'adminForm'])->name('contact.admin.form');
+        Route::post('/kontakt-admina', [\App\Http\Controllers\Member\ContactController::class, 'sendAdmin'])->name('contact.admin.send');
     });

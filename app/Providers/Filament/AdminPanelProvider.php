@@ -50,7 +50,12 @@ class AdminPanelProvider extends PanelProvider
                 "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>
                  @vite(['resources/css/filament-admin.css'])"
             ))
-            ->renderHook('panels::global-search.before', fn (): string => view('filament.components.ai-search'))
+            ->renderHook('panels::global-search.before', fn (): string => Blade::render('
+                <div class="flex items-center">
+                    @include("filament.components.language-switch")
+                    @include("filament.components.ai-search")
+                </div>
+            '))
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
@@ -77,6 +82,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            ->globalSearch(\App\Filament\GlobalSearch\AiGlobalSearchProvider::class)
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->navigationGroups([
                 \Filament\Navigation\NavigationGroup::make()
@@ -97,10 +103,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn (): string => __('admin.navigation.groups.admin_tools')),
             ])
             ->widgets([
-                AccountWidget::class,
+                \App\Filament\Widgets\WelcomeBannerWidget::class,
                 \App\Filament\Widgets\AdminKpiOverview::class,
-                \App\Filament\Widgets\FinanceOverview::class,
-                FilamentInfoWidget::class,
+                \App\Filament\Widgets\SystemHealthWidget::class,
+                \App\Filament\Widgets\RecentActivityWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
