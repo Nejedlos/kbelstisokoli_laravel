@@ -47,7 +47,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
             ->renderHook('panels::head.end', fn (): string => Blade::render(
-                "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>"
+                "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>
+                 @vite(['resources/css/filament-admin.css'])"
             ))
             ->renderHook('panels::global-search.before', fn (): string => view('filament.components.ai-search'))
             ->login(Login::class)

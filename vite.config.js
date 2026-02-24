@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/filament-auth.css',
                 'resources/js/filament-auth.js',
+                'resources/css/filament-admin.css',
                 'resources/js/filament-error-handler.js'
             ],
             refresh: true,
