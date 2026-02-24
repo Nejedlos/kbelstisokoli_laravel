@@ -28,6 +28,8 @@ return [
         'email' => 'Kontaktní E-mail',
         'phone' => 'Kontaktní telefon',
         'address' => 'Adresa / Sídlo',
+        'admin_contact_email' => 'E-mail pro administrátorský kontakt',
+        'admin_contact_email_help' => 'Bude použit jako cílová adresa pro zprávy z členské sekce (kontakt na admina). Pokud nebude vyplněno, použije se ERROR_REPORT_EMAIL z .env.',
         'facebook' => 'Facebook URL',
         'instagram' => 'Instagram URL',
         'youtube' => 'YouTube URL',

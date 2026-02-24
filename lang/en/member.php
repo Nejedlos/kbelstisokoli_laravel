@@ -184,4 +184,21 @@ return [
         'not_found_text' => 'The system is constantly learning. If you feel the search should respond better to your query, let us know.',
         'send_feedback' => 'Send feedback',
     ],
+
+    'feedback' => [
+        'contact_coach_title' => 'Contact Coach',
+        'contact_coach_subtitle' => 'Send a message to your team coaches.',
+        'contact_admin_title' => 'Contact Admin',
+        'contact_admin_subtitle' => 'Report a system issue or request a setting change.',
+        'team' => 'Team',
+        'choose_team' => 'Choose team',
+        'subject' => 'Subject',
+        'message' => 'Message',
+        'attachment' => 'Attachment',
+        'attachment_help' => 'Optional. Max 10 MB. Allowed formats: pdf, jpg, png, doc, xls.',
+        'send_to_coach' => 'Send to Coach',
+        'send_to_admin' => 'Send to Admin',
+        'no_team_warning' => 'You are not assigned to any team. The message will be delivered to the administrator.',
+        'sent_success' => 'Your message has been sent successfully. Thank you for the feedback!',
+    ],
 ];

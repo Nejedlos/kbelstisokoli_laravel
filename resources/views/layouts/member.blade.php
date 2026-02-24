@@ -59,10 +59,10 @@
                 <div x-data="{ searchOpen: false, loading: false }" class="hidden md:block relative">
                     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
                     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-                            class="flex items-center gap-3 px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white/70 hover:bg-white/15 hover:border-accent/50 transition-all group text-left shadow-inner">
-                        <i class="fa-light fa-sparkles text-accent group-hover:scale-110 transition-transform text-[10px]"></i>
-                        <span class="text-[11px] truncate font-bold group-hover:text-white transition-colors">{{ __('search.ai_hint') }}</span>
-                        <span class="ml-auto text-[9px] font-black text-white/30 group-hover:text-accent transition-colors">AI</span>
+                            class="flex items-center gap-3 px-3 py-1.5 bg-black/20 border border-white/10 rounded-lg text-white hover:bg-black/30 hover:border-white/20 transition-all group text-left shadow-inner">
+                        <i class="fa-light fa-sparkles text-primary group-hover:scale-110 transition-transform text-[10px]"></i>
+                        <span class="text-[11px] truncate font-bold opacity-80 group-hover:opacity-100 transition-opacity">{{ __('search.ai_hint') }}</span>
+                        <span class="ml-auto text-[9px] font-black text-white/20 group-hover:text-primary transition-colors">AI</span>
                     </button>
 
                     <div x-show="searchOpen"
@@ -74,20 +74,20 @@
                          style="display: none;">
 
                         <div class="flex items-center gap-2 mb-3">
-                            <div class="w-2 h-2 rounded-full bg-accent shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(225,29,72,0.5)]"></div>
                             <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-900">{{ __('search.ai_suggestion') }}</h3>
                         </div>
 
                         <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInput.value)">
                             <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                                <i class="fa-light fa-sparkles text-sm animate-pulse text-accent"></i>
+                                <i class="fa-light fa-sparkles text-sm animate-pulse text-primary"></i>
                             </div>
                             <input type="text"
                                    name="q"
                                    x-ref="searchInput"
                                    placeholder="{{ __('search.ai_search_placeholder') }}"
-                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-10 pr-12 py-3 text-sm text-slate-700 focus:border-accent focus:ring-0 outline-none transition-all">
-                            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-accent text-white flex items-center justify-center hover:scale-105 transition-transform">
+                                   class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl pl-10 pr-12 py-3 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none transition-all">
+                            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform">
                                 <i class="fa-light fa-arrow-right text-xs"></i>
                             </button>
                         </form>
@@ -124,7 +124,7 @@
                         <input type="text"
                                name="q"
                                placeholder="{{ __('Search') }}..."
-                               class="w-full bg-white/10 border border-white/20 rounded-lg pl-9 pr-4 py-1.5 text-[12px] text-white placeholder:text-white/40 focus:bg-white/15 focus:border-accent/50 focus:ring-0 outline-none transition-all shadow-inner">
+                               class="w-full bg-black/20 border border-white/10 rounded-lg pl-9 pr-4 py-1.5 text-[12px] text-white placeholder:text-white/60 focus:bg-black/30 focus:border-primary/50 focus:ring-0 outline-none transition-all shadow-inner">
                     </form>
                 </div>
 
@@ -157,8 +157,8 @@
                                    name="q"
                                    x-ref="searchInputMobileStandard"
                                    placeholder="{{ __('Search') }}..."
-                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-accent focus:ring-0 outline-none pr-10">
-                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-accent">
+                                   class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary">
                                 <i class="fa-light fa-arrow-right text-sm"></i>
                             </button>
                         </form>
@@ -177,8 +177,8 @@
                                    name="q"
                                    x-ref="searchInputMobileAi"
                                    placeholder="{{ __('search.ai_hint') }}"
-                                   class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-accent focus:ring-0 outline-none pr-10">
-                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-accent">
+                                   class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-700 focus:border-primary focus:ring-0 outline-none pr-10">
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary">
                                 <i class="fa-light fa-arrow-right text-sm"></i>
                             </button>
                         </form>

@@ -28,6 +28,8 @@ return [
         'email' => 'Contact Email',
         'phone' => 'Contact Phone',
         'address' => 'Address / Headquarters',
+        'admin_contact_email' => 'Admin Contact E-mail',
+        'admin_contact_email_help' => 'Will be used as the target address for member section messages (contact admin). If empty, ERROR_REPORT_EMAIL from .env is used.',
         'facebook' => 'Facebook URL',
         'instagram' => 'Instagram URL',
         'youtube' => 'YouTube URL',

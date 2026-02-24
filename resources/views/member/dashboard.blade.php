@@ -34,6 +34,8 @@
                             <a href="{{ route('member.profile.edit') }}" class="btn btn-outline text-xs"><i class="fa-light fa-user-gear mr-1.5"></i> {{ __('member.dashboard.actions.edit_profile') }}</a>
                             <a href="{{ route('member.attendance.index') }}" class="btn btn-outline text-xs"><i class="fa-light fa-calendar-star mr-1.5"></i> {{ __('member.dashboard.actions.my_program') }}</a>
                             <a href="{{ route('member.economy.index') }}" class="btn btn-primary text-xs"><i class="fa-light fa-credit-card mr-1.5"></i> {{ __('member.dashboard.actions.payments') }}</a>
+                            <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline text-xs"><i class="fa-light fa-whistle mr-1.5"></i> {{ __('member.feedback.contact_coach_title') }}</a>
+                            <a href="{{ route('member.contact.admin.form') }}" class="btn btn-outline text-xs"><i class="fa-light fa-envelope mr-1.5"></i> {{ __('member.feedback.contact_admin_title') }}</a>
                         </div>
                     </div>
 
