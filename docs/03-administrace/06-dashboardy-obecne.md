@@ -42,7 +42,7 @@ Tento dokument popisuje pravidla pro responzivitu dashboardů a kontextové umí
 
 ## 6. Build a verifikace
 - Po změnách v CSS/JS spusťte `npm run build` (kvůli Vite manifestu).
-- Pro kontrolu vzhledu použijte snapshot HTML (viz `docs/18-renderovani-html.md`).
+- Pro kontrolu vzhledu použijte snapshot HTML (viz `docs/08-manualy-a-ostatni/01-renderovani-html.md`).
 
 ---
 Aktualizace: 2026‑02‑24

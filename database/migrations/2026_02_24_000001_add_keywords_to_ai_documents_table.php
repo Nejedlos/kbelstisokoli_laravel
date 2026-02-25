@@ -8,8 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('ai_documents', function (Blueprint $table): void {
-            $table->json('keywords')->nullable()->after('content');
-            $table->json('metadata')->nullable()->after('keywords');
+            $table->text('keywords')->nullable()->after('content');
+            $table->text('metadata')->nullable()->after('keywords');
         });
     }
 

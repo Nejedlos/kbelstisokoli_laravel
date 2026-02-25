@@ -53,7 +53,7 @@ Tento příkaz automaticky:
 2. Provede `git fetch` a `git reset --hard` (vynutí stav odpovídající repozitáři, případné lokální změny na serveru budou zahozeny).
 3. Spustí `composer install` (s využitím zvolené PHP binárky, optimalizovaný pro produkci).
 4. Synchronizuje veřejné soubory do zvoleného veřejného adresáře a zajistí správné cesty v `index.php`.
-5. Spustí migrace databáze (`migrate --force`).
+5. Spustí migrace databáze (`migrate --force`) a automaticky provede seedování (`app:seed --force`).
 6. Nainstaluje NPM balíčky a sestaví assety (`npm run build`).
 7. Synchronizuje ikony a optimalizuje cache aplikace.
 
@@ -75,8 +75,10 @@ Tento příkaz na serveru automaticky:
 1. Ověří verzi PHP na serveru.
 2. Vytvoří nebo aktualizuje `.env` soubor podle vašeho lokálního nastavení.
 3. Synchronizuje obsah složky `public` do veřejného adresáře a opraví cesty v `index.php`.
-4. Spustí migrace databáze (`migrate --force`).
+4. Spustí migrace databáze (`migrate --force`) a automaticky provede seedování (`app:seed --force`).
 5. Provede synchronizaci ikon a optimalizaci mezipaměti (`optimize`).
+
+Na konci příkazu se zobrazí přehledný souhrn všech provedených kroků s potvrzením úspěšnosti.
 
 Je to **nejjednodušší a nejrobustnější cesta**, pokud nechcete na serveru řešit Git, NPM nebo verze Node.js.
 
@@ -92,12 +94,18 @@ Tyto metody vyžadují hloubkovou introspekci schématu, která na tomto hosting
 1. **Přidávání sloupců:** Provádějte přímo v `Schema::table` bez předchozí kontroly existence sloupce.
 2. **Změna typu sloupce:** Pokud je změna nezbytná, upravte původní `create` migraci (pokud ještě neproběhla na produkci) nebo použijte `DB::statement("ALTER TABLE ... MODIFY ...")`.
 
-Všechny stávající migrace byly k 23. 2. 2026 upraveny tak, aby byly s tímto omezením kompatibilní.
+Všechny stávající migrace byly k 25. 2. 2026 upraveny tak, aby byly s tímto omezením kompatibilní. Pokud v budoucnu narazíte na chybu `SQLSTATE[42000]: Syntax error or access violation: 1064 ... for column ... json`, je to právě kvůli tomuto omezení.
 
-Oba příkazy (`app:production:setup` i `app:deploy`) jsou vybaveny **automatickou detekcí verzí**.
+Oba příkazy (`app:production:setup`, `app:deploy` i `app:sync`) jsou vybaveny **automatickou detekcí verzí**.
 - Pokud je v konfiguraci nastaveno obecné `node`, systém se při každém běhu pokusí na serveru najít verzi 18+ (např. `node20`, `node18` nebo `/usr/bin/node`).
 - To řeší specifický problém hostingu Webglobe, kde v různých SSH session může být různé pořadí v `PATH` a výchozí `node` může být zastaralý (v14).
 - Pokud systém automaticky najde lepší verzi, vypíše informaci `✅ Použiji: /cesta/k/binarce`.
+
+### Autonomní a AI režim (--ai-test)
+Pro účely automatizace (např. při opravách pomocí AI agenta nebo v CI/CD) podporují příkazy `app:deploy` a `app:sync` přepínač `--ai-test`.
+- V tomto režimu se systém **nepotáže na hesla ani tokeny**, i kdyby chyběly nebo byly změněny.
+- Použije výhradně hodnoty uložené v lokálním `.env`.
+- Přeskakuje veškeré interaktivní dotazy (`select`, `password`, `confirm`), což zabraňuje zablokování terminálu v neinteraktivním prostředí.
 
 Oba příkazy jsou také vybaveny **automatickým opakováním**. 
 - Pokud selže SSH spojení během setupu, systém vám umožní upravit údaje nebo zkusit znovu nahrát SSH klíč (včetně nového dotazu na heslo).

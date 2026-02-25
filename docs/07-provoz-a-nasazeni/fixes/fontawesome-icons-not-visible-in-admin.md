@@ -27,7 +27,7 @@ Admin panel již tento soubor načítá globálně přes `AdminPanelProvider` po
 1. Spusťte build assetů, aby se aktualizoval manifest a přibalily se webfonty FA:
    - `npm run build`
 2. Ověřte ve Filament adminu, že se ikony v AI vyhledávání a v jeho dropdownu vykreslují.
-3. Případně vygenerujte snapshot HTML podle `docs/18-renderovani-html.md` a zkontrolujte přítomnost FA tříd a linků na assety s hashem.
+3. Případně vygenerujte snapshot HTML podle `docs/08-manualy-a-ostatni/01-renderovani-html.md` a zkontrolujte přítomnost FA tříd a linků na assety s hashem.
 
 ## Poznámky
 - V repozitáři jsou lokálně vendornuté webfonty v `resources/vendor/fontawesome/webfonts`, které Vite detekuje a publikuje (viz `public/build/manifest.json`).

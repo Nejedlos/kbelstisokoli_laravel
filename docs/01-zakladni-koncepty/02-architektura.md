@@ -792,7 +792,7 @@ Projekt je připraven na použití **Font Awesome 7 Pro**. Protože se jedná o 
 4.  **Sestavte assety:**
     ```bash
     npm run build
-    # Poznámka: Na produkci (Webglobe) může vyžadovat novější verzi Node.js (viz docs/17-nasazeni-na-produkci.md)
+    # Poznámka: Na produkci (Webglobe) může vyžadovat novější verzi Node.js (viz docs/07-provoz-a-nasazeni/01-nasazeni.md)
     php artisan optimize:clear
     ```
 

@@ -3,6 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\password;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\warning;
 
 class ProductionSyncCommand extends Command
 {
@@ -11,7 +15,7 @@ class ProductionSyncCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'app:sync';
+    protected $signature = 'app:sync {--ai-test}';
 
     /**
      * The console command description.
@@ -49,6 +53,40 @@ class ProductionSyncCommand extends Command
             return self::FAILURE;
         }
 
+        $currentPassword = env('PROD_DB_PASSWORD');
+        $dbConfig['db_password'] = $currentPassword;
+
+        if (!$this->option('ai-test')) {
+            if ($currentPassword) {
+                $choice = select(
+                    label: 'Jak chcete naložit s heslem k produkční databázi?',
+                    options: [
+                        'keep' => 'Použít uložené heslo (' . str_repeat('*', 8) . ')',
+                        'new' => 'Zadat nové heslo',
+                    ],
+                    default: 'keep'
+                );
+
+                if ($choice === 'new') {
+                    $dbConfig['db_password'] = password(
+                        label: 'Zadejte nové heslo k produkční databázi:',
+                        required: true
+                    );
+                }
+            } else {
+                $dbConfig['db_password'] = password(
+                    label: 'Zadejte heslo k produkční databázi:',
+                    required: true
+                );
+            }
+
+            if ($dbConfig['db_password'] !== $currentPassword) {
+                if (confirm("Chcete nové heslo uložit do lokálního .env?", true)) {
+                    $this->updateEnv(['PROD_DB_PASSWORD' => $dbConfig['db_password']]);
+                }
+            }
+        }
+
         // Ověření dostupnosti PHP na serveru
         \Laravel\Prompts\info("🔍 Ověřuji dostupnost PHP na serveru...");
         $checkPhp = \Illuminate\Support\Facades\Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
@@ -71,6 +109,55 @@ class ProductionSyncCommand extends Command
         $npmBinary = 'npm';
         if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
              $npmBinary = 'npm' . $m[1];
+        }
+
+        if ($this->option('ai-test')) {
+            $this->info("🚀 Synchronizuji konfiguraci (AI TEST MODE) na {$user}@{$host}:{$port}...");
+
+            $params = [
+                "--host=" . escapeshellarg($host),
+                "--port=" . escapeshellarg($port),
+                "--user=" . escapeshellarg($user),
+                "--php=" . escapeshellarg($phpBinary),
+                "--node=" . escapeshellarg($nodeBinary),
+                "--npm=" . escapeshellarg($npmBinary),
+                "--path=" . escapeshellarg($path),
+            ];
+
+            if ($publicPath) {
+                $params[] = "--public_path=" . escapeshellarg($publicPath);
+            }
+
+            foreach ($dbConfig as $key => $value) {
+                if ($value !== null) {
+                    $params[] = "--{$key}=" . escapeshellarg($value);
+                }
+            }
+
+            $command = "php " . base_path('vendor/bin/envoy') . " run sync " . implode(' ', $params);
+
+            $process = \Illuminate\Support\Facades\Process::forever()->run($command, function (string $type, string $output) {
+                echo $output;
+            });
+
+            if ($process->successful()) {
+                $this->info('🎉 Synchronizace byla úspěšně dokončena!');
+
+                $this->line('Provedené kroky:');
+                $this->line(' ✅ Aktualizace .env konfigurace na serveru');
+                $this->line(' ✅ Vyčištění systémové mezipaměti');
+                $this->line(' ✅ Propojení veřejné složky a oprava index.php');
+                $this->line(' ✅ Spuštění databázových migrací');
+                $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
+                $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
+                $this->line(' ✅ Optimalizace aplikace (config/route cache)');
+                $this->line(' ✅ Reindexace AI vyhledávání');
+
+                return self::SUCCESS;
+            } else {
+                $this->error('❌ Synchronizace selhala.');
+                return self::FAILURE;
+            }
         }
 
         while (true) {
@@ -107,6 +194,16 @@ class ProductionSyncCommand extends Command
             if ($process->successful()) {
                 \Laravel\Prompts\info('🎉 Synchronizace byla úspěšně dokončena!');
 
+                $this->line('Provedené kroky:');
+                $this->line(' ✅ Aktualizace .env konfigurace na serveru');
+                $this->line(' ✅ Vyčištění systémové mezipaměti');
+                $this->line(' ✅ Propojení veřejné složky a oprava index.php');
+                $this->line(' ✅ Spuštění databázových migrací');
+                $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
+                $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
+                $this->line(' ✅ Optimalizace aplikace (config/route cache)');
+                $this->line(' ✅ Reindexace AI vyhledávání');
+
                 if (!\Laravel\Prompts\confirm('Chcete synchronizaci spustit znovu? (např. po dalším nahrání souborů)', false)) {
                     break;
                 }
@@ -120,5 +217,29 @@ class ProductionSyncCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Aktualizuje soubor .env o zadané klíče a hodnoty.
+     */
+    protected function updateEnv(array $data): void
+    {
+        $path = base_path('.env');
+
+        if (!file_exists($path)) {
+            return;
+        }
+
+        $content = file_get_contents($path);
+
+        foreach ($data as $key => $value) {
+            if (str_contains($content, "{$key}=")) {
+                $content = preg_replace("/^{$key}=.*/m", "{$key}=\"{$value}\"", $content);
+            } else {
+                $content .= "\n{$key}=\"{$value}\"";
+            }
+        }
+
+        file_put_contents($path, $content);
     }
 }

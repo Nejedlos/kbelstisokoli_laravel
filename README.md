@@ -50,12 +50,10 @@ Projekt moderní webové prezentace a administrativního systému pro klub **Kbe
 ## Dokumentace
 Podrobná dokumentace k projektu se nachází v adresáři `docs/`:
 
-- [**Index dokumentace**](docs/index.md) - Rozcestník všech témat.
-- [Struktura projektu](docs/project_structure.md) - Technický popis a stack.
-- [Konfigurace prostředí](docs/configuration.md) - Popis `.env` proměnných.
-- [Nasazení (Deployment)](docs/deployment.md) - Návod pro produkční server (Webglobe).
-- [Správa uživatelů](docs/user_management.md) - Role a oprávnění.
-- [Ekonomický modul](docs/economy_management.md) - Správa financí a klubových poplatků.
+- [**Index dokumentace**](docs/index.md) - Hlavní rozcestník všech témat.
+- [Základní koncepty](docs/01-zakladni-koncepty/01-uvod.md) - Přehled a architektura.
+- [Nasazení (Deployment)](docs/07-provoz-a-nasazeni/01-nasazeni.md) - Návod pro produkční server.
+- [AI Funkce](docs/05-ai-funkce/01-ai-vyhledavani.md) - Správa a nastavení AI.
 
 ## Vývojové pokyny
 - Dodržujeme **PSR-12** a používáme **Laravel Pint** pro formátování.

@@ -59,7 +59,7 @@
     {{ $php }} -r '
         $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
-        $content = file_get_contents($envFile);
+        $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [
             "APP_ENV" => "production",
             "APP_DEBUG" => "false",
@@ -79,13 +79,20 @@
             $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
         }
         foreach ($vars as $key => $value) {
-            if (preg_match("/^$key=/m", $content)) {
-                $content = preg_replace("/^$key=.*/m", "$key=$value", $content);
-            } else {
-                $content .= "\n$key=$value";
+            $found = false;
+            $safeValue = str_replace(["\\", "\"", "$"], ["\\\\", "\\\"", "\\$"], $value);
+            foreach ($lines as &$line) {
+                if (strpos(trim($line), "$key=") === 0) {
+                    $line = "$key=\"$safeValue\"";
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $lines[] = "$key=\"$safeValue\"";
             }
         }
-        file_put_contents($envFile, trim($content) . "\n");
+        file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
     echo "✅ .env updated."
 
@@ -150,6 +157,18 @@
         echo "✅ index.php patched with absolute paths."
     fi
 
+    # Use custom production index if present
+    if [ -f "public/index.production.php" ]; then
+        echo "Using index.production.php as production index..."
+        if [ -z "{{ $public_path ?? '' }}" ] || [ "{{ $public_path }}" = "{{ $path }}/public" ]; then
+            DEST="{{ $path }}/public/index.php"
+        else
+            DEST="{{ $public_path }}/index.php"
+        fi
+        cp public/index.production.php "$DEST"
+        echo "✅ index.php replaced by index.production.php"
+    fi
+
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
 
@@ -210,6 +229,9 @@
     echo "Running database migrations..."
     {{ $php }} artisan migrate --force
 
+    echo "Running database seeding..."
+    {{ $php }} artisan app:seed --force --no-interaction
+
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan filament:clear-cached-components
@@ -250,23 +272,44 @@
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
     {{ $php }} artisan migrate --force
 
+    echo "Running database seeding..."
+    {{ $php }} artisan app:seed --force --no-interaction
+
     echo "Updating .env configuration..."
     {{ $php }} -r '
         $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
-        $content = file_get_contents($envFile);
+        $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [];
+        if ("{{ $db_database_b64 }}") {
+            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
+            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
+            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
+            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
+            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
+            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
+            if ("{{ $db_prefix_b64 }}") {
+                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
+            }
+        }
         if ("{{ $public_path_b64 }}") {
             $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
         }
         foreach ($vars as $key => $value) {
-            if (preg_match("/^$key=/m", $content)) {
-                $content = preg_replace("/^$key=.*/m", "$key=$value", $content);
-            } else {
-                $content .= "\n$key=$value";
+            $found = false;
+            $safeValue = str_replace(["\\", "\"", "$"], ["\\\\", "\\\"", "\\$"], $value);
+            foreach ($lines as &$line) {
+                if (strpos(trim($line), "$key=") === 0) {
+                    $line = "$key=\"$safeValue\"";
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $lines[] = "$key=\"$safeValue\"";
             }
         }
-        file_put_contents($envFile, trim($content) . "\n");
+        file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
     echo "✅ .env updated."
 
@@ -312,6 +355,18 @@
 
             file_put_contents($path, $content);
         '
+    fi
+
+    # Use custom production index if present
+    if [ -f "public/index.production.php" ]; then
+        echo "Using index.production.php as production index..."
+        if [ -z "{{ $public_path ?? '' }}" ] || [ "{{ $public_path }}" = "{{ $path }}/public" ]; then
+            DEST="{{ $path }}/public/index.php"
+        else
+            DEST="{{ $public_path }}/index.php"
+        fi
+        cp public/index.production.php "$DEST"
+        echo "✅ index.php replaced by index.production.php"
     fi
 
     echo "Installing NPM dependencies..."
@@ -400,7 +455,7 @@
     {{ $php }} -r '
         $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
-        $content = file_get_contents($envFile);
+        $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [
             "APP_ENV" => "production",
             "APP_DEBUG" => "false",
@@ -420,13 +475,20 @@
             $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
         }
         foreach ($vars as $key => $value) {
-            if (preg_match("/^$key=/m", $content)) {
-                $content = preg_replace("/^$key=.*/m", "$key=$value", $content);
-            } else {
-                $content .= "\n$key=$value";
+            $found = false;
+            $safeValue = str_replace(["\\", "\"", "$"], ["\\\\", "\\\"", "\\$"], $value);
+            foreach ($lines as &$line) {
+                if (strpos(trim($line), "$key=") === 0) {
+                    $line = "$key=\"$safeValue\"";
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $lines[] = "$key=\"$safeValue\"";
             }
         }
-        file_put_contents($envFile, trim($content) . "\n");
+        file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
     echo "✅ .env updated."
 
@@ -491,6 +553,9 @@
 
     echo "Running database migrations..."
     {{ $php }} artisan migrate --force
+
+    echo "Running database seeding..."
+    {{ $php }} artisan app:seed --force --no-interaction
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync

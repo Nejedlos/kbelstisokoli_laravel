@@ -52,7 +52,7 @@ Barvy používají primární brand odstín přes CSS variables injektované v `
 ## 4. Best practices
 - Na Auth stránkách zachovejte pravidlo: nedefinovat loader pro `.fi-processing`; používejte `.is-loading` nebo globální overlay dle potřeby.
 - Loader by neměl blokovat kritické interakce déle, než je nezbytné – používejte `wire:loading.delay`, aby se zobrazoval až po krátkém zpoždění a nepřeskakoval při rychlých odpovědích.
-- Po každé změně stylů spusťte `npm run build` (viz `docs/06-sprava-assetu.md`).
+- Po každé změně stylů spusťte `npm run build` (viz `docs/02-vyvoj-a-standardy/01-sprava-assetu.md`).
 
 ## 5. Příklady nasazení
 - AI Search page (`App\Filament\Pages\AiSearch`) má loader vložený přímo ve view `resources/views/filament/pages/ai-search.blade.php`.

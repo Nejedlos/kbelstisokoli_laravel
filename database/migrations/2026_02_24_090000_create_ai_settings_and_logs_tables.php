@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('analyze_model')->default('gpt-4o');
             $table->string('fast_model')->default('gpt-4o-mini');
             $table->string('embeddings_model')->default('text-embedding-3-small');
-            $table->json('model_presets')->nullable();
+            $table->longText('model_presets')->nullable();
 
             // Chování
             $table->float('temperature')->default(0.7);
@@ -66,9 +66,9 @@ return new class extends Migration
             $table->text('prompt_preview')->nullable();
             $table->text('response_preview')->nullable();
             $table->integer('latency_ms')->nullable();
-            $table->json('token_usage')->nullable(); // input, output, total
+            $table->longText('token_usage')->nullable(); // input, output, total
             $table->text('error_message')->nullable();
-            $table->json('metadata')->nullable();
+            $table->longText('metadata')->nullable();
             $table->timestamps();
 
             $table->index('created_at');

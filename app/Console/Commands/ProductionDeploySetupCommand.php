@@ -147,23 +147,69 @@ class ProductionDeploySetupCommand extends Command
         // 2. Veřejný adresář (kam přijde obsah public)
         $publicPath = $this->browseServerPath($host, $port, $user, 'Zvolte VEŘEJNÝ ADRESÁŘ (kam přijdou veřejné soubory, obvykle www, public_html)', $defaultPublic);
 
-        $token = password(
-            label: 'GitHub Personal Access Token (pro Git autentikaci)?',
-            placeholder: 'ghp_...',
-            hint: 'Token zajistí automatické stažení kódu z GitHubu na server bez nutnosti nastavování SSH klíčů.',
-            required: true
-        );
+        $token = env('PROD_GIT_TOKEN');
+        if ($token) {
+            $choice = select(
+                label: 'Jak chcete naložit s GitHub Personal Access Tokenem?',
+                options: [
+                    'keep' => 'Použít uložený token (' . substr($token, 0, 4) . '...' . substr($token, -4) . ')',
+                    'new' => 'Zadat nový token',
+                ],
+                default: 'keep'
+            );
+
+            if ($choice === 'new') {
+                $token = password(
+                    label: 'Zadejte nový GitHub Personal Access Token:',
+                    placeholder: 'ghp_...',
+                    required: true
+                );
+            }
+        } else {
+            $token = password(
+                label: 'Zadejte GitHub Personal Access Token (pro Git autentikaci)?',
+                placeholder: 'ghp_...',
+                hint: 'Token zajistí automatické stažení kódu z GitHubu na server bez nutnosti nastavování SSH klíčů.',
+                required: true
+            );
+        }
 
         // 3. Konfigurace databáze
         $dbConfig = [];
         info("🗄️  Konfigurace databáze na produkci");
-        $dbConfig['db_connection'] = select('Typ databáze?', ['mysql', 'mariadb', 'pgsql', 'sqlite'], 'mysql');
-        $dbConfig['db_host'] = text('DB Host', default: '127.0.0.1');
-        $dbConfig['db_port'] = text('DB Port', default: '3306');
-        $dbConfig['db_database'] = text('Název databáze', required: true);
-        $dbConfig['db_username'] = text('DB Uživatel', required: true);
-        $dbConfig['db_password'] = password('DB Heslo', required: true);
-        $dbConfig['db_prefix'] = text('Prefix tabulek (volitelné)', default: 'new_', hint: 'Např. new_ zajistí, že tabulky budou mít název new_users atd.');
+        $dbConfig['db_connection'] = select('Typ databáze?', ['mysql', 'mariadb', 'pgsql', 'sqlite'], env('PROD_DB_CONNECTION', 'mysql'));
+        $dbConfig['db_host'] = text('DB Host', default: env('PROD_DB_HOST', '127.0.0.1'));
+        $dbConfig['db_port'] = text('DB Port', default: env('PROD_DB_PORT', '3306'));
+        $dbConfig['db_database'] = text('Název databáze', default: env('PROD_DB_DATABASE', ''), required: true);
+        $dbConfig['db_username'] = text('DB Uživatel', default: env('PROD_DB_USERNAME', ''), required: true);
+
+        $dbPassword = env('PROD_DB_PASSWORD');
+        if ($dbPassword) {
+            $choice = select(
+                label: 'Jak chcete naložit s heslem k produkční databázi?',
+                options: [
+                    'keep' => 'Použít uložené heslo (' . str_repeat('*', 8) . ')',
+                    'new' => 'Zadat nové heslo',
+                ],
+                default: 'keep'
+            );
+
+            if ($choice === 'new') {
+                $dbConfig['db_password'] = password(
+                    label: 'Zadejte nové DB Heslo:',
+                    required: true
+                );
+            } else {
+                $dbConfig['db_password'] = $dbPassword;
+            }
+        } else {
+            $dbConfig['db_password'] = password(
+                label: 'Zadejte DB Heslo:',
+                required: true
+            );
+        }
+
+        $dbConfig['db_prefix'] = text('Prefix tabulek (volitelné)', default: env('PROD_DB_PREFIX', 'new_'), hint: 'Např. new_ zajistí, že tabulky budou mít název new_users atd.');
 
         // Uložit do .env pro příště
         $envData = [
@@ -181,6 +227,7 @@ class ProductionDeploySetupCommand extends Command
             'PROD_DB_PORT' => $dbConfig['db_port'],
             'PROD_DB_DATABASE' => $dbConfig['db_database'],
             'PROD_DB_USERNAME' => $dbConfig['db_username'],
+            'PROD_DB_PASSWORD' => $dbConfig['db_password'],
             'PROD_DB_PREFIX' => $dbConfig['db_prefix'] ?? '',
         ];
 
@@ -683,6 +730,19 @@ class ProductionDeploySetupCommand extends Command
 
             if ($process->successful()) {
                 info('🎉 Setup byl úspěšně dokončen!');
+
+                $this->line('Provedené kroky:');
+                $this->line(' ✅ Kontrola PHP verze (8.4+)');
+                $this->line(' ✅ Klonování repozitáře (Git clone)');
+                $this->line(' ✅ Příprava a aktualizace .env souboru');
+                $this->line(' ✅ Generování APP_KEY');
+                $this->line(' ✅ Instalace PHP závislostí (Composer)');
+                $this->line(' ✅ Propojení veřejné složky a oprava index.php');
+                $this->line(' ✅ Instalace a sestavení assetů (NPM & Vite)');
+                $this->line(' ✅ Spuštění databázových migrací a seedování');
+                $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
+                $this->line(' ✅ Optimalizace aplikace a AI reindexace');
+
                 break;
             } else {
                 error('❌ Setup selhal. Zkontrolujte prosím SSH přístup a chybové hlášky výše.');

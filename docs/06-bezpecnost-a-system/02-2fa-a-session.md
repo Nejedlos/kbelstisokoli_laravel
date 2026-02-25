@@ -35,10 +35,15 @@ Nově je také k dispozici globální odhlašovací URL **/admin/logout**, kter�
 - **View:** Upravený `auth.two-factor-challenge` s checkboxem.
 - **Chybové stránky:** Vlastní `419.blade.php` pro elegantní zvládnutí vypršené relace.
 
-## Konfigurace
-V souboru `.env` lze (volitelně, po přidání do configu) nastavit:
+## Konfigurace a synchronizace (Seeding)
 - `AUTH_2FA_TIMEOUT` (v sekundách, výchozí 86400).
 - `SESSION_LIFETIME` (v minutách, výchozí 180).
+
+### Synchronizace 2FA mezi prostředími
+Pro usnadnění přechodu z lokálního vývoje na produkci byl vytvořen seeder `UserSecuritySeeder`.
+- **Účel:** Přenáší nastavení 2FA (secret, recovery codes) a hesla pro klíčové uživatele (např. `nejedlymi@gmail.com`).
+- **Použití:** `php artisan db:seed --class=UserSecuritySeeder` (nebo automaticky přes `GlobalSeeder`).
+- **Pozor:** Seeder obsahuje zašifrovaná citlivá data a měl by být používán s vědomím toho, že přepisuje bezpečnostní nastavení v cílové databázi.
 
 ## Správa pro administrátory
 Pokud uživatel ztratí zařízení, stačí se odhlásit na všech zařízeních, nebo počkat na vypršení 30denní lhůty. Cookie je vázána na ID uživatele.

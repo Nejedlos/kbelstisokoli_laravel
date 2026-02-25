@@ -13,6 +13,7 @@ class GlobalSeeder extends Seeder
     public const SEEDERS = [
         RoleSeeder::class,
         UserSeeder::class,
+        UserSecuritySeeder::class,
         CronTaskSeeder::class,
         SportSeeder::class,
         PostSeeder::class,
