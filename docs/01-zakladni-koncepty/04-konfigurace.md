@@ -12,6 +12,21 @@ Projekt využívá standardní Laravel `.env` soubor s několika specifickými r
 Pro lokální vývoj je přednastaven MySQL na `127.0.0.1`.
 - `DB_DATABASE`: `kbelstisokoli`
 
+## Konfigurace na hostingu (Webglobe)
+
+Vzhledem ke specifické struktuře hostingu Webglobe (kde projektový root a veřejná složka mohou být v různých adresářích), Laravel v tomto projektu používá konfiguraci umístěnou v `public/.env`.
+
+- **Kořenový `.env`**: Slouží pro lokální vývoj a uchování "master" konfigurace (zejména `PROD_` proměnných). Je v `.gitignore`.
+- **Veřejný `public/.env`**: Je primárním zdrojem konfigurace pro běžící aplikaci (web i Artisan). Je také v `.gitignore`.
+- **Automatická synchronizace**: Příkaz `php artisan app:sync` automaticky inicializuje nebo aktualizuje `public/.env` kombinací šablony `.env.example` a hodnot (zejména tajných klíčů a produkčních přístupů) z kořenového `.env`.
+
+### Důležité produkční proměnné (`PROD_`)
+Tyto proměnné v kořenovém `.env` definují, kam a jak se aplikace synchronizuje:
+- `PROD_HOST`, `PROD_PORT`, `PROD_USER`: SSH přístup.
+- `PROD_PATH`: Cesta k projektu na serveru.
+- `PROD_DB_*`: Přihlašovací údaje k produkční databázi (používají se pro vzdálené migrace).
+- `PROD_GIT_TOKEN`: Token pro přístup k repozitáři z produkčního serveru.
+
 ## Vlastní cesty a disky
 Tyto proměnné jsou důležité pro správné fungování nahrávání souborů a přístupových práv na serveru:
 - `PUBLIC_FOLDER`: Relativní nebo absolutní cesta k veřejné složce (obvykle `public`).

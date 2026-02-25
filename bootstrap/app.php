@@ -185,6 +185,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
     })->create();
 
+$app->useEnvironmentPath($app->basePath('public'));
+
 // Oprava kompatibility: usePublicPath voláme až na instanci Application,
 // protože ApplicationBuilder ji v této verzi frameworku nemusí podporovat.
 $publicPath = env('APP_PUBLIC_PATH');

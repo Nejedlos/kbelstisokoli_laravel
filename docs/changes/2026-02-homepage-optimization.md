@@ -81,8 +81,8 @@ Následující položky jsou spravovány obsahem (DB). Pokud byly dříve nasaze
 
 Hero video (doporučení):
 1) Video soubory umístěte do `public/assets/video/`:
-   - Desktop: `public/assets/video/hero.mp4` (optimalizujte bitrate: ~2–4 Mbps, rozumné rozlišení 1280×720/1600×900).
-   - Volitelně `webm` verzi: `public/assets/video/hero.webm` (je-li k dispozici; v šabloně snadno doplnitelné jako další `<source>`).
+   - Desktop (WebM - primární): `public/assets/video/hero.webm` (lepší komprese).
+   - Desktop (MP4 - fallback): `public/assets/video/hero.mp4` (pro starší prohlížeče).
 2) Poster obrázky umístěte do `public/assets/img/home/`:
    - `home-hero-basketball-team.webp` (desktop, hlavní volba pro moderní prohlížeče)
    - `home-hero-basketball-team.png` (desktop, fallback pro starší prohlížeče)

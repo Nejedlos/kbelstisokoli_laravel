@@ -2,6 +2,7 @@
     $asset = isset($data['media_asset_id']) ? \App\Models\MediaAsset::find($data['media_asset_id']) : null;
     $imageUrl = $asset ? $asset->getUrl('large') : ($data['image_url'] ?? null);
     $videoUrl = $data['video_url'] ?? null;
+    $webmUrl = $videoUrl && str_contains($videoUrl, '.mp4') ? str_replace('.mp4', '.webm', $videoUrl) : null;
     $variant = $data['variant'] ?? 'standard';
     $alignment = $data['alignment'] ?? ($variant === 'centered' ? 'center' : 'left');
 
@@ -43,11 +44,18 @@
                     playsinline
                     preload="none"
                     poster="{{ asset($imageUrl) }}"
-                    data-src="{{ asset($videoUrl) }}"
                     aria-label="Hero background video"
-                ></video>
+                >
+                    @if($webmUrl && file_exists(public_path($webmUrl)))
+                        <source data-src="{{ asset($webmUrl) }}" type="video/webm">
+                    @endif
+                    <source data-src="{{ asset($videoUrl) }}" type="video/mp4">
+                </video>
                 <noscript>
                     <video class="w-full h-full object-cover hidden sm:block" autoplay muted loop playsinline poster="{{ asset($imageUrl) }}">
+                        @if($webmUrl && file_exists(public_path($webmUrl)))
+                            <source src="{{ asset($webmUrl) }}" type="video/webm">
+                        @endif
                         <source src="{{ asset($videoUrl) }}" type="video/mp4">
                     </video>
                 </noscript>
@@ -59,8 +67,15 @@
                             const video = document.querySelector('.js-hero-video');
                             if (!video || mqMobile.matches || prefersReduced.matches) return;
                             const load = () => {
-                                if (video.dataset.src && !video.src) {
-                                    video.src = video.dataset.src;
+                                const sources = video.querySelectorAll('source');
+                                let needsLoad = false;
+                                sources.forEach(source => {
+                                    if (source.dataset.src && !source.src) {
+                                        source.src = source.dataset.src;
+                                        needsLoad = true;
+                                    }
+                                });
+                                if (needsLoad) {
                                     video.load();
                                 }
                             };

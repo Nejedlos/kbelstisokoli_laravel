@@ -7,9 +7,9 @@ Tento dokument slouží jako deník vyřešených problémů při nasazování a
 
 **Příčiny a řešení:**
 1. **Prázdné heslo v .env:** Envoy script na serveru přepsal heslo prázdnou hodnotou, protože v lokálním `.env` chyběl klíč `PROD_DB_PASSWORD`.
-   - *Řešení:* Vždy vyplňte `PROD_DB_PASSWORD` v lokálním `.env` nebo použijte interaktivní dotaz při startu příkazu.
+   - *Řešení:* Vždy vyplňte `PROD_DB_PASSWORD` v lokálním `.env` nebo použijte interaktivní dotaz při startu příkazu. Příkaz `app:sync` nyní proaktivně kontroluje DB připojení před startem synchronizace a v případě selhání nabídne zadání nového hesla.
 2. **Neplatné heslo v .env:** V lokálním `.env` bylo uloženo zastaralé nebo náhodně vygenerované heslo, které neodpovídalo realitě na serveru.
-   - *Řešení:* Ověřte heslo v administraci hostingu. Pozor na zapomenuté soubory typu `public/.env`, které mohou obsahovat citlivé (a správné) údaje z předchozích pokusů. **Tyto soubory ihned po zjištění smažte!**
+   - *Řešení:* Spusťte `php artisan app:sync`. Pokud se příkaz neohlásí jako "OK", nabídne vám možnost zadat heslo ručně a uložit jej do lokálního `.env`. Případně ověřte heslo v administraci hostingu. Pozor na zapomenuté soubory typu `public/.env`, které mohou obsahovat citlivé (a správné) údaje z předchozích pokusů. **Tyto soubory ihned po zjištění smažte!**
 3. **Chyba v uvozovkách/speciálních znacích:** Pokud heslo obsahuje znaky jako `$`, `#`, `"` nebo `/`, mohlo dojít k chybě při zápisu do `.env` na serveru.
    - *Řešení:* Používejte aktualizovanou verzi `Envoy.blade.php`, která pro aktualizaci `.env` využívá robustní PHP skript s base64 kódováním a správným escapováním.
 

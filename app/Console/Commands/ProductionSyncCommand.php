@@ -29,6 +29,8 @@ class ProductionSyncCommand extends Command
      */
     public function handle()
     {
+        $this->initializeEnv();
+
         $host = env('PROD_HOST');
         $port = env('PROD_PORT', '22');
         $user = env('PROD_USER');
@@ -56,43 +58,84 @@ class ProductionSyncCommand extends Command
         $currentPassword = env('PROD_DB_PASSWORD');
         $dbConfig['db_password'] = $currentPassword;
 
-        if (!$this->option('ai-test')) {
-            if ($currentPassword) {
-                $choice = select(
-                    label: 'Jak chcete naložit s heslem k produkční databázi?',
-                    options: [
-                        'keep' => 'Použít uložené heslo (' . str_repeat('*', 8) . ')',
-                        'new' => 'Zadat nové heslo',
-                    ],
-                    default: 'keep'
-                );
-
-                if ($choice === 'new') {
-                    $dbConfig['db_password'] = password(
-                        label: 'Zadejte nové heslo k produkční databázi:',
-                        required: true
-                    );
-                }
-            } else {
-                $dbConfig['db_password'] = password(
-                    label: 'Zadejte heslo k produkční databázi:',
-                    required: true
-                );
-            }
-
-            if ($dbConfig['db_password'] !== $currentPassword) {
-                if (confirm("Chcete nové heslo uložit do lokálního .env?", true)) {
-                    $this->updateEnv(['PROD_DB_PASSWORD' => $dbConfig['db_password']]);
-                }
-            }
-        }
-
         // Ověření dostupnosti PHP na serveru
         \Laravel\Prompts\info("🔍 Ověřuji dostupnost PHP na serveru...");
         $checkPhp = \Illuminate\Support\Facades\Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
         if (!$checkPhp->successful()) {
             $this->error("❌ PHP binárka '{$phpBinary}' není na serveru dostupná nebo nefunguje.");
             return self::FAILURE;
+        }
+
+        while (true) {
+            // Ověření DB připojení ze serveru
+            \Laravel\Prompts\info("🔍 Ověřuji DB připojení ze serveru...");
+
+            $dbCheckPhp = '
+                $conn = @mysqli_connect(
+                    base64_decode("' . base64_encode($dbConfig['db_host']) . '"),
+                    base64_decode("' . base64_encode($dbConfig['db_username']) . '"),
+                    base64_decode("' . base64_encode($dbConfig['db_password']) . '"),
+                    base64_decode("' . base64_encode($dbConfig['db_database']) . '"),
+                    (int)base64_decode("' . base64_encode($dbConfig['db_port']) . '")
+                );
+                if ($conn) {
+                    echo "OK";
+                    mysqli_close($conn);
+                } else {
+                    echo "FAIL: " . mysqli_connect_error();
+                }
+            ';
+
+            $dbCheckCmd = "ssh -p {$port} {$user}@{$host} \"{$phpBinary} -r 'eval(stream_get_contents(STDIN));'\"";
+            $checkDb = \Illuminate\Support\Facades\Process::input($dbCheckPhp)->run($dbCheckCmd);
+            $output = trim($checkDb->output());
+
+            if ($output === 'OK') {
+                \Laravel\Prompts\info("✅ DB připojení je v pořádku.");
+                break;
+            }
+
+            $this->error("❌ Nelze se připojit k produkční databázi ze serveru.");
+            if (!empty($output) && str_contains($output, 'FAIL:')) {
+                $this->line("Důvod: " . substr($output, strpos($output, 'FAIL:') + 5));
+            } elseif (!empty($checkDb->errorOutput())) {
+                $this->line("Chyba: " . trim($checkDb->errorOutput()));
+            }
+
+            if ($this->option('ai-test')) {
+                return self::FAILURE;
+            }
+
+            if (!confirm("Chcete zadat jiné heslo?", true)) {
+                return self::FAILURE;
+            }
+
+            $dbConfig['db_password'] = password(
+                label: 'Zadejte správné heslo k produkční databázi:',
+                required: true
+            );
+
+            if (confirm("Chcete toto heslo uložit do lokálního .env?", true)) {
+                // Uložíme do public/.env (primární pro aktuální aplikaci)
+                $this->updateEnv(['PROD_DB_PASSWORD' => $dbConfig['db_password']]);
+
+                // Uložíme i do kořenového .env (master kopie), pokud existuje
+                $rootEnv = base_path('.env');
+                if (file_exists($rootEnv)) {
+                    $content = file_get_contents($rootEnv);
+                    $safeValue = $dbConfig['db_password'];
+                    if (str_contains($safeValue, ' ') && !str_starts_with($safeValue, '"')) {
+                        $safeValue = '"' . str_replace('"', '\"', $safeValue) . '"';
+                    }
+
+                    if (preg_match("/^PROD_DB_PASSWORD=/m", $content)) {
+                        $content = preg_replace("/^PROD_DB_PASSWORD=.*/m", "PROD_DB_PASSWORD={$safeValue}", $content);
+                    } else {
+                        $content = rtrim($content) . "\nPROD_DB_PASSWORD={$safeValue}\n";
+                    }
+                    file_put_contents($rootEnv, $content);
+                }
+            }
         }
 
         // Zajištění správné verze Node.js (Vite vyžaduje 18+)
@@ -224,22 +267,98 @@ class ProductionSyncCommand extends Command
      */
     protected function updateEnv(array $data): void
     {
-        $path = base_path('.env');
+        $path = base_path('public/.env');
 
         if (!file_exists($path)) {
-            return;
+            if (file_exists(base_path('.env.example'))) {
+                copy(base_path('.env.example'), $path);
+            } else {
+                return;
+            }
         }
 
         $content = file_get_contents($path);
 
         foreach ($data as $key => $value) {
-            if (str_contains($content, "{$key}=")) {
-                $content = preg_replace("/^{$key}=.*/m", "{$key}=\"{$value}\"", $content);
+            // Očištění hodnoty pro zápis do .env
+            $safeValue = (string)$value;
+
+            // Pokud hodnota obsahuje mezery a není v uvozovkách, obalíme ji
+            if (str_contains($safeValue, ' ') && !str_starts_with($safeValue, '"')) {
+                $safeValue = '"' . str_replace('"', '\"', $safeValue) . '"';
+            }
+
+            if (preg_match("/^{$key}=/m", $content)) {
+                $content = preg_replace("/^{$key}=.*/m", "{$key}={$safeValue}", $content);
             } else {
-                $content .= "\n{$key}=\"{$value}\"";
+                // Přidání na konec, pokud klíč neexistuje
+                $content = rtrim($content) . "\n{$key}={$safeValue}\n";
             }
         }
 
         file_put_contents($path, $content);
+    }
+
+    /**
+     * Inicializuje public/.env soubor kombinací .env.example a kořenového .env.
+     */
+    protected function initializeEnv(): void
+    {
+        $rootEnvPath = base_path('.env');
+        $publicEnvPath = base_path('public/.env');
+        $exampleEnvPath = base_path('.env.example');
+
+        // Pokud public/.env neexistuje, vytvoříme ho z .env.example
+        if (!file_exists($publicEnvPath) && file_exists($exampleEnvPath)) {
+            \Laravel\Prompts\info("📄 Vytvářím public/.env ze šablony .env.example...");
+            copy($exampleEnvPath, $publicEnvPath);
+        }
+
+        // Pokud v kořeni existuje .env, vytáhneme z něj PROD_ proměnné a APP_KEY
+        if (file_exists($rootEnvPath)) {
+            \Laravel\Prompts\info("🔗 Přenáším konfiguraci z kořenového .env do public/.env...");
+
+            // Načtení kořenového .env pomocí Dotenv (dočasně do pole, ne do globálního $_ENV, abychom neovlivnili zbytek)
+            $rootVars = \Dotenv\Dotenv::parse(file_get_contents($rootEnvPath));
+
+            $toTransfer = [];
+            foreach ($rootVars as $key => $value) {
+                // Přenášíme vše co začíná PROD_, APP_KEY a další důležité klíče
+                if (str_starts_with($key, 'PROD_') ||
+                    $key === 'APP_KEY' ||
+                    $key === 'FONTAWESOME_TOKEN' ||
+                    $key === 'OPENAI_API_KEY' ||
+                    $key === 'ERROR_REPORT_EMAIL' ||
+                    $key === 'ERROR_REPORT_SENDER') {
+
+                    if (!empty($value)) {
+                        $toTransfer[$key] = $value;
+                    }
+                }
+            }
+
+            if (!empty($toTransfer)) {
+                $this->updateEnv($toTransfer);
+            }
+        }
+
+        // Pokud stále chybí APP_KEY v public/.env, vygenerujeme ho
+        if (file_exists($publicEnvPath)) {
+            $content = file_get_contents($publicEnvPath);
+            // Hledáme APP_KEY= s prázdnou nebo neexistující hodnotou (včetně možných uvozovek)
+            if (!preg_match('/^APP_KEY="?base64:[^" \n]+"?/m', $content)) {
+                 \Laravel\Prompts\info("🔑 Generuji APP_KEY...");
+                 $this->call('key:generate', ['--no-interaction' => true]);
+            }
+        }
+
+        // Znovu načteme public/.env do aktuálního procesu, aby env() vracel správné hodnoty
+        if (file_exists($publicEnvPath)) {
+             try {
+                 \Dotenv\Dotenv::createMutable(base_path('public'), '.env')->load();
+             } catch (\Exception $e) {
+                 // Ignorovat
+             }
+        }
     }
 }

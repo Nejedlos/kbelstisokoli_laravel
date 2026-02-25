@@ -49,15 +49,15 @@
         git clean -df
     fi
 
-    echo "Preparing .env file..."
-    if [ ! -f ".env" ]; then
-        echo "Creating .env from .env.example..."
-        cp .env.example .env
+    echo "Preparing public/.env file..."
+    if [ ! -f "public/.env" ]; then
+        echo "Creating public/.env from .env.example..."
+        cp .env.example public/.env
     fi
 
-    echo "Updating .env configuration..."
+    echo "Updating public/.env configuration..."
     {{ $php }} -r '
-        $envFile = ".env";
+        $envFile = "public/.env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [
@@ -94,9 +94,9 @@
         }
         file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
-    echo "✅ .env updated."
+    echo "✅ public/.env updated."
 
-    if ! grep -q "APP_KEY=base64" .env; then
+    if ! grep -q "APP_KEY=base64" public/.env; then
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
     fi
@@ -275,9 +275,9 @@
     echo "Running database seeding..."
     {{ $php }} artisan app:seed --force --no-interaction
 
-    echo "Updating .env configuration..."
+    echo "Updating public/.env configuration..."
     {{ $php }} -r '
-        $envFile = ".env";
+        $envFile = "public/.env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [];
@@ -311,7 +311,7 @@
         }
         file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
-    echo "✅ .env updated."
+    echo "✅ public/.env updated."
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
         echo "Ensuring custom public path is linked: {{ $public_path }}"
@@ -445,15 +445,15 @@
 
     cd {{ $path }}
 
-    echo "Preparing .env file..."
-    if [ ! -f ".env" ]; then
-        echo "Creating .env from .env.example..."
-        cp .env.example .env
+    echo "Preparing public/.env file..."
+    if [ ! -f "public/.env" ]; then
+        echo "Creating public/.env from .env.example..."
+        cp .env.example public/.env
     fi
 
-    echo "Updating .env configuration..."
+    echo "Updating public/.env configuration..."
     {{ $php }} -r '
-        $envFile = ".env";
+        $envFile = "public/.env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [
@@ -490,9 +490,9 @@
         }
         file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
-    echo "✅ .env updated."
+    echo "✅ public/.env updated."
 
-    if ! grep -q "APP_KEY=base64" .env; then
+    if ! grep -q "APP_KEY=base64" public/.env; then
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
     fi
@@ -501,9 +501,9 @@
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path is linked: {{ $public_path }}"
+        echo "Ensuring custom public path is linked or updated: {{ $public_path }}"
         if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
-            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public..."
+            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public (if any)..."
             cp -rn "{{ $public_path }}"/* public/ 2>/dev/null || true
             rm -rf "{{ $public_path }}"
         fi
@@ -513,17 +513,20 @@
             echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
         fi
 
-        if [ ! -L "{{ $public_path }}" ]; then
+        if [ ! -L "{{ $public_path }}" ] && [ -d "public/build" ]; then
             echo "Copying local assets (build) to custom public path: {{ $public_path }}"
             mkdir -p "{{ $public_path }}/build"
             cp -rf public/build/* "{{ $public_path }}/build/"
         fi
 
-        echo "Patching index.php in project root for absolute paths..."
+        echo "Patching index.php for absolute paths..."
         {{ $php }} -r '
-            $path = "{{ $path }}/public/index.php";
-            if (!file_exists($path)) { exit(0); }
-            $content = file_get_contents($path);
+            $target = "{{ $path }}/public/index.php";
+            if ("{{ $public_path ?? '' }}" && !is_link("{{ $public_path }}") && file_exists("{{ $public_path }}/index.php")) {
+                $target = "{{ $public_path }}/index.php";
+            }
+            if (!file_exists($target)) { exit(0); }
+            $content = file_get_contents($target);
             $base = "{{ $path }}";
 
             $content = preg_replace(
@@ -546,7 +549,7 @@
                 $content
             );
 
-            file_put_contents($path, $content);
+            file_put_contents($target, $content);
         '
         echo "✅ index.php patched."
     fi

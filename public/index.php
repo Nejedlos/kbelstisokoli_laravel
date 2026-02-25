@@ -17,7 +17,7 @@ require __DIR__.'/../vendor/autoload.php';
 (function () {
     try {
         if (class_exists(\Dotenv\Dotenv::class)) {
-            \Dotenv\Dotenv::createImmutable(dirname(__DIR__))->safeLoad();
+            \Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
         }
     } catch (\Throwable $e) {
         // Ignorovat chyby při načítání .env
