@@ -52,6 +52,17 @@ class ProductionDeployCommand extends Command
             return self::FAILURE;
         }
 
+        // Pokud je nodeBinary jen 'node', zkusíme v session najít v18+ verzi,
+        // protože i když je v PATH, může tam být dřív v14 (častý problém na Webglobe).
+        if ($nodeBinary === 'node') {
+            info("🔍 Hledám optimální verzi Node.js (v18+)...");
+            $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
+            if ($findNode->successful() && !empty(trim($findNode->output()))) {
+                $nodeBinary = trim($findNode->output());
+                info("✅ Použiji: {$nodeBinary}");
+            }
+        }
+
         $checkNode = Process::run("ssh -p {$port} {$user}@{$host} '{$nodeBinary} -v'");
         if (!$checkNode->successful()) {
             error("❌ Node.js binárka '{$nodeBinary}' není na serveru dostupná.");
@@ -62,18 +73,18 @@ class ProductionDeployCommand extends Command
             info("🚀 Nasazuji na {$user}@{$host}:{$port}...");
 
             $params = [
-                "--host={$host}",
-                "--port={$port}",
-                "--user={$user}",
-                "--php={$phpBinary}",
-                "--node={$nodeBinary}",
-                "--npm={$npmBinary}",
-                "--path={$path}",
-                "--token={$token}",
+                "--host=" . escapeshellarg($host),
+                "--port=" . escapeshellarg($port),
+                "--user=" . escapeshellarg($user),
+                "--php=" . escapeshellarg($phpBinary),
+                "--node=" . escapeshellarg($nodeBinary),
+                "--npm=" . escapeshellarg($npmBinary),
+                "--path=" . escapeshellarg($path),
+                "--token=" . escapeshellarg($token),
             ];
 
             if ($publicPath) {
-                $params[] = "--public_path={$publicPath}";
+                $params[] = "--public_path=" . escapeshellarg($publicPath);
             }
 
             $command = base_path('vendor/bin/envoy') . " run deploy " . implode(' ', $params);

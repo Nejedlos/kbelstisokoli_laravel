@@ -29,6 +29,7 @@ class ProductionSyncCommand extends Command
         $port = env('PROD_PORT', '22');
         $user = env('PROD_USER');
         $phpBinary = env('PROD_PHP_BINARY', 'php');
+        $nodeBinary = env('PROD_NODE_BINARY', 'node');
         $path = env('PROD_PATH');
         $publicPath = env('PROD_PUBLIC_PATH');
 
@@ -56,29 +57,48 @@ class ProductionSyncCommand extends Command
             return self::FAILURE;
         }
 
+        // Zajištění správné verze Node.js (Vite vyžaduje 18+)
+        if ($nodeBinary === 'node' || empty($nodeBinary)) {
+            \Laravel\Prompts\info("🔍 Hledám optimální verzi Node.js (v18+)...");
+            $findNode = \Illuminate\Support\Facades\Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node22 node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
+            if ($findNode->successful() && !empty(trim($findNode->output()))) {
+                $nodeBinary = trim($findNode->output());
+                \Laravel\Prompts\info("✅ Použiji: {$nodeBinary}");
+            }
+        }
+
+        // Pokud jsme našli konkrétní node binárku, zkusíme najít i NPM
+        $npmBinary = 'npm';
+        if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
+             $npmBinary = 'npm' . $m[1];
+        }
+
         while (true) {
             \Laravel\Prompts\info("🚀 Synchronizuji konfiguraci na {$user}@{$host}:{$port}...");
-            \Laravel\Prompts\info("💡 Nezapomeňte před nahráním na FTP spustit lokálně: php artisan app:local:prepare");
+            \Laravel\Prompts\info("💡 TIP: Před nahráním na FTP vždy spusťte lokálně: php artisan app:local:prepare");
+            \Laravel\Prompts\info("💡 TIP: Nezapomeňte nahrát složku public/build/ do kořene projektu na FTP.");
 
             $params = [
-                "--host={$host}",
-                "--port={$port}",
-                "--user={$user}",
-                "--php={$phpBinary}",
-                "--path={$path}",
+                "--host=" . escapeshellarg($host),
+                "--port=" . escapeshellarg($port),
+                "--user=" . escapeshellarg($user),
+                "--php=" . escapeshellarg($phpBinary),
+                "--node=" . escapeshellarg($nodeBinary),
+                "--npm=" . escapeshellarg($npmBinary),
+                "--path=" . escapeshellarg($path),
             ];
 
             if ($publicPath) {
-                $params[] = "--public_path={$publicPath}";
+                $params[] = "--public_path=" . escapeshellarg($publicPath);
             }
 
             foreach ($dbConfig as $key => $value) {
-                if ($value) {
-                    $params[] = "--{$key}=\"{$value}\"";
+                if ($value !== null) {
+                    $params[] = "--{$key}=" . escapeshellarg($value);
                 }
             }
 
-            $command = base_path('vendor/bin/envoy') . " run sync " . implode(' ', $params);
+            $command = "php " . base_path('vendor/bin/envoy') . " run sync " . implode(' ', $params);
 
             $process = \Illuminate\Support\Facades\Process::forever()->run($command, function (string $type, string $output) {
                 echo $output;
@@ -86,7 +106,10 @@ class ProductionSyncCommand extends Command
 
             if ($process->successful()) {
                 \Laravel\Prompts\info('🎉 Synchronizace byla úspěšně dokončena!');
-                break;
+
+                if (!\Laravel\Prompts\confirm('Chcete synchronizaci spustit znovu? (např. po dalším nahrání souborů)', false)) {
+                    break;
+                }
             } else {
                 $this->error('❌ Synchronizace selhala. Zkontrolujte prosím chybové hlášky výše.');
 

@@ -1,24 +1,34 @@
-<div x-data="{ searchOpen: false, loading: false }" class="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50/50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-800 max-w-[280px] transition-all hover:bg-white dark:hover:bg-gray-950 hover:border-primary/30 group cursor-pointer relative mr-4" @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())">
+<div x-data="{ searchOpen: false, loading: false }" class="relative flex items-center">
     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
-    <div class="flex items-center justify-center w-6 h-6 rounded bg-primary/10 text-primary group-hover:bg-primary transition-all duration-300">
-        <i class="fa-light fa-sparkles text-[10px] group-hover:!text-white"></i>
-    </div>
 
-    <span class="text-[11px] text-gray-400 dark:text-gray-500 truncate font-medium group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
-        {{ __('search.ai_hint') }}
-    </span>
+    <!-- Desktop Trigger (Pill) -->
+    <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
+            class="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:border-primary/30 transition-all group text-left shadow-sm min-w-[200px]"
+            title="{{ __('search.ai_hint') }}">
+        <i class="fa-light fa-sparkles text-primary group-hover:scale-110 transition-transform text-[10px]"></i>
+        <span class="text-[11px] truncate font-bold opacity-80 group-hover:opacity-100 transition-opacity">{{ __('search.ai_hint') }}</span>
+        <span class="ml-auto text-[9px] font-black text-gray-400 group-hover:text-primary transition-colors">AI</span>
+    </button>
 
-    <div class="ml-auto text-[9px] font-black text-primary/40 group-hover:text-primary transition-colors">
-        AI
-    </div>
+    <!-- Mobile Trigger (Icon) -->
+    <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
+            class="md:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
+            title="{{ __('search.ai_hint') }}">
+        <i class="fa-light fa-sparkles text-xl group-hover:scale-110 transition-transform"></i>
+        <span class="absolute -top-1 -right-1 flex h-3 w-3" x-show="!searchOpen">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-40"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-primary/80"></span>
+        </span>
+    </button>
 
     <!-- AI Search Overlay -->
     <div x-show="searchOpen"
          @click.away="searchOpen = false"
+         @keydown.escape.window="searchOpen = false"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-         class="absolute left-0 top-full mt-3 w-full min-w-[380px] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-4 z-50 overflow-hidden text-left ring-1 ring-black/5 dark:ring-white/5"
+         class="fixed inset-x-0 top-16 w-screen md:absolute md:inset-auto md:left-0 md:top-full md:mt-3 md:w-full md:min-w-[380px] bg-white dark:bg-gray-900 rounded-none md:rounded-2xl shadow-2xl border-t md:border border-gray-100 dark:border-gray-800 p-4 z-50 overflow-hidden text-left ring-1 ring-black/5 dark:ring-white/5"
          style="display: none;">
 
         <div class="mb-4">

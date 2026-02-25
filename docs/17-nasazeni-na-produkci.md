@@ -65,7 +65,7 @@ Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na se
    php artisan app:local:prepare
    ```
    *Tento příkaz automaticky nainstaluje NPM balíčky, sestaví assety (Vite build), synchronizuje ikony a pročistí lokální cache.*
-2. Přes **FTP klienta** (např. FileZilla, WinSCP nebo IDE) nahrajte změněné soubory na server do **funkčního adresáře**. Nezapomeňte nahrát i složky `public/build/` a `public/webfonts/`.
+2. Přes **FTP klienta** (např. FileZilla, WinSCP nebo IDE) nahrajte změněné soubory na server do **funkčního adresáře**. Nezapomeňte nahrát i složku `public/build/`.
 3. Následně ve svém počítači spusťte příkaz:
    ```bash
    php artisan app:sync
@@ -94,7 +94,12 @@ Tyto metody vyžadují hloubkovou introspekci schématu, která na tomto hosting
 
 Všechny stávající migrace byly k 23. 2. 2026 upraveny tak, aby byly s tímto omezením kompatibilní.
 
-Oba příkazy (`app:production:setup` i `app:deploy`) jsou vybaveny **automatickým opakováním**. 
+Oba příkazy (`app:production:setup` i `app:deploy`) jsou vybaveny **automatickou detekcí verzí**.
+- Pokud je v konfiguraci nastaveno obecné `node`, systém se při každém běhu pokusí na serveru najít verzi 18+ (např. `node20`, `node18` nebo `/usr/bin/node`).
+- To řeší specifický problém hostingu Webglobe, kde v různých SSH session může být různé pořadí v `PATH` a výchozí `node` může být zastaralý (v14).
+- Pokud systém automaticky najde lepší verzi, vypíše informaci `✅ Použiji: /cesta/k/binarce`.
+
+Oba příkazy jsou také vybaveny **automatickým opakováním**. 
 - Pokud selže SSH spojení během setupu, systém vám umožní upravit údaje nebo zkusit znovu nahrát SSH klíč (včetně nového dotazu na heslo).
 - Veškeré zadané údaje o serveru se ukládají do `.env` ihned po potvrzení, takže i při přerušení setupu si je systém pro příště pamatuje.
 - Pokud dojde k chybě během běhu (např. selže `composer install` nebo `npm run build`), systém se vás zeptá, zda chcete operaci zkusit znovu. To umožňuje opravit příčinu (např. chybějící balíček na serveru) a pokračovat bez nutnosti znovu zadávat všechny konfigurační údaje.
@@ -129,12 +134,26 @@ php8.4 artisan migrate --force
 # Zkuste: node -v, node20 -v, node18 -v atd.
 # Pokud 'node -v' vypíše 18+, můžete použít přímo 'node'.
 # Na Webglobe často existují binárky jako node20, node18, ale mohou být skryté (např. v /opt/alt/node*/usr/bin/).
+# POZOR: Někdy je 'node' v /usr/local/bin/ zastaralý (v14), zatímco v /usr/bin/ je v18+.
 
 # Tip pro důkladné vyhledání všech dostupných Node binárek (mimo naši složku .node_bin):
 # which -a node20 node18 node | grep -v ".node_bin"
 
-# Příklad pro automatické nalezení a uložení cesty k binárce:
-set -l NODE_BIN (which -a node20 node18 node | grep -v ".node_bin" | head -n1; or which /opt/alt/node*/usr/bin/node | head -n1)
+# Tip pro důkladné vyhledání všech dostupných NPM binárek:
+# for n in (which -a npm22 npm20 npm18 npm | grep -v ".node_bin"; or ls /opt/alt/node*/usr/bin/npm 2>/dev/null); if test -x $n; echo -n "$n: "; $n -v; end; end
+
+# Příklad pro automatické nalezení a uložení cesty k binárce (preferuje v18+):
+set -l NODE_BIN ""
+for n in (which -a node20 node18 node | grep -v ".node_bin"; or ls /opt/alt/node*/usr/bin/node)
+    if $n -v | string match -rq '^v(18|2[0-9])'
+        set NODE_BIN $n
+        break
+    end
+end
+
+if test -z "$NODE_BIN"
+    set NODE_BIN (which -a node | grep -v ".node_bin" | head -n1; or which /opt/alt/node*/usr/bin/node | head -n1)
+end
 
 # 2. Vytvořte lokální binářky (symlinky) pro konzistenci
 mkdir -p .node_bin

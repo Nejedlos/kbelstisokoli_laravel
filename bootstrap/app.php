@@ -95,6 +95,94 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 return redirect()->to('/');
             }
         });
+
+        // Odeslání e-mailu s chybou na produkci (vynechá 4xx chyby)
+        $exceptions->report(function (\Throwable $e) {
+            try {
+                if (!app()->environment('production')) {
+                    return;
+                }
+
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $e->getStatusCode() < 500) {
+                    return; // nehlásíme 4xx
+                }
+
+                $request = request();
+
+                // Sestavení hlášení s očištěním citlivých údajů
+                $sanitize = function (array $data) use (&$sanitize): array {
+                    $sensitive = ['password', 'password_confirmation', '_token', 'current_password', 'token'];
+                    foreach ($data as $k => $v) {
+                        if (in_array(strtolower((string) $k), $sensitive, true)) {
+                            $data[$k] = '[hidden]';
+                        } elseif (is_array($v)) {
+                            $data[$k] = $sanitize($v);
+                        }
+                    }
+                    return $data;
+                };
+
+                $headers = [];
+                if ($request) {
+                    foreach ($request->headers->all() as $k => $v) {
+                        $headers[$k] = is_array($v) ? implode(', ', $v) : (string) $v;
+                    }
+                }
+
+                $user = null;
+                try {
+                    if (\Illuminate\Support\Facades\Auth::check()) {
+                        $u = \Illuminate\Support\Facades\Auth::user();
+                        $user = [
+                            'id' => $u->id ?? null,
+                            'email' => $u->email ?? null,
+                            'name' => $u->name ?? null,
+                        ];
+                    }
+                } catch (\Throwable $ignored) {}
+
+                $report = [
+                    'timestamp' => now()->toIso8601String(),
+                    'app' => [
+                        'name' => config('app.name'),
+                        'env' => config('app.env'),
+                        'url' => config('app.url'),
+                    ],
+                    'exception' => [
+                        'class' => get_class($e),
+                        'message' => $e->getMessage(),
+                        'code' => $e->getCode(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => substr($e->getTraceAsString(), 0, 20000),
+                    ],
+                    'request' => $request ? [
+                        'url' => $request->fullUrl(),
+                        'method' => $request->method(),
+                        'ip' => $request->ip(),
+                        'query' => $sanitize($request->query()),
+                        'input' => $sanitize($request->except(['password', 'password_confirmation', '_token', 'current_password', 'token'])),
+                    ] : null,
+                    'headers' => $headers,
+                    'server' => [
+                        'php' => PHP_VERSION,
+                        'sapi' => PHP_SAPI,
+                        'memory_usage' => memory_get_usage(true),
+                    ],
+                    'user' => $user,
+                ];
+
+                $to = env('ERROR_REPORT_EMAIL');
+                $from = env('ERROR_REPORT_SENDER', config('mail.from.address'));
+
+                if ($to) {
+                    \Illuminate\Support\Facades\Mail::to($to)
+                        ->send((new \App\Mail\ErrorMail($report))->from($from, config('mail.from.name')));
+                }
+            } catch (\Throwable $ignored) {
+                // Tichý pád, ať nenaruší běh aplikace
+            }
+        });
     })->create();
 
 // Oprava kompatibility: usePublicPath voláme až na instanci Application,

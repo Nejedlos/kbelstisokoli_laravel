@@ -273,3 +273,34 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     to { transform: translateX(-50%) scale(0.6); opacity: 0.1; }
 }
 
+/* ==========================
+   Admin Topbar – Search Visibility & Layout
+   ========================== */
+
+/* Skryj výchozí Filament globální hledání v horní liště (vždy, protože používáme vlastní ikonový trigger) */
+.fi-topbar .fi-topbar-end > .fi-global-search-ctn {
+    display: none !important;
+}
+
+/* Povol zobrazení v našem vlastním overlayi (který je uvnitř .ks-search-overlay) */
+.fi-topbar .ks-search-overlay .fi-global-search-ctn {
+    display: block !important;
+}
+
+@media (max-width: 767px) {
+    /* Zajisti, aby pravá část (kde jsou naše prvky) byla na mobilu viditelná a flex */
+    .fi-topbar .fi-topbar-end {
+        display: flex !important;
+        flex: 1 !important;
+        justify-content: flex-end !important;
+    }
+}
+
+
+
+/* ==========================
+   Admin Topbar – Hide duplicate logo link
+   ========================== */
+.fi-topbar .fi-topbar-start > a {
+    display: none !important;
+}

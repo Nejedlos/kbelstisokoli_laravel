@@ -390,7 +390,7 @@ class ProductionDeploySetupCommand extends Command
                 $bn = basename($candidate);
                 if (!preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') continue;
 
-                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
                     if (version_compare($matches[1] ?? '0', '8.4', '>=')) {
@@ -400,22 +400,24 @@ class ProductionDeploySetupCommand extends Command
                 }
             }
 
-            // Node discovery
+            // Node discovery (Vylepšeno pro preferenci verzí 18+)
             $remoteNodeBinaries = $this->findBinariesOnServer($host, $port, $user, 'node*');
-            $nodeCandidates = array_unique(array_merge($remoteNodeBinaries, [$node, 'node22', 'node20', 'node18', 'node']));
+            // Důležité: 'node' dáváme až na konec, abychom preferovali verze s číslem (node20, node18) nebo plné cesty
+            $nodeCandidates = array_unique(array_merge($remoteNodeBinaries, ['node22', 'node20', 'node18', $node, 'node']));
 
+            $foundNode = false;
             foreach ($nodeCandidates as $candidate) {
-                // Only look for node or node digits
                 $bn = basename($candidate);
                 if (!preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') continue;
 
-                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
                     if (version_compare($matches[1] ?? '0', '18.0', '>=')) {
                         $node = $candidate;
+                        $foundNode = true;
 
-                        // Try to find matching npm (e.g., node20 -> npm20)
+                        // Zkusíme najít odpovídající npm (např. node20 -> npm20)
                         $remoteNpmBinaries = $this->findBinariesOnServer($host, $port, $user, 'npm*');
                         $npmCandidates = array_unique(array_merge($remoteNpmBinaries, ['npm']));
 
@@ -428,7 +430,7 @@ class ProductionDeploySetupCommand extends Command
                             $bn = basename($npmCandidate);
                             if (!preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') continue;
 
-                            $npmProc = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
+                            $npmProc = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
                             if ($npmProc->successful()) {
                                 $npm = $npmCandidate;
                                 break;
@@ -485,7 +487,7 @@ class ProductionDeploySetupCommand extends Command
                 $bn = basename($candidate);
                 if (!preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') continue;
 
-                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
                     $version = $matches[1] ?? '0';
@@ -510,7 +512,7 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // 2. Git Check
-            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'git --version 2>/dev/null'");
+            $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'git --version 2>/dev/null'");
             if ($process->successful() && !empty($process->output())) {
                 preg_match('/git version ([\d\.]+)/', $process->output(), $matches);
                 $results[] = "<fg=green>✓</> Git: Verze " . ($matches[1] ?? 'neznámá');
@@ -520,7 +522,7 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // 3. Composer Check
-            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'composer --version 2>/dev/null'");
+            $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'composer --version 2>/dev/null'");
             if ($process->successful() && !empty($process->output())) {
                 preg_match('/Composer version ([\d\.]+)/', $process->output(), $matches);
                 $results[] = "<fg=green>✓</> Composer: Verze " . ($matches[1] ?? 'neznámá');
@@ -529,9 +531,9 @@ class ProductionDeploySetupCommand extends Command
                 $allOk = false;
             }
 
-            // 4. Node Discovery & Check
+            // 4. Node Discovery & Check (Vylepšeno pro preferenci verzí 18+)
             $remoteNodeBinaries = $this->findBinariesOnServer($host, $port, $user, 'node*');
-            $nodeCandidates = array_unique(array_merge($remoteNodeBinaries, [$nodeBinary, 'node22', 'node20', 'node18', 'node']));
+            $nodeCandidates = array_unique(array_merge($remoteNodeBinaries, ['node22', 'node20', 'node18', $nodeBinary, 'node']));
             $bestNode = null;
             $bestNodeVer = null;
 
@@ -539,7 +541,7 @@ class ProductionDeploySetupCommand extends Command
                 $bn = basename($candidate);
                 if (!preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') continue;
 
-                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
                     $version = $matches[1] ?? '0';
@@ -577,7 +579,7 @@ class ProductionDeploySetupCommand extends Command
                 $bn = basename($candidate);
                 if (!preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') continue;
 
-                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && !empty($process->output())) {
                     $bestNpm = $candidate;
                     $npmBinary = $candidate;
@@ -652,23 +654,25 @@ class ProductionDeploySetupCommand extends Command
             info("🚀 Spouštím Envoy setup na {$user}@{$host}:{$port}...");
 
             $params = [
-                "--host={$host}",
-                "--port={$port}",
-                "--user={$user}",
-                "--php={$phpBinary}",
-                "--node={$nodeBinary}",
-                "--npm={$npmBinary}",
-                "--path={$path}",
-                "--token={$token}",
-                "--repository={$repository}",
+                "--host=" . escapeshellarg($host),
+                "--port=" . escapeshellarg($port),
+                "--user=" . escapeshellarg($user),
+                "--php=" . escapeshellarg($phpBinary),
+                "--node=" . escapeshellarg($nodeBinary),
+                "--npm=" . escapeshellarg($npmBinary),
+                "--path=" . escapeshellarg($path),
+                "--token=" . escapeshellarg($token),
+                "--repository=" . escapeshellarg($repository),
             ];
 
             if ($publicPath) {
-                $params[] = "--public_path={$publicPath}";
+                $params[] = "--public_path=" . escapeshellarg($publicPath);
             }
 
             foreach ($dbConfig as $key => $value) {
-                $params[] = "--{$key}={$value}";
+                if ($value !== null) {
+                    $params[] = "--{$key}=" . escapeshellarg($value);
+                }
             }
 
             $command = base_path('vendor/bin/envoy') . " run setup " . implode(' ', $params);

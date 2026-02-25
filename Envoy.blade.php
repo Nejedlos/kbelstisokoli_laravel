@@ -6,6 +6,15 @@
     $php = $php ?? 'php';
     $node = $node ?? 'node';
     $npm = $npm ?? 'npm';
+
+    $db_connection_b64 = base64_encode($db_connection ?? 'mysql');
+    $db_host_b64 = base64_encode($db_host ?? '127.0.0.1');
+    $db_port_b64 = base64_encode($db_port ?? '3306');
+    $db_database_b64 = base64_encode($db_database ?? '');
+    $db_username_b64 = base64_encode($db_username ?? '');
+    $db_password_b64 = base64_encode($db_password ?? '');
+    $db_prefix_b64 = base64_encode($db_prefix ?? '');
+    $public_path_b64 = base64_encode($public_path ?? '');
 @endsetup
 
 @task('setup', ['on' => 'web'])
@@ -46,33 +55,39 @@
         cp .env.example .env
     fi
 
-    if [ ! -z "{{ $db_database ?? '' }}" ]; then
-        sed -i "s|DB_CONNECTION=.*|DB_CONNECTION={{ $db_connection ?? 'mysql' }}|" .env
-        sed -i "s|DB_HOST=.*|DB_HOST={{ $db_host ?? '127.0.0.1' }}|" .env
-        sed -i "s|DB_PORT=.*|DB_PORT={{ $db_port ?? '3306' }}|" .env
-        sed -i "s|DB_DATABASE=.*|DB_DATABASE={{ $db_database }}|" .env
-        sed -i "s|DB_USERNAME=.*|DB_USERNAME={{ $db_username }}|" .env
-        sed -i "s|DB_PASSWORD=.*|DB_PASSWORD={{ $db_password }}|" .env
-        if [ ! -z "{{ $db_prefix ?? '' }}" ]; then
-            if grep -q "^DB_PREFIX=" .env; then
-                sed -i "s|DB_PREFIX=.*|DB_PREFIX={{ $db_prefix }}|" .env
-            else
-                echo "DB_PREFIX={{ $db_prefix }}" >> .env
-            fi
-        fi
-        echo "✅ Database configured in .env."
-    fi
-
-    sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
-    sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
-
-    if [ ! -z "{{ $public_path ?? '' }}" ]; then
-        if grep -q "^APP_PUBLIC_PATH=" .env; then
-            sed -i "s|APP_PUBLIC_PATH=.*|APP_PUBLIC_PATH={{ $public_path }}|" .env
-        else
-            echo "APP_PUBLIC_PATH={{ $public_path }}" >> .env
-        fi
-    fi
+    echo "Updating .env configuration..."
+    {{ $php }} -r '
+        $envFile = ".env";
+        if (!file_exists($envFile)) { exit(0); }
+        $content = file_get_contents($envFile);
+        $vars = [
+            "APP_ENV" => "production",
+            "APP_DEBUG" => "false",
+        ];
+        if ("{{ $db_database_b64 }}") {
+            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
+            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
+            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
+            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
+            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
+            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
+            if ("{{ $db_prefix_b64 }}") {
+                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
+            }
+        }
+        if ("{{ $public_path_b64 }}") {
+            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
+        }
+        foreach ($vars as $key => $value) {
+            if (preg_match("/^$key=/m", $content)) {
+                $content = preg_replace("/^$key=.*/m", "$key=$value", $content);
+            } else {
+                $content .= "\n$key=$value";
+            }
+        }
+        file_put_contents($envFile, trim($content) . "\n");
+    '
+    echo "✅ .env updated."
 
     if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
@@ -84,6 +99,7 @@
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
+    if [ ! -z "{{ $public_path ?? '' }}" ]; then
         echo "Ensuring custom public path is linked: {{ $public_path }}"
         if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
             echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public..."
@@ -108,7 +124,7 @@
 
             // 1. Fix autoload.php reference
             $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\"\']\s*;/",
+                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
                 "require \"$base/vendor/autoload.php\";",
                 $content
             );
@@ -117,14 +133,14 @@
             $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
 
             $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\"\']\s*;/",
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
                 "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
                 $content
             );
 
             // 3. Fix maintenance mode path
             $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\"\']\s*\)/",
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
                 "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
                 $content
             );
@@ -141,7 +157,18 @@
     if [[ "{{ $node }}" == /* ]]; then
         NODE_BIN_PATH="{{ $node }}"
     else
-        NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        # Prefer v18+ versions if found
+        NODE_BIN_PATH=""
+        for n in $(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
+            VER=$($n -v | sed "s/v//")
+            if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
+                NODE_BIN_PATH=$n
+                break
+            fi
+        done
+        if [ -z "$NODE_BIN_PATH" ]; then
+            NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        fi
     fi
     ln -sf "$NODE_BIN_PATH" .node_bin/node
 
@@ -171,7 +198,7 @@
         npm run build
 
         # Zajištění, aby build byl v subdoméně, ale i pro PHP dostupné v public_path()
-        if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+        if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ] && [ ! -L "{{ $public_path }}" ]; then
             echo "Copying build to custom public path: {{ $public_path }}/build"
             mkdir -p "{{ $public_path }}/build"
             cp -r public/build/* "{{ $public_path }}/build/"
@@ -185,6 +212,8 @@
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
+    {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan view:clear
 
     echo "Optimizing application..."
     {{ $php }} artisan optimize
@@ -221,13 +250,25 @@
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
     {{ $php }} artisan migrate --force
 
-    if [ ! -z "{{ $public_path ?? '' }}" ]; then
-        if grep -q "^APP_PUBLIC_PATH=" .env; then
-            sed -i "s|APP_PUBLIC_PATH=.*|APP_PUBLIC_PATH={{ $public_path }}|" .env
-        else
-            echo "APP_PUBLIC_PATH={{ $public_path }}" >> .env
-        fi
-    fi
+    echo "Updating .env configuration..."
+    {{ $php }} -r '
+        $envFile = ".env";
+        if (!file_exists($envFile)) { exit(0); }
+        $content = file_get_contents($envFile);
+        $vars = [];
+        if ("{{ $public_path_b64 }}") {
+            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
+        }
+        foreach ($vars as $key => $value) {
+            if (preg_match("/^$key=/m", $content)) {
+                $content = preg_replace("/^$key=.*/m", "$key=$value", $content);
+            } else {
+                $content .= "\n$key=$value";
+            }
+        }
+        file_put_contents($envFile, trim($content) . "\n");
+    '
+    echo "✅ .env updated."
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
         echo "Ensuring custom public path is linked: {{ $public_path }}"
@@ -250,7 +291,7 @@
             $base = "{{ $path }}";
 
             $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\"\']\s*;/",
+                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
                 "require \"$base/vendor/autoload.php\";",
                 $content
             );
@@ -258,13 +299,13 @@
             $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
 
             $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\"\']\s*;/",
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
                 "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
                 $content
             );
 
             $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\"\']\s*\)/",
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
                 "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
                 $content
             );
@@ -280,7 +321,18 @@
     if [[ "{{ $node }}" == /* ]]; then
         NODE_BIN_PATH="{{ $node }}"
     else
-        NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        # Prefer v18+ versions if found
+        NODE_BIN_PATH=""
+        for n in $(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
+            VER=$($n -v | sed "s/v//")
+            if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
+                NODE_BIN_PATH=$n
+                break
+            fi
+        done
+        if [ -z "$NODE_BIN_PATH" ]; then
+            NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        fi
     fi
     ln -sf "$NODE_BIN_PATH" .node_bin/node
 
@@ -310,13 +362,15 @@
     npm run build
 
     # Zajištění, aby build byl v subdoméně
-    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ] && [ ! -L "{{ $public_path }}" ]; then
         echo "Copying build to custom public path: {{ $public_path }}/build"
         mkdir -p "{{ $public_path }}/build"
         cp -r public/build/* "{{ $public_path }}/build/"
     fi
 
     {{ $php }} artisan app:icons:sync
+    {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan view:clear
     {{ $php }} artisan optimize
 
     echo "Reindexing AI..."
@@ -342,38 +396,47 @@
         cp .env.example .env
     fi
 
-    if [ ! -z "{{ $db_database ?? '' }}" ]; then
-        sed -i "s|DB_CONNECTION=.*|DB_CONNECTION={{ $db_connection ?? 'mysql' }}|" .env
-        sed -i "s|DB_HOST=.*|DB_HOST={{ $db_host ?? '127.0.0.1' }}|" .env
-        sed -i "s|DB_PORT=.*|DB_PORT={{ $db_port ?? '3306' }}|" .env
-        sed -i "s|DB_DATABASE=.*|DB_DATABASE={{ $db_database }}|" .env
-        sed -i "s|DB_USERNAME=.*|DB_USERNAME={{ $db_username }}|" .env
-        sed -i "s|DB_PASSWORD=.*|DB_PASSWORD={{ $db_password }}|" .env
-        if [ ! -z "{{ $db_prefix ?? '' }}" ]; then
-            if grep -q "^DB_PREFIX=" .env; then
-                sed -i "s|DB_PREFIX=.*|DB_PREFIX={{ $db_prefix }}|" .env
-            else
-                echo "DB_PREFIX={{ $db_prefix }}" >> .env
-            fi
-        fi
-        echo "✅ Database configured in .env."
-    fi
-
-    sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
-    sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
-
-    if [ ! -z "{{ $public_path ?? '' }}" ]; then
-        if grep -q "^APP_PUBLIC_PATH=" .env; then
-            sed -i "s|APP_PUBLIC_PATH=.*|APP_PUBLIC_PATH={{ $public_path }}|" .env
-        else
-            echo "APP_PUBLIC_PATH={{ $public_path }}" >> .env
-        fi
-    fi
+    echo "Updating .env configuration..."
+    {{ $php }} -r '
+        $envFile = ".env";
+        if (!file_exists($envFile)) { exit(0); }
+        $content = file_get_contents($envFile);
+        $vars = [
+            "APP_ENV" => "production",
+            "APP_DEBUG" => "false",
+        ];
+        if ("{{ $db_database_b64 }}") {
+            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
+            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
+            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
+            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
+            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
+            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
+            if ("{{ $db_prefix_b64 }}") {
+                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
+            }
+        }
+        if ("{{ $public_path_b64 }}") {
+            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
+        }
+        foreach ($vars as $key => $value) {
+            if (preg_match("/^$key=/m", $content)) {
+                $content = preg_replace("/^$key=.*/m", "$key=$value", $content);
+            } else {
+                $content .= "\n$key=$value";
+            }
+        }
+        file_put_contents($envFile, trim($content) . "\n");
+    '
+    echo "✅ .env updated."
 
     if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
     fi
+
+    echo "Cleaning up cache..."
+    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
         echo "Ensuring custom public path is linked: {{ $public_path }}"
@@ -388,6 +451,12 @@
             echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
         fi
 
+        if [ ! -L "{{ $public_path }}" ]; then
+            echo "Copying local assets (build) to custom public path: {{ $public_path }}"
+            mkdir -p "{{ $public_path }}/build"
+            cp -rf public/build/* "{{ $public_path }}/build/"
+        fi
+
         echo "Patching index.php in project root for absolute paths..."
         {{ $php }} -r '
             $path = "{{ $path }}/public/index.php";
@@ -396,7 +465,7 @@
             $base = "{{ $path }}";
 
             $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\"\']\s*;/",
+                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
                 "require \"$base/vendor/autoload.php\";",
                 $content
             );
@@ -404,13 +473,13 @@
             $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
 
             $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\"\']\s*;/",
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
                 "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
                 $content
             );
 
             $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\"\']\s*\)/",
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
                 "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
                 $content
             );
@@ -420,14 +489,13 @@
         echo "✅ index.php patched."
     fi
 
-    echo "Cleaning up cache..."
-    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
-
     echo "Running database migrations..."
     {{ $php }} artisan migrate --force
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
+    {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan view:clear
 
     echo "Optimizing application..."
     {{ $php }} artisan optimize

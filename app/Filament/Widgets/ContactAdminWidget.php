@@ -19,6 +19,21 @@ class ContactAdminWidget extends Widget
         'md' => 1,
     ];
 
+    // Výška placeholderu při lazy načítání – stabilizuje layout a brání přeskakování.
+    protected ?string $placeholderHeight = '14rem';
+
+    /**
+     * Placeholder načteme přes celou šířku (full), aby se dva pulzující bloky
+     * vedle sebe nepřekrývaly uprostřed při načítání.
+     */
+    public function getPlaceholderData(): array
+    {
+        return [
+            'columnSpan' => 'full',
+            'columnStart' => [],
+        ];
+    }
+
     // Vstupy formuláře (stack pod sebou)
     public ?string $senderName = null;
     public ?string $senderEmail = null;

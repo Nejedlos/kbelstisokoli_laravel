@@ -18,6 +18,21 @@ class WelcomeBannerWidget extends Widget
         'md' => 1,
     ];
 
+    // Výška placeholderu při lazy načítání – stabilizuje layout a brání přeskakování.
+    protected ?string $placeholderHeight = '11rem';
+
+    /**
+     * Placeholder načteme přes celou šířku (full), aby se dva pulzující bloky
+     * vedle sebe nepřekrývaly uprostřed při načítání.
+     */
+    public function getPlaceholderData(): array
+    {
+        return [
+            'columnSpan' => 'full',
+            'columnStart' => [],
+        ];
+    }
+
     protected function getViewData(): array
     {
         $activePlayers = class_exists(PlayerProfile::class)
