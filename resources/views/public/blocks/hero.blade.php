@@ -2,19 +2,10 @@
     $asset = isset($data['media_asset_id']) ? \App\Models\MediaAsset::find($data['media_asset_id']) : null;
     $imageUrl = $asset ? $asset->getUrl('large') : ($data['image_url'] ?? null);
     $videoUrl = $data['video_url'] ?? null;
-    $webmUrl = $videoUrl && str_contains($videoUrl, '.mp4') ? str_replace('.mp4', '.webm', $videoUrl) : null;
     $variant = $data['variant'] ?? 'standard';
     $alignment = $data['alignment'] ?? ($variant === 'centered' ? 'center' : 'left');
 
-    // WebP detekce a mobilní varianty pro statické assety
-    $isStaticAsset = !empty($imageUrl) && str_contains($imageUrl, '/assets/img/');
-    $webpUrl = $isStaticAsset ? str_replace(['.jpg', '.png'], '.webp', $imageUrl) : null;
-
-    // Speciální logika pro Hero - pokud máme desktopový hero, zkusíme najít mobilní verzi
-    $mobileImageUrl = ($isStaticAsset && str_contains($imageUrl, 'home-hero-basketball-team'))
-        ? str_replace('home-hero-basketball-team', 'home-hero-mobile', $imageUrl)
-        : $imageUrl;
-    $mobileWebpUrl = $isStaticAsset ? str_replace(['.jpg', '.png'], '.webp', $mobileImageUrl) : null;
+    $webmUrl = $videoUrl && str_contains($videoUrl, '.mp4') ? str_replace('.mp4', '.webm', $videoUrl) : null;
 @endphp
 
 <section @class([
@@ -27,83 +18,62 @@
 ])>
     {{-- Background Image / Video / Overlay --}}
     @if(($imageUrl || $videoUrl) && $variant !== 'minimal')
-        <div class="absolute inset-0 z-0">
-            @if($videoUrl)
-                {{-- Mobilní fallback: bez videa, pouze poster (WebP s PNG/JPG fallbackem) --}}
-                <picture class="block sm:hidden w-full h-full">
-                    @if($mobileWebpUrl) <source srcset="{{ asset($mobileWebpUrl) }}" type="image/webp"> @endif
-                    <img src="{{ asset($mobileImageUrl) }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover" decoding="async" fetchpriority="high">
-                </picture>
+        <div class="absolute inset-0 z-0 bg-secondary">
+            {{-- Image-First: Prioritní <x-picture> element pro mobil i desktop --}}
+            <x-picture
+                :src="$imageUrl"
+                class="absolute inset-0 w-full h-full object-cover"
+                :alt="$asset->alt_text ?? ($data['headline'] ?? '')"
+                decoding="async"
+                fetchpriority="high"
+                loading="eager"
+            />
 
-                {{-- Desktop: lazy-load video s IO, bez okamžitého načítání --}}
+            @if($videoUrl)
+                {{-- Video-Later: Odložené načítání videa po window.load --}}
                 <video
-                    class="w-full h-full object-cover hidden sm:block js-hero-video"
+                    class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000 js-hero-video hidden sm:block"
                     autoplay
                     muted
                     loop
                     playsinline
                     preload="none"
-                    poster="{{ asset($imageUrl) }}"
                     aria-label="Hero background video"
                 >
-                    @if($webmUrl && file_exists(public_path($webmUrl)))
+                    @if($webmUrl && file_exists(public_path(ltrim($webmUrl, '/'))))
                         <source data-src="{{ asset($webmUrl) }}" type="video/webm">
                     @endif
                     <source data-src="{{ asset($videoUrl) }}" type="video/mp4">
                 </video>
-                <noscript>
-                    <video class="w-full h-full object-cover hidden sm:block" autoplay muted loop playsinline poster="{{ asset($imageUrl) }}">
-                        @if($webmUrl && file_exists(public_path($webmUrl)))
-                            <source src="{{ asset($webmUrl) }}" type="video/webm">
-                        @endif
-                        <source src="{{ asset($videoUrl) }}" type="video/mp4">
-                    </video>
-                </noscript>
+
                 <script>
                     (function(){
-                        try {
-                            const mqMobile = window.matchMedia('(max-width: 639px)');
-                            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+                        window.addEventListener('load', function() {
                             const video = document.querySelector('.js-hero-video');
-                            if (!video || mqMobile.matches || prefersReduced.matches) return;
-                            const load = () => {
-                                const sources = video.querySelectorAll('source');
-                                let needsLoad = false;
-                                sources.forEach(source => {
-                                    if (source.dataset.src && !source.src) {
-                                        source.src = source.dataset.src;
-                                        needsLoad = true;
-                                    }
-                                });
-                                if (needsLoad) {
-                                    video.load();
-                                }
-                            };
-                            if ('IntersectionObserver' in window) {
-                                const io = new IntersectionObserver((entries) => {
-                                    entries.forEach(entry => {
-                                        if (entry.isIntersecting) {
-                                            load();
-                                            io.disconnect();
-                                        }
-                                    });
-                                }, { rootMargin: '256px' });
-                                io.observe(video);
-                            } else {
-                                window.addEventListener('load', load, { once: true });
-                            }
-                        } catch (e) {}
+                            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                            if (!video || prefersReduced) return;
+
+                            // Přepíšeme data-src na src
+                            const sources = video.querySelectorAll('source');
+                            sources.forEach(s => {
+                                if (s.dataset.src) s.src = s.dataset.src;
+                            });
+
+                            video.load();
+
+                            // Jakmile je video připraveno plynule hrát, zobrazíme ho
+                            video.addEventListener('canplaythrough', function() {
+                                video.classList.remove('opacity-0');
+                                video.classList.add('opacity-100');
+                            }, { once: true });
+                        });
                     })();
                 </script>
-            @else
-                <picture class="w-full h-full">
-                    @if($webpUrl) <source srcset="{{ asset($webpUrl) }}" type="image/webp"> @endif
-                    <img src="{{ asset($imageUrl) }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover" decoding="async" fetchpriority="high">
-                </picture>
             @endif
 
             @if($data['overlay'] ?? true)
-                <div class="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent z-[1]"></div>
             @endif
         </div>
     @elseif($variant === 'standard')

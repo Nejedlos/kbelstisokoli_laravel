@@ -25,16 +25,22 @@
 - `config/navigation.php`: položka týmů nyní ukazuje na `public.teams.index`.
 
 3) Homepage – hero video a obrázky
-- Zrušeno okamžité načítání videa: `preload="none"`, lazy načtení `src` přes `IntersectionObserver` až při vstupu do viewportu.
-- Mobilní fallback: na mobilech se nenačítá video vůbec. Zobrazuje se optimalizovaný obrázek pomocí `<picture>` (WebP s fallbackem na PNG).
-- Automatická detekce mobilní verze: pro Hero se automaticky hledá soubor `home-hero-mobile.webp` / `.png`, pokud je v CMS nastaven `home-hero-basketball-team`.
-- Respektováno `prefers-reduced-motion` → použije se jen obrázek.
-- Přidán `noscript` fallback.
+- **Strategie "Image-First, Video-Later"**:
+  - Hero sekce nyní prioritně načítá statický obrázek (`<x-picture>` s `fetchpriority="high"` a `loading="eager"`).
+  - Video je odloženo až po události `window.load`.
+  - Po načtení videa a detekci připravenosti (`canplaythrough`) se video plynule zobrazí (transition opacity) přes statický obrázek.
+  - Tímto je dosaženo bleskového LCP (Largest Contentful Paint), zatímco uživatelský zážitek s videem zůstává zachován.
+- **Odstraněno**: Okamžité načítání videa a IntersectionObserver (nahrazeno spolehlivějším odloženým načítáním pro maximální výkon).
 
 4) Obrázky (globálně)
-- Implementována podpora pro **WebP s automatickým fallbackem** (pomocí `<picture>` tagu) v blocích `hero`, `cards_grid` a `image`.
-- Pro statické assety v `assets/img/` se automaticky zkouší existence `.webp` varianty.
-- Doplněno: `loading="lazy"`, `decoding="async"`, a základní `width/height` u vybraných bloků.
+- Vytvořena nová **Blade komponenta `<x-picture>`**, která sjednocuje práci s obrázky v celém projektu.
+- **Robustní Fallback systém**:
+  1. Zkusí se WebP verze (`.webp`).
+  2. Pokud neexistuje, zkusí se JPG/JPEG verze (`.jpg`, `.jpeg`).
+  3. Pokud ani ta neexistuje, použije se globální fallback: `assets/img/home/basketball-court-detail.webp` (resp. `.jpg`).
+- **Automatická detekce mobilních verzí**: Komponenta automaticky hledá soubor s příponou `-mobile` (např. `hero-mobile.webp`), pokud existuje, použije ho pro mobilní zobrazení.
+- Použito v blocích `hero`, `cards_grid` a `image`.
+- Doplněno: `loading="lazy"`, `decoding="async"` (pokud není u Hero nastaveno jinak).
 
 5) Patička
 - Badge („Praha‑Kbely • basketbal • komunita“) zarovnána pomocí `inline-flex items-center`, tečka je vlevo a vertikálně vystředěná, zachován `animate-ping`.
