@@ -37,8 +37,18 @@
             />
         @else
             <div class="grid gap-8 max-w-4xl">
-                <div class="flex items-center justify-between text-sm text-slate-500 border-b border-slate-100 pb-4">
-                    <span>{{ __('search.found_count', ['count' => $results->count()]) }}</span>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 border-b border-slate-100 pb-4">
+                    @php
+                        $stats = $results->groupBy('type');
+                    @endphp
+
+                    <span class="font-bold text-slate-900">{{ __('search.total_results') }}: {{ $results->count() }}</span>
+                    <span class="text-slate-200">|</span>
+
+                    @foreach($stats as $type => $group)
+                        <span>{{ $type }}: {{ $group->count() }}</span>
+                        @if(!$loop->last) <span class="text-slate-200">•</span> @endif
+                    @endforeach
                 </div>
 
                 @foreach($results as $result)

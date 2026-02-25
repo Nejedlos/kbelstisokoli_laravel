@@ -11,6 +11,7 @@ return [
     'empty_cta_teams' => 'Týmy',
     'back_home' => 'Zpět na úvod',
     'found_count' => 'Nalezeno :count výsledků',
+    'total_results' => 'Celkem',
     'types' => [
         'page' => 'Stránka',
         'post' => 'Aktualita',

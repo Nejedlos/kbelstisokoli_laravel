@@ -15,7 +15,7 @@
     'hero-gradient' => $variant === 'standard' && !$imageUrl && !$videoUrl,
     'py-20 md:py-32' => $variant === 'centered',
     'py-16 md:py-24' => $variant !== 'centered',
-])>
+]) x-data="{ videoLoaded: false }">
     {{-- Background Image / Video / Overlay --}}
     @if(($imageUrl || $videoUrl) && $variant !== 'minimal')
         <div class="absolute inset-0 z-0 bg-secondary">
@@ -31,51 +31,69 @@
             />
 
             @if($videoUrl)
-                {{-- Video-Later: Odložené načítání videa po window.load, pouze na desktopu --}}
-                <template x-if="window.innerWidth >= 640">
+                {{-- Video-Later: Optimalizované načítání videa --}}
+                <div class="hidden sm:block">
                     <video
-                        class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000 js-hero-video"
+                        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 js-hero-video"
+                        :class="videoLoaded ? 'opacity-100' : 'opacity-0'"
                         autoplay
                         muted
                         loop
                         playsinline
-                        preload="none"
-                        aria-label="Hero background video"
+                        poster="{{ $imageUrl }}"
+                        preload="auto"
+                        aria-hidden="true"
                     >
-                        @if($webmUrl && file_exists(public_path(ltrim($webmUrl, '/'))))
-                            <source data-src="{{ asset($webmUrl) }}" type="video/webm">
+                        @if($webmUrl)
+                            <source src="{{ asset($webmUrl) }}" type="video/webm">
                         @endif
-                        <source data-src="{{ asset($videoUrl) }}" type="video/mp4">
+                        <source src="{{ asset($videoUrl) }}" type="video/mp4">
                     </video>
-                </template>
+                </div>
 
                 <script>
                     (function(){
                         const initVideo = function() {
                             const video = document.querySelector('.js-hero-video');
+                            if (!video) return;
+
                             const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                            if (prefersReduced || window.innerWidth < 640) {
+                                video.remove();
+                                return;
+                            }
 
-                            if (!video || prefersReduced || window.innerWidth < 640) return;
+                            // Pokud už video hraje nebo je načtené, rovnou zobrazíme
+                            if (video.readyState >= 3) {
+                                video.dispatchEvent(new CustomEvent('video-ready'));
+                            }
 
-                            // Přepíšeme data-src na src
-                            const sources = video.querySelectorAll('source');
-                            sources.forEach(s => {
-                                if (s.dataset.src) s.src = s.dataset.src;
-                            });
-
-                            video.load();
-
-                            // Jakmile je video připraveno plynule hrát, zobrazíme ho
-                            video.addEventListener('canplaythrough', function() {
-                                video.classList.remove('opacity-0');
-                                video.classList.add('opacity-100');
+                            video.addEventListener('loadeddata', function() {
+                                // Vyvoláme event pro Alpine
+                                const section = video.closest('.block-hero');
+                                if (section && section.__x) {
+                                    section._x_dataStack[0].videoLoaded = true;
+                                } else {
+                                    // Fallback bez Alpine
+                                    video.style.opacity = '1';
+                                }
                             }, { once: true });
+
+                            // Záložní zobrazení po 2 sekundách, i kdyby event nepřišel
+                            setTimeout(() => {
+                                const section = video.closest('.block-hero');
+                                if (section && section.__x) {
+                                    section._x_dataStack[0].videoLoaded = true;
+                                } else {
+                                    video.style.opacity = '1';
+                                }
+                            }, 2000);
                         };
 
-                        if (document.readyState === 'complete') {
+                        if (document.readyState !== 'loading') {
                             initVideo();
                         } else {
-                            window.addEventListener('load', initVideo);
+                            document.addEventListener('DOMContentLoaded', initVideo);
                         }
                     })();
                 </script>

@@ -11,6 +11,7 @@ return [
     'empty_cta_teams' => 'Teams',
     'back_home' => 'Back to home',
     'found_count' => 'Found :count results',
+    'total_results' => 'Total',
     'types' => [
         'page' => 'Page',
         'post' => 'News',
