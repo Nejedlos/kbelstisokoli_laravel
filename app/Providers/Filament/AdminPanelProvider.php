@@ -36,6 +36,8 @@ class AdminPanelProvider extends PanelProvider
     // Pozn.: Hooky a assety registrujeme přímo na panelu v metodě panel(),
     // aby se spolehlivě vykreslily i na auth stránkách.
 
+
+
     public function panel(Panel $panel): Panel
     {
         $branding = app(BrandingService::class)->getSettings();

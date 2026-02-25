@@ -21,3 +21,6 @@ require $APP_BASE . '/vendor/autoload.php';
 $app = require_once $APP_BASE . '/bootstrap/app.php';
 
 $app->handleRequest(Request::capture());
+
+
+
