@@ -73,7 +73,7 @@ window.initButtonSpinners = () => {
     });
 };
 
-// Email Protection Logic
+// Email Protection Logic (Redirect to contact form)
 window.initEmailProtection = () => {
     document.querySelectorAll('[data-protected-email]').forEach(el => {
         if (el.dataset.emailInit) return;
@@ -83,7 +83,8 @@ window.initEmailProtection = () => {
             const encoded = el.dataset.protectedEmail;
             const email = atob(encoded);
 
-            el.setAttribute('href', `mailto:${email}`);
+            // Redirect to our contact form instead of mailto:
+            el.setAttribute('href', `/napiste-nam?to=${encoded}`);
 
             // Replace placeholder in text if present
             if (el.textContent.includes('[email]')) {
@@ -95,12 +96,40 @@ window.initEmailProtection = () => {
     });
 };
 
+// Analytics / Tracking Readiness
+window.initAnalytics = () => {
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-track-click]');
+        if (!target) return;
+
+        const eventName = target.getAttribute('data-track-click') || 'cta_click';
+        const eventLabel = target.getAttribute('data-track-label') || target.innerText.trim();
+        const eventCategory = target.getAttribute('data-track-category') || 'engagement';
+
+        // Graceful push to dataLayer if exists
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            'event': 'custom_interaction',
+            'event_action': eventName,
+            'event_label': eventLabel,
+            'event_category': eventCategory
+        });
+
+        // Debug log in dev environment
+        if (import.meta.env.DEV) {
+            console.log(`[Analytics] Tracked: ${eventName} | ${eventLabel} | ${eventCategory}`);
+        }
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     window.initButtonSpinners();
     window.initEmailProtection();
+    window.initAnalytics();
 });
 
 document.addEventListener('livewire:navigated', () => {
     window.initButtonSpinners();
     window.initEmailProtection();
+    // initAnalytics relies on document listener, so it doesn't need re-init
 });

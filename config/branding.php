@@ -2,7 +2,7 @@
 
 return [
     // Základní brand identita (může být později spravována přes admin UI)
-    'club_name' => env('APP_BRAND_NAME', 'Kbelští sokoli C & E'),
+    'club_name' => env('APP_BRAND_NAME', 'Kbelští sokoli'),
     'club_short_name' => env('APP_BRAND_SHORT', 'Sokoli'),
     'slogan' => env('APP_BRAND_SLOGAN', null),
 

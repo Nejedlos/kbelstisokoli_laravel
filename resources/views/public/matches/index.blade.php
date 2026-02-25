@@ -28,7 +28,29 @@
                 <x-empty-state
                     :title="$type === 'upcoming' ? __('matches.empty_upcoming') : __('matches.empty_latest')"
                     :subtitle="__('matches.empty_subtitle')"
+                    icon="fa-calendar-days"
+                    :primaryCta="['url' => route('public.teams.index'), 'label' => __('matches.empty_cta_teams')]"
+                    :secondaryCta="['url' => route('public.contact.index'), 'label' => __('matches.empty_cta_contact')]"
                 />
+
+                <div class="mt-20 max-w-4xl mx-auto border-t border-slate-100 pt-16">
+                    <div class="flex flex-col md:flex-row gap-12 items-center">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-black uppercase tracking-tighter mb-4 text-secondary">{{ __('matches.starter_title') }}</h3>
+                            <p class="text-slate-500 leading-relaxed text-balance">
+                                {{ __('matches.starter_text') }}
+                            </p>
+                        </div>
+                        <div class="w-full md:w-64 flex-shrink-0">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-[0.03] transition-opacity"></div>
+                                <i class="fa-light fa-arrows-rotate text-3xl text-primary mb-4 block"></i>
+                                <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{{ __('matches.starter_sync') }}</div>
+                                <div class="font-bold text-secondary tracking-tight">{{ __('matches.starter_source') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @else
                 <div class="flex flex-col gap-6">
                     @foreach($matches as $match)

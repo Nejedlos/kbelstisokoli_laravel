@@ -80,6 +80,16 @@ class AppSeedCommand extends Command
         if ($result === 0) {
             $this->info('Seedování proběhlo úspěšně.');
             $this->line(Artisan::output());
+
+            // Vyčistíme cache, aby se změny projevily hned
+            $this->info('Čistím cache...');
+            Artisan::call('cache:clear');
+            Artisan::call('view:clear');
+            if ($fresh) {
+                Artisan::call('config:clear');
+                Artisan::call('route:clear');
+            }
+            $this->info('Cache vyčištěna.');
         } else {
             $this->error('Během seedování došlo k chybě.');
             $this->line(Artisan::output());

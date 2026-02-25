@@ -96,6 +96,17 @@ php artisan ai:index --locale=cs --no-interaction
   - Plynulé animace (`animate-in`, `fade-in`, `slide-in`) pro lepší pocit z odezvy.
   - **Interaktivní chat:** Podpora pro kontinuální konverzaci, automatické odrolování na konec chatu a živá aktualizace stavu tlačítka při psaní.
 
-## 12. Další kroky
+## 13. Frontend vyhledávání
+Od verze 1.2 je AI vyhledávání integrováno i do veřejné části webu (frontend).
+- **Kontext:** Hledání na frontendu je striktně odděleno od admin/member sekce (`context => 'frontend'`).
+- **Indexované zdroje:**
+  - Veřejné stránky (`Page`) – indexuje se titulek a obsah (včetně bloků z page builderu).
+  - Aktuality (`Post`) – indexuje se titulek, perex a obsah.
+- **Vlastnosti:**
+  - Plná podpora lokalizace (hledá se v jazyce aktuálně nastaveném na frontendu).
+  - Výsledky obsahují náhledy (snippets) a u aktualit i náhledové obrázky.
+  - Využívá stejný scoringový algoritmus jako admin vyhledávání (shoda v titulku > klíčová slova > obsah).
+
+## 14. Další kroky
 - Přidat indexer pro Eloquent modely a generovat smysluplné URL ke zdrojům.
 - Přidat Filament administrativní akci „Rebuild AI index“ dostupnou pouze adminům.

@@ -24,4 +24,12 @@ return [
         'welcome' => 'Welcome to the Kbely Falcons website',
         'no_content' => 'Homepage content has not been created in the administration yet.',
     ],
+    'view_on_map' => 'View on map',
+    'send_email' => 'Send e-mail',
+    'match_day_desc' => 'Usual time for home games in the gym.',
+    'main_club' => 'Main club',
+    'youth_recruitment' => 'Youth recruitment',
+    'visit_website' => 'Club website',
+    'quick_facts_title' => 'Quick Facts',
+    'quick_facts_subtitle' => 'Everything you need to know about how we work',
 ];

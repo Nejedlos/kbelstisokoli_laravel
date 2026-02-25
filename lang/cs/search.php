@@ -4,8 +4,11 @@ return [
     'title' => 'Vyhledávání',
     'results_for' => 'Výsledky hledání pro',
     'placeholder' => 'Co hledáte?',
-    'no_results_title' => 'Nebylo nic nalezeno',
-    'no_results_text' => 'Zkuste prosím jiné klíčové slovo nebo zkontrolujte překlepy.',
+    'no_results_title' => 'Tato střela nepadla do koše',
+    'no_results_text' => 'Bohužel jsme pro váš dotaz nenašli žádné výsledky. Zkuste prosím jiné klíčové slovo nebo zkuste hledat v konkrétních sekcích.',
+    'empty_cta_news' => 'Novinky',
+    'empty_cta_matches' => 'Zápasy',
+    'empty_cta_teams' => 'Týmy',
     'back_home' => 'Zpět na úvod',
     'found_count' => 'Nalezeno :count výsledků',
     'types' => [

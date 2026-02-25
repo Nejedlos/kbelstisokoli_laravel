@@ -21,6 +21,7 @@ Technické standardy, správa assetů a vizuálních prvků.
 7. [Idempotentní migrace](./02-vyvoj-a-standardy/07-idempotentni-migrace.md)
 8. [Lokalizované řádkování](./02-vyvoj-a-standardy/08-lokalizovane-radkovani.md)
 9. [Antispamová ochrana e-mailů](./02-vyvoj-a-standardy/09-antispamova-ochrana.md)
+10. [Error Pages a Empty States](./02-vyvoj-a-standardy/10-errors-a-empty-states.md)
 
 ### 03. [Administrace](./03-administrace)
 Vše o administrativním rozhraní postaveném na Filament PHP.

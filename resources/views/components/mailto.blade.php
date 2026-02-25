@@ -1,10 +1,11 @@
 @props(['email', 'class' => ''])
 
 @php
-    $encoded = base64_encode($email);
+    $encoded = \App\Support\EmailObfuscator::encode($email);
+    $url = \App\Support\EmailObfuscator::getContactUrl($email);
 @endphp
 
-<a href="javascript:void(0)"
+<a href="{{ $url }}"
    data-protected-email="{{ $encoded }}"
    {{ $attributes->merge(['class' => $class]) }}>
     {{ $slot->isEmpty() ? '[email]' : $slot }}

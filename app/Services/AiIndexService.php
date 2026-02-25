@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\AiDocument;
+use App\Models\Page;
+use App\Models\Post;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -28,6 +30,7 @@ class AiIndexService
         $count += $this->indexFilament($locale);
         $count += $this->indexMemberSection($locale);
         $count += $this->indexDocs(base_path('docs'), $locale);
+        $count += $this->indexFrontend($locale);
 
         return $count;
     }
@@ -38,7 +41,9 @@ class AiIndexService
     public function enrichWithAi(AiDocument $doc): bool
     {
         $settings = $this->aiSettings->getSettings();
-        if (!($settings['enabled'] ?? true)) return false;
+        if (! ($settings['enabled'] ?? true)) {
+            return false;
+        }
 
         $prompt = "Analyzuj následující obsah stránky a vygeneruj seznam klíčových slov a synonym (v jazyce {$doc->locale}), které by uživatelé mohli hledat, aby tuto stránku našli.
 Zaměř se na akce, které lze na stránce provádět, a synonyma pro důležité termíny.
@@ -46,7 +51,7 @@ Příklad: Pokud jde o nastavení brandingu, klíčová slova mohou být: logo, 
 
 Název: {$doc->title}
 Typ: {$doc->type}
-Obsah: " . Str::limit($doc->content, 2000);
+Obsah: ".Str::limit($doc->content, 2000);
 
         try {
             $response = Http::timeout(60)
@@ -56,7 +61,7 @@ Obsah: " . Str::limit($doc->content, 2000);
                     'model' => $settings['fast_model'] ?? 'gpt-4o-mini',
                     'messages' => [
                         ['role' => 'system', 'content' => 'Jsi expert na SEO a vyhledávání. Vracej pouze seznam klíčových slov oddělených čárkou.'],
-                        ['role' => 'user', 'content' => $prompt]
+                        ['role' => 'user', 'content' => $prompt],
                     ],
                     'temperature' => 0.3,
                 ])->json();
@@ -65,10 +70,11 @@ Obsah: " . Str::limit($doc->content, 2000);
             if ($keywordsStr) {
                 $keywords = array_map('trim', explode(',', $keywordsStr));
                 $doc->update(['keywords' => array_unique($keywords)]);
+
                 return true;
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("AI Enrichment Error: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('AI Enrichment Error: '.$e->getMessage());
         }
 
         return false;
@@ -90,6 +96,7 @@ Obsah: " . Str::limit($doc->content, 2000);
                 // Pokud se změnil obsah, vymažeme keywords, aby se znovu vygenerovaly (nebo je můžeme nechat a jen flagovat)
                 $existing->update(['keywords' => null]);
             }
+
             return $existing;
         }
 
@@ -110,10 +117,12 @@ Obsah: " . Str::limit($doc->content, 2000);
                     $label = $item->getLabel();
                     $url = $item->getUrl();
 
-                    if (!$label || !$url) continue;
+                    if (! $label || ! $url) {
+                        continue;
+                    }
 
                     $content = "V hlavním menu se tato položka nachází v sekci \"{$groupLabel}\" pod názvem \"{$label}\". ";
-                    $content .= "Uživatel ji najde v postranním panelu (sidebar).";
+                    $content .= 'Uživatel ji najde v postranním panelu (sidebar).';
 
                     $this->updateOrCreateDocument([
                         'type' => 'admin.navigation',
@@ -122,7 +131,7 @@ Obsah: " . Str::limit($doc->content, 2000);
                         'url' => $url,
                         'locale' => $locale,
                         'content' => $content,
-                        'checksum' => hash('sha256', $content . $url),
+                        'checksum' => hash('sha256', $content.$url),
                     ]);
                     $count++;
                 }
@@ -158,11 +167,11 @@ Obsah: " . Str::limit($doc->content, 2000);
                     $group = (string) $pageClass::getNavigationGroup();
                 }
 
-                if (!$group && property_exists($pageClass, 'navigationGroup')) {
+                if (! $group && property_exists($pageClass, 'navigationGroup')) {
                     $group = (string) $pageClass::$navigationGroup;
                 }
 
-                $content = "";
+                $content = '';
 
                 // EXTRAKCE ZE SCHÉMATU (Formuláře na stránkách)
                 try {
@@ -172,7 +181,7 @@ Obsah: " . Str::limit($doc->content, 2000);
                         $page->form($schema);
                         $schemaTexts = $this->extractTextsFromSchema($schema);
                         if ($schemaTexts) {
-                            $content .= "Obsahuje pole a sekce: " . $schemaTexts . ". ";
+                            $content .= 'Obsahuje pole a sekce: '.$schemaTexts.'. ';
                         }
                     }
                 } catch (\Throwable $e) {
@@ -193,9 +202,10 @@ Obsah: " . Str::limit($doc->content, 2000);
                             $content .= $this->sanitizeBlade($raw);
                         }
                     }
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
 
-                $navigationInfo = $group ? "Tato stránka se v menu nachází v sekci \"{$group}\". " : "";
+                $navigationInfo = $group ? "Tato stránka se v menu nachází v sekci \"{$group}\". " : '';
 
                 $this->updateOrCreateDocument([
                     'type' => 'admin.page',
@@ -203,8 +213,8 @@ Obsah: " . Str::limit($doc->content, 2000);
                     'title' => (string) $title,
                     'url' => $url,
                     'locale' => $locale,
-                    'content' => $navigationInfo . ($content ?: 'Administrační stránka ' . $title),
-                    'checksum' => hash('sha256', $content . $url . $group),
+                    'content' => $navigationInfo.($content ?: 'Administrační stránka '.$title),
+                    'checksum' => hash('sha256', $content.$url.$group),
                 ]);
                 $count++;
             } catch (\Throwable $e) {
@@ -228,9 +238,10 @@ Obsah: " . Str::limit($doc->content, 2000);
                     $resourceClass::form($schema);
                     $schemaTexts = $this->extractTextsFromSchema($schema);
                     if ($schemaTexts) {
-                        $content .= "Formulář obsahuje: " . $schemaTexts . ". ";
+                        $content .= 'Formulář obsahuje: '.$schemaTexts.'. ';
                     }
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
 
                 // Extrakce tabulky
                 try {
@@ -241,11 +252,12 @@ Obsah: " . Str::limit($doc->content, 2000);
                     $resourceClass::table($table);
                     $tableTexts = $this->extractTextsFromTable($table);
                     if ($tableTexts) {
-                        $content .= "Tabulka přehledu obsahuje: " . $tableTexts . ". ";
+                        $content .= 'Tabulka přehledu obsahuje: '.$tableTexts.'. ';
                     }
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
 
-                $navigationInfo = $group ? "Tato sekce se v menu nachází v sekci \"{$group}\". " : "";
+                $navigationInfo = $group ? "Tato sekce se v menu nachází v sekci \"{$group}\". " : '';
 
                 $this->updateOrCreateDocument([
                     'type' => 'admin.resource',
@@ -253,8 +265,8 @@ Obsah: " . Str::limit($doc->content, 2000);
                     'title' => (string) $title,
                     'url' => $url,
                     'locale' => $locale,
-                    'content' => $navigationInfo . $content,
-                    'checksum' => hash('sha256', $resourceClass . $url . $group . $content),
+                    'content' => $navigationInfo.$content,
+                    'checksum' => hash('sha256', $resourceClass.$url.$group.$content),
                 ]);
                 $count++;
             } catch (\Throwable $e) {
@@ -395,7 +407,7 @@ Obsah: " . Str::limit($doc->content, 2000);
         foreach ($routes as $routeName => $info) {
             try {
                 $url = route($routeName);
-                $content = "";
+                $content = '';
                 if (view()->exists($info['view'])) {
                     $viewPath = view($info['view'])->getPath();
                     $raw = File::get($viewPath);
@@ -409,7 +421,7 @@ Obsah: " . Str::limit($doc->content, 2000);
                     'url' => $url,
                     'locale' => $locale,
                     'content' => $content ?: $info['title'],
-                    'checksum' => hash('sha256', $content . $url),
+                    'checksum' => hash('sha256', $content.$url),
                 ]);
                 $count++;
             } catch (\Throwable $e) {
@@ -419,7 +431,103 @@ Obsah: " . Str::limit($doc->content, 2000);
 
         return $count;
     }
-    public function search(string $query, string $locale = 'cs', int $limit = 8, string $context = null)
+
+    private function indexFrontend(string $locale): int
+    {
+        $count = 0;
+
+        // 1. Indexace stránek (Pages)
+        $pages = Page::query()
+            ->where('is_visible', true)
+            ->where('status', 'published')
+            ->get();
+
+        foreach ($pages as $page) {
+            $title = $page->getTranslation('title', $locale);
+            $content = $page->getTranslation('content', $locale);
+
+            if (is_array($content)) {
+                $content = $this->extractStringsFromBlocks($content);
+            }
+
+            $url = $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug);
+
+            $this->updateOrCreateDocument([
+                'type' => 'frontend.page',
+                'source' => 'page:'.$page->id,
+                'title' => $title,
+                'url' => $url,
+                'locale' => $locale,
+                'content' => strip_tags((string) $content),
+                'checksum' => hash('sha256', $content.$url.$title),
+            ]);
+            $count++;
+        }
+
+        // 2. Indexace aktualit (Posts)
+        $posts = Post::query()
+            ->where('is_visible', true)
+            ->where('status', 'published')
+            ->where(function ($q) {
+                $q->whereNull('publish_at')
+                    ->orWhere('publish_at', '<=', now());
+            })
+            ->get();
+
+        foreach ($posts as $post) {
+            $title = $post->getTranslation('title', $locale);
+            $excerpt = $post->getTranslation('excerpt', $locale);
+            $content = $post->getTranslation('content', $locale);
+
+            $fullContent = $excerpt.' '.$content;
+
+            $url = route('public.news.show', $post->slug);
+
+            $this->updateOrCreateDocument([
+                'type' => 'frontend.post',
+                'source' => 'post:'.$post->id,
+                'title' => $title,
+                'url' => $url,
+                'locale' => $locale,
+                'content' => strip_tags((string) $fullContent),
+                'metadata' => [
+                    'image' => $post->featured_image,
+                ],
+                'checksum' => hash('sha256', $fullContent.$url.$title.$post->featured_image),
+            ]);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Pomocná metoda pro extrakci textu z blokového editoru (Filament Builder/Fabricator)
+     */
+    private function extractStringsFromBlocks(array $blocks): string
+    {
+        $texts = [];
+        foreach ($blocks as $block) {
+            if (isset($block['data']) && is_array($block['data'])) {
+                $this->collectStringsRecursive($block['data'], $texts);
+            }
+        }
+
+        return implode(' ', array_filter($texts));
+    }
+
+    private function collectStringsRecursive(array $data, array &$texts): void
+    {
+        foreach ($data as $value) {
+            if (is_string($value)) {
+                $texts[] = $value;
+            } elseif (is_array($value)) {
+                $this->collectStringsRecursive($value, $texts);
+            }
+        }
+    }
+
+    public function search(string $query, string $locale = 'cs', int $limit = 8, ?string $context = null)
     {
         $q = Str::lower($query);
 
@@ -430,21 +538,23 @@ Obsah: " . Str::limit($doc->content, 2000);
         if ($context === 'admin') {
             $queryBuilder->where(function ($w) {
                 $w->where('type', 'like', 'admin.%')
-                  ->orWhere('type', 'docs');
+                    ->orWhere('type', 'docs');
             });
         } elseif ($context === 'member') {
             $queryBuilder->where(function ($w) {
                 $w->where('type', 'like', 'member.%')
-                  ->orWhere('type', 'docs');
+                    ->orWhere('type', 'docs');
             });
+        } elseif ($context === 'frontend') {
+            $queryBuilder->where('type', 'like', 'frontend.%');
         }
 
         $candidates = $queryBuilder->where(function ($w) use ($q) {
-                $w->whereRaw('LOWER(title) LIKE ?', ['%' . $q . '%'])
-                  ->orWhereRaw('LOWER(content) LIKE ?', ['%' . $q . '%'])
-                  ->orWhereRaw('LOWER(keywords) LIKE ?', ['%' . $q . '%'])
-                  ->orWhereJsonContains('keywords', $q);
-            })
+            $w->whereRaw('LOWER(title) LIKE ?', ['%'.$q.'%'])
+                ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$q.'%'])
+                ->orWhereRaw('LOWER(keywords) LIKE ?', ['%'.$q.'%'])
+                ->orWhereJsonContains('keywords', $q);
+        })
             ->limit(100)
             ->get();
 
@@ -458,7 +568,9 @@ Obsah: " . Str::limit($doc->content, 2000);
             // Shoda v titulku (velmi vysoká váha)
             if (Str::contains($title, $q)) {
                 $score += 50;
-                if ($title === $q) $score += 50; // Přesná shoda
+                if ($title === $q) {
+                    $score += 50;
+                } // Přesná shoda
             }
 
             // Shoda v klíčových slovech (vysoká váha)
@@ -490,9 +602,9 @@ Obsah: " . Str::limit($doc->content, 2000);
 
             return [$doc, $score];
         })->sortByDesc(fn ($pair) => $pair[1])
-          ->take($limit)
-          ->map(fn ($pair) => $pair[0])
-          ->values();
+            ->take($limit)
+            ->map(fn ($pair) => $pair[0])
+            ->values();
 
         return $scored;
     }
@@ -523,15 +635,15 @@ Obsah: " . Str::limit($doc->content, 2000);
 
             $checksum = hash('sha256', $raw);
 
-                $this->updateOrCreateDocument([
-                    'type' => $type,
-                    'source' => str_replace(base_path() . DIRECTORY_SEPARATOR, '', $path),
-                    'title' => $title,
-                    'url' => null,
-                    'locale' => $locale,
-                    'content' => $text,
-                    'checksum' => $checksum,
-                ]);
+            $this->updateOrCreateDocument([
+                'type' => $type,
+                'source' => str_replace(base_path().DIRECTORY_SEPARATOR, '', $path),
+                'title' => $title,
+                'url' => null,
+                'locale' => $locale,
+                'content' => $text,
+                'checksum' => $checksum,
+            ]);
 
             $count++;
         }
@@ -567,7 +679,7 @@ Obsah: " . Str::limit($doc->content, 2000);
 
             $this->updateOrCreateDocument([
                 'type' => 'docs',
-                'source' => str_replace(base_path() . DIRECTORY_SEPARATOR, '', $path),
+                'source' => str_replace(base_path().DIRECTORY_SEPARATOR, '', $path),
                 'title' => $title,
                 'url' => null,
                 'locale' => $locale,
@@ -589,6 +701,7 @@ Obsah: " . Str::limit($doc->content, 2000);
         $text = preg_replace('/{\!\!.*?\!\!}/s', ' ', $text) ?? $text;
         // Odstranit HTML tagy
         $text = strip_tags($text);
+
         // Komprimovat whitespace
         return trim(preg_replace('/\s+/', ' ', $text) ?? $text);
     }
@@ -602,6 +715,7 @@ Obsah: " . Str::limit($doc->content, 2000);
         $text = preg_replace('/!\[[^\]]*\]\([^)]*\)/', ' ', $text) ?? $text; // obrázky
         $text = preg_replace('/\[[^\]]*\]\([^)]*\)/', ' ', $text) ?? $text;  // odkazy
         $text = strip_tags($text);
+
         return trim(preg_replace('/\s+/', ' ', $text) ?? $text);
     }
 
@@ -614,6 +728,7 @@ Obsah: " . Str::limit($doc->content, 2000);
         if (preg_match("/@section\(['\"]title['\"],\s*['\"](.*?)['\"]\)/si", $raw, $m)) {
             return trim($m[1]);
         }
+
         return null;
     }
 
@@ -622,6 +737,7 @@ Obsah: " . Str::limit($doc->content, 2000);
         if (preg_match('/^#\s+(.+)$/m', $raw, $m)) {
             return trim($m[1]);
         }
+
         return null;
     }
 }

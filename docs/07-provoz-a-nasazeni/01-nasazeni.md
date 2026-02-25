@@ -66,17 +66,20 @@ Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na se
    ```
    *Tento příkaz automaticky nainstaluje NPM balíčky, sestaví assety (Vite build), synchronizuje ikony a pročistí lokální cache.*
 2. Přes **FTP klienta** (např. FileZilla, WinSCP nebo IDE) nahrajte změněné soubory na server do **funkčního adresáře**. Nezapomeňte nahrát i složku `public/build/`.
+   *Tip: Pokud vyplníte údaje `PROD_FTP_*` v `.env`, příkaz `app:sync` se o nahrání assetů pokusí automaticky.*
 3. Následně ve svém počítači spusťte příkaz:
    ```bash
    php artisan app:sync
    ```
 
-Tento příkaz na serveru automaticky:
+Tento příkaz automaticky:
 1. Ověří verzi PHP na serveru.
 2. Vytvoří nebo aktualizuje `.env` soubor podle vašeho lokálního nastavení.
-3. Synchronizuje obsah složky `public` do veřejného adresáře a opraví cesty v `index.php`.
-4. Spustí migrace databáze (`migrate --force`) a automaticky provede seedování (`app:seed --force`).
-5. Provede synchronizaci ikon a optimalizaci mezipaměti (`optimize`).
+3. **Nahrává lokální assety a build** (`public/assets/`, `public/build/`) na server. Prioritně používá `rsync`, jako fallback pak **FTP** (pokud je nakonfigurováno) nebo `scp`.
+4. Synchronizuje veškerý obsah složky `public` do veřejného adresáře (webrootu), přičemž cílové složky nejprve vyčistí, aby odpovídaly lokálnímu stavu.
+5. Spustí migrace databáze (`migrate --force`) a automaticky provede seedování (`app:seed --force`).
+6. Provede synchronizaci ikon a optimalizaci mezipaměti (`optimize`).
+7. Reindexuje AI vyhledávání.
 
 Na konci příkazu se zobrazí přehledný souhrn všech provedených kroků s potvrzením úspěšnosti.
 

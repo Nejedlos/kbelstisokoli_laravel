@@ -172,11 +172,12 @@ class BrandingService
     }
 
     /**
-     * Vymaže cache nastavení.
+     * Vymaže cache nastavení pro všechny podporované jazyky.
      */
     public function clearCache(): void
     {
-        Cache::forget('global_branding_settings_' . app()->getLocale());
+        Cache::forget('global_branding_settings_cs');
+        Cache::forget('global_branding_settings_en');
     }
 
     /**

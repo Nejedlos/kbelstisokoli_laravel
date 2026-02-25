@@ -32,4 +32,16 @@ class PageBlock extends Model
     {
         return $this->belongsTo(Page::class);
     }
+
+    protected static function booted()
+    {
+        static::saved(function ($block) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('view:clear');
+                \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            } catch (\Throwable $e) {
+                // Ignorovat
+            }
+        });
+    }
 }

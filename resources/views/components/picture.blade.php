@@ -8,6 +8,7 @@
     'width' => null,
     'height' => null,
     'mobileSrc' => null,
+    'sizes' => '100vw',
 ])
 
 @php
@@ -77,7 +78,7 @@
     @endif
 
     @if($desktop['webp'])
-        <source srcset="{{ asset($desktop['webp']) }}" type="image/webp">
+        <source srcset="{{ asset($desktop['webp']) }}" type="image/webp" @if($sizes) sizes="{{ $sizes }}" @endif>
     @endif
     <img
         src="{{ asset($desktop['img']) }}"
@@ -88,5 +89,6 @@
         @if($fetchpriority !== 'auto') fetchpriority="{{ $fetchpriority }}" @endif
         @if($width) width="{{ $width }}" @endif
         @if($height) height="{{ $height }}" @endif
+        @if($sizes) sizes="{{ $sizes }}" @endif
     >
 </picture>

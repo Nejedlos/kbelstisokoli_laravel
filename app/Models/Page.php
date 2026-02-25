@@ -33,4 +33,16 @@ class Page extends Model
     {
         return $this->hasMany(PageBlock::class)->orderBy('sort_order');
     }
+
+    protected static function booted()
+    {
+        static::saved(function ($page) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('view:clear');
+                \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            } catch (\Throwable $e) {
+                // Ignorovat během migrací/seedování
+            }
+        });
+    }
 }

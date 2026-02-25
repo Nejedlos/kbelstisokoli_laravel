@@ -3,7 +3,14 @@
 @section('content')
     <x-page-header
         :title="$team->name"
-        :subtitle="$team->slug === 'muzi-c' ? 'Soutěžní tým s ambicemi (Pražský přebor B)' : 'Tým se skvělou partou (Pražský přebor 3.B)'"
+        :subtitle="match($team->slug) {
+            'muzi-a' => 'Vlajková loď klubu (2. liga skupina A)',
+            'muzi-b' => 'Zkušený tým (Pražský přebor A)',
+            'muzi-c' => 'Soutěžní tým s ambicemi (Pražský přebor B)',
+            'muzi-d' => 'Soutěžní basket (1. třída)',
+            'muzi-e' => 'Tým se skvělou partou (3. třída B)',
+            default => $team->name
+        }"
         :breadcrumbs="[__('teams.breadcrumbs') => route('public.teams.index'), $team->name => null]"
         :image="'assets/img/teams/' . $team->slug . '-header.jpg'"
         alignment="left"
@@ -68,7 +75,16 @@
                                 </div>
                                 <div>
                                     <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.competition') }}</span>
-                                    <span class="font-bold text-secondary">{{ $team->slug === 'muzi-c' ? 'Pražský přebor B' : 'Pražský přebor 3. třída B' }}</span>
+                                    <span class="font-bold text-secondary">
+                                        {{ match($team->slug) {
+                                            'muzi-a' => '2. liga (skupina A)',
+                                            'muzi-b' => 'Pražský přebor A',
+                                            'muzi-c' => 'Pražský přebor B',
+                                            'muzi-d' => '1. třída',
+                                            'muzi-e' => '3. třída B',
+                                            default => ''
+                                        } }}
+                                    </span>
                                 </div>
                             </div>
 

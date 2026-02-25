@@ -17,6 +17,13 @@ class CmsContentSeeder extends Seeder
         $this->seedSettings();
         $this->seedPages();
         $this->seedMenus();
+
+        // Vyčistit cache po seedování, aby se změny projevily hned
+        try {
+            app(\App\Services\BrandingService::class)->clearCache();
+        } catch (\Throwable $e) {
+            // Ignorovat, pokud služba není dostupná
+        }
     }
 
     protected function seedSettings(): void
@@ -88,12 +95,12 @@ class CmsContentSeeder extends Seeder
                 'is_visible' => true,
                 'seo' => [
                     'title' => [
-                        'cs' => 'Kbelští sokoli – Muži C a Muži E | Basket Kbely Praha',
-                        'en' => 'Kbely Falcons – Men C and Men E | Basketball Kbely Prague'
+                        'cs' => 'Kbelští sokoli – Mužské týmy A–E | Basket Kbely Praha',
+                        'en' => 'Kbely Falcons – Men\'s teams A–E | Basketball Kbely Prague'
                     ],
                     'description' => [
-                        'cs' => 'Web týmů Kbelští sokoli Muži C a Muži E v rámci TJ Sokol Kbely Basketbal. Zápasy, týmové informace, aktuality a odkazy na nábor a hlavní kbelský basket.',
-                        'en' => 'Website of teams Kbely Falcons Men C and Men E within TJ Sokol Kbely Basketball. Matches, team info, news and links to recruitment.'
+                        'cs' => 'Web mužských týmů Kbelští sokoli A–E v rámci TJ Sokol Kbely Basketbal. Zápasy, týmové informace, aktuality a odkazy na nábor a hlavní kbelský basket.',
+                        'en' => 'Website of Men\'s teams Kbely Falcons A–E within TJ Sokol Kbely Basketball. Matches, team info, news and links to recruitment.'
                     ],
                 ],
             ],
@@ -248,11 +255,14 @@ class CmsContentSeeder extends Seeder
         $footerClubMenu->items()->delete();
 
         $footerClubItems = [
-            ['label' => ['cs' => 'Muži C', 'en' => 'Men C'], 'url' => '/tymy/muzi-c', 'sort' => 10],
-            ['label' => ['cs' => 'Muži E', 'en' => 'Men E'], 'url' => '/tymy/muzi-e', 'sort' => 20],
-            ['label' => ['cs' => 'Hlavní web TJ Sokol Kbely Basketbal', 'en' => 'Main Club Website'], 'url' => 'https://www.basketkbely.cz/', 'sort' => 30, 'is_external' => true],
-            ['label' => ['cs' => 'Nábor/Začni hrát', 'en' => 'Recruitment'], 'url' => 'https://www.basketkbely.cz/zacnihrat', 'sort' => 40, 'is_external' => true],
-            ['label' => ['cs' => 'Družstva a mládež', 'en' => 'Teams & Youth'], 'url' => 'https://www.basketkbely.cz/druzstva', 'sort' => 50, 'is_external' => true],
+            ['label' => ['cs' => 'Muži A', 'en' => 'Men A'], 'url' => '/tymy/muzi-a', 'sort' => 10],
+            ['label' => ['cs' => 'Muži B', 'en' => 'Men B'], 'url' => '/tymy/muzi-b', 'sort' => 20],
+            ['label' => ['cs' => 'Muži C', 'en' => 'Men C'], 'url' => '/tymy/muzi-c', 'sort' => 30],
+            ['label' => ['cs' => 'Muži D', 'en' => 'Men D'], 'url' => '/tymy/muzi-d', 'sort' => 40],
+            ['label' => ['cs' => 'Muži E', 'en' => 'Men E'], 'url' => '/tymy/muzi-e', 'sort' => 50],
+            ['label' => ['cs' => 'Hlavní web TJ Sokol Kbely Basketbal', 'en' => 'Main Club Website'], 'url' => 'https://www.basketkbely.cz/', 'sort' => 60, 'is_external' => true],
+            ['label' => ['cs' => 'Nábor/Začni hrát', 'en' => 'Recruitment'], 'url' => 'https://www.basketkbely.cz/zacnihrat', 'sort' => 70, 'is_external' => true],
+            ['label' => ['cs' => 'Družstva a mládež', 'en' => 'Teams & Youth'], 'url' => 'https://www.basketkbely.cz/druzstva', 'sort' => 80, 'is_external' => true],
         ];
 
         foreach ($footerClubItems as $item) {
@@ -278,11 +288,11 @@ class CmsContentSeeder extends Seeder
                         'eyebrow' => 'KBELŠTÍ SOKOLI • MUŽI C & MUŽI E',
                         'headline' => "Basket ve Kbelích pro srdcaře,\ntýmové hráče a komunitu",
                         'subheadline' => 'Jsme týmy Muži C a Muži E v rámci TJ Sokol Kbely Basketbal. Na tomto webu najdete informace o našich zápasech, týmech a dění kolem nás – a zároveň cestu do širšího světa kbelského basketu, který staví na tradici, komunitu a práci s mládeží.',
-                        'cta_label' => 'Naše týmy C a E',
+                        'cta_label' => 'Zobrazit naše týmy',
                         'cta_url' => '/tymy',
-                        'cta_secondary_label' => 'Chci začít s basketem',
+                        'cta_secondary_label' => 'Jak začít hrát',
                         'cta_secondary_url' => 'https://www.basketkbely.cz/zacnihrat',
-                        'cta_tertiary_label' => 'Hlavní web TJ Sokol Kbely Basketbal',
+                        'cta_tertiary_label' => 'Navštívit hlavní web TJ Sokol Kbely',
                         'cta_tertiary_url' => 'https://www.basketkbely.cz/',
                         'microtext' => 'Součást oddílu s tradicí basketbalu ve Kbelích a návazností na mládežnické kategorie.',
                         'image_url' => 'assets/img/home/home-hero.jpg',
@@ -297,40 +307,70 @@ class CmsContentSeeder extends Seeder
                     'data' => [
                         'style' => 'outline',
                         'alignment' => 'left',
-                        'title' => 'Tento web patří týmům Muži C a Muži E',
-                        'text' => 'Kbelští sokoli jsou součástí širšího oddílu TJ Sokol Kbely Basketbal. Náš web se zaměřuje hlavně na mužské týmy C a E – jejich informace, zápasy, týmové dění a komunikaci s hráči a fanoušky. Pokud hledáte mládežnické kategorie, přípravku nebo oficiální náborové informace pro děti, pokračujte na hlavní web oddílu. Pokud se chcete přidat k našim mužským týmům, navštivte naši náborovou stránku.',
-                        'button_text' => 'Profil týmu Muži C',
-                        'button_url' => '/tymy/muzi-c',
-                        'secondary_button_text' => 'Profil týmu Muži E',
-                        'secondary_button_url' => '/tymy/muzi-e',
+                        'title' => 'Tento web patří mužským týmům A–E',
+                        'text' => 'Kbelští sokoli jsou součástí širšího oddílu TJ Sokol Kbely Basketbal. Náš web se zaměřuje na mužské týmy A až E – jejich informace, zápasy, týmové dění a komunikaci s hráči a fanoušky. Pokud hledáte mládežnické kategorie, přípravku nebo oficiální náborové informace pro děti, pokračujte na hlavní web oddílu. Pokud se chcete přidat k našim mužským týmům, navštivte naši náborovou stránku.',
+                        'button_text' => 'Přehled všech týmů',
+                        'button_url' => '/tymy',
+                        'secondary_button_text' => 'Nábor hráčů',
+                        'secondary_button_url' => '/nabor',
                     ]
                 ],
                 [
                     'type' => 'cards_grid',
                     'data' => [
                         'title' => 'Naše týmy',
-                        'subtitle' => 'Dva mužské týmy, jeden klubový základ a společná chuť hrát basket.',
-                        'columns' => 2,
+                        'subtitle' => 'Pět mužských týmů, jeden klubový základ a společná chuť hrát basket.',
+                        'columns' => 3,
                         'cards' => [
                             [
+                                'title' => 'Muži A',
+                                'description' => 'Vlajková loď klubu hrající 2. ligu (skupina A). Tým s nejvyššími ambicemi a elitním basketbalem.',
+                                'image_url' => 'assets/img/home/team-muzi-a.jpg',
+                                'link' => '/tymy/muzi-a',
+                                'link_label' => 'Detail týmu Muži A',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Program / výsledky',
+                                'badge' => '2. LIGA',
+                            ],
+                            [
+                                'title' => 'Muži B',
+                                'description' => 'Zkušený tým hrající Pražský přebor. Kvalitní basketbal a silné týmové jádro.',
+                                'image_url' => 'assets/img/home/team-muzi-b.jpg',
+                                'link' => '/tymy/muzi-b',
+                                'link_label' => 'Detail týmu Muži B',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Program / výsledky',
+                                'badge' => 'PRAŽSKÝ PŘEBOR',
+                            ],
+                            [
                                 'title' => 'Muži C',
-                                'description' => 'Tým Muži C působí v kategorii mužů a v sezóně 2025/2026 je veden v soutěži Pražský přebor B. Na klubovém profilu je uveden trenér Tomáš Spanilý.',
+                                'description' => 'Tým hrající Pražský přebor B. Dynamický celek s ambicí posouvat se v tabulce výše.',
                                 'image_url' => 'assets/img/home/team-muzi-c.jpg',
                                 'link' => '/tymy/muzi-c',
                                 'link_label' => 'Detail týmu Muži C',
                                 'secondary_link' => '/zapasy',
                                 'secondary_link_label' => 'Program / výsledky',
-                                'badge' => 'NÁBOR C OTEVŘEN • Pražský přebor B',
+                                'badge' => 'PŘEBOR B',
+                            ],
+                            [
+                                'title' => 'Muži D',
+                                'description' => 'Soutěžní basketbal v 1. třídě. Skvělá parta a radost z každého vítězného zápasu.',
+                                'image_url' => 'assets/img/home/team-muzi-d.jpg',
+                                'link' => '/tymy/muzi-d',
+                                'link_label' => 'Detail týmu Muži D',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Program / výsledky',
+                                'badge' => '1. TŘÍDA',
                             ],
                             [
                                 'title' => 'Muži E',
-                                'description' => 'Tým Muži E působí v kategorii mužů a v sezóně 2025/26 je veden v soutěži Pražský přebor 3. třída B. Na klubovém profilu je uveden trenér Lubor Viktorin.',
+                                'description' => 'Hobby i soutěžní basket ve 3. třídě B. Pohodové tempo a radost ze hry pro všechny generace.',
                                 'image_url' => 'assets/img/home/team-muzi-e.jpg',
                                 'link' => '/tymy/muzi-e',
                                 'link_label' => 'Detail týmu Muži E',
                                 'secondary_link' => '/zapasy',
                                 'secondary_link_label' => 'Program / výsledky',
-                                'badge' => 'NÁBOR E OTEVŘEN • Pražský přebor 3. třída B',
+                                'badge' => '3. TŘÍDA B',
                             ],
                         ]
                     ]
@@ -352,11 +392,11 @@ class CmsContentSeeder extends Seeder
                         'columns' => 2,
                         'cards' => [
                             [
-                                'title' => 'Hráči pro Muže C a E',
-                                'description' => 'Hledáme parťáky se zkušenostmi, kteří chtějí hrát Pražský přebor. Máme super partu a chuť vyhrávat, ale i si to užít. Stačí se ozvat.',
+                                'title' => 'Hráči pro mužské týmy',
+                                'description' => 'Hledáme parťáky se zkušenostmi do všech našich týmů (A–E). Máme super partu a chuť vyhrávat, ale i si to užít. Stačí se ozvat.',
                                 'image_url' => 'assets/img/home/basketball-court-detail.jpg',
                                 'link' => '/nabor',
-                                'link_label' => 'Chci se přidat k C / E',
+                                'link_label' => 'Přejít na detail náboru',
                                 'badge' => 'NÁBOR MUŽI',
                             ],
                             [
@@ -364,7 +404,7 @@ class CmsContentSeeder extends Seeder
                                 'description' => 'Hledáte basketbal pro děti? Kompletní informace o náborech mládeže do všech kategorií najdete na hlavním webu TJ Sokol Kbely Basketbal.',
                                 'image_url' => 'assets/img/home/kids-youth-basket-training.jpg',
                                 'link' => 'https://www.basketkbely.cz/zacnihrat',
-                                'link_label' => 'Začni hrát (Mládež)',
+                                'link_label' => 'Nábor dětí a mládeže',
                                 'badge' => 'HLAVNÍ ODDÍL',
                             ],
                         ]
@@ -378,7 +418,7 @@ class CmsContentSeeder extends Seeder
                         'cards' => [
                             [
                                 'title' => 'Zápasy a program',
-                                'description' => 'Přehled utkání, výsledků a týmového programu pro Muže C a Muže E (postupně napojené na data).',
+                                'description' => 'Přehled utkání, výsledků a týmového programu pro všechny naše mužské týmy.',
                                 'icon' => 'calendar-days',
                                 'link' => '/zapasy',
                             ],
@@ -406,7 +446,7 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'news_listing',
                     'data' => [
-                        'title' => 'Novinky z týmů C a E',
+                        'title' => 'Novinky z našich týmů',
                         'subtitle' => 'Aktuality budou průběžně doplňovány.',
                         'limit' => 3,
                         'layout' => 'grid',
@@ -417,7 +457,7 @@ class CmsContentSeeder extends Seeder
                     'data' => [
                         'style' => 'light',
                         'title' => 'Hrajeme pro radost ze hry, tým a Kbely',
-                        'text' => 'Sledujte dění kolem týmů Muži C a Muži E, fanděte s námi a pokud hledáte basket pro děti nebo mládež, navštivte hlavní stránky kbelského basketu.',
+                        'text' => 'Sledujte dění kolem našich mužských týmů A až E, fanděte s námi a pokud hledáte basket pro děti nebo mládež, navštivte hlavní stránky kbelského basketu.',
                         'button_text' => 'Naše týmy',
                         'button_url' => '/tymy',
                         'secondary_button_text' => 'Hlavní web TJ Sokol Kbely Basketbal',
@@ -429,14 +469,14 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'hero',
                     'data' => [
-                        'eyebrow' => 'KBELY FALCONS • MEN C & MEN E',
+                        'eyebrow' => 'KBELY FALCONS • MEN A–E',
                         'headline' => "Basketball in Kbely for hearts,\nteam players and community",
-                        'subheadline' => 'We are Men C and Men E teams within TJ Sokol Kbely Basketbal. On this website you will find information about our matches, teams and happenings around us – and also a path to the wider world of Kbely basketball.',
-                        'cta_label' => 'Our C & E teams',
+                        'subheadline' => 'We are Men\'s teams A to E within TJ Sokol Kbely Basketbal. On this website you will find information about our matches, teams and happenings around us – and also a path to the wider world of Kbely basketball.',
+                        'cta_label' => 'Show our teams',
                         'cta_url' => '/tymy',
-                        'cta_secondary_label' => 'I want to start playing',
+                        'cta_secondary_label' => 'How to start playing',
                         'cta_secondary_url' => 'https://www.basketkbely.cz/zacnihrat',
-                        'cta_tertiary_label' => 'Main Club Website',
+                        'cta_tertiary_label' => 'Visit main TJ Sokol Kbely website',
                         'cta_tertiary_url' => 'https://www.basketkbely.cz/',
                         'microtext' => 'Part of the club with basketball tradition in Kbely and connection to youth categories.',
                         'image_url' => 'assets/img/home/home-hero.jpg',
@@ -451,36 +491,70 @@ class CmsContentSeeder extends Seeder
                     'data' => [
                         'style' => 'outline',
                         'alignment' => 'left',
-                        'title' => 'This website belongs to Men C and Men E teams',
-                        'text' => 'Kbely Falcons are part of the wider TJ Sokol Kbely Basketbal club. Our website focuses mainly on the Men C and E teams – their info, matches and communication. If you are looking for youth categories, please proceed to the main club website.',
-                        'button_text' => 'Men C Profile',
-                        'button_url' => '/tymy/muzi-c',
-                        'secondary_button_text' => 'Men E Profile',
-                        'secondary_button_url' => '/tymy/muzi-e',
+                        'title' => 'This website belongs to Men\'s teams A–E',
+                        'text' => 'Kbely Falcons are part of the wider TJ Sokol Kbely Basketbal club. Our website focuses on the Men\'s teams A to E – their info, matches and communication. If you are looking for youth categories, please proceed to the main club website.',
+                        'button_text' => 'All Teams Overview',
+                        'button_url' => '/tymy',
+                        'secondary_button_text' => 'Player Recruitment',
+                        'secondary_button_url' => '/nabor',
                     ]
                 ],
                 [
                     'type' => 'cards_grid',
                     'data' => [
                         'title' => 'Our Teams',
-                        'subtitle' => 'Two men\'s teams, one club base and a shared passion for basketball.',
-                        'columns' => 2,
+                        'subtitle' => 'Five men\'s teams, one club base and a shared passion for basketball.',
+                        'columns' => 3,
                         'cards' => [
                             [
-                                'title' => 'Men C',
-                                'description' => 'The Men C team competes in the Prague Championship B. Led by coach Tomáš Spanilý for the 2025/2026 season.',
-                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
-                                'link' => '/tymy/muzi-c',
-                                'link_label' => 'Men C Details',
-                                'badge' => 'RECRUITMENT OPEN • Prague Championship B',
+                                'title' => 'Men A',
+                                'description' => 'The flagship team playing the 2nd League (Group A). A team with elite basketball ambitions.',
+                                'image_url' => 'assets/img/home/team-muzi-a.jpg',
+                                'link' => '/tymy/muzi-a',
+                                'link_label' => 'Men A Details',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Schedule / Results',
+                                'badge' => '2ND LEAGUE',
                             ],
                             [
-                                'title' => 'Men E',
-                                'description' => 'The Men E team competes in the Prague Championship 3rd Class B. Led by coach Lubor Viktorin for the 2025/26 season.',
+                                'title' => 'Men B',
+                                'description' => 'Experienced team playing the Prague Championship. Quality basketball and strong team core.',
+                                'image_url' => 'assets/img/home/team-muzi-b.jpg',
+                                'link' => '/tymy/muzi-b',
+                                'link_label' => 'Men B Details',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Schedule / Results',
+                                'badge' => 'PRAGUE CHAMPIONSHIP',
+                            ],
+                            [
+                                'title' => 'Men C',
+                                'description' => 'Team competing in the Prague Championship B. Dynamic squad aiming higher in the standings.',
+                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
+                                'link' => '/tymy/muzi-c',
+                                'link_label' => 'Men C Details',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Schedule / Results',
+                                'badge' => 'CHAMPIONSHIP B',
+                            ],
+                            [
+                                'title' => 'Men D',
+                                'description' => 'Competitive basketball in the 1st Class. Great group and joy of every victory.',
+                                'image_url' => 'assets/img/home/team-muzi-d.jpg',
+                                'link' => '/tymy/muzi-d',
+                                'link_label' => 'Men D Details',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Schedule / Results',
+                                'badge' => '1ST CLASS',
+                            ],
+                            [
+                                'title' => 'Men E',
+                                'description' => 'Hobby and competitive basketball in the 3rd Class B. Relaxed pace and joy of the game.',
                                 'image_url' => 'assets/img/home/team-muzi-e.jpg',
                                 'link' => '/tymy/muzi-e',
-                                'link_label' => 'Men E Details',
-                                'badge' => 'RECRUITMENT OPEN • Prague Championship 3rd Class B',
+                                'link_label' => 'Men E Details',
+                                'secondary_link' => '/zapasy',
+                                'secondary_link_label' => 'Schedule / Results',
+                                'badge' => '3RD CLASS B',
                             ],
                         ]
                     ]
@@ -502,11 +576,11 @@ class CmsContentSeeder extends Seeder
                         'columns' => 2,
                         'cards' => [
                             [
-                                'title' => 'Players for Men C & E',
-                                'description' => 'Looking for experienced teammates to join our Prague Championship squads. Great team spirit and competitive drive. Join us!',
+                                'title' => 'Players for Men\'s Teams',
+                                'description' => 'Looking for experienced teammates to join our squads (A–E). Great team spirit and competitive drive. Join us!',
                                 'image_url' => 'assets/img/home/basketball-court-detail.jpg',
                                 'link' => '/nabor',
-                                'link_label' => 'Join Men C / E',
+                                'link_label' => 'View recruitment details',
                                 'badge' => 'MEN RECRUITMENT',
                             ],
                             [
@@ -514,7 +588,7 @@ class CmsContentSeeder extends Seeder
                                 'description' => 'Looking for basketball for children? Complete info about youth recruitment for all categories can be found on the main club website.',
                                 'image_url' => 'assets/img/home/kids-youth-basket-training.jpg',
                                 'link' => 'https://www.basketkbely.cz/zacnihrat',
-                                'link_label' => 'Start Playing (Youth)',
+                                'link_label' => 'Youth recruitment info',
                                 'badge' => 'MAIN CLUB',
                             ],
                         ]

@@ -142,17 +142,38 @@
                         <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-6">{{ __('contact.follow_us') }}</h4>
                         <div class="flex gap-4">
                             @if($branding['socials']['facebook'] ?? null)
-                                <a href="{{ $branding['socials']['facebook'] }}" class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20" target="_blank">
+                                <a href="{{ $branding['socials']['facebook'] }}"
+                                   class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20"
+                                   target="_blank"
+                                   rel="noopener"
+                                   aria-label="Facebook"
+                                   data-track-click="social_link"
+                                   data-track-label="Facebook"
+                                   data-track-category="engagement">
                                     <i class="fa-brands fa-facebook-f"></i>
                                 </a>
                             @endif
                             @if($branding['socials']['instagram'] ?? null)
-                                <a href="{{ $branding['socials']['instagram'] }}" class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20" target="_blank">
+                                <a href="{{ $branding['socials']['instagram'] }}"
+                                   class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20"
+                                   target="_blank"
+                                   rel="noopener"
+                                   aria-label="Instagram"
+                                   data-track-click="social_link"
+                                   data-track-label="Instagram"
+                                   data-track-category="engagement">
                                     <i class="fa-brands fa-instagram"></i>
                                 </a>
                             @endif
                             @if($branding['socials']['youtube'] ?? null)
-                                <a href="{{ $branding['socials']['youtube'] }}" class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20" target="_blank">
+                                <a href="{{ $branding['socials']['youtube'] }}"
+                                   class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20"
+                                   target="_blank"
+                                   rel="noopener"
+                                   aria-label="YouTube"
+                                   data-track-click="social_link"
+                                   data-track-label="YouTube"
+                                   data-track-category="engagement">
                                     <i class="fa-brands fa-youtube"></i>
                                 </a>
                             @endif

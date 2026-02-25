@@ -14,4 +14,15 @@ class Setting extends Model
     protected $fillable = ['key', 'value'];
 
     public $translatable = ['value'];
+
+    protected static function booted()
+    {
+        static::saved(function ($setting) {
+            try {
+                app(\App\Services\BrandingService::class)->clearCache();
+            } catch (\Throwable $e) {
+                // Ignorovat během migrací/seedování pokud služba není připravena
+            }
+        });
+    }
 }

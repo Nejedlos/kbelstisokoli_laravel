@@ -35,11 +35,17 @@
             <!-- Language Switcher -->
             <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full text-[10px] font-black tracking-widest shadow-sm border border-slate-200">
                 <a href="{{ route('language.switch', ['lang' => 'cs']) }}"
-                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
+                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}"
+                   data-track-click="language_switch"
+                   data-track-label="CS"
+                   data-track-category="ux">
                     CZ
                 </a>
                 <a href="{{ route('language.switch', ['lang' => 'en']) }}"
-                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}">
+                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}"
+                   data-track-click="language_switch"
+                   data-track-label="EN"
+                   data-track-category="ux">
                     EN
                 </a>
             </div>
@@ -105,25 +111,29 @@
 
     <!-- Search Overlay -->
     <div x-show="searchOpen"
-         @click.away="searchOpen = false"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-2"
+         @keydown.escape.window="searchOpen = false"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-4"
          x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-2"
-         class="absolute inset-x-0 top-full bg-white border-t border-slate-100 shadow-xl py-6 z-40">
-        <div class="container">
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         class="absolute inset-x-0 top-full bg-white border-t border-slate-100 shadow-2xl py-8 md:py-12 z-40">
+        <div class="container relative">
             <form action="{{ route('public.search') }}" method="GET" class="relative max-w-3xl mx-auto">
                 <input type="text"
                        name="q"
                        placeholder="{{ __('search.placeholder') }}"
-                       class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 md:py-3 text-base md:text-lg focus:border-primary focus:ring-0 transition-all outline-none pr-14"
-                       x-init="$watch('searchOpen', value => value && $el.focus())">
-                <button type="submit" class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors p-2" aria-label="Search">
-                    <i class="fa-light fa-magnifying-glass text-xl"></i>
+                       class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-5 md:py-4 text-lg md:text-xl focus:border-primary focus:ring-0 transition-all outline-none pr-16 shadow-inner"
+                       x-init="$watch('searchOpen', value => value && setTimeout(() => $el.focus(), 100))">
+                <button type="submit" class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors p-2" aria-label="{{ __('Search') }}">
+                    <i class="fa-light fa-magnifying-glass text-2xl"></i>
                 </button>
             </form>
+
+            <button @click="searchOpen = false" class="absolute -top-4 right-0 p-2 text-slate-400 hover:text-primary transition-colors md:hidden">
+                <i class="fa-light fa-xmark text-xl"></i>
+            </button>
         </div>
     </div>
 

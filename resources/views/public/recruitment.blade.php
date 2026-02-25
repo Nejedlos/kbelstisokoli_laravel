@@ -49,22 +49,16 @@
             {{-- Výběr týmu --}}
             <div class="mb-20">
                 <h2 class="text-3xl font-black uppercase tracking-tighter text-center mb-10">{{ __('recruitment.which_team_title') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    {{-- Muži C --}}
-                    <div class="card card-hover border-t-4 border-primary p-8 flex flex-col items-center text-center">
-                        <h3 class="text-4xl font-black uppercase tracking-tighter mb-2">Muži C</h3>
-                        <span class="badge badge-outline mb-6">Pražský přebor B</span>
-                        <p class="text-slate-600 mb-8 flex-1">{{ __('recruitment.muzi_c_desc') }}</p>
-                        <a href="{{ route('public.teams.show', 'muzi-c') }}" class="btn btn-primary w-full">{{ __('teams.view_detail') }}</a>
-                    </div>
-
-                    {{-- Muži E --}}
-                    <div class="card card-hover border-t-4 border-secondary p-8 flex flex-col items-center text-center">
-                        <h3 class="text-4xl font-black uppercase tracking-tighter mb-2">Muži E</h3>
-                        <span class="badge badge-outline mb-6">Pražský přebor 3.B</span>
-                        <p class="text-slate-600 mb-8 flex-1">{{ __('recruitment.muzi_e_desc') }}</p>
-                        <a href="{{ route('public.teams.show', 'muzi-e') }}" class="btn btn-secondary w-full">{{ __('teams.view_detail') }}</a>
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    @foreach($teams ?? [] as $team)
+                        <div class="card card-hover border-t-4 {{ $loop->index % 2 == 0 ? 'border-t-primary' : 'border-t-secondary' }} p-8 flex flex-col items-center text-center">
+                            <h3 class="text-4xl font-black uppercase tracking-tighter mb-2">{{ $team->name }}</h3>
+                            <p class="text-slate-600 mb-8 flex-1">
+                                {{ $team->description }}
+                            </p>
+                            <a href="{{ route('public.teams.show', $team->slug) }}" class="btn {{ $loop->index % 2 == 0 ? 'btn-primary' : 'btn-secondary' }} w-full">{{ __('teams.view_detail') }}</a>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -165,11 +159,23 @@
                 <p class="text-lg text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">{{ __('recruitment.youth_recruitment_text') }}</p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="{{ $branding['recruitment_url'] }}" target="_blank" rel="noopener" class="btn btn-primary btn-lg px-12 group">
+                    <a href="{{ $branding['recruitment_url'] }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn btn-primary btn-lg px-12 group"
+                       data-track-click="external_link"
+                       data-track-label="Youth Recruitment - Bottom"
+                       data-track-category="external">
                         <span>{{ __('recruitment.youth_recruitment_cta') }}</span>
                         <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"></i>
                     </a>
-                    <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-lg px-12 group">
+                    <a href="{{ $branding['main_club_url'] }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn btn-outline-primary btn-lg px-12 group"
+                       data-track-click="external_link"
+                       data-track-label="Club Website - Bottom"
+                       data-track-category="external">
                         <span>{{ __('recruitment.club_web') }}</span>
                         <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70"></i>
                     </a>

@@ -10,22 +10,29 @@
 
     <div class="section-padding bg-bg">
         <div class="container">
-            {{-- Srovnávací blok týmů --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+            {{-- Přehled týmů --}}
+            <div class="flex flex-wrap justify-center gap-8 mb-20">
                 @foreach($teams->flatten() as $team)
-                    @if(in_array($team->slug, ['muzi-c', 'muzi-e']))
-                        <div class="card card-hover group flex flex-col h-full border-t-4 {{ $team->slug === 'muzi-c' ? 'border-primary' : 'border-secondary' }}">
-                            <div class="p-8 flex-1">
-                                <div class="flex justify-between items-start mb-6">
-                                    <h3 class="text-3xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors">
+                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-md flex">
+                        <div class="card card-hover group flex flex-col h-full border-t-4 {{ $loop->index % 2 == 0 ? 'border-primary' : 'border-secondary' }} w-full">
+                            <div class="p-8 flex-1 flex flex-col">
+                                <div class="flex justify-between items-start mb-6 gap-4">
+                                    <h3 class="text-2xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight">
                                         {{ $team->name }}
                                     </h3>
-                                    <span class="badge badge-outline uppercase tracking-widest text-[10px] py-1 px-3">
-                                        {{ $team->slug === 'muzi-c' ? 'Pražský přebor B' : 'Pražský přebor 3.B' }}
+                                    <span class="badge badge-outline uppercase tracking-widest text-[10px] py-1 px-3 shrink-0">
+                                        {{ match($team->slug) {
+                                            'muzi-a' => '2. liga A',
+                                            'muzi-b' => 'Přebor A',
+                                            'muzi-c' => 'Přebor B',
+                                            'muzi-d' => '1. třída',
+                                            'muzi-e' => '3. třída B',
+                                            default => ''
+                                        } }}
                                     </span>
                                 </div>
 
-                                <p class="text-slate-600 mb-8 leading-relaxed">
+                                <p class="text-slate-600 mb-8 leading-relaxed text-sm flex-1">
                                     {{ $team->description }}
                                 </p>
 
@@ -36,7 +43,16 @@
                                         </div>
                                         <div>
                                             <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.competition') }}</span>
-                                            <span class="text-sm font-bold text-secondary">{{ $team->slug === 'muzi-c' ? 'Pražský přebor B' : 'Pražský přebor 3. třída B' }}</span>
+                                            <span class="text-sm font-bold text-secondary">
+                                                {{ match($team->slug) {
+                                                    'muzi-a' => '2. liga (skupina A)',
+                                                    'muzi-b' => 'Pražský přebor',
+                                                    'muzi-c' => 'Pražský přebor B',
+                                                    'muzi-d' => '1. třída',
+                                                    'muzi-e' => '3. třída B',
+                                                    default => ''
+                                                } }}
+                                            </span>
                                         </div>
                                     </div>
 
@@ -47,7 +63,7 @@
                                         <div>
                                             <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.player_type') }}</span>
                                             <span class="text-sm font-bold text-secondary">
-                                                {{ $team->slug === 'muzi-c' ? __('teams.detail.muzi_c_type') : __('teams.detail.muzi_e_type') }}
+                                                {{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_type') }}
                                             </span>
                                         </div>
                                     </div>
@@ -59,18 +75,18 @@
                                         <div>
                                             <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.tempo_atmos') }}</span>
                                             <span class="text-sm font-bold text-secondary">
-                                                {{ $team->slug === 'muzi-c' ? __('teams.detail.muzi_c_tempo') : __('teams.detail.muzi_e_tempo') }}
+                                                {{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_tempo') }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <a href="{{ route('public.teams.show', $team->slug) }}" class="btn btn-primary w-full">
+                                <a href="{{ route('public.teams.show', $team->slug) }}" class="btn {{ $loop->index % 2 == 0 ? 'btn-primary' : 'btn-secondary' }} w-full">
                                     {{ __('teams.view_detail') }}
                                 </a>
                             </div>
                         </div>
-                    @endif
+                    </div>
                 @endforeach
             </div>
 
@@ -122,8 +138,18 @@
                     </p>
 
                     <div class="flex flex-wrap gap-4">
-                        <a href="{{ route('public.recruitment.index') }}" class="btn btn-primary btn-lg">{{ __('recruitment.cta_contact_us') }}</a>
-                        <a href="{{ $branding['recruitment_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-white btn-lg group">
+                        <a href="{{ route('public.recruitment.index') }}"
+                           class="btn btn-primary btn-lg"
+                           data-track-click="conversion_intent"
+                           data-track-label="Join Us - Section"
+                           data-track-category="conversion">{{ __('recruitment.cta_contact_us') }}</a>
+                        <a href="{{ $branding['recruitment_url'] }}"
+                           target="_blank"
+                           rel="noopener"
+                           class="btn btn-outline-white btn-lg group"
+                           data-track-click="external_link"
+                           data-track-label="Youth Recruitment - Section"
+                           data-track-category="external">
                             <span>{{ __('recruitment.youth_recruitment_cta') }}</span>
                             <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"></i>
                         </a>

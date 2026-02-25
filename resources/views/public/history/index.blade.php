@@ -17,60 +17,69 @@
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-20">
                     <x-section-heading
-                        :title="__('history.tradition')"
+                        :title="__('history.empty_title')"
                         :subtitle="__('history.empty_subtitle')"
-                        alignment="center"
+                        align="center"
                     />
+                    <div class="max-w-3xl mx-auto mt-8 text-lg text-slate-600 leading-relaxed">
+                        {{ __('history.intro') }}
+                    </div>
                 </div>
 
                 {{-- Timeline layout --}}
-                <div class="relative space-y-12 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                <div class="relative space-y-12 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent mb-32">
 
-                    {{-- Timeline Item 1 --}}
-                    <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 group-[.is-active]:bg-primary text-slate-500 group-[.is-active]:text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 transition-colors duration-500">
-                            <i class="fa-light fa-calendar-star text-sm"></i>
-                        </div>
-                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] card p-6 md:p-8 hover:shadow-xl transition-shadow duration-500">
-                            <div class="flex items-center justify-between mb-2">
-                                <time class="font-black text-primary uppercase tracking-widest text-sm">Založení oddílu</time>
+                    @foreach(__('history.milestones') as $year => $milestone)
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group {{ $loop->first ? 'is-active' : '' }}">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 group-[.is-active]:bg-primary text-slate-500 group-[.is-active]:text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 transition-colors duration-500">
+                                <span class="text-[10px] font-bold">{{ $year === 'today' ? 'NOW' : $year }}</span>
                             </div>
-                            <div class="text-slate-600 leading-relaxed">
-                                Basketbal ve Kbelích má hluboké kořeny sahající desítky let do minulosti. Vše začalo jako parta nadšenců v rámci TJ Sokol Kbely.
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] card p-6 md:p-8 hover:shadow-xl transition-shadow duration-500">
+                                <div class="flex items-center justify-between mb-2">
+                                    <time class="font-black text-primary uppercase tracking-widest text-sm">{{ $milestone['title'] }}</time>
+                                </div>
+                                <div class="text-slate-600 leading-relaxed text-sm">
+                                    {{ $milestone['content'] }}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endforeach
+                </div>
 
-                    {{-- Timeline Item 2 --}}
-                    <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 transition-colors">
-                            <i class="fa-light fa-trophy text-sm"></i>
-                        </div>
-                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] card p-6 md:p-8 hover:shadow-xl transition-shadow">
-                            <div class="flex items-center justify-between mb-2">
-                                <time class="font-black text-secondary uppercase tracking-widest text-sm">Úspěchy v soutěžích</time>
+                {{-- Detailed Sections --}}
+                <div class="space-y-24">
+                    @foreach(__('history.sections') as $key => $section)
+                        <div class="relative">
+                            <h3 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-8 flex items-center gap-4">
+                                <span class="w-12 h-1px bg-primary block"></span>
+                                {{ $section['title'] }}
+                            </h3>
+                            <div class="grid gap-6 text-slate-600 leading-relaxed">
+                                @foreach($section['paragraphs'] as $paragraph)
+                                    <p>{{ $paragraph }}</p>
+                                @endforeach
                             </div>
-                            <div class="text-slate-600 leading-relaxed">
-                                Postupem času se kbelský basketbal vypracoval v respektovanou značku na pražské basketbalové mapě s týmy v různých úrovních Pražského přeboru.
-                            </div>
                         </div>
-                    </div>
+                    @endforeach
+                </div>
 
-                    {{-- Timeline Item 3 --}}
-                    <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 transition-colors">
-                            <i class="fa-light fa-users-medical text-sm"></i>
+                {{-- Current Teams Info --}}
+                <div class="mt-24 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    @foreach(__('history.current_teams') as $key => $team)
+                        <div class="card p-8 border-t-4 {{ $loop->index % 2 == 0 ? 'border-t-primary' : 'border-t-secondary' }}">
+                            <h4 class="text-xl font-bold mb-4">{{ $team['title'] }}</h4>
+                            <ul class="space-y-2 text-slate-600 mb-6">
+                                <li><strong>{{ $team['competition'] }}</strong></li>
+                                @if(isset($team['since']))
+                                    <li>{{ $team['since'] }}</li>
+                                @endif
+                            </ul>
+                            <a href="{{ $team['link'] }}" target="_blank" rel="noopener" class="text-sm font-bold text-primary hover:text-secondary transition-colors inline-flex items-center gap-2">
+                                {{ __('teams.detail.competition') }} na cz.basketball
+                                <i class="fa-light fa-arrow-up-right-from-square text-xs"></i>
+                            </a>
                         </div>
-                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] card p-6 md:p-8 hover:shadow-xl transition-shadow">
-                            <div class="flex items-center justify-between mb-2">
-                                <time class="font-black text-secondary uppercase tracking-widest text-sm">Současnost: Týmy C a E</time>
-                            </div>
-                            <div class="text-slate-600 leading-relaxed">
-                                Dnes se soustředíme na rozvoj komunity kolem mužských týmů C a E, které propojují zkušené hráče s mladší generací v duchu fair-play a radosti ze hry.
-                            </div>
-                        </div>
-                    </div>
-
+                    @endforeach
                 </div>
 
                 <div class="mt-24 bg-white rounded-[3rem] p-8 md:p-16 border border-slate-100 shadow-xl shadow-slate-200/50 text-center relative overflow-hidden">

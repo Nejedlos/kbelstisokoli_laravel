@@ -170,6 +170,53 @@ class ProductionSyncCommand extends Command
             }
         }
 
+        // --- PŘIDÁNO: Nahrávání lokálních assetů ---
+        \Laravel\Prompts\info("📤 Nahrávám lokální assety a build na server...");
+
+        $ftpHost = env('PROD_FTP_HOST');
+        $ftpUser = env('PROD_FTP_USER');
+        $ftpPass = env('PROD_FTP_PASSWORD');
+        $ftpPort = env('PROD_FTP_PORT', 21);
+
+        foreach (['public/assets/', 'public/build/'] as $dir) {
+            $localDir = base_path($dir);
+            if (file_exists($localDir)) {
+                $this->line("Syncing $dir...");
+                $synced = false;
+
+                // 1. Zkusíme rsync (rychlejší a umí --delete)
+                $checkRsync = \Illuminate\Support\Facades\Process::run("rsync --version");
+                if ($checkRsync->successful()) {
+                    $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' " . escapeshellarg($localDir) . " {$user}@{$host}:" . escapeshellarg($path . "/" . $dir);
+                    $result = \Illuminate\Support\Facades\Process::forever()->run($rsyncCmd, function (string $type, string $output) {
+                        if ($type === 'out' && strlen(trim($output)) > 0) {
+                            $this->line("  " . trim($output));
+                        }
+                    });
+                    if ($result->successful()) {
+                        $synced = true;
+                    }
+                }
+
+                // 2. Fallback na FTP pokud je nastaveno
+                if (!$synced && $ftpHost && $ftpUser) {
+                    $this->line("  Trying FTP fallback for $dir...");
+                    if ($this->syncViaFtp($localDir, $path . "/" . $dir, $ftpHost, $ftpUser, $ftpPass, $ftpPort)) {
+                        $synced = true;
+                    }
+                }
+
+                // 3. Fallback na scp
+                if (!$synced) {
+                    $this->line("  Falling back to SCP...");
+                    $scpCmd = "scp -P {$port} -r " . escapeshellarg($localDir . ".") . " {$user}@{$host}:" . escapeshellarg($path . "/" . $dir);
+                    \Illuminate\Support\Facades\Process::forever()->run($scpCmd);
+                }
+            }
+        }
+        \Laravel\Prompts\info("✅ Assety nahrány.");
+        // ------------------------------------------
+
         // Pokud jsme našli konkrétní node binárku, zkusíme najít i NPM
         $npmBinary = 'npm';
         if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
@@ -212,11 +259,12 @@ class ProductionSyncCommand extends Command
                 $this->line(' ✅ Aktualizace .env konfigurace na serveru');
                 $this->line(' ✅ Vyčištění systémové mezipaměti');
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
+                $this->line(' ✅ Synchronizace statických assetů (build, assets, img)');
                 $this->line(' ✅ Spuštění databázových migrací');
                 $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
-                $this->line(' ✅ Reindexace AI vyhledávání');
+                $this->line(' ✅ Reindexace AI vyhledávání (cs/en)');
 
                 return self::SUCCESS;
             } else {
@@ -268,7 +316,7 @@ class ProductionSyncCommand extends Command
                 $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
-                $this->line(' ✅ Reindexace AI vyhledávání');
+                $this->line(' ✅ Reindexace AI vyhledávání (cs/en)');
 
                 if ($publicPath) {
                     $this->newLine();
@@ -290,6 +338,68 @@ class ProductionSyncCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Synchronizuje adresář přes FTP.
+     */
+    protected function syncViaFtp($localDir, $remoteDir, $host, $user, $pass, $port = 21): bool
+    {
+        try {
+            $conn = @ftp_connect($host, $port, 10);
+            if (!$conn) {
+                $this->error("  ❌ Could not connect to FTP host: $host");
+                return false;
+            }
+
+            if (!@ftp_login($conn, $user, $pass)) {
+                $this->error("  ❌ FTP login failed for user: $user");
+                ftp_close($conn);
+                return false;
+            }
+
+            ftp_pasv($conn, true);
+
+            $this->uploadRecursive($conn, $localDir, $remoteDir);
+
+            ftp_close($conn);
+            return true;
+        } catch (\Exception $e) {
+            $this->error("  ❌ FTP Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Rekurzivní nahrávání na FTP.
+     */
+    protected function uploadRecursive($conn, $localDir, $remoteDir): void
+    {
+        // Zajistíme existenci vzdáleného adresáře
+        $parts = explode('/', trim($remoteDir, '/'));
+        $path = '';
+        foreach ($parts as $part) {
+            $path .= '/' . $part;
+            if (!@ftp_chdir($conn, $path)) {
+                @ftp_mkdir($conn, $path);
+            }
+        }
+
+        $items = scandir($localDir);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+
+            $localPath = $localDir . '/' . $item;
+            $remotePath = $remoteDir . '/' . $item;
+
+            if (is_dir($localPath)) {
+                $this->uploadRecursive($conn, $localPath, $remotePath);
+            } else {
+                if (!@ftp_put($conn, $remotePath, $localPath, FTP_BINARY)) {
+                    $this->warn("    ⚠️ Failed to upload: $item");
+                }
+            }
+        }
     }
 
     /**

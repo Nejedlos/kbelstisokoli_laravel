@@ -96,7 +96,11 @@
 
     /* Tlačítka */
     .btn {
-        @apply inline-flex items-center justify-center px-6 py-3 rounded-club font-bold uppercase tracking-widest transition duration-200 cursor-pointer text-sm md:text-base border-2 border-transparent;
+        @apply inline-flex items-center justify-center px-6 py-3 rounded-club font-bold uppercase tracking-widest transition duration-200 cursor-pointer text-sm md:text-base border-2 border-transparent outline-none;
+    }
+
+    .btn:focus-visible {
+        @apply ring-2 ring-primary ring-offset-2 ring-offset-bg;
     }
 
     .btn-sm {

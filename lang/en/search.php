@@ -4,8 +4,11 @@ return [
     'title' => 'Search',
     'results_for' => 'Search results for',
     'placeholder' => 'What are you looking for?',
-    'no_results_title' => 'No results found',
-    'no_results_text' => 'Please try another keyword or check for typos.',
+    'no_results_title' => 'This shot didn\'t hit the basket',
+    'no_results_text' => 'Unfortunately, we found no results for your query. Please try a different keyword or try searching in specific sections.',
+    'empty_cta_news' => 'News',
+    'empty_cta_matches' => 'Matches',
+    'empty_cta_teams' => 'Teams',
     'back_home' => 'Back to home',
     'found_count' => 'Found :count results',
     'types' => [

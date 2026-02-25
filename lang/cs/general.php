@@ -24,4 +24,12 @@ return [
         'welcome' => 'Vítejte na webu Kbelští sokoli',
         'no_content' => 'Obsah úvodní stránky zatím nebyl vytvořen v administraci.',
     ],
+    'view_on_map' => 'Zobrazit na mapě',
+    'send_email' => 'Poslat e-mail',
+    'match_day_desc' => 'Obvyklý čas domácích utkání v hale.',
+    'main_club' => 'Hlavní oddíl',
+    'youth_recruitment' => 'Nábor dětí a mládeže',
+    'visit_website' => 'Web oddílu',
+    'quick_facts_title' => 'Základní informace',
+    'quick_facts_subtitle' => 'Vše důležité o našem fungování na jednom místě',
 ];

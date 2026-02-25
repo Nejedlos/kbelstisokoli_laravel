@@ -2,17 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\Page;
-use App\Models\Post;
 use App\DataTransferObjects\SearchResult;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class SearchService
 {
+    public function __construct(
+        protected AiIndexService $aiIndexService
+    ) {}
+
     /**
-     * @param string $query
-     * @param int $limit
      * @return Collection<SearchResult>
      */
     public function search(string $query, int $limit = 20): Collection
@@ -21,57 +21,36 @@ class SearchService
             return collect();
         }
 
-        $results = collect();
+        $locale = app()->getLocale();
+        $aiResults = $this->aiIndexService->search($query, $locale, $limit, 'frontend');
 
-        // Prohledávání stránek
-        $pages = Page::query()
-            ->where('is_visible', true)
-            ->where(function ($q) use ($query) {
-                $q->where('title->' . app()->getLocale(), 'like', "%{$query}%")
-                  ->orWhere('content->' . app()->getLocale(), 'like', "%{$query}%");
-            })
-            ->limit($limit)
-            ->get();
+        return $aiResults->map(function ($doc) {
+            // $doc je pole [$aiDocument, $score] z AiIndexService::search
+            $aiDocument = is_array($doc) ? $doc[0] : $doc;
 
-        foreach ($pages as $page) {
-            $results->push(new SearchResult(
-                title: $page->getTranslation('title', app()->getLocale()),
-                snippet: $this->makeSnippet($page->getTranslation('content', app()->getLocale())),
-                url: $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug),
-                type: __('search.types.page'),
-                date: $page->updated_at->format('d.m.Y'),
-            ));
-        }
+            return new SearchResult(
+                title: $aiDocument->title,
+                snippet: $this->makeSnippet($aiDocument->content),
+                url: $aiDocument->url,
+                type: $this->getDocTypeLabel($aiDocument->type),
+                image: $aiDocument->metadata['image'] ?? null,
+                date: $aiDocument->updated_at?->format('d.m.Y'),
+            );
+        });
+    }
 
-        // Prohledávání příspěvků
-        $posts = Post::query()
-            ->where('is_visible', true)
-            ->where('status', 'published') // Předpokládáme, že existuje status
-            ->where(function ($q) use ($query) {
-                $q->where('title->' . app()->getLocale(), 'like', "%{$query}%")
-                  ->orWhere('excerpt->' . app()->getLocale(), 'like', "%{$query}%")
-                  ->orWhere('content->' . app()->getLocale(), 'like', "%{$query}%");
-            })
-            ->limit($limit)
-            ->get();
-
-        foreach ($posts as $post) {
-            $results->push(new SearchResult(
-                title: $post->getTranslation('title', app()->getLocale()),
-                snippet: $this->makeSnippet($post->getTranslation('excerpt', app()->getLocale()) ?: $post->getTranslation('content', app()->getLocale())),
-                url: route('public.news.show', $post->slug),
-                type: __('search.types.post'),
-                image: $post->featured_image,
-                date: $post->publish_at?->format('d.m.Y') ?: $post->created_at->format('d.m.Y'),
-            ));
-        }
-
-        return $results->take($limit);
+    protected function getDocTypeLabel(string $type): string
+    {
+        return match ($type) {
+            'frontend.page' => __('search.types.page'),
+            'frontend.post' => __('search.types.post'),
+            default => __('search.types.general'),
+        };
     }
 
     private function makeSnippet(string|array|null $content): string
     {
-        if (!$content) {
+        if (! $content) {
             return '';
         }
 

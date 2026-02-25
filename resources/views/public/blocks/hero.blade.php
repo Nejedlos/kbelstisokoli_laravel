@@ -27,32 +27,35 @@
                 decoding="async"
                 fetchpriority="high"
                 loading="eager"
+                sizes="100vw"
             />
 
             @if($videoUrl)
-                {{-- Video-Later: Odložené načítání videa po window.load --}}
-                <video
-                    class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000 js-hero-video hidden sm:block"
-                    autoplay
-                    muted
-                    loop
-                    playsinline
-                    preload="none"
-                    aria-label="Hero background video"
-                >
-                    @if($webmUrl && file_exists(public_path(ltrim($webmUrl, '/'))))
-                        <source data-src="{{ asset($webmUrl) }}" type="video/webm">
-                    @endif
-                    <source data-src="{{ asset($videoUrl) }}" type="video/mp4">
-                </video>
+                {{-- Video-Later: Odložené načítání videa po window.load, pouze na desktopu --}}
+                <template x-if="window.innerWidth >= 640">
+                    <video
+                        class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000 js-hero-video"
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                        preload="none"
+                        aria-label="Hero background video"
+                    >
+                        @if($webmUrl && file_exists(public_path(ltrim($webmUrl, '/'))))
+                            <source data-src="{{ asset($webmUrl) }}" type="video/webm">
+                        @endif
+                        <source data-src="{{ asset($videoUrl) }}" type="video/mp4">
+                    </video>
+                </template>
 
                 <script>
                     (function(){
-                        window.addEventListener('load', function() {
+                        const initVideo = function() {
                             const video = document.querySelector('.js-hero-video');
                             const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-                            if (!video || prefersReduced) return;
+                            if (!video || prefersReduced || window.innerWidth < 640) return;
 
                             // Přepíšeme data-src na src
                             const sources = video.querySelectorAll('source');
@@ -67,7 +70,13 @@
                                 video.classList.remove('opacity-0');
                                 video.classList.add('opacity-100');
                             }, { once: true });
-                        });
+                        };
+
+                        if (document.readyState === 'complete') {
+                            initVideo();
+                        } else {
+                            window.addEventListener('load', initVideo);
+                        }
                     })();
                 </script>
             @endif
@@ -132,7 +141,11 @@
             @if(($data['cta_label'] ?? null) || ($data['cta_secondary_label'] ?? null) || ($data['cta_tertiary_label'] ?? null))
                 <div class="flex flex-wrap items-center gap-4 sm:gap-6 {{ $alignment === 'center' ? 'justify-center' : ($alignment === 'right' ? 'justify-end' : '') }}">
                     @if($data['cta_label'] ?? null)
-                        <a href="{{ $data['cta_url'] ?? '#' }}" class="btn btn-primary btn-glow group w-full sm:w-auto">
+                        <a href="{{ $data['cta_url'] ?? '#' }}"
+                           class="btn btn-primary btn-glow group w-full sm:w-auto"
+                           data-track-click="hero_cta"
+                           data-track-label="Primary: {{ $data['cta_label'] }}"
+                           data-track-category="conversion">
                             <span>{{ $data['cta_label'] }}</span>
                             <i class="fa-light fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                         </a>
@@ -142,7 +155,10 @@
                         @php $isExternalSecondary = str_contains($data['cta_secondary_url'] ?? '', 'basketkbely.cz'); @endphp
                         <a href="{{ $data['cta_secondary_url'] ?? '#' }}"
                            @if($isExternalSecondary) target="_blank" rel="noopener" @endif
-                           class="btn btn-outline-white w-full sm:w-auto group">
+                           class="btn btn-outline-white w-full sm:w-auto group"
+                           data-track-click="{{ $isExternalSecondary ? 'external_link' : 'hero_cta' }}"
+                           data-track-label="Secondary: {{ $data['cta_secondary_label'] }}"
+                           data-track-category="{{ $isExternalSecondary ? 'external' : 'engagement' }}">
                             <span>{{ $data['cta_secondary_label'] }}</span>
                             @if($isExternalSecondary)
                                 <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70"></i>
@@ -151,7 +167,13 @@
                     @endif
 
                     @if($data['cta_tertiary_label'] ?? null)
-                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}" target="_blank" rel="noopener" class="inline-flex items-center gap-4 text-[min(4.2vw,0.875rem)] sm:text-sm font-black uppercase tracking-widest-responsive text-white hover:text-white transition-all group py-4 px-5 sm:py-3 sm:px-6 bg-secondary/80 sm:bg-secondary/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl mt-4 sm:mt-0 leading-tight">
+                        <a href="{{ $data['cta_tertiary_url'] ?? '#' }}"
+                           target="_blank"
+                           rel="noopener"
+                           class="inline-flex items-center gap-4 text-[min(4.2vw,0.875rem)] sm:text-sm font-black uppercase tracking-widest-responsive text-white hover:text-white transition-all group py-4 px-5 sm:py-3 sm:px-6 bg-secondary/80 sm:bg-secondary/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl mt-4 sm:mt-0 leading-tight"
+                           data-track-click="external_link"
+                           data-track-label="Tertiary: {{ $data['cta_tertiary_label'] }}"
+                           data-track-category="external">
                             <span class="relative border-b border-white/30 group-hover:border-primary transition-colors pb-1 leading-tight text-balance">
                                 {{ $data['cta_tertiary_label'] }}
                             </span>

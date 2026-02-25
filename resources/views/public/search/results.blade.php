@@ -31,12 +31,10 @@
             <x-empty-state
                 :title="__('search.no_results_title')"
                 :subtitle="__('search.no_results_text')"
+                icon="fa-basketball"
+                :primaryCta="['url' => route('public.news.index'), 'label' => __('search.empty_cta_news')]"
+                :secondaryCta="['url' => route('public.matches.index'), 'label' => __('search.empty_cta_matches')]"
             />
-            <div class="mt-12 text-center">
-                <a href="{{ route('public.home') }}" class="btn btn-primary">
-                    {{ __('search.back_home') }}
-                </a>
-            </div>
         @else
             <div class="grid gap-8 max-w-4xl">
                 <div class="flex items-center justify-between text-sm text-slate-500 border-b border-slate-100 pb-4">

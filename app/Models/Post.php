@@ -13,7 +13,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Post extends Model implements HasMedia
 {
-    use HasSeo, HasTranslations, Auditable, InteractsWithMedia, HasFactory;
+    use Auditable, HasFactory, HasSeo, HasTranslations, InteractsWithMedia;
 
     protected $fillable = [
         'category_id',
@@ -42,7 +42,7 @@ class Post extends Model implements HasMedia
         static::updating(function (Post $post) {
             if ($post->isDirty('title')) {
                 foreach ($post->getMedia('featured_image') as $media) {
-                    $newFileName = \Illuminate\Support\Str::slug($post->title) . '.' . $media->extension;
+                    $newFileName = \Illuminate\Support\Str::slug($post->title).'.'.$media->extension;
                     if ($media->file_name !== $newFileName) {
                         $media->file_name = $newFileName;
                         $media->save();
@@ -65,7 +65,7 @@ class Post extends Model implements HasMedia
     /**
      * Zaregistruje konverze médií.
      */
-    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
     {
         $this->addMediaConversion('thumb')
             ->width(400)

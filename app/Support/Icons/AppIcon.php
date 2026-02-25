@@ -38,6 +38,7 @@ enum AppIcon: string
     case CRON_LOGS = 'history';
     case BRANDING = 'palette';
     case AI = 'sparkles';
+    case RECAPTCHA = 'shield-halved';
     case SETTINGS = 'gear';
 
     // --- UI Akce a Stavy ---

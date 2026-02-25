@@ -114,6 +114,18 @@ class SeoService
             return asset('storage/' . $settings['seo_og_image_path']);
         }
 
+        // Hardcoded fallback na kvalitní týmový obrázek v assetech
+        $fallbacks = [
+            'assets/img/home/home-hero.jpg',
+            'assets/img/home/kbely-basket-community.jpg',
+        ];
+
+        foreach ($fallbacks as $fallback) {
+            if (file_exists(public_path($fallback))) {
+                return asset($fallback);
+            }
+        }
+
         return $settings['logo_path'] ? asset('storage/' . $settings['logo_path']) : null;
     }
 

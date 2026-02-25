@@ -106,18 +106,9 @@
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-    if [ ! -z "{{ $public_path ?? '' }}" ]; then
-        echo "Ensuring custom public path is linked: {{ $public_path }}"
-        if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
-            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public..."
-            # Prevent moving public files if they are already there (e.g., if paths are same)
-            if [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-                cp -rn "{{ $public_path }}"/* public/ 2>/dev/null || true
-                rm -rf "{{ $public_path }}"
-            fi
-        fi
-
-        if [ ! -L "{{ $public_path }}" ]; then
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+        echo "Ensuring custom public path is configured: {{ $public_path }}"
+        if [ ! -L "{{ $public_path }}" ] && [ ! -d "{{ $public_path }}" ]; then
             ln -sf "{{ $path }}/public" "{{ $public_path }}"
             echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
         fi
@@ -217,17 +208,21 @@
         npm run build
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
-    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ] && [ ! -L "{{ $public_path }}" ]; then
-        for dir in build assets css js fonts vendor; do
-            if [ -d "public/$dir" ]; then
-                echo "Syncing $dir to custom public path: {{ $public_path }}/$dir"
-                rm -rf "{{ $public_path }}/$dir"
-                mkdir -p "{{ $public_path }}/$dir"
-                cp -rf public/$dir/* "{{ $public_path }}/$dir/"
-            fi
-        done
-        # Také zkopírovat jednotlivé soubory v public/ (kromě indexů, ty jsou řešeny patchováním)
-        cp -rf public/*.{png,ico,xml,json,txt,webmanifest} "{{ $public_path }}/" 2>/dev/null || true
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+        # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
+        if [ ! -L "{{ $public_path }}" ]; then
+            cd {{ $path }}/public
+            find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
+                dir_name=$(basename "$dir")
+                echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
+                rm -rf "{{ $public_path }}/$dir_name"
+                mkdir -p "{{ $public_path }}/$dir_name"
+                cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
+            done
+
+            echo "Syncing root files to custom public path..."
+            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
+        fi
     fi
 
         echo "Cleaning up cache..."
@@ -242,13 +237,14 @@
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
 
     echo "Optimizing application..."
     {{ $php }} artisan optimize
 
     echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --no-interaction
+    {{ $php }} artisan ai:index --locale=all --no-interaction
 
     echo "✅ Setup finished successfully!"
 @endtask
@@ -321,14 +317,8 @@
     echo "✅ public/.env updated."
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path is linked: {{ $public_path }}"
-        if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
-            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public..."
-            cp -rn "{{ $public_path }}"/* public/ 2>/dev/null || true
-            rm -rf "{{ $public_path }}"
-        fi
-
-        if [ ! -L "{{ $public_path }}" ]; then
+        echo "Ensuring custom public path is configured: {{ $public_path }}"
+        if [ ! -L "{{ $public_path }}" ] && [ ! -d "{{ $public_path }}" ]; then
             ln -sf "{{ $path }}/public" "{{ $public_path }}"
             echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
         fi
@@ -424,26 +414,31 @@
     npm run build
 
     # Zajištění, aby build a assety byly v subdoméně
-    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ] && [ ! -L "{{ $public_path }}" ]; then
-        for dir in build assets css js fonts vendor; do
-            if [ -d "public/$dir" ]; then
-                echo "Syncing $dir to custom public path: {{ $public_path }}/$dir"
-                rm -rf "{{ $public_path }}/$dir"
-                mkdir -p "{{ $public_path }}/$dir"
-                cp -rf public/$dir/* "{{ $public_path }}/$dir/"
-            fi
-        done
-        # Také zkopírovat jednotlivé soubory v public/ (kromě indexů, ty jsou řešeny patchováním)
-        cp -rf public/*.{png,ico,xml,json,txt,webmanifest} "{{ $public_path }}/" 2>/dev/null || true
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
+        # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
+        if [ ! -L "{{ $public_path }}" ]; then
+            cd {{ $path }}/public
+            find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
+                dir_name=$(basename "$dir")
+                echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
+                rm -rf "{{ $public_path }}/$dir_name"
+                mkdir -p "{{ $public_path }}/$dir_name"
+                cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
+            done
+
+            echo "Syncing root files to custom public path..."
+            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
+        fi
     fi
 
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan optimize
 
     echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --no-interaction
+    {{ $php }} artisan ai:index --locale=all --no-interaction
 
     echo "✅ Deployment finished successfully!"
 @endtask
@@ -514,36 +509,30 @@
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
+    # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path is linked or updated: {{ $public_path }}"
-        if [ ! -L "{{ $public_path }}" ] && [ -d "{{ $public_path }}" ]; then
-            echo "Moving existing public files from {{ $public_path }} back to {{ $path }}/public (if any)..."
-            cp -rn "{{ $public_path }}"/* public/ 2>/dev/null || true
-            rm -rf "{{ $public_path }}"
-        fi
-
         if [ ! -L "{{ $public_path }}" ]; then
-            ln -sf "{{ $path }}/public" "{{ $public_path }}"
-            echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
-        fi
-
-        if [ ! -L "{{ $public_path }}" ]; then
-            for dir in build assets css js fonts vendor; do
-                if [ -d "public/$dir" ]; then
-                    echo "Syncing local $dir to custom public path: {{ $public_path }}/$dir"
-                    rm -rf "{{ $public_path }}/$dir"
-                    mkdir -p "{{ $public_path }}/$dir"
-                    cp -rf public/$dir/* "{{ $public_path }}/$dir/"
-                fi
+            cd {{ $path }}/public
+            # Najdeme všechny skutečné adresáře v public/
+            find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
+                dir_name=$(basename "$dir")
+                echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
+                rm -rf "{{ $public_path }}/$dir_name"
+                mkdir -p "{{ $public_path }}/$dir_name"
+                # Kopírování obsahu včetně skrytých souborů
+                cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
             done
-            # Také zkopírovat jednotlivé soubory v public/ (kromě indexů, ty jsou řešeny patchováním)
-            cp -rf public/*.{png,ico,xml,json,txt,webmanifest} "{{ $public_path }}/" 2>/dev/null || true
+
+            # Také zkopírovat jednotlivé soubory v public/ (všechny, ne jen vybrané přípony)
+            # Vynecháme index.php a index.production.php, které jsou řešeny patchováním/nahrazením
+            echo "Syncing root files to custom public path..."
+            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
         fi
 
         echo "Patching index.php for absolute paths..."
         {{ $php }} -r '
             $target = "{{ $path }}/public/index.php";
-            if ("{{ $public_path ?? '' }}" && !is_link("{{ $public_path }}") && file_exists("{{ $public_path }}/index.php")) {
+            if ("{{ $public_path ?? "" }}" && !is_link("{{ $public_path }}") && file_exists("{{ $public_path }}/index.php")) {
                 $target = "{{ $public_path }}/index.php";
             }
             if (!file_exists($target)) { exit(0); }
@@ -584,13 +573,14 @@
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
     {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
 
     echo "Optimizing application..."
     {{ $php }} artisan optimize
 
     echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --no-interaction
+    {{ $php }} artisan ai:index --locale=all --no-interaction
 
     echo "✅ Sync finished successfully!"
 @endtask

@@ -57,11 +57,15 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Kontakt
     Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
     Route::post('/kontakt', [\App\Http\Controllers\PublicLeadController::class, 'storeContact'])->name('contact.store')->middleware('throttle:5,1');
+    Route::get('/napiste-nam', function (\Illuminate\Http\Request $request) {
+        return view('public.contact.form', ['to' => $request->query('to', '')]);
+    })->name('contact-form');
 
     // Nábor – GET (statická landing page)
     Route::get('/nabor', function () {
         $page = \App\Models\Page::where('slug', 'nabor')->first();
-        return view('public.recruitment', compact('page'));
+        $teams = \App\Models\Team::where('category', 'senior')->orderBy('slug')->get();
+        return view('public.recruitment', compact('page', 'teams'));
     })->name('recruitment.index');
 
     // Nábor – POST (zpracování leadu)

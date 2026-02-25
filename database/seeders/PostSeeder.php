@@ -38,12 +38,12 @@ class PostSeeder extends Seeder
                     'en' => 'Welcome to the new Kbely Falcons website!',
                 ],
                 'excerpt' => [
-                    'cs' => 'Spustili jsme nový web pro naše týmy Muži C a Muži E.',
-                    'en' => 'We have launched a new website for our Men C and Men E teams.',
+                    'cs' => 'Spustili jsme nový web pro naše týmy Muži C & Muži E.',
+                    'en' => 'We have launched a new website for our Men C & Men E teams.',
                 ],
                 'content' => [
-                    'cs' => '<p>Máme velkou radost, že vám můžeme představit náš nový web, který bude sloužit jako hlavní informační kanál pro naše mužské týmy C a E. Najdete zde rozpis zápasů, výsledky, informace o týmech i novinky z klubového dění.</p>',
-                    'en' => '<p>We are very happy to present our new website, which will serve as the main information channel for our men\'s teams C and E. You will find match schedules, results, team information and news from club events here.</p>',
+                    'cs' => '<p>Máme velkou radost, že vám můžeme představit náš nový web, který bude sloužit jako hlavní informační kanál pro naše mužské týmy C & E. Najdete zde rozpis zápasů, výsledky, informace o týmech i novinky z klubového dění.</p>',
+                    'en' => '<p>We are very happy to present our new website, which will serve as the main information channel for our men\'s teams C & E. You will find match schedules, results, team information and news from club events here.</p>',
                 ],
                 'status' => 'published',
                 'is_visible' => true,

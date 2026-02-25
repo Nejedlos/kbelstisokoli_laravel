@@ -42,6 +42,7 @@ class IconHelper
     public const CRON_LOGS = AppIcon::CRON_LOGS;
     public const BRANDING = AppIcon::BRANDING;
     public const AI = AppIcon::AI;
+    public const RECAPTCHA = AppIcon::RECAPTCHA;
     public const DASHBOARD = AppIcon::DASHBOARD;
     public const SETTINGS = AppIcon::SETTINGS;
 

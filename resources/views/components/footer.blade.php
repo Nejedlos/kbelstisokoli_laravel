@@ -42,12 +42,12 @@
                     </p>
                 </div>
 
-                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive text-white/50 badge-nowrap max-w-full overflow-hidden">
-                    <span class="flex items-center justify-center h-2 w-2 mr-3 shrink-0 relative">
+                <div class="inline-flex items-center bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest-responsive text-white/50 max-w-full overflow-hidden">
+                    <span class="flex items-center justify-center h-2 w-2 mr-2.5 shrink-0 relative translate-y-[0.5px]">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                     </span>
-                    <span>{{ __('footer.brand_badge') }}</span>
+                    <span class="leading-tight">{{ __('footer.brand_badge') }}</span>
                 </div>
             </div>
 
@@ -172,7 +172,13 @@
                         <a href="{{ route('public.contact.index') }}" class="btn btn-primary btn-sm px-6">
                             <span>{{ __('footer.contact_page_cta') }}</span>
                         </a>
-                        <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-white btn-sm px-6 group">
+                        <a href="{{ $branding['main_club_url'] }}"
+                           target="_blank"
+                           rel="noopener"
+                           class="btn btn-outline-white btn-sm px-6 group"
+                           data-track-click="external_link"
+                           data-track-label="Footer: Main Club Website"
+                           data-track-category="external">
                             <span>{{ __('footer.contact_club_cta') }}</span>
                             <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70"></i>
                         </a>
@@ -192,7 +198,7 @@
                 </div>
                 <div class="flex items-center justify-center md:justify-start gap-4">
                     <div class="w-10 h-px bg-primary/30 hidden xs:block"></div>
-                    <span class="uppercase tracking-widest-responsive sm:tracking-[0.2em] text-[10px] font-black text-slate-500 badge-nowrap">
+                    <span class="uppercase tracking-widest-responsive sm:tracking-[0.2em] text-[10px] font-black text-slate-500 leading-tight">
                         {{ __('footer.bottom_part_of') }}
                     </span>
                 </div>
