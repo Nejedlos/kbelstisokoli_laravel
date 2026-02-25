@@ -2,7 +2,7 @@
 
 <div class="mb-10 {{ $align === 'center' ? 'text-center' : 'text-left' }}">
     @if($subtitle)
-        <div class="text-[min(3.5vw,0.875rem)] sm:text-sm uppercase tracking-widest-responsive text-primary font-bold mb-3 max-w-full leading-tight">{{ $subtitle }}</div>
+        <div class="text-[min(3.5vw,0.875rem)] sm:text-sm uppercase tracking-widest-responsive text-primary font-bold mb-3 max-w-full leading-tight break-words [overflow-wrap:anywhere] hyphens-auto">{{ $subtitle }}</div>
     @endif
     @if($title)
         <h2 class="section-title text-balance {{ $align === 'center' ? 'section-title-center' : '' }}">{{ $title }}</h2>

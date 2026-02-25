@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Page;
+use Database\Seeders\CmsContentSeeder;
+use Database\Seeders\GdprPageSeeder;
 use Database\Seeders\GlobalSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -18,6 +21,7 @@ class AppSeedCommand extends Command
     protected $signature = 'app:seed
                             {--fresh : Smaže všechna data v dotčených tabulkách před seedováním}
                             {--force : Vynutí spuštění na produkci}
+                            {--frontend-only : Spustí pouze seedery frontendového obsahu (CmsContentSeeder, GdprPageSeeder)}
                             {--class=Database\\Seeders\\GlobalSeeder : Třída seederu, který se má spustit}';
 
     /**
@@ -33,7 +37,22 @@ class AppSeedCommand extends Command
     public function handle()
     {
         $fresh = $this->option('fresh');
+        $frontendOnly = (bool) $this->option('frontend-only');
         $class = $this->option('class');
+
+        // Informativní výpis aktivní DB
+        try {
+            $default = config('database.default');
+            $conn = (array) config("database.connections.$default");
+            $dbInfo = sprintf('%s://%s:%s/%s', $default, $conn['host'] ?? '-', $conn['port'] ?? '-', $conn['database'] ?? '-');
+            $this->line("🔌 Použitá databáze: <comment>{$dbInfo}</comment>");
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        // Počty stránek před seedem (diagnostika)
+        $pagesBefore = Page::query()->count();
+        $this->line("📄 Pages (před): <comment>{$pagesBefore}</comment>");
 
         // Normalizace názvu třídy, pokud uživatel zadá jen název
         if (!str_contains($class, '\\')) {
@@ -60,26 +79,47 @@ class AppSeedCommand extends Command
             $this->wipeData();
         }
 
-        $this->info("Spouštím seedování: {$class}");
+        $result = 0;
 
-        $params = [
-            '--class' => $class,
-        ];
-
-        if ($this->option('force')) {
-            $params['--force'] = true;
+        if ($frontendOnly) {
+            $this->info('Spouštím seedování: CmsContentSeeder + GdprPageSeeder (frontend-only)');
+            $seeders = [CmsContentSeeder::class, GdprPageSeeder::class];
+            foreach ($seeders as $seederClass) {
+                $params = ['--class' => $seederClass];
+                if ($this->option('force')) {
+                    $params['--force'] = true;
+                }
+                if ($this->option('no-interaction')) {
+                    $params['--no-interaction'] = true;
+                }
+                $r = Artisan::call('db:seed', $params);
+                $this->line(Artisan::output());
+                if ($r !== 0) {
+                    $result = $r;
+                    break;
+                }
+            }
+        } else {
+            $this->info("Spouštím seedování: {$class}");
+            $params = ['--class' => $class];
+            if ($this->option('force')) {
+                $params['--force'] = true;
+            }
+            if ($this->option('no-interaction')) {
+                $params['--no-interaction'] = true;
+            }
+            $result = Artisan::call('db:seed', $params);
         }
-
-        // Propagujeme no-interaction
-        if ($this->option('no-interaction')) {
-            $params['--no-interaction'] = true;
-        }
-
-        $result = Artisan::call('db:seed', $params);
 
         if ($result === 0) {
             $this->info('Seedování proběhlo úspěšně.');
-            $this->line(Artisan::output());
+
+            // Počty stránek po seedu a audit vybraných slugů
+            $pagesAfter = Page::query()->count();
+            $this->line("📄 Pages (po): <comment>{$pagesAfter}</comment> (Δ " . ($pagesAfter - $pagesBefore) . ")");
+            $slugs = ['home','o-klubu','nabor','treninky','zapasy','tymy','kontakt','gdpr'];
+            $found = Page::query()->whereIn('slug', $slugs)->pluck('slug')->all();
+            $this->line('🔎 Frontend slugs přítomné: <comment>' . implode(', ', $found) . '</comment>');
 
             // Vyčistíme cache, aby se změny projevily hned
             $this->info('Čistím cache...');
