@@ -63,7 +63,9 @@ class SeoService
             'og_description' => $ogDescription,
             'og_image' => $ogImage,
             'og_type' => $this->resolveOgType($model),
+            'og_locale' => $this->resolveOgLocale(),
             'twitter_card' => $seo->twitter_card ?? 'summary_large_image',
+            'twitter_image_alt' => $siteName,
             'site_name' => $siteName,
             'structured_data' => $this->generateStructuredData($model, $seo, $settings),
         ];
@@ -129,36 +131,54 @@ class SeoService
         $data = [];
 
         // Organization
-        $data[] = [
+        $org = [
             '@context' => 'https://schema.org',
             '@type' => 'SportsOrganization',
             'name' => $settings['club_name'] ?? 'Kbelští sokoli',
             'url' => url('/'),
             'logo' => $settings['logo_path'] ? asset('storage/' . $settings['logo_path']) : null,
-            'address' => [
-                '@type' => 'PostalAddress',
-                'streetAddress' => $settings['contact']['address'] ?? '',
-            ],
-            'contactPoint' => [
-                '@type' => 'ContactPoint',
-                'telephone' => $settings['contact']['phone'] ?? '',
-                'contactType' => 'customer service',
-                'email' => $settings['contact']['email'] ?? '',
-            ],
-            'sameAs' => array_filter([
-                $settings['socials']['facebook'] ?? null,
-                $settings['socials']['instagram'] ?? null,
-                $settings['socials']['youtube'] ?? null,
-            ]),
         ];
+
+        // Address (jen pokud existují smysluplná data)
+        $address = [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $settings['contact']['address'] ?? null,
+        ];
+        $address = $this->cleanSchema($address);
+        if (!empty($address)) {
+            $org['address'] = $address;
+        }
+
+        // ContactPoint (jen pokud existují data)
+        $contact = [
+            '@type' => 'ContactPoint',
+            'telephone' => $settings['contact']['phone'] ?? null,
+            'contactType' => 'customer service',
+            'email' => $settings['contact']['email'] ?? null,
+        ];
+        $contact = $this->cleanSchema($contact);
+        if (!empty($contact)) {
+            $org['contactPoint'] = $contact;
+        }
+
+        $sameAs = array_filter([
+            $settings['socials']['facebook'] ?? null,
+            $settings['socials']['instagram'] ?? null,
+            $settings['socials']['youtube'] ?? null,
+        ]);
+        if (!empty($sameAs)) {
+            $org['sameAs'] = $sameAs;
+        }
+
+        $data[] = $this->cleanSchema($org);
 
         // Article if post
         if ($model instanceof \App\Models\Post) {
-            $data[] = [
+            $article = [
                 '@context' => 'https://schema.org',
                 '@type' => 'NewsArticle',
                 'headline' => $model->title,
-                'image' => $model->featured_image ? [asset('storage/' . $model->featured_image)] : [],
+                'image' => $model->featured_image ? [asset('storage/' . $model->featured_image)] : null,
                 'datePublished' => $model->publish_at?->toIso8601String() ?? $model->created_at->toIso8601String(),
                 'dateModified' => $model->updated_at->toIso8601String(),
                 'author' => [
@@ -166,13 +186,52 @@ class SeoService
                     'name' => $settings['club_name'] ?? 'Kbelští sokoli',
                 ],
             ];
+            $data[] = $this->cleanSchema($article);
         }
 
         // Custom override
         if ($seo && $seo->structured_data_override) {
-            $data = array_merge($data, $seo->structured_data_override);
+            foreach ((array) $seo->structured_data_override as $schema) {
+                $data[] = $this->cleanSchema($schema);
+            }
         }
 
-        return $data;
+        // Finální očištění prázdných záznamů
+        return array_values(array_filter($data, fn ($item) => !empty($item)));
+    }
+
+    protected function resolveOgLocale(): string
+    {
+        $locale = app()->getLocale();
+        return match ($locale) {
+            'cs' => 'cs_CZ',
+            'en' => 'en_US',
+            default => 'cs_CZ',
+        };
+    }
+
+    /**
+     * Rekurzivní očištění JSON-LD od null/""/prázdných polí.
+     */
+    protected function cleanSchema($value)
+    {
+        if (is_array($value)) {
+            $clean = [];
+            foreach ($value as $k => $v) {
+                $v = $this->cleanSchema($v);
+                if ($v === null) {
+                    continue;
+                }
+                if (is_array($v) && empty($v)) {
+                    continue;
+                }
+                if ($v === '') {
+                    continue;
+                }
+                $clean[$k] = $v;
+            }
+            return $clean;
+        }
+        return $value;
     }
 }

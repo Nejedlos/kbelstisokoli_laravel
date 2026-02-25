@@ -18,18 +18,56 @@
     @if(($imageUrl || $videoUrl) && $variant !== 'minimal')
         <div class="absolute inset-0 z-0">
             @if($videoUrl)
+                {{-- Mobilní fallback: bez videa, pouze poster --}}
+                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover block sm:hidden" decoding="async" fetchpriority="high">
+                {{-- Desktop: lazy-load video s IO, bez okamžitého načítání --}}
                 <video
+                    class="w-full h-full object-cover hidden sm:block js-hero-video"
                     autoplay
                     muted
                     loop
                     playsinline
+                    preload="none"
                     poster="{{ $imageUrl }}"
-                    class="w-full h-full object-cover"
-                >
-                    <source src="{{ asset($videoUrl) }}" type="video/mp4">
-                </video>
+                    data-src="{{ asset($videoUrl) }}"
+                    aria-label="Hero background video"
+                ></video>
+                <noscript>
+                    <video class="w-full h-full object-cover hidden sm:block" autoplay muted loop playsinline poster="{{ $imageUrl }}">
+                        <source src="{{ asset($videoUrl) }}" type="video/mp4">
+                    </video>
+                </noscript>
+                <script>
+                    (function(){
+                        try {
+                            const mqMobile = window.matchMedia('(max-width: 639px)');
+                            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+                            const video = document.querySelector('.js-hero-video');
+                            if (!video || mqMobile.matches || prefersReduced.matches) return;
+                            const load = () => {
+                                if (video.dataset.src && !video.src) {
+                                    video.src = video.dataset.src;
+                                    video.load();
+                                }
+                            };
+                            if ('IntersectionObserver' in window) {
+                                const io = new IntersectionObserver((entries) => {
+                                    entries.forEach(entry => {
+                                        if (entry.isIntersecting) {
+                                            load();
+                                            io.disconnect();
+                                        }
+                                    });
+                                }, { rootMargin: '256px' });
+                                io.observe(video);
+                            } else {
+                                window.addEventListener('load', load, { once: true });
+                            }
+                        } catch (e) {}
+                    })();
+                </script>
             @else
-                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover">
+                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover" decoding="async" fetchpriority="high">
             @endif
 
             @if($data['overlay'] ?? true)

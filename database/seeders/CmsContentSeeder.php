@@ -235,7 +235,7 @@ class CmsContentSeeder extends Seeder
             ['label' => ['cs' => 'Muži C', 'en' => 'Men C'], 'url' => '/tym/muzi-c', 'sort' => 10],
             ['label' => ['cs' => 'Muži E', 'en' => 'Men E'], 'url' => '/tym/muzi-e', 'sort' => 20],
             ['label' => ['cs' => 'Hlavní web TJ Sokol Kbely Basketbal', 'en' => 'Main Club Website'], 'url' => 'https://www.basketkbely.cz/', 'sort' => 30, 'is_external' => true],
-            ['label' => ['cs' => 'Nábor/Začni hrát', 'en' => 'Recruitment'], 'url' => 'https://www.basketkbely.cz/nabor', 'sort' => 40, 'is_external' => true],
+            ['label' => ['cs' => 'Nábor/Začni hrát', 'en' => 'Recruitment'], 'url' => 'https://www.basketkbely.cz/zacnihrat', 'sort' => 40, 'is_external' => true],
             ['label' => ['cs' => 'Družstva a mládež', 'en' => 'Teams & Youth'], 'url' => 'https://www.basketkbely.cz/druzstva', 'sort' => 50, 'is_external' => true],
         ];
 
@@ -265,7 +265,7 @@ class CmsContentSeeder extends Seeder
                         'cta_label' => 'Naše týmy C a E',
                         'cta_url' => '/tymy',
                         'cta_secondary_label' => 'Chci začít s basketem',
-                        'cta_secondary_url' => 'https://www.basketkbely.cz/nabor',
+                        'cta_secondary_url' => 'https://www.basketkbely.cz/zacnihrat',
                         'cta_tertiary_label' => 'Hlavní web TJ Sokol Kbely Basketbal',
                         'cta_tertiary_url' => 'https://www.basketkbely.cz/',
                         'microtext' => 'Součást oddílu s tradicí basketbalu ve Kbelích a návazností na mládežnické kategorie.',
@@ -419,7 +419,7 @@ class CmsContentSeeder extends Seeder
                         'cta_label' => 'Our C & E teams',
                         'cta_url' => '/tymy',
                         'cta_secondary_label' => 'I want to start playing',
-                        'cta_secondary_url' => 'https://www.basketkbely.cz/nabor',
+                        'cta_secondary_url' => 'https://www.basketkbely.cz/zacnihrat',
                         'cta_tertiary_label' => 'Main Club Website',
                         'cta_tertiary_url' => 'https://www.basketkbely.cz/',
                         'microtext' => 'Part of the club with basketball tradition in Kbely and connection to youth categories.',

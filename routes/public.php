@@ -32,8 +32,13 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     Route::get('/zapasy', [MatchController::class, 'index'])->name('matches.index');
     Route::get('/zapasy/{id}', [MatchController::class, 'show'])->name('matches.show');
 
-    // Tým
-    Route::get('/tym', [TeamController::class, 'index'])->name('team.index');
+    // Týmy (plural hlavní přehled)
+    Route::get('/tymy', [TeamController::class, 'index'])->name('teams.index');
+
+    // Zpětná kompatibilita: /tym -> 301 redirect na /tymy
+    Route::get('/tym', function () {
+        return redirect('/tymy', 301);
+    });
 
     // Galerie
     Route::get('/galerie', [\App\Http\Controllers\Public\GalleryController::class, 'index'])->name('galleries.index');
@@ -49,7 +54,7 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
     Route::post('/kontakt', [\App\Http\Controllers\PublicLeadController::class, 'storeContact'])->name('contact.store')->middleware('throttle:5,1');
 
-    // Nábor
+    // Nábor – GET je obsloužen generickými stránkami (PageController) přes slug `nabor`
     Route::post('/nabor', [\App\Http\Controllers\PublicLeadController::class, 'storeRecruitment'])->name('recruitment.store')->middleware('throttle:5,1');
 
     // Vyhledávání

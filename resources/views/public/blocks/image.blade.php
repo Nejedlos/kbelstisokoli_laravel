@@ -9,7 +9,7 @@
     <div class="container flex justify-center">
         @if($imageUrl)
             <figure class="overflow-hidden rounded-club shadow-club {{ $widthClass }}">
-                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full">
+                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full" loading="lazy" decoding="async" width="1600" height="900">
                 @if($caption)
                     <figcaption class="p-4 bg-slate-50 text-center italic text-slate-600 border-t border-slate-100">
                         {{ $caption }}

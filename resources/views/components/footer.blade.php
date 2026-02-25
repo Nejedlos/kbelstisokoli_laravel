@@ -42,12 +42,12 @@
                     </p>
                 </div>
 
-                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive text-white/50 badge-nowrap max-w-full overflow-hidden">
-                    <span class="relative flex h-2 w-2 mr-3 shrink-0">
+                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive text-white/50 badge-nowrap max-w-full overflow-hidden leading-none">
+                    <span class="inline-flex items-center justify-center h-2 w-2 mr-3 shrink-0 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                     </span>
-                    {{ __('footer.brand_badge') }}
+                    <span class="leading-none">{{ __('footer.brand_badge') }}</span>
                 </div>
             </div>
 
@@ -196,7 +196,7 @@
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
 
-                <a href="#" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center">
+                <a href="{{ url('/gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     {{ __('Ochrana soukromí') }}
                 </a>

@@ -18,6 +18,7 @@ class GlobalSeeder extends Seeder
         SportSeeder::class,
         PostSeeder::class,
         CmsContentSeeder::class,
+        GdprPageSeeder::class,
     ];
 
     /**
