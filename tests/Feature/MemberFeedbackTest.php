@@ -36,7 +36,7 @@ class MemberFeedbackTest extends TestCase
         $response->assertRedirect(route('member.dashboard'));
 
         Mail::assertQueued(FeedbackMessage::class, function (FeedbackMessage $mail) {
-            return $mail->hasTo(env('ERROR_REPORT_EMAIL'));
+            return $mail->hasTo(config('mail.error_reporting.email'));
         });
     }
 

@@ -5,6 +5,8 @@ return [
     'subtitle' => 'Pět mužských týmů, jeden klubový základ a společná chuť hrát basket.',
     'senior_title' => 'Dospělí',
     'youth_title' => 'Mládež',
+    'main_teams' => 'Těmto týmům se věnujeme primárně',
+    'other_teams' => 'Ostatní mužské týmy',
     'other_title' => 'Ostatní',
     'view_detail' => 'Zobrazit detail týmu',
     'roster' => 'Přejít na soupisku',

@@ -94,4 +94,18 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Uploads Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This value defines the default disk and directory for file uploads.
+    |
+    */
+
+    'uploads' => [
+        'disk' => env('UPLOADS_DISK', 'public'),
+        'dir' => env('UPLOADS_DIR', 'uploads'),
+    ],
+
 ];

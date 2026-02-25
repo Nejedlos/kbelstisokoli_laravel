@@ -103,6 +103,8 @@ return [
 
     'key' => env('APP_KEY'),
 
+    'public_path' => env('APP_PUBLIC_PATH'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

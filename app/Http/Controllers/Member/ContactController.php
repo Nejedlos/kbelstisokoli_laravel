@@ -25,7 +25,7 @@ class ContactController extends Controller
         $settings = \App\Models\Setting::pluck('value', 'key')->toArray();
         $adminFallback = [
             'name' => $settings['admin_contact_name'] ?? __('member.feedback.contact_card.admin_name_default'),
-            'email' => $settings['admin_contact_email'] ?? env('ERROR_REPORT_EMAIL'),
+            'email' => $settings['admin_contact_email'] ?? config('mail.error_reporting.email'),
             'phone' => $settings['admin_contact_phone'] ?? ($settings['contact_phone'] ?? null),
             'photo' => $settings['admin_contact_photo_path'] ?? null,
         ];
@@ -85,7 +85,7 @@ class ContactController extends Controller
 
         // Fallback na admina
         if ($recipients->isEmpty()) {
-            $adminEmail = Setting::where('key', 'admin_contact_email')->value('value') ?: env('ERROR_REPORT_EMAIL');
+            $adminEmail = Setting::where('key', 'admin_contact_email')->value('value') ?: config('mail.error_reporting.email');
             if ($adminEmail) {
                 $recipients->push($adminEmail);
             }
@@ -94,8 +94,8 @@ class ContactController extends Controller
         // Uložení přílohy (pokud je)
         $storedPath = null;
         if ($request->hasFile('attachment')) {
-            $disk = config('filesystems.default', env('UPLOADS_DISK', 'public'));
-            $dir = trim(env('UPLOADS_DIR', 'uploads'), '/').'/feedback';
+            $disk = config('filesystems.uploads.disk', 'public');
+            $dir = trim(config('filesystems.uploads.dir', 'uploads'), '/').'/feedback';
             $storedPath = $request->file('attachment')->store($dir, $disk);
         }
 
@@ -112,7 +112,7 @@ class ContactController extends Controller
                     subject: $data['subject'],
                     message: $data['message'],
                     team: $team,
-                    attachmentDisk: $storedPath ? config('filesystems.default', env('UPLOADS_DISK', 'public')) : null,
+                    attachmentDisk: $storedPath ? config('filesystems.uploads.disk', 'public') : null,
                     attachmentPath: $storedPath,
                     locale: $locale,
                 ));
@@ -140,7 +140,7 @@ class ContactController extends Controller
 
         $adminContact = [
             'name' => $settings['admin_contact_name'] ?? __('member.feedback.contact_card.admin_name_default'),
-            'email' => $settings['admin_contact_email'] ?? env('ERROR_REPORT_EMAIL'),
+            'email' => $settings['admin_contact_email'] ?? config('mail.error_reporting.email'),
             'phone' => $settings['admin_contact_phone'] ?? ($settings['contact_phone'] ?? null),
             'photo' => $settings['admin_contact_photo_path'] ?? null,
         ];
@@ -162,7 +162,7 @@ class ContactController extends Controller
             'attachment' => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx',
         ]);
 
-        $adminEmail = Setting::where('key', 'admin_contact_email')->value('value') ?: env('ERROR_REPORT_EMAIL');
+        $adminEmail = Setting::where('key', 'admin_contact_email')->value('value') ?: config('mail.error_reporting.email');
         $recipients = collect();
         if ($adminEmail) {
             $recipients->push($adminEmail);
@@ -170,8 +170,8 @@ class ContactController extends Controller
 
         $storedPath = null;
         if ($request->hasFile('attachment')) {
-            $disk = config('filesystems.default', env('UPLOADS_DISK', 'public'));
-            $dir = trim(env('UPLOADS_DIR', 'uploads'), '/').'/feedback';
+            $disk = config('filesystems.uploads.disk', 'public');
+            $dir = trim(config('filesystems.uploads.dir', 'uploads'), '/').'/feedback';
             $storedPath = $request->file('attachment')->store($dir, $disk);
         }
 
@@ -187,7 +187,7 @@ class ContactController extends Controller
                     subject: $data['subject'],
                     message: $data['message'],
                     team: null,
-                    attachmentDisk: $storedPath ? config('filesystems.default', env('UPLOADS_DISK', 'public')) : null,
+                    attachmentDisk: $storedPath ? config('filesystems.uploads.disk', 'public') : null,
                     attachmentPath: $storedPath,
                     locale: $locale,
                 ));

@@ -10,85 +10,137 @@
 
     <div class="section-padding bg-bg">
         <div class="container">
-            {{-- Přehled týmů --}}
-            <div class="flex flex-wrap justify-center gap-8 mb-20">
-                @foreach($teams->flatten() as $team)
-                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-md flex">
-                        <div class="card card-hover group flex flex-col h-full border-t-4 {{ $loop->index % 2 == 0 ? 'border-primary' : 'border-secondary' }} w-full">
-                            <div class="p-8 flex-1 flex flex-col">
-                                <div class="flex justify-between items-start mb-6 gap-4">
-                                    <h3 class="text-2xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight">
-                                        {{ $team->name }}
-                                    </h3>
-                                    <span class="badge badge-outline uppercase tracking-widest text-[10px] py-1 px-3 shrink-0">
-                                        {{ match($team->slug) {
-                                            'muzi-a' => '2. liga A',
-                                            'muzi-b' => 'Přebor A',
-                                            'muzi-c' => 'Přebor B',
-                                            'muzi-d' => '1. třída',
-                                            'muzi-e' => '3. třída B',
-                                            default => ''
-                                        } }}
-                                    </span>
-                                </div>
-
-                                <p class="text-slate-600 mb-8 leading-relaxed text-sm flex-1">
-                                    {{ $team->description }}
-                                </p>
-
-                                <div class="space-y-4 mb-8">
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <i class="fa-light fa-medal text-xs text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.competition') }}</span>
-                                            <span class="text-sm font-bold text-secondary">
+            {{-- Hlavní týmy s náborem --}}
+            @if($mainTeams->isNotEmpty())
+                <div class="mb-20">
+                    <x-section-heading
+                        :title="__('teams.main_teams')"
+                        alignment="center"
+                        class="mb-10"
+                    />
+                    <div class="flex flex-wrap justify-center gap-8">
+                        @foreach($mainTeams as $team)
+                            <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(50%-1rem)] max-w-md flex">
+                                <div class="card card-hover group flex flex-col h-full border-t-4 {{ $loop->index % 2 == 0 ? 'border-primary' : 'border-secondary' }} w-full">
+                                    <div class="p-8 flex-1 flex flex-col">
+                                        <div class="flex justify-between items-start mb-6 gap-4">
+                                            <h3 class="text-2xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight">
+                                                {{ $team->name }}
+                                            </h3>
+                                            <span class="badge badge-outline uppercase tracking-widest text-[10px] py-1 px-3 shrink-0">
                                                 {{ match($team->slug) {
-                                                    'muzi-a' => '2. liga (skupina A)',
-                                                    'muzi-b' => 'Pražský přebor',
-                                                    'muzi-c' => 'Pražský přebor B',
+                                                    'muzi-a' => '2. liga A',
+                                                    'muzi-b' => 'Přebor A',
+                                                    'muzi-c' => 'Přebor B',
                                                     'muzi-d' => '1. třída',
                                                     'muzi-e' => '3. třída B',
                                                     default => ''
                                                 } }}
                                             </span>
                                         </div>
-                                    </div>
 
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <i class="fa-light fa-users text-xs text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.player_type') }}</span>
-                                            <span class="text-sm font-bold text-secondary">
-                                                {{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_type') }}
-                                            </span>
-                                        </div>
-                                    </div>
+                                        <p class="text-slate-600 mb-8 leading-relaxed text-sm flex-1">
+                                            {{ $team->description }}
+                                        </p>
 
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <i class="fa-light fa-bolt text-xs text-primary"></i>
+                                        <div class="space-y-4 mb-8">
+                                            <div class="flex items-start gap-3">
+                                                <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                    <i class="fa-light fa-medal text-xs text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.competition') }}</span>
+                                                    <span class="text-sm font-bold text-secondary">
+                                                        {{ match($team->slug) {
+                                                            'muzi-a' => '2. liga (skupina A)',
+                                                            'muzi-b' => 'Pražský přebor',
+                                                            'muzi-c' => 'Pražský přebor B',
+                                                            'muzi-d' => '1. třída',
+                                                            'muzi-e' => '3. třída B',
+                                                            default => ''
+                                                        } }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-start gap-3">
+                                                <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                    <i class="fa-light fa-users text-xs text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.player_type') }}</span>
+                                                    <span class="text-sm font-bold text-secondary">
+                                                        {{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_type') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-start gap-3">
+                                                <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                    <i class="fa-light fa-bolt text-xs text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.tempo_atmos') }}</span>
+                                                    <span class="text-sm font-bold text-secondary">
+                                                        {{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_tempo') }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.tempo_atmos') }}</span>
-                                            <span class="text-sm font-bold text-secondary">
-                                                {{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_tempo') }}
-                                            </span>
-                                        </div>
+
+                                        <a href="{{ route('public.teams.show', $team->slug) }}" class="btn {{ $loop->index % 2 == 0 ? 'btn-primary' : 'btn-secondary' }} w-full">
+                                            {{ __('teams.view_detail') }}
+                                        </a>
                                     </div>
                                 </div>
-
-                                <a href="{{ route('public.teams.show', $team->slug) }}" class="btn {{ $loop->index % 2 == 0 ? 'btn-primary' : 'btn-secondary' }} w-full">
-                                    {{ __('teams.view_detail') }}
-                                </a>
                             </div>
-                        </div>
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endif
+
+            {{-- Ostatní týmy --}}
+            @if($otherTeams->isNotEmpty())
+                <div class="mb-24">
+                    <div class="max-w-3xl mx-auto text-center mb-10">
+                        <h3 class="text-2xl font-black uppercase tracking-tighter">{{ __('teams.other_teams') }}</h3>
+                        <div class="w-16 h-1 bg-primary mx-auto mt-4"></div>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-6">
+                        @foreach($otherTeams as $team)
+                            <div class="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-sm flex">
+                                <div class="card card-hover group flex flex-col h-full border-t-2 border-slate-200 w-full">
+                                    <div class="p-6 flex-1 flex flex-col">
+                                        <div class="flex justify-between items-start mb-4 gap-4">
+                                            <h4 class="text-xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight">
+                                                {{ $team->name }}
+                                            </h4>
+                                            <span class="badge badge-outline uppercase tracking-widest text-[9px] py-0.5 px-2 shrink-0">
+                                                {{ match($team->slug) {
+                                                    'muzi-a' => '2. liga A',
+                                                    'muzi-b' => 'Přebor A',
+                                                    'muzi-c' => 'Přebor B',
+                                                    'muzi-d' => '1. třída',
+                                                    'muzi-e' => '3. třída B',
+                                                    default => ''
+                                                } }}
+                                            </span>
+                                        </div>
+
+                                        <p class="text-slate-500 mb-6 leading-relaxed text-xs flex-1">
+                                            {{ Str::limit($team->description, 100) }}
+                                        </p>
+
+                                        <a href="{{ route('public.teams.show', $team->slug) }}" class="btn btn-outline btn-sm w-full">
+                                            {{ __('teams.view_detail') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             {{-- Pro koho je který tým vhodný --}}
             <div class="mb-20">

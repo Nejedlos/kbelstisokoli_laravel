@@ -172,16 +172,84 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     'user' => $user,
                 ];
 
-                $to = env('ERROR_REPORT_EMAIL');
-                $from = env('ERROR_REPORT_SENDER', config('mail.from.address'));
+                $to = config('mail.error_reporting.email');
+                $from = config('mail.error_reporting.sender', config('mail.from.address'));
 
                 if ($to) {
                     \Illuminate\Support\Facades\Mail::to($to)
                         ->send((new \App\Mail\ErrorMail($report))->from($from, config('mail.from.name')));
                 }
             } catch (\Throwable $ignored) {
-                // Tichý pád, ať nenaruší běh aplikace
+                // Zaloggujeme selhání odeslání chybového e-mailu pro následnou diagnostiku
+                try {
+                    \Illuminate\Support\Facades\Log::error('Error report email failed', [
+                        'message' => $ignored->getMessage(),
+                        'exception' => get_class($ignored),
+                    ]);
+                } catch (\Throwable $e2) {}
             }
+        });
+
+        // Vlastní 500 stránka s kopírovatelnými debug informacemi (bez citlivých dat)
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            if (!app()->environment('production')) {
+                return null; // nezasahujeme mimo produkci
+            }
+
+            // Pouze pro neošetřené chyby 500+
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $e->getStatusCode() < 500) {
+                return null;
+            }
+
+            // Stejné čištění dat jako pro e-mail
+            $sanitize = function (array $data) use (&$sanitize): array {
+                $sensitive = ['password', 'password_confirmation', '_token', 'current_password', 'token'];
+                foreach ($data as $k => $v) {
+                    if (in_array(strtolower((string) $k), $sensitive, true)) {
+                        $data[$k] = '[hidden]';
+                    } elseif (is_array($v)) {
+                        $data[$k] = $sanitize($v);
+                    }
+                }
+                return $data;
+            };
+
+            $headers = [];
+            foreach ($request->headers->all() as $k => $v) {
+                $headers[$k] = is_array($v) ? implode(', ', $v) : (string) $v;
+            }
+
+            $report = [
+                'timestamp' => now()->toIso8601String(),
+                'app' => [
+                    'name' => config('app.name'),
+                    'env' => config('app.env'),
+                    'url' => config('app.url'),
+                ],
+                'exception' => [
+                    'class' => get_class($e),
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => substr($e->getTraceAsString(), 0, 20000),
+                ],
+                'request' => [
+                    'url' => $request->fullUrl(),
+                    'method' => $request->method(),
+                    'ip' => $request->ip(),
+                    'query' => $sanitize($request->query()),
+                    'input' => $sanitize($request->except(['password', 'password_confirmation', '_token', 'current_password', 'token'])),
+                ],
+                'headers' => $headers,
+                'server' => [
+                    'php' => PHP_VERSION,
+                    'sapi' => PHP_SAPI,
+                    'memory_usage' => memory_get_usage(true),
+                ],
+            ];
+
+            return response()->view('errors.500', ['report' => $report], 500);
         });
     })->create();
 

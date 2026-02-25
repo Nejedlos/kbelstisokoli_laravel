@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Galleries\RelationManagers;
 
+use App\Models\PhotoPool;
+use App\Services\GalleryService;
+use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -10,11 +13,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
@@ -71,6 +76,31 @@ class MediaAssetsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
+                Action::make('fillFromPool')
+                    ->label(new HtmlString('<i class="fa-light fa-shuffle mr-1"></i> Doplnit z poolu'))
+                    ->form([
+                        Select::make('photo_pool_id')
+                            ->label('Pool')
+                            ->native(false)
+                            ->options(fn () => PhotoPool::query()
+                                ->where('is_public', true)
+                                ->where('is_visible', true)
+                                ->orderBy('event_date', 'desc')
+                                ->pluck('title', 'id')
+                                ->map(fn ($t) => brand_text($t))
+                                ->toArray()
+                            )
+                            ->placeholder('Všechny veřejné pooly')
+                            ->searchable(),
+                        TextInput::make('count')->label('Počet fotek')->numeric()->default(20)->minValue(1)->maxValue(200),
+                    ])
+                    ->action(function (array $data, GalleryService $service) {
+                        /** @var \App\Models\Gallery $gallery */
+                        $gallery = $this->getOwnerRecord();
+                        $added = $service->fillFromPoolRandom($gallery, (int)($data['count'] ?? 20), $data['photo_pool_id'] ?? null);
+                        $this->notify('success', "$added fotek přidáno z poolu.");
+                        $this->refreshTable();
+                    }),
                 AttachAction::make()
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),

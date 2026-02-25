@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Image\Manipulations;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -73,11 +74,16 @@ class MediaAsset extends Model implements HasMedia
         $this->addMediaConversion('thumb')
             ->width(300)
             ->height(300)
+            ->format(Manipulations::FORMAT_WEBP)
+            ->nonQueued()
             ->sharpen(10);
 
         $this->addMediaConversion('large')
-            ->width(1200)
-            ->height(1200)
+            ->width(1600)
+            ->height(1600)
+            ->format(Manipulations::FORMAT_WEBP)
+            ->optimize()
+            ->nonQueued()
             ->sharpen(10);
     }
 }

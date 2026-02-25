@@ -9,10 +9,20 @@ class TeamController extends Controller
 {
     public function index(): View
     {
-        $teams = \App\Models\Team::orderBy('name')->get()->groupBy('category');
+        $allTeams = \App\Models\Team::orderBy('name')->get();
+
+        $mainSlugs = ['muzi-c', 'muzi-e'];
+
+        // Zachováme pořadí podle $mainSlugs
+        $mainTeams = collect($mainSlugs)->map(function ($slug) use ($allTeams) {
+            return $allTeams->firstWhere('slug', $slug);
+        })->filter();
+
+        $otherTeams = $allTeams->reject(fn ($team) => in_array($team->slug, $mainSlugs));
+
         $page = \App\Models\Page::where('slug', 'tymy')->first();
 
-        return view('public.teams.index', compact('teams', 'page'));
+        return view('public.teams.index', compact('mainTeams', 'otherTeams', 'page'));
     }
 
     public function show(string $slug): View

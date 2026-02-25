@@ -5,6 +5,8 @@ return [
     'subtitle' => 'Five men\'s teams, one club foundation, and a shared passion for basketball.',
     'senior_title' => 'Seniors',
     'youth_title' => 'Youth',
+    'main_teams' => 'These pages are dedicated to these teams',
+    'other_teams' => 'Other men\'s teams',
     'other_title' => 'Others',
     'view_detail' => 'View team detail',
     'roster' => 'Go to roster',
