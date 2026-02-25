@@ -9,7 +9,16 @@
     <div class="container flex justify-center">
         @if($imageUrl)
             <figure class="overflow-hidden rounded-club shadow-club {{ $widthClass }}">
-                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full" loading="lazy" decoding="async" width="1600" height="900">
+                @php
+                    $isStatic = str_contains($imageUrl, 'assets/img/');
+                    $webpUrl = $isStatic ? str_replace(['.jpg', '.png'], '.webp', $imageUrl) : null;
+                @endphp
+                <picture>
+                    @if($isStatic && file_exists(public_path($webpUrl)))
+                        <source srcset="{{ asset($webpUrl) }}" type="image/webp">
+                    @endif
+                    <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full" loading="lazy" decoding="async" width="1600" height="900">
+                </picture>
                 @if($caption)
                     <figcaption class="p-4 bg-slate-50 text-center italic text-slate-600 border-t border-slate-100">
                         {{ $caption }}

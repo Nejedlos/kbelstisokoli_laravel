@@ -24,14 +24,17 @@
 2) Navigace
 - `config/navigation.php`: položka týmů nyní ukazuje na `public.teams.index`.
 
-3) Homepage – hero video
-- Zrušeno okamžité načítání: `preload="none"`, lazy načtení `src` přes `IntersectionObserver` až při vstupu do viewportu.
-- Mobilní fallback: na mobilech se nenačítá video vůbec (zobrazuje se jen poster/obrázek).
+3) Homepage – hero video a obrázky
+- Zrušeno okamžité načítání videa: `preload="none"`, lazy načtení `src` přes `IntersectionObserver` až při vstupu do viewportu.
+- Mobilní fallback: na mobilech se nenačítá video vůbec. Zobrazuje se optimalizovaný obrázek pomocí `<picture>` (WebP s fallbackem na PNG).
+- Automatická detekce mobilní verze: pro Hero se automaticky hledá soubor `home-hero-mobile.webp` / `.png`, pokud je v CMS nastaven `home-hero-basketball-team`.
 - Respektováno `prefers-reduced-motion` → použije se jen obrázek.
 - Přidán `noscript` fallback.
 
-4) Obrázky pod hero
-- Doplněno: `loading="lazy"`, `decoding="async"`, a základní `width/height` u vybraných bloků (např. `cards_grid`, `image`).
+4) Obrázky (globálně)
+- Implementována podpora pro **WebP s automatickým fallbackem** (pomocí `<picture>` tagu) v blocích `hero`, `cards_grid` a `image`.
+- Pro statické assety v `assets/img/` se automaticky zkouší existence `.webp` varianty.
+- Doplněno: `loading="lazy"`, `decoding="async"`, a základní `width/height` u vybraných bloků.
 
 5) Patička
 - Badge („Praha‑Kbely • basketbal • komunita“) zarovnána pomocí `inline-flex items-center`, tečka je vlevo a vertikálně vystředěná, zachován `animate-ping`.
@@ -80,10 +83,12 @@ Hero video (doporučení):
 1) Video soubory umístěte do `public/assets/video/`:
    - Desktop: `public/assets/video/hero.mp4` (optimalizujte bitrate: ~2–4 Mbps, rozumné rozlišení 1280×720/1600×900).
    - Volitelně `webm` verzi: `public/assets/video/hero.webm` (je-li k dispozici; v šabloně snadno doplnitelné jako další `<source>`).
-2) Poster obrázek umístěte do `public/assets/img/home/`:
-   - `home-hero-basketball-team.jpg` (desktop, kvalitní, rozumná velikost)
-   - `home-hero-mobile.webp` (mobilní, lehký)
-3) Po výměně souborů není nutná změna kódu, pokud zachováte stejné cesty. Pokud měníte názvy, upravte je v adminu v obsahu (blok „Hero“ → `image_url`/`video_url`).
+2) Poster obrázky umístěte do `public/assets/img/home/`:
+   - `home-hero-basketball-team.webp` (desktop, hlavní volba pro moderní prohlížeče)
+   - `home-hero-basketball-team.png` (desktop, fallback pro starší prohlížeče)
+   - `home-hero-mobile.webp` (mobilní, lehký, automaticky preferován na malých displejích)
+   - `home-hero-mobile.png` (mobilní fallback)
+3) Systém automaticky upřednostňuje WebP, pokud existuje ve stejné složce se stejným názvem (jen jinou příponou). Pokud měníte názvy, upravte je v adminu v obsahu (blok „Hero“ → `image_url`). Pro Hero stačí v adminu zadat cestu k desktopové verzi, mobilní se odvodí automaticky (konvence `-mobile`).
 4) Optimalizace:
    - Zajistěte krátkou smyčku, nižší framerate (např. 24 fps), klidnější scény.
    - Mobile-first: na mobilech se obecně video nenačítá (zobrazuje se poster) – to je nyní default.

@@ -4,6 +4,16 @@
     $videoUrl = $data['video_url'] ?? null;
     $variant = $data['variant'] ?? 'standard';
     $alignment = $data['alignment'] ?? ($variant === 'centered' ? 'center' : 'left');
+
+    // WebP detekce a mobilní varianty pro statické assety
+    $isStaticAsset = !empty($imageUrl) && str_contains($imageUrl, '/assets/img/');
+    $webpUrl = $isStaticAsset ? str_replace(['.jpg', '.png'], '.webp', $imageUrl) : null;
+
+    // Speciální logika pro Hero - pokud máme desktopový hero, zkusíme najít mobilní verzi
+    $mobileImageUrl = ($isStaticAsset && str_contains($imageUrl, 'home-hero-basketball-team'))
+        ? str_replace('home-hero-basketball-team', 'home-hero-mobile', $imageUrl)
+        : $imageUrl;
+    $mobileWebpUrl = $isStaticAsset ? str_replace(['.jpg', '.png'], '.webp', $mobileImageUrl) : null;
 @endphp
 
 <section @class([
@@ -18,8 +28,12 @@
     @if(($imageUrl || $videoUrl) && $variant !== 'minimal')
         <div class="absolute inset-0 z-0">
             @if($videoUrl)
-                {{-- Mobilní fallback: bez videa, pouze poster --}}
-                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover block sm:hidden" decoding="async" fetchpriority="high">
+                {{-- Mobilní fallback: bez videa, pouze poster (WebP s PNG/JPG fallbackem) --}}
+                <picture class="block sm:hidden w-full h-full">
+                    @if($mobileWebpUrl) <source srcset="{{ asset($mobileWebpUrl) }}" type="image/webp"> @endif
+                    <img src="{{ asset($mobileImageUrl) }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover" decoding="async" fetchpriority="high">
+                </picture>
+
                 {{-- Desktop: lazy-load video s IO, bez okamžitého načítání --}}
                 <video
                     class="w-full h-full object-cover hidden sm:block js-hero-video"
@@ -28,12 +42,12 @@
                     loop
                     playsinline
                     preload="none"
-                    poster="{{ $imageUrl }}"
+                    poster="{{ asset($imageUrl) }}"
                     data-src="{{ asset($videoUrl) }}"
                     aria-label="Hero background video"
                 ></video>
                 <noscript>
-                    <video class="w-full h-full object-cover hidden sm:block" autoplay muted loop playsinline poster="{{ $imageUrl }}">
+                    <video class="w-full h-full object-cover hidden sm:block" autoplay muted loop playsinline poster="{{ asset($imageUrl) }}">
                         <source src="{{ asset($videoUrl) }}" type="video/mp4">
                     </video>
                 </noscript>
@@ -67,7 +81,10 @@
                     })();
                 </script>
             @else
-                <img src="{{ $imageUrl }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover" decoding="async" fetchpriority="high">
+                <picture class="w-full h-full">
+                    @if($webpUrl) <source srcset="{{ asset($webpUrl) }}" type="image/webp"> @endif
+                    <img src="{{ asset($imageUrl) }}" alt="{{ $asset->alt_text ?? '' }}" class="w-full h-full object-cover" decoding="async" fetchpriority="high">
+                </picture>
             @endif
 
             @if($data['overlay'] ?? true)

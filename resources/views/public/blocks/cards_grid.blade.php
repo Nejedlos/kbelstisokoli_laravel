@@ -23,7 +23,20 @@
                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                         @if($card['image_url'] ?? null)
                             <div class="relative h-64 overflow-hidden">
-                                <img src="{{ asset($card['image_url']) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $card['title'] ?? '' }}" loading="lazy" decoding="async" width="1600" height="900">
+                                @php
+                                    $cardImageUrl = $card['image_url'];
+                                    $cardWebpUrl = str_replace(['.jpg', '.png'], '.webp', $cardImageUrl);
+                                    // Pro statické assety v adresáři assets zkusíme, zda existuje webp verze
+                                    $isStatic = str_contains($cardImageUrl, 'assets/img/');
+                                    // Pozn: V produkci by bylo lepší mít toto předgenerované, ale pro jednoduchost a spolehlivost
+                                    // zde kontrolujeme existenci souboru jen pokud jde o statický asset.
+                                @endphp
+                                <picture class="w-full h-full">
+                                    @if($isStatic && file_exists(public_path($cardWebpUrl)))
+                                        <source srcset="{{ asset($cardWebpUrl) }}" type="image/webp">
+                                    @endif
+                                    <img src="{{ asset($cardImageUrl) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $card['title'] ?? '' }}" loading="lazy" decoding="async" width="1600" height="900">
+                                </picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
                                 @if($card['badge'] ?? null)
                                     <div class="absolute top-4 left-4 bg-primary text-white text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive px-2.5 sm:px-3 py-1 rounded badge-nowrap max-w-[calc(100%-2rem)] overflow-hidden">
