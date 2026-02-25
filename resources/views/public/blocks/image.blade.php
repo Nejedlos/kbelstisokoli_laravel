@@ -25,7 +25,7 @@
                 @endif
             </figure>
         @else
-            <x-empty-state title="Obrázek chybí" subtitle="Obrázek nebyl v knihovně nalezen." />
+            <x-empty-state :title="__('general.blocks.image_missing')" :subtitle="__('general.blocks.image_missing_desc')" />
         @endif
     </div>
 </section>

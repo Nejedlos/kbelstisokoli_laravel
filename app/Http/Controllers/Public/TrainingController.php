@@ -16,7 +16,8 @@ class TrainingController extends Controller
                   ->orderBy('starts_at', 'asc')
                   ->limit(5);
         }])->get();
+        $page = \App\Models\Page::where('slug', 'treninky')->first();
 
-        return view('public.trainings.index', compact('teams'));
+        return view('public.trainings.index', compact('teams', 'page'));
     }
 }

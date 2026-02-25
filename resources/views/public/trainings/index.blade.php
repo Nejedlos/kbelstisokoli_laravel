@@ -2,59 +2,110 @@
 
 @section('content')
     <x-page-header
-        title="Tréninkové informace"
-        subtitle="Přehled tréninkových časů a míst pro jednotlivé věkové kategorie."
-        :breadcrumbs="['Tréninky' => null]"
+        :title="__('trainings.title')"
+        :subtitle="__('trainings.subtitle')"
+        :breadcrumbs="[__('trainings.breadcrumbs') => null]"
     />
 
     <div class="section-padding bg-bg">
         <div class="container">
             @if($teams->isEmpty())
                 <x-empty-state
-                    title="Zatím žádné informace o trénincích"
-                    subtitle="Aktuálně připravujeme rozpis tréninků pro nadcházející období."
+                    :title="__('trainings.empty_title')"
+                    :subtitle="__('trainings.empty_subtitle')"
                 />
             @else
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            @foreach($teams as $team)
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <h2 class="text-2xl font-bold mb-4 text-primary border-b pb-2">{{ $team->name }}</h2>
-                    <div class="mb-4 text-gray-700">
-                        {{ $team->description ?? 'Popis týmu nebyl zadán.' }}
-                    </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
+                    @foreach($teams as $team)
+                        <div class="card p-8 border-t-4 {{ $loop->first ? 'border-primary' : 'border-secondary' }}">
+                            <h2 class="text-3xl font-black uppercase tracking-tighter mb-6 text-secondary">{{ $team->name }}</h2>
+                            <div class="mb-8 text-slate-600 leading-relaxed">
+                                {{ $team->description ?? __('trainings.no_description') }}
+                            </div>
 
-                    <h3 class="text-lg font-semibold mb-3">Nadcházející tréninky</h3>
-                    @if($team->trainings->isEmpty())
-                        <p class="text-sm text-gray-500 italic">Pro tento tým nejsou vypsány žádné nadcházející tréninky.</p>
-                    @else
-                        <div class="space-y-3">
-                            @foreach($team->trainings as $training)
-                                <div class="flex items-start gap-4 p-3 bg-gray-50 rounded-md">
-                                    <div class="bg-primary text-white p-2 rounded text-center min-w-[60px]">
-                                        <div class="text-xs uppercase">{{ $training->starts_at->format('M') }}</div>
-                                        <div class="text-lg font-bold">{{ $training->starts_at->format('d') }}</div>
-                                    </div>
-                                    <div>
-                                        <div class="font-medium text-gray-900">
-                                            {{ $training->starts_at->format('H:i') }} - {{ $training->ends_at->format('H:i') }}
-                                        </div>
-                                        <div class="text-sm text-gray-600">
-                                            {{ $training->location ?? 'Místo neuvedeno' }}
-                                        </div>
-                                        @if($training->notes)
-                                            <div class="text-xs text-gray-500 mt-1 italic">
-                                                {{ $training->notes }}
+                            <h3 class="text-sm font-black uppercase tracking-widest text-primary mb-4">{{ __('trainings.upcoming') }}</h3>
+                            @if($team->trainings->isEmpty())
+                                <p class="text-sm text-slate-400 italic bg-slate-50 p-4 rounded-xl border border-slate-100">{{ __('trainings.no_trainings') }}</p>
+                            @else
+                                <div class="space-y-4">
+                                    @foreach($team->trainings as $training)
+                                        <div class="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-md transition-all">
+                                            <div class="bg-white shadow-sm text-secondary p-3 rounded-xl text-center min-w-[70px] border border-slate-100 group-hover:bg-primary group-hover:text-white transition-colors">
+                                                <div class="text-[10px] font-black uppercase tracking-widest opacity-60">{{ $training->starts_at->translatedFormat('M') }}</div>
+                                                <div class="text-2xl font-black leading-none">{{ $training->starts_at->format('d') }}</div>
                                             </div>
-                                        @endif
-                                    </div>
+                                            <div>
+                                                <div class="font-black text-secondary uppercase tracking-tight">
+                                                    {{ $training->starts_at->format('H:i') }} - {{ $training->ends_at->format('H:i') }}
+                                                </div>
+                                                <div class="text-sm text-slate-500 flex items-center mt-1">
+                                                    <i class="fa-light fa-location-dot mr-2 text-primary opacity-70"></i>
+                                                    {{ $training->location ?? __('trainings.location_not_specified') }}
+                                                </div>
+                                                @if($training->notes)
+                                                    <div class="text-xs text-slate-400 mt-2 italic flex items-start gap-2">
+                                                        <i class="fa-light fa-circle-info mt-0.5 text-primary"></i>
+                                                        {{ $training->notes }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
+                            @endif
                         </div>
-                    @endif
+                    @endforeach
                 </div>
-            @endforeach
-        </div>
-    @endif
+            @endif
+
+            {{-- Practical Info & Map --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div class="lg:col-span-1 space-y-8">
+                    <div>
+                        <h2 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-6">{{ __('trainings.practical_info') }}</h2>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                    <i class="fa-light fa-shoe-prints"></i>
+                                </div>
+                                <span class="text-sm font-bold text-secondary uppercase tracking-tight mt-2">{{ __('trainings.shoes') }}</span>
+                            </li>
+                            <li class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                    <i class="fa-light fa-shirt"></i>
+                                </div>
+                                <span class="text-sm font-bold text-secondary uppercase tracking-tight mt-2">{{ __('trainings.clothing') }}</span>
+                            </li>
+                            <li class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                    <i class="fa-light fa-bottle-water"></i>
+                                </div>
+                                <span class="text-sm font-bold text-secondary uppercase tracking-tight mt-2">{{ __('trainings.water') }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <h2 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-6">{{ __('trainings.where_we_train') }}</h2>
+                    <div class="card h-[400px] bg-slate-100 relative overflow-hidden border-2 border-slate-200">
+                        @if($branding['venue']['map_url'] ?? null)
+                            <iframe src="{{ $branding['venue']['map_url'] }}"
+                                    class="absolute inset-0 w-full h-full"
+                                    style="border:0;"
+                                    allowfullscreen=""
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    aria-label="{{ app()->getLocale() === 'cs' ? 'Mapa haly' : 'Gym map' }} – {{ $branding['venue']['name'] ?? '' }}">
+                            </iframe>
+                        @else
+                            <div class="flex items-center justify-center h-full text-slate-400 italic">
+                                {{ __('contact.map_not_available') ?? 'Mapa není k dispozici' }}
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

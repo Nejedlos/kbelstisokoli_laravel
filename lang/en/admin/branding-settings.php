@@ -14,6 +14,10 @@ return [
         'maintenance_desc' => 'Activate if you are still preparing the website. Visitors will see a stylish and funny basketball-themed page.',
         'seo' => 'Global SEO Settings',
         'seo_desc' => 'Default values for search engines and social networks, used if not filled for a specific page.',
+        'venue' => 'Venue & Practical Info',
+        'venue_desc' => 'Set up details about your home arena and match schedules here.',
+        'public_contact' => 'Team Management (Public Contact)',
+        'public_contact_desc' => 'Detailed contact information for the public (Contact page).',
     ],
     'fields' => [
         'theme_preset' => 'Color Theme (Preset)',
@@ -53,6 +57,17 @@ return [
         'seo_og_image_help' => 'Image displayed when sharing on social networks (recommended 1200x630px).',
         'seo_robots_index' => 'Index Website (Robots Index)',
         'seo_robots_follow' => 'Follow Links (Robots Follow)',
+        'venue_name' => 'Venue Name',
+        'venue_street' => 'Street & No.',
+        'venue_city' => 'City Part / City',
+        'venue_gps' => 'GPS Coordinates',
+        'venue_map_url' => 'Google Maps Link',
+        'match_day' => 'Main Match Day',
+        'contact_person' => 'Contact Person (Name)',
+        'contact_role' => 'Role in Team',
+        'contact_street' => 'Street',
+        'contact_city' => 'City',
+        'contact_fax' => 'Fax',
     ],
     'options' => [
         'header' => [

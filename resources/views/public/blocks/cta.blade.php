@@ -81,12 +81,20 @@
                 @endif
 
                 @if($data['secondary_button_text'] ?? null)
-                    <a href="{{ $data['secondary_button_url'] ?? '#' }}" @class([
+                    @php
+                        $isExternal = isset($data['secondary_button_url']) && str_contains($data['secondary_button_url'], 'basketkbely.cz');
+                    @endphp
+                    <a href="{{ $data['secondary_button_url'] ?? '#' }}"
+                       @if($isExternal) target="_blank" rel="noopener" @endif
+                       @class([
                         'btn px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl font-black transition-all duration-300 transform hover:scale-105 group w-full sm:w-auto',
                         'btn-outline-white' => in_array($style, ['primary', 'secondary']),
                         'btn-outline-primary' => in_array($style, ['outline', 'light']),
                     ])>
                         <span>{{ $data['secondary_button_text'] }}</span>
+                        @if($isExternal)
+                            <i class="fa-light fa-arrow-up-right ml-3 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform text-sm opacity-70"></i>
+                        @endif
                     </a>
                 @endif
             </div>

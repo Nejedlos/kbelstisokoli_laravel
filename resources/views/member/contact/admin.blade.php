@@ -63,7 +63,7 @@
                                         <div>
                                             <i class="fa-light fa-envelope text-primary mr-1.5"></i>
                                             @if(!empty($adminContact['email']))
-                                                <a href="mailto:{{ $adminContact['email'] }}" class="font-bold hover:underline">{{ $adminContact['email'] }}</a>
+                                                <x-mailto :email="$adminContact['email']" class="font-bold hover:underline" />
                                             @else
                                                 <span class="text-slate-400">{{ __('member.feedback.contact_card.not_available') }}</span>
                                             @endif

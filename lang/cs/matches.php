@@ -1,0 +1,21 @@
+<?php
+return [
+    'title' => 'Zápasy',
+    'subtitle' => 'Sledujte výsledky a rozpis utkání našich týmů.',
+    'breadcrumbs' => 'Zápasy',
+    'upcoming' => 'Nadcházející',
+    'latest' => 'Poslední výsledky',
+    'empty_upcoming' => 'Žádné nadcházející zápasy',
+    'empty_latest' => 'Žádné odehrané zápasy',
+    'empty_subtitle' => 'Aktuálně v této kategorii nemáme žádné záznamy.',
+    'view_detail' => 'Detail zápasu',
+    'date_time' => 'Datum a čas',
+    'location' => 'Místo',
+    'opponent' => 'Soupeř',
+    'score' => 'Skóre',
+    'vs' => 'vs',
+    'planned' => 'Plánováno',
+    'completed' => 'Odehráno',
+    'cancelled' => 'Zrušeno',
+    'postponed' => 'Odloženo',
+];

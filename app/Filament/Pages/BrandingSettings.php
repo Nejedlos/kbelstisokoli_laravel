@@ -241,6 +241,45 @@ class BrandingSettings extends Page implements HasForms
                                     ->default(true),
                             ]),
                     ]),
+
+                Section::make(__('admin/branding-settings.sections.venue'))
+                    ->description(__('admin/branding-settings.sections.venue_desc'))
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('venue_name')
+                                    ->label(__('admin/branding-settings.fields.venue_name')),
+                                TextInput::make('match_day')
+                                    ->label(__('admin/branding-settings.fields.match_day')),
+                                TextInput::make('venue_street')
+                                    ->label(__('admin/branding-settings.fields.venue_street')),
+                                TextInput::make('venue_city')
+                                    ->label(__('admin/branding-settings.fields.venue_city')),
+                                TextInput::make('venue_gps')
+                                    ->label(__('admin/branding-settings.fields.venue_gps')),
+                                TextInput::make('venue_map_url')
+                                    ->label(__('admin/branding-settings.fields.venue_map_url'))
+                                    ->url(),
+                            ]),
+                    ]),
+
+                Section::make(__('admin/branding-settings.sections.public_contact'))
+                    ->description(__('admin/branding-settings.sections.public_contact_desc'))
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('contact_person')
+                                    ->label(__('admin/branding-settings.fields.contact_person')),
+                                TextInput::make('contact_role')
+                                    ->label(__('admin/branding-settings.fields.contact_role')),
+                                TextInput::make('contact_street')
+                                    ->label(__('admin/branding-settings.fields.contact_street')),
+                                TextInput::make('contact_city')
+                                    ->label(__('admin/branding-settings.fields.contact_city')),
+                                TextInput::make('contact_fax')
+                                    ->label(__('admin/branding-settings.fields.contact_fax')),
+                            ]),
+                    ]),
             ]);
     }
 

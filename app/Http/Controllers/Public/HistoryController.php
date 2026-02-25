@@ -9,6 +9,7 @@ class HistoryController extends Controller
 {
     public function index(): View
     {
-        return view('public.history.index');
+        $page = \App\Models\Page::where('slug', 'historie')->first();
+        return view('public.history.index', compact('page'));
     }
 }

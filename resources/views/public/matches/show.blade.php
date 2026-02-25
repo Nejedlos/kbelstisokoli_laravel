@@ -9,17 +9,17 @@
             'postponed' => 'bg-warning text-black',
         ];
         $statusLabels = [
-            'planned' => 'Plánováno',
-            'completed' => 'Odehráno',
-            'cancelled' => 'Zrušeno',
-            'postponed' => 'Odloženo',
+            'planned' => __('matches.planned'),
+            'completed' => __('matches.completed'),
+            'cancelled' => __('matches.cancelled'),
+            'postponed' => __('matches.postponed'),
         ];
     @endphp
 
     <x-page-header
-        :title="$match->team->name . ' vs ' . $match->opponent->name"
-        :subtitle="$match->scheduled_at->format('d. m. Y H:i') . ' | ' . ($match->location ?? 'Místo neuvedeno')"
-        :breadcrumbs="['Zápasy' => route('public.matches.index'), 'Detail zápasu' => null]"
+        :title="$match->team->name . ' ' . __('matches.vs') . ' ' . $match->opponent->name"
+        :subtitle="$match->scheduled_at->format('d. m. Y H:i') . ' | ' . ($match->location ?? __('matches.location_not_specified'))"
+        :breadcrumbs="[__('matches.breadcrumbs') => route('public.matches.index'), __('matches.view_detail') => null]"
     />
 
     <div class="section-padding bg-bg">
@@ -109,7 +109,7 @@
                     @if($match->notes_public)
                         <section class="card p-8">
                             <h2 class="text-2xl font-black uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
-                                Informace k zápasu
+                                {{ app()->getLocale() === 'cs' ? 'Informace k zápasu' : 'Match information' }}
                             </h2>
                             <div class="prose prose-slate max-w-none prose-headings:font-display prose-headings:uppercase prose-headings:tracking-tight prose-a:text-primary">
                                 {!! nl2br(e($match->notes_public)) !!}
@@ -119,11 +119,11 @@
 
                     <section class="card p-8">
                         <h2 class="text-2xl font-black uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
-                            Reportáž ze zápasu
+                            {{ app()->getLocale() === 'cs' ? 'Reportáž ze zápasu' : 'Match report' }}
                         </h2>
                         <x-empty-state
-                            title="Reportáž připravujeme"
-                            subtitle="Podrobné statistiky a komentář k zápasu budou doplněny co nejdříve po jeho skončení."
+                            :title="app()->getLocale() === 'cs' ? 'Reportáž připravujeme' : 'Report in preparation'"
+                            :subtitle="app()->getLocale() === 'cs' ? 'Podrobné statistiky a komentář k zápasu budou doplněny co nejdříve po jeho skončení.' : 'Detailed statistics and match commentary will be added as soon as possible after the game.'"
                         />
                     </section>
                 </div>
@@ -132,22 +132,22 @@
                 <div class="space-y-8">
                     <!-- Additional Info Widget -->
                     <aside class="card p-6 bg-secondary text-white">
-                        <h3 class="text-lg font-black uppercase tracking-tight mb-4 text-primary">Důležité info</h3>
+                        <h3 class="text-lg font-black uppercase tracking-tight mb-4 text-primary">{{ app()->getLocale() === 'cs' ? 'Důležité info' : 'Important info' }}</h3>
                         <ul class="space-y-4 text-sm font-medium">
                             <li class="flex justify-between border-b border-white/10 pb-2">
-                                <span class="opacity-60">Sraz týmu:</span>
+                                <span class="opacity-60">{{ app()->getLocale() === 'cs' ? 'Sraz týmu:' : 'Team meeting:' }}</span>
                                 <span>{{ $match->scheduled_at->subMinutes(60)->format('H:i') }}</span>
                             </li>
                             <li class="flex justify-between border-b border-white/10 pb-2">
-                                <span class="opacity-60">Dresy:</span>
-                                <span>{{ $match->is_home ? 'Bílá (Světlá)' : 'Tmavá' }}</span>
+                                <span class="opacity-60">{{ app()->getLocale() === 'cs' ? 'Dresy:' : 'Jerseys:' }}</span>
+                                <span>{{ $match->is_home ? (app()->getLocale() === 'cs' ? 'Bílá (Světlá)' : 'White (Light)') : (app()->getLocale() === 'cs' ? 'Tmavá' : 'Dark') }}</span>
                             </li>
                         </ul>
                     </aside>
 
                     <!-- Back Link -->
-                    <a href="{{ route('public.matches.index') }}" class="btn btn-outline w-full py-4 uppercase tracking-widest font-black text-sm">
-                        &larr; Zpět na seznam zápasů
+                    <a href="{{ route('public.matches.index') }}" class="btn btn-outline-primary w-full py-4 uppercase tracking-widest font-black text-sm">
+                        &larr; {{ app()->getLocale() === 'cs' ? 'Zpět na seznam zápasů' : 'Back to match list' }}
                     </a>
                 </div>
             </div>

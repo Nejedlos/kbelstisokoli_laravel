@@ -42,12 +42,12 @@
                     </p>
                 </div>
 
-                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive text-white/50 badge-nowrap max-w-full overflow-hidden leading-none">
-                    <span class="inline-flex items-center justify-center h-2 w-2 mr-3 shrink-0 relative">
+                <div class="inline-flex items-center bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg text-[min(3.2vw,10px)] sm:text-[10px] font-black uppercase tracking-widest-responsive text-white/50 badge-nowrap max-w-full overflow-hidden">
+                    <span class="flex items-center justify-center h-2 w-2 mr-3 shrink-0 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                     </span>
-                    <span class="leading-none">{{ __('footer.brand_badge') }}</span>
+                    <span>{{ __('footer.brand_badge') }}</span>
                 </div>
             </div>
 
@@ -93,16 +93,18 @@
                 </h3>
                 <ul class="space-y-4">
                     @forelse($clubNav as $item)
-                        <li>
-                            @php $isExternal = str_starts_with($item->url, 'http'); @endphp
+                        @php $isExternal = str_starts_with($item->url, 'http'); @endphp
+                        <li class="{{ $isExternal ? 'pb-1' : '' }}">
                             <a href="{{ $item->url }}"
                                @if($isExternal) target="_blank" rel="noopener" @endif
-                               class="hover:text-primary transition-all flex items-center justify-between group">
-                                <span class="font-medium">{{ $item->label }}</span>
+                               class="group flex items-center justify-between transition-all duration-300 {{ $isExternal ? 'bg-white/5 border border-white/10 py-2 px-4 rounded-xl hover:bg-primary/10 hover:border-primary/20 hover:text-white' : 'hover:text-primary py-1' }}">
+                                <span class="{{ $isExternal ? 'font-bold text-sm tracking-tight' : 'font-medium text-sm' }}">{{ $item->label }}</span>
                                 @if($isExternal)
-                                    <i class="fa-light fa-arrow-up-right text-xs opacity-30 group-hover:opacity-100 transition-opacity"></i>
+                                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                                        <i class="fa-light fa-arrow-up-right text-[10px]"></i>
+                                    </span>
                                 @else
-                                    <i class="fa-light fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                    <i class="fa-light fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                                 @endif
                             </a>
                         </li>
@@ -126,12 +128,26 @@
 
                 <div class="space-y-6">
                     <ul class="space-y-4 text-sm">
+                        @if($branding['venue']['name'] ?? null)
+                            <li class="flex items-center gap-4 group">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
+                                    <i class="fa-light fa-basketball-hoop"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white leading-tight">{{ $branding['venue']['name'] }}</div>
+                                    @if($branding['match_day'] ?? null)
+                                        <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">{{ $branding['match_day'] }}</div>
+                                    @endif
+                                </div>
+                            </li>
+                        @endif
+
                         @if(data_get($branding, 'contact.email'))
                             <li class="flex items-center gap-4 group">
-                                <a href="mailto:{{ $branding['contact']['email'] }}" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                <x-mailto :email="$branding['contact']['email']" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
                                     <i class="fa-light fa-envelope"></i>
-                                </a>
-                                <a href="mailto:{{ $branding['contact']['email'] }}" class="hover:text-primary transition-colors font-bold break-all py-2">{{ $branding['contact']['email'] }}</a>
+                                </x-mailto>
+                                <x-mailto :email="$branding['contact']['email']" class="hover:text-primary transition-colors font-bold break-all py-2" />
                             </li>
                         @endif
 
@@ -156,8 +172,9 @@
                         <a href="{{ route('public.contact.index') }}" class="btn btn-primary btn-sm px-6">
                             <span>{{ __('footer.contact_page_cta') }}</span>
                         </a>
-                        <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-white btn-sm px-6">
+                        <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-white btn-sm px-6 group">
                             <span>{{ __('footer.contact_club_cta') }}</span>
+                            <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70"></i>
                         </a>
                     </div>
 
@@ -196,7 +213,7 @@
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
 
-                <a href="{{ url('/gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center">
+                <a href="{{ route('public.pages.show', 'gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     {{ __('Ochrana soukromí') }}
                 </a>

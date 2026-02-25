@@ -185,7 +185,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
     })->create();
 
-$app->useEnvironmentPath($app->basePath('public'));
+// Na lokále preferujeme .env v kořeni, na produkci (dle Envoy/Sync) může být v public/
+$app->useEnvironmentPath(file_exists(base_path('.env')) ? base_path() : base_path('public'));
 
 // Oprava kompatibility: usePublicPath voláme až na instanci Application,
 // protože ApplicationBuilder ji v této verzi frameworku nemusí podporovat.

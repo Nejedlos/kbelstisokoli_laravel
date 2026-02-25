@@ -14,6 +14,10 @@ return [
         'maintenance_desc' => 'Aktivujte, pokud web teprve připravujete. Návštěvníkům se zobrazí stylová a vtipná stránka s basketbalovou tématikou.',
         'seo' => 'Globální SEO nastavení',
         'seo_desc' => 'Výchozí hodnoty pro vyhledávače a sociální sítě, které se použijí, pokud nejsou vyplněny u konkrétní stránky.',
+        'venue' => 'Hala a praktické informace',
+        'venue_desc' => 'Zde nastavte údaje o vaší domovské aréně a termíny zápasů.',
+        'public_contact' => 'Vedení týmu (Veřejný kontakt)',
+        'public_contact_desc' => 'Podrobné kontaktní údaje pro veřejnost (stránka Kontakt).',
     ],
     'fields' => [
         'theme_preset' => 'Barevné téma (Preset)',
@@ -53,6 +57,17 @@ return [
         'seo_og_image_help' => 'Obrázek, který se zobrazí při sdílení na sociálních sítích (doporučeno 1200x630px).',
         'seo_robots_index' => 'Indexovat web (Robots Index)',
         'seo_robots_follow' => 'Sledovat odkazy (Robots Follow)',
+        'venue_name' => 'Název haly',
+        'venue_street' => 'Ulice a č.p.',
+        'venue_city' => 'Část obce / Město',
+        'venue_gps' => 'GPS souřadnice',
+        'venue_map_url' => 'Odkaz na Google Maps',
+        'match_day' => 'Hlavní hrací den',
+        'contact_person' => 'Kontaktní osoba (Jméno)',
+        'contact_role' => 'Role v týmu',
+        'contact_street' => 'Ulice',
+        'contact_city' => 'Město',
+        'contact_fax' => 'Fax',
     ],
     'options' => [
         'header' => [

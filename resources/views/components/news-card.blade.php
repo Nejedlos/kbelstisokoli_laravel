@@ -5,7 +5,12 @@
 <article class="card card-hover flex flex-col h-full">
     @if($post->featured_image)
         <div class="aspect-video overflow-hidden">
-            <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+            <x-picture
+                :src="'storage/' . $post->featured_image"
+                :alt="$post->title"
+                class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                loading="lazy"
+            />
         </div>
     @endif
 
@@ -34,7 +39,7 @@
 
         <div class="mt-auto">
             <a href="{{ route('public.news.show', $post->slug) }}" class="inline-flex items-center text-sm font-black uppercase tracking-widest text-secondary hover:text-primary transition-colors">
-                Číst více
+                {{ __('news.view_detail') }}
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
                 </svg>

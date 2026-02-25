@@ -55,6 +55,23 @@ class BrandingService
             ],
             'main_club_url' => $dbSettings['main_club_url'] ?? $cfg['main_club_url'] ?? 'https://www.basketkbely.cz/',
             'recruitment_url' => $dbSettings['recruitment_url'] ?? $cfg['recruitment_url'] ?? 'https://www.basketkbely.cz/nabor',
+            'venue' => [
+                'name' => $dbSettings['venue_name'] ?? null,
+                'street' => $dbSettings['venue_street'] ?? null,
+                'city' => $dbSettings['venue_city'] ?? null,
+                'gps' => $dbSettings['venue_gps'] ?? null,
+                'map_url' => $dbSettings['venue_map_url'] ?? null,
+            ],
+            'match_day' => $dbSettings['match_day'] ?? null,
+            'public_contact' => [
+                'person' => $dbSettings['contact_person'] ?? null,
+                'role' => $dbSettings['contact_role'] ?? null,
+                'street' => $dbSettings['contact_street'] ?? null,
+                'city' => $dbSettings['contact_city'] ?? null,
+                'phone' => $dbSettings['contact_phone'] ?? null, // Use the one already in dbSettings
+                'fax' => $dbSettings['contact_fax'] ?? null,
+                'email' => $dbSettings['contact_email'] ?? null, // Use the one already in dbSettings
+            ],
             'maintenance_mode' => filter_var($dbSettings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'maintenance_title' => $dbSettings['maintenance_title'] ?? __('Trenér právě kreslí vítěznou taktiku pro náš nový web.'),
             'maintenance_text' => $dbSettings['maintenance_text'] ?? __('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),

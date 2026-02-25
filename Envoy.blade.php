@@ -216,12 +216,19 @@
         echo "Building assets..."
         npm run build
 
-        # Zajištění, aby build byl v subdoméně, ale i pro PHP dostupné v public_path()
-        if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ] && [ ! -L "{{ $public_path }}" ]; then
-            echo "Copying build to custom public path: {{ $public_path }}/build"
-            mkdir -p "{{ $public_path }}/build"
-            cp -r public/build/* "{{ $public_path }}/build/"
-        fi
+    # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
+    if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ] && [ ! -L "{{ $public_path }}" ]; then
+        for dir in build assets css js fonts vendor; do
+            if [ -d "public/$dir" ]; then
+                echo "Syncing $dir to custom public path: {{ $public_path }}/$dir"
+                rm -rf "{{ $public_path }}/$dir"
+                mkdir -p "{{ $public_path }}/$dir"
+                cp -rf public/$dir/* "{{ $public_path }}/$dir/"
+            fi
+        done
+        # Také zkopírovat jednotlivé soubory v public/ (kromě indexů, ty jsou řešeny patchováním)
+        cp -rf public/*.{png,ico,xml,json,txt,webmanifest} "{{ $public_path }}/" 2>/dev/null || true
+    fi
 
         echo "Cleaning up cache..."
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
@@ -416,11 +423,18 @@
     echo "Building assets..."
     npm run build
 
-    # Zajištění, aby build byl v subdoméně
+    # Zajištění, aby build a assety byly v subdoméně
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ] && [ ! -L "{{ $public_path }}" ]; then
-        echo "Copying build to custom public path: {{ $public_path }}/build"
-        mkdir -p "{{ $public_path }}/build"
-        cp -r public/build/* "{{ $public_path }}/build/"
+        for dir in build assets css js fonts vendor; do
+            if [ -d "public/$dir" ]; then
+                echo "Syncing $dir to custom public path: {{ $public_path }}/$dir"
+                rm -rf "{{ $public_path }}/$dir"
+                mkdir -p "{{ $public_path }}/$dir"
+                cp -rf public/$dir/* "{{ $public_path }}/$dir/"
+            fi
+        done
+        # Také zkopírovat jednotlivé soubory v public/ (kromě indexů, ty jsou řešeny patchováním)
+        cp -rf public/*.{png,ico,xml,json,txt,webmanifest} "{{ $public_path }}/" 2>/dev/null || true
     fi
 
     {{ $php }} artisan app:icons:sync
@@ -513,10 +527,17 @@
             echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
         fi
 
-        if [ ! -L "{{ $public_path }}" ] && [ -d "public/build" ]; then
-            echo "Copying local assets (build) to custom public path: {{ $public_path }}"
-            mkdir -p "{{ $public_path }}/build"
-            cp -rf public/build/* "{{ $public_path }}/build/"
+        if [ ! -L "{{ $public_path }}" ]; then
+            for dir in build assets css js fonts vendor; do
+                if [ -d "public/$dir" ]; then
+                    echo "Syncing local $dir to custom public path: {{ $public_path }}/$dir"
+                    rm -rf "{{ $public_path }}/$dir"
+                    mkdir -p "{{ $public_path }}/$dir"
+                    cp -rf public/$dir/* "{{ $public_path }}/$dir/"
+                fi
+            done
+            # Také zkopírovat jednotlivé soubory v public/ (kromě indexů, ty jsou řešeny patchováním)
+            cp -rf public/*.{png,ico,xml,json,txt,webmanifest} "{{ $public_path }}/" 2>/dev/null || true
         fi
 
         echo "Patching index.php for absolute paths..."

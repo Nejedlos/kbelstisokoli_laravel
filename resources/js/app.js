@@ -73,5 +73,34 @@ window.initButtonSpinners = () => {
     });
 };
 
-document.addEventListener('DOMContentLoaded', window.initButtonSpinners);
-document.addEventListener('livewire:navigated', window.initButtonSpinners);
+// Email Protection Logic
+window.initEmailProtection = () => {
+    document.querySelectorAll('[data-protected-email]').forEach(el => {
+        if (el.dataset.emailInit) return;
+        el.dataset.emailInit = "1";
+
+        try {
+            const encoded = el.dataset.protectedEmail;
+            const email = atob(encoded);
+
+            el.setAttribute('href', `mailto:${email}`);
+
+            // Replace placeholder in text if present
+            if (el.textContent.includes('[email]')) {
+                el.innerHTML = el.innerHTML.replace('[email]', email);
+            }
+        } catch (e) {
+            console.error('Email protection failed', e);
+        }
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.initButtonSpinners();
+    window.initEmailProtection();
+});
+
+document.addEventListener('livewire:navigated', () => {
+    window.initButtonSpinners();
+    window.initEmailProtection();
+});

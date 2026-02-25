@@ -66,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
 
             // Přidání SEO metadat pro public layout, pokud už nejsou nastaveny
             if ($audience === 'public' && !isset($view->seo)) {
-                $model = $view->page ?? $view->post ?? $view->news ?? null;
+                $model = $view->page ?? $view->post ?? $view->news ?? $view->team ?? null;
                 $view->with('seo', $seoService->getMetadata($model));
             }
 

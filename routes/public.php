@@ -34,10 +34,14 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
 
     // Týmy (plural hlavní přehled)
     Route::get('/tymy', [TeamController::class, 'index'])->name('teams.index');
+    Route::get('/tymy/{slug}', [TeamController::class, 'show'])->name('teams.show');
 
     // Zpětná kompatibilita: /tym -> 301 redirect na /tymy
     Route::get('/tym', function () {
         return redirect('/tymy', 301);
+    });
+    Route::get('/tym/{slug}', function ($slug) {
+        return redirect('/tymy/' . $slug, 301);
     });
 
     // Galerie
@@ -54,7 +58,13 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
     Route::post('/kontakt', [\App\Http\Controllers\PublicLeadController::class, 'storeContact'])->name('contact.store')->middleware('throttle:5,1');
 
-    // Nábor – GET je obsloužen generickými stránkami (PageController) přes slug `nabor`
+    // Nábor – GET (statická landing page)
+    Route::get('/nabor', function () {
+        $page = \App\Models\Page::where('slug', 'nabor')->first();
+        return view('public.recruitment', compact('page'));
+    })->name('recruitment.index');
+
+    // Nábor – POST (zpracování leadu)
     Route::post('/nabor', [\App\Http\Controllers\PublicLeadController::class, 'storeRecruitment'])->name('recruitment.store')->middleware('throttle:5,1');
 
     // Vyhledávání

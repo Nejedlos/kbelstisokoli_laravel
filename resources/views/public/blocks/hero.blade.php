@@ -139,8 +139,14 @@
                     @endif
 
                     @if($data['cta_secondary_label'] ?? null)
-                        <a href="{{ $data['cta_secondary_url'] ?? '#' }}" class="btn btn-outline-white w-full sm:w-auto">
+                        @php $isExternalSecondary = str_contains($data['cta_secondary_url'] ?? '', 'basketkbely.cz'); @endphp
+                        <a href="{{ $data['cta_secondary_url'] ?? '#' }}"
+                           @if($isExternalSecondary) target="_blank" rel="noopener" @endif
+                           class="btn btn-outline-white w-full sm:w-auto group">
                             <span>{{ $data['cta_secondary_label'] }}</span>
+                            @if($isExternalSecondary)
+                                <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70"></i>
+                            @endif
                         </a>
                     @endif
 
@@ -150,7 +156,7 @@
                                 {{ $data['cta_tertiary_label'] }}
                             </span>
                             <span class="w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-primary/40">
-                                <i class="fa-solid fa-arrow-up-right text-lg sm:text-sm text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300"></i>
+                                <i class="fa-light fa-arrow-up-right text-lg sm:text-sm text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300"></i>
                             </span>
                         </a>
                     @endif

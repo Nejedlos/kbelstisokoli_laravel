@@ -2,9 +2,9 @@
 
 @section('content')
     <x-page-header
-        title="Kontakt"
-        subtitle="Zde nás najdete. Neváhejte se na nás obrátit s jakýmkoliv dotazem."
-        :breadcrumbs="['Kontakt' => null]"
+        :title="__('contact.title')"
+        :subtitle="__('contact.subtitle')"
+        :breadcrumbs="[__('contact.breadcrumbs') => null]"
     />
 
     <div class="section-padding bg-bg">
@@ -13,23 +13,96 @@
                 <!-- Contact Info -->
                 <div class="lg:col-span-1 space-y-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-6">Spojte se s námi</h2>
+                        <h2 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-6">{{ __('contact.connect_with_us') }}</h2>
                         <p class="text-slate-600 mb-8 leading-relaxed">
-                            Máte dotaz k náboru, tréninkům nebo zápasům? Jsme tu pro vás.
+                            {{ __('contact.connect_desc') }}
                         </p>
                     </div>
 
                     <div class="space-y-6">
-                        @if($branding['contact']['address'] ?? null)
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 rounded-club bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                        {{-- Vedoucí týmu --}}
+                        @if($branding['public_contact']['person'] ?? null)
+                            <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm mb-8">
+                                <h4 class="font-black uppercase tracking-widest text-[10px] text-primary mb-4">{{ __('contact.team_leader') ?? 'Vedoucí týmu' }}</h4>
+                                <div class="space-y-4">
+                                    <div class="font-bold text-secondary text-lg">{{ $branding['public_contact']['person'] }}</div>
+                                    @if($branding['public_contact']['role'] ?? null)
+                                        <div class="text-xs font-bold uppercase text-slate-400 -mt-3">{{ $branding['public_contact']['role'] }}</div>
+                                    @endif
+
+                                    <div class="pt-2 space-y-2">
+                                        @if($branding['public_contact']['street'] ?? null)
+                                            <div class="flex items-center text-sm text-slate-600">
+                                                <i class="fa-light fa-location-dot w-5 text-primary opacity-70"></i>
+                                                <span>{{ $branding['public_contact']['street'] }}, {{ $branding['public_contact']['city'] }}</span>
+                                            </div>
+                                        @endif
+                                        @if($branding['public_contact']['phone'] ?? null)
+                                            <div class="flex items-center text-sm text-slate-600">
+                                                <i class="fa-light fa-phone w-5 text-primary opacity-70"></i>
+                                                <a href="tel:{{ str_replace(' ', '', $branding['public_contact']['phone']) }}" class="hover:text-primary transition-colors">{{ $branding['public_contact']['phone'] }}</a>
+                                            </div>
+                                        @endif
+                                        @if($branding['public_contact']['fax'] ?? null)
+                                            <div class="flex items-center text-sm text-slate-600">
+                                                <i class="fa-light fa-fax w-5 text-primary opacity-70"></i>
+                                                <span>{{ $branding['public_contact']['fax'] }}</span>
+                                            </div>
+                                        @endif
+                                        @if($branding['public_contact']['email'] ?? null)
+                                            <div class="flex items-center text-sm text-slate-600">
+                                                <i class="fa-light fa-envelope w-5 text-primary opacity-70"></i>
+                                                <x-mailto :email="$branding['public_contact']['email']" class="hover:text-primary transition-colors" />
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($branding['venue']['name'] ?? null)
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <i class="fa-light fa-basketball-hoop text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-black uppercase tracking-widest text-xs text-slate-400 mb-1">Adresa</h4>
+                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.venue') ?? 'Hala / Aréna' }}</h4>
+                                    <div class="font-bold text-secondary tracking-tight">
+                                        {{ $branding['venue']['name'] }}
+                                    </div>
+                                    <div class="text-sm text-slate-500">
+                                        {{ $branding['venue']['street'] }}, {{ $branding['venue']['city'] }}
+                                    </div>
+                                    @if($branding['venue']['gps'] ?? null)
+                                        <div class="text-[10px] font-mono text-slate-400 mt-1">
+                                            GPS: {{ $branding['venue']['gps'] }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($branding['match_day'] ?? null)
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <i class="fa-light fa-calendar-star text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.match_day') ?? 'Hlavní hrací den' }}</h4>
+                                    <div class="font-bold text-secondary tracking-tight">
+                                        {{ $branding['match_day'] }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($branding['contact']['address'] ?? null)
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <i class="fa-light fa-location-dot text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.address') }}</h4>
                                     <address class="not-italic font-bold text-secondary tracking-tight">
                                         {!! nl2br(e($branding['contact']['address'])) !!}
                                     </address>
@@ -38,30 +111,24 @@
                         @endif
 
                         @if($branding['contact']['email'] ?? null)
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 rounded-club bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <i class="fa-light fa-envelope text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-black uppercase tracking-widest text-xs text-slate-400 mb-1">Email</h4>
-                                    <a href="mailto:{{ $branding['contact']['email'] }}" class="font-bold text-secondary tracking-tight hover:text-primary transition-colors">
-                                        {{ $branding['contact']['email'] }}
-                                    </a>
+                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.email') }}</h4>
+                                    <x-mailto :email="$branding['contact']['email']" class="font-bold text-secondary tracking-tight hover:text-primary transition-colors" />
                                 </div>
                             </div>
                         @endif
 
                         @if($branding['contact']['phone'] ?? null)
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 rounded-club bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <i class="fa-light fa-phone text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-black uppercase tracking-widest text-xs text-slate-400 mb-1">Telefon</h4>
+                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.phone') }}</h4>
                                     <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="font-bold text-secondary tracking-tight hover:text-primary transition-colors">
                                         {{ $branding['contact']['phone'] }}
                                     </a>
@@ -72,46 +139,69 @@
 
                     <!-- Social Icons -->
                     <div class="pt-8 border-t border-slate-200">
-                        <h4 class="font-black uppercase tracking-widest text-xs text-slate-400 mb-4">Sledujte nás</h4>
-                        <div class="flex space-x-4">
-                            @foreach(['facebook', 'instagram', 'youtube'] as $social)
-                                @if($branding['socials'][$social] ?? null)
-                                    <a href="{{ $branding['socials'][$social] }}" class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center hover:bg-primary transition-colors" target="_blank">
-                                        <span class="sr-only">{{ ucfirst($social) }}</span>
-                                        <div class="font-black text-xs">{{ strtoupper(substr($social, 0, 1)) }}</div>
-                                    </a>
-                                @endif
-                            @endforeach
+                        <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-6">{{ __('contact.follow_us') }}</h4>
+                        <div class="flex gap-4">
+                            @if($branding['socials']['facebook'] ?? null)
+                                <a href="{{ $branding['socials']['facebook'] }}" class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20" target="_blank">
+                                    <i class="fa-brands fa-facebook-f"></i>
+                                </a>
+                            @endif
+                            @if($branding['socials']['instagram'] ?? null)
+                                <a href="{{ $branding['socials']['instagram'] }}" class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20" target="_blank">
+                                    <i class="fa-brands fa-instagram"></i>
+                                </a>
+                            @endif
+                            @if($branding['socials']['youtube'] ?? null)
+                                <a href="{{ $branding['socials']['youtube'] }}" class="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center hover:bg-primary transition-all hover:-translate-y-1 shadow-md hover:shadow-primary/20" target="_blank">
+                                    <i class="fa-brands fa-youtube"></i>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
 
                 <!-- Map & Form Column -->
                 <div class="lg:col-span-2 space-y-12">
-                    <!-- Interactive Map Placeholder -->
-                    <div class="card h-[400px] bg-slate-100 relative overflow-hidden flex items-center justify-center border-2 border-slate-200">
-                        <div class="text-center p-8">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                            </svg>
-                            <h3 class="text-xl font-black uppercase tracking-tight text-slate-400 mb-2">Interaktivní mapa</h3>
-                            <p class="text-slate-400 text-sm">Zde se zobrazí mapa s polohou naší haly.</p>
-                        </div>
+                    <!-- Interactive Map -->
+                    <div class="card h-[400px] bg-slate-100 relative overflow-hidden border-2 border-slate-200">
+                        @if($branding['venue']['map_url'] ?? null)
+                            <iframe src="{{ $branding['venue']['map_url'] }}"
+                                    class="absolute inset-0 w-full h-full"
+                                    style="border:0;"
+                                    allowfullscreen=""
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    aria-label="{{ app()->getLocale() === 'cs' ? 'Mapa haly' : 'Gym map' }} – {{ $branding['venue']['name'] ?? '' }}">
+                            </iframe>
+                        @else
+                            <div class="flex items-center justify-center h-full text-slate-400 italic">
+                                {{ __('contact.map_not_available') ?? 'Mapa není k dispozici' }}
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Simple Contact Info / CTA -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="bg-primary text-white p-8 rounded-club shadow-lg relative overflow-hidden">
-                            <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full"></div>
-                            <h3 class="text-xl font-black uppercase tracking-tight mb-2">Chcete hrát?</h3>
-                            <p class="text-white/80 text-sm mb-6">Pořádáme nábor nových hráčů do všech kategorií. Přijďte si vyzkoušet trénink zdarma!</p>
-                            <a href="#" class="inline-block font-black uppercase tracking-widest text-xs border-b-2 border-white pb-1 hover:text-secondary hover:border-secondary transition-colors">Více informací &rarr;</a>
+                        <div class="bg-primary text-white p-10 rounded-[2.5rem] shadow-xl shadow-primary/20 relative overflow-hidden group">
+                            <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                            <i class="fa-light fa-basketball fa-4xl absolute -top-4 -right-4 opacity-10 rotate-12"></i>
+
+                            <h3 class="text-2xl font-black uppercase tracking-tighter mb-4">{{ __('contact.want_to_play') }}</h3>
+                            <p class="text-white/80 mb-8 leading-relaxed">{{ __('contact.want_to_play_desc') }}</p>
+                            <a href="{{ route('public.recruitment.index') }}" class="btn bg-white text-primary hover:bg-secondary hover:text-white px-8">
+                                {{ __('contact.more_info') }}
+                            </a>
                         </div>
-                        <div class="bg-secondary text-white p-8 rounded-club shadow-lg relative overflow-hidden">
-                            <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full"></div>
-                            <h3 class="text-xl font-black uppercase tracking-tight mb-2">Napište nám</h3>
-                            <p class="text-white/80 text-sm mb-6">Máte-li jakýkoliv jiný dotaz, napište nám na email nebo zavolejte.</p>
-                            <a href="mailto:{{ $branding['contact']['email'] ?? '' }}" class="inline-block font-black uppercase tracking-widest text-xs border-b-2 border-white pb-1 hover:text-primary hover:border-primary transition-colors">Poslat email &rarr;</a>
+
+                        <div class="bg-secondary text-white p-10 rounded-[2.5rem] shadow-xl shadow-secondary/20 relative overflow-hidden group border border-white/5">
+                            <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-white/5 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                            <i class="fa-light fa-envelope-open-text fa-4xl absolute -top-4 -right-4 opacity-5 rotate-12"></i>
+
+                            <h3 class="text-2xl font-black uppercase tracking-tighter mb-4">{{ __('contact.write_us') }}</h3>
+                            <p class="text-white/80 mb-8 leading-relaxed">{{ __('contact.write_us_desc') }}</p>
+                            <x-mailto :email="$branding['contact']['email'] ?? ''" class="btn btn-primary px-8">
+                                {{ __('contact.send_email') }}
+                            </x-mailto>
                         </div>
                     </div>
                 </div>

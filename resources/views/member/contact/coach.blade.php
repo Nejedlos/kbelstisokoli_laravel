@@ -90,7 +90,7 @@
                                                         <span>
                                                             <i class="fa-light fa-envelope text-primary mr-1"></i>
                                                             @if(!empty($c['email']))
-                                                                <a href="mailto:{{ $c['email'] }}" class="font-bold hover:underline">{{ $c['email'] }}</a>
+                                                                <x-mailto :email="$c['email']" class="font-bold hover:underline" />
                                                             @else
                                                                 <span class="text-slate-400">{{ __('member.feedback.contact_card.not_available') }}</span>
                                                             @endif
@@ -125,7 +125,7 @@
                                                     <div>
                                                         <i class="fa-light fa-envelope text-primary mr-1.5"></i>
                                                         @if(!empty($adminFallback['email']))
-                                                            <a href="mailto:{{ $adminFallback['email'] }}" class="font-bold hover:underline">{{ $adminFallback['email'] }}</a>
+                                                            <x-mailto :email="$adminFallback['email']" class="font-bold hover:underline" />
                                                         @else
                                                             <span class="text-slate-400">{{ __('member.feedback.contact_card.not_available') }}</span>
                                                         @endif

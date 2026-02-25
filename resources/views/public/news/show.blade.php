@@ -4,8 +4,8 @@
     <article>
         <x-page-header
             :title="$post->title"
-            :image="$post->featured_image ? asset('storage/' . $post->featured_image) : null"
-            :breadcrumbs="['Novinky' => route('public.news.index'), $post->title => null]"
+            :image="$post->featured_image ? 'storage/' . $post->featured_image : null"
+            :breadcrumbs="[__('news.breadcrumbs') => route('public.news.index'), $post->title => null]"
         />
 
         <div class="section-padding bg-white">
@@ -38,13 +38,13 @@
                 </div>
 
                 <div class="mt-16 pt-8 border-t border-slate-100 flex items-center justify-between">
-                    <a href="{{ route('public.news.index') }}" class="btn btn-outline py-2 px-6">
-                        &larr; Zpět na novinky
+                    <a href="{{ route('public.news.index') }}" class="btn btn-outline-primary py-2 px-6">
+                        &larr; {{ __('news.back_to_news') }}
                     </a>
 
                     {{-- Placeholder pro social sharing --}}
                     <div class="flex items-center space-x-4">
-                        <span class="text-xs font-black uppercase tracking-widest text-slate-400">Sdílet:</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-slate-400">{{ app()->getLocale() === 'cs' ? 'Sdílet:' : 'Share:' }}</span>
                         <div class="flex space-x-2">
                             <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition-colors cursor-pointer">F</div>
                             <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition-colors cursor-pointer">X</div>

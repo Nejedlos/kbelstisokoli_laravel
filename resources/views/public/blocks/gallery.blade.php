@@ -45,8 +45,8 @@
             </div>
         @else
             <x-empty-state
-                title="Galerie je prázdná"
-                subtitle="Tato galerie zatím neobsahuje žádné viditelné snímky."
+                :title="__('general.blocks.gallery_empty')"
+                :subtitle="__('general.blocks.gallery_empty_desc')"
             />
         @endif
     </div>

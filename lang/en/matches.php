@@ -1,0 +1,21 @@
+<?php
+return [
+    'title' => 'Matches',
+    'subtitle' => 'Follow the results and schedule of our teams\' games.',
+    'breadcrumbs' => 'Matches',
+    'upcoming' => 'Upcoming',
+    'latest' => 'Latest results',
+    'empty_upcoming' => 'No upcoming matches',
+    'empty_latest' => 'No matches played yet',
+    'empty_subtitle' => 'Currently we have no records in this category.',
+    'view_detail' => 'Match details',
+    'date_time' => 'Date and time',
+    'location' => 'Location',
+    'opponent' => 'Opponent',
+    'score' => 'Score',
+    'vs' => 'vs',
+    'planned' => 'Planned',
+    'completed' => 'Completed',
+    'cancelled' => 'Cancelled',
+    'postponed' => 'Postponed',
+];

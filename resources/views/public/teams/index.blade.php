@@ -2,62 +2,156 @@
 
 @section('content')
     <x-page-header
-        title="Naše týmy"
-        subtitle="Přehled všech věkových kategorií našeho basketbalového oddílu."
-        :breadcrumbs="['Týmy' => null]"
+        :title="__('teams.title')"
+        :subtitle="__('teams.subtitle')"
+        :breadcrumbs="[__('teams.breadcrumbs') => null]"
+        image="assets/img/teams/teams-header.jpg"
     />
 
     <div class="section-padding bg-bg">
         <div class="container">
-            @if($teams->isEmpty())
-                <x-empty-state
-                    title="Zatím žádné týmy"
-                    subtitle="Aktuálně připravujeme soupisky pro novou sezónu."
-                />
-            @else
-                @foreach($teams as $category => $categoryTeams)
-                    <div class="mb-16 last:mb-0">
-                        <div class="flex items-center mb-8">
-                            <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mr-6">
-                                {{ match($category) {
-                                    'youth' => 'Mládež',
-                                    'senior' => 'Dospělí',
-                                    default => 'Ostatní'
-                                } }}
-                            </h2>
-                            <div class="flex-1 h-px bg-slate-200"></div>
-                        </div>
+            {{-- Srovnávací blok týmů --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+                @foreach($teams->flatten() as $team)
+                    @if(in_array($team->slug, ['muzi-c', 'muzi-e']))
+                        <div class="card card-hover group flex flex-col h-full border-t-4 {{ $team->slug === 'muzi-c' ? 'border-primary' : 'border-secondary' }}">
+                            <div class="p-8 flex-1">
+                                <div class="flex justify-between items-start mb-6">
+                                    <h3 class="text-3xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors">
+                                        {{ $team->name }}
+                                    </h3>
+                                    <span class="badge badge-outline uppercase tracking-widest text-[10px] py-1 px-3">
+                                        {{ $team->slug === 'muzi-c' ? 'Pražský přebor B' : 'Pražský přebor 3.B' }}
+                                    </span>
+                                </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            @foreach($categoryTeams as $team)
-                                <div class="card card-hover group">
-                                    <div class="bg-secondary p-8 flex items-center justify-center border-b border-white/5 relative overflow-hidden">
-                                        <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                                        <span class="text-6xl font-black text-white opacity-10 group-hover:scale-110 transition-transform duration-500">{{ $team->slug }}</span>
+                                <p class="text-slate-600 mb-8 leading-relaxed">
+                                    {{ $team->description }}
+                                </p>
+
+                                <div class="space-y-4 mb-8">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <i class="fa-light fa-medal text-xs text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.competition') }}</span>
+                                            <span class="text-sm font-bold text-secondary">{{ $team->slug === 'muzi-c' ? 'Pražský přebor B' : 'Pražský přebor 3. třída B' }}</span>
+                                        </div>
                                     </div>
-                                    <div class="p-6">
-                                        <h3 class="text-xl font-black uppercase tracking-tight mb-2 group-hover:text-primary transition-colors">
-                                            {{ $team->name }}
-                                        </h3>
-                                        @if($team->description)
-                                            <p class="text-slate-600 text-sm mb-6 line-clamp-2">{{ $team->description }}</p>
-                                        @endif
 
-                                        <div class="flex items-center justify-between mt-auto">
-                                            <div class="flex -space-x-2">
-                                                @for($i=0; $i<3; $i++)
-                                                    <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">?</div>
-                                                @endfor
-                                            </div>
-                                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Přejít na soupisku &rarr;</span>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <i class="fa-light fa-users text-xs text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.player_type') }}</span>
+                                            <span class="text-sm font-bold text-secondary">
+                                                {{ $team->slug === 'muzi-c' ? __('teams.detail.muzi_c_type') : __('teams.detail.muzi_e_type') }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <i class="fa-light fa-bolt text-xs text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.tempo_atmos') }}</span>
+                                            <span class="text-sm font-bold text-secondary">
+                                                {{ $team->slug === 'muzi-c' ? __('teams.detail.muzi_c_tempo') : __('teams.detail.muzi_e_tempo') }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+
+                                <a href="{{ route('public.teams.show', $team->slug) }}" class="btn btn-primary w-full">
+                                    {{ __('teams.view_detail') }}
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 @endforeach
-            @endif
+            </div>
+
+            {{-- Pro koho je který tým vhodný --}}
+            <div class="mb-20">
+                <x-section-heading
+                    :title="__('teams.detail.suitable_title')"
+                    :subtitle="__('teams.detail.suitable_subtitle')"
+                    alignment="center"
+                />
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-8 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa-light fa-basketball fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="text-xl font-black uppercase mb-3">{{ __('teams.detail.suitable_regular') }}</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">{{ __('teams.detail.suitable_regular_desc') }}</p>
+                    </div>
+
+                    <div class="p-8 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa-light fa-comments fa-2x text-secondary"></i>
+                        </div>
+                        <h4 class="text-xl font-black uppercase mb-3">{{ __('teams.detail.suitable_return') }}</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">{{ __('teams.detail.suitable_return_desc') }}</p>
+                    </div>
+
+                    <div class="p-8 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa-light fa-user-group fa-2x text-slate-400"></i>
+                        </div>
+                        <h4 class="text-xl font-black uppercase mb-3">{{ __('teams.detail.suitable_crew') }}</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">{{ __('teams.detail.suitable_crew_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Jak se přidat --}}
+            <div class="bg-secondary rounded-[2rem] p-8 md:p-16 text-white relative overflow-hidden mb-20">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <i class="fa-light fa-file-signature fa-9x"></i>
+                </div>
+
+                <div class="relative z-10 max-w-3xl">
+                    <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">{{ __('teams.detail.how_to_join') }}</h2>
+                    <p class="text-lg text-slate-300 mb-10 leading-relaxed">
+                        {{ __('recruitment.hero_subheadline') }}
+                    </p>
+
+                    <div class="flex flex-wrap gap-4">
+                        <a href="{{ route('public.recruitment.index') }}" class="btn btn-primary btn-lg">{{ __('recruitment.cta_contact_us') }}</a>
+                        <a href="{{ $branding['recruitment_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-white btn-lg group">
+                            <span>{{ __('recruitment.youth_recruitment_cta') }}</span>
+                            <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- FAQ --}}
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-2xl font-black uppercase text-center mb-10">{{ __('teams.detail.faq_title') }}</h2>
+
+                <div class="space-y-4">
+                    <div class="p-6 bg-white rounded-xl border border-slate-100">
+                        <h5 class="font-bold mb-2">{{ __('teams.detail.faq_exp_q') }}</h5>
+                        <p class="text-slate-600 text-sm">{{ __('teams.detail.faq_exp_a') }}</p>
+                    </div>
+
+                    <div class="p-6 bg-white rounded-xl border border-slate-100">
+                        <h5 class="font-bold mb-2">{{ __('teams.detail.faq_try_q') }}</h5>
+                        <p class="text-slate-600 text-sm">{{ __('teams.detail.faq_try_a') }}</p>
+                    </div>
+
+                    <div class="p-6 bg-white rounded-xl border border-slate-100">
+                        <h5 class="font-bold mb-2">{{ __('teams.detail.faq_contact_q') }}</h5>
+                        <p class="text-slate-600 text-sm">{{ __('teams.detail.faq_contact_a') }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

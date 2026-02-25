@@ -10,10 +10,10 @@
         'postponed' => 'bg-warning text-black',
     ];
     $statusLabels = [
-        'planned' => 'Plánováno',
-        'completed' => 'Odehráno',
-        'cancelled' => 'Zrušeno',
-        'postponed' => 'Odloženo',
+        'planned' => __('matches.planned') ?? 'Plánováno',
+        'completed' => __('matches.completed') ?? 'Odehráno',
+        'cancelled' => __('matches.cancelled') ?? 'Zrušeno',
+        'postponed' => __('matches.postponed') ?? 'Odloženo',
     ];
 @endphp
 
@@ -60,9 +60,9 @@
                         $isLoss = ($match->is_home && $match->score_home < $match->score_away) || (!$match->is_home && $match->score_away < $match->score_home);
                     @endphp
                     <span class="text-[10px] font-black uppercase tracking-widest mt-1 {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-slate-400') }}">
-                        {{ $isWin ? 'Vítězství' : ($isLoss ? 'Prohra' : 'Remíza') }}
+                        {{ $isWin ? (app()->getLocale() === 'cs' ? 'Vítězství' : 'Victory') : ($isLoss ? (app()->getLocale() === 'cs' ? 'Prohra' : 'Loss') : (app()->getLocale() === 'cs' ? 'Remíza' : 'Draw')) }}
                     </span>
-                @else
+@else
                     <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
                         {{ $statusLabels[$match->status] ?? $match->status }}
                     </span>
@@ -72,8 +72,8 @@
 
         <!-- Action -->
         <div class="md:ml-4 flex items-center justify-center">
-            <a href="{{ route('public.matches.show', $match->id) }}" class="btn btn-outline py-2 px-4 text-xs font-black">
-                Detaily
+            <a href="{{ route('public.matches.show', $match->id) }}" class="btn btn-outline-primary py-2 px-4 text-xs font-black">
+                {{ __('matches.view_detail') }}
             </a>
         </div>
     </div>

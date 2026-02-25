@@ -28,19 +28,14 @@
 
     <div class="container py-16">
         @if($results->isEmpty())
-            <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fa-light fa-magnifying-glass text-3xl text-slate-400"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">{{ __('search.no_results_title') }}</h2>
-                <p class="text-slate-500 max-w-md mx-auto">
-                    {{ __('search.no_results_text') }}
-                </p>
-                <div class="mt-8">
-                    <a href="{{ route('public.home') }}" class="btn btn-outline">
-                        {{ __('search.back_home') }}
-                    </a>
-                </div>
+            <x-empty-state
+                :title="__('search.no_results_title')"
+                :subtitle="__('search.no_results_text')"
+            />
+            <div class="mt-12 text-center">
+                <a href="{{ route('public.home') }}" class="btn btn-primary">
+                    {{ __('search.back_home') }}
+                </a>
             </div>
         @else
             <div class="grid gap-8 max-w-4xl">
@@ -52,7 +47,12 @@
                     <article class="group relative flex flex-col md:flex-row gap-6 bg-white p-6 rounded-2xl hover:shadow-xl transition-all border border-slate-100">
                         @if($result->image)
                             <div class="w-full md:w-48 h-32 flex-shrink-0 overflow-hidden rounded-xl">
-                                <img src="{{ asset('storage/' . $result->image) }}" alt="{{ $result->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <x-picture
+                                    :src="'storage/' . $result->image"
+                                    :alt="$result->title"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                />
                             </div>
                         @endif
 

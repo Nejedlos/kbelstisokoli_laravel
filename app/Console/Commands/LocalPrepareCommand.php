@@ -64,6 +64,7 @@ class LocalPrepareCommand extends Command
         $this->newLine();
         info('🎉 Vše je připraveno! Nyní můžete nahrát tyto složky na FTP:');
         $this->line('  - public/build/');
+        $this->line('  - public/assets/');
         $this->line('  - (a případně změněné PHP soubory v app/, resources/, routes/, atd.)');
         $this->newLine();
         $this->line('Po nahrání na server nezapomeňte spustit:');

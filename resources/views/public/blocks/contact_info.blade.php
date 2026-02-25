@@ -8,7 +8,7 @@
                         <p><strong>Adresa:</strong><br>{{ $data['address'] }}</p>
                     @endif
                     @if($data['email'] ?? null)
-                        <p><strong>Email:</strong> <a href="mailto:{{ $data['email'] }}" class="text-red-600 hover:underline">{{ $data['email'] }}</a></p>
+                        <p><strong>Email:</strong> <x-mailto :email="$data['email']" class="text-red-600 hover:underline" /></p>
                     @endif
                     @if($data['phone'] ?? null)
                         <p><strong>Telefon:</strong> {{ $data['phone'] }}</p>

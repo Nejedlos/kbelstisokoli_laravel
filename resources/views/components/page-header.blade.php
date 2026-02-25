@@ -9,7 +9,13 @@
 <div class="page-header bg-secondary text-white py-16 md:py-24 relative overflow-hidden">
     @if($image)
         <div class="absolute inset-0 z-0 opacity-30">
-            <img src="{{ $image }}" alt="" class="w-full h-full object-cover">
+            <x-picture
+                :src="$image"
+                class="w-full h-full object-cover"
+                alt=""
+                loading="eager"
+                fetchpriority="high"
+            />
         </div>
     @endif
 

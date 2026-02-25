@@ -71,18 +71,37 @@ class ProductionSyncCommand extends Command
             \Laravel\Prompts\info("🔍 Ověřuji DB připojení ze serveru...");
 
             $dbCheckPhp = '
-                $conn = @mysqli_connect(
-                    base64_decode("' . base64_encode($dbConfig['db_host']) . '"),
-                    base64_decode("' . base64_encode($dbConfig['db_username']) . '"),
-                    base64_decode("' . base64_encode($dbConfig['db_password']) . '"),
-                    base64_decode("' . base64_encode($dbConfig['db_database']) . '"),
-                    (int)base64_decode("' . base64_encode($dbConfig['db_port']) . '")
-                );
-                if ($conn) {
+                mysqli_report(MYSQLI_REPORT_OFF);
+                $host = base64_decode("' . base64_encode($dbConfig['db_host']) . '");
+                $user = base64_decode("' . base64_encode($dbConfig['db_username']) . '");
+                $pass = base64_decode("' . base64_encode($dbConfig['db_password']) . '");
+                $db   = base64_decode("' . base64_encode($dbConfig['db_database']) . '");
+                $port = (int)base64_decode("' . base64_encode($dbConfig['db_port']) . '");
+
+                // Pokus o připojení s ošetřením chyb
+                $conn = @mysqli_init();
+                if (!$conn) {
+                    echo "FAIL: mysqli_init failed";
+                    exit;
+                }
+
+                // Nastavení timeoutu
+                mysqli_options($conn, MYSQLI_OPT_CONNECT_TIMEOUT, 5);
+
+                $success = @mysqli_real_connect($conn, $host, $user, $pass, $db, $port);
+
+                if ($success) {
                     echo "OK";
                     mysqli_close($conn);
                 } else {
-                    echo "FAIL: " . mysqli_connect_error();
+                    $error = mysqli_connect_error();
+                    $errno = mysqli_connect_errno();
+                    // Pokud je chyba prázdná, zkusíme vzít chybu z instance
+                    if (empty($error)) {
+                        $error = mysqli_error($conn);
+                        $errno = mysqli_errno($conn);
+                    }
+                    echo "FAIL: [" . $errno . "] " . $error;
                 }
             ';
 
@@ -117,7 +136,10 @@ class ProductionSyncCommand extends Command
 
             if (confirm("Chcete toto heslo uložit do lokálního .env?", true)) {
                 // Uložíme do public/.env (primární pro aktuální aplikaci)
-                $this->updateEnv(['PROD_DB_PASSWORD' => $dbConfig['db_password']]);
+                $this->updateEnv([
+                    'PROD_DB_PASSWORD' => $dbConfig['db_password'],
+                    'DB_PASSWORD' => $dbConfig['db_password'],
+                ]);
 
                 // Uložíme i do kořenového .env (master kopie), pokud existuje
                 $rootEnv = base_path('.env');
@@ -206,7 +228,7 @@ class ProductionSyncCommand extends Command
         while (true) {
             \Laravel\Prompts\info("🚀 Synchronizuji konfiguraci na {$user}@{$host}:{$port}...");
             \Laravel\Prompts\info("💡 TIP: Před nahráním na FTP vždy spusťte lokálně: php artisan app:local:prepare");
-            \Laravel\Prompts\info("💡 TIP: Nezapomeňte nahrát složku public/build/ do kořene projektu na FTP.");
+            \Laravel\Prompts\info("💡 TIP: Nezapomeňte nahrát složky public/build/ a public/assets/ do kořene projektu na FTP.");
 
             $params = [
                 "--host=" . escapeshellarg($host),
@@ -239,13 +261,21 @@ class ProductionSyncCommand extends Command
 
                 $this->line('Provedené kroky:');
                 $this->line(' ✅ Aktualizace .env konfigurace na serveru');
-                $this->line(' ✅ Vyčištění systémové mezipaměti');
+                $this->line(' ✅ Vyčištění systémové mezipaměti (config, route, view)');
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
+                $this->line(' ✅ Synchronizace statických assetů (vyčištění a kopírování do ' . ($publicPath ?: 'public') . ')');
                 $this->line(' ✅ Spuštění databázových migrací');
                 $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
                 $this->line(' ✅ Reindexace AI vyhledávání');
+
+                if ($publicPath) {
+                    $this->newLine();
+                    $this->warn("⚠️  Pozor: Pokud jste mazali obrázky lokálně, synchronizace je nyní odstranila i z veřejné složky:");
+                    $this->line("   Cesta: " . $publicPath . "/assets/img/home/");
+                    $this->line("   Pokud je stále vidíte, zkuste v prohlížeči Hard Refresh (Ctrl+F5 / Cmd+Shift+R).");
+                }
 
                 if (!\Laravel\Prompts\confirm('Chcete synchronizaci spustit znovu? (např. po dalším nahrání souborů)', false)) {
                     break;
@@ -314,14 +344,38 @@ class ProductionSyncCommand extends Command
             copy($exampleEnvPath, $publicEnvPath);
         }
 
-        // Pokud v kořeni existuje .env, vytáhneme z něj PROD_ proměnné a APP_KEY
+        if (!file_exists($publicEnvPath)) {
+            return;
+        }
+
+        $toTransfer = [];
+
+        // 1. Nejprve načteme výchozí produkční hodnoty z .env.example
+        if (file_exists($exampleEnvPath)) {
+            $exampleVars = \Dotenv\Dotenv::parse(file_get_contents($exampleEnvPath));
+
+            // Přenášíme základní DB konfiguraci (která je v .env.example produkční)
+            foreach (['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_PREFIX'] as $key) {
+                if (isset($exampleVars[$key])) {
+                    $toTransfer[$key] = $exampleVars[$key];
+                }
+            }
+
+            // Přenášíme i PROD_ proměnné z example, pokud existují
+            foreach ($exampleVars as $key => $value) {
+                if (str_starts_with($key, 'PROD_')) {
+                    $toTransfer[$key] = $value;
+                }
+            }
+        }
+
+        // 2. Poté přeneseme konfiguraci z kořenového .env (uživatelská přebití)
         if (file_exists($rootEnvPath)) {
             \Laravel\Prompts\info("🔗 Přenáším konfiguraci z kořenového .env do public/.env...");
 
-            // Načtení kořenového .env pomocí Dotenv (dočasně do pole, ne do globálního $_ENV, abychom neovlivnili zbytek)
+            // Načtení kořenového .env pomocí Dotenv
             $rootVars = \Dotenv\Dotenv::parse(file_get_contents($rootEnvPath));
 
-            $toTransfer = [];
             foreach ($rootVars as $key => $value) {
                 // Přenášíme vše co začíná PROD_, APP_KEY a další důležité klíče
                 if (str_starts_with($key, 'PROD_') ||
@@ -331,15 +385,22 @@ class ProductionSyncCommand extends Command
                     $key === 'ERROR_REPORT_EMAIL' ||
                     $key === 'ERROR_REPORT_SENDER') {
 
-                    if (!empty($value)) {
+                    // U DB hesla chceme i prázdnou hodnotu (pokud ji uživatel nastavil)
+                    if (!empty($value) || $key === 'PROD_DB_PASSWORD') {
                         $toTransfer[$key] = $value;
+
+                        // Speciální mapování: Pokud jde o PROD_DB_*, nastavíme i odpovídající DB_* v public/.env
+                        if (str_starts_with($key, 'PROD_DB_')) {
+                            $dbKey = str_replace('PROD_', '', $key);
+                            $toTransfer[$dbKey] = $value;
+                        }
                     }
                 }
             }
+        }
 
-            if (!empty($toTransfer)) {
-                $this->updateEnv($toTransfer);
-            }
+        if (!empty($toTransfer)) {
+            $this->updateEnv($toTransfer);
         }
 
         // Pokud stále chybí APP_KEY v public/.env, vygenerujeme ho

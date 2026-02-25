@@ -25,8 +25,9 @@ class MatchController extends Controller
         }
 
         $matches = $query->paginate(15);
+        $page = \App\Models\Page::where('slug', 'zapasy')->first();
 
-        return view('public.matches.index', compact('matches', 'type'));
+        return view('public.matches.index', compact('matches', 'type', 'page'));
     }
 
     public function show(int $id): View

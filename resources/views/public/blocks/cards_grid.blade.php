@@ -13,7 +13,7 @@
         @endif
 
         @if(empty($cards))
-            <x-empty-state title="Žádná data" subtitle="Karty budou doplněny později." />
+            <x-empty-state :title="__('general.blocks.no_data')" :subtitle="__('general.blocks.cards_placeholder')" />
         @else
             <div @class([
                 'grid gap-8',
@@ -67,12 +67,22 @@
                             </p>
 
                             @if(($card['link'] ?? null) || ($card['secondary_link'] ?? null))
-                                <div class="mt-auto flex flex-wrap gap-x-12 sm:gap-x-16 gap-y-4 items-center">
+                                @php
+                                    $isExternal = isset($card['link']) && str_contains($card['link'], 'basketkbely.cz');
+                                @endphp
+                                <div class="mt-auto flex flex-wrap gap-4 items-center">
                                     @if($card['link'] ?? null)
-                                        <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest-responsive text-xs sm:text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1 underline decoration-slate-300 underline-offset-4 group-hover:decoration-primary">
-                                            <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
-                                            <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
-                                        </a>
+                                        @if($isExternal)
+                                            <a href="{{ $card['link'] }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm w-full sm:w-auto px-6 py-2.5">
+                                                <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
+                                                <i class="fa-light fa-arrow-up-right ml-2 text-[10px]"></i>
+                                            </a>
+                                        @else
+                                            <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest-responsive text-xs sm:text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1 underline decoration-slate-300 underline-offset-4 group-hover:decoration-primary">
+                                                <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
+                                                <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
+                                            </a>
+                                        @endif
                                     @endif
 
                                     @if($card['secondary_link'] ?? null)

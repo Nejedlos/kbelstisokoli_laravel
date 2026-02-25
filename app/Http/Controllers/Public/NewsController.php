@@ -20,9 +20,10 @@ class NewsController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
+        $page = \App\Models\Page::where('slug', 'novinky')->first();
         $breadcrumbs = $breadcrumbService->addHome()->add(__('nav.news'))->get();
 
-        return view('public.news.index', compact('posts', 'breadcrumbs'));
+        return view('public.news.index', compact('posts', 'page', 'breadcrumbs'));
     }
 
     public function show(string $slug, \App\Services\BreadcrumbService $breadcrumbService): View
