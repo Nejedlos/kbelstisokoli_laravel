@@ -133,7 +133,7 @@
         </div>
     </div>
 
-    {{-- Galerie / Budoucí data placeholder --}}
+    {{-- Galerie --}}
     <div class="section-padding bg-bg overflow-hidden">
         <div class="container text-center">
             <x-section-heading
@@ -142,14 +142,38 @@
                 alignment="center"
             />
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 opacity-40 grayscale group hover:grayscale-0 transition-all duration-500">
-                <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse"></div>
-                <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse delay-75"></div>
-                <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse delay-150"></div>
-                <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse delay-300"></div>
-            </div>
-
-            <p class="mt-8 text-slate-400 italic">{{ __('teams.detail.no_data') }}</p>
+            @if($randomPhotos->isNotEmpty())
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    @foreach($randomPhotos as $photo)
+                        <div class="group relative aspect-square overflow-hidden rounded-2xl bg-slate-200">
+                            <img
+                                src="{{ $photo->getUrl('optimized') }}"
+                                alt="{{ $photo->alt_text ?: $photo->title }}"
+                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                loading="lazy"
+                            >
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-end p-4">
+                                <p class="text-white text-xs font-bold text-left line-clamp-2">
+                                    {{ $photo->title }}
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mt-12">
+                    <a href="{{ route('public.galleries.index') }}" class="btn btn-outline border-slate-200 hover:border-primary">
+                        <i class="fa-light fa-images mr-2"></i> {{ app()->getLocale() === 'cs' ? 'Zobrazit všechny galerie' : 'View all galleries' }}
+                    </a>
+                </div>
+            @else
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 opacity-40 grayscale group hover:grayscale-0 transition-all duration-500">
+                    <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse"></div>
+                    <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse delay-75"></div>
+                    <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse delay-150"></div>
+                    <div class="aspect-square bg-slate-200 rounded-2xl animate-pulse delay-300"></div>
+                </div>
+                <p class="mt-8 text-slate-400 italic">{{ __('teams.detail.no_data') }}</p>
+            @endif
         </div>
     </div>
 

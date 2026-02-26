@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
 class PhotoPool extends Model
 {
-    use HasTranslations;
+    use HasSeo, HasTranslations;
 
     protected $fillable = [
         'title',
@@ -16,6 +17,7 @@ class PhotoPool extends Model
         'description',
         'event_type',
         'event_date',
+        'team_id',
         'is_public',
         'is_visible',
     ];
@@ -27,6 +29,14 @@ class PhotoPool extends Model
         'is_public' => 'boolean',
         'is_visible' => 'boolean',
     ];
+
+    /**
+     * Tým, ke kterému tato galerie patří.
+     */
+    public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 
     /**
      * Média přiřazená do tohoto poolu.

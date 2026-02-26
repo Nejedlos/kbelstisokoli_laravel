@@ -35,7 +35,7 @@ class AiTextEnhancer
         try {
             $client = new Client([
                 'base_uri' => $baseUrl,
-                'timeout' => (int) ($settings['openai_timeout_seconds'] ?? 20),
+                'timeout' => (int) ($settings['openai_timeout_seconds'] ?? 30),
             ]);
 
             $prompt = $this->buildBilingualPrompt($title, $date, $description);
@@ -47,7 +47,7 @@ class AiTextEnhancer
                 ],
                 'json' => [
                     'model' => $model,
-                    'temperature' => 0.3,
+                    'temperature' => 0.5,
                     'messages' => $prompt,
                     'response_format' => ['type' => 'json_object'],
                 ],
@@ -64,26 +64,40 @@ class AiTextEnhancer
             return [
                 'cs' => [
                     'title' => $this->ensureString($parsed['cs']['title'] ?? ($parsed['cs'] ?? $title), 200, $title),
-                    'description' => $this->ensureString($parsed['cs']['description'] ?? ($parsed['cs'] ?? $description), 2000, $description),
+                    'description' => $this->ensureString($parsed['cs']['description'] ?? ($parsed['cs'] ?? $description), 3000, $description),
                 ],
                 'en' => [
                     'title' => $this->ensureString($parsed['en']['title'] ?? ($parsed['en'] ?? $title), 200, $title),
-                    'description' => $this->ensureString($parsed['en']['description'] ?? ($parsed['en'] ?? $description), 2000, $description),
+                    'description' => $this->ensureString($parsed['en']['description'] ?? ($parsed['en'] ?? $description), 3000, $description),
                 ],
                 'date' => $this->ensureString($parsed['date'] ?? $date, 10, ($date ?? '')),
                 'slug' => $this->ensureString($parsed['slug'] ?? Str::slug($parsed['cs']['title'] ?? $title), 200),
             ];
         } catch (\Throwable $e) {
+            \Log::error('AI Suggestion Error: '.$e->getMessage());
+
             return $this->fallbackBilingual($title, $date, $description);
         }
     }
 
     protected function buildBilingualPrompt(string $title, ?string $date, string $description): array
     {
-        $system = 'Jsi editor klubového webu basketbalového týmu "Kbelští sokoli". Tvým úkolem je na základě vstupu navrhnout bilingvní (česká a anglická) metadata pro fotogalerii (pool fotografií).
-        Výstup musí být POUZE validní JSON.
-        Pole "date" musí být ve formátu YYYY-MM-DD. Pokud uživatel zadá jen měsíc a rok, doplň první den v měsíci.
-        Pole "slug" musí být URL přátelský identifikátor vygenerovaný z českého názvu.';
+        $now = date('Y-m-d');
+        $system = "Jsi profesionální redaktor, copywriter a social media manager basketbalového klubu \"Kbelští sokoli\".
+        Tvým úkolem je na základě surového vstupu (název, datum, popis) navrhnout atraktivní bilingvní metadata (CS a EN) pro fotogalerii.
+
+        DŮLEŽITÝ KONTEXT ČASU:
+        - Dnešní datum je: {$now}
+        - Pokud je datum akce ({$date}) v MINULOSTI, piš popis jako reportáž nebo vzpomínku na proběhlou akci (např. 'Ohlédnutí za...', 'Byli jsme u toho...').
+        - Pokud je datum akce v BUDOUCNOSTI, piš popis jako pozvánku (např. 'Přijďte nás podpořit...', 'Těšíme se na vás...').
+
+        POŽADAVKY:
+        1. NÁZEV (title): Musí být poutavý, jasný a reprezentativní.
+        2. POPIS (description): Musí být gramaticky správný, čtivý a v duchu klubu (komunitní, sportovní, pozitivní). Vylepši a rozšiř původní popis tak, aby zněl profesionálně na webu.
+        3. PŘEKLAD: Vytvoř věrný, ale přirozený překlad do angličtiny (EN).
+        4. FORMÁT: Výstup musí být POUZE validní JSON ve specifikované struktuře.
+        5. DATUM (date): Musí být ve formátu YYYY-MM-DD. Pokud uživatel zadá jen měsíc a rok, doplň první den v měsíci.
+        6. SLUG (slug): URL přátelský identifikátor vygenerovaný z českého názvu.";
 
         $user = [
             'role' => 'user',
@@ -97,8 +111,8 @@ class AiTextEnhancer
                     'languages' => ['cs', 'en'],
                     'format' => 'json',
                     'structure' => [
-                        'cs' => ['title' => '...', 'description' => '...'],
-                        'en' => ['title' => '...', 'description' => '...'],
+                        'cs' => ['title' => 'string', 'description' => 'string'],
+                        'en' => ['title' => 'string', 'description' => 'string'],
                         'date' => 'YYYY-MM-DD',
                         'slug' => 'url-slug-from-cs-title',
                     ],

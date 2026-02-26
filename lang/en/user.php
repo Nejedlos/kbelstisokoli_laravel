@@ -78,6 +78,9 @@ return [
         'primary_team' => 'Primary Team',
     ],
     'actions' => [
+        'edit' => 'Edit',
+        'delete' => 'Delete',
+        'delete_selected' => 'Delete selected',
         'generate_vs' => 'Generate VS',
         'generate_member_id' => 'Generate ID',
         'send_invitation' => 'Send Invitation',

@@ -132,8 +132,14 @@ return [
             'photo_pool' => [
                 'label' => 'Pool fotografií',
                 'plural_label' => 'Pooly fotografií',
+                'title' => 'Galerie fotografií',
                 'actions' => [
-                    'create_wizard' => 'Přidat pool fotografií',
+                    'create_wizard' => 'Přidat galerii',
+                    'regenerate_ai' => 'Vylepšit pomocí AI',
+                    'detach' => 'Odebrat z poolu',
+                ],
+                'notifications' => [
+                    'ai_regenerated' => 'Metadata byla znovu vygenerována pomocí AI.',
                 ],
                 'steps' => [
                     'context' => [

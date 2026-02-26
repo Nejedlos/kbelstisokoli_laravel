@@ -53,12 +53,19 @@ class CreatePhotoPool extends CreateRecord
             $sort = 0;
             foreach ($files as $path) {
                 try {
-                    $fullPath = Storage::disk(env('UPLOADS_DISK', 'public'))->path($path);
+                    $diskName = config('filesystems.uploads.disk');
+                    $disk = Storage::disk($diskName);
+
+                    if (! $disk->exists($path)) {
+                        continue;
+                    }
+
+                    $fullPath = $disk->path($path);
                     $file = new \Illuminate\Http\File($fullPath);
 
                     $asset = new MediaAsset([
-                        'title' => (string) (brand_text($pool->title).' #'.(++$sort)),
-                        'alt_text' => brand_text($pool->title),
+                        'title' => (string) (brand_text($pool->getTranslation('title', 'cs')).' #'.(++$sort)),
+                        'alt_text' => brand_text($pool->getTranslation('title', 'cs')),
                         'type' => 'image',
                         'access_level' => 'public',
                         'is_public' => true,
@@ -77,8 +84,7 @@ class CreatePhotoPool extends CreateRecord
                         'caption_override' => null,
                     ]);
                 } catch (\Throwable $e) {
-                    // Pokud se jedna fotka nepovede, pokračujeme dál, ale zalogujeme
-                    \Log::warning('Photo import failed: '.$e->getMessage());
+                    \Log::error('Photo import failed in afterCreate: '.$e->getMessage());
                 }
             }
         });

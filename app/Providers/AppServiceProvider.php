@@ -2,11 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
-use Filament\Support\Facades\FilamentIcon;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(\App\Services\AuditLogService::class, function ($app) {
-            return new \App\Services\AuditLogService();
+            return new \App\Services\AuditLogService;
         });
     }
 
@@ -65,8 +63,8 @@ class AppServiceProvider extends ServiceProvider
             }
 
             // Přidání SEO metadat pro public layout, pokud už nejsou nastaveny
-            if ($audience === 'public' && !isset($view->seo)) {
-                $model = $view->page ?? $view->post ?? $view->news ?? $view->team ?? null;
+            if ($audience === 'public' && ! isset($view->seo)) {
+                $model = $view->page ?? $view->post ?? $view->news ?? $view->team ?? $view->gallery ?? $view->pool ?? null;
                 $view->with('seo', $seoService->getMetadata($model));
             }
 

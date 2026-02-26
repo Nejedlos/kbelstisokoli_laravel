@@ -78,6 +78,9 @@ return [
         'primary_team' => 'Primární tým',
     ],
     'actions' => [
+        'edit' => 'Upravit',
+        'delete' => 'Smazat',
+        'delete_selected' => 'Smazat vybrané',
         'generate_vs' => 'Vygenerovat VS',
         'generate_member_id' => 'Vygenerovat ID',
         'send_invitation' => 'Poslat pozvánku',

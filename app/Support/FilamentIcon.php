@@ -31,6 +31,12 @@ class FilamentIcon
             return 'heroicon-o-stop';
         }
 
+        // Avoid container calls during early config bootstrap.
+        // Use getenv instead of app()->environment() if possible.
+        if (getenv('APP_ENV') === 'testing') {
+             return 'heroicon-o-stop';
+        }
+
         // 1. Získání základního názvu ikony
         $iconName = match (true) {
             $icon instanceof AppIcon => $icon->value,

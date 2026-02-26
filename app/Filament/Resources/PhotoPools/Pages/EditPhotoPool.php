@@ -42,12 +42,19 @@ class EditPhotoPool extends EditRecord
 
             foreach ($files as $path) {
                 try {
-                    $fullPath = Storage::disk(config('filesystems.default'))->path($path);
+                    $diskName = config('filesystems.uploads.disk');
+                    $disk = Storage::disk($diskName);
+
+                    if (! $disk->exists($path)) {
+                        continue;
+                    }
+
+                    $fullPath = $disk->path($path);
                     $file = new \Illuminate\Http\File($fullPath);
 
                     $asset = new MediaAsset([
-                        'title' => (string) (brand_text($pool->title).' #'.(++$sort)),
-                        'alt_text' => brand_text($pool->title),
+                        'title' => (string) (brand_text($pool->getTranslation('title', 'cs')).' #'.(++$sort)),
+                        'alt_text' => brand_text($pool->getTranslation('title', 'cs')),
                         'type' => 'image',
                         'access_level' => 'public',
                         'is_public' => true,
@@ -65,16 +72,16 @@ class EditPhotoPool extends EditRecord
                         'is_visible' => true,
                         'caption_override' => null,
                     ]);
-
-                    // Po zpracování smažeme dočasný soubor (volitelné, Filament to většinou pořeší, ale jistota je jistota)
-                    // Storage::disk(config('filesystems.default'))->delete($path);
                 } catch (\Throwable $e) {
-                    \Log::warning('Photo import failed during edit: '.$e->getMessage());
+                    \Log::error('Photo import failed in afterSave: '.$e->getMessage());
                 }
             }
         });
 
-        // Vyčistíme pole photos ve formuláři, aby se neukládalo znovu při dalším save
-        $this->form->fill(['photos' => []]);
+        // Vyčistíme pole photos ve formuláři bez resetu celého formuláře
+        $this->data['photos'] = [];
+
+        // Refreshneme Relation Manager, aby se fotky hned zobrazily
+        $this->dispatch('refreshRelationManager', relationship: 'mediaAssets');
     }
 }

@@ -132,8 +132,14 @@ return [
             'photo_pool' => [
                 'label' => 'Photo Pool',
                 'plural_label' => 'Photo Pools',
+                'title' => 'Photo Gallery',
                 'actions' => [
-                    'create_wizard' => 'Add Photo Pool',
+                    'create_wizard' => 'Add Gallery',
+                    'regenerate_ai' => 'Improve with AI',
+                    'detach' => 'Remove from pool',
+                ],
+                'notifications' => [
+                    'ai_regenerated' => 'Metadata has been regenerated using AI.',
                 ],
                 'steps' => [
                     'context' => [

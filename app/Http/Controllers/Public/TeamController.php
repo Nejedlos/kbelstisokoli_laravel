@@ -29,6 +29,13 @@ class TeamController extends Controller
     {
         $team = \App\Models\Team::where('slug', $slug)->firstOrFail();
 
-        return view('public.teams.show', compact('team'));
+        $randomPhotos = \App\Support\PhotoGallery::getRandomPhotos(8, $team->id);
+
+        // Pokud pro tým nejsou žádné fotky, zkusíme vzít jakékoliv náhodné
+        if ($randomPhotos->isEmpty()) {
+            $randomPhotos = \App\Support\PhotoGallery::getRandomPhotos(8);
+        }
+
+        return view('public.teams.show', compact('team', 'randomPhotos'));
     }
 }

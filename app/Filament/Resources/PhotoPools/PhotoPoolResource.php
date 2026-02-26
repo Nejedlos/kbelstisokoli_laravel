@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\PhotoPools;
 
+use App\Filament\Forms\CmsForms;
 use App\Filament\Resources\PhotoPools\Pages\CreatePhotoPool;
 use App\Filament\Resources\PhotoPools\Pages\EditPhotoPool;
 use App\Filament\Resources\PhotoPools\Pages\ListPhotoPools;
 use App\Models\PhotoPool;
+use App\Services\AiTextEnhancer;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -17,6 +20,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -86,7 +90,38 @@ class PhotoPoolResource extends Resource
                                         ->label('Datum akce')
                                         ->native(false)
                                         ->required(),
+                                    Select::make('team_id')
+                                        ->label('Tým')
+                                        ->relationship('team', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->native(false),
                                 ]),
+                                Actions::make([
+                                    Action::make('regenerateAi')
+                                        ->label(__('admin.navigation.resources.photo_pool.actions.regenerate_ai'))
+                                        ->icon(new HtmlString('<i class="fa-light fa-wand-magic-sparkles"></i>'))
+                                        ->color('info')
+                                        ->action(function ($get, $set, AiTextEnhancer $enhancer) {
+                                            $result = $enhancer->suggestPhotoPoolMetadataBilingual(
+                                                $get('title.cs') ?? '',
+                                                $get('event_date'),
+                                                $get('description.cs') ?? ''
+                                            );
+
+                                            $set('title.cs', $result['cs']['title']);
+                                            $set('title.en', $result['en']['title']);
+                                            $set('description.cs', $result['cs']['description']);
+                                            $set('description.en', $result['en']['description']);
+                                            $set('event_date', $result['date']);
+                                            $set('slug', $result['slug']);
+
+                                            \Filament\Notifications\Notification::make()
+                                                ->title(__('admin.navigation.resources.photo_pool.notifications.ai_regenerated'))
+                                                ->success()
+                                                ->send();
+                                        }),
+                                ])->columnSpanFull(),
                                 Tabs::make('Translations')
                                     ->tabs([
                                         Tabs\Tab::make('Čeština')
@@ -128,7 +163,7 @@ class PhotoPoolResource extends Resource
                                     ->multiple()
                                     ->image()
                                     ->reorderable()
-                                    ->disk(env('UPLOADS_DISK', 'public'))
+                                    ->disk(config('filesystems.uploads.disk'))
                                     ->directory('uploads/photos/pools')
                                     ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                     ->downloadable()
@@ -155,6 +190,12 @@ class PhotoPoolResource extends Resource
                                         ->helperText('Umožňuje dočasně skrýt pool z výběru v galeriích.')
                                         ->default(true),
                                 ]),
+                            ]),
+
+                        Tabs\Tab::make('SEO')
+                            ->label(new HtmlString('<i class="fa-light fa-globe mr-1"></i> SEO'))
+                            ->schema([
+                                CmsForms::getSeoSection(),
                             ]),
                     ])
                     ->persistTabInQueryString(),
@@ -234,7 +275,7 @@ class PhotoPoolResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // V budoucnu: RelationManager na média přímo v poolu
+            \App\Filament\Resources\PhotoPools\RelationManagers\MediaAssetsRelationManager::class,
         ];
     }
 
