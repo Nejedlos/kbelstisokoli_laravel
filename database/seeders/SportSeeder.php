@@ -35,25 +35,13 @@ class SportSeeder extends Seeder
 
     protected function seedTeams(): void
     {
+        // Ponecháme pouze týmy Muži C a Muži E
+        $allowedSlugs = ['muzi-c', 'muzi-e'];
+
+        // Smažeme případné jiné týmy, aby zůstaly jen požadované
+        Team::whereNotIn('slug', $allowedSlugs)->delete();
+
         $teams = [
-            [
-                'name' => ['cs' => 'Muži A', 'en' => 'Men A'],
-                'slug' => 'muzi-a',
-                'category' => 'senior',
-                'description' => [
-                    'cs' => 'Tým Muži A je vlajkovou lodí klubu a v sezóně 2025/2026 hraje 2. ligu (skupina A).',
-                    'en' => 'The Men A team is the club\'s flagship and plays the 2nd League (Group A) in the 2025/2026 season.',
-                ],
-            ],
-            [
-                'name' => ['cs' => 'Muži B', 'en' => 'Men B'],
-                'slug' => 'muzi-b',
-                'category' => 'senior',
-                'description' => [
-                    'cs' => 'Tým Muži B působí v kategorii mužů a v sezóně 2025/2026 hraje Pražský přebor.',
-                    'en' => 'The Men B team competes in the senior category and plays the Prague Championship in the 2025/2026 season.',
-                ],
-            ],
             [
                 'name' => ['cs' => 'Muži C', 'en' => 'Men C'],
                 'slug' => 'muzi-c',
@@ -61,15 +49,6 @@ class SportSeeder extends Seeder
                 'description' => [
                     'cs' => 'Tým Muži C působí v kategorii mužů a v sezóně 2025/2026 hraje Pražský přebor B.',
                     'en' => 'The Men C team competes in the senior category and plays the Prague Championship B in the 2025/2026 season.',
-                ],
-            ],
-            [
-                'name' => ['cs' => 'Muži D', 'en' => 'Men D'],
-                'slug' => 'muzi-d',
-                'category' => 'senior',
-                'description' => [
-                    'cs' => 'Tým Muži D působí v kategorii mužů a v sezóně 2025/2026 hraje 1. třídu.',
-                    'en' => 'The Men D team competes in the senior category and plays the 1st Class in the 2025/2026 season.',
                 ],
             ],
             [

@@ -24,12 +24,12 @@ class TeamCoachSeeder extends Seeder
                     'en' => 'The Men C team competes in the senior category and plays the Prague Championship B in the 2025/2026 season.',
                 ],
             ],
-            'muzi-d' => [
-                'name' => ['cs' => 'Muži D', 'en' => 'Men D'],
+            'muzi-e' => [
+                'name' => ['cs' => 'Muži E', 'en' => 'Men E'],
                 'category' => 'senior',
                 'description' => [
-                    'cs' => 'Tým Muži D působí v kategorii mužů a v sezóně 2025/2026 hraje 1. třídu.',
-                    'en' => 'The Men D team competes in the senior category and plays the 1st Class in the 2025/2026 season.',
+                    'cs' => 'Tým Muži E působí v kategorii mužů a v sezóně 2025/2026 hraje 3. třídu B.',
+                    'en' => 'The Men E team competes in the senior category and plays the 3rd Class B in the 2025/2026 season.',
                 ],
             ],
         ];
@@ -42,7 +42,7 @@ class TeamCoachSeeder extends Seeder
                 'email' => 'petr.novotny@kbelstisokoli.cz',
                 'phone' => '+420 123 456 789',
             ],
-            'muzi-d' => [
+            'muzi-e' => [
                 'first_name' => 'Marek',
                 'last_name' => 'Svoboda',
                 'email' => 'marek.svoboda@kbelstisokoli.cz',

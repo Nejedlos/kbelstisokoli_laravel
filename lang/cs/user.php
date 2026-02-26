@@ -78,9 +78,13 @@ return [
         'primary_team' => 'Primární tým',
         'full_name' => 'Celé jméno',
     ],
+    'helpers' => [
+        'phone_9_digits' => 'Zadejte 9 číslic bez předvolby (např. 777666555).',
+    ],
     'actions' => [
         'view' => 'Zobrazit',
         'edit' => 'Upravit',
+        'edit_user' => 'Upravit uživatele',
         'delete' => 'Smazat',
         'delete_selected' => 'Smazat vybrané',
         'replicate' => 'Duplikovat',

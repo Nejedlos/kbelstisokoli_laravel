@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Teams\RelationManagers;
 
+use App\Filament\Resources\Users\UserResource;
 use App\Support\IconHelper;
+use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -30,6 +32,7 @@ class CoachesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('name')
                     ->label(__('user.fields.full_name'))
+                    ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record]))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('pivot.email')
@@ -55,6 +58,11 @@ class CoachesRelationManager extends RelationManager
                     ]),
             ])
             ->recordActions([
+                Action::make('edit_user')
+                    ->label(__('user.actions.edit_user'))
+                    ->icon(IconHelper::get(IconHelper::USER))
+                    ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record]))
+                    ->openUrlInNewTab(),
                 DetachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.detach'))
                     ->icon(IconHelper::get(IconHelper::TRASH)),

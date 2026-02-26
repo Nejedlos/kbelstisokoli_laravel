@@ -162,10 +162,28 @@ class UserForm
                             ->schema([
                                 TextInput::make('phone')
                                     ->label(__('user.fields.phone'))
-                                    ->tel(),
+                                    ->tel()
+                                    ->prefix('+420')
+                                    ->helperText(__('user.helpers.phone_9_digits'))
+                                    ->rules(['phone:CZ'])
+                                    ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state)
+                                    ->extraAlpineAttributes([
+                                        'x-init' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\').trim()',
+                                        'x-on:input' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\'); $el.dispatchEvent(new Event(\'input\'))',
+                                        'x-on:blur' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\').trim(); $el.dispatchEvent(new Event(\'input\'))',
+                                    ]),
                                 TextInput::make('phone_secondary')
                                     ->label(__('user.fields.phone_secondary'))
-                                    ->tel(),
+                                    ->tel()
+                                    ->prefix('+420')
+                                    ->helperText(__('user.helpers.phone_9_digits'))
+                                    ->rules(['phone:CZ'])
+                                    ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state)
+                                    ->extraAlpineAttributes([
+                                        'x-init' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\').trim()',
+                                        'x-on:input' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\'); $el.dispatchEvent(new Event(\'input\'))',
+                                        'x-on:blur' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\').trim(); $el.dispatchEvent(new Event(\'input\'))',
+                                    ]),
                             ]),
                     ]),
             ]);
@@ -233,7 +251,16 @@ class UserForm
                                     ->label(__('user.fields.emergency_contact_name')),
                                 TextInput::make('emergency_contact_phone')
                                     ->label(__('user.fields.emergency_contact_phone'))
-                                    ->tel(),
+                                    ->tel()
+                                    ->prefix('+420')
+                                    ->helperText(__('user.helpers.phone_9_digits'))
+                                    ->rules(['phone:CZ'])
+                                    ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state)
+                                    ->extraAlpineAttributes([
+                                        'x-init' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\').trim()',
+                                        'x-on:input' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\'); $el.dispatchEvent(new Event(\'input\'))',
+                                        'x-on:blur' => '$el.value = $el.value.replace(/^\+420\s?/, \'\').replace(/\s/g, \'\').trim(); $el.dispatchEvent(new Event(\'input\'))',
+                                    ]),
                             ]),
                     ]),
             ]);

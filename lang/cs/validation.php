@@ -131,6 +131,7 @@ return [
     'uploaded' => 'Nahrávání :attribute selhalo.',
     'url' => 'Formát :attribute je neplatný.',
     'uuid' => ':attribute musí být platné UUID.',
+    'phone' => 'Pole :attribute musí být platné telefonní číslo.',
 
     /*
     |--------------------------------------------------------------------------
@@ -162,9 +163,12 @@ return [
     */
 
     'attributes' => [
-        'email' => 'e-mailová adresa',
-        'password' => 'heslo',
-        'password_confirmation' => 'potvrzení hesla',
+        'email' => 'E-mailová adresa',
+        'password' => 'Heslo',
+        'password_confirmation' => 'Potvrzení hesla',
+        'phone' => 'Telefonní číslo',
+        'phone_secondary' => 'Druhý telefon',
+        'emergency_contact_phone' => 'Nouzový kontakt (telefon)',
     ],
 
 ];

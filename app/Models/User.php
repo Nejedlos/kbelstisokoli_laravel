@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -100,6 +102,9 @@ class User extends Authenticatable implements FilamentUser, HasMedia
             'membership_status' => MembershipStatus::class,
             'membership_type' => MembershipType::class,
             'payment_method' => PaymentMethod::class,
+            'phone' => E164PhoneNumberCast::class.':CZ',
+            'phone_secondary' => E164PhoneNumberCast::class.':CZ',
+            'emergency_contact_phone' => E164PhoneNumberCast::class.':CZ',
         ];
     }
 
@@ -156,7 +161,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     /**
      * Týmy, které uživatel trénuje.
      */
-    public function teamsCoached(): BelongsToMany
+    public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'coach_team')
             ->withPivot(['email'])
@@ -221,6 +226,14 @@ class User extends Authenticatable implements FilamentUser, HasMedia
      */
     public function getDisplayNameAttribute(): string
     {
-        return $this->attributes['display_name'] ?? $this->name;
+        return $this->first_name.' '.$this->last_name;
+    }
+
+    /**
+     * Helper pro formátované zobrazení telefonu.
+     */
+    public function getFormattedPhoneAttribute(): ?string
+    {
+        return $this->phone?->formatInternational();
     }
 }

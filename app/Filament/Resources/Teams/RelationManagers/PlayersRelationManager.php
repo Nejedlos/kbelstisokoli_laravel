@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Teams\RelationManagers;
 
+use App\Filament\Resources\Users\UserResource;
 use App\Support\IconHelper;
+use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -50,6 +52,7 @@ class PlayersRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('user.name')
                     ->label(__('user.fields.full_name'))
+                    ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id]))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('jersey_number')
@@ -80,8 +83,13 @@ class PlayersRelationManager extends RelationManager
                     ]),
             ])
             ->recordActions([
+                Action::make('edit_user')
+                    ->label(__('user.actions.edit_user'))
+                    ->icon(IconHelper::get(IconHelper::USER))
+                    ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id]))
+                    ->openUrlInNewTab(),
                 EditAction::make()
-                    ->label(__('user.actions.edit'))
+                    ->label(__('admin.navigation.resources.team.fields.role_in_team'))
                     ->icon(IconHelper::get(IconHelper::EDIT)),
                 DetachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.detach'))

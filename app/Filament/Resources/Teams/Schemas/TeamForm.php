@@ -18,12 +18,15 @@ class TeamForm
             ->components([
                 Section::make(new HtmlString(IconHelper::render(IconHelper::INFO) . ' ' . __('admin.navigation.resources.team.tabs.general')))
                     ->schema([
-                        TextInput::make('name')
-                            ->label(__('admin.navigation.resources.team.fields.name'))
+                        TextInput::make('name.cs')
+                            ->label('Název týmu (CZ)')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                        TextInput::make('name.en')
+                            ->label('Team name (EN)')
+                            ->maxLength(255),
                         TextInput::make('slug')
                             ->label(__('admin.navigation.resources.team.fields.slug'))
                             ->required()
@@ -41,8 +44,13 @@ class TeamForm
 
                 Section::make(new HtmlString(IconHelper::render(IconHelper::LIST) . ' ' . __('admin.navigation.resources.team.fields.description')))
                     ->schema([
-                        Textarea::make('description')
-                            ->label(__('admin.navigation.resources.team.fields.description'))
+                        Textarea::make('description.cs')
+                            ->label('Popis týmu (CZ)')
+                            ->rows(5)
+                            ->default(null)
+                            ->columnSpanFull(),
+                        Textarea::make('description.en')
+                            ->label('Team description (EN)')
                             ->rows(5)
                             ->default(null)
                             ->columnSpanFull(),

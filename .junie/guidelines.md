@@ -128,3 +128,30 @@ Tato sekce definuje kritická pravidla pro úpravy přihlašovacích stránek a 
 - **Globální basketbalový loader (KS):** Pro dlouhé operace (AI, importy) používáme overlay loader s Glassmorphism designem a animovaným míčem v branding barvách (definováno v `filament-admin.css`).
 - **Kritické pravidlo:** V CSS souborech s vlastním designem (auth stránky) **nesmí** být definován loader pro `.fi-processing`. Všechny vizuální indikátory běhu musí být navázány na třídu `.is-loading` nebo na globální overlay, aby se předešlo zdvojení loaderů při odeslání formuláře.
 - **Detaily:** Více informací naleznete v `docs/02-vyvoj-a-standardy/04-loading-stavy.md` a `docs/02-vyvoj-a-standardy/05-globalni-loader.md`.
+
+## 12. Filament PHP v5 (Standardy a fixy)
+Tato sekce definuje kritická pravidla pro práci s Filamentem v5 v tomto projektu, aby se předešlo `FatalError` a `BadMethodCallException`.
+
+### 12.1 Jmenné prostory (Namespaces) - KRITICKÉ
+Filament v5 sjednotil jmenné prostory pro akce a komponenty schémat. Vždy používejte tyto cesty:
+- **Akce (Actions):** `Filament\Actions\Action`, `EditAction`, `DeleteAction`, `DeleteBulkAction`, `BulkActionGroup`, `ReplicateAction`, `DetachAction` atd.
+    - *Nikdy nepoužívejte* `Filament\Tables\Actions\*` nebo `Filament\Resources\Pages\EditRecord\Concerns\Translatable`.
+- **Schémata a Layout:** `Filament\Schemas\Schema`, `Filament\Schemas\Components\Section`, `Grid`, `Tabs`.
+- **Formulářové prvky:** `Filament\Forms\Components\TextInput`, `Select`, `Textarea`, `FileUpload`, `DatePicker`, `Toggle`.
+- **Tabulkové sloupce:** `Filament\Tables\Columns\TextColumn`, `IconColumn`, `SpatieMediaLibraryImageColumn`.
+
+### 12.2 Lokalizace (Translatable)
+V tomto projektu **nepoužíváme** oficiální Filament Spatie Translatable plugin (který přidává `LocaleSwitcher` a vyžaduje traity na stránkách).
+- **Modely:** Používají trait `Spatie\Translatable\HasTranslations`.
+- **Formulář:** Pole definujeme pomocí dot notace (např. `TextInput::make('name.cs')`, `TextInput::make('name.en')`).
+- **Stránky:** Na stránkách (`CreateTeam`, `EditTeam`, `ListTeams`) **nepoužíváme** žádné `Translatable` traity ani `LocaleSwitcher` v `getHeaderActions()`.
+
+### 12.3 Relace a automatické mapování
+Filament v akcích jako `AttachAction` automaticky odhaduje název inverzního vztahu.
+- **Pojmenování:** Relace v modelech pojmenovávejte intuitivně (např. `User::teams()` místo `teamsCoached()`). Pokud je název jiný, Filament vyhodí `BadMethodCallException`.
+- **Pivot pole:** Pivot hodnoty (např. `email`, `role_in_team`) se nastavují v `form()` metodě `AttachAction` nebo v relation manageru.
+
+### 12.4 Ikony v administraci
+- **Helper:** Používejte `App\Support\IconHelper::get(IconHelper::KEY)` nebo modernější `App\Support\FilamentIcon::get(AppIcon::KEY)` pro metodu `->icon()`.
+- **Render:** Pro labely nebo `HtmlString` (zejména u Font Awesome ikon) používejte `IconHelper::render(IconHelper::KEY)`.
+- **Namespace:** Nepoužívejte standardní Filament ikony (Heroicons), pokud projekt vyžaduje Font Awesome přes náš `IconHelper`/`FilamentIcon`.

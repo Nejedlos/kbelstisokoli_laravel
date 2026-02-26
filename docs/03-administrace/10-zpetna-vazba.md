@@ -22,7 +22,7 @@ Tento modul umožňuje členům rychle kontaktovat své trenéry (pro týmová t
   - Nová pivot tabulka `coach_team` (`team_id`, `user_id`, `email`, timestamps) – umožňuje přiřadit trenéry (uživatele) k týmům a případně pro tým přepsat kontaktní e-mail.
   - Relace:
     - `Team::coaches()` → `belongsToMany(User::class, 'coach_team')->withPivot(['email'])`.
-    - `User::teamsCoached()` → `belongsToMany(Team::class, 'coach_team')->withPivot(['email'])`.
+    - `User::teams()` → `belongsToMany(Team::class, 'coach_team')->withPivot(['email'])`.
 - Nastavení admin e-mailu:
   - Filament stránka `BrandingSettings` rozšířena o pole `admin_contact_email`.
   - Fallback: pokud není nastaveno, použije se `.env` klíč `ERROR_REPORT_EMAIL`.

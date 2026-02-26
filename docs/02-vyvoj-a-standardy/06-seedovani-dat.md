@@ -12,7 +12,7 @@ Projekt využívá hierarchický systém seederů s hlavním bodem v `GlobalSeed
 - **`UserSeeder`**: Vytváří výchozí uživatele (administrátora a testovacího editora).
 - **`CronTaskSeeder`**: Registruje systémové úlohy pro plánovač (RSVP upomínky, synchronizace statistik atd.).
 - **`SportSeeder`**: Základní data pro sportovní část (sezóny, týmy).
-- **`TeamCoachSeeder`**: Naseedování konkrétních týmů (Muži C, Muži D) včetně přiřazení trenérů a jejich kontaktů.
+- **`TeamCoachSeeder`**: Naseedování konkrétních týmů (Muži C, Muži E) včetně přiřazení trenérů a jejich kontaktů.
 - **`PostSeeder`**: Kategorie novinek a úvodní uvítací článek.
 - **`CmsContentSeeder`**: Kompletní struktura webu – nastavení (Settings), stránky (Pages), bloky (PageBlocks), menu a SEO metadata.
 

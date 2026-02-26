@@ -77,8 +77,12 @@ return [
         'joined_team_at' => 'Joined Team At',
         'primary_team' => 'Primary Team',
     ],
+    'helpers' => [
+        'phone_9_digits' => 'Enter 9 digits without the prefix (e.g., 777666555).',
+    ],
     'actions' => [
         'edit' => 'Edit',
+        'edit_user' => 'Edit User',
         'delete' => 'Delete',
         'delete_selected' => 'Delete selected',
         'generate_vs' => 'Generate VS',

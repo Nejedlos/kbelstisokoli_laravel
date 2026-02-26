@@ -166,6 +166,7 @@ return [
     'url' => 'The :attribute field must be a valid URL.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
+    'phone' => 'The :attribute field must be a valid phone number.',
 
     /*
     |--------------------------------------------------------------------------
@@ -195,6 +196,13 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'email' => 'Email Address',
+        'password' => 'Password',
+        'password_confirmation' => 'Password Confirmation',
+        'phone' => 'Phone Number',
+        'phone_secondary' => 'Secondary Phone',
+        'emergency_contact_phone' => 'Emergency Contact (phone)',
+    ],
 
 ];
