@@ -146,7 +146,7 @@ class AiSearchService
             : 'Below is the local context from the project pages (selected relevant snippets):';
 
         $chunks = $sources->map(function ($doc, $i) {
-            $snippet = Str::limit($doc->content, 800);
+            $snippet = $doc->summary ? "Shrnutí: " . $doc->summary . "\nObsah: " . Str::limit($doc->content, 600) : Str::limit($doc->content, 800);
             $urlInfo = $doc->url ? " (URL: " . $doc->url . ")" : "";
             return ($i + 1) . ") [" . $doc->type . "] " . $doc->title . $urlInfo . "\n" . $snippet;
         })->implode("\n\n");

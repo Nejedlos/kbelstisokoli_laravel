@@ -137,7 +137,7 @@ class BackendSearchService
             return $aiResults->map(function ($doc) {
                 return new SearchResult(
                     title: $doc->title,
-                    snippet: mb_substr(strip_tags($doc->content), 0, 160) . '...',
+                    snippet: $doc->summary ?: mb_substr(strip_tags($doc->content), 0, 160) . '...',
                     url: $doc->url ?? '#',
                     type: $this->getDocTypeLabel($doc->type)
                 );

@@ -24,10 +24,11 @@ Tento modul umožňuje spravovat centrální „pool“ fotografií a hromadně 
 ## Admin (Filament)
 - Resource: „Pooly fotografií“ (`PhotoPoolResource`) ve skupině Média.
 - Formulář:
-  - Název, Slug (auto, volitelně), Typ akce, Datum akce, Popis.
-  - Viditelnost: Veřejné, Viditelné.
-  - Hromadné nahrání fotografií (JPG/PNG/WEBP/HEIC/HEIF, max ~25 MB/ks, až 200 souborů).
-- Akce „Navrhnout AI“ v headeru stránky Vytvořit – připraví návrh názvu/data/popisu, který lze před uložením upravit.
+  - Rozdělení do záložek (Základní informace, Fotografie, Nastavení).
+  - Název, Slug (automatické generování), Typ akce, Datum akce.
+  - Interaktivní AI asistence (ikonka u pole Název) – okamžitě navrhne vylepšená metadata (název, datum, popis) a promítne je do polí k revizi.
+  - Hromadné nahrávání fotografií (JPG/PNG/WEBP/HEIC/HEIF, max ~30 MB/ks, až 200 souborů). Nahrávat lze při vytváření i editaci (doplňování).
+  - Viditelnost: Veřejné, Viditelné v nabídce.
 
 ## Naplnění galerií z poolu
 - V `GalleryResource` → „Média v galerii“ je akce „Doplnit z poolu“.

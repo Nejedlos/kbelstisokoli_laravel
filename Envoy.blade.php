@@ -225,10 +225,10 @@
         fi
     fi
 
-        echo "Cleaning up cache..."
+    echo "Cleaning up cache..."
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
-    echo "Running database migrations..."
+    echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
@@ -273,6 +273,8 @@
 
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+    echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
@@ -564,7 +566,7 @@
         echo "✅ index.php patched."
     fi
 
-    echo "Running database migrations..."
+    echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."

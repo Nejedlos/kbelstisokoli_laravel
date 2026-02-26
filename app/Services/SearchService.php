@@ -25,12 +25,11 @@ class SearchService
         $aiResults = $this->aiIndexService->search($query, $locale, $limit, 'frontend');
 
         return $aiResults->map(function ($doc) {
-            // $doc je pole [$aiDocument, $score] z AiIndexService::search
             $aiDocument = is_array($doc) ? $doc[0] : $doc;
 
             return new SearchResult(
                 title: $aiDocument->title,
-                snippet: $this->makeSnippet($aiDocument->content),
+                snippet: $aiDocument->summary ?: $this->makeSnippet($aiDocument->content),
                 url: $aiDocument->url,
                 type: $this->getDocTypeLabel($aiDocument->type),
                 image: $aiDocument->metadata['image'] ?? null,

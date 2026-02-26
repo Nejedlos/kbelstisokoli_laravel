@@ -6,9 +6,9 @@ use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\MediaAsset;
 use App\Models\PhotoPool;
 use App\Services\AiTextEnhancer;
+use Filament\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -20,26 +20,7 @@ class CreatePhotoPool extends CreateRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('suggestAi')
-                ->label('Navrhnout AI')
-                ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::AI))
-                ->action(function (AiTextEnhancer $enhancer) {
-                    $state = $this->form->getState();
-                    $locale = app()->getLocale();
-                    $result = $enhancer->suggestPhotoPoolMetadata(
-                        (string)($state['title'] ?? ''),
-                        $state['event_date'] ?? null,
-                        (string)($state['description'] ?? ''),
-                        $locale,
-                    );
-
-                    // Aplikujeme návrh do formuláře (uživatel může upravit před uložením)
-                    $this->form->fill([
-                        'title' => $result['title'] ?? $state['title'] ?? null,
-                        'event_date' => $result['date'] ?: ($state['event_date'] ?? null),
-                        'description' => $result['description'] ?? $state['description'] ?? null,
-                    ]);
-                }),
+            //
         ];
     }
 

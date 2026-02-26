@@ -11,11 +11,15 @@ class TrainingController extends Controller
 {
     public function index(): View
     {
-        $teams = Team::with(['trainings' => function($query) {
+        $teams = Team::with(['trainings' => function ($query) {
             $query->where('starts_at', '>=', now())
-                  ->orderBy('starts_at', 'asc')
-                  ->limit(5);
+                ->orderBy('starts_at', 'asc');
         }])->get();
+
+        foreach ($teams as $team) {
+            $team->setRelation('trainings', $team->trainings->take(5));
+        }
+
         $page = \App\Models\Page::where('slug', 'treninky')->first();
 
         return view('public.trainings.index', compact('teams', 'page'));

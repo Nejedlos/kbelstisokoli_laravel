@@ -739,7 +739,7 @@ class ProductionDeploySetupCommand extends Command
                 $this->line(' ✅ Instalace PHP závislostí (Composer)');
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
                 $this->line(' ✅ Instalace a sestavení assetů (NPM & Vite)');
-                $this->line(' ✅ Spuštění databázových migrací a seedování');
+                $this->line(' ✅ Spuštění idempotentních databázových migrací a seedování');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace a AI reindexace');
 

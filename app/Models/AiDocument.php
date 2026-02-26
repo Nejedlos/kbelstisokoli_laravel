@@ -15,6 +15,7 @@ class AiDocument extends Model
         'type',
         'source',
         'title',
+        'summary',
         'url',
         'locale',
         'content',

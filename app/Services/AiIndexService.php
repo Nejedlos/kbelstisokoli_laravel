@@ -29,14 +29,13 @@ class AiIndexService
         $count += $this->indexNavigation($locale);
         $count += $this->indexFilament($locale);
         $count += $this->indexMemberSection($locale);
-        $count += $this->indexDocs(base_path('docs'), $locale);
         $count += $this->indexFrontend($locale);
 
         return $count;
     }
 
     /**
-     * Generuje klíčová slova a synonyma pro dokument pomocí AI.
+     * Obohatí dokument o AI generované shrnutí a klíčová slova.
      */
     public function enrichWithAi(AiDocument $doc): bool
     {
@@ -45,13 +44,21 @@ class AiIndexService
             return false;
         }
 
-        $prompt = "Analyzuj následující obsah stránky a vygeneruj seznam klíčových slov a synonym (v jazyce {$doc->locale}), které by uživatelé mohli hledat, aby tuto stránku našli.
-Zaměř se na akce, které lze na stránce provádět, a synonyma pro důležité termíny.
-Příklad: Pokud jde o nastavení brandingu, klíčová slova mohou být: logo, barvy, vzhled, identita, změna loga.
+        $prompt = "Analyzuj následující metadata a obsah stránky webu basketbalového klubu Kbelští sokoli.
+Vygeneruj:
+1. Stručné a výstižné shrnutí (summary) v jedné větě, které popisuje, co uživatel na této stránce najde nebo jakou akci tam může provést. Toto shrnutí se zobrazí ve výsledcích vyhledávání.
+2. Seznam klíčových slov a synonym, které by uživatelé mohli hledat.
 
+Formát odpovědi (JSON):
+{
+  \"summary\": \"Zde bude shrnutí...\",
+  \"keywords\": [\"slovo1\", \"slovo2\", ...]
+}
+
+Metadata stránky:
 Název: {$doc->title}
 Typ: {$doc->type}
-Obsah: ".Str::limit($doc->content, 2000);
+Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
 
         try {
             $response = Http::timeout(60)
@@ -60,16 +67,20 @@ Obsah: ".Str::limit($doc->content, 2000);
                 ->post('/chat/completions', [
                     'model' => $settings['fast_model'] ?? 'gpt-4o-mini',
                     'messages' => [
-                        ['role' => 'system', 'content' => 'Jsi expert na SEO a vyhledávání. Vracej pouze seznam klíčových slov oddělených čárkou.'],
+                        ['role' => 'system', 'content' => 'Jsi expert na UX a SEO pro sportovní klubové weby. Vracej pouze validní JSON.'],
                         ['role' => 'user', 'content' => $prompt],
                     ],
+                    'response_format' => ['type' => 'json_object'],
                     'temperature' => 0.3,
                 ])->json();
 
-            $keywordsStr = $response['choices'][0]['message']['content'] ?? '';
-            if ($keywordsStr) {
-                $keywords = array_map('trim', explode(',', $keywordsStr));
-                $doc->update(['keywords' => array_unique($keywords)]);
+            $data = json_decode($response['choices'][0]['message']['content'] ?? '{}', true);
+
+            if (!empty($data)) {
+                $doc->update([
+                    'summary' => $data['summary'] ?? $doc->summary,
+                    'keywords' => array_unique($data['keywords'] ?? ($doc->keywords ?: [])),
+                ]);
 
                 return true;
             }
@@ -121,8 +132,9 @@ Obsah: ".Str::limit($doc->content, 2000);
                         continue;
                     }
 
-                    $content = "V hlavním menu se tato položka nachází v sekci \"{$groupLabel}\" pod názvem \"{$label}\". ";
-                    $content .= 'Uživatel ji najde v postranním panelu (sidebar).';
+                    $content = "Položka menu: {$label}. Nachází se v sekci administrace: {$groupLabel}. ";
+                    $content .= "Cíl: Administrační stránka nebo nástroj pro správu klubu. ";
+                    $content .= "Klíčová slova z navigace: {$groupLabel}, {$label}.";
 
                     $this->updateOrCreateDocument([
                         'type' => 'admin.navigation',
@@ -205,7 +217,8 @@ Obsah: ".Str::limit($doc->content, 2000);
                 } catch (\Throwable $e) {
                 }
 
-                $navigationInfo = $group ? "Tato stránka se v menu nachází v sekci \"{$group}\". " : '';
+                $navigationInfo = $group ? "Sekce administrace: {$group}. " : '';
+                $typeInfo = "Typ: Administrační stránka (Page). ";
 
                 $this->updateOrCreateDocument([
                     'type' => 'admin.page',
@@ -213,7 +226,7 @@ Obsah: ".Str::limit($doc->content, 2000);
                     'title' => (string) $title,
                     'url' => $url,
                     'locale' => $locale,
-                    'content' => $navigationInfo.($content ?: 'Administrační stránka '.$title),
+                    'content' => $navigationInfo.$typeInfo.($content ?: 'Administrační stránka '.$title),
                     'checksum' => hash('sha256', $content.$url.$group),
                 ]);
                 $count++;
@@ -257,7 +270,8 @@ Obsah: ".Str::limit($doc->content, 2000);
                 } catch (\Throwable $e) {
                 }
 
-                $navigationInfo = $group ? "Tato sekce se v menu nachází v sekci \"{$group}\". " : '';
+                $navigationInfo = $group ? "Sekce administrace: {$group}. " : '';
+                $typeInfo = "Typ: Správa dat (Resource). ";
 
                 $this->updateOrCreateDocument([
                     'type' => 'admin.resource',
@@ -265,7 +279,7 @@ Obsah: ".Str::limit($doc->content, 2000);
                     'title' => (string) $title,
                     'url' => $url,
                     'locale' => $locale,
-                    'content' => $navigationInfo.$content,
+                    'content' => $navigationInfo.$typeInfo.$content,
                     'checksum' => hash('sha256', $resourceClass.$url.$group.$content),
                 ]);
                 $count++;
@@ -536,15 +550,9 @@ Obsah: ".Str::limit($doc->content, 2000);
             ->where('locale', $locale);
 
         if ($context === 'admin') {
-            $queryBuilder->where(function ($w) {
-                $w->where('type', 'like', 'admin.%')
-                    ->orWhere('type', 'docs');
-            });
+            $queryBuilder->where('type', 'like', 'admin.%');
         } elseif ($context === 'member') {
-            $queryBuilder->where(function ($w) {
-                $w->where('type', 'like', 'member.%')
-                    ->orWhere('type', 'docs');
-            });
+            $queryBuilder->where('type', 'like', 'member.%');
         } elseif ($context === 'frontend') {
             $queryBuilder->where('type', 'like', 'frontend.%');
         }
@@ -552,8 +560,7 @@ Obsah: ".Str::limit($doc->content, 2000);
         $candidates = $queryBuilder->where(function ($w) use ($q) {
             $w->whereRaw('LOWER(title) LIKE ?', ['%'.$q.'%'])
                 ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$q.'%'])
-                ->orWhereRaw('LOWER(keywords) LIKE ?', ['%'.$q.'%'])
-                ->orWhereJsonContains('keywords', $q);
+                ->orWhereRaw('LOWER(keywords) LIKE ?', ['%'.$q.'%']);
         })
             ->limit(100)
             ->get();
@@ -593,11 +600,9 @@ Obsah: ".Str::limit($doc->content, 2000);
                 $score += (500 - $pos) / 50;
             }
 
-            // Typový boost (upřednostnit admin sekci před dokumentací)
+            // Typový boost (upřednostnit admin sekci)
             if (str_starts_with($doc->type, 'admin.')) {
                 $score += 30;
-            } elseif ($doc->type === 'docs') {
-                $score -= 5; // mírná penalizace dokumentace v rámci admin kontextu
             }
 
             return [$doc, $score];
@@ -607,90 +612,6 @@ Obsah: ".Str::limit($doc->content, 2000);
             ->values();
 
         return $scored;
-    }
-
-    private function indexBladeViews(string $dir, string $type, string $locale): int
-    {
-        if (! is_dir($dir)) {
-            return 0;
-        }
-
-        $files = File::allFiles($dir);
-        $count = 0;
-
-        foreach ($files as $file) {
-            if ($file->getExtension() !== 'php' && ! str_ends_with($file->getFilename(), '.blade.php')) {
-                continue;
-            }
-
-            $path = $file->getRealPath();
-            try {
-                $raw = File::get($path);
-            } catch (FileNotFoundException) {
-                continue;
-            }
-
-            $text = $this->sanitizeBlade($raw);
-            $title = $this->guessTitleFromBlade($raw) ?: basename($path);
-
-            $checksum = hash('sha256', $raw);
-
-            $this->updateOrCreateDocument([
-                'type' => $type,
-                'source' => str_replace(base_path().DIRECTORY_SEPARATOR, '', $path),
-                'title' => $title,
-                'url' => null,
-                'locale' => $locale,
-                'content' => $text,
-                'checksum' => $checksum,
-            ]);
-
-            $count++;
-        }
-
-        return $count;
-    }
-
-    private function indexDocs(string $dir, string $locale): int
-    {
-        if (! is_dir($dir)) {
-            return 0;
-        }
-
-        $files = File::allFiles($dir);
-        $count = 0;
-
-        foreach ($files as $file) {
-            if (! in_array(strtolower($file->getExtension()), ['md', 'markdown'], true)) {
-                continue;
-            }
-
-            $path = $file->getRealPath();
-            try {
-                $raw = File::get($path);
-            } catch (FileNotFoundException) {
-                continue;
-            }
-
-            $text = $this->sanitizeMarkdown($raw);
-            $title = $this->guessTitleFromMarkdown($raw) ?: basename($path);
-
-            $checksum = hash('sha256', $raw);
-
-            $this->updateOrCreateDocument([
-                'type' => 'docs',
-                'source' => str_replace(base_path().DIRECTORY_SEPARATOR, '', $path),
-                'title' => $title,
-                'url' => null,
-                'locale' => $locale,
-                'content' => $text,
-                'checksum' => $checksum,
-            ]);
-
-            $count++;
-        }
-
-        return $count;
     }
 
     private function sanitizeBlade(string $raw): string
@@ -704,40 +625,5 @@ Obsah: ".Str::limit($doc->content, 2000);
 
         // Komprimovat whitespace
         return trim(preg_replace('/\s+/', ' ', $text) ?? $text);
-    }
-
-    private function sanitizeMarkdown(string $raw): string
-    {
-        // Odstranit kódové bloky
-        $text = preg_replace('/```.*?```/s', ' ', $raw) ?? $raw;
-        // Odstranit markdown syntaxi #,*,_,[]()
-        $text = preg_replace('/[#*_`>\-]+/', ' ', $text) ?? $text;
-        $text = preg_replace('/!\[[^\]]*\]\([^)]*\)/', ' ', $text) ?? $text; // obrázky
-        $text = preg_replace('/\[[^\]]*\]\([^)]*\)/', ' ', $text) ?? $text;  // odkazy
-        $text = strip_tags($text);
-
-        return trim(preg_replace('/\s+/', ' ', $text) ?? $text);
-    }
-
-    private function guessTitleFromBlade(string $raw): ?string
-    {
-        // Hledat <h1>...</h1> nebo @section('title', '...')
-        if (preg_match('/<h1[^>]*>(.*?)<\\/h1>/si', $raw, $m)) {
-            return trim(strip_tags($m[1]));
-        }
-        if (preg_match("/@section\(['\"]title['\"],\s*['\"](.*?)['\"]\)/si", $raw, $m)) {
-            return trim($m[1]);
-        }
-
-        return null;
-    }
-
-    private function guessTitleFromMarkdown(string $raw): ?string
-    {
-        if (preg_match('/^#\s+(.+)$/m', $raw, $m)) {
-            return trim($m[1]);
-        }
-
-        return null;
     }
 }

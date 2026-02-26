@@ -178,7 +178,7 @@ class ProductionSyncCommand extends Command
         $ftpPass = env('PROD_FTP_PASSWORD');
         $ftpPort = env('PROD_FTP_PORT', 21);
 
-        foreach (['public/assets/', 'public/build/'] as $dir) {
+        foreach (['public/assets/', 'public/build/', 'database/migrations/', 'database/seeders/', 'database/factories/'] as $dir) {
             $localDir = base_path($dir);
             if (file_exists($localDir)) {
                 $this->line("Syncing $dir...");
@@ -260,7 +260,7 @@ class ProductionSyncCommand extends Command
                 $this->line(' ✅ Vyčištění systémové mezipaměti');
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
                 $this->line(' ✅ Synchronizace statických assetů (build, assets, img)');
-                $this->line(' ✅ Spuštění databázových migrací');
+                $this->line(' ✅ Spuštění idempotentních databázových migrací');
                 $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
@@ -312,7 +312,7 @@ class ProductionSyncCommand extends Command
                 $this->line(' ✅ Vyčištění systémové mezipaměti (config, route, view)');
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
                 $this->line(' ✅ Synchronizace statických assetů (vyčištění a kopírování do ' . ($publicPath ?: 'public') . ')');
-                $this->line(' ✅ Spuštění databázových migrací');
+                $this->line(' ✅ Spuštění idempotentních databázových migrací');
                 $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');

@@ -29,22 +29,27 @@
          class="ks-search-overlay fixed inset-x-0 top-16 w-screen md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-full md:min-w-[450px] bg-white dark:bg-gray-900 rounded-none md:rounded-2xl shadow-2xl border-t md:border border-gray-100 dark:border-gray-800 p-2 z-50 overflow-hidden"
          style="display: none;">
 
-        <div class="p-2">
-            @livewire(\Filament\Livewire\GlobalSearch::class)
+        <div class="p-2 filament-standard-search-container">
+            @livewire('filament-panels::global-search')
         </div>
     </div>
 </div>
 
 <style>
     /* Stylování vnořeného globálního vyhledávání, aby zapadlo do našeho dropdownu */
-    .fi-global-search-container {
+    .filament-standard-search-container .fi-global-search {
+        display: block !important;
         width: 100% !important;
     }
-    .fi-global-search-field {
+    .filament-standard-search-container .fi-global-search-container {
+        width: 100% !important;
+    }
+    .filament-standard-search-container .fi-global-search-field {
         margin-bottom: 0 !important;
     }
-    /* Skrytí původního vyhledávání v topbaru, pokud by tam zůstalo */
-    header .fi-global-search:not(.p-2 .fi-global-search) {
+    /* Skrytí původního vyhledávání v topbaru (v layoutu), aby nezůstalo zdvojené */
+    /* Využíváme faktu, že naše vyhledávání je uvnitř .filament-standard-search-container */
+    .fi-topbar .fi-global-search:not(.filament-standard-search-container .fi-global-search) {
         display: none !important;
     }
 </style>

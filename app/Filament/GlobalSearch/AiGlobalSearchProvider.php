@@ -21,11 +21,12 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         $documents = AiDocument::where('locale', $locale)
             ->where('type', 'like', 'admin.%')
             ->where(function ($q) use ($query) {
-                $q->where('title', 'like', "%{$query}%")
-                  ->orWhere('content', 'like', "%{$query}%")
-                  ->orWhere('keywords', 'like', "%{$query}%")
-                  ->orWhereJsonContains('keywords', $query);
+                $queryLower = mb_strtolower($query);
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$queryLower}%"])
+                  ->orWhereRaw('LOWER(content) LIKE ?', ["%{$queryLower}%"])
+                  ->orWhereRaw('LOWER(keywords) LIKE ?', ["%{$queryLower}%"]);
             })
+            ->orderBy('title')
             ->limit(10)
             ->get();
 
@@ -58,6 +59,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
             'admin.page' => __('admin.search.categories.pages'),
             'admin.resource' => __('admin.search.categories.resources'),
             'admin.navigation' => __('admin.search.categories.navigation'),
+            'docs' => 'Dokumentace',
             default => __('admin.search.categories.other'),
         };
     }
@@ -71,9 +73,9 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
             $details[__('admin.search.details.group')] = $doc->metadata['group'];
         }
 
-        // Náhled obsahu (zkrácený)
-        $excerpt = mb_substr(strip_tags($doc->content), 0, 100) . '...';
-        $details[__('admin.search.details.content')] = $excerpt;
+        // AI vygenerované shrnutí (pokud existuje) nebo náhled obsahu
+        $summary = $doc->summary ?: mb_substr(strip_tags($doc->content), 0, 100) . '...';
+        $details[__('admin.search.details.content')] = $summary;
 
         return $details;
     }

@@ -190,7 +190,7 @@ class ProductionDeployCommand extends Command
                 $this->line(' ✅ Aktualizace zdrojového kódu (Git fetch & reset)');
                 $this->line(' ✅ Vyčištění systémové mezipaměti');
                 $this->line(' ✅ Instalace PHP závislostí (Composer)');
-                $this->line(' ✅ Spuštění databázových migrací');
+                $this->line(' ✅ Spuštění idempotentních databázových migrací');
                 $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
                 $this->line(' ✅ Aktualizace .env konfigurace');
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
