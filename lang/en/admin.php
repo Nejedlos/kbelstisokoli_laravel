@@ -129,6 +129,39 @@ return [
                 'label' => 'User',
                 'plural_label' => 'Users',
             ],
+            'photo_pool' => [
+                'label' => 'Photo Pool',
+                'plural_label' => 'Photo Pools',
+                'actions' => [
+                    'create_wizard' => 'Add Photo Pool',
+                ],
+                'steps' => [
+                    'context' => [
+                        'label' => 'Base Context',
+                        'description' => 'Enter information for AI analysis',
+                    ],
+                    'review' => [
+                        'label' => 'AI Proposal & Review',
+                        'description' => 'Check bilingual texts',
+                    ],
+                    'upload' => [
+                        'label' => 'Photo Upload',
+                        'description' => 'Bulk dropzone for your images',
+                    ],
+                ],
+                'fields' => [
+                    'preliminary_title' => 'Preliminary Title',
+                    'preliminary_date' => 'Approximate Date',
+                    'preliminary_description' => 'Short Description',
+                    'event_date' => 'Event Date (normalized)',
+                    'slug' => 'URL Identifier (slug)',
+                    'title_cs' => 'Title (CS)',
+                    'description_cs' => 'Description (CS)',
+                    'title_en' => 'Title (EN)',
+                    'description_en' => 'Description (EN)',
+                    'photos' => 'Photos',
+                ],
+            ],
         ],
     ],
     'loader' => [

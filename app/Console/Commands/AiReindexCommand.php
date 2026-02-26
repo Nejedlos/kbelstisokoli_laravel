@@ -20,7 +20,18 @@ class AiReindexCommand extends Command
         $locales = $locale === 'all' ? ['cs', 'en'] : [$locale];
 
         foreach ($locales as $l) {
+            // Nastavíme globální locale pro aktuální iteraci
+            \Illuminate\Support\Facades\App::setLocale($l);
+
             $this->info("Indexing AI documents for locale '{$l}'" . ($fresh ? " (fresh)" : "") . "...");
+
+            // Pokud není fresh, aspoň promažeme typy, které už nechceme indexovat
+            if (!$fresh) {
+                \App\Models\AiDocument::where('locale', $l)
+                    ->whereIn('type', ['docs', 'admin.page', 'admin.navigation'])
+                    ->delete();
+            }
+
             $count = $index->reindex($l, $fresh);
             $this->info("Processed {$count} documents for locale '{$l}'.");
 

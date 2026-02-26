@@ -41,8 +41,7 @@ class SearchService
     protected function getDocTypeLabel(string $type): string
     {
         return match ($type) {
-            'frontend.page' => __('search.types.page'),
-            'frontend.post' => __('search.types.post'),
+            'frontend.resource' => __('search.types.page'),
             default => __('search.types.general'),
         };
     }

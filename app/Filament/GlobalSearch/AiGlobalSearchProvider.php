@@ -56,10 +56,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
     protected function getCategoryName(string $type): string
     {
         return match ($type) {
-            'admin.page' => __('admin.search.categories.pages'),
             'admin.resource' => __('admin.search.categories.resources'),
-            'admin.navigation' => __('admin.search.categories.navigation'),
-            'docs' => 'Dokumentace',
             default => __('admin.search.categories.other'),
         };
     }

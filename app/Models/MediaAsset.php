@@ -33,7 +33,7 @@ class MediaAsset extends Model implements HasMedia
         static::updating(function (MediaAsset $asset) {
             if ($asset->isDirty('title') && $asset->title) {
                 foreach ($asset->getMedia('default') as $media) {
-                    $newFileName = \Illuminate\Support\Str::slug($asset->title) . '.' . $media->extension;
+                    $newFileName = \Illuminate\Support\Str::slug($asset->title).'.'.$media->extension;
                     if ($media->file_name !== $newFileName) {
                         $media->file_name = $newFileName;
                         $media->save();
@@ -41,6 +41,13 @@ class MediaAsset extends Model implements HasMedia
                 }
             }
         });
+    }
+
+    public function photoPools(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(PhotoPool::class, 'photo_pool_media_asset')
+            ->withPivot(['sort_order', 'caption_override', 'is_visible'])
+            ->withTimestamps();
     }
 
     public function uploadedBy(): BelongsTo
@@ -69,21 +76,27 @@ class MediaAsset extends Model implements HasMedia
     /**
      * Zaregistruje konverze médií.
      */
-    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
     {
         $this->addMediaConversion('thumb')
-            ->width(300)
-            ->height(300)
+            ->width(400)
+            ->height(400)
             ->format(Manipulations::FORMAT_WEBP)
             ->nonQueued()
             ->sharpen(10);
 
-        $this->addMediaConversion('large')
-            ->width(1600)
-            ->height(1600)
+        $this->addMediaConversion('optimized')
+            ->width(1920)
+            ->height(1920)
             ->format(Manipulations::FORMAT_WEBP)
             ->optimize()
-            ->nonQueued()
-            ->sharpen(10);
+            ->nonQueued();
+
+        $this->addMediaConversion('original')
+            ->width(2560)
+            ->height(2560)
+            ->keepOriginalImageFormat()
+            ->optimize()
+            ->nonQueued();
     }
 }

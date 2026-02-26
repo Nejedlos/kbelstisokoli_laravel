@@ -244,7 +244,7 @@
     {{ $php }} artisan optimize
 
     echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --locale=all --no-interaction
+    {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
 
     echo "✅ Setup finished successfully!"
 @endtask
@@ -440,7 +440,7 @@
     {{ $php }} artisan optimize
 
     echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --locale=all --no-interaction
+    {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
 
     echo "✅ Deployment finished successfully!"
 @endtask
@@ -582,7 +582,7 @@
     {{ $php }} artisan optimize
 
     echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --locale=all --no-interaction
+    {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
 
     echo "✅ Sync finished successfully!"
 @endtask

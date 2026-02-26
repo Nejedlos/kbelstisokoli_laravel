@@ -30,7 +30,7 @@
          style="display: none;">
 
         <div class="p-2 filament-standard-search-container">
-            @livewire('filament-panels::global-search')
+            @livewire(\Filament\Livewire\GlobalSearch::class)
         </div>
     </div>
 </div>

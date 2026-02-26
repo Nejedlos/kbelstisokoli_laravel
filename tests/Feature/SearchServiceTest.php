@@ -15,15 +15,18 @@ class SearchServiceTest extends TestCase
 
     public function test_search_returns_results_without_type_error()
     {
-        // Vytvoření testovací stránky s překlady
-        Page::create([
-            'title' => ['cs' => 'Nábor dětí', 'en' => 'Recruitment of children'],
-            'slug' => 'nabor',
-            'content' => ['cs' => 'Hledáme nové sokolíky do našich oddílů.', 'en' => 'We are looking for new little falcons for our sections.'],
-            'is_visible' => true,
+        // Vytvoření testovacího AI dokumentu
+        \App\Models\AiDocument::create([
+            'title' => 'Nábor dětí',
+            'content' => 'Hledáme nové sokolíky do našich oddílů.',
+            'locale' => 'cs',
+            'type' => 'frontend.resource',
+            'url' => '/nabor',
+            'checksum' => 'test1',
+            'source' => 'page:1',
         ]);
 
-        $searchService = new SearchService();
+        $searchService = app(SearchService::class);
 
         // Simulace hledání, které vyvolalo chybu
         // Musíme nastavit locale, protože SearchService ho používá
@@ -41,22 +44,19 @@ class SearchServiceTest extends TestCase
 
     public function test_search_posts_returns_results_without_type_error()
     {
-        $category = PostCategory::create([
-            'name' => ['cs' => 'Zprávy', 'en' => 'News'],
-            'slug' => 'zpravy',
+        // Vytvoření testovacího AI dokumentu
+        \App\Models\AiDocument::create([
+            'title' => 'Nový trenér',
+            'content' => 'Máme nového trenéra pro mladší žáky. Detailní informace o novém trenérovi.',
+            'summary' => 'Máme nového trenéra pro mladší žáky.',
+            'locale' => 'cs',
+            'type' => 'frontend.resource',
+            'url' => '/news/novy-trener',
+            'checksum' => 'test2',
+            'source' => 'post:1',
         ]);
 
-        Post::create([
-            'category_id' => $category->id,
-            'title' => ['cs' => 'Nový trenér', 'en' => 'New coach'],
-            'slug' => 'novy-trener',
-            'excerpt' => ['cs' => 'Máme nového trenéra pro mladší žáky.', 'en' => 'We have a new coach for younger pupils.'],
-            'content' => ['cs' => 'Detailní informace o novém trenérovi.', 'en' => 'Detailed information about the new coach.'],
-            'is_visible' => true,
-            'status' => 'published',
-        ]);
-
-        $searchService = new SearchService();
+        $searchService = app(SearchService::class);
         app()->setLocale('cs');
 
         try {
@@ -71,14 +71,27 @@ class SearchServiceTest extends TestCase
 
     public function test_search_works_in_different_locales()
     {
-        Page::create([
-            'title' => ['cs' => 'Kontakt', 'en' => 'Contact Us'],
-            'slug' => 'kontakt',
-            'content' => ['cs' => 'Napište nám zprávu.', 'en' => 'Send us a message.'],
-            'is_visible' => true,
+        \App\Models\AiDocument::create([
+            'title' => 'Kontakt',
+            'content' => 'Napište nám zprávu.',
+            'locale' => 'cs',
+            'type' => 'frontend.resource',
+            'url' => '/kontakt',
+            'checksum' => 'test3',
+            'source' => 'page:2',
         ]);
 
-        $searchService = new SearchService();
+        \App\Models\AiDocument::create([
+            'title' => 'Contact Us',
+            'content' => 'Send us a message.',
+            'locale' => 'en',
+            'type' => 'frontend.resource',
+            'url' => '/contact',
+            'checksum' => 'test4',
+            'source' => 'page:2',
+        ]);
+
+        $searchService = app(SearchService::class);
 
         // Test Czech
         app()->setLocale('cs');

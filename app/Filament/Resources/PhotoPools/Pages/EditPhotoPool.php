@@ -5,7 +5,6 @@ namespace App\Filament\Resources\PhotoPools\Pages;
 use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\MediaAsset;
 use App\Models\PhotoPool;
-use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +25,7 @@ class EditPhotoPool extends EditRecord
     {
         // Zpracujeme nahrané soubory a vytvoříme MediaAsset + pivot
         // Stejná logika jako v CreatePhotoPool, aby šlo doplňovat fotky i při editaci
-        $state = $this->form->getState();
+        $state = $this->form->getRawState();
         $files = $state['photos'] ?? [];
 
         if (empty($files)) {
@@ -47,7 +46,7 @@ class EditPhotoPool extends EditRecord
                     $file = new \Illuminate\Http\File($fullPath);
 
                     $asset = new MediaAsset([
-                        'title' => (string) (brand_text($pool->title) . ' #' . (++$sort)),
+                        'title' => (string) (brand_text($pool->title).' #'.(++$sort)),
                         'alt_text' => brand_text($pool->title),
                         'type' => 'image',
                         'access_level' => 'public',
@@ -70,7 +69,7 @@ class EditPhotoPool extends EditRecord
                     // Po zpracování smažeme dočasný soubor (volitelné, Filament to většinou pořeší, ale jistota je jistota)
                     // Storage::disk(config('filesystems.default'))->delete($path);
                 } catch (\Throwable $e) {
-                    \Log::warning('Photo import failed during edit: ' . $e->getMessage());
+                    \Log::warning('Photo import failed during edit: '.$e->getMessage());
                 }
             }
         });

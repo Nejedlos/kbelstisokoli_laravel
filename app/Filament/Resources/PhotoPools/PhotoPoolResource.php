@@ -6,28 +6,23 @@ use App\Filament\Resources\PhotoPools\Pages\CreatePhotoPool;
 use App\Filament\Resources\PhotoPools\Pages\EditPhotoPool;
 use App\Filament\Resources\PhotoPools\Pages\ListPhotoPools;
 use App\Models\PhotoPool;
-use App\Services\AiTextEnhancer;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -71,42 +66,6 @@ class PhotoPoolResource extends Resource
                             ->label(new HtmlString('<i class="fa-light fa-info-circle mr-1"></i> Základní informace'))
                             ->schema([
                                 Grid::make(2)->schema([
-                                    TextInput::make('title')
-                                        ->label('Název akce')
-                                        ->required()
-                                        ->maxLength(200)
-                                        ->live(onBlur: true)
-                                        ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                                            if (!$get('slug') && $state) {
-                                                $set('slug', Str::slug($state));
-                                            }
-                                        })
-                                        ->hintAction(
-                                            \Filament\Forms\Components\Actions\Action::make('suggestAi')
-                                                ->label('Vylepšit pomocí AI')
-                                                ->icon('heroicon-m-sparkles')
-                                                ->color('primary')
-                                                ->action(function (Get $get, Set $set, AiTextEnhancer $enhancer) {
-                                                    $locale = app()->getLocale();
-                                                    $result = $enhancer->suggestPhotoPoolMetadata(
-                                                        (string)($get('title') ?? ''),
-                                                        $get('event_date') ?? null,
-                                                        (string)($get('description') ?? ''),
-                                                        $locale,
-                                                    );
-
-                                                    $set('title', $result['title']);
-                                                    if ($result['date']) {
-                                                        $set('event_date', $result['date']);
-                                                    }
-                                                    $set('description', $result['description']);
-
-                                                    // Update slug if it was empty
-                                                    if (!$get('slug')) {
-                                                        $set('slug', Str::slug($result['title']));
-                                                    }
-                                                })
-                                        ),
                                     TextInput::make('slug')
                                         ->label('Slug / URL indentifikátor')
                                         ->required()
@@ -128,11 +87,37 @@ class PhotoPoolResource extends Resource
                                         ->native(false)
                                         ->required(),
                                 ]),
-                                Textarea::make('description')
-                                    ->label('Popis akce (vylepšeno AI)')
-                                    ->placeholder('Zadejte stručné informace a klikněte na "Vylepšit pomocí AI" výše...')
-                                    ->rows(6)
-                                    ->columnSpanFull(),
+                                Tabs::make('Translations')
+                                    ->tabs([
+                                        Tabs\Tab::make('Čeština')
+                                            ->icon(new HtmlString('<i class="fa-light fa-flag-checkered"></i>'))
+                                            ->schema([
+                                                TextInput::make('title.cs')
+                                                    ->label('Název akce (cs)')
+                                                    ->required()
+                                                    ->maxLength(200)
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(function ($get, $set, ?string $state) {
+                                                        if (! $get('slug') && $state) {
+                                                            $set('slug', Str::slug($state));
+                                                        }
+                                                    }),
+                                                Textarea::make('description.cs')
+                                                    ->label('Popis akce (cs)')
+                                                    ->rows(6),
+                                            ]),
+                                        Tabs\Tab::make('English')
+                                            ->icon(new HtmlString('<i class="fa-light fa-flag-usa"></i>'))
+                                            ->schema([
+                                                TextInput::make('title.en')
+                                                    ->label('Event name (en)')
+                                                    ->required()
+                                                    ->maxLength(200),
+                                                Textarea::make('description.en')
+                                                    ->label('Event description (en)')
+                                                    ->rows(6),
+                                            ]),
+                                    ]),
                             ]),
 
                         Tabs\Tab::make('Photos')
@@ -143,8 +128,9 @@ class PhotoPoolResource extends Resource
                                     ->multiple()
                                     ->image()
                                     ->reorderable()
+                                    ->disk(env('UPLOADS_DISK', 'public'))
                                     ->directory('uploads/photos/pools')
-                                    ->preserveFilenames()
+                                    ->sanitizeFileName(fn (string $fileName): string => Str::slug(pathinfo($fileName, PATHINFO_FILENAME)).'.'.strtolower(pathinfo($fileName, PATHINFO_EXTENSION)))
                                     ->downloadable()
                                     ->openable()
                                     ->maxFiles(200)
@@ -152,7 +138,7 @@ class PhotoPoolResource extends Resource
                                     ->imageEditor()
                                     ->helperText('Povolené typy: JPG, PNG, WEBP, HEIC. Fotografie budou automaticky optimalizovány pro web (WebP).')
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
-                                    ->dehydrate(false) // Zpracováváme v Create/Edit stránce
+                                    ->dehydrated(false) // Zpracováváme v Create/Edit stránce
                                     ->columnSpanFull(),
                             ]),
 
@@ -181,6 +167,7 @@ class PhotoPoolResource extends Resource
             ->columns([
                 TextColumn::make('title')
                     ->label('Název akce')
+                    ->formatStateUsing(fn ($state, PhotoPool $record) => (string) $record->getTranslation('title', app()->getLocale()))
                     ->searchable()
                     ->sortable()
                     ->limit(50),
@@ -235,7 +222,7 @@ class PhotoPoolResource extends Resource
             ])
             ->actions([
                 EditAction::make()->icon(new HtmlString('<i class="fa-light fa-pen-to-square"></i>')),
-                \Filament\Tables\Actions\DeleteAction::make()->icon(new HtmlString('<i class="fa-light fa-trash"></i>')),
+                DeleteAction::make()->icon(new HtmlString('<i class="fa-light fa-trash"></i>')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

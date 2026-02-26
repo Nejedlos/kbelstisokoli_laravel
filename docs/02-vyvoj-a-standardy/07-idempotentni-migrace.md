@@ -38,5 +38,26 @@ if (Schema::hasTable('old_name') && !Schema::hasTable('new_name')) {
 ### 4. Změny typů sloupců (`->change()`)
 Při změně typu sloupce (např. na JSON pro překlady) používáme standardní `change()`, ale celou operaci balíme do kontroly existence tabulky, aby nedocházelo k chybám, pokud tabulka ještě neexistuje (např. při paralelním vývoji).
 
+### 5. Specifika pro produkční prostředí (Webglobe)
+Na některých serverech (např. Webglobe v produkci) může standardní schéma Laravelu (`Schema::hasColumn`, `Schema::table`) selhat s chybou `Unknown column 'generation_expression' in 'field list'` kvůli specifické konfiguraci MariaDB/MySQL a ovladačů.
+
+V takových případech používáme **vlastní kontrolu pomocí raw SQL**:
+
+```php
+$prefix = DB::getTablePrefix();
+$table = $prefix . 'ai_documents';
+
+try {
+    $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'column_name'");
+    if (empty($columnExists)) {
+        DB::statement("ALTER TABLE {$table} ADD COLUMN column_name TEXT NULL");
+    }
+} catch (\Throwable $e) {
+    // Log or ignore
+}
+```
+
+Tento přístup obchází introspekci schématu a přímo komunikuje s databází, čímž zajišťuje funkčnost i v problematických prostředích.
+
 ## Proč je to důležité
 Na produkčním prostředí (Webglobe) může při nasazení dojít k neočekávaným stavům. Idempotentní migrace zajišťují, že `php artisan migrate` v rámci `Envoy` nasazení vždy doběhne úspěšně a nezanechá databázi v nekonzistentním stavu.

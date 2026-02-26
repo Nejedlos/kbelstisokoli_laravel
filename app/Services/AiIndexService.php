@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Models\AiDocument;
 use App\Models\Page;
 use App\Models\Post;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Support\Facades\File;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AiIndexService
@@ -17,16 +20,19 @@ class AiIndexService
     ) {}
 
     /**
-     * Provede kompletní reindex zdrojů (Blade views a Markdown v docs).
+     * Provede kompletní reindex zdrojů (Blade views, DB záznamy).
      */
     public function reindex(string $locale = 'cs', bool $fresh = false): int
     {
+        // Nastavíme locale pro korektní překlady během indexace
+        App::setLocale($locale);
+
         if ($fresh) {
             AiDocument::query()->where('locale', $locale)->delete();
         }
 
         $count = 0;
-        $count += $this->indexNavigation($locale);
+        // Indexujeme pouze zdroje pro admin, member a frontend
         $count += $this->indexFilament($locale);
         $count += $this->indexMemberSection($locale);
         $count += $this->indexFrontend($locale);
@@ -44,28 +50,52 @@ class AiIndexService
             return false;
         }
 
-        $prompt = "Analyzuj následující metadata a obsah stránky webu basketbalového klubu Kbelští sokoli.
-Vygeneruj:
-1. Stručné a výstižné shrnutí (summary) v jedné větě, které popisuje, co uživatel na této stránce najde nebo jakou akci tam může provést. Toto shrnutí se zobrazí ve výsledcích vyhledávání.
-2. Seznam klíčových slov a synonym, které by uživatelé mohli hledat.
+        $prompt = "### SYSTEM PROMPT (Role: Semantic Search Architect)
+Jsi expert na indexaci webového obsahu pro basketbalový klub \"Kbelští sokoli\". Tvým úkolem je transformovat surový obsah stránky do sémantického profilu, který umožní uživatelům najít stránku pomocí přirozených dotazů, záměrů (intents) a synonym.
 
-Formát odpovědi (JSON):
+### VSTUPNÍ KONTEXT
+- URL: {$doc->url}
+- SEKCE: {$doc->type} (např. Administrace, Členská sekce, Veřejný web)
+- JAZYK: {$doc->locale} (cs/en)
+
+### SUROVÝ OBSAH STRÁNKY
+{$doc->content}
+
+### TVÉ INSTRUKCE (ZÁVAZNÉ)
+
+#### 1. Sémantické mapování (Záměr uživatele)
+Nehledej jen texty, hledej význam.
+- Pokud na stránce vidíš pole \"Znak klubu\" nebo \"Nahrát logo\", zaindexuj: \"změna loga\", \"nastavit logo\", \"brand\", \"identity\", \"nahrát obrázek týmu\".
+- Pokud vidíš tabulku s platbami, zaindexuj: \"kolik dlužím\", \"bankovní spojení\", \"qr kód\", \"přehled příspěvků\".
+- Pokud vidíš formulář hráče, zaindexuj: \"vytvořit člena\", \"přidat kluka do týmu\", \"registrace\".
+
+#### 2. Struktura výstupu (Validní JSON)
+Mustíš vrátit POUZE validní JSON. Nic jiného.
 {
-  \"summary\": \"Zde bude shrnutí...\",
-  \"keywords\": [\"slovo1\", \"slovo2\", ...]
+  \"title\": \"Lidsky srozumitelný název stránky (např. 'Správa identity' místo 'Settings')\",
+  \"description\": \"Stručný jednovětý popis pro výsledky vyhledávání\",
+  \"queries\": [\"seznam 15-20 pravděpodobných dotazů, otázek a synonym, které by uživatel mohl zadat\"],
+  \"keywords\": [\"technická klíčová slova\"],
+  \"priority\": 5
 }
 
-Metadata stránky:
-Název: {$doc->title}
-Typ: {$doc->type}
-Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
+#### 3. Bezpečnost a soukromí (Kritické)
+- **ANONYMIZACE**: Pokud v obsahu vidíš konkrétní jména (např. 'Jan Novák'), maily nebo telefony, NIKDY je neukládej do indexu. Nahraď je zástupnými symboly jako '[jméno_člena]' nebo '[kontakt]'. Indexuj pouze TYPY informací, ne konkrétní data.
+- **FILTRACE**: Ignoruj UUID, CSRF tokeny, hash řetězce a technické chyby.
+
+#### 4. Výkon a Jazyk
+- Buď maximálně stručný a věcný.
+- **DŮLEŽITÉ: Veškerý textový výstup (title, description, queries, keywords) generuj VÝHRADNĚ v jazyce stránky ({$doc->locale}).**
+- Pokud je jazyk cs, piš česky. Pokud en, piš anglicky.
+
+### ZPRACOVEJ TEĎ (ODPOVĚZ POUZE FORMÁTEM JSON):";
 
         try {
             $response = Http::timeout(60)
                 ->withToken($settings['openai_api_key'])
                 ->baseUrl($settings['openai_base_url'] ?? 'https://api.openai.com/v1')
                 ->post('/chat/completions', [
-                    'model' => $settings['fast_model'] ?? 'gpt-4o-mini',
+                    'model' => $settings['analyze_model'] ?? $settings['fast_model'] ?? 'gpt-4o-mini',
                     'messages' => [
                         ['role' => 'system', 'content' => 'Jsi expert na UX a SEO pro sportovní klubové weby. Vracej pouze validní JSON.'],
                         ['role' => 'user', 'content' => $prompt],
@@ -76,16 +106,18 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
 
             $data = json_decode($response['choices'][0]['message']['content'] ?? '{}', true);
 
-            if (!empty($data)) {
+            if (! empty($data)) {
                 $doc->update([
-                    'summary' => $data['summary'] ?? $doc->summary,
-                    'keywords' => array_unique($data['keywords'] ?? ($doc->keywords ?: [])),
+                    'title' => $data['title'] ?? $doc->title,
+                    'summary' => $data['description'] ?? $doc->summary,
+                    'keywords' => array_unique(array_merge($data['queries'] ?? [], $data['keywords'] ?? [])),
+                    'metadata' => array_merge($doc->metadata ?? [], ['priority' => $data['priority'] ?? 5]),
                 ]);
 
                 return true;
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('AI Enrichment Error: '.$e->getMessage());
+            Log::error('AI Enrichment Error: '.$e->getMessage());
         }
 
         return false;
@@ -114,58 +146,44 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
         return AiDocument::create($data);
     }
 
-    private function indexNavigation(string $locale): int
-    {
-        $count = 0;
-        try {
-            $panel = \Filament\Facades\Filament::getPanel('admin');
-            \Filament\Facades\Filament::setCurrentPanel($panel);
-            $navigation = $panel->getNavigation();
-
-            foreach ($navigation as $group) {
-                $groupLabel = $group->getLabel();
-                foreach ($group->getItems() as $item) {
-                    $label = $item->getLabel();
-                    $url = $item->getUrl();
-
-                    if (! $label || ! $url) {
-                        continue;
-                    }
-
-                    $content = "Položka menu: {$label}. Nachází se v sekci administrace: {$groupLabel}. ";
-                    $content .= "Cíl: Administrační stránka nebo nástroj pro správu klubu. ";
-                    $content .= "Klíčová slova z navigace: {$groupLabel}, {$label}.";
-
-                    $this->updateOrCreateDocument([
-                        'type' => 'admin.navigation',
-                        'source' => 'navigation',
-                        'title' => (string) $label,
-                        'url' => $url,
-                        'locale' => $locale,
-                        'content' => $content,
-                        'checksum' => hash('sha256', $content.$url),
-                    ]);
-                    $count++;
-                }
-            }
-        } catch (\Throwable $e) {
-            // V CLI může getNavigation selhat, pokud nejsou správně zinicializovány všechny služby
-            // V takovém případě aspoň zalogujeme nebo ignorujeme
-        }
-
-        return $count;
-    }
-
     private function indexFilament(string $locale): int
     {
         $count = 0;
+        $admin = null;
+        try {
+            $admin = User::role('admin')->first() ?: User::find(1);
+        } catch (\Throwable $e) {
+            $admin = User::find(1);
+        }
+
+        // 0. Indexování Photo Poolů
+        $pools = \App\Models\PhotoPool::all();
+        foreach ($pools as $pool) {
+            $title = $pool->getTranslation('title', $locale);
+            $description = $pool->getTranslation('description', $locale);
+            $url = \App\Filament\Resources\PhotoPools\PhotoPoolResource::getUrl('edit', ['record' => $pool]);
+
+            $content = "Photo Pool (Galerie): {$title}. Datum: {$pool->event_date?->format('d.m.Y')}. Popis: {$description}. Typ: {$pool->event_type}.";
+
+            $this->updateOrCreateDocument([
+                'type' => 'admin.resource',
+                'source' => 'PhotoPool:'.$pool->id,
+                'title' => (string) $title,
+                'url' => $url,
+                'locale' => $locale,
+                'content' => $content,
+                'checksum' => hash('sha256', $content.$url),
+                'metadata' => ['group' => __('admin.navigation.groups.media'), 'model' => 'PhotoPool', 'id' => $pool->id],
+            ]);
+            $count++;
+        }
 
         // Indexování stránek (Pages)
         $pages = \Filament\Facades\Filament::getPanel('admin')->getPages();
         foreach ($pages as $pageClass) {
             try {
-                // Přeskočíme naši AI vyhledávací stránku a dashboard (ten má málo obsahu v třídě)
-                if (str_contains($pageClass, 'AiSearch') || str_contains($pageClass, 'Dashboard')) {
+                // Přeskočíme naši AI vyhledávací stránku
+                if (str_contains($pageClass, 'AiSearch')) {
                     continue;
                 }
 
@@ -173,61 +191,40 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
                 $title = $page->getTitle() ?: $pageClass;
                 $url = $pageClass::getUrl();
 
+                // Zkusíme vyrenderovat obsah přes URL (Render-then-Analyze)
+                $content = $this->renderUrl($url, $admin);
+
+                // Pokud rendering nic nevrátil, zkusíme aspoň extrakci ze schématu (fallback)
+                if (empty($content)) {
+                    // EXTRAKCE ZE SCHÉMATU (Formuláře na stránkách)
+                    try {
+                        if (method_exists($page, 'form')) {
+                            $schema = app(\Filament\Schemas\Schema::class);
+                            $page->form($schema);
+                            $content .= $this->extractTextsFromSchema($schema);
+                        }
+                    } catch (\Throwable $e) {
+                    }
+                }
+
                 // Zkusíme získat informaci o umístění v menu
                 $group = null;
                 if (method_exists($pageClass, 'getNavigationGroup')) {
                     $group = (string) $pageClass::getNavigationGroup();
                 }
 
-                if (! $group && property_exists($pageClass, 'navigationGroup')) {
-                    $group = (string) $pageClass::$navigationGroup;
-                }
-
-                $content = '';
-
-                // EXTRAKCE ZE SCHÉMATU (Formuláře na stránkách)
-                try {
-                    if (method_exists($page, 'form')) {
-                        $schema = app(\Filament\Schemas\Schema::class);
-                        // Některé stránky mohou vyžadovat inicializaci stavu, zkusíme to bezpečně
-                        $page->form($schema);
-                        $schemaTexts = $this->extractTextsFromSchema($schema);
-                        if ($schemaTexts) {
-                            $content .= 'Obsahuje pole a sekce: '.$schemaTexts.'. ';
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    // Ignorujeme chyby při extrakci schématu
-                }
-
-                // Zkusíme najít Blade soubor pro tuto stránku
-                try {
-                    $reflection = new \ReflectionClass($pageClass);
-                    if ($reflection->hasProperty('view')) {
-                        $viewProperty = $reflection->getProperty('view');
-                        $viewProperty->setAccessible(true);
-                        $viewName = $viewProperty->getValue($page);
-
-                        if ($viewName && view()->exists($viewName)) {
-                            $viewPath = view($viewName)->getPath();
-                            $raw = File::get($viewPath);
-                            $content .= $this->sanitizeBlade($raw);
-                        }
-                    }
-                } catch (\Throwable $e) {
-                }
-
                 $navigationInfo = $group ? "Sekce administrace: {$group}. " : '';
-                $typeInfo = "Typ: Administrační stránka (Page). ";
+                $typeInfo = 'Typ: '.($page->getTitle() ?: 'Administrační stránka').'. ';
 
                 $this->updateOrCreateDocument([
-                    'type' => 'admin.page',
+                    'type' => 'admin.resource',
                     'source' => $pageClass,
                     'title' => (string) $title,
                     'url' => $url,
                     'locale' => $locale,
                     'content' => $navigationInfo.$typeInfo.($content ?: 'Administrační stránka '.$title),
                     'checksum' => hash('sha256', $content.$url.$group),
+                    'metadata' => ['group' => $group],
                 ]);
                 $count++;
             } catch (\Throwable $e) {
@@ -243,35 +240,25 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
                 $url = $resourceClass::getUrl();
                 $group = $resourceClass::getNavigationGroup();
 
-                $content = "Správa sekce {$title}. Zde můžete přidávat, upravovat nebo mazat záznamy. ";
+                // Pro resource zkusíme vyrenderovat index stránku
+                $content = $this->renderUrl($url, $admin);
 
-                // Extrakce formuláře
-                try {
-                    $schema = app(\Filament\Schemas\Schema::class);
-                    $resourceClass::form($schema);
-                    $schemaTexts = $this->extractTextsFromSchema($schema);
-                    if ($schemaTexts) {
-                        $content .= 'Formulář obsahuje: '.$schemaTexts.'. ';
+                // Fallback na extrakci ze schématu
+                if (empty($content)) {
+                    $content = "Správa sekce {$title}. Zde můžete přidávat, upravovat nebo mazat záznamy. ";
+                    try {
+                        $schema = app(\Filament\Schemas\Schema::class);
+                        $resourceClass::form($schema);
+                        $schemaTexts = $this->extractTextsFromSchema($schema);
+                        if ($schemaTexts) {
+                            $content .= 'Formulář obsahuje: '.$schemaTexts.'. ';
+                        }
+                    } catch (\Throwable $e) {
                     }
-                } catch (\Throwable $e) {
-                }
-
-                // Extrakce tabulky
-                try {
-                    // Pro tabulku potřebujeme instanci, která může být složitější na vytvoření v CLI
-                    // Ale zkusíme alespoň základní extrakci pokud configure metoda existuje v oddělené třídě
-                    // nebo pokud můžeme zavolat table() na resource.
-                    $table = \Filament\Tables\Table::make(app(\Filament\Pages\Dashboard::class));
-                    $resourceClass::table($table);
-                    $tableTexts = $this->extractTextsFromTable($table);
-                    if ($tableTexts) {
-                        $content .= 'Tabulka přehledu obsahuje: '.$tableTexts.'. ';
-                    }
-                } catch (\Throwable $e) {
                 }
 
                 $navigationInfo = $group ? "Sekce administrace: {$group}. " : '';
-                $typeInfo = "Typ: Správa dat (Resource). ";
+                $typeInfo = 'Typ: '.($title ?: 'Resource').'. ';
 
                 $this->updateOrCreateDocument([
                     'type' => 'admin.resource',
@@ -281,6 +268,7 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
                     'locale' => $locale,
                     'content' => $navigationInfo.$typeInfo.$content,
                     'checksum' => hash('sha256', $resourceClass.$url.$group.$content),
+                    'metadata' => ['group' => $group],
                 ]);
                 $count++;
             } catch (\Throwable $e) {
@@ -409,27 +397,31 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
     private function indexMemberSection(string $locale): int
     {
         $count = 0;
+        $member = null;
+        try {
+            $member = User::role('player')->first() ?: User::find(1);
+        } catch (\Throwable $e) {
+            $member = User::find(1);
+        }
+
         $routes = [
-            'member.dashboard' => ['title' => 'Nástěnka člena', 'view' => 'member.dashboard'],
-            'member.attendance.index' => ['title' => 'Program a docházka', 'view' => 'member.attendance.index'],
-            'member.profile.edit' => ['title' => 'Můj profil', 'view' => 'member.profile.edit'],
-            'member.economy.index' => ['title' => 'Moje platby a ekonomika', 'view' => 'member.economy.index'],
-            'member.notifications.index' => ['title' => 'Notifikace', 'view' => 'member.notifications.index'],
-            'member.teams.index' => ['title' => 'Týmové přehledy (pro trenéry)', 'view' => 'member.teams.index'],
+            'member.dashboard' => ['title' => __('admin.navigation.pages.member_section')],
+            'member.attendance.index' => ['title' => __('member.attendance.title')],
+            'member.profile.edit' => ['title' => __('member.profile.title')],
+            'member.economy.index' => ['title' => __('member.economy.title')],
+            'member.notifications.index' => ['title' => __('member.notifications.title')],
+            'member.teams.index' => ['title' => __('member.teams.title')],
         ];
 
         foreach ($routes as $routeName => $info) {
             try {
                 $url = route($routeName);
-                $content = '';
-                if (view()->exists($info['view'])) {
-                    $viewPath = view($info['view'])->getPath();
-                    $raw = File::get($viewPath);
-                    $content = $this->sanitizeBlade($raw);
-                }
+
+                // Renderování stránky (Render-then-Analyze)
+                $content = $this->renderUrl($url, $member);
 
                 $this->updateOrCreateDocument([
-                    'type' => 'member.page',
+                    'type' => 'member.resource',
                     'source' => $routeName,
                     'title' => $info['title'],
                     'url' => $url,
@@ -458,21 +450,28 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
 
         foreach ($pages as $page) {
             $title = $page->getTranslation('title', $locale);
-            $content = $page->getTranslation('content', $locale);
-
-            if (is_array($content)) {
-                $content = $this->extractStringsFromBlocks($content);
-            }
-
             $url = $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug);
 
+            // Renderování stránky (Render-then-Analyze)
+            $content = $this->renderUrl($url);
+
+            // Fallback pokud rendering selže
+            if (empty($content)) {
+                $rawContent = $page->getTranslation('content', $locale);
+                if (is_array($rawContent)) {
+                    $content = $this->extractStringsFromBlocks($rawContent);
+                } else {
+                    $content = strip_tags((string) $rawContent);
+                }
+            }
+
             $this->updateOrCreateDocument([
-                'type' => 'frontend.page',
+                'type' => 'frontend.resource',
                 'source' => 'page:'.$page->id,
                 'title' => $title,
                 'url' => $url,
                 'locale' => $locale,
-                'content' => strip_tags((string) $content),
+                'content' => $content,
                 'checksum' => hash('sha256', $content.$url.$title),
             ]);
             $count++;
@@ -490,24 +489,29 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
 
         foreach ($posts as $post) {
             $title = $post->getTranslation('title', $locale);
-            $excerpt = $post->getTranslation('excerpt', $locale);
-            $content = $post->getTranslation('content', $locale);
-
-            $fullContent = $excerpt.' '.$content;
-
             $url = route('public.news.show', $post->slug);
 
+            // Renderování stránky (Render-then-Analyze)
+            $content = $this->renderUrl($url);
+
+            // Fallback
+            if (empty($content)) {
+                $excerpt = $post->getTranslation('excerpt', $locale);
+                $rawContent = $post->getTranslation('content', $locale);
+                $content = strip_tags($excerpt.' '.$rawContent);
+            }
+
             $this->updateOrCreateDocument([
-                'type' => 'frontend.post',
+                'type' => 'frontend.resource',
                 'source' => 'post:'.$post->id,
                 'title' => $title,
                 'url' => $url,
                 'locale' => $locale,
-                'content' => strip_tags((string) $fullContent),
+                'content' => $content,
                 'metadata' => [
                     'image' => $post->featured_image,
                 ],
-                'checksum' => hash('sha256', $fullContent.$url.$title.$post->featured_image),
+                'checksum' => hash('sha256', $content.$url.$title.$post->featured_image),
             ]);
             $count++;
         }
@@ -612,6 +616,71 @@ Původní obsah (pro analýzu): ".Str::limit($doc->content, 2500);
             ->values();
 
         return $scored;
+    }
+
+    /**
+     * Vyrenderuje URL a vrátí vyčištěný obsah.
+     */
+    public function renderUrl(string $url, ?User $user = null): string
+    {
+        if ($user) {
+            Auth::login($user);
+        }
+
+        // Vytvoříme request pro danou URL
+        $request = Request::create($url, 'GET');
+
+        // Předáme informaci o jazyku do requestu pro middleware
+        $locale = App::getLocale();
+        $request->cookies->set('filament_language_switch_locale', $locale);
+
+        // Simulujeme, že jde o AJAX request pro Livewire (pokud by bylo potřeba),
+        // ale pro základní SEO/Search indexaci chceme čisté HTML.
+
+        try {
+            // Použijeme app()->handle pro interní zpracování requestu bez sítě
+            $response = app()->handle($request);
+            $html = $response->getContent();
+
+            return $this->preprocessHtml($html);
+        } catch (\Throwable $e) {
+            Log::error("Rendering failed for {$url}: ".$e->getMessage());
+
+            return '';
+        } finally {
+            if ($user) {
+                Auth::logout();
+            }
+        }
+    }
+
+    /**
+     * Odstraní z HTML šum (head, script, style, nav, footer).
+     */
+    private function preprocessHtml(string $html): string
+    {
+        // Odstranění nepotřebných sekcí
+        $html = preg_replace('/<head>.*?<\/head>/is', '', $html) ?: $html;
+        $html = preg_replace('/<script.*?>.*?<\/script>/is', '', $html) ?: $html;
+        $html = preg_replace('/<style.*?>.*?<\/style>/is', '', $html) ?: $html;
+        $html = preg_replace('/<nav.*?>.*?<\/nav>/is', '', $html) ?: $html;
+        $html = preg_replace('/<footer.*?>.*?<\/footer>/is', '', $html) ?: $html;
+        $html = preg_replace('/<header.*?>.*?<\/header>/is', '', $html) ?: $html;
+
+        // Zkusíme najít hlavní obsah
+        if (preg_match('/<main.*?>.*?<\/main>/is', $html, $matches)) {
+            $html = $matches[0];
+        } elseif (preg_match('/<article.*?>.*?<\/article>/is', $html, $matches)) {
+            $html = $matches[0];
+        } elseif (preg_match('/<div[^>]+id=["\']content["\'].*?>.*?<\/div>/is', $html, $matches)) {
+            $html = $matches[0];
+        }
+
+        $text = strip_tags($html);
+        $text = html_entity_decode($text);
+
+        // Komprimace whitespace
+        return trim(preg_replace('/\s+/', ' ', $text) ?? $text);
     }
 
     private function sanitizeBlade(string $raw): string

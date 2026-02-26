@@ -129,6 +129,39 @@ return [
                 'label' => 'Uživatel',
                 'plural_label' => 'Uživatelé',
             ],
+            'photo_pool' => [
+                'label' => 'Pool fotografií',
+                'plural_label' => 'Pooly fotografií',
+                'actions' => [
+                    'create_wizard' => 'Přidat pool fotografií',
+                ],
+                'steps' => [
+                    'context' => [
+                        'label' => 'Základní kontext',
+                        'description' => 'Zadejte informace pro AI analýzu',
+                    ],
+                    'review' => [
+                        'label' => 'AI Návrh & Revize',
+                        'description' => 'Zkontrolujte bilingvní texty',
+                    ],
+                    'upload' => [
+                        'label' => 'Nahrávání fotografií',
+                        'description' => 'Hromadný dropzone pro vaše snímky',
+                    ],
+                ],
+                'fields' => [
+                    'preliminary_title' => 'Předběžný název',
+                    'preliminary_date' => 'Přibližné datum',
+                    'preliminary_description' => 'Stručný popis akce',
+                    'event_date' => 'Datum akce (normalizováno)',
+                    'slug' => 'URL identifikátor (slug)',
+                    'title_cs' => 'Název (CS)',
+                    'description_cs' => 'Popis (CS)',
+                    'title_en' => 'Title (EN)',
+                    'description_en' => 'Description (EN)',
+                    'photos' => 'Fotografie',
+                ],
+            ],
         ],
     ],
     'loader' => [

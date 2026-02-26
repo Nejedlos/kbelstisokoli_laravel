@@ -5,9 +5,6 @@ namespace App\Filament\Resources\PhotoPools\Pages;
 use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\MediaAsset;
 use App\Models\PhotoPool;
-use App\Services\AiTextEnhancer;
-use Filament\Actions\Action;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -27,12 +24,12 @@ class CreatePhotoPool extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Vygenerujeme slug pokud chybí
-        if (empty($data['slug']) && !empty($data['title'])) {
+        if (empty($data['slug']) && ! empty($data['title'])) {
             $base = Str::slug(is_string($data['title']) ? $data['title'] : (string) (\Illuminate\Support\Arr::get($data['title'], app()->getLocale()) ?? ''));
             $slug = $base;
             $i = 1;
             while (PhotoPool::where('slug', $slug)->exists()) {
-                $slug = $base . '-' . $i++;
+                $slug = $base.'-'.$i++;
             }
             $data['slug'] = $slug;
         }
@@ -43,7 +40,7 @@ class CreatePhotoPool extends CreateRecord
     protected function afterCreate(): void
     {
         // Zpracujeme nahrané soubory a vytvoříme MediaAsset + pivot
-        $files = $this->form->getState()['photos'] ?? [];
+        $files = $this->form->getRawState()['photos'] ?? [];
         if (empty($files)) {
             return;
         }
@@ -56,11 +53,11 @@ class CreatePhotoPool extends CreateRecord
             $sort = 0;
             foreach ($files as $path) {
                 try {
-                    $fullPath = Storage::disk(config('filesystems.default'))->path($path);
+                    $fullPath = Storage::disk(env('UPLOADS_DISK', 'public'))->path($path);
                     $file = new \Illuminate\Http\File($fullPath);
 
                     $asset = new MediaAsset([
-                        'title' => (string) (brand_text($pool->title) . ' #' . (++$sort)),
+                        'title' => (string) (brand_text($pool->title).' #'.(++$sort)),
                         'alt_text' => brand_text($pool->title),
                         'type' => 'image',
                         'access_level' => 'public',
@@ -81,7 +78,7 @@ class CreatePhotoPool extends CreateRecord
                     ]);
                 } catch (\Throwable $e) {
                     // Pokud se jedna fotka nepovede, pokračujeme dál, ale zalogujeme
-                    \Log::warning('Photo import failed: ' . $e->getMessage());
+                    \Log::warning('Photo import failed: '.$e->getMessage());
                 }
             }
         });
