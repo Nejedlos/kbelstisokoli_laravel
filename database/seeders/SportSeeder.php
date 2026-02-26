@@ -47,8 +47,8 @@ class SportSeeder extends Seeder
                 'slug' => 'muzi-c',
                 'category' => 'senior',
                 'description' => [
-                    'cs' => 'Tým Muži C působí v kategorii mužů a v sezóně 2025/2026 hraje Pražský přebor B.',
-                    'en' => 'The Men C team competes in the senior category and plays the Prague Championship B in the 2025/2026 season.',
+                    'cs' => 'Tým Muži C hraje Pražský přebor B. Jsme jádro naší basketbalové komunity v Letňanech (Třinecká 650). Zakládáme si na týmovém duchu a chceme se v sezóně 2025/2026 posunout v tabulce výše.',
+                    'en' => 'The Men C team competes in the Prague Championship B. We are the core of our basketball community in Letňany (Třinecká 650). We focus on team spirit and aim to move up the table in the 2025/2026 season.',
                 ],
             ],
             [
@@ -56,8 +56,8 @@ class SportSeeder extends Seeder
                 'slug' => 'muzi-e',
                 'category' => 'senior',
                 'description' => [
-                    'cs' => 'Tým Muži E působí v kategorii mužů a v sezóně 2025/2026 hraje 3. třídu B.',
-                    'en' => 'The Men E team competes in the senior category and plays the 3rd Class B in the 2025/2026 season.',
+                    'cs' => 'Tým Muži E hraje 3. třídu B v naší RumcajsAreně v Letňanech. Ideální místo pro ty, co milují basketbal, dobrou partu a chtějí hrát pro radost i v soutěžním tempu.',
+                    'en' => 'The Men E team plays the 3rd Class B in our RumcajsArena in Letňany. Perfect place for those who love basketball, a great community, and want to play for joy even at a competitive pace.',
                 ],
             ],
         ];
