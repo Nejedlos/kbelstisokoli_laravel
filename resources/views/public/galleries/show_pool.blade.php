@@ -18,11 +18,16 @@
             @else
                 <div class="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     @foreach($pool->mediaAssets as $asset)
-                        <div class="card overflow-hidden group cursor-pointer relative aspect-square">
+                        <a
+                            href="{{ $asset->getUrl('optimized') }}"
+                            class="spotlight card overflow-hidden group cursor-pointer relative aspect-square"
+                            data-group="pool-gallery"
+                            data-caption="{{ $asset->pivot->caption_override ?: $asset->title }}"
+                        >
                             <img
                                 src="{{ $asset->getUrl('thumb') }}"
                                 alt="{{ $asset->alt_text ?: $asset->title }}"
-                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 loading="lazy"
                             >
                             @php
@@ -35,7 +40,7 @@
                                     </p>
                                 </div>
                             @endif
-                        </div>
+                        </a>
                     @endforeach
                 </div>
 

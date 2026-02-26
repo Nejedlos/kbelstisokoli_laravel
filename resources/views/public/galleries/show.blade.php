@@ -23,20 +23,25 @@
                 ])>
                     @foreach($gallery->mediaAssets as $asset)
                         @if($asset->pivot->is_visible)
-                            <div @class([
-                                'card overflow-hidden group cursor-pointer relative',
-                                'aspect-square' => $gallery->variant === 'grid',
-                                'break-inside-avoid' => $gallery->variant === 'masonry',
-                            ])>
+                            @php
+                                $caption = $asset->pivot->caption_override ?: ($asset->caption ?: $asset->title);
+                            @endphp
+                            <a
+                                href="{{ $asset->getUrl('optimized') }}"
+                                @class([
+                                    'spotlight card overflow-hidden group cursor-pointer relative',
+                                    'aspect-square' => $gallery->variant === 'grid',
+                                    'break-inside-avoid' => $gallery->variant === 'masonry',
+                                ])
+                                data-group="gallery-{{ $gallery->id }}"
+                                data-caption="{{ $caption }}"
+                            >
                                 <img
-                                    src="{{ $asset->getUrl($gallery->variant === 'grid' ? 'thumb' : 'large') }}"
+                                    src="{{ $asset->getUrl($gallery->variant === 'grid' ? 'thumb' : 'optimized') }}"
                                     alt="{{ $asset->alt_text ?? '' }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     loading="lazy"
                                 >
-                                @php
-                                    $caption = $asset->pivot->caption_override ?: ($asset->caption ?: $asset->title);
-                                @endphp
                                 @if($caption)
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                                         <p class="text-white text-sm font-medium line-clamp-2">
@@ -44,7 +49,7 @@
                                         </p>
                                     </div>
                                 @endif
-                            </div>
+                            </a>
                         @endif
                     @endforeach
                 </div>

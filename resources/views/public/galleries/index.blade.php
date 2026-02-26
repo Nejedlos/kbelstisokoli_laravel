@@ -19,7 +19,12 @@
                     />
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         @foreach($randomPhotos as $photo)
-                            <div class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 shadow-sm">
+                            <a
+                                href="{{ $photo->getUrl('optimized') }}"
+                                class="spotlight group relative aspect-square overflow-hidden rounded-xl bg-slate-200 shadow-sm"
+                                data-group="random-moments"
+                                data-caption="{{ $photo->title }}"
+                            >
                                 <img
                                     src="{{ $photo->getUrl('thumb') }}"
                                     alt="{{ $photo->alt_text ?: $photo->title }}"
@@ -31,7 +36,7 @@
                                         {{ $photo->title }}
                                     </p>
                                 </div>
-                            </div>
+                            </a>
                         @endforeach
                     </div>
                 </div>

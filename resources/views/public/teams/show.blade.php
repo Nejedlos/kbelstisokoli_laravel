@@ -145,9 +145,14 @@
             @if($randomPhotos->isNotEmpty())
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     @foreach($randomPhotos as $photo)
-                        <div class="group relative aspect-square overflow-hidden rounded-2xl bg-slate-200">
+                        <a
+                            href="{{ $photo->getUrl('optimized') }}"
+                            class="spotlight group relative aspect-square overflow-hidden rounded-2xl bg-slate-200"
+                            data-group="team-gallery"
+                            data-caption="{{ $photo->title }}"
+                        >
                             <img
-                                src="{{ $photo->getUrl('optimized') }}"
+                                src="{{ $photo->getUrl('thumb') }}"
                                 alt="{{ $photo->alt_text ?: $photo->title }}"
                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 loading="lazy"
@@ -157,7 +162,7 @@
                                     {{ $photo->title }}
                                 </p>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
                 <div class="mt-12">

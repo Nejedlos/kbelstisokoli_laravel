@@ -2,6 +2,7 @@ import './bootstrap';
 import Alpine from 'alpinejs';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import 'spotlight.js';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 import { Spinner } from 'spin.js';
