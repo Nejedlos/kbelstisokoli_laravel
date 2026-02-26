@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'title' => 'Naše týmy',
-    'subtitle' => 'Pět mužských týmů, jeden klubový základ a společná chuť hrát basket.',
+    'title' => 'Naše týmy hrající v Letňanech',
+    'subtitle' => 'Tento web je věnován těmto týmům.',
     'senior_title' => 'Dospělí',
     'youth_title' => 'Mládež',
-    'main_teams' => 'Těmto týmům se věnujeme primárně',
+    'main_teams' => 'Hlavní týmy',
     'other_teams' => 'Ostatní mužské týmy',
     'other_title' => 'Ostatní',
     'view_detail' => 'Zobrazit detail týmu',

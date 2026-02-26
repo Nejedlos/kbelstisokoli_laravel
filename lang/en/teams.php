@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'title' => 'Our Teams',
-    'subtitle' => 'Five men\'s teams, one club foundation, and a shared passion for basketball.',
+    'title' => 'Our teams playing in Letňany',
+    'subtitle' => 'This website is dedicated to these teams.',
     'senior_title' => 'Seniors',
     'youth_title' => 'Youth',
-    'main_teams' => 'These pages are dedicated to these teams',
+    'main_teams' => 'Primary Teams',
     'other_teams' => 'Other men\'s teams',
     'other_title' => 'Others',
     'view_detail' => 'View team detail',

@@ -69,6 +69,7 @@ Návody pro nasazení na produkci a řešení provozních problémů.
 1. [Nasazení na produkci](./07-provoz-a-nasazeni/01-nasazeni.md)
 2. [Řešení problémů](./07-provoz-a-nasazeni/02-reseni-problemu.md)
 3. [Hlášení chyb](./07-provoz-a-nasazeni/03-hlaseni-chyb.md)
+4. [Oprava relativních odkazů](./07-provoz-a-nasazeni/fixes/relative-links-in-user-menu.md)
 - [Fixes (Konkrétní řešení chyb)](./07-provoz-a-nasazeni/fixes)
 
 ### 08. [Manuály a ostatní](./08-manualy-a-ostatni)

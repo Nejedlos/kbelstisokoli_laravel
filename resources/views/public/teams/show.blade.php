@@ -108,15 +108,53 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-light fa-envelope text-primary"></i>
+                            @if($team->coaches->isNotEmpty())
+                                @foreach($team->coaches as $coach)
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-light fa-user-tie text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ app()->getLocale() === 'cs' ? 'Trenér' : 'Coach' }}</span>
+                                            <span class="font-bold text-secondary">{{ $coach->name }}</span>
+                                        </div>
+                                    </div>
+
+                                    @if($coach->phone)
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                                <i class="fa-light fa-phone text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ app()->getLocale() === 'cs' ? 'Telefon' : 'Phone' }}</span>
+                                                <a href="tel:{{ str_replace(' ', '', $coach->phone) }}" class="font-bold text-secondary hover:text-primary transition-colors">{{ $coach->phone }}</a>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if($coach->pivot->email || $coach->email)
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                                <i class="fa-light fa-envelope text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ app()->getLocale() === 'cs' ? 'E-mail' : 'Email' }}</span>
+                                                <a href="mailto:{{ $coach->pivot->email ?: $coach->email }}" class="font-bold text-secondary hover:text-primary transition-colors break-all text-sm">{{ $coach->pivot->email ?: $coach->email }}</a>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @else
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-light fa-envelope text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.contact') }}</span>
+                                        <a href="{{ route('public.recruitment.index') }}" class="font-bold text-primary hover:underline">{{ app()->getLocale() === 'cs' ? 'Náborový kontakt' : 'Recruitment contact' }}</a>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.contact') }}</span>
-                                    <a href="{{ route('public.recruitment.index') }}" class="font-bold text-primary hover:underline">{{ app()->getLocale() === 'cs' ? 'Náborový kontakt' : 'Recruitment contact' }}</a>
-                                </div>
-                            </div>
+                            @endif
                         </div>
 
                         <div class="space-y-3">

@@ -72,13 +72,13 @@
                             <span class="block text-sm font-bold text-slate-900 truncate">{{ auth()->user()->email }}</span>
                         </div>
 
-                        <a href="{{ route('member.dashboard') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
+                        <a href="{{ url('/clenska-sekce/dashboard') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
                             <i class="fa-light fa-user-gear w-5 text-center"></i>
                             {{ __('nav.member_section') }}
                         </a>
 
                         @if(auth()->user()?->canAccessAdmin())
-                            <a href="{{ config('filament.panels.admin.path', 'admin') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
+                            <a href="{{ url(config('filament.panels.admin.path', 'admin')) }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">
                                 <i class="fa-light fa-lock-keyhole w-5 text-center"></i>
                                 {{ __('nav.administration') }}
                             </a>

@@ -120,6 +120,30 @@ return [
             'team' => [
                 'label' => 'Tým',
                 'plural_label' => 'Týmy',
+                'fields' => [
+                    'name' => 'Název týmu',
+                    'slug' => 'Identifikátor (Slug)',
+                    'category' => 'Kategorie',
+                    'coaches_count' => 'Trenéři',
+                    'players_count' => 'Hráči',
+                    'description' => 'Popis týmu',
+                    'coaches' => 'Trenéři',
+                    'players' => 'Hráči',
+                    'coach_email' => 'Kontaktní e-mail (pro tento tým)',
+                    'coach_email_help' => 'Pokud je vyplněn, zobrazí se na webu místo hlavního e-mailu trenéra.',
+                    'role_in_team' => 'Role v týmu',
+                    'is_primary_team' => 'Primární tým',
+                ],
+                'tabs' => [
+                    'general' => 'Základní informace',
+                ],
+                'actions' => [
+                    'view_public' => 'Zobrazit na webu',
+                    'attach_coach' => 'Přiřadit trenéra',
+                    'attach_player' => 'Přiřadit hráče',
+                    'detach' => 'Odebrat',
+                    'detach_selected' => 'Odebrat vybrané',
+                ],
             ],
             'training' => [
                 'label' => 'Trénink',
