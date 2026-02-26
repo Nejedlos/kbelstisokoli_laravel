@@ -130,7 +130,7 @@ class PhotoPoolResource extends Resource
                                     ->reorderable()
                                     ->disk(env('UPLOADS_DISK', 'public'))
                                     ->directory('uploads/photos/pools')
-                                    ->sanitizeFileName(fn (string $fileName): string => Str::slug(pathinfo($fileName, PATHINFO_FILENAME)).'.'.strtolower(pathinfo($fileName, PATHINFO_EXTENSION)))
+                                    ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                     ->downloadable()
                                     ->openable()
                                     ->maxFiles(200)

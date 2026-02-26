@@ -13,8 +13,8 @@ return [
     ],
     'commands' => [
         'ai_index' => [
-            'label' => 'AI: Reindex',
-            'desc' => 'Builds search index for AI assistant from templates and documentation.',
+            'label' => 'AI: Hard Reindex',
+            'desc' => 'Complete rebuild of the search index from the website and administration content.',
             'flags' => [
                 'all' => 'All languages',
                 'cs' => 'Czech only',

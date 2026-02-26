@@ -46,6 +46,7 @@ class SystemConsole extends Page
 
     protected function getCommandGroups(): array
     {
+        $isLocal = app()->isLocal();
         $seeders = [];
         if (is_dir(database_path('seeders'))) {
             $files = scandir(database_path('seeders'));
@@ -56,25 +57,30 @@ class SystemConsole extends Page
             }
         }
 
-        return [
-            __('admin/system-console.groups.ai') => [
-                'ai:index' => [
-                    'label' => __('admin/system-console.commands.ai_index.label'),
-                    'desc' => __('admin/system-console.commands.ai_index.desc'),
-                    'type' => 'artisan',
-                    'flags' => [
-                        '--locale=all' => __('admin/system-console.commands.ai_index.flags.all'),
-                        '--locale=cs' => __('admin/system-console.commands.ai_index.flags.cs'),
-                        '--locale=en' => __('admin/system-console.commands.ai_index.flags.en'),
-                        '--fresh' => __('admin/system-console.commands.ai_index.flags.fresh'),
-                        '--enrich' => __('admin/system-console.commands.ai_index.flags.enrich'),
-                        '--no-interaction' => __('admin/system-console.commands.ai_index.flags.no_interaction')
-                    ],
-                    'color' => 'primary',
-                    'icon' => FilamentIcon::get('sparkles')
+        $groups = [];
+
+        // 1. AI & Vyhledávání (Vždy)
+        $groups[__('admin/system-console.groups.ai')] = [
+            'ai:index' => [
+                'label' => __('admin/system-console.commands.ai_index.label'),
+                'desc' => __('admin/system-console.commands.ai_index.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--locale=all' => __('admin/system-console.commands.ai_index.flags.all'),
+                    '--locale=cs' => __('admin/system-console.commands.ai_index.flags.cs'),
+                    '--locale=en' => __('admin/system-console.commands.ai_index.flags.en'),
+                    '--fresh' => __('admin/system-console.commands.ai_index.flags.fresh'),
+                    '--enrich' => __('admin/system-console.commands.ai_index.flags.enrich'),
+                    '--no-interaction' => __('admin/system-console.commands.ai_index.flags.no_interaction')
                 ],
+                'color' => 'primary',
+                'icon' => FilamentIcon::get('sparkles')
             ],
-            __('admin/system-console.groups.deploy') => [
+        ];
+
+        // 2. Správa & Nasazení (Pouze LOCALLY)
+        if ($isLocal) {
+            $groups[__('admin/system-console.groups.deploy')] = [
                 'app:deploy' => [
                     'label' => __('admin/system-console.commands.deploy.label'),
                     'desc' => __('admin/system-console.commands.deploy.desc'),
@@ -103,228 +109,247 @@ class SystemConsole extends Page
                     'color' => 'gray',
                     'icon' => FilamentIcon::get('gears')
                 ],
+            ];
+        }
+
+        // 3. Synchronizace dat (Vždy)
+        $groups[__('admin/system-console.groups.sync')] = [
+            'app:icons:sync' => [
+                'label' => __('admin/system-console.commands.icons_sync.label'),
+                'desc' => __('admin/system-console.commands.icons_sync.desc'),
+                'type' => 'artisan',
+                'flags' => ['--pro' => __('admin/system-console.commands.icons_sync.flags.pro')],
+                'color' => 'primary',
+                'icon' => FilamentIcon::get('icons')
             ],
-            __('admin/system-console.groups.sync') => [
-                'app:icons:sync' => [
-                    'label' => __('admin/system-console.commands.icons_sync.label'),
-                    'desc' => __('admin/system-console.commands.icons_sync.desc'),
-                    'type' => 'artisan',
-                    'flags' => ['--pro' => __('admin/system-console.commands.icons_sync.flags.pro')],
-                    'color' => 'primary',
-                    'icon' => FilamentIcon::get('icons')
-                ],
-                'app:icons:doctor' => [
-                    'label' => __('admin/system-console.commands.icons_doctor.label'),
-                    'desc' => __('admin/system-console.commands.icons_doctor.desc'),
-                    'type' => 'artisan',
-                    'color' => 'info',
-                    'icon' => FilamentIcon::get('stethoscope')
-                ],
-                'announcements:sync' => [
-                    'label' => __('admin/system-console.commands.announcements_sync.label'),
-                    'desc' => __('admin/system-console.commands.announcements_sync.desc'),
-                    'type' => 'artisan',
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('bullhorn')
-                ],
-                'finance:sync' => [
-                    'label' => __('admin/system-console.commands.finance_sync.label'),
-                    'desc' => __('admin/system-console.commands.finance_sync.desc'),
-                    'type' => 'artisan',
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('money-bill-transfer')
-                ],
-                'stats:import' => [
-                    'label' => __('admin/system-console.commands.stats_import.label'),
-                    'desc' => __('admin/system-console.commands.stats_import.desc'),
-                    'type' => 'artisan',
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('chart-line')
-                ],
+            'app:icons:doctor' => [
+                'label' => __('admin/system-console.commands.icons_doctor.label'),
+                'desc' => __('admin/system-console.commands.icons_doctor.desc'),
+                'type' => 'artisan',
+                'color' => 'info',
+                'icon' => FilamentIcon::get('stethoscope')
             ],
-            __('admin/system-console.groups.maintenance') => [
-                'system:cleanup' => [
-                    'label' => __('admin/system-console.commands.system_cleanup.label'),
-                    'desc' => __('admin/system-console.commands.system_cleanup.desc'),
-                    'type' => 'artisan',
-                    'color' => 'danger',
-                    'icon' => FilamentIcon::get('broom')
-                ],
-                'audit:cleanup' => [
-                    'label' => __('admin/system-console.commands.audit_cleanup.label'),
-                    'desc' => __('admin/system-console.commands.audit_cleanup.desc'),
-                    'type' => 'artisan',
-                    'flags' => [
-                        '--days=30' => __('admin/system-console.commands.audit_cleanup.flags.30'),
-                        '--days=90' => __('admin/system-console.commands.audit_cleanup.flags.90'),
-                        '--days=180' => __('admin/system-console.commands.audit_cleanup.flags.180')
-                    ],
-                    'color' => 'warning',
-                    'icon' => FilamentIcon::get('clock-rotate-left')
-                ],
-                'club:backfill-identifiers' => [
-                    'label' => __('admin/system-console.commands.backfill_ids.label'),
-                    'desc' => __('admin/system-console.commands.backfill_ids.desc'),
-                    'type' => 'artisan',
-                    'flags' => ['--regenerate-existing' => __('admin/system-console.commands.backfill_ids.flags.regenerate')],
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('user-check')
-                ],
-                'rsvp:reminders' => [
-                    'label' => __('admin/system-console.commands.rsvp_reminders.label'),
-                    'desc' => __('admin/system-console.commands.rsvp_reminders.desc'),
-                    'type' => 'artisan',
-                    'color' => 'info',
-                    'icon' => FilamentIcon::get('bell')
-                ],
+            'announcements:sync' => [
+                'label' => __('admin/system-console.commands.announcements_sync.label'),
+                'desc' => __('admin/system-console.commands.announcements_sync.desc'),
+                'type' => 'artisan',
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('bullhorn')
             ],
-            __('admin/system-console.groups.database') => [
-                'migrate' => [
-                    'label' => __('admin/system-console.commands.migrate.label'),
-                    'desc' => __('admin/system-console.commands.migrate.desc'),
-                    'type' => 'artisan',
-                    'flags' => [
-                        '--force' => __('admin/system-console.commands.migrate.flags.force'),
-                        '--seed' => __('admin/system-console.commands.migrate.flags.seed')
-                    ],
-                    'color' => 'primary',
-                    'icon' => FilamentIcon::get('database')
-                ],
-                'migrate:rollback' => [
-                    'label' => __('admin/system-console.commands.migrate_rollback.label'),
-                    'desc' => __('admin/system-console.commands.migrate_rollback.desc'),
-                    'type' => 'artisan',
-                    'flags' => [
-                        '--force' => __('admin/system-console.commands.migrate_rollback.flags.force'),
-                        '--step=1' => __('admin/system-console.commands.migrate_rollback.flags.step')
-                    ],
-                    'color' => 'warning',
-                    'icon' => FilamentIcon::get('undo')
-                ],
-                'db:seed' => [
-                    'label' => __('admin/system-console.commands.db_seed.label'),
-                    'desc' => __('admin/system-console.commands.db_seed.desc'),
-                    'type' => 'artisan',
-                    'flags' => ['--force' => __('admin/system-console.commands.db_seed.flags.force')],
-                    'select' => [
-                        'name' => '--class',
-                        'label' => __('admin/system-console.commands.db_seed.select_label'),
-                        'options' => array_combine($seeders, $seeders)
-                    ],
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('seedling')
-                ],
-                'app:seed' => [
-                    'label' => __('admin/system-console.commands.app_seed.label'),
-                    'desc' => __('admin/system-console.commands.app_seed.desc'),
-                    'type' => 'artisan',
-                    'flags' => ['--fresh' => __('admin/system-console.commands.app_seed.flags.fresh')],
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('seedling')
-                ],
+            'finance:sync' => [
+                'label' => __('admin/system-console.commands.finance_sync.label'),
+                'desc' => __('admin/system-console.commands.finance_sync.desc'),
+                'type' => 'artisan',
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('money-bill-transfer')
             ],
-            __('admin/system-console.groups.optimization') => [
-                'optimize:clear' => [
-                    'label' => __('admin/system-console.commands.optimize_clear.label'),
-                    'desc' => __('admin/system-console.commands.optimize_clear.desc'),
-                    'type' => 'artisan',
-                    'color' => 'danger',
-                    'icon' => FilamentIcon::get('trash')
-                ],
-                'config:cache' => [
-                    'label' => __('admin/system-console.commands.config_cache.label'),
-                    'desc' => __('admin/system-console.commands.config_cache.desc'),
-                    'type' => 'artisan',
-                    'color' => 'primary',
-                    'icon' => FilamentIcon::get('gear')
-                ],
-                'route:cache' => [
-                    'label' => __('admin/system-console.commands.route_cache.label'),
-                    'desc' => __('admin/system-console.commands.route_cache.desc'),
-                    'type' => 'artisan',
-                    'color' => 'primary',
-                    'icon' => FilamentIcon::get('route')
-                ],
-                'view:cache' => [
-                    'label' => __('admin/system-console.commands.view_cache.label'),
-                    'desc' => __('admin/system-console.commands.view_cache.desc'),
-                    'type' => 'artisan',
-                    'color' => 'primary',
-                    'icon' => FilamentIcon::get('eye')
-                ],
-                'storage:link' => [
-                    'label' => __('admin/system-console.commands.storage_link.label'),
-                    'desc' => __('admin/system-console.commands.storage_link.desc'),
-                    'type' => 'artisan',
-                    'color' => 'info',
-                    'icon' => FilamentIcon::get('link')
-                ],
-            ],
-            __('admin/system-console.groups.dev_tools') => [
-                'npm install' => [
-                    'label' => __('admin/system-console.commands.npm_install.label'),
-                    'desc' => __('admin/system-console.commands.npm_install.desc'),
-                    'type' => 'shell',
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('download')
-                ],
-                'npm run build' => [
-                    'label' => __('admin/system-console.commands.npm_build.label'),
-                    'desc' => __('admin/system-console.commands.npm_build.desc'),
-                    'type' => 'shell',
-                    'color' => 'success',
-                    'icon' => FilamentIcon::get('hammer')
-                ],
-                'composer install' => [
-                    'label' => __('admin/system-console.commands.composer_install.label'),
-                    'desc' => __('admin/system-console.commands.composer_install.desc'),
-                    'type' => 'shell',
-                    'flags' => [
-                        '--no-dev' => __('admin/system-console.commands.composer_install.flags.no_dev'),
-                        '--optimize-autoloader' => __('admin/system-console.commands.composer_install.flags.optimize')
-                    ],
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('box-open')
-                ],
-                'git status' => [
-                    'label' => __('admin/system-console.commands.git_status.label'),
-                    'desc' => __('admin/system-console.commands.git_status.desc'),
-                    'type' => 'shell',
-                    'color' => 'info',
-                    'icon' => FilamentIcon::get('code-branch')
-                ],
-                'git pull' => [
-                    'label' => __('admin/system-console.commands.git_pull.label'),
-                    'desc' => __('admin/system-console.commands.git_pull.desc'),
-                    'type' => 'shell',
-                    'color' => 'warning',
-                    'icon' => FilamentIcon::get('cloud-download')
-                ],
-            ],
-            __('admin/system-console.groups.diagnostics') => [
-                'php -v' => [
-                    'label' => 'PHP Version',
-                    'desc' => 'Zobrazí verzi PHP na serveru.',
-                    'type' => 'shell',
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('php', 'fab')
-                ],
-                'node -v' => [
-                    'label' => 'Node Version',
-                    'desc' => 'Zobrazí verzi Node.js na serveru.',
-                    'type' => 'shell',
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('node-js', 'fab')
-                ],
-                'npm -v' => [
-                    'label' => 'NPM Version',
-                    'desc' => 'Zobrazí verzi NPM na serveru.',
-                    'type' => 'shell',
-                    'color' => 'gray',
-                    'icon' => FilamentIcon::get('npm', 'fab')
-                ],
+            'stats:import' => [
+                'label' => __('admin/system-console.commands.stats_import.label'),
+                'desc' => __('admin/system-console.commands.stats_import.desc'),
+                'type' => 'artisan',
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('chart-line')
             ],
         ];
+
+        // 4. Údržba & Čištění (Vždy)
+        $groups[__('admin/system-console.groups.maintenance')] = [
+            'system:cleanup' => [
+                'label' => __('admin/system-console.commands.system_cleanup.label'),
+                'desc' => __('admin/system-console.commands.system_cleanup.desc'),
+                'type' => 'artisan',
+                'color' => 'danger',
+                'icon' => FilamentIcon::get('broom')
+            ],
+            'audit:cleanup' => [
+                'label' => __('admin/system-console.commands.audit_cleanup.label'),
+                'desc' => __('admin/system-console.commands.audit_cleanup.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--days=30' => __('admin/system-console.commands.audit_cleanup.flags.30'),
+                    '--days=90' => __('admin/system-console.commands.audit_cleanup.flags.90'),
+                    '--days=180' => __('admin/system-console.commands.audit_cleanup.flags.180')
+                ],
+                'color' => 'warning',
+                'icon' => FilamentIcon::get('clock-rotate-left')
+            ],
+            'club:backfill-identifiers' => [
+                'label' => __('admin/system-console.commands.backfill_ids.label'),
+                'desc' => __('admin/system-console.commands.backfill_ids.desc'),
+                'type' => 'artisan',
+                'flags' => ['--regenerate-existing' => __('admin/system-console.commands.backfill_ids.flags.regenerate')],
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('user-check')
+            ],
+            'rsvp:reminders' => [
+                'label' => __('admin/system-console.commands.rsvp_reminders.label'),
+                'desc' => __('admin/system-console.commands.rsvp_reminders.desc'),
+                'type' => 'artisan',
+                'color' => 'info',
+                'icon' => FilamentIcon::get('bell')
+            ],
+        ];
+
+        // 5. Databáze (Vždy)
+        $groups[__('admin/system-console.groups.database')] = [
+            'migrate' => [
+                'label' => __('admin/system-console.commands.migrate.label'),
+                'desc' => __('admin/system-console.commands.migrate.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--force' => __('admin/system-console.commands.migrate.flags.force'),
+                    '--seed' => __('admin/system-console.commands.migrate.flags.seed')
+                ],
+                'color' => 'primary',
+                'icon' => FilamentIcon::get('database')
+            ],
+            'migrate:rollback' => [
+                'label' => __('admin/system-console.commands.migrate_rollback.label'),
+                'desc' => __('admin/system-console.commands.migrate_rollback.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--force' => __('admin/system-console.commands.migrate_rollback.flags.force'),
+                    '--step=1' => __('admin/system-console.commands.migrate_rollback.flags.step')
+                ],
+                'color' => 'warning',
+                'icon' => FilamentIcon::get('undo')
+            ],
+            'db:seed' => [
+                'label' => __('admin/system-console.commands.db_seed.label'),
+                'desc' => __('admin/system-console.commands.db_seed.desc'),
+                'type' => 'artisan',
+                'flags' => ['--force' => __('admin/system-console.commands.db_seed.flags.force')],
+                'select' => [
+                    'name' => '--class',
+                    'label' => __('admin/system-console.commands.db_seed.select_label'),
+                    'options' => array_combine($seeders, $seeders)
+                ],
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('seedling')
+            ],
+            'app:seed' => [
+                'label' => __('admin/system-console.commands.app_seed.label'),
+                'desc' => __('admin/system-console.commands.app_seed.desc'),
+                'type' => 'artisan',
+                'flags' => ['--fresh' => __('admin/system-console.commands.app_seed.flags.fresh')],
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('seedling')
+            ],
+        ];
+
+        // 6. Optimalizace & Cache (Vždy)
+        $groups[__('admin/system-console.groups.optimization')] = [
+            'optimize:clear' => [
+                'label' => __('admin/system-console.commands.optimize_clear.label'),
+                'desc' => __('admin/system-console.commands.optimize_clear.desc'),
+                'type' => 'artisan',
+                'color' => 'danger',
+                'icon' => FilamentIcon::get('trash')
+            ],
+            'config:cache' => [
+                'label' => __('admin/system-console.commands.config_cache.label'),
+                'desc' => __('admin/system-console.commands.config_cache.desc'),
+                'type' => 'artisan',
+                'color' => 'primary',
+                'icon' => FilamentIcon::get('gear')
+            ],
+            'route:cache' => [
+                'label' => __('admin/system-console.commands.route_cache.label'),
+                'desc' => __('admin/system-console.commands.route_cache.desc'),
+                'type' => 'artisan',
+                'color' => 'primary',
+                'icon' => FilamentIcon::get('route')
+            ],
+            'view:cache' => [
+                'label' => __('admin/system-console.commands.view_cache.label'),
+                'desc' => __('admin/system-console.commands.view_cache.desc'),
+                'type' => 'artisan',
+                'color' => 'primary',
+                'icon' => FilamentIcon::get('eye')
+            ],
+            'storage:link' => [
+                'label' => __('admin/system-console.commands.storage_link.label'),
+                'desc' => __('admin/system-console.commands.storage_link.desc'),
+                'type' => 'artisan',
+                'color' => 'info',
+                'icon' => FilamentIcon::get('link')
+            ],
+        ];
+
+        // 7. Vývojářské nástroje (Filtrované)
+        $devTools = [
+            'composer install' => [
+                'label' => __('admin/system-console.commands.composer_install.label'),
+                'desc' => __('admin/system-console.commands.composer_install.desc'),
+                'type' => 'shell',
+                'flags' => [
+                    '--no-dev' => __('admin/system-console.commands.composer_install.flags.no_dev'),
+                    '--optimize-autoloader' => __('admin/system-console.commands.composer_install.flags.optimize')
+                ],
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('box-open')
+            ],
+            'npm install' => [
+                'label' => __('admin/system-console.commands.npm_install.label'),
+                'desc' => __('admin/system-console.commands.npm_install.desc'),
+                'type' => 'shell',
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('download')
+            ],
+            'npm run build' => [
+                'label' => __('admin/system-console.commands.npm_build.label'),
+                'desc' => __('admin/system-console.commands.npm_build.desc'),
+                'type' => 'shell',
+                'color' => 'success',
+                'icon' => FilamentIcon::get('hammer')
+            ],
+        ];
+
+        if (!$isLocal) {
+            $devTools['git status'] = [
+                'label' => __('admin/system-console.commands.git_status.label'),
+                'desc' => __('admin/system-console.commands.git_status.desc'),
+                'type' => 'shell',
+                'color' => 'info',
+                'icon' => FilamentIcon::get('code-branch')
+            ];
+            $devTools['git pull'] = [
+                'label' => __('admin/system-console.commands.git_pull.label'),
+                'desc' => __('admin/system-console.commands.git_pull.desc'),
+                'type' => 'shell',
+                'color' => 'warning',
+                'icon' => FilamentIcon::get('cloud-download')
+            ];
+        }
+
+        $groups[__('admin/system-console.groups.dev_tools')] = $devTools;
+
+        // 8. Diagnostika (Vždy)
+        $groups[__('admin/system-console.groups.diagnostics')] = [
+            'php -v' => [
+                'label' => 'PHP Version',
+                'desc' => 'Zobrazí verzi PHP na serveru.',
+                'type' => 'shell',
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('php', 'fab')
+            ],
+            'node -v' => [
+                'label' => 'Node Version',
+                'desc' => 'Zobrazí verzi Node.js na serveru.',
+                'type' => 'shell',
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('node-js', 'fab')
+            ],
+            'npm -v' => [
+                'label' => 'NPM Version',
+                'desc' => 'Zobrazí verzi NPM na serveru.',
+                'type' => 'shell',
+                'color' => 'gray',
+                'icon' => FilamentIcon::get('npm', 'fab')
+            ],
+        ];
+
+        return $groups;
     }
 
     public function run(string $command, string $type, array $selectedFlags = [], ?string $selectName = null, ?string $selectValue = null): void

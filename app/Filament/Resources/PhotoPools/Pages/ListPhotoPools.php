@@ -117,6 +117,7 @@ class ListPhotoPools extends ListRecords
                                 ->reorderable()
                                 ->maxFiles(200)
                                 ->maxSize(30720)
+                                ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                 ->helperText('Maximálně 200 fotek, každá do 30 MB. Budou automaticky převedeny na WebP.')
                                 ->required(),
                         ]),

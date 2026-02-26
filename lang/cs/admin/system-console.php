@@ -13,8 +13,8 @@ return [
     ],
     'commands' => [
         'ai_index' => [
-            'label' => 'AI: Reindexace',
-            'desc' => 'Sestaví vyhledávací index pro AI asistenta ze šablon a dokumentace.',
+            'label' => 'AI: Hard Reindexace',
+            'desc' => 'Kompletní sestavení vyhledávacího indexu z obsahu webu a administrace.',
             'flags' => [
                 'all' => 'Všechny jazyky',
                 'cs' => 'Pouze čeština',
