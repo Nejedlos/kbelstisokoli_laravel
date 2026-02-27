@@ -49,7 +49,6 @@
                             </h3>
                         </div>
 
-                        <!-- VS / Score -->
                         <div class="flex flex-col items-center min-w-[150px]">
                             @if(in_array($match->status, ['completed', 'played']) && ($match->score_home !== null || $match->score_away !== null))
                                 <div class="text-6xl md:text-8xl font-black tabular-nums tracking-tighter leading-none mb-4">
@@ -61,6 +60,11 @@
                             <span class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-700' }}">
                                 {{ $statusLabels[$match->status] ?? $match->status }}
                             </span>
+                            @if(in_array($match->status, ['completed', 'played']) && $match->score_home === null && $match->score_away === null)
+                                <div class="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
+                                    {{ __('matches.result_missing') }}
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Away Team -->

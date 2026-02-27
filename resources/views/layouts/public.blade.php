@@ -45,6 +45,18 @@
 
     <meta name="theme-color" content="{{ $branding['colors']['red'] ?? '#e11d48' }}">
     <style>{!! $branding_css !!}</style>
+    <style>
+        /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
+        .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+            display: inline-block;
+            width: 1.25em;
+            height: 1em;
+            line-height: 1;
+            vertical-align: -0.125em;
+            overflow: hidden;
+            opacity: 0;
+        }
+    </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @if(isset($head_code))

@@ -405,3 +405,10 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
 .fi-topbar .fi-topbar-start > a {
     display: none !important;
 }
+
+
+/* Zviditelnění ikon po načtení stylů a stabilizačního CSS z head */
+.fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+    opacity: 1 !important;
+    visibility: visible !important;
+}

@@ -5,6 +5,7 @@
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap');
+@import "../vendor/fontawesome/css/all.min.css";
 @import "tailwindcss";
 
 @theme {
@@ -26,8 +27,8 @@
 @source '../**/*.js';
 @source '../../storage/framework/views/*.php';
 
+
 /* Font Awesome Pro integration */
-@import "../vendor/fontawesome/css/all.min.css";
 
 /* Animace */
 @keyframes shake {
@@ -862,4 +863,11 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
 /* Dark mode overrides */
 .dark body .fi-no-notification {
     background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+
+/* Zviditelnění ikon po načtení stylů a stabilizačního CSS z head */
+.fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+    opacity: 1 !important;
+    visibility: visible !important;
 }

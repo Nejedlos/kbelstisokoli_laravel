@@ -38,4 +38,5 @@ return [
     'victory' => 'Victory',
     'loss' => 'Loss',
     'draw' => 'Draw',
+    'result_missing' => 'Result not specified',
 ];

@@ -21,4 +21,8 @@ return [
     'map_cta' => 'Ukázat na mapě',
     'no_description' => 'Popis týmu nebyl zadán.',
     'location_not_specified' => 'Místo neuvedeno',
+    'expected' => 'Očekáváno',
+    'confirmed' => 'Potvrzeno',
+    'apologies' => 'Omluveno',
+    'detail_in_member' => 'Členská sekce',
 ];

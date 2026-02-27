@@ -49,7 +49,19 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
             ->renderHook('panels::head.end', fn (): string => Blade::render(
-                "<style>{!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}</style>
+                "<style>
+                    {!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}
+                    /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
+                    .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+                        display: inline-block;
+                        width: 1.25em;
+                        height: 1em;
+                        line-height: 1;
+                        vertical-align: -0.125em;
+                        overflow: hidden;
+                        opacity: 0;
+                    }
+                 </style>
                  @vite(['resources/css/filament-admin.css'])"
             ))
             ->renderHook('panels::body.end', fn (): string => Blade::render('<x-back-to-top />'))

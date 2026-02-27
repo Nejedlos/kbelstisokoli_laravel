@@ -11,6 +11,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;700&family=Oswald:wght@700&display=swap" rel="stylesheet">
 
     <style>{!! $branding_css !!}</style>
+    <style>
+        /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
+        .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+            display: inline-block;
+            width: 1.25em;
+            height: 1em;
+            line-height: 1;
+            vertical-align: -0.125em;
+            overflow: hidden;
+            opacity: 0;
+        }
+    </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @stack('head')

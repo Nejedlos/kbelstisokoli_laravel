@@ -21,4 +21,8 @@ return [
     'map_cta' => 'Show on map',
     'no_description' => 'Team description was not entered.',
     'location_not_specified' => 'Location not specified',
+    'expected' => 'Expected',
+    'confirmed' => 'Confirmed',
+    'apologies' => 'Apologies',
+    'detail_in_member' => 'Member zone',
 ];

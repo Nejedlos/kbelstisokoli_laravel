@@ -42,12 +42,26 @@
                                                     <i class="fa-light fa-location-dot mr-2 text-primary opacity-70"></i>
                                                     {{ $training->location ?? __('trainings.location_not_specified') }}
                                                 </div>
-                                                @if($training->notes)
-                                                    <div class="text-xs text-slate-400 mt-2 italic flex items-start gap-2">
-                                                        <i class="fa-light fa-circle-info mt-0.5 text-primary"></i>
-                                                        {{ $training->notes }}
+
+                                                <div class="mt-3 flex flex-wrap items-center gap-2">
+                                                    <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400 shadow-sm" title="{{ __('trainings.expected') }}">
+                                                        <i class="fa-light fa-users-viewfinder text-primary/50"></i>
+                                                        {{ $team->expected_count ?? 0 }}
                                                     </div>
-                                                @endif
+                                                    <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-sm" title="{{ __('trainings.confirmed') }}">
+                                                        <i class="fa-light fa-circle-check"></i>
+                                                        {{ $training->confirmed_count ?? 0 }}
+                                                    </div>
+                                                    <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-50 border border-rose-100 text-[10px] font-black uppercase tracking-widest text-rose-600 shadow-sm" title="{{ __('trainings.apologies') }}">
+                                                        <i class="fa-light fa-circle-xmark"></i>
+                                                        {{ $training->declined_count ?? 0 }}
+                                                    </div>
+                                                    <a href="{{ route('member.attendance.show', ['type' => 'training', 'id' => $training->id]) }}"
+                                                       class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-sm ml-auto">
+                                                        {{ __('trainings.detail_in_member') }}
+                                                        <i class="fa-light fa-arrow-right"></i>
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach

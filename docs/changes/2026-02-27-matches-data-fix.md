@@ -20,6 +20,7 @@ V rámci tohoto úkolu byla vyřešena neúplnost dat, špatné zobrazení zápa
     *   **Oprava zobrazení výsledků:** Vyřešen problém, kdy se u zápasů se stavem `played` (automaticky nastaveno u historických dat) nezobrazovalo skóre v seznamu i v detailu zápasu.
     *   **Robustnější kontrola skóre:** V komponentě `x-match-card` i v detailu `show.blade.php` byla upravena podmínka pro zobrazení výsledků tak, aby správně pracovala s hodnotou `0` (pomocí `isset()` / `!is_null()`) a lépe detekovala vyplněné výsledky i pro stav `played`.
     *   **Podpora stavů v administraci:** Filament administrace nyní plně podporuje stavy `played` (odehráno ze svazu) a `scheduled` (naplánováno ze svazu), včetně možnosti editace skóre u těchto stavů.
+    *   **Hláška u chybějících výsledků:** U odehraných zápasů, které v databázi nemají vyplněné skóre (zejména sezóna 2025/2026), se nyní na webu pod štítkem „Odehráno“ zobrazuje doplňující text **„Výsledek nebyl zadán“**. Tím je uživateli jasně komunikováno, že data v systému zatím chybí.
 
 4.  **Oprava stavů a historických dat:**
     *   Historické zápasy (přes 200 záznamů), které byly dříve neviditelné kvůli stavu `scheduled`, byly opraveny na `played`.

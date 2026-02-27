@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import "../vendor/fontawesome/css/all.min.css";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -225,9 +226,6 @@
     }
 }
 
-/* Font Awesome Pro - Lokální (Vendored) */
-@import "../vendor/fontawesome/css/all.min.css";
-
 @layer utilities {
     .auth-gradient {
         @apply min-h-[100vh] relative overflow-hidden flex items-center justify-center py-12 px-4;
@@ -445,4 +443,11 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
 /* Dark mode overrides */
 .dark body .fi-no-notification {
     background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+
+/* Zajištění zviditelnění ikon po načtení Font Awesome a stabilizačního CSS z head */
+.fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+    opacity: 1 !important;
+    visibility: visible !important;
 }
