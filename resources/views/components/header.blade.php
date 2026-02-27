@@ -1,9 +1,10 @@
 @props(['branding', 'navigation'])
 
+@cacheFragment('header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 3600)
 <header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container py-4 flex items-center justify-between gap-4">
         <!-- Logo -->
-        <a href="{{ route('public.home') }}" class="flex items-center gap-3 shrink-0">
+        <a href="{{ route('public.home') }}" @wireNavigate class="flex items-center gap-3 shrink-0">
             @if($branding['logo_path'])
                 <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-12 w-auto">
                 <div class="hidden md:block">
@@ -18,6 +19,7 @@
         <nav class="hidden lg:flex items-center gap-8">
             @foreach($navigation as $item)
                 <a href="{{ route($item['route']) }}"
+                   @wireNavigate
                    class="font-bold uppercase text-sm tracking-wide text-slate-700 hover:text-primary transition {{ request()->routeIs($item['route']) ? 'text-primary border-b-2 border-primary' : '' }}">
                     {{ __($item['title']) }}
                 </a>
@@ -164,3 +166,4 @@
     </div>
     @endif
 </header>
+@endCacheFragment

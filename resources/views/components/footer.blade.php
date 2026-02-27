@@ -1,5 +1,6 @@
 @props(['branding'])
 
+@cacheFragment('footer_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 86400)
 @php
     $footerNav = $footerMenu ?? [];
     $clubNav = $footerClubMenu ?? [];
@@ -60,7 +61,7 @@
                 <ul class="space-y-4">
                     @forelse($footerNav as $item)
                         <li>
-                            <a href="{{ $item->url }}" class="hover:text-primary transition-all flex items-center group {{ request()->url() === $item->url ? 'text-primary' : '' }}">
+                            <a href="{{ $item->url }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->url() === $item->url ? 'text-primary' : '' }}">
                                 <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
                                 <span class="font-medium">{{ $item->label }}</span>
                             </a>
@@ -69,7 +70,7 @@
                         {{-- Fallback na statickou navigaci z configu, pokud menu v DB není --}}
                         @foreach(config('navigation.public', []) as $item)
                             <li>
-                                <a href="{{ route($item['route']) }}" class="hover:text-primary transition-all flex items-center group {{ request()->routeIs($item['route']) ? 'text-primary' : '' }}">
+                                <a href="{{ route($item['route']) }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs($item['route']) ? 'text-primary' : '' }}">
                                     <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
                                     <span class="font-medium">{{ __($item['title']) }}</span>
                                 </a>
@@ -77,7 +78,7 @@
                         @endforeach
                     @endforelse
                     <li>
-                        <a href="{{ route('public.search') }}" class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">
+                        <a href="{{ route('public.search') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">
                             <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
                             <span class="font-medium">{{ __('Search') }}</span>
                         </a>
@@ -236,3 +237,4 @@
         </div>
     </div>
 </footer>
+@endCacheFragment

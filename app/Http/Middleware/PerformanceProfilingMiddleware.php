@@ -64,6 +64,10 @@ class PerformanceProfilingMiddleware
             $response->headers->set('X-Perf-Query-Count', $queryCount);
             $response->headers->set('X-Perf-Query-Time-MS', round($queryTime, 2));
             $response->headers->set('X-Perf-Memory-MB', round($memoryPeak, 2));
+
+            // Diagnostika Opcache
+            $opcacheEnabled = function_exists('opcache_get_status') && opcache_get_status(false);
+            $response->headers->set('X-Perf-Opcache', $opcacheEnabled ? 'enabled' : 'disabled');
         }
 
         return $response;

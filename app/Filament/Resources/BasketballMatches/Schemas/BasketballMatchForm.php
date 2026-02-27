@@ -21,9 +21,10 @@ class BasketballMatchForm
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                Select::make('team_id')
-                                    ->label('Náš tým')
-                                    ->relationship('team', 'name')
+                                Select::make('teams')
+                                    ->label('Týmy')
+                                    ->relationship('teams', 'name')
+                                    ->multiple()
                                     ->searchable()
                                     ->preload()
                                     ->required(),

@@ -293,6 +293,39 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.contact_fax')),
                             ]),
                     ]),
+
+                Section::make(__('Výkon a optimalizace'))
+                    ->schema([
+                        Select::make('perf_scenario')
+                            ->label(__('Výkonnostní scénář'))
+                            ->options([
+                                'standard' => 'Standardní (Eager loading, Indexy)',
+                                'aggressive' => 'Agresivní (+ Minifikace, Fragment cache)',
+                                'ultra' => 'Ultra (+ Full-page cache, SPA režim)',
+                            ])
+                            ->default('standard')
+                            ->live(),
+
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('perf_full_page_cache')
+                                    ->label(__('Full-page cache'))
+                                    ->helperText(__('Cachuje celé stránky pro nepřihlášené uživatele (TTFB < 20ms).')),
+                                Toggle::make('perf_fragment_cache')
+                                    ->label(__('Fragment caching'))
+                                    ->helperText(__('Cachuje části stránek jako menu a patičku.')),
+                                Toggle::make('perf_html_minification')
+                                    ->label(__('Minifikace HTML'))
+                                    ->helperText(__('Odstraňuje přebytečné mezery z HTML kódu.')),
+                                Toggle::make('perf_livewire_navigate')
+                                    ->label(__('SPA režim (wire:navigate)'))
+                                    ->helperText(__('Plynulé přechody mezi stránkami bez reloadu.')),
+                                Toggle::make('perf_lazy_load_images')
+                                    ->label(__('Lazy loading obrázků'))
+                                    ->default(true),
+                            ])
+                            ->visible(fn ($get) => $get('perf_scenario') === 'standard'),
+                    ]),
             ]);
     }
 

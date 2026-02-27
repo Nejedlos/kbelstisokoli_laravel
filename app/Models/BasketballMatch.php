@@ -56,6 +56,11 @@ class BasketballMatch extends Model
         return $this->attendances()->where('is_mismatch', true);
     }
 
+    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'basketball_match_team', 'basketball_match_id', 'team_id');
+    }
+
     public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Team::class);

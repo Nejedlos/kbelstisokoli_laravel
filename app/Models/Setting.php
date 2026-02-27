@@ -20,6 +20,7 @@ class Setting extends Model
         static::saved(function ($setting) {
             try {
                 app(\App\Services\BrandingService::class)->clearCache();
+                app(\App\Services\PerformanceService::class)->clearCache();
             } catch (\Throwable $e) {
                 // Ignorovat během migrací/seedování pokud služba není připravena
             }

@@ -70,11 +70,13 @@ class Post extends Model implements HasMedia
         $this->addMediaConversion('thumb')
             ->width(400)
             ->height(300)
+            ->format('webp')
             ->sharpen(10);
 
         $this->addMediaConversion('large')
             ->width(1200)
             ->height(800)
+            ->format('webp')
             ->sharpen(10);
     }
 

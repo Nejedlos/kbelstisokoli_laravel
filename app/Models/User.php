@@ -272,6 +272,18 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     }
 
     /**
+     * Zaregistruje konverze médií.
+     */
+    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(100)
+            ->height(100)
+            ->format('webp')
+            ->sharpen(10);
+    }
+
+    /**
      * Get display name for the user.
      */
     public function getDisplayNameAttribute(): string

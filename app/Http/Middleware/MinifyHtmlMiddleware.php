@@ -19,6 +19,16 @@ class MinifyHtmlMiddleware
     {
         $response = $next($request);
 
+        // Respektujeme výkonnostní config
+        if (!config('performance.features.html_minification', false)) {
+            return $response;
+        }
+
+        // Nemínifikujeme v administraci (Filament/Livewire stabilita)
+        if ($request->is('admin*')) {
+            return $response;
+        }
+
         if ($this->shouldMinify($response)) {
             $content = $response->getContent();
 

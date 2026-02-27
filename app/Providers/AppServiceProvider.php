@@ -33,11 +33,66 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Načtení a aplikace výkonnostních nastavení z DB
+        app(\App\Services\PerformanceService::class)->bootSettings();
+
+        // Vlastní Blade direktiva pro fragment caching
+        \Illuminate\Support\Facades\Blade::directive('cacheFragment', function ($expression) {
+            return "<?php
+                \$__cache_args = [{$expression}];
+                \$__cache_key = \$__cache_args[0] ?? 'fragment_'.md5(request()->fullUrl());
+                \$__cache_ttl = \$__cache_args[1] ?? config('performance.cache_ttl.fragments', 3600);
+                \$__should_cache = config('performance.features.fragment_cache', false);
+
+                if (\$__should_cache && Cache::has(\$__cache_key)) {
+                    echo Cache::get(\$__cache_key);
+                    \$__skip_render = true;
+                } else {
+                    \$__skip_render = false;
+                    ob_start();
+                }
+
+                if (!\$__skip_render):
+            ?>";
+        });
+
+        \Illuminate\Support\Facades\Blade::directive('endCacheFragment', function () {
+            return "<?php
+                endif;
+                if (!\$__skip_render) {
+                    \$__cache_content = ob_get_clean();
+                    if (\$__should_cache) {
+                        Cache::put(\$__cache_key, \$__cache_content, \$__cache_ttl);
+                    }
+                    echo \$__cache_content;
+                }
+            ?>";
+        });
+
+        \Illuminate\Support\Facades\Blade::directive('wireNavigate', function () {
+            return "<?php echo config('performance.features.livewire_navigate', false) ? 'wire:navigate' : ''; ?>";
+        });
+
         Schema::defaultStringLength(191);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch->visible(false);
         });
+
+        // Registrace Performance Observeru pro automatické mazání cache
+        $models = [
+            \App\Models\Post::class,
+            \App\Models\BasketballMatch::class,
+            \App\Models\Team::class,
+            \App\Models\Training::class,
+            \App\Models\Setting::class,
+        ];
+
+        foreach ($models as $model) {
+            if (class_exists($model)) {
+                $model::observe(\App\Observers\PerformanceObserver::class);
+            }
+        }
 
         \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
