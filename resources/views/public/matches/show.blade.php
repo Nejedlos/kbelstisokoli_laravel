@@ -4,20 +4,27 @@
     @php
         $statusColors = [
             'planned' => 'bg-accent text-white',
+            'scheduled' => 'bg-accent text-white',
             'completed' => 'bg-success text-white',
+            'played' => 'bg-success text-white',
             'cancelled' => 'bg-danger text-white',
             'postponed' => 'bg-warning text-black',
         ];
         $statusLabels = [
             'planned' => __('matches.planned'),
+            'scheduled' => __('matches.planned'),
             'completed' => __('matches.completed'),
+            'played' => __('matches.completed'),
             'cancelled' => __('matches.cancelled'),
             'postponed' => __('matches.postponed'),
         ];
-    @endphp
 
+        $hasKlub = $match->teams->contains('slug', 'klub');
+        $teamNames = $match->teams->pluck('name')->join(' & ');
+        $mainTeamName = ($hasKlub || $match->teams->count() > 1) ? ($hasKlub ? 'Sokoli (Celý klub)' : $teamNames) : ($match->teams->first()?->name ?? $match->team?->name);
+    @endphp
     <x-page-header
-        :title="$match->team->name . ' ' . __('matches.vs') . ' ' . $match->opponent->name"
+        :title="$mainTeamName . ' ' . __('matches.vs') . ' ' . $match->opponent->name"
         :subtitle="$match->scheduled_at->format('d. m. Y H:i') . ' | ' . ($match->location ?? __('matches.location_not_specified'))"
         :breadcrumbs="[__('matches.breadcrumbs') => route('public.matches.index'), __('matches.view_detail') => null]"
     />

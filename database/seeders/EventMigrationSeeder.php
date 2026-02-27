@@ -88,7 +88,7 @@ class EventMigrationSeeder extends Seeder
                     $matchTypes = ['MI', 'PO', 'PRATEL', 'TUR'];
                     if (in_array($old->druh, $matchTypes)) {
                         // Migrace zápasu
-                        $this->migrateMatch($old, $mainTeamId, $season?->id, $scheduledAt, $existingMatches->get($old->id));
+                        $this->migrateMatch($old, $targetTeamIds, $season?->id, $scheduledAt, $existingMatches->get($old->id));
                     } elseif ($old->druh === 'TR') {
                         // Migrace tréninku
                         $this->migrateTraining($old, $targetTeamIds, $scheduledAt, $existingTrainings->get($old->id));
@@ -115,8 +115,9 @@ class EventMigrationSeeder extends Seeder
         }
     }
 
-    protected function migrateMatch($old, $teamId, $seasonId, $scheduledAt, $existing = null)
+    protected function migrateMatch($old, $teamIds, $seasonId, $scheduledAt, $existing = null)
     {
+        $teamIds = (array) $teamIds;
         // Najít nebo vytvořit soupeře
         $opponentName = trim($old->souper);
         $opponentId = null;
@@ -142,7 +143,7 @@ class EventMigrationSeeder extends Seeder
         }
 
         $matchData = [
-            'team_id' => $teamId,
+            'team_id' => $teamIds[0], // Ponecháme i původní team_id pro kompatibilitu
             'season_id' => $seasonId,
             'opponent_id' => $opponentId,
             'scheduled_at' => $scheduledAt,
@@ -158,9 +159,12 @@ class EventMigrationSeeder extends Seeder
 
         if ($existing) {
             $existing->update($matchData);
+            $match = $existing;
         } else {
-            \App\Models\BasketballMatch::create($matchData);
+            $match = \App\Models\BasketballMatch::create($matchData);
         }
+
+        $match->teams()->syncWithoutDetaching($teamIds);
     }
 
     protected function migrateTraining($old, $teamIds, $scheduledAt, $existing = null)

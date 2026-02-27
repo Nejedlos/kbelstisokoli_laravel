@@ -16,7 +16,7 @@ class MatchController extends Controller
         $seasonId = $request->get('season_id');
         $matchType = $request->get('match_type');
 
-        $query = BasketballMatch::with(['team', 'opponent', 'season']);
+        $query = BasketballMatch::with(['teams', 'opponent', 'season']);
 
         // Defaultní sezóna (aktuální), pokud není vybrána jiná
         if (!$seasonId) {
@@ -32,7 +32,9 @@ class MatchController extends Controller
         }
 
         if ($teamId) {
-            $query->where('team_id', $teamId);
+            $query->whereHas('teams', function($q) use ($teamId) {
+                $q->where('teams.id', $teamId);
+            });
         }
 
         if ($matchType) {
@@ -75,13 +77,17 @@ class MatchController extends Controller
 
     public function show(int $id): View
     {
-        $match = BasketballMatch::with(['team', 'opponent', 'season'])
+        $match = BasketballMatch::with(['teams', 'opponent', 'season'])
             ->findOrFail($id);
+
+        $hasKlub = $match->teams->contains('slug', 'klub');
+        $teamNames = $match->teams->pluck('name')->join(' & ');
+        $mainTeamName = ($hasKlub || $match->teams->count() > 1) ? ($hasKlub ? 'Sokoli (Celý klub)' : $teamNames) : ($match->teams->first()?->name ?? $match->team?->name);
 
         return view('public.matches.show', [
             'match' => $match,
-            'seo_title' => "{$match->team->name} vs {$match->opponent->name} | Zápasy",
-            'seo_description' => "Detail zápasu {$match->team->name} proti {$match->opponent->name}. Termín: {$match->scheduled_at->format('d. m. Y H:i')}, místo: {$match->location}.",
+            'seo_title' => "{$mainTeamName} vs {$match->opponent->name} | Zápasy",
+            'seo_description' => "Detail zápasu {$mainTeamName} proti {$match->opponent->name}. Termín: {$match->scheduled_at->format('d. m. Y H:i')}, místo: {$match->location}.",
         ]);
     }
 }

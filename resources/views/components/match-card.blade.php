@@ -67,12 +67,19 @@
         <div class="flex-1 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex flex-col items-center sm:items-start text-center sm:text-left">
                 <div class="flex items-center gap-2 mb-1">
-                    @if($match->team->slug === 'klub')
+                    @php
+                        $hasKlub = $match->teams->contains('slug', 'klub');
+                        $teamNames = $match->teams->pluck('name')->join(' & ');
+                    @endphp
+
+                    @if($hasKlub || $match->teams->count() > 1)
                         <span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.1em] border border-primary/20">
-                            <i class="fa-light fa-users-crown mr-1"></i> CELÝ KLUB
+                            <i class="fa-light fa-users-crown mr-1"></i>
+                            {{ $hasKlub ? 'CELÝ KLUB' : $teamNames }}
                         </span>
                     @else
-                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{{ $match->team->name }}</span>
+                        @php $singleTeam = $match->teams->first() ?? $match->team; @endphp
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{{ $singleTeam?->name }}</span>
                     @endif
 
                     @if($match->match_type)

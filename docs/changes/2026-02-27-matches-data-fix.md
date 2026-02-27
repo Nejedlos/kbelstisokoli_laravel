@@ -1,32 +1,29 @@
 ### Oprava a vylepšení dat zápasů (2026-02-27)
 
-V rámci tohoto úkolu byla vyřešena neúplnost a špatné zobrazení zápasů pro sezóny 2024/2025 a 2025/2026.
+V rámci tohoto úkolu byla vyřešena neúplnost dat, špatné zobrazení zápasů a implementována podpora pro přiřazení více týmů k jedné události.
 
 #### Hlavní provedené změny:
 
-1.  **Oprava stavů zápasů (Status fix):**
-    *   Zápasy v minulosti, které měly stav `scheduled` (plánováno), byly hromadně aktualizovány na `played` (odehráno).
-    *   Díky tomu se těchto ~212 zápasů (zejména ze sezóny 2025/2026) začalo správně zobrazovat v sekci "Poslední výsledky" namísto toho, aby byly neviditelné.
+1.  **M:N vztah pro zápasy a týmy:**
+    *   Zápasy byly převedeny z pevné vazby 1:N na **M:N (Many-to-Many)** pomocí nové pivot tabulky `basketball_match_team`.
+    *   To umožňuje přiřadit k jednomu zápasu více týmů (např. C i E zároveň).
+    *   V administraci (Filament) byl upraven formulář zápasu na `multiselect` pro týmy.
 
-2.  **Migrace celoklubových zápasů:**
-    *   Byl vytvořen nový systémový tým **"Sokoli (Celý klub)"** (slug: `klub`).
-    *   Došlo k re-migraci 38 zápasů ze staré databáze (původní ID týmu 3), které dříve chyběly nebo byly nesprávně přiřazeny.
-    *   Tyto zápasy jsou v UI jasně označeny štítkem "CELÝ KLUB" a ikonou.
+2.  **Migrace celoklubových dat:**
+    *   U všech událostí (zápasy, tréninky, akce), které byly ve staré DB označeny jako celoklubové (ID 3), jsou nyní automaticky přiřazeny týmy **Muži C**, **Muži E** i systémový tým **Sokoli (Celý klub)**.
+    *   Tím je zajištěno, že se tyto akce zobrazí ve filtrech pro oba hlavní týmy.
 
-3.  **Vizuální vylepšení komponenty x-match-card:**
-    *   **Barevné rozlišení typů zápasů:** Každý typ (Mistrovské, Pohárové, Turnaj, Přátelské) má nyní svou barvu a ikonu (trofej, medaile atd.).
-    *   **Zvýraznění týmu:** Klubový název "Sokoli" je v rozpisu zvýrazněn klubovou oranžovou barvou.
-    *   **Responzivita:** Štítky typů zápasů se nyní správně zobrazují i na mobilních zařízeních.
+3.  **Vizuální vylepšení a UI:**
+    *   **Zobrazení týmů:** Pokud má zápas více týmů nebo je označen jako celoklubový, v komponentě `x-match-card` se zobrazí výrazný štítek **"CELÝ KLUB"** nebo výčet týmů (např. "Muži C & Muži E").
+    *   **Barevné rozlišení typů zápasů:** Mistrovské (modrá), Pohárové (fialová), Turnaj (zelená), Přátelské (šedá).
+    *   **Zvýraznění v detailu:** Stránka detailu zápasu nyní také korektně zobrazuje názvy všech přiřazených týmů v nadpisu i meta informacích.
 
-4.  **Optimalizace importu (EventMigrationSeeder):**
-    *   Seeder byl upraven tak, aby automaticky nastavoval stav `played` u všech importovaných zápasů, které jsou starší než 2 hodiny od aktuálního času, i když u nich chybí skóre.
-    *   Bylo opraveno mapování týmů ze staré databáze.
+4.  **Oprava stavů a historických dat:**
+    *   Historické zápasy (přes 200 záznamů), které byly dříve neviditelné kvůli stavu `scheduled`, byly opraveny na `played`.
+    *   Seeder nyní automaticky detekuje stav na základě času konání.
 
 #### Technické detaily:
-- Nový tým: Název `Sokoli (Celý klub)`, slug `klub`, kategorie `all`.
-- Barevné schéma typů:
-    - MI (Mistrovské): Modrá
-    - PO (Pohárové): Fialová
-    - TUR (Turnaj): Zelená
-    - PRATEL: Šedá
-- Příkaz pro opravu stavů: `php artisan matches:update-past-status` (začleněno do seederu).
+- Nová pivot tabulka: `basketball_match_team`.
+- Aktualizované modely: `BasketballMatch`, `Team`, `Training`, `ClubEvent`.
+- Aktualizované Filament resources: `BasketballMatchResource`, `TrainingResource`, `ClubEventResource`.
+- Seeder: `EventMigrationSeeder` nyní používá `sync()` pro všechny typy událostí.
