@@ -224,6 +224,8 @@ return [
                 ],
                 'notifications' => [
                     'ai_regenerated' => 'Metadata has been regenerated using AI.',
+                    'processing' => 'Processing photos',
+                    'uploading' => 'Uploading photos to server',
                 ],
                 'steps' => [
                     'context' => [

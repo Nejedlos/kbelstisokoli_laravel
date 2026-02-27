@@ -60,9 +60,10 @@ class RowsRelationManager extends RelationManager
                             ->relationship('player', 'name')
                             ->searchable()
                             ->preload(),
-                        Select::make('team_id')
-                            ->label('Tým')
-                            ->relationship('team', 'name')
+                        Select::make('teams')
+                            ->label(__('admin.navigation.resources.team.plural_label'))
+                            ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                            ->multiple()
                             ->searchable()
                             ->preload(),
                     ]),
@@ -110,7 +111,7 @@ class RowsRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('displayName')
                     ->label('Účastník')
-                    ->state(fn ($record) => $record->player?->name ?? $record->team?->name ?? $record->row_label)
+                    ->state(fn ($record) => $record->player?->name ?? ($record->teams->count() ? $record->teams->pluck('name')->join(', ') : null) ?? $record->row_label)
                     ->searchable(['row_label']),
             ], $dynamicColumns, [
                 IconColumn::make('is_visible')

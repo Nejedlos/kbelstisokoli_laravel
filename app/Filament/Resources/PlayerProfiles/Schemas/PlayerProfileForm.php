@@ -61,7 +61,7 @@ class PlayerProfileForm
                     ->schema([
                         Select::make('teams')
                             ->label('Přiřazené týmy')
-                            ->relationship('teams', 'name')
+                            ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                             ->multiple()
                             ->preload()
                             ->searchable(),

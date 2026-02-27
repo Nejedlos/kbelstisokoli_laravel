@@ -32,4 +32,5 @@ return [
     'city' => 'Město',
     'street' => 'Ulice',
     'zip' => 'PSČ',
+    'mismatches' => 'Rozpory',
 ];

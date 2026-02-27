@@ -8,9 +8,14 @@
                 <i class="fa-light fa-basketball"></i>
             </div>
         </div>
-        @if(!$slot->isEmpty())
-            <div class="ks-loader-text">{{ $slot }}</div>
-        @endif
+        <div class="ks-loader-text">
+            @if($slot->isEmpty())
+                {{ __('admin.navigation.resources.photo_pool.notifications.processing') }}
+            @else
+                {{ $slot }}
+            @endif
+            <span wire:stream="ks-loader-progress"></span>
+        </div>
     </div>
 </div>
 @endteleport

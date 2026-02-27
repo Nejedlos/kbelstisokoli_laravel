@@ -36,9 +36,10 @@ class EntriesRelationManager extends RelationManager
                             ->relationship('player', 'name')
                             ->searchable()
                             ->preload(),
-                        Select::make('team_id')
-                            ->label('Tým')
-                            ->relationship('team', 'name')
+                        Select::make('teams')
+                            ->label(__('admin.navigation.resources.team.plural_label'))
+                            ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                            ->multiple()
                             ->searchable()
                             ->preload(),
                     ]),
@@ -80,7 +81,7 @@ class EntriesRelationManager extends RelationManager
                     ->state(fn ($rowLoop) => $rowLoop->iteration),
                 TextColumn::make('displayName')
                     ->label('Účastník')
-                    ->state(fn ($record) => $record->player?->name ?? $record->team?->name ?? $record->label)
+                    ->state(fn ($record) => $record->player?->name ?? ($record->teams->count() ? $record->teams->pluck('name')->join(', ') : null) ?? $record->label)
                     ->searchable(['label']),
                 TextColumn::make('value')
                     ->label('Hodnota')

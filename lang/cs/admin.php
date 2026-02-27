@@ -224,6 +224,8 @@ return [
                 ],
                 'notifications' => [
                     'ai_regenerated' => 'Metadata byla znovu vygenerována pomocí AI.',
+                    'processing' => 'Zpracovávám fotografie',
+                    'uploading' => 'Nahrávám fotografie na server...',
                 ],
                 'steps' => [
                     'context' => [

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\PhotoPools\RelationManagers;
 
+use App\Models\MediaAsset;
+use App\Support\IconHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -33,18 +35,26 @@ class MediaAssetsRelationManager extends RelationManager
                     ->label(__('admin.navigation.resources.photo_pool.fields.photos'))
                     ->collection('default')
                     ->conversion('thumb')
+                    ->height(100)
+                    ->width(100)
+                    ->circular(false)
                     ->square(),
                 TextColumn::make('title')
                     ->label(__('user.fields.display_name'))
                     ->searchable()
+                    ->description(fn (MediaAsset $record): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('<span class="flex items-center gap-1">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().' ' . $record->type . ' | ' . number_format($record->getFirstMedia('default')?->size / 1024, 2) . ' KB</span>'))
                     ->limit(50),
                 TextColumn::make('sort_order')
                     ->label('Pořadí')
+                    ->badge()
+                    ->color('gray')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Nahráno')
                     ->dateTime('d.m.Y H:i')
+                    ->color('gray')
+                    ->size('xs')
                     ->sortable(),
             ])
             ->filters([])

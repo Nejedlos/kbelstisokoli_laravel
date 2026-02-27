@@ -14,7 +14,9 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use App\Support\IconHelper;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -64,6 +66,19 @@ class PhotoPoolResource extends Resource
         return $schema
             ->columns(1)
             ->components([
+                Placeholder::make('ks_global_loader')
+                    ->label('')
+                    ->content(fn () => view('components.loader.basketball', [
+                        'id' => 'ks-basketball-loader',
+                        'style' => 'display: none;',
+                    ]))
+                    ->columnSpanFull(),
+
+                Placeholder::make('processing_progress')
+                    ->label('')
+                    ->content(fn () => new HtmlString('<div wire:stream="ks-loader-progress-text" class="text-sm font-bold text-primary-600 dark:text-primary-400 text-center animate-pulse"></div>'))
+                    ->columnSpanFull(),
+
                 Tabs::make('PhotoPoolTabs')
                     ->tabs([
                         Tabs\Tab::make('Metadata')
@@ -90,9 +105,10 @@ class PhotoPoolResource extends Resource
                                         ->label('Datum akce')
                                         ->native(false)
                                         ->required(),
-                                    Select::make('team_id')
-                                        ->label('Tým')
-                                        ->relationship('team', 'name')
+                                    Select::make('teams')
+                                        ->label(__('admin.navigation.resources.team.plural_label'))
+                                        ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                                        ->multiple()
                                         ->searchable()
                                         ->preload()
                                         ->native(false),
@@ -160,6 +176,7 @@ class PhotoPoolResource extends Resource
                             ->schema([
                                 FileUpload::make('photos')
                                     ->label('Hromadné nahrávání fotografií')
+                                    ->placeholder(new HtmlString('<div class="flex flex-col items-center justify-center py-4 text-gray-500 dark:text-gray-400">' . IconHelper::render(IconHelper::UPLOAD, 'fal')->toHtml() . '<span class="text-sm font-medium mt-3">Klikněte nebo přetáhněte fotografie sem</span><span class="text-xs mt-1">Podporuje hromadný výběr (až 200 souborů najednou)</span></div>'))
                                     ->multiple()
                                     ->image()
                                     ->reorderable()
@@ -171,9 +188,20 @@ class PhotoPoolResource extends Resource
                                     ->maxFiles(200)
                                     ->maxSize(30720) // 30 MB
                                     ->imageEditor()
-                                    ->helperText('Povolené typy: JPG, PNG, WEBP, HEIC. Fotografie budou automaticky optimalizovány pro web (WebP).')
+                                    ->imageEditorAspectRatios([
+                                        null,
+                                        '16:9',
+                                        '4:3',
+                                        '1:1',
+                                    ])
+                                    ->panelLayout('grid')
+                                    ->uploadingMessage(__('admin.navigation.resources.photo_pool.notifications.uploading'))
+                                    ->extraAttributes([
+                                        'style' => 'max-height: 60vh; overflow-y: auto;',
+                                    ])
+                                    ->helperText(new HtmlString('<div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 flex items-start gap-3">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().'<div><strong>Informace k optimalizaci:</strong> Povolené typy: JPG, PNG, WEBP, HEIC. Fotografie budou po uložení automaticky optimalizovány pro web (převedeny na WebP a zmenšeny). Pokud nahráváte velké množství fotek, proces uložení může trvat déle.</div></div>'))
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
-                                    ->dehydrated(false) // Zpracováváme v Create/Edit stránce
+                                    ->dehydrated(false)
                                     ->columnSpanFull(),
                             ]),
 
@@ -230,6 +258,11 @@ class PhotoPoolResource extends Resource
                         default => 'gray',
                     })
                     ->sortable(),
+                TextColumn::make('teams.name')
+                    ->label(__('admin.navigation.resources.team.plural_label'))
+                    ->badge()
+                    ->state(fn ($record) => $record->teams->reject(fn($team) => $team->category === 'all')->pluck('name'))
+                    ->searchable(),
                 TextColumn::make('event_date')
                     ->label('Datum')
                     ->date('d.m.Y')
@@ -251,6 +284,11 @@ class PhotoPoolResource extends Resource
             ])
             ->defaultSort('event_date', 'desc')
             ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('teams')
+                    ->label(__('admin.navigation.resources.team.label'))
+                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                    ->multiple()
+                    ->preload(),
                 \Filament\Tables\Filters\SelectFilter::make('event_type')
                     ->label('Typ akce')
                     ->options([

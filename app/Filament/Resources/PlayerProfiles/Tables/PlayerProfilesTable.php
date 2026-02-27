@@ -34,6 +34,7 @@ class PlayerProfilesTable
                 TextColumn::make('teams.name')
                     ->label('Týmy')
                     ->badge()
+                    ->state(fn ($record) => $record->teams->reject(fn($team) => $team->category === 'all')->pluck('name'))
                     ->separator(','),
                 IconColumn::make('is_active')
                     ->label('Aktivní')
@@ -43,7 +44,9 @@ class PlayerProfilesTable
             ->filters([
                 SelectFilter::make('teams')
                     ->label('Tým')
-                    ->relationship('teams', 'name'),
+                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                    ->multiple()
+                    ->preload(),
                 TernaryFilter::make('is_active')
                     ->label('Aktivní status'),
             ])

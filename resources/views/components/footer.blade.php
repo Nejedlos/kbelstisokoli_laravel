@@ -4,6 +4,22 @@
 @php
     $footerNav = $footerMenu ?? [];
     $clubNav = $footerClubMenu ?? [];
+
+    // Rozšířený fallback pro klubové odkazy, které uživatel vyžaduje (funnel)
+    // Cílem je mít zde vždy: Týmy C a E, ostatní kbelské týmy a nábor do našich/ostatních
+    $clubLinks = [
+        ['label' => __('Muži C'), 'url' => '/tymy/muzi-c', 'is_external' => false],
+        ['label' => __('Muži E'), 'url' => '/tymy/muzi-e', 'is_external' => false],
+        ['label' => __('Nábor - Kbelští sokoli'), 'url' => route('public.recruitment.index'), 'is_external' => false],
+        ['label' => __('Ostatní kbelské týmy'), 'url' => 'https://www.basketkbely.cz/druzstva', 'is_external' => true],
+        ['label' => __('Nábor - Mládež & Elita'), 'url' => 'https://www.basketkbely.cz/zacnihrat', 'is_external' => true],
+        ['label' => __('Hlavní web oddílu'), 'url' => 'https://www.basketkbely.cz/', 'is_external' => true],
+    ];
+
+    if (empty($clubNav) || (is_object($clubNav) && method_exists($clubNav, 'isEmpty') && $clubNav->isEmpty()) || (is_array($clubNav) && count($clubNav) === 0)) {
+        // Převedeme na objekty pro jednotnou práci v Blade
+        $clubNav = collect($clubLinks)->map(fn($link) => (object)$link);
+    }
 @endphp
 
 <footer class="bg-secondary pt-6 pb-6 text-slate-300 relative overflow-hidden">
@@ -16,9 +32,9 @@
     </div>
 
     <div class="container pt-12 md:pt-20 pb-6 relative z-10">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-x-8 lg:gap-y-16">
             {{-- Column 1: Brand & Identity --}}
-            <div class="space-y-6 sm:col-span-2 lg:col-span-1">
+            <div class="space-y-6 sm:col-span-2 lg:col-span-3">
                 @if($branding['logo_path'])
                     <a href="{{ route('public.home') }}" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl">
@@ -53,12 +69,12 @@
             </div>
 
             {{-- Column 2: Navigation --}}
-            <div>
+            <div class="lg:col-span-3">
                 <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.nav_title') }}
                 </h3>
-                <ul class="space-y-4">
+                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
                     @forelse($footerNav as $item)
                         <li>
                             <a href="{{ $item->url }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->url() === $item->url ? 'text-primary' : '' }}">
@@ -87,31 +103,29 @@
             </div>
 
             {{-- Column 3: Teams & Club --}}
-            <div>
+            <div class="lg:col-span-3">
                 <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.club_title') }}
                 </h3>
-                <ul class="space-y-4">
-                    @forelse($clubNav as $item)
-                        @php $isExternal = str_starts_with($item->url, 'http'); @endphp
+                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
+                    @foreach($clubNav as $item)
+                        @php $isExternal = str_starts_with($item->url, 'http') || ($item->is_external ?? false); @endphp
                         <li class="{{ $isExternal ? 'pb-1' : '' }}">
                             <a href="{{ $item->url }}"
                                @if($isExternal) target="_blank" rel="noopener" @endif
                                class="group flex items-center justify-between transition-all duration-300 {{ $isExternal ? 'bg-white/5 border border-white/10 py-2 px-4 rounded-xl hover:bg-primary/10 hover:border-primary/20 hover:text-white' : 'hover:text-primary py-1' }}">
-                                <span class="{{ $isExternal ? 'font-bold text-sm tracking-tight' : 'font-medium text-sm' }}">{{ $item->label }}</span>
+                                <span class="{{ $isExternal ? 'font-bold text-[11px] tracking-tight leading-tight' : 'font-medium text-sm' }}">{{ $item->label }}</span>
                                 @if($isExternal)
-                                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                                        <i class="fa-light fa-arrow-up-right text-[10px]"></i>
+                                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0 ml-2">
+                                        <i class="fa-light fa-arrow-up-right text-[8px]"></i>
                                     </span>
                                 @else
                                     <i class="fa-light fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                                 @endif
                             </a>
                         </li>
-                    @empty
-                        <li class="text-sm text-slate-500 italic">{{ __('footer.empty_menu') }}</li>
-                    @endforelse
+                    @endforeach
                 </ul>
                 <div class="mt-8 p-4 bg-white/5 rounded-xl border border-white/5">
                     <p class="text-xs leading-relaxed text-slate-400">
@@ -121,7 +135,7 @@
             </div>
 
             {{-- Column 4: Contact & Socials --}}
-            <div class="sm:col-span-2 lg:col-span-1">
+            <div class="sm:col-span-2 lg:col-span-3">
                 <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.contact_title') }}

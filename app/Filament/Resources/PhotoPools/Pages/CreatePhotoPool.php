@@ -6,6 +6,7 @@ use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\MediaAsset;
 use App\Models\PhotoPool;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -19,6 +20,16 @@ class CreatePhotoPool extends CreateRecord
         return [
             //
         ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return parent::getFormActions();
+    }
+
+    public function render(): \Illuminate\Contracts\View\View
+    {
+        return parent::render();
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -50,9 +61,20 @@ class CreatePhotoPool extends CreateRecord
         $uploaderId = auth()->id();
 
         DB::transaction(function () use ($files, $pool, $uploaderId) {
+            // Zvýšení časového limitu pro dlouhé zpracování fotek
+            @set_time_limit(300);
+
+            $total = count($files);
             $sort = 0;
+            $this->stream('ks-loader-progress', '', true);
+            $this->stream('ks-loader-progress-text', '', true);
             foreach ($files as $path) {
                 try {
+                    $sort++;
+                    $progressMsg = __("admin.navigation.resources.photo_pool.notifications.processing")." ($sort / $total)";
+                    $this->stream('ks-loader-progress', " ($sort / $total)");
+                    $this->stream('ks-loader-progress-text', $progressMsg);
+
                     $diskName = config('filesystems.uploads.disk');
                     $disk = Storage::disk($diskName);
 

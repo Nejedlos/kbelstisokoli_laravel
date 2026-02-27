@@ -7,6 +7,7 @@ use App\Models\MediaAsset;
 use App\Models\PhotoPool;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,6 +20,16 @@ class EditPhotoPool extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return parent::getFormActions();
+    }
+
+    public function render(): \Illuminate\Contracts\View\View
+    {
+        return parent::render();
     }
 
     protected function afterSave(): void
@@ -37,11 +48,22 @@ class EditPhotoPool extends EditRecord
         $uploaderId = auth()->id();
 
         DB::transaction(function () use ($files, $pool, $uploaderId) {
+            // Zvýšení časového limitu pro dlouhé zpracování fotek
+            @set_time_limit(300);
+
             $lastSort = $pool->mediaAssets()->max('sort_order') ?? 0;
             $sort = $lastSort;
-
+            $total = count($files);
+            $count = 0;
+            $this->stream('ks-loader-progress', '', true);
+            $this->stream('ks-loader-progress-text', '', true);
             foreach ($files as $path) {
                 try {
+                    $count++;
+                    $progressMsg = __("admin.navigation.resources.photo_pool.notifications.processing")." ($count / $total)";
+                    $this->stream('ks-loader-progress', " ($count / $total)");
+                    $this->stream('ks-loader-progress-text', $progressMsg);
+
                     $diskName = config('filesystems.uploads.disk');
                     $disk = Storage::disk($diskName);
 

@@ -43,6 +43,7 @@ class ClubEventsTable
                     ->label('Týmy')
                     ->placeholder('Celý klub')
                     ->badge()
+                    ->state(fn ($record) => $record->teams->reject(fn($team) => $team->category === 'all')->pluck('name'))
                     ->searchable(),
                 TextColumn::make('starts_at')
                     ->label('Od')
@@ -67,7 +68,9 @@ class ClubEventsTable
                     ]),
                 SelectFilter::make('teams')
                     ->label('Tým')
-                    ->relationship('teams', 'name'),
+                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                    ->multiple()
+                    ->preload(),
                 TernaryFilter::make('is_public')
                     ->label('Veřejnost'),
             ])

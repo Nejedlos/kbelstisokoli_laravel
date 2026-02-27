@@ -37,10 +37,17 @@
         'TUR' => 'fa-flag-checkered',
         'PRATEL' => 'fa-handshake',
     ];
+
+    $branding = $branding ?? app(\App\Services\BrandingService::class)->getSettings();
 @endphp
 
-<div class="card card-hover overflow-hidden border-l-4 border-l-primary">
-    <div class="p-5 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+<div class="card card-hover overflow-hidden border-l-4 border-l-primary group">
+    <div class="p-5 md:p-8 flex flex-col md:flex-row md:items-center gap-6 relative">
+        <div class="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.07] transition-opacity">
+            @if(isset($typeIcons[$match->match_type]))
+                <i class="fa-light {{ $typeIcons[$match->match_type] }} text-7xl"></i>
+            @endif
+        </div>
         <!-- Date & Time -->
         <div class="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-center md:min-w-[120px] pb-4 md:pb-0 border-b md:border-b-0 md:border-r border-slate-100">
             <div class="flex flex-col">

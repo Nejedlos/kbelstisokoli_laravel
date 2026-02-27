@@ -10,7 +10,6 @@ class StatisticRow extends Model
     protected $fillable = [
         'statistic_set_id',
         'player_id',
-        'team_id',
         'basketball_match_id',
         'season_id',
         'row_label',
@@ -35,6 +34,11 @@ class StatisticRow extends Model
     public function player(): BelongsTo
     {
         return $this->belongsTo(User::class, 'player_id');
+    }
+
+    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'statistic_row_team');
     }
 
     public function team(): BelongsTo

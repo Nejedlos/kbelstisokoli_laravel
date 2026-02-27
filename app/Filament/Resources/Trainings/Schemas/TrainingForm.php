@@ -19,7 +19,7 @@ class TrainingForm
                     ->schema([
                         Select::make('teams')
                             ->label('Týmy')
-                            ->relationship('teams', 'name')
+                            ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                             ->multiple()
                             ->searchable()
                             ->preload()

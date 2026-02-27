@@ -39,7 +39,7 @@ class ClubEventForm
                                 Select::make('teams')
                                     ->label('Určeno pro týmy')
                                     ->helperText('Ponechte prázdné, pokud je akce pro celý klub.')
-                                    ->relationship('teams', 'name')
+                                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                                     ->multiple()
                                     ->searchable()
                                     ->preload(),

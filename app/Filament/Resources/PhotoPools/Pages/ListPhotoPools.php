@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -33,8 +34,22 @@ class ListPhotoPools extends ListRecords
                 ->label(__('admin.navigation.resources.photo_pool.actions.create_wizard'))
                 ->icon(new HtmlString('<i class="fa-light fa-plus"></i>'))
                 ->modalWidth('4xl')
-                ->steps([
-                    Step::make('Kontext akce')
+                ->form([
+                    Placeholder::make('ks_global_loader')
+                        ->label('')
+                        ->content(fn () => view('components.loader.basketball', [
+                            'id' => 'ks-basketball-loader',
+                            'style' => 'display: none;',
+                        ]))
+                        ->columnSpanFull(),
+
+                    Placeholder::make('processing_progress')
+                        ->label('')
+                        ->content(fn () => new HtmlString('<div wire:stream="ks-loader-progress-text" class="text-sm font-bold text-primary-600 dark:text-primary-400 text-center animate-pulse"></div>'))
+                        ->columnSpanFull(),
+
+                    \Filament\Forms\Components\Wizard::make([
+                        Step::make('Kontext akce')
                         ->label(__('admin.navigation.resources.photo_pool.steps.context.label'))
                         ->description(__('admin.navigation.resources.photo_pool.steps.context.description'))
                         ->icon(new HtmlString('<i class="fa-light fa-sparkles"></i>'))
@@ -48,9 +63,10 @@ class ListPhotoPools extends ListRecords
                                 ->native(false)
                                 ->displayFormat('m/Y')
                                 ->required(),
-                            Select::make('team_id')
-                                ->label('Tým')
-                                ->relationship('team', 'name')
+                            Select::make('teams')
+                                ->label(__('admin.navigation.resources.team.plural_label'))
+                                ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                                ->multiple()
                                 ->searchable()
                                 ->preload()
                                 ->native(false),
@@ -146,17 +162,24 @@ class ListPhotoPools extends ListRecords
                         ->schema([
                             FileUpload::make('photos')
                                 ->label(__('admin.navigation.resources.photo_pool.fields.photos'))
+                                ->placeholder(new \Illuminate\Support\HtmlString('<div class="flex flex-col items-center justify-center py-4 text-gray-500 dark:text-gray-400">' . \App\Support\IconHelper::render(\App\Support\IconHelper::UPLOAD, 'fal')->toHtml() . '<span class="text-sm font-medium mt-3">Klikněte nebo přetáhněte fotografie sem</span></div>'))
                                 ->multiple()
                                 ->image()
+                                ->panelLayout('grid')
                                 ->reorderable()
                                 ->disk(config('filesystems.uploads.disk'))
                                 ->directory('uploads/photos/pools')
                                 ->maxFiles(200)
                                 ->maxSize(30720)
+                                ->uploadingMessage(__('admin.navigation.resources.photo_pool.notifications.uploading'))
+                                ->extraAttributes([
+                                    'style' => 'max-height: 60vh; overflow-y: auto;',
+                                ])
                                 ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                 ->helperText('Maximálně 200 fotek, každá do 30 MB. Budou automaticky převedeny na WebP.')
                                 ->required(),
                         ]),
+                    ]),
                 ])
                 ->mutateFormDataUsing(function (array $data): array {
                     return [
@@ -170,14 +193,18 @@ class ListPhotoPools extends ListRecords
                         ],
                         'event_date' => $data['event_date'],
                         'slug' => $data['slug'],
-                        'team_id' => $data['team_id'] ?? null,
                         'event_type' => 'other',
                         'is_public' => true,
                         'is_visible' => true,
                         'photos' => $data['photos'],
+                        'teams' => $data['teams'] ?? [],
                     ];
                 })
-                ->after(function (array $data, PhotoPool $record) {
+                ->after(function (array $data, PhotoPool $record, $livewire) {
+                    if (!empty($data['teams'])) {
+                        $record->teams()->sync($data['teams']);
+                    }
+
                     $files = $data['photos'] ?? [];
                     if (empty($files)) {
                         return;
@@ -185,10 +212,18 @@ class ListPhotoPools extends ListRecords
 
                     $uploaderId = auth()->id();
 
-                    DB::transaction(function () use ($files, $record, $uploaderId) {
+                    DB::transaction(function () use ($files, $record, $uploaderId, $livewire) {
+                        $total = count($files);
                         $sort = 0;
+                        $livewire->stream('ks-loader-progress', '', true);
+                        $livewire->stream('ks-loader-progress-text', '', true);
                         foreach ($files as $path) {
                             try {
+                                $sort++;
+                                $progressMsg = __("admin.navigation.resources.photo_pool.notifications.processing")." ($sort / $total)";
+                                $livewire->stream('ks-loader-progress', " ($sort / $total)");
+                                $livewire->stream('ks-loader-progress-text', $progressMsg);
+
                                 $diskName = config('filesystems.uploads.disk');
                                 $disk = Storage::disk($diskName);
 

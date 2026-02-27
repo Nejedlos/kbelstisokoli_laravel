@@ -10,7 +10,6 @@ class ClubCompetitionEntry extends Model
     protected $fillable = [
         'club_competition_id',
         'player_id',
-        'team_id',
         'label',
         'value',
         'value_type',
@@ -32,6 +31,11 @@ class ClubCompetitionEntry extends Model
     public function player(): BelongsTo
     {
         return $this->belongsTo(User::class, 'player_id');
+    }
+
+    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'club_competition_entry_team', 'entry_id', 'team_id');
     }
 
     public function team(): BelongsTo

@@ -64,7 +64,9 @@ class AdminPanelProvider extends PanelProvider
                  </style>
                  @vite(['resources/css/filament-admin.css'])"
             ))
-            ->renderHook('panels::body.end', fn (): string => Blade::render('<x-back-to-top />'))
+            ->renderHook('panels::body.end', fn (): string => Blade::render('
+                <x-back-to-top />
+            '))
             ->renderHook('panels::global-search.before', fn (): string => Blade::render('
                 <div class="flex items-center gap-1 sm:gap-2">
                     @include("filament.components.language-switch")

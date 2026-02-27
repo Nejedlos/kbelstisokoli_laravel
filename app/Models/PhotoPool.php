@@ -17,7 +17,6 @@ class PhotoPool extends Model
         'description',
         'event_type',
         'event_date',
-        'team_id',
         'is_public',
         'is_visible',
     ];
@@ -31,7 +30,15 @@ class PhotoPool extends Model
     ];
 
     /**
-     * Tým, ke kterému tato galerie patří.
+     * Týmy, ke kterým tato galerie patří.
+     */
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'photo_pool_team');
+    }
+
+    /**
+     * Tým, ke kterému tato galerie patří (pro zpětnou kompatibilitu).
      */
     public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

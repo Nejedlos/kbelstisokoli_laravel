@@ -21,39 +21,64 @@
                     </a>
                 </div>
 
-                <form action="{{ route('public.matches.index') }}" method="GET" class="flex flex-wrap items-center gap-3 py-4 md:py-0">
+                <form action="{{ route('public.matches.index') }}" method="GET" class="flex flex-wrap items-center gap-4 py-4 md:py-0">
                     <input type="hidden" name="type" value="{{ $type }}">
 
-                    <select name="team_id" class="bg-white border-slate-200 rounded-lg text-xs font-bold text-secondary focus:ring-primary focus:border-primary px-3 py-2" onchange="this.form.submit()">
-                        <option value="">{{ __('matches.filter_all_teams') }}</option>
-                        @foreach($teams as $team)
-                            <option value="{{ $team->id }}" {{ (string)$teamId === (string)$team->id ? 'selected' : '' }}>
-                                {{ $team->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                            <i class="fa-light fa-users text-xs"></i>
+                        </div>
+                        <select name="team_id" class="bg-white border-slate-200 pl-9 pr-8 py-2 rounded-lg text-xs font-bold text-secondary focus:ring-primary focus:border-primary appearance-none cursor-pointer transition-all hover:border-slate-300 shadow-sm" onchange="this.form.submit()">
+                            <option value="">{{ __('matches.filter_all_teams') }}</option>
+                            @foreach($teams as $team)
+                                <option value="{{ $team->id }}" {{ (string)$teamId === (string)$team->id ? 'selected' : '' }}>
+                                    {{ $team->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-light fa-chevron-down text-[10px]"></i>
+                        </div>
+                    </div>
 
-                    <select name="season_id" class="bg-white border-slate-200 rounded-lg text-xs font-bold text-secondary focus:ring-primary focus:border-primary px-3 py-2" onchange="this.form.submit()">
-                        <option value="">{{ __('matches.filter_all_seasons') }}</option>
-                        @foreach($seasons as $season)
-                            <option value="{{ $season->id }}" {{ (string)$seasonId === (string)$season->id ? 'selected' : '' }}>
-                                {{ $season->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                            <i class="fa-light fa-calendar-range text-xs"></i>
+                        </div>
+                        <select name="season_id" class="bg-white border-slate-200 pl-9 pr-8 py-2 rounded-lg text-xs font-bold text-secondary focus:ring-primary focus:border-primary appearance-none cursor-pointer transition-all hover:border-slate-300 shadow-sm" onchange="this.form.submit()">
+                            <option value="">{{ __('matches.filter_all_seasons') }}</option>
+                            @foreach($seasons as $season)
+                                <option value="{{ $season->id }}" {{ (string)$seasonId === (string)$season->id ? 'selected' : '' }}>
+                                    {{ $season->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-light fa-chevron-down text-[10px]"></i>
+                        </div>
+                    </div>
 
-                    <select name="match_type" class="bg-white border-slate-200 rounded-lg text-xs font-bold text-secondary focus:ring-primary focus:border-primary px-3 py-2" onchange="this.form.submit()">
-                        <option value="">{{ __('matches.filter_all_types') }}</option>
-                        @foreach($matchTypes as $key => $label)
-                            <option value="{{ $key }}" {{ $matchType === $key ? 'selected' : '' }}>
-                                {{ $label }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                            <i class="fa-light fa-tags text-xs"></i>
+                        </div>
+                        <select name="match_type" class="bg-white border-slate-200 pl-9 pr-8 py-2 rounded-lg text-xs font-bold text-secondary focus:ring-primary focus:border-primary appearance-none cursor-pointer transition-all hover:border-slate-300 shadow-sm" onchange="this.form.submit()">
+                            <option value="">{{ __('matches.filter_all_types') }}</option>
+                            @foreach($matchTypes as $key => $label)
+                                <option value="{{ $key }}" {{ $matchType === $key ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-light fa-chevron-down text-[10px]"></i>
+                        </div>
+                    </div>
 
                     @if($teamId || $matchType || ($seasonId && (string)$seasonId !== (string)($seasons->where('name', \App\Models\Season::getExpectedCurrentSeasonName())->first()?->id)))
-                        <a href="{{ route('public.matches.index', ['type' => $type]) }}" class="text-slate-400 hover:text-danger transition-colors" title="Zrušit filtry">
-                            <i class="fa-light fa-circle-xmark text-lg"></i>
+                        <a href="{{ route('public.matches.index', ['type' => $type]) }}" class="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-danger/10 text-slate-500 hover:text-danger rounded-lg transition-all text-[10px] font-black uppercase tracking-widest border border-slate-200 shadow-sm" title="Zrušit filtry">
+                            <i class="fa-light fa-circle-xmark text-sm"></i>
+                            <span class="hidden sm:inline">Zrušit filtry</span>
                         </a>
                     @endif
                 </form>

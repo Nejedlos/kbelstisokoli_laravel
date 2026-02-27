@@ -16,7 +16,7 @@ class BasketballMatch extends Model
     protected $table = 'matches';
 
     protected $fillable = [
-        'team_id',
+        'match_type',
         'season_id',
         'opponent_id',
         'scheduled_at',
