@@ -36,10 +36,17 @@ if (Schema::hasTable('old_name') && !Schema::hasTable('new_name')) {
 ```
 
 ### 4. Změny typů sloupců (`->change()`)
-Při změně typu sloupce (např. na JSON pro překlady) používáme standardní `change()`, ale celou operaci balíme do kontroly existence tabulky, aby nedocházelo k chybám, pokud tabulka ještě neexistuje (např. při paralelním vývoji).
+Při změně typu sloupce (např. na `longText` pro překlady) používáme standardní `change()`, ale celou operaci balíme do kontroly existence tabulky, aby nedocházelo k chybám, pokud tabulka ještě neexistuje (např. při paralelním vývoji).
 
 ### 5. Specifika pro produkční prostředí (Webglobe)
-Na některých serverech (např. Webglobe v produkci) může standardní schéma Laravelu (`Schema::hasColumn`, `Schema::table`) selhat s chybou `Unknown column 'generation_expression' in 'field list'` kvůli specifické konfiguraci MariaDB/MySQL a ovladačů.
+Na produkčním serveru (Webglobe) platí kritické omezení: **databáze nepodporuje datový typ `json`**.
+
+Při vytváření nebo úpravě migrací:
+- Místo `$table->json('field')` **vždy** používejte `$table->longText('field')`.
+- Toto platí pro všechna translatable pole i metadata.
+- Laravel (a balíček `spatie/laravel-translatable`) se postará o serializaci/deserializaci JSON dat do tohoto textového pole.
+
+Dále může standardní schéma Laravelu (`Schema::hasColumn`, `Schema::table`) selhat s chybou `Unknown column 'generation_expression' in 'field list'` kvůli specifické konfiguraci MariaDB/MySQL a ovladačů.
 
 V takových případech používáme **vlastní kontrolu pomocí raw SQL**:
 

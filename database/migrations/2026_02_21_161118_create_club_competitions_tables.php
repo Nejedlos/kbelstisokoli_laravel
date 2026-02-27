@@ -15,12 +15,12 @@ return new class extends Migration
         if (!Schema::hasTable('club_competitions')) {
             Schema::create('club_competitions', function (Blueprint $table) {
                 $table->id();
-                $table->json('name');
+                $table->longText('name');
                 $table->string('slug')->unique();
-                $table->json('description')->nullable();
-                $table->json('metric_description')->nullable(); // např. "Nejlepší střelec sezóny"
+                $table->longText('description')->nullable();
+                $table->longText('metric_description')->nullable(); // např. "Nejlepší střelec sezóny"
                 $table->foreignId('season_id')->nullable()->constrained('seasons')->onDelete('set null');
-                $table->json('rules')->nullable();
+                $table->longText('rules')->nullable();
                 $table->boolean('is_public')->default(true);
                 $table->string('status')->default('active'); // active, completed, archived
                 $table->timestamps();
@@ -39,7 +39,7 @@ return new class extends Migration
                 $table->string('value_type')->default('incremental'); // incremental, absolute
                 $table->string('source_note')->nullable(); // Poznámka k původu (z jakého zápasu/akce)
                 $table->foreignId('basketball_match_id')->nullable()->constrained('matches')->onDelete('set null');
-                $table->json('metadata')->nullable(); // Libovolná doplňující metadata
+                $table->longText('metadata')->nullable(); // Libovolná doplňující metadata
                 $table->timestamps();
             });
         }

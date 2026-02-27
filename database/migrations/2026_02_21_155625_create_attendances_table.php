@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->text('note')->nullable(); // poznámka člena (omluvenka)
                 $table->text('internal_note')->nullable(); // poznámka trenéra
                 $table->timestamp('responded_at')->nullable(); // čas poslední odpovědi
-                $table->json('metadata')->nullable();
+                $table->longText('metadata')->nullable();
                 $table->timestamps();
 
                 // Unikátní index pro user + událost

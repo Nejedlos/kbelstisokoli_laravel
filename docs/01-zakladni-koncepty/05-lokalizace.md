@@ -7,15 +7,16 @@ Projekt je nastaven jako plně dvojjazyčný. Výchozím jazykem je čeština (`
 
 ### Komponenty:
 - **Middleware:** `SetLocaleMiddleware` – Stará se o nastavení jazyka aplikace na základě session nebo URL parametru `?lang=xx`.
-- **Modely:** `spatie/laravel-translatable` – Umožňuje ukládat překlady přímo v JSON sloupcích databáze.
+- **Modely:** `spatie/laravel-translatable` – Umožňuje ukládat překlady přímo v polích databáze (formát JSON, typ `longText`).
 - **Administrace:** `bezhansalleh/filament-language-switch` – Přidává přepínač jazyků do horní lišty Filamentu.
 
 ## 2. Překlady v databázi (Modely)
 Pokud model obsahuje pole, která mají být bilingvní (např. titulek, obsah), postupujte následovně:
 
-1. **Migrace:** Sloupec musí být typu `json`.
+1. **Migrace:** Sloupec musí být typu `longText`.
+   > **POZOR:** Produkční prostředí (Webglobe) nepodporuje nativní typ `json`. Všechna translatable pole musí být definována jako `longText`.
    ```php
-   $table->json('title');
+   $table->longText('title');
    ```
 2. **Model:** Použijte trait `HasTranslations`.
    ```php
@@ -41,7 +42,7 @@ Volba se uloží do session a zůstane aktivní pro další požadavky.
 UI obsahuje moderní přepínač jazyků (CZ | EN) v hlavičce webu a na stránce údržby.
 
 ## 5. Implementované změny (21. 2. 2026)
-- **Migrace:** Všechna textová pole vyžadující lokalizaci byla převedena na typ `json` v migraci `2026_02_21_205203_make_tables_translatable.php`.
+- **Migrace:** Všechna textová pole vyžadující lokalizaci byla převedena na typ `longText` v migraci `2026_02_21_205203_make_tables_translatable.php` (v produkci není typ `json` podporován).
 - **Modely:** Modely (`Post`, `Page`, `Setting`, `Announcement`, atd.) nyní používají trait `HasTranslations`.
 - **Under Construction:** Stránka údržby je plně lokalizovaná a obsahuje vlastní stylový přepínač jazyků.
 - **Frontend Header:** Hlavní hlavička webu byla rozšířena o přepínač jazyků.

@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('fine_templates', function (Blueprint $table) {
             $table->id();
-            $table->json('name');
+            $table->longText('name');
             $table->decimal('default_amount', 10, 2)->default(0);
             $table->string('unit')->nullable();
-            $table->json('description')->nullable();
-            $table->json('metadata')->nullable();
+            $table->longText('description')->nullable();
+            $table->longText('metadata')->nullable();
             $table->timestamps();
         });
     }
