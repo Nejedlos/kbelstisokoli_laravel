@@ -27,7 +27,7 @@ class MediaAssetForm
                             ->collection('default')
                             ->image()
                             // Dynamický disk podle úrovně přístupu
-                            ->disk(fn ($get) => $get('access_level') === 'public' ? 'media_public' : 'media_private')
+                            ->disk(fn ($get) => $get('access_level') === 'public' ? config('filesystems.uploads.disk') : 'media_private')
                             // Čištění názvu souboru při nahrávání
                             ->getUploadedFileNameForStorageUsing(function ($file, $get) {
                                 $title = $get('title');

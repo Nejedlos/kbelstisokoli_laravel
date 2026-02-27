@@ -193,7 +193,7 @@ class PhotoPoolResource extends Resource
                                     ->image()
                                     ->reorderable()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory('uploads/photos/pools')
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/photo_pools/incoming')
                                     ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                     ->downloadable()
                                     ->openable()

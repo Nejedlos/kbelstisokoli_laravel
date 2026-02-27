@@ -202,7 +202,7 @@ class ListPhotoPools extends ListRecords
                                 ->panelLayout('grid')
                                 ->reorderable()
                                 ->disk(config('filesystems.uploads.disk'))
-                                ->directory('uploads/photos/pools')
+                                ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/photo_pools/incoming')
                                 ->maxFiles(200)
                                 ->maxSize(30720)
                                 ->uploadingMessage(__('admin.navigation.resources.photo_pool.notifications.uploading'))
@@ -256,6 +256,16 @@ class ListPhotoPools extends ListRecords
                         $sort = 0;
                         $livewire->stream('ks-loader-progress', '', true);
                         $livewire->stream('ks-loader-progress-text', '', true);
+
+                        $diskName = config('filesystems.uploads.disk');
+                        $disk = Storage::disk($diskName);
+                        $uploadsDir = trim(config('filesystems.uploads.dir', 'uploads'), '/');
+                        $targetBase = "{$uploadsDir}/photo_pools/{$record->id}/originals";
+
+                        if (! $disk->exists($targetBase)) {
+                            $disk->makeDirectory($targetBase);
+                        }
+
                         foreach ($files as $path) {
                             try {
                                 $sort++;
@@ -263,18 +273,23 @@ class ListPhotoPools extends ListRecords
                                 $livewire->stream('ks-loader-progress', " ($sort / $total)");
                                 $livewire->stream('ks-loader-progress-text', $progressMsg);
 
-                                $diskName = config('filesystems.uploads.disk');
-                                $disk = Storage::disk($diskName);
-
                                 if (! $disk->exists($path)) {
                                     continue;
                                 }
 
-                                $fullPath = $disk->path($path);
+                                // Přesun z incoming do trvalé složky pro originály
+                                $filename = basename($path);
+                                $targetPath = $targetBase . '/' . $filename;
+
+                                if ($path !== $targetPath) {
+                                    $disk->move($path, $targetPath);
+                                }
+
+                                $fullPath = $disk->path($targetPath);
                                 $file = new \Illuminate\Http\File($fullPath);
 
                                 $asset = new MediaAsset([
-                                    'title' => (string) (brand_text($record->getTranslation('title', 'cs')).' #'.(++$sort)),
+                                    'title' => (string) (brand_text($record->getTranslation('title', 'cs')).' #'.($sort)),
                                     'alt_text' => brand_text($record->getTranslation('title', 'cs')),
                                     'type' => 'image',
                                     'access_level' => 'public',

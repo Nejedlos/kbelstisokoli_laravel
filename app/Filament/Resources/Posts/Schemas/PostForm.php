@@ -122,7 +122,7 @@ class PostForm
                                             ->label('Hlavní náhledový obrázek')
                                             ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku.')
                                             ->collection('featured_image')
-                                            ->disk('media_public') // Veřejný prostor pro články
+                                            ->disk(config('filesystems.uploads.disk')) // Veřejný prostor pro články
                                             ->image()
                                             ->getUploadedFileNameForStorageUsing(function ($file, $get) {
                                                 $title = $get('title');

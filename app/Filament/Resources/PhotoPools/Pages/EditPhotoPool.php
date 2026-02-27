@@ -57,6 +57,17 @@ class EditPhotoPool extends EditRecord
             $count = 0;
             $this->stream('ks-loader-progress', '', true);
             $this->stream('ks-loader-progress-text', '', true);
+
+            $diskName = config('filesystems.uploads.disk');
+            $disk = Storage::disk($diskName);
+            $uploadsDir = trim(config('filesystems.uploads.dir', 'uploads'), '/');
+            $targetBase = "{$uploadsDir}/photo_pools/{$pool->id}/originals";
+
+            // Zajistíme existenci cílové složky pro originály
+            if (! $disk->exists($targetBase)) {
+                $disk->makeDirectory($targetBase);
+            }
+
             foreach ($files as $path) {
                 try {
                     $count++;
@@ -64,14 +75,19 @@ class EditPhotoPool extends EditRecord
                     $this->stream('ks-loader-progress', " ($count / $total)");
                     $this->stream('ks-loader-progress-text', $progressMsg);
 
-                    $diskName = config('filesystems.uploads.disk');
-                    $disk = Storage::disk($diskName);
-
                     if (! $disk->exists($path)) {
                         continue;
                     }
 
-                    $fullPath = $disk->path($path);
+                    // Přesun z incoming do trvalé složky pro originály
+                    $filename = basename($path);
+                    $targetPath = $targetBase . '/' . $filename;
+
+                    if ($path !== $targetPath) {
+                        $disk->move($path, $targetPath);
+                    }
+
+                    $fullPath = $disk->path($targetPath);
                     $file = new \Illuminate\Http\File($fullPath);
 
                     $asset = new MediaAsset([

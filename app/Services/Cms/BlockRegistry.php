@@ -273,7 +273,8 @@ class BlockRegistry
                         FileUpload::make('icon')
                             ->label('Ikona nebo obrázek')
                             ->image()
-                            ->directory('blocks/cards'),
+                            ->disk(config('filesystems.uploads.disk'))
+                            ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/blocks/cards'),
                     ])
                     ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
                     ->collapsible()

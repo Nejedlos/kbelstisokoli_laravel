@@ -116,7 +116,8 @@ class CmsForms
                             ->label('Sdílený obrázek (OG Image)')
                             ->helperText('Doporučený rozměr 1200x630px. Pokud nevyberete, použije se náhledový obrázek stránky nebo globální logo.')
                             ->image()
-                            ->directory('seo/og-images'),
+                            ->disk(config('filesystems.uploads.disk'))
+                            ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/seo/og-images'),
 
                         Textarea::make('structured_data_override')
                             ->label('Vlastní strukturovaná data (JSON-LD)')

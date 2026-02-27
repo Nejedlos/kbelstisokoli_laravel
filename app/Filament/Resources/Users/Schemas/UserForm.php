@@ -63,7 +63,7 @@ class UserForm
                 ->schema([
                     SpatieMediaLibraryFileUpload::make('avatar')
                         ->collection('avatar')
-                        ->disk('media_public')
+                        ->disk(config('filesystems.uploads.disk'))
                         ->avatar()
                         ->alignLeft()
                         ->hiddenLabel()

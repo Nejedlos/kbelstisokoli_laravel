@@ -129,12 +129,12 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.logo'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory('branding'),
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding'),
                                 FileUpload::make('alt_logo_path')
                                     ->label(__('admin/branding-settings.fields.alt_logo'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory('branding'),
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding'),
                             ]),
                     ]),
 
@@ -161,7 +161,7 @@ class BrandingSettings extends Page implements HasForms
                                     	->label(__('admin/branding-settings.fields.admin_contact_photo'))
                                     	->image()
                                     	->disk(config('filesystems.uploads.disk'))
-                                    	->directory('branding')
+                                    	->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding')
                                     	->helperText(__('admin/branding-settings.fields.admin_contact_photo_help')),
                             ]),
                     ]),
@@ -245,7 +245,8 @@ class BrandingSettings extends Page implements HasForms
                         FileUpload::make('seo_og_image_path')
                             ->label(__('admin/branding-settings.fields.seo_og_image'))
                             ->image()
-                            ->directory('branding')
+                            ->disk(config('filesystems.uploads.disk'))
+                            ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding')
                             ->helperText(__('admin/branding-settings.fields.seo_og_image_help')),
                         Grid::make(2)
                             ->schema([
