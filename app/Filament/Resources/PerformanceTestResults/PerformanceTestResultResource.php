@@ -60,6 +60,13 @@ class PerformanceTestResultResource extends Resource
         ];
     }
 
+    public static function getWidgets(): array
+    {
+        return [
+            Widgets\PerformanceComparisonWidget::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [

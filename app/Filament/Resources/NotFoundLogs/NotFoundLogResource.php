@@ -18,7 +18,30 @@ class NotFoundLogResource extends Resource
 {
     protected static ?string $model = NotFoundLog::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.admin_tools');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.navigation.resources.not_found_log.plural_label');
+    }
+
+    public static function getNavigationIcon(): ?string
+    {
+        return \App\Support\IconHelper::get(\App\Support\IconHelper::NOT_FOUND);
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.not_found_log.plural_label');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 95;
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -41,8 +64,6 @@ class NotFoundLogResource extends Resource
     {
         return [
             'index' => ListNotFoundLogs::route('/'),
-            'create' => CreateNotFoundLog::route('/create'),
-            'edit' => EditNotFoundLog::route('/{record}/edit'),
         ];
     }
 }

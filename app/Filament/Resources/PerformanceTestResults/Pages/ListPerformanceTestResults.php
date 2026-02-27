@@ -13,6 +13,13 @@ class ListPerformanceTestResults extends ListRecords
 {
     protected static string $resource = PerformanceTestResultResource::class;
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            PerformanceTestResultResource::getWidgets()[0],
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

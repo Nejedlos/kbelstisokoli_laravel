@@ -37,6 +37,7 @@ class IconHelper
     public const GALLERIES = AppIcon::GALLERIES;
     public const ANNOUNCEMENTS = AppIcon::ANNOUNCEMENTS;
     public const AUDIT_LOGS = AppIcon::AUDIT_LOGS;
+    public const NOT_FOUND = AppIcon::NOT_FOUND;
     public const REDIRECTS = AppIcon::REDIRECTS;
     public const CRON_TASKS = AppIcon::CRON_TASKS;
     public const CRON_LOGS = AppIcon::CRON_LOGS;
