@@ -148,7 +148,7 @@ class AttendanceMigrationSeeder extends Seeder
             foreach ($platiciIds as $pId) {
                 $rId = $platiciToRid->get($pId);
                 if ($rId && ($user = $usersById->get($rId))) {
-                    $this->updateActualStatus($user, $event, 'attended');
+                    $this->updateActualStatus($user, $event, 'attended', $actual->datum);
                 }
             }
 
@@ -156,7 +156,7 @@ class AttendanceMigrationSeeder extends Seeder
             $absentNames = array_filter(explode('-', $actual->nebili));
             foreach ($absentNames as $name) {
                 if ($user = $usersByName->get(trim($name))) {
-                    $this->updateActualStatus($user, $event, 'absent');
+                    $this->updateActualStatus($user, $event, 'absent', $actual->datum);
                 }
             }
 
@@ -164,7 +164,7 @@ class AttendanceMigrationSeeder extends Seeder
             $excusedNames = array_filter(explode('-', ($actual->omluveno ?? '') . '-' . ($actual->pokuta_zrusena ?? '')));
             foreach ($excusedNames as $name) {
                 if ($user = $usersByName->get(trim($name))) {
-                    $this->updateActualStatus($user, $event, 'excused');
+                    $this->updateActualStatus($user, $event, 'excused', $actual->datum);
                 }
             }
 
@@ -174,7 +174,7 @@ class AttendanceMigrationSeeder extends Seeder
         $this->command->info('');
     }
 
-    protected function updateActualStatus($user, $event, $status)
+    protected function updateActualStatus($user, $event, $status, $recordedAt = null)
     {
         $attendance = \App\Models\Attendance::where([
             'user_id' => $user->id,
@@ -184,6 +184,11 @@ class AttendanceMigrationSeeder extends Seeder
 
         if ($attendance) {
             $attendance->actual_status = $status;
+            if ($recordedAt) {
+                $metadata = $attendance->metadata ?? [];
+                $metadata['legacy_recorded_at'] = \Carbon\Carbon::createFromTimestamp($recordedAt)->toDateTimeString();
+                $attendance->metadata = $metadata;
+            }
             // is_mismatch se spočítá automaticky v booted() metodě při save()
             $attendance->save();
         } else {
@@ -193,6 +198,9 @@ class AttendanceMigrationSeeder extends Seeder
                 'attendable_type' => get_class($event),
                 'planned_status' => 'pending',
                 'actual_status' => $status,
+                'metadata' => $recordedAt ? [
+                    'legacy_recorded_at' => \Carbon\Carbon::createFromTimestamp($recordedAt)->toDateTimeString()
+                ] : null,
             ]);
         }
     }

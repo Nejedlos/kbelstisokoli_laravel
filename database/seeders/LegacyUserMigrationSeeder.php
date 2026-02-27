@@ -103,6 +103,7 @@ class LegacyUserMigrationSeeder extends Seeder
                 'last_name' => $lastName,
                 'display_name' => $jmeno,
                 'phone' => $phone,
+                'address_street' => $reg->adresa,
                 'is_active' => $isActive,
                 'membership_status' => $membershipStatus,
                 'notification_preferences' => $notificationPreferences,

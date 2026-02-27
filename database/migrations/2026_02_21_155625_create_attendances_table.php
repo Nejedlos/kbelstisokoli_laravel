@@ -16,10 +16,13 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');
                 $table->morphs('attendable'); // trénink, zápas, klubová akce
-                $table->string('status')->default('pending'); // pending, confirmed, declined, maybe
+                $table->string('planned_status')->default('pending'); // pending, confirmed, declined, maybe
+                $table->string('actual_status')->nullable(); // attended, absent, excused
+                $table->boolean('is_mismatch')->default(false);
                 $table->text('note')->nullable(); // poznámka člena (omluvenka)
                 $table->text('internal_note')->nullable(); // poznámka trenéra
                 $table->timestamp('responded_at')->nullable(); // čas poslední odpovědi
+                $table->json('metadata')->nullable();
                 $table->timestamps();
 
                 // Unikátní index pro user + událost

@@ -6,8 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Spatie\Translatable\HasTranslations;
+
 class ClubCompetition extends Model
 {
+    use HasTranslations;
+
+    public $translatable = ['name', 'description', 'metric_description', 'rules'];
+
     protected $fillable = [
         'name',
         'slug',

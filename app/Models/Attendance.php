@@ -18,11 +18,13 @@ class Attendance extends Model
         'note',
         'internal_note',
         'responded_at',
+        'metadata',
     ];
 
     protected $casts = [
         'responded_at' => 'datetime',
         'is_mismatch' => 'boolean',
+        'metadata' => 'array',
     ];
 
     /**

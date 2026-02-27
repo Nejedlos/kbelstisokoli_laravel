@@ -19,7 +19,7 @@
 
     <div class="flex items-center justify-center gap-6 text-slate-400">
         <div class="h-px w-10 bg-gradient-to-r from-transparent to-white/10"></div>
-        <p class="text-[10px] font-black uppercase tracking-[0.4em] italic opacity-40">
+        <p class="text-[min(2.5vw,10px)] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] italic opacity-40 text-balance px-4 max-w-xs mx-auto">
             {{ $branding['club_name'] ?? 'Kbelští sokoli' }}
         </p>
         <div class="h-px w-10 bg-gradient-to-l from-transparent to-white/10"></div>

@@ -10,14 +10,14 @@
     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
 
     {{-- Decor --}}
-    <div class="absolute top-0 right-0 w-1/3 h-full pointer-events-none opacity-[0.03]">
-        <i class="fa-light fa-basketball text-[30rem] translate-x-1/2 -translate-y-1/4"></i>
+    <div class="absolute top-0 right-0 w-1/3 h-full pointer-events-none opacity-[0.03] overflow-hidden">
+        <i class="fa-light fa-basketball text-[15rem] md:text-[30rem] translate-x-1/2 -translate-y-1/4"></i>
     </div>
 
     <div class="container pt-12 md:pt-20 pb-6 relative z-10">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
             {{-- Column 1: Brand & Identity --}}
-            <div class="space-y-6">
+            <div class="space-y-6 sm:col-span-2 lg:col-span-1">
                 @if($branding['logo_path'])
                     <a href="{{ route('public.home') }}" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl">
@@ -120,14 +120,14 @@
             </div>
 
             {{-- Column 4: Contact & Socials --}}
-            <div>
+            <div class="sm:col-span-2 lg:col-span-1">
                 <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.contact_title') }}
                 </h3>
 
                 <div class="space-y-6">
-                    <ul class="space-y-4 text-sm">
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-y-4 gap-x-8 text-sm">
                         @if($branding['venue']['name'] ?? null)
                             <li class="flex items-center gap-4 group">
                                 <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
@@ -147,7 +147,9 @@
                                 <x-mailto :email="$branding['contact']['email']" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
                                     <i class="fa-light fa-envelope"></i>
                                 </x-mailto>
-                                <x-mailto :email="$branding['contact']['email']" class="hover:text-primary transition-colors font-bold break-all py-2" />
+                                <div class="min-w-0">
+                                    <x-mailto :email="$branding['contact']['email']" class="hover:text-primary transition-colors font-bold break-all py-1 inline-block" />
+                                </div>
                             </li>
                         @endif
 
@@ -156,31 +158,31 @@
                                 <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
                                     <i class="fa-light fa-phone"></i>
                                 </a>
-                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="hover:text-primary transition-colors font-bold py-2">{{ $branding['contact']['phone'] }}</a>
+                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="hover:text-primary transition-colors font-bold py-1 inline-block">{{ $branding['contact']['phone'] }}</a>
                             </li>
                         @endif
 
                         @if(!data_get($branding, 'contact.email') && !data_get($branding, 'contact.phone'))
-                            <li class="text-slate-400 italic text-xs flex items-start gap-3">
+                            <li class="text-slate-400 italic text-xs flex items-start gap-3 sm:col-span-2 lg:col-span-1">
                                 <i class="fa-light fa-circle-info mt-0.5 text-primary"></i>
                                 {{ __('footer.contact_placeholder_text') }}
                             </li>
                         @endif
                     </ul>
 
-                    <div class="flex flex-wrap gap-4 pt-4 border-t border-white/5">
-                        <a href="{{ route('public.contact.index') }}" class="btn btn-primary btn-sm px-6">
+                    <div class="flex flex-wrap gap-3 sm:gap-4 pt-4 border-t border-white/5">
+                        <a href="{{ route('public.contact.index') }}" class="btn btn-primary btn-sm px-4 sm:px-6 grow sm:grow-0 justify-center">
                             <span>{{ __('footer.contact_page_cta') }}</span>
                         </a>
                         <a href="{{ $branding['main_club_url'] }}"
                            target="_blank"
                            rel="noopener"
-                           class="btn btn-outline-white btn-sm px-6 group"
+                           class="btn btn-outline-white btn-sm px-4 sm:px-6 group grow sm:grow-0 justify-center text-center"
                            data-track-click="external_link"
                            data-track-label="Footer: Main Club Website"
                            data-track-category="external">
-                            <span>{{ __('footer.contact_club_cta') }}</span>
-                            <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70"></i>
+                            <span class="truncate">{{ __('footer.contact_club_cta') }}</span>
+                            <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70 shrink-0"></i>
                         </a>
                     </div>
 
@@ -192,7 +194,7 @@
     {{-- Bottom Bar --}}
     <div class="bg-black/40 border-t border-white/5 text-slate-500 text-xs md:text-sm">
         <div class="container py-10 md:py-8 flex flex-col md:flex-row items-center justify-between gap-10 md:gap-8">
-            <div class="text-center md:text-left">
+            <div class="text-center md:text-left w-full md:w-auto">
                 <div class="font-bold text-slate-300 mb-2 uppercase tracking-tight text-balance leading-tight">
                     {{ brand_text($branding['footer_text'] ?? ('© ' . date('Y') . ' ' . __('footer.brand_title'))) }}
                 </div>
@@ -204,33 +206,35 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-8 gap-y-6 md:gap-x-6 md:gap-y-4">
-                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2">
+            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-4 sm:gap-x-8 sm:gap-y-6 md:gap-x-6 md:gap-y-4 w-full md:w-auto">
+                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
                     <span class="w-1.5 h-1.5 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Kontakt') }}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
 
-                <a href="{{ route('login') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center">
+                <a href="{{ route('login') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     {!! str_replace(' ', '&nbsp;', __('Členská sekce')) !!}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
 
-                <a href="{{ route('public.pages.show', 'gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center">
+                <a href="{{ route('public.pages.show', 'gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     {{ __('Ochrana soukromí') }}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
 
-                <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black flex items-center group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:bg-primary/10 hover:border-primary/20">
+                <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black flex items-center group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:bg-primary/10 hover:border-primary/20 min-w-full sm:min-w-0 justify-center">
                     {{ __('Hlavní oddíl') }}
                     <i class="fa-light fa-arrow-up-right ml-2 text-[8px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 text-primary"></i>
                 </a>
             </div>
         </div>
     </div>
+
+    <x-back-to-top />
 </footer>

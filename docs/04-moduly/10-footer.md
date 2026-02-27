@@ -6,8 +6,11 @@ Patička webu byla kompletně přepracována do moderního sportovního stylu, k
 
 ### 1. Vizuální identita a layout
 - **4-sloupcový layout:** Desktopová verze je rozdělena do čtyř logických celků pro lepší přehlednost.
+- **Maximalizovaná responzivita:** 
+    - Na tabletech (sm/md) se sloupce řadí do inteligentní 2-sloupcové mřížky s využitím `col-span` pro vyvážení vizuální váhy (branding a kontakty přes celou šířku).
+    - Na mobilních zařízeních se sloupce řadí pod sebe s dostatečným odsazením a pohodlnými klikacími plochami (full-width tlačítka).
+    - Dekorativní prvky (basketbalový míč) a texty se adaptivně zmenšují pro zachování harmonie na malých displejích.
 - **Moderní design:** Tmavé pozadí (navy), akcentní horní linka v brand barvách a subtilní dekorativní prvek (basketbalový míč na pozadí).
-- **Responzivita:** Na mobilních zařízeních se sloupce řadí pod sebe s dostatečným odsazením a pohodlnými klikacími plochami.
 
 ### 2. Obsahová struktura
 - **Sloupec 1: Brand & Identita:** Jasně komunikuje, že web patří týmům Muži C a Muži E. Obsahuje logo a krátký vysvětlující text.

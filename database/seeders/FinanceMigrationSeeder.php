@@ -39,6 +39,13 @@ class FinanceMigrationSeeder extends Seeder
                 return [$legacyId => $t];
             });
 
+            // 3.5 Migrace Šablon pokut
+            $this->call(FineTemplateSeeder::class);
+            $fineTemplatesByLegacyId = \App\Models\FineTemplate::all()->mapWithKeys(function ($t) {
+                $legacyId = $t->metadata['legacy_id'] ?? 0;
+                return [$legacyId => $t];
+            });
+
             // 4. Migrace Sezónních konfigurací (web_platici)
             $this->migrateUserSeasonConfigs($oldDb, $usersByLegacyId, $seasonsByName, $tariffsByLegacyId);
 
@@ -46,7 +53,7 @@ class FinanceMigrationSeeder extends Seeder
             $this->migratePayerChargesFromConfigs();
 
             // 6. Migrace pokut
-            $this->migrateFines($oldDb, $usersByLegacyId);
+            $this->migrateFines($oldDb, $usersByLegacyId, $fineTemplatesByLegacyId);
 
             // 7. Migrace plateb
             $this->migratePayments($oldDb, $usersByLegacyId);
@@ -167,7 +174,7 @@ class FinanceMigrationSeeder extends Seeder
         }
     }
 
-    protected function migrateFines($oldDb, $usersByLegacyId)
+    protected function migrateFines($oldDb, $usersByLegacyId, $fineTemplatesByLegacyId = null)
     {
         $this->command->info('Vytvářím předpisy z pokut...');
         $fines = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_pokuty')->get();
@@ -191,10 +198,12 @@ class FinanceMigrationSeeder extends Seeder
 
             $existing = $existingFines->get($fine->id);
 
+            $fineTemplate = $fineTemplatesByLegacyId ? $fineTemplatesByLegacyId->get($fine->druh) : null;
+
             $fineData = [
                 'user_id' => $user->id,
                 'title' => 'Pokuta: ' . $fine->typ,
-                'description' => "Původní ID: {$fine->id}",
+                'description' => $fineTemplate ? "Šablona: {$fineTemplate->name}. Původní ID: {$fine->id}" : "Původní ID: {$fine->id}",
                 'charge_type' => 'fine',
                 'amount_total' => $amount,
                 'currency' => 'CZK',
@@ -203,6 +212,7 @@ class FinanceMigrationSeeder extends Seeder
                 'metadata' => [
                     'legacy_fine_id' => $fine->id,
                     'legacy_p_id' => $fine->p_id,
+                    'fine_template_id' => $fineTemplate?->id,
                     'paid_at_legacy' => $paidAt?->toDateTimeString(),
                 ],
             ];
