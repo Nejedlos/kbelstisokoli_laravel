@@ -18,7 +18,9 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -37,10 +39,7 @@ class ListPhotoPools extends ListRecords
                 ->form([
                     Placeholder::make('ks_global_loader')
                         ->label('')
-                        ->content(fn () => view('components.loader.basketball', [
-                            'id' => 'ks-basketball-loader',
-                            'style' => 'display: none;',
-                        ]))
+                        ->content(fn () => new HtmlString(Blade::render('<x-loader.basketball id="ks-basketball-loader" style="display: none;" />')))
                         ->columnSpanFull(),
 
                     Placeholder::make('processing_progress')
@@ -48,7 +47,7 @@ class ListPhotoPools extends ListRecords
                         ->content(fn () => new HtmlString('<div wire:stream="ks-loader-progress-text" class="text-sm font-bold text-primary-600 dark:text-primary-400 text-center animate-pulse"></div>'))
                         ->columnSpanFull(),
 
-                    \Filament\Forms\Components\Wizard::make([
+                    Wizard::make([
                         Step::make('Kontext akce')
                         ->label(__('admin.navigation.resources.photo_pool.steps.context.label'))
                         ->description(__('admin.navigation.resources.photo_pool.steps.context.description'))

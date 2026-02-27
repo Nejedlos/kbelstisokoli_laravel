@@ -29,6 +29,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -68,10 +69,7 @@ class PhotoPoolResource extends Resource
             ->components([
                 Placeholder::make('ks_global_loader')
                     ->label('')
-                    ->content(fn () => view('components.loader.basketball', [
-                        'id' => 'ks-basketball-loader',
-                        'style' => 'display: none;',
-                    ]))
+                    ->content(fn () => new HtmlString(Blade::render('<x-loader.basketball id="ks-basketball-loader" style="display: none;" />')))
                     ->columnSpanFull(),
 
                 Placeholder::make('processing_progress')

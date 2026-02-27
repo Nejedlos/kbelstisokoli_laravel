@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fine_templates', function (Blueprint $table) {
-            $table->id();
-            $table->longText('name');
-            $table->decimal('default_amount', 10, 2)->default(0);
-            $table->string('unit')->nullable();
-            $table->longText('description')->nullable();
-            $table->longText('metadata')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('fine_templates')) {
+            Schema::create('fine_templates', function (Blueprint $table) {
+                $table->id();
+                $table->longText('name'); // Spatie Translatable používá JSON v LONGTEXT
+                $table->decimal('default_amount', 10, 2)->default(0);
+                $table->string('unit')->nullable();
+                $table->longText('description')->nullable();
+                $table->longText('metadata')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
