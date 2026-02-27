@@ -20,4 +20,5 @@ return [
     'starter_updates' => 'Aktuality',
     'coming_soon' => 'Připravujeme',
     'suggest_topic' => 'Máte tip na článek?',
+    'all_news' => 'Všechny novinky',
 ];

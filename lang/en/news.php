@@ -20,4 +20,5 @@ return [
     'starter_updates' => 'Latest News',
     'coming_soon' => 'Coming soon',
     'suggest_topic' => 'Got a story tip?',
+    'all_news' => 'All news',
 ];

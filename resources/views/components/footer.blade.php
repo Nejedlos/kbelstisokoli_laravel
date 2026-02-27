@@ -135,9 +135,9 @@
                                 </div>
                                 <div>
                                     <div class="font-bold text-white leading-tight">{{ $branding['venue']['name'] }}</div>
-                                    @if($branding['match_day'] ?? null)
-                                        <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">{{ $branding['match_day'] }}</div>
-                                    @endif
+                                    <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">
+                                        {{ $branding['venue']['city'] ?? '' }}@if(($branding['venue']['city'] ?? null) && ($branding['match_day'] ?? null)) • @endif{{ $branding['match_day'] ?? '' }}
+                                    </div>
                                 </div>
                             </li>
                         @endif
