@@ -18,6 +18,7 @@ return [
         'venue_desc' => 'Zde nastavte údaje o vaší domovské aréně a termíny zápasů.',
         'public_contact' => 'Vedení týmu (Veřejný kontakt)',
         'public_contact_desc' => 'Podrobné kontaktní údaje pro veřejnost (stránka Kontakt).',
+        'global_links' => 'Důležité odkazy',
     ],
     'fields' => [
         'theme_preset' => 'Barevné téma (Preset)',
@@ -68,6 +69,8 @@ return [
         'contact_street' => 'Ulice',
         'contact_city' => 'Město',
         'contact_fax' => 'Fax',
+        'main_club_url' => 'Web hlavního oddílu (externí)',
+        'recruitment_url' => 'URL náboru mládeže (externí)',
     ],
     'options' => [
         'header' => [

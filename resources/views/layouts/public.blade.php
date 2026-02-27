@@ -68,6 +68,8 @@
     <!-- Footer -->
     <x-footer :branding="$branding ?? []" :navigation="config('navigation.public', [])" />
 
+    <x-back-to-top />
+
     @if(isset($footer_code))
         {!! $footer_code !!}
     @endif

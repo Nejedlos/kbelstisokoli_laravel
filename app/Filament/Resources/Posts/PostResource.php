@@ -41,6 +41,12 @@ class PostResource extends Resource
         return 1;
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['category']);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PostForm::configure($schema);

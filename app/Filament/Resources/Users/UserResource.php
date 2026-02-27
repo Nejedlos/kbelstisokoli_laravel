@@ -46,6 +46,12 @@ class UserResource extends Resource
         return 1;
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['roles', 'playerProfile', 'playerProfile.primaryTeam']);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);

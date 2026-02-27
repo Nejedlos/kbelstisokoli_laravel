@@ -18,6 +18,7 @@ class TeamsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->deferredLoading()
             ->columns([
                 TextColumn::make('name')
                     ->label(__('admin.navigation.resources.team.fields.name'))

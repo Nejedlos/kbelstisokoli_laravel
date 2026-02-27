@@ -28,6 +28,7 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->deferredLoading()
             ->columns([
                 SpatieMediaLibraryImageColumn::make('avatar')
                     ->collection('avatar')

@@ -12,14 +12,38 @@ class MatchController extends Controller
     public function index(Request $request): View
     {
         $type = $request->get('type', 'upcoming');
+        $teamId = $request->get('team_id');
+        $seasonId = $request->get('season_id');
+        $matchType = $request->get('match_type');
 
         $query = BasketballMatch::with(['team', 'opponent', 'season']);
 
+        // Defaultní sezóna (aktuální), pokud není vybrána jiná
+        if (!$seasonId) {
+            $currentSeasonName = \App\Models\Season::getExpectedCurrentSeasonName();
+            $currentSeason = \App\Models\Season::where('name', $currentSeasonName)->first();
+            if ($currentSeason) {
+                $seasonId = $currentSeason->id;
+            }
+        }
+
+        if ($seasonId) {
+            $query->where('season_id', $seasonId);
+        }
+
+        if ($teamId) {
+            $query->where('team_id', $teamId);
+        }
+
+        if ($matchType) {
+            $query->where('match_type', $matchType);
+        }
+
         if ($type === 'latest') {
-            $query->where('status', 'completed')
+            $query->whereIn('status', ['completed', 'played'])
                   ->orderBy('scheduled_at', 'desc');
         } else {
-            $query->where('status', '!=', 'completed')
+            $query->whereNotIn('status', ['completed', 'played'])
                   ->where('scheduled_at', '>=', now()->subHours(3)) // Zobrazit i probíhající
                   ->orderBy('scheduled_at', 'asc');
         }
@@ -27,7 +51,26 @@ class MatchController extends Controller
         $matches = $query->paginate(15);
         $page = \App\Models\Page::where('slug', 'zapasy')->first();
 
-        return view('public.matches.index', compact('matches', 'type', 'page'));
+        $seasons = \App\Models\Season::orderBy('name', 'desc')->get();
+        $teams = \App\Models\Team::orderBy('name')->get();
+        $matchTypes = [
+            'MI' => __('matches.type_mi'),
+            'PO' => __('matches.type_po'),
+            'TUR' => __('matches.type_tur'),
+            'PRATEL' => __('matches.type_pratel'),
+        ];
+
+        return view('public.matches.index', compact(
+            'matches',
+            'type',
+            'page',
+            'seasons',
+            'teams',
+            'matchTypes',
+            'teamId',
+            'seasonId',
+            'matchType'
+        ));
     }
 
     public function show(int $id): View

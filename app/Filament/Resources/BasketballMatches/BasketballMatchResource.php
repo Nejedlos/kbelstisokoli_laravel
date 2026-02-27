@@ -45,6 +45,12 @@ class BasketballMatchResource extends Resource
         return 2;
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['team', 'opponent', 'season']);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BasketballMatchForm::configure($schema);

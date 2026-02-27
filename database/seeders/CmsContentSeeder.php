@@ -95,12 +95,12 @@ class CmsContentSeeder extends Seeder
                 'is_visible' => true,
                 'seo' => [
                     'title' => [
-                        'cs' => 'Kbelští sokoli – Týmy C & E | Basket Kbely Praha',
-                        'en' => 'Kbely Falcons – Teams C & E | Basketball Kbely Prague'
+                        'cs' => 'Basketbal Letňany & Kbely – Týmy C & E | Kbelští sokoli',
+                        'en' => 'Basketball Letňany & Kbely – Teams C & E | Kbely Falcons'
                     ],
                     'description' => [
-                        'cs' => 'Web basketbalových týmů Kbelští sokoli C & E v rámci TJ Sokol Kbely Basketbal. Zápasy, týmové informace a nábor nových hráčů do Letňan.',
-                        'en' => 'Website of Basketball teams Kbely Falcons C & E within TJ Sokol Kbely Basketball. Matches, team info and recruitment.'
+                        'cs' => 'Oficiální web basketbalových týmů Kbelští sokoli C & E (TJ Sokol Kbely). Hrajeme v Letňanech. Aktuální výsledky, tréninky a nábor nových hráčů.',
+                        'en' => 'Official website of basketball teams Kbely Falcons C & E (TJ Sokol Kbely). We play in Letňany. Match results, trainings and recruitment.'
                     ],
                 ],
             ],
@@ -122,8 +122,8 @@ class CmsContentSeeder extends Seeder
                 'status' => 'published',
                 'is_visible' => true,
                 'seo' => [
-                    'title' => ['cs' => 'Nábor nových hráčů | Kbelští sokoli', 'en' => 'Recruitment of new players | Kbely Falcons'],
-                    'description' => ['cs' => 'Hledáme nové talenty! Přijďte si vyzkoušet basketbal do Kbel.', 'en' => 'We are looking for new talents! Come and try basketball in Kbely.'],
+                    'title' => ['cs' => 'Nábor basketbal Letňany – Muži C & E | Kbelští sokoli', 'en' => 'Basketball Recruitment Letňany – Men C & E | Kbely Falcons'],
+                    'description' => ['cs' => 'Přijď si zahrát basketbal do Letňan! Týmy Kbelští sokoli C & E hledají nové spoluhráče. Tréninky v RumcajsAreně.', 'en' => 'Come play basketball in Letňany! Kbely Falcons C & E teams are looking for new teammates. Trainings in RumcajsArena.'],
                 ],
             ],
             [

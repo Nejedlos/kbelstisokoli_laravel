@@ -35,8 +35,8 @@ class SportSeeder extends Seeder
 
     protected function seedTeams(): void
     {
-        // Ponecháme pouze týmy Muži C a Muži E
-        $allowedSlugs = ['muzi-c', 'muzi-e'];
+        // Ponecháme pouze týmy Muži C, Muži E a Klub
+        $allowedSlugs = ['muzi-c', 'muzi-e', 'klub'];
 
         // Smažeme případné jiné týmy, aby zůstaly jen požadované
         Team::whereNotIn('slug', $allowedSlugs)->delete();
@@ -58,6 +58,15 @@ class SportSeeder extends Seeder
                 'description' => [
                     'cs' => 'Tým Muži E hraje 3. třídu B v naší RumcajsAreně v Letňanech. Ideální místo pro ty, co milují basketbal, dobrou partu a chtějí hrát pro radost i v soutěžním tempu.',
                     'en' => 'The Men E team plays the 3rd Class B in our RumcajsArena in Letňany. Perfect place for those who love basketball, a great community, and want to play for joy even at a competitive pace.',
+                ],
+            ],
+            [
+                'name' => ['cs' => 'Sokoli (Celý klub)', 'en' => 'Sokoli (Whole Club)'],
+                'slug' => 'klub',
+                'category' => 'all',
+                'description' => [
+                    'cs' => 'Zápasy a akce, které se týkají všech členů klubu nebo obou našich týmů.',
+                    'en' => 'Matches and events concerning all club members or both our teams.',
                 ],
             ],
         ];

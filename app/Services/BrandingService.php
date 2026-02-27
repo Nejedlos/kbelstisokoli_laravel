@@ -9,17 +9,26 @@ use Illuminate\Support\Facades\Schema;
 class BrandingService
 {
     /**
+     * Cache v rámci requestu.
+     */
+    protected ?array $settings = null;
+
+    /**
      * Získá globální nastavení brandingu.
      */
     public function getSettings(): array
     {
+        if ($this->settings !== null) {
+            return $this->settings;
+        }
+
         $cfg = config('branding', []);
         $dbSettings = $this->getDbSettings();
 
         $activeTheme = $dbSettings['theme_preset'] ?? $cfg['default_theme'];
         $themeConfig = $cfg['themes'][$activeTheme] ?? $cfg['themes'][$cfg['default_theme']];
 
-        return [
+        $this->settings = [
             'club_name' => $dbSettings['club_name'] ?? $cfg['club_name'] ?? 'Kbelští sokoli',
             'club_short_name' => $dbSettings['club_short_name'] ?? $cfg['club_short_name'] ?? 'Sokoli',
             'slogan' => $dbSettings['slogan'] ?? $cfg['slogan'] ?? null,
@@ -76,6 +85,8 @@ class BrandingService
             'maintenance_title' => $dbSettings['maintenance_title'] ?? __('Trenér právě kreslí vítěznou taktiku pro náš nový web.'),
             'maintenance_text' => $dbSettings['maintenance_text'] ?? __('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),
         ];
+
+        return $this->settings;
     }
 
     /**

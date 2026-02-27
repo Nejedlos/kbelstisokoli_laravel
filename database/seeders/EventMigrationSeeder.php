@@ -25,14 +25,15 @@ class EventMigrationSeeder extends Seeder
             $seasons = \App\Models\Season::all()->keyBy('name');
             $teamC = \App\Models\Team::where('slug', 'muzi-c')->first();
             $teamE = \App\Models\Team::where('slug', 'muzi-e')->first();
+            $teamKlub = \App\Models\Team::where('slug', 'klub')->first();
 
             // Načtení existujících událostí do paměti pro zamezení JSON dotazům v databázi
             $existingMatches = \App\Models\BasketballMatch::all()->keyBy(fn($m) => $m->metadata['legacy_z_id'] ?? null)->forget(null);
             $existingTrainings = \App\Models\Training::all()->keyBy(fn($t) => $t->metadata['legacy_z_id'] ?? null)->forget(null);
             $existingClubEvents = \App\Models\ClubEvent::all()->keyBy(fn($e) => $e->metadata['legacy_z_id'] ?? null)->forget(null);
 
-            if (!$teamC || !$teamE) {
-                $this->command->error('Týmy C nebo E nebyly nalezeny.');
+            if (!$teamC || !$teamE || !$teamKlub) {
+                $this->command->error('Týmy C, E nebo Klub nebyly nalezeny.');
                 return;
             }
 
@@ -42,7 +43,7 @@ class EventMigrationSeeder extends Seeder
             foreach ($oldEvents as $old) {
                 try {
                     // Normalizace názvu sezóny a formátu
-                    $seasonName = $old->sezona ? str_replace('-', '/', $old->sezona) : null;
+                    $seasonName = $old->sezona ? trim(str_replace(['-', ' '], ['/', ''], $old->sezona)) : null;
 
                     // Pokud u historického záznamu chybí název sezóny, odvodíme jej podle data (sezóna začíná 1. září)
                     if (!$seasonName && $old->datum) {
@@ -67,11 +68,15 @@ class EventMigrationSeeder extends Seeder
                     }
 
                     // Mapování týmu
-                    $teamId = match ((int) $old->team) {
-                        1 => $teamC->id,
-                        2 => $teamE->id,
-                        default => $teamC->id, // Fallback
+                    $targetTeamIds = match ((int) $old->team) {
+                        1 => [$teamC->id],
+                        2 => [$teamE->id],
+                        3 => [$teamC->id, $teamE->id, $teamKlub->id],
+                        default => [$teamC->id], // Fallback
                     };
+
+                    // Pro zápas potřebujeme jeden hlavní team_id
+                    $mainTeamId = (int) $old->team === 3 ? $teamKlub->id : $targetTeamIds[0];
 
                     // Normalizace času
                     $time = $old->cas ?: '00:00';
@@ -83,16 +88,16 @@ class EventMigrationSeeder extends Seeder
                     $matchTypes = ['MI', 'PO', 'PRATEL', 'TUR'];
                     if (in_array($old->druh, $matchTypes)) {
                         // Migrace zápasu
-                        $this->migrateMatch($old, $teamId, $season?->id, $scheduledAt, $existingMatches->get($old->id));
+                        $this->migrateMatch($old, $mainTeamId, $season?->id, $scheduledAt, $existingMatches->get($old->id));
                     } elseif ($old->druh === 'TR') {
                         // Migrace tréninku
-                        $this->migrateTraining($old, $teamId, $scheduledAt, $existingTrainings->get($old->id));
+                        $this->migrateTraining($old, $targetTeamIds, $scheduledAt, $existingTrainings->get($old->id));
                     } elseif ($old->druh === 'ALL') {
                         // Migrace klubové akce
-                        $this->migrateClubEvent($old, $teamId, $scheduledAt, $existingClubEvents->get($old->id));
+                        $this->migrateClubEvent($old, $targetTeamIds, $scheduledAt, $existingClubEvents->get($old->id));
                     } else {
                         // Fallback pro ostatní typy (např. TR, pokud tam bylo dříve něco jiného)
-                        $this->migrateTraining($old, $teamId, $scheduledAt, $existingTrainings->get($old->id));
+                        $this->migrateTraining($old, $targetTeamIds, $scheduledAt, $existingTrainings->get($old->id));
                     }
                 } catch (\Exception $e) {
                     $this->command->error("\nChyba u záznamu ID {$old->id}: " . $e->getMessage());
@@ -129,6 +134,13 @@ class EventMigrationSeeder extends Seeder
             $scoreAway = (int) trim($parts[1]);
         }
 
+        $status = 'scheduled';
+        if ($old->vysledek) {
+            $status = 'completed';
+        } elseif ($scheduledAt->isPast() && $scheduledAt->diffInHours(now()) > 2) {
+            $status = 'played';
+        }
+
         $matchData = [
             'team_id' => $teamId,
             'season_id' => $seasonId,
@@ -137,7 +149,7 @@ class EventMigrationSeeder extends Seeder
             'match_type' => $old->druh, // MI, PO, TUR, PRATEL
             'location' => $old->adresa ?: ($old->kde === 'doma' ? 'Kbely' : null),
             'is_home' => $old->kde === 'doma',
-            'status' => $old->vysledek ? 'played' : 'scheduled',
+            'status' => $status,
             'score_home' => $scoreHome,
             'score_away' => $scoreAway,
             'notes_internal' => "Původní ID: {$old->id}\nSport: {$old->sport}",
@@ -151,8 +163,9 @@ class EventMigrationSeeder extends Seeder
         }
     }
 
-    protected function migrateTraining($old, $teamId, $scheduledAt, $existing = null)
+    protected function migrateTraining($old, $teamIds, $scheduledAt, $existing = null)
     {
+        $teamIds = (array) $teamIds;
         $trainingData = [
             'location' => $old->adresa ?: 'Kbely',
             'starts_at' => $scheduledAt,
@@ -168,11 +181,12 @@ class EventMigrationSeeder extends Seeder
             $training = \App\Models\Training::create($trainingData);
         }
 
-        $training->teams()->syncWithoutDetaching([$teamId]);
+        $training->teams()->syncWithoutDetaching($teamIds);
     }
 
-    protected function migrateClubEvent($old, $teamId, $scheduledAt, $existing = null)
+    protected function migrateClubEvent($old, $teamIds, $scheduledAt, $existing = null)
     {
+        $teamIds = (array) $teamIds;
         $event = $existing;
 
         if (!$event) {
@@ -195,6 +209,6 @@ class EventMigrationSeeder extends Seeder
         $event->is_public = true;
         $event->save();
 
-        $event->teams()->syncWithoutDetaching([$teamId]);
+        $event->teams()->syncWithoutDetaching($teamIds);
     }
 }

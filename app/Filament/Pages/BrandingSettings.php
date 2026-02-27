@@ -176,6 +176,19 @@ class BrandingSettings extends Page implements HasForms
                             ]),
                     ]),
 
+                Section::make(__('admin/branding-settings.sections.global_links'))
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('main_club_url')
+                                    ->label(__('admin/branding-settings.fields.main_club_url'))
+                                    ->url(),
+                                TextInput::make('recruitment_url')
+                                    ->label(__('admin/branding-settings.fields.recruitment_url'))
+                                    ->url(),
+                            ]),
+                    ]),
+
                 Section::make(__('admin/branding-settings.sections.cta'))
                     ->schema([
                         Toggle::make('cta_enabled')

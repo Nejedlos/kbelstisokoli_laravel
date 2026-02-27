@@ -1,10 +1,16 @@
+@php
+    $branding = app(\App\Services\BrandingService::class)->getSettings();
+    $primaryColor = $branding['colors']['red'] ?? '#e11d48';
+    $primaryHover = '#be123c'; // Fallback
+@endphp
+
 <div x-data="{
         show: false,
         scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
      }"
-     x-init="window.addEventListener('scroll', () => { show = window.pageYOffset > 500 })"
+     @scroll.window.throttle.50ms="show = window.scrollY > 500"
      x-show="show"
      x-transition:enter="transition ease-out duration-300"
      x-transition:enter-start="opacity-0 translate-y-10 scale-90"
@@ -16,7 +22,8 @@
      style="display: none;">
 
     <button @click="scrollToTop()"
-            class="group relative flex items-center justify-center w-14 h-14 rounded-full bg-primary text-white shadow-2xl shadow-primary/30 hover:bg-primary-hover hover:scale-110 active:scale-95 transition-all duration-300 overflow-hidden"
+            class="group relative flex items-center justify-center w-14 h-14 rounded-full text-white shadow-2xl transition-all duration-300 overflow-hidden hover:scale-110 active:scale-95"
+            style="background-color: {{ $primaryColor }}; shadow: 0 20px 25px -5px {{ $primaryColor }}4D;"
             title="{{ __('Zpět nahoru') }}">
 
         {{-- Shine effect --}}
@@ -31,6 +38,6 @@
         </div>
 
         {{-- Pulse rings --}}
-        <div class="absolute inset-0 rounded-full border border-primary animate-ping opacity-20 pointer-events-none"></div>
+        <div class="absolute inset-0 rounded-full border border-white/30 animate-ping opacity-20 pointer-events-none"></div>
     </button>
 </div>

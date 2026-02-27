@@ -18,6 +18,7 @@ return [
         'venue_desc' => 'Set up details about your home arena and match schedules here.',
         'public_contact' => 'Team Management (Public Contact)',
         'public_contact_desc' => 'Detailed contact information for the public (Contact page).',
+        'global_links' => 'Important Links',
     ],
     'fields' => [
         'theme_preset' => 'Color Theme (Preset)',
@@ -68,6 +69,8 @@ return [
         'contact_street' => 'Street',
         'contact_city' => 'City',
         'contact_fax' => 'Fax',
+        'main_club_url' => 'Main Club Website (external)',
+        'recruitment_url' => 'Youth Recruitment URL (external)',
     ],
     'options' => [
         'header' => [
