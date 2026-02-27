@@ -2,13 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Support\IconHelper;
 use App\Services\AiSearchService;
 use Filament\Pages\Page;
 use Illuminate\Http\Request;
 
 class AiSearch extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'fa-light fa-sparkles';
+    protected static string | \BackedEnum | null $navigationIcon = 'fal-sparkles';
     protected static ?string $navigationLabel = 'AI Vyhledávání';
     protected static ?string $title = 'AI Vyhledávání';
     protected string $view = 'filament.pages.ai-search';

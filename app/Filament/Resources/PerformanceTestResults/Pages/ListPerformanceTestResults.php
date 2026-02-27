@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PerformanceTestResults\Pages;
 
 use App\Filament\Resources\PerformanceTestResults\PerformanceTestResultResource;
 use App\Services\PerformanceTestService;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -25,19 +26,19 @@ class ListPerformanceTestResults extends ListRecords
         return [
             Action::make('runPublicTest')
                 ->label('Test Veřejné sekce')
-                ->icon('fa-light fa-globe')
+                ->icon(IconHelper::get(IconHelper::GLOBE))
                 ->color('success')
                 ->action(fn (PerformanceTestService $service) => $this->runTest($service, 'public')),
 
             Action::make('runMemberTest')
                 ->label('Test Členské sekce')
-                ->icon('fa-light fa-user')
+                ->icon(IconHelper::get(IconHelper::USER))
                 ->color('info')
                 ->action(fn (PerformanceTestService $service) => $this->runTest($service, 'member')),
 
             Action::make('runAdminTest')
                 ->label('Test Admin sekce')
-                ->icon('fa-light fa-lock')
+                ->icon(IconHelper::get(IconHelper::SECURITY))
                 ->color('warning')
                 ->action(fn (PerformanceTestService $service) => $this->runTest($service, 'admin')),
 

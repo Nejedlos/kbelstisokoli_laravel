@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AuditLogs\Tables;
 
+use App\Support\IconHelper;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
@@ -9,7 +10,8 @@ use Filament\Tables\Filters\Filter;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\DatePicker;
-use Illuminate\Support\HtmlString;
+use Filament\Support\Colors\Color;
+use Filament\Support\Enums\IconSize;
 
 class AuditLogsTable
 {
@@ -18,53 +20,53 @@ class AuditLogsTable
         return $table
             ->columns([
                 TextColumn::make('occurred_at')
-                    ->label('Čas')
+                    ->label(__('admin.resources.audit_log.fields.occurred_at'))
                     ->dateTime('d.m.Y H:i:s')
                     ->sortable(),
                 TextColumn::make('category')
-                    ->label('Kategorie')
+                    ->label(__('admin.resources.audit_log.fields.category'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.categories.$state") ?? $state)
+                    ->color('gray')
                     ->sortable(),
                 TextColumn::make('event_key')
-                    ->label('Událost')
+                    ->label(__('admin.resources.audit_log.fields.event_key'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('action')
-                    ->label('Akce')
+                    ->label(__('admin.resources.audit_log.fields.action'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'created' => 'success',
                         'updated' => 'warning',
                         'deleted' => 'danger',
                         'login' => 'info',
+                        'failed_login' => 'danger',
                         default => 'gray',
                     })
                     ->icon(fn (string $state): string => match ($state) {
-                        'created' => 'heroicon-o-plus-circle',
-                        'updated' => 'heroicon-o-pencil-square',
-                        'deleted' => 'heroicon-o-trash',
-                        'login' => 'heroicon-o-arrow-right-on-rectangle',
-                        default => 'heroicon-o-information-circle',
+                        'created' => IconHelper::get('plus'),
+                        'updated' => IconHelper::get('pen-to-square'),
+                        'deleted' => IconHelper::get('trash'),
+                        'login' => IconHelper::get('right-to-bracket'),
+                        'logout' => IconHelper::get('right-from-bracket'),
+                        'password_reset' => IconHelper::get('key'),
+                        'failed_login' => IconHelper::get('circle-exclamation'),
+                        default => IconHelper::get('circle-info'),
                     })
-                    ->formatStateUsing(fn (string $state): string => match($state) {
-                        'created' => __('admin/dashboard.recent_activity.actions.created'),
-                        'updated' => __('admin/dashboard.recent_activity.actions.updated'),
-                        'deleted' => __('admin/dashboard.recent_activity.actions.deleted'),
-                        'login' => __('admin/dashboard.recent_activity.actions.login'),
-                        'password_reset' => __('admin/dashboard.recent_activity.actions.password_reset'),
-                        default => ucfirst($state),
-                    })
+                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.actions.$state") ?? $state)
                     ->sortable(),
                 TextColumn::make('actor.name')
-                    ->label('Aktér')
-                    ->description(fn ($record) => $record->is_system_event ? 'Systém' : ($record->actor?->email ?? 'Host'))
+                    ->label(__('admin.resources.audit_log.fields.actor'))
+                    ->description(fn ($record) => $record->is_system_event ? 'System' : ($record->actor?->email ?? 'Guest'))
                     ->sortable(),
                 TextColumn::make('subject_label')
-                    ->label('Předmět')
+                    ->label(__('admin.resources.audit_log.fields.subject'))
                     ->description(fn ($record) => $record->subject_type ? class_basename($record->subject_type) : null)
                     ->searchable(),
                 TextColumn::make('changes')
-                    ->label('Změny')
+                    ->label(__('admin.resources.audit_log.fields.changes'))
                     ->formatStateUsing(function ($state) {
                         if (empty($state['after'])) return null;
                         $keys = array_keys($state['after']);
@@ -76,7 +78,7 @@ class AuditLogsTable
                     ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('severity')
-                    ->label('Závažnost')
+                    ->label(__('admin.resources.audit_log.fields.severity'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'critical' => 'danger',
@@ -84,34 +86,36 @@ class AuditLogsTable
                         'info' => 'info',
                         default => 'gray',
                     })
+                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.severities.$state") ?? $state)
                     ->sortable(),
                 TextColumn::make('source')
-                    ->label('Zdroj')
+                    ->label(__('admin.resources.audit_log.fields.source'))
+                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.sources.$state") ?? $state)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('occurred_at', 'desc')
             ->filters([
                 SelectFilter::make('category')
-                    ->label('Kategorie')
+                    ->label(__('admin.resources.audit_log.fields.category'))
                     ->options([
-                        'auth' => 'Auth',
-                        'admin_crud' => 'Admin CRUD',
-                        'lead' => 'Lead',
-                        'settings' => 'Settings',
-                        'content' => 'Content',
-                        'system' => 'System',
+                        'auth' => __('admin.resources.audit_log.categories.auth'),
+                        'admin_crud' => __('admin.resources.audit_log.categories.admin_crud'),
+                        'lead' => __('admin.resources.audit_log.categories.lead'),
+                        'settings' => __('admin.resources.audit_log.categories.settings'),
+                        'content' => __('admin.resources.audit_log.categories.content'),
+                        'system' => __('admin.resources.audit_log.categories.system'),
                     ]),
                 SelectFilter::make('severity')
-                    ->label('Závažnost')
+                    ->label(__('admin.resources.audit_log.fields.severity'))
                     ->options([
-                        'info' => 'Info',
-                        'warning' => 'Varování',
-                        'critical' => 'Kritické',
+                        'info' => __('admin.resources.audit_log.severities.info'),
+                        'warning' => __('admin.resources.audit_log.severities.warning'),
+                        'critical' => __('admin.resources.audit_log.severities.critical'),
                     ]),
                 Filter::make('occurred_at')
                     ->form([
-                        DatePicker::make('from')->label('Od'),
-                        DatePicker::make('to')->label('Do'),
+                        DatePicker::make('from')->label(__('general.date_from') !== 'general.date_from' ? __('general.date_from') : 'Od'),
+                        DatePicker::make('to')->label(__('general.date_to') !== 'general.date_to' ? __('general.date_to') : 'Do'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -125,13 +129,13 @@ class AuditLogsTable
                             );
                     }),
                 SelectFilter::make('source')
-                    ->label('Zdroj')
+                    ->label(__('admin.resources.audit_log.fields.source'))
                     ->options([
-                        'web' => 'Web',
-                        'admin' => 'Admin',
-                        'console' => 'Console',
-                        'api' => 'API',
-                        'job' => 'Job',
+                        'web' => __('admin.resources.audit_log.sources.web'),
+                        'admin' => __('admin.resources.audit_log.sources.admin'),
+                        'console' => __('admin.resources.audit_log.sources.console'),
+                        'api' => __('admin.resources.audit_log.sources.api'),
+                        'job' => __('admin.resources.audit_log.sources.job'),
                     ]),
             ])
             ->actions([

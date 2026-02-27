@@ -131,8 +131,18 @@ class EventMigrationSeeder extends Seeder
         $scoreAway = null;
         if ($old->vysledek && str_contains($old->vysledek, ':')) {
             $parts = explode(':', $old->vysledek);
-            $scoreHome = (int) trim($parts[0]);
-            $scoreAway = (int) trim($parts[1]);
+            $s1 = (int) trim($parts[0]);
+            $s2 = (int) trim($parts[1]);
+
+            if ($old->kde === 'doma') {
+                $scoreHome = $s1;
+                $scoreAway = $s2;
+            } else {
+                // Venku: ve staré DB je to "naši:soupeř", ale v nové home/away
+                // Takže naši (hosté) jsou scoreAway, soupeř (domácí) je scoreHome
+                $scoreHome = $s2;
+                $scoreAway = $s1;
+            }
         }
 
         $status = 'scheduled';

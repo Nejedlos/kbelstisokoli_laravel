@@ -14,85 +14,89 @@ class AuditLogForm
     {
         return $schema
             ->components([
-                Section::make('Základní informace')
+                Section::make(__('admin.resources.audit_log.tabs.general'))
                     ->columns(3)
                     ->schema([
                         TextInput::make('occurred_at')
-                            ->label('Čas události')
+                            ->label(__('admin.resources.audit_log.fields.occurred_at'))
                             ->disabled(),
                         TextInput::make('category')
-                            ->label('Kategorie')
+                            ->label(__('admin.resources.audit_log.fields.category'))
+                            ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.categories.$state") ?? $state)
                             ->disabled(),
                         TextInput::make('event_key')
-                            ->label('Klíč události')
+                            ->label(__('admin.resources.audit_log.fields.event_key'))
                             ->disabled(),
                         TextInput::make('action')
-                            ->label('Akce')
+                            ->label(__('admin.resources.audit_log.fields.action'))
+                            ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.actions.$state") ?? $state)
                             ->disabled(),
                         TextInput::make('severity')
-                            ->label('Závažnost')
+                            ->label(__('admin.resources.audit_log.fields.severity'))
+                            ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.severities.$state") ?? $state)
                             ->disabled(),
                         TextInput::make('source')
-                            ->label('Zdroj')
+                            ->label(__('admin.resources.audit_log.fields.source'))
+                            ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.sources.$state") ?? $state)
                             ->disabled(),
                     ]),
 
-                Section::make('Aktér a Předmět')
+                Section::make(__('admin.resources.audit_log.tabs.actor_subject'))
                     ->columns(2)
                     ->schema([
                         Grid::make()
                             ->schema([
                                 TextInput::make('actor.name')
-                                    ->label('Jméno aktéra')
+                                    ->label(__('admin.resources.audit_log.fields.actor'))
                                     ->disabled(),
                                 TextInput::make('actor_type')
-                                    ->label('Typ Aktéra')
+                                    ->label(__('admin.resources.audit_log.fields.actor') . ' (Type)')
                                     ->disabled(),
                             ]),
                         Grid::make()
                             ->schema([
                                 TextInput::make('subject_label')
-                                    ->label('Název předmětu')
+                                    ->label(__('admin.resources.audit_log.fields.subject'))
                                     ->disabled(),
                                 TextInput::make('subject_type')
-                                    ->label('Typ předmětu')
+                                    ->label(__('admin.resources.audit_log.fields.subject') . ' (Type)')
                                     ->disabled(),
                                 TextInput::make('subject_id')
-                                    ->label('ID předmětu')
+                                    ->label(__('admin.resources.audit_log.fields.subject') . ' (ID)')
                                     ->disabled(),
                             ]),
                     ]),
 
-                Section::make('Kontext požadavku')
+                Section::make(__('admin.resources.audit_log.tabs.context'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('url')
-                            ->label('URL')
+                            ->label(__('admin.resources.audit_log.fields.url'))
                             ->disabled(),
                         TextInput::make('route_name')
-                            ->label('Název cesty')
+                            ->label(__('admin.resources.audit_log.fields.url') . ' (Route)')
                             ->disabled(),
                         TextInput::make('ip_address')
-                            ->label('Anonymizovaná IP')
+                            ->label(__('admin.resources.audit_log.fields.ip_address'))
                             ->disabled(),
                         TextInput::make('request_id')
                             ->label('Request ID')
                             ->disabled(),
                         Textarea::make('user_agent_summary')
-                            ->label('User Agent')
+                            ->label(__('admin.resources.audit_log.fields.user_agent'))
                             ->disabled()
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Změny a Metadata')
+                Section::make(__('admin.resources.audit_log.fields.changes') . ' & ' . __('admin.resources.audit_log.fields.metadata'))
                     ->schema([
                         Textarea::make('changes')
-                            ->label('Změny')
+                            ->label(__('admin.resources.audit_log.fields.changes'))
                             ->disabled()
                             ->formatStateUsing(fn ($state) => $state ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : null)
                             ->rows(10),
                         Textarea::make('metadata')
-                            ->label('Metadata')
+                            ->label(__('admin.resources.audit_log.fields.metadata'))
                             ->disabled()
                             ->formatStateUsing(fn ($state) => $state ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : null)
                             ->rows(5),
