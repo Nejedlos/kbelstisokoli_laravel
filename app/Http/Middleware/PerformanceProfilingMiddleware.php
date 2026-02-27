@@ -75,8 +75,12 @@ class PerformanceProfilingMiddleware
 
     protected function shouldProfile(Request $request): bool
     {
-        // Profilujeme v lokálním prostředí nebo pro autorizované uživatele s patřičným oprávněním
+        // Profilujeme v lokálním prostředí, pro autorizované uživatele nebo pro interní testy
         if (app()->environment('local')) {
+            return true;
+        }
+
+        if ($request->header('X-Performance-Test-Key') === config('app.key')) {
             return true;
         }
 

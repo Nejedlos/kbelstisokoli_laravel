@@ -15,9 +15,15 @@ class PerformanceService
     public function bootSettings(): void
     {
         $settings = $this->getSettings();
+        $scenario = $settings['perf_scenario'] ?? 'standard';
+
+        // Povolení vynucení scénáře pro admina (užitečné pro testy)
+        if (request()->has('perf_scenario') && auth()->check() && auth()->user()->can('access_admin')) {
+            $scenario = request('perf_scenario');
+        }
 
         config([
-            'performance.scenario' => $settings['perf_scenario'] ?? 'standard',
+            'performance.scenario' => $scenario,
             'performance.features.full_page_cache' => (bool)($settings['perf_full_page_cache'] ?? false),
             'performance.features.fragment_cache' => (bool)($settings['perf_fragment_cache'] ?? false),
             'performance.features.html_minification' => (bool)($settings['perf_html_minification'] ?? false),
@@ -26,7 +32,7 @@ class PerformanceService
         ]);
 
         // Pokud je vybrán scénář, přepíše jednotlivé features dle předdefinovaných šablon
-        $this->applyScenarioDefaults($settings['perf_scenario'] ?? 'standard');
+        $this->applyScenarioDefaults($scenario);
     }
 
     public function getSettings(): array
