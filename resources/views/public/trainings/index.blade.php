@@ -46,7 +46,7 @@
                                                 <div class="mt-3 flex flex-wrap items-center gap-2">
                                                     <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400 shadow-sm" title="{{ __('trainings.expected') }}">
                                                         <i class="fa-light fa-users-viewfinder text-primary/50"></i>
-                                                        {{ $team->expected_count ?? 0 }}
+                                                        {{ $training->total_expected_count ?? 0 }}
                                                     </div>
                                                     <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-sm" title="{{ __('trainings.confirmed') }}">
                                                         <i class="fa-light fa-circle-check"></i>
