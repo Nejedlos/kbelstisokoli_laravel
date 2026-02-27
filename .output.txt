@@ -1,0 +1,246 @@
+Array
+(
+    [0] => stdClass Object
+        (
+            [id] => 5
+            [datum] => 2008-10-31
+            [cas] => 19:40
+            [souper] => Technika Praha A
+            [team] => 1
+            [kde] => doma
+            [druh] => MI
+            [sport] => basket
+            [adresa] =>
+            [nadpis] =>
+            [komentar] =>
+<!-- by Texy2! -->
+            [texykomentar] =>
+            [vysledek] => 78:65
+            [ctvrtiny] =>
+            [stav] => v
+            [nej_hrac] => Zálužanský 36
+            [sezona] =>
+        )
+    [1] => stdClass Object
+        (
+            [id] => 2
+            [datum] => 2008-10-22
+            [cas] => 19:40
+            [souper] => BK Pirelli A
+            [team] => 1
+            [kde] => venku
+            [druh] => MI
+            [sport] => basket
+            [adresa] =>
+            [nadpis] =>
+            [komentar] =>
+<!-- by Texy2! -->
+            [texykomentar] =>
+            [vysledek] => 64:55
+            [ctvrtiny] =>
+            [stav] => v
+            [nej_hrac] => Zálužanský 15
+            [sezona] =>
+        )
+    [2] => stdClass Object
+        (
+            [id] => 6
+            [datum] => 2008-11-07
+            [cas] => 18:15
+            [souper] => BK Siam
+            [team] => 1
+            [kde] => venku
+            [druh] => MI
+            [sport] => basket
+            [adresa] =>
+            [nadpis] =>
+            [komentar] =>
+<!-- by Texy2! -->
+            [texykomentar] =>
+            [vysledek] => 60:69
+            [ctvrtiny] =>
+            [stav] => p
+            [nej_hrac] => Polák 21
+            [sezona] =>
+        )
+    [3] => stdClass Object
+        (
+            [id] => 7
+            [datum] => 2008-11-13
+            [cas] => 18:45
+            [souper] => Radotínský SK
+            [team] => 1
+            [kde] => venku
+            [druh] => MI
+            [sport] => basket
+            [adresa] =>
+            [nadpis] =>
+            [komentar] =>
+<!-- by Texy2! -->
+            [texykomentar] =>
+            [vysledek] => 59:72
+            [ctvrtiny] =>
+            [stav] => p
+            [nej_hrac] => Zálužanský 21
+            [sezona] =>
+        )
+    [4] => stdClass Object
+        (
+            [id] => 8
+            [datum] => 2008-11-21
+            [cas] => 19:40
+            [souper] => Sokol Žižkov E
+            [team] => 1
+            [kde] => doma
+            [druh] => MI
+            [sport] => basket
+            [adresa] =>
+            [nadpis] =>
+            [komentar] =>
+<!-- by Texy2! -->
+            [texykomentar] =>
+            [vysledek] => 73:52
+            [ctvrtiny] =>
+            [stav] => v
+            [nej_hrac] => Zálužanský 25
+            [sezona] =>
+        )
+    [5] => stdClass Object
+        (
+            [id] => 1
+            [datum] => 2008-09-30
+            [cas] => 18:45
+            [souper] => Meteor Praha B
+            [team] => 1
+            [kde] => venku
+            [druh] => PO
+            [sport] => basket
+            [adresa] => Rumcajsarena
+            [nadpis] =>
+            [komentar] =>
+            [texykomentar] =>
+            [vysledek] => 82:81
+            [ctvrtiny] =>
+            [stav] => v
+            [nej_hrac] => Zálužanský 31
+            [sezona] =>
+        )
+    [6] => stdClass Object
+        (
+            [id] => 10
+            [datum] => 2008-11-24
+            [cas] => 18:40
+            [souper] => Sokol Motol D
+            [team] => 1
+            [kde] => venku
+            [druh] => MI
+            [sport] => basket
+            [adresa] =>
+            [nadpis] =>
+            [komentar] =>
+<!-- by Texy2! -->
+            [texykomentar] =>
+            [vysledek] => 79:74
+            [ctvrtiny] =>
+            [stav] => v
+            [nej_hrac] => Končický 20
+            [sezona] =>
+        )
+    [7] => stdClass Object
+        (
+            [id] => 4
+            [datum] => 2008-10-06
+            [cas] => 20:45
+            [souper] => Aritma Praha
+            [team] => 1
+            [kde] => venku
+            [druh] => MI
+            [sport] => basket
+            [adresa] =>
+            [nadpis] =>
+            [komentar] =>
+<!-- by Texy2! -->
+            [texykomentar] =>
+            [vysledek] => 70:72
+            [ctvrtiny] =>
+            [stav] => p
+            [nej_hrac] => Malý 17
+            [sezona] =>
+        )
+    [8] => stdClass Object
+        (
+            [id] => 1600
+            [datum] => 2022-10-06
+            [cas] => 20:00
+            [souper] => Sokol Kbely B
+            [team] => 1
+            [kde] => venku
+            [druh] => MI
+            [sport] => basket
+            [adresa] => Litvínovská 500
+            [nadpis] =>
+            [komentar] =>
+        <p>STATISTIKA – BODY Bašta Martin 30, Jansa Vladimír 12, Štrupl Karel 7,
+        Písečný Tomáš 4, Bašta Roman 3, Bobčík Radoslav 3, Zalužanský Jan 3,
+        Hummel Tomáš 0, Jaroch Jan 0, Polák Tomáš 0, Polák Jan 0 – Votýpka
+        Filip 16, Šustr Martin 11, Votípka Tomáš 11, Amrillaev Lazizbek 9,
+        Vellendorf Petr 9, Bartoška Vojtěch 6, Popel Martin 1, Kadlec Martin 0,
+        Kyselý Dalibor 0, Palas Libor 0</p>
+        <p>STŘELBA 3B. 7:3 STŘELBA 2B. 12:22 TH 21/17:17/10 CHYBY 22:20 ROZHODČÍ
+        Balog Lukáš 3, Bohata Pavel 4 DIVACI 10 – naši Kája, Eliška, Rameš
+        Honza, Renda FF Tumba, Karel, JJ, Renda po 2, Radek 1 POKUTY Karlos 30 (TH) +
+        500 (TCH) Roman 30 (TH) Tumba 500 (TCH)</p>
+<!-- by Texy2! -->
+            [texykomentar] => STATISTIKA - BODY
+Bašta Martin 30, Jansa Vladimír 12, Štrupl Karel 7, Písečný Tomáš 4, Bašta Roman 3, Bobčík Radoslav 3, Zalužanský Jan 3, Hummel Tomáš 0, Jaroch Jan 0, Polák Tomáš 0, Polák Jan 0 - Votýpka Filip 16, Šustr Martin 11, Votípka Tomáš 11, Amrillaev Lazizbek 9, Vellendorf Petr 9, Bartoška Vojtěch 6, Popel Martin 1, Kadlec Martin 0, Kyselý Dalibor 0, Palas Libor 0
+STŘELBA 3B.     7:3
+STŘELBA 2B.     12:22
+TH                      21/17:17/10
+CHYBY           22:20
+ROZHODČÍ        Balog Lukáš 3, Bohata Pavel 4
+DIVACI              10 - naši Kája, Eliška, Rameš Honza, Renda
+FF                     Tumba, Karel, JJ, Renda po 2, Radek 1
+POKUTY             Karlos 30 (TH) + 500 (TCH) Roman 30 (TH) Tumba 500 (TCH)
+            [vysledek] => 62:63
+            [ctvrtiny] => 17:22 35:38 52:50
+            [stav] => p
+            [nej_hrac] =>
+            [sezona] => 2022-2023
+        )
+    [9] => stdClass Object
+        (
+            [id] => 1601
+            [datum] => 2022-10-05
+            [cas] => 19:15
+            [souper] => PSK UNION
+            [team] => 2
+            [kde] => doma
+            [druh] => MI
+            [sport] => basket
+            [adresa] => RumcajsArena
+            [nadpis] =>
+            [komentar] =>
+        <p>STATISTIKA – BODY Končický Tomáš 9, Novotný Marek 9, Koudela Jiří
+        8, Viktorin Filip 8, Filip Dominik 7, Viktorin Vojtěch 6, Lhota Jaroslav 3,
+        Horník Michal 2, Viktorin Lubor 0</p>
+        <p>STŘELBA 3B. 4:0 STŘELBA 2B. 19:0 TH 5/2: CHYBY 12:0 ROZHODČÍ Neubauer Jan
+        2, Bukovský Michal 1 FF Renda, Štěpán, Lubor, Michal H. po 1 DIVACI
+        3 naši Mucha, Misíková, Lep POKUTY</p>
+<!-- by Texy2! -->
+            [texykomentar] => STATISTIKA - BODY
+Končický Tomáš 9, Novotný Marek 9, Koudela Jiří 8, Viktorin Filip 8, Filip Dominik 7, Viktorin Vojtěch 6, Lhota Jaroslav 3, Horník Michal 2, Viktorin Lubor 0
+STŘELBA 3B.     4:0
+STŘELBA 2B.     19:0
+TH                       5/2:
+CHYBY            12:0
+ROZHODČÍ        Neubauer Jan 2, Bukovský Michal 1
+FF                     Renda, Štěpán, Lubor, Michal H. po 1
+DIVACI              3 naši Mucha, Misíková, Lep
+POKUTY
+            [vysledek] => 52:48
+            [ctvrtiny] => 7:17 25:28 39:35
+            [stav] => v
+            [nej_hrac] =>
+            [sezona] => 2022-2023
+        )
+)

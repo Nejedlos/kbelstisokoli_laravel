@@ -33,6 +33,7 @@ enum AppIcon: string
     case GALLERIES = 'film';
     case ANNOUNCEMENTS = 'bullhorn';
     case AUDIT_LOGS = 'clipboard-list';
+    case NOT_FOUND = 'ghost';
     case REDIRECTS = 'shuffle';
     case CRON_TASKS = 'clock';
     case CRON_LOGS = 'history';
