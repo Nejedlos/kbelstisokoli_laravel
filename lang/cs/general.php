@@ -27,6 +27,8 @@ return [
     'view_on_map' => 'Zobrazit na mapě',
     'send_email' => 'Poslat e-mail',
     'match_day_desc' => 'Obvyklý čas domácích utkání v hale.',
+    'date_from' => 'Od',
+    'date_to' => 'Do',
     'main_club' => 'Hlavní oddíl',
     'youth_recruitment' => 'Nábor dětí a mládeže',
     'visit_website' => 'Web oddílu',

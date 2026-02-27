@@ -27,6 +27,8 @@ return [
     'view_on_map' => 'View on map',
     'send_email' => 'Send e-mail',
     'match_day_desc' => 'Usual time for home games in the gym.',
+    'date_from' => 'From',
+    'date_to' => 'To',
     'main_club' => 'Main club',
     'youth_recruitment' => 'Youth recruitment',
     'visit_website' => 'Club website',

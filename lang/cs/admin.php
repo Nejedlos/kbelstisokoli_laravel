@@ -142,6 +142,17 @@ return [
                     'actor_subject' => 'Aktér a Předmět',
                     'context' => 'Kontext požadavku',
                 ],
+                'actors' => [
+                    'system' => 'Systém',
+                    'guest' => 'Host',
+                ],
+                'sources' => [
+                    'web' => 'Web',
+                    'admin' => 'Administrace',
+                    'console' => 'Konzole',
+                    'api' => 'API',
+                    'job' => 'Plánovaná úloha',
+                ],
             ],
             'not_found_log' => [
                 'label' => '404 Log',

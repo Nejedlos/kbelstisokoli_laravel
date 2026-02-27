@@ -1,5 +1,5 @@
 <x-filament-widgets::widget>
-    <x-filament::section icon="fa-light fa-chart-line" heading="Srovnání výkonnostních scénářů">
+    <x-filament::section :icon="\App\Support\IconHelper::get(\App\Support\IconHelper::DASHBOARD)" heading="Srovnání výkonnostních scénářů">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>

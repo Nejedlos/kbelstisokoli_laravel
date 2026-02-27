@@ -20,22 +20,22 @@ class AuditLogsTable
         return $table
             ->columns([
                 TextColumn::make('occurred_at')
-                    ->label(__('admin.resources.audit_log.fields.occurred_at'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.occurred_at'))
                     ->dateTime('d.m.Y H:i:s')
                     ->sortable(),
                 TextColumn::make('category')
-                    ->label(__('admin.resources.audit_log.fields.category'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.category'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.categories.$state") ?? $state)
+                    ->formatStateUsing(fn (string $state): string => __("admin.navigation.resources.audit_log.categories.$state") ?? $state)
                     ->color('gray')
                     ->sortable(),
                 TextColumn::make('event_key')
-                    ->label(__('admin.resources.audit_log.fields.event_key'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.event_key'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('action')
-                    ->label(__('admin.resources.audit_log.fields.action'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.action'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'created' => 'success',
@@ -55,18 +55,18 @@ class AuditLogsTable
                         'failed_login' => IconHelper::get('circle-exclamation'),
                         default => IconHelper::get('circle-info'),
                     })
-                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.actions.$state") ?? $state)
+                    ->formatStateUsing(fn (string $state): string => __("admin.navigation.resources.audit_log.actions.$state") ?? $state)
                     ->sortable(),
                 TextColumn::make('actor.name')
-                    ->label(__('admin.resources.audit_log.fields.actor'))
-                    ->description(fn ($record) => $record->is_system_event ? 'System' : ($record->actor?->email ?? 'Guest'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.actor'))
+                    ->description(fn ($record) => $record->is_system_event ? __('admin.navigation.resources.audit_log.actors.system') : ($record->actor?->email ?? __('admin.navigation.resources.audit_log.actors.guest')))
                     ->sortable(),
                 TextColumn::make('subject_label')
-                    ->label(__('admin.resources.audit_log.fields.subject'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.subject'))
                     ->description(fn ($record) => $record->subject_type ? class_basename($record->subject_type) : null)
                     ->searchable(),
                 TextColumn::make('changes')
-                    ->label(__('admin.resources.audit_log.fields.changes'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.changes'))
                     ->formatStateUsing(function ($state) {
                         if (empty($state['after'])) return null;
                         $keys = array_keys($state['after']);
@@ -78,7 +78,7 @@ class AuditLogsTable
                     ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('severity')
-                    ->label(__('admin.resources.audit_log.fields.severity'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.severity'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'critical' => 'danger',
@@ -86,36 +86,36 @@ class AuditLogsTable
                         'info' => 'info',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.severities.$state") ?? $state)
+                    ->formatStateUsing(fn (string $state): string => __("admin.navigation.resources.audit_log.severities.$state") ?? $state)
                     ->sortable(),
                 TextColumn::make('source')
-                    ->label(__('admin.resources.audit_log.fields.source'))
-                    ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.sources.$state") ?? $state)
+                    ->label(__('admin.navigation.resources.audit_log.fields.source'))
+                    ->formatStateUsing(fn (string $state): string => __("admin.navigation.resources.audit_log.sources.$state") ?? $state)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('occurred_at', 'desc')
             ->filters([
                 SelectFilter::make('category')
-                    ->label(__('admin.resources.audit_log.fields.category'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.category'))
                     ->options([
-                        'auth' => __('admin.resources.audit_log.categories.auth'),
-                        'admin_crud' => __('admin.resources.audit_log.categories.admin_crud'),
-                        'lead' => __('admin.resources.audit_log.categories.lead'),
-                        'settings' => __('admin.resources.audit_log.categories.settings'),
-                        'content' => __('admin.resources.audit_log.categories.content'),
-                        'system' => __('admin.resources.audit_log.categories.system'),
+                        'auth' => __('admin.navigation.resources.audit_log.categories.auth'),
+                        'admin_crud' => __('admin.navigation.resources.audit_log.categories.admin_crud'),
+                        'lead' => __('admin.navigation.resources.audit_log.categories.lead'),
+                        'settings' => __('admin.navigation.resources.audit_log.categories.settings'),
+                        'content' => __('admin.navigation.resources.audit_log.categories.content'),
+                        'system' => __('admin.navigation.resources.audit_log.categories.system'),
                     ]),
                 SelectFilter::make('severity')
-                    ->label(__('admin.resources.audit_log.fields.severity'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.severity'))
                     ->options([
-                        'info' => __('admin.resources.audit_log.severities.info'),
-                        'warning' => __('admin.resources.audit_log.severities.warning'),
-                        'critical' => __('admin.resources.audit_log.severities.critical'),
+                        'info' => __('admin.navigation.resources.audit_log.severities.info'),
+                        'warning' => __('admin.navigation.resources.audit_log.severities.warning'),
+                        'critical' => __('admin.navigation.resources.audit_log.severities.critical'),
                     ]),
                 Filter::make('occurred_at')
                     ->form([
-                        DatePicker::make('from')->label(__('general.date_from') !== 'general.date_from' ? __('general.date_from') : 'Od'),
-                        DatePicker::make('to')->label(__('general.date_to') !== 'general.date_to' ? __('general.date_to') : 'Do'),
+                        DatePicker::make('from')->label(__('general.date_from')),
+                        DatePicker::make('to')->label(__('general.date_to')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -129,13 +129,13 @@ class AuditLogsTable
                             );
                     }),
                 SelectFilter::make('source')
-                    ->label(__('admin.resources.audit_log.fields.source'))
+                    ->label(__('admin.navigation.resources.audit_log.fields.source'))
                     ->options([
-                        'web' => __('admin.resources.audit_log.sources.web'),
-                        'admin' => __('admin.resources.audit_log.sources.admin'),
-                        'console' => __('admin.resources.audit_log.sources.console'),
-                        'api' => __('admin.resources.audit_log.sources.api'),
-                        'job' => __('admin.resources.audit_log.sources.job'),
+                        'web' => __('admin.navigation.resources.audit_log.sources.web'),
+                        'admin' => __('admin.navigation.resources.audit_log.sources.admin'),
+                        'console' => __('admin.navigation.resources.audit_log.sources.console'),
+                        'api' => __('admin.navigation.resources.audit_log.sources.api'),
+                        'job' => __('admin.navigation.resources.audit_log.sources.job'),
                     ]),
             ])
             ->actions([

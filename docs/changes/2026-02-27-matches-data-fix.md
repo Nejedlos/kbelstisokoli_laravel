@@ -20,6 +20,8 @@ V rámci tohoto úkolu byla vyřešena neúplnost dat, špatné zobrazení zápa
 
 4.  **Oprava stavů a historických dat:**
     *   Historické zápasy (přes 200 záznamů), které byly dříve neviditelné kvůli stavu `scheduled`, byly opraveny na `played`.
+    *   **Oprava prohazování skóre u zápasů venku:** V seederu byla opravena kritická chyba, kdy se skóre `naše:soupeř` ze staré DB ukládalo jako `home:away` bez ohledu na místo konání. Nyní se u zápasů venku skóre prohodí, aby odpovídalo skutečnému stavu (domácí soupeř : hostující Sokoli).
+    *   **Diagnostika chybějících výsledků pro 2025/2026:** Zjištěno, že v tabulce `zapasy` (stará DB) jsou u aktuální sezóny výsledky `NULL`.
     *   Seeder nyní automaticky detekuje stav na základě času konání.
 
 #### Technické detaily:

@@ -142,6 +142,17 @@ return [
                     'actor_subject' => 'Actor & Subject',
                     'context' => 'Request Context',
                 ],
+                'actors' => [
+                    'system' => 'System',
+                    'guest' => 'Guest',
+                ],
+                'sources' => [
+                    'web' => 'Web',
+                    'admin' => 'Admin',
+                    'console' => 'Console',
+                    'api' => 'API',
+                    'job' => 'Job',
+                ],
             ],
             'not_found_log' => [
                 'label' => '404 Log',
