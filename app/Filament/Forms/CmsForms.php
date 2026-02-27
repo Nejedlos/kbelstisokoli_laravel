@@ -13,12 +13,16 @@ use Filament\Forms\Components\Toggle;
 
 class CmsForms
 {
-    public static function getSeoSection(): Section
+    public static function getSeoSection(bool $withRelationship = true): Section
     {
-        return Section::make('SEO Metadata')
-            ->description('Nastavení pro vyhledávače a sociální sítě. Pomáhá lepšímu zobrazení na Google a Facebooku.')
-            ->relationship('seo')
-            ->schema([
+        $section = Section::make('SEO Metadata')
+            ->description('Nastavení pro vyhledávače a sociální sítě. Pomáhá lepšímu zobrazení na Google a Facebooku.');
+
+        if ($withRelationship) {
+            $section->relationship('seo');
+        }
+
+        return $section->schema([
                 \Filament\Schemas\Components\Tabs::make('SeoLanguageVersions')
                     ->tabs([
                         \Filament\Schemas\Components\Tabs\Tab::make('Čeština')

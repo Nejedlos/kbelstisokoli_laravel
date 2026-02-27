@@ -130,6 +130,20 @@ class PhotoPoolResource extends Resource
                                             $set('event_date', $result['date']);
                                             $set('slug', $result['slug']);
 
+                                            // SEO Metadata - CS
+                                            $set('seo.title.cs', $result['cs']['seo']['title']);
+                                            $set('seo.description.cs', $result['cs']['seo']['description']);
+                                            $set('seo.keywords.cs', $result['cs']['seo']['keywords']);
+                                            $set('seo.og_title.cs', $result['cs']['seo']['og_title']);
+                                            $set('seo.og_description.cs', $result['cs']['seo']['og_description']);
+
+                                            // SEO Metadata - EN
+                                            $set('seo.title.en', $result['en']['seo']['title']);
+                                            $set('seo.description.en', $result['en']['seo']['description']);
+                                            $set('seo.keywords.en', $result['en']['seo']['keywords']);
+                                            $set('seo.og_title.en', $result['en']['seo']['og_title']);
+                                            $set('seo.og_description.en', $result['en']['seo']['og_description']);
+
                                             \Filament\Notifications\Notification::make()
                                                 ->title(__('admin.navigation.resources.photo_pool.notifications.ai_regenerated'))
                                                 ->success()

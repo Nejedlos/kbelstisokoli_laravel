@@ -65,10 +65,24 @@ class AiTextEnhancer
                 'cs' => [
                     'title' => $this->ensureString($parsed['cs']['title'] ?? ($parsed['cs'] ?? $title), 200, $title),
                     'description' => $this->ensureString($parsed['cs']['description'] ?? ($parsed['cs'] ?? $description), 3000, $description),
+                    'seo' => [
+                        'title' => $this->ensureString($parsed['cs']['seo']['title'] ?? '', 100),
+                        'description' => $this->ensureString($parsed['cs']['seo']['description'] ?? '', 255),
+                        'keywords' => $this->ensureString($parsed['cs']['seo']['keywords'] ?? '', 255),
+                        'og_title' => $this->ensureString($parsed['cs']['seo']['og_title'] ?? '', 100),
+                        'og_description' => $this->ensureString($parsed['cs']['seo']['og_description'] ?? '', 255),
+                    ],
                 ],
                 'en' => [
                     'title' => $this->ensureString($parsed['en']['title'] ?? ($parsed['en'] ?? $title), 200, $title),
                     'description' => $this->ensureString($parsed['en']['description'] ?? ($parsed['en'] ?? $description), 3000, $description),
+                    'seo' => [
+                        'title' => $this->ensureString($parsed['en']['seo']['title'] ?? '', 100),
+                        'description' => $this->ensureString($parsed['en']['seo']['description'] ?? '', 255),
+                        'keywords' => $this->ensureString($parsed['en']['seo']['keywords'] ?? '', 255),
+                        'og_title' => $this->ensureString($parsed['en']['seo']['og_title'] ?? '', 100),
+                        'og_description' => $this->ensureString($parsed['en']['seo']['og_description'] ?? '', 255),
+                    ],
                 ],
                 'date' => $this->ensureString($parsed['date'] ?? $date, 10, ($date ?? '')),
                 'slug' => $this->ensureString($parsed['slug'] ?? Str::slug($parsed['cs']['title'] ?? $title), 200),
@@ -97,7 +111,8 @@ class AiTextEnhancer
         3. PŘEKLAD: Vytvoř věrný, ale přirozený překlad do angličtiny (EN).
         4. FORMÁT: Výstup musí být POUZE validní JSON ve specifikované struktuře.
         5. DATUM (date): Musí být ve formátu YYYY-MM-DD. Pokud uživatel zadá jen měsíc a rok, doplň první den v měsíci.
-        6. SLUG (slug): URL přátelský identifikátor vygenerovaný z českého názvu.";
+        6. SLUG (slug): URL přátelský identifikátor vygenerovaný z českého názvu.
+        7. SEO (seo): Pro každý jazyk navrhni SEO titulek (do 60 znaků), SEO popis (do 160 znaků), klíčová slova (oddělená čárkou), OG titulek a OG popis.";
 
         $user = [
             'role' => 'user',
@@ -111,8 +126,28 @@ class AiTextEnhancer
                     'languages' => ['cs', 'en'],
                     'format' => 'json',
                     'structure' => [
-                        'cs' => ['title' => 'string', 'description' => 'string'],
-                        'en' => ['title' => 'string', 'description' => 'string'],
+                        'cs' => [
+                            'title' => 'string',
+                            'description' => 'string',
+                            'seo' => [
+                                'title' => 'string (max 60 chars)',
+                                'description' => 'string (max 160 chars)',
+                                'keywords' => 'string',
+                                'og_title' => 'string',
+                                'og_description' => 'string',
+                            ],
+                        ],
+                        'en' => [
+                            'title' => 'string',
+                            'description' => 'string',
+                            'seo' => [
+                                'title' => 'string (max 60 chars)',
+                                'description' => 'string (max 160 chars)',
+                                'keywords' => 'string',
+                                'og_title' => 'string',
+                                'og_description' => 'string',
+                            ],
+                        ],
                         'date' => 'YYYY-MM-DD',
                         'slug' => 'url-slug-from-cs-title',
                     ],
@@ -132,10 +167,24 @@ class AiTextEnhancer
             'cs' => [
                 'title' => Str::title(Str::of($title)->squish()),
                 'description' => Str::ucfirst(Str::of($description)->squish()),
+                'seo' => [
+                    'title' => '',
+                    'description' => '',
+                    'keywords' => '',
+                    'og_title' => '',
+                    'og_description' => '',
+                ],
             ],
             'en' => [
                 'title' => Str::title(Str::of($title)->squish()),
                 'description' => Str::ucfirst(Str::of($description)->squish()),
+                'seo' => [
+                    'title' => '',
+                    'description' => '',
+                    'keywords' => '',
+                    'og_title' => '',
+                    'og_description' => '',
+                ],
             ],
             'date' => $date ?? '',
             'slug' => Str::slug($title),

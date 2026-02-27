@@ -88,6 +88,19 @@ class ListPhotoPools extends ListRecords
                             $set('description_en', $result['en']['description']);
                             $set('event_date', $result['date']);
                             $set('slug', $result['slug']);
+
+                            // SEO Metadata
+                            $set('seo.title.cs', $result['cs']['seo']['title']);
+                            $set('seo.description.cs', $result['cs']['seo']['description']);
+                            $set('seo.keywords.cs', $result['cs']['seo']['keywords']);
+                            $set('seo.og_title.cs', $result['cs']['seo']['og_title']);
+                            $set('seo.og_description.cs', $result['cs']['seo']['og_description']);
+
+                            $set('seo.title.en', $result['en']['seo']['title']);
+                            $set('seo.description.en', $result['en']['seo']['description']);
+                            $set('seo.keywords.en', $result['en']['seo']['keywords']);
+                            $set('seo.og_title.en', $result['en']['seo']['og_title']);
+                            $set('seo.og_description.en', $result['en']['seo']['og_description']);
                         }),
 
                     Step::make('AI Návrh & Revize')
@@ -113,6 +126,19 @@ class ListPhotoPools extends ListRecords
                                         $set('description_en', $result['en']['description']);
                                         $set('event_date', $result['date']);
                                         $set('slug', $result['slug']);
+
+                                        // SEO Metadata
+                                        $set('seo.title.cs', $result['cs']['seo']['title']);
+                                        $set('seo.description.cs', $result['cs']['seo']['description']);
+                                        $set('seo.keywords.cs', $result['cs']['seo']['keywords']);
+                                        $set('seo.og_title.cs', $result['cs']['seo']['og_title']);
+                                        $set('seo.og_description.cs', $result['cs']['seo']['og_description']);
+
+                                        $set('seo.title.en', $result['en']['seo']['title']);
+                                        $set('seo.description.en', $result['en']['seo']['description']);
+                                        $set('seo.keywords.en', $result['en']['seo']['keywords']);
+                                        $set('seo.og_title.en', $result['en']['seo']['og_title']);
+                                        $set('seo.og_description.en', $result['en']['seo']['og_description']);
 
                                         \Filament\Notifications\Notification::make()
                                             ->title(__('admin.navigation.resources.photo_pool.notifications.ai_regenerated'))
@@ -150,6 +176,15 @@ class ListPhotoPools extends ListRecords
                                             Textarea::make('description_en')
                                                 ->label(__('admin.navigation.resources.photo_pool.fields.description_en'))
                                                 ->rows(4),
+                                        ]),
+                                    Tabs\Tab::make('SEO')
+                                        ->icon(new HtmlString('<i class="fa-light fa-globe"></i>'))
+                                        ->schema([
+                                            \Filament\Schemas\Components\Group::make()
+                                                ->statePath('seo')
+                                                ->schema([
+                                                    \App\Filament\Forms\CmsForms::getSeoSection(false),
+                                                ]),
                                         ]),
                                 ]),
                         ]),
@@ -197,11 +232,16 @@ class ListPhotoPools extends ListRecords
                         'is_visible' => true,
                         'photos' => $data['photos'],
                         'teams' => $data['teams'] ?? [],
+                        'seo' => $data['seo'] ?? [],
                     ];
                 })
                 ->after(function (array $data, PhotoPool $record, $livewire) {
                     if (!empty($data['teams'])) {
                         $record->teams()->sync($data['teams']);
+                    }
+
+                    if (!empty($data['seo'])) {
+                        $record->seo()->create($data['seo']);
                     }
 
                     $files = $data['photos'] ?? [];
