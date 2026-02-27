@@ -3,17 +3,17 @@
 @section('content')
     <x-page-header
         :title="brand_text($pool->getTranslation('title', app()->getLocale()))"
-        :subtitle="brand_text($pool->getTranslation('description', app()->getLocale()))"
+        :subtitle="($pool->event_date ? $pool->event_date->format('d. m. Y') . ($pool->getTranslation('description', app()->getLocale()) ? ' • ' : '') : '') . brand_text($pool->getTranslation('description', app()->getLocale()))"
         :image="$pool->mediaAssets->first() ? $pool->mediaAssets->first()->getUrl('optimized') : null"
-        :breadcrumbs="['Galerie' => route('public.galleries.index'), brand_text($pool->getTranslation('title', app()->getLocale())) => null]"
+        :breadcrumbs="[__('gallery.breadcrumb') => route('public.galleries.index'), brand_text($pool->getTranslation('title', app()->getLocale())) => null]"
     />
 
     <div class="section-padding bg-bg">
         <div class="container">
             @if($pool->mediaAssets->isEmpty())
                 <x-empty-state
-                    title="Sbírka je prázdná"
-                    subtitle="Tato sbírka zatím neobsahuje žádné snímky."
+                    :title="__('gallery.empty_pool_title')"
+                    :subtitle="__('gallery.empty_pool_subtitle')"
                 />
             @else
                 <div class="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -46,7 +46,7 @@
 
                 <div class="mt-16 pt-8 border-t border-slate-200">
                     <a href="{{ route('public.galleries.index') }}" class="btn btn-outline border-slate-200 hover:border-primary">
-                        <i class="fa-light fa-arrow-left mr-2"></i> Zpět na seznam galerií
+                        <i class="fa-light fa-arrow-left mr-2"></i> {{ __('gallery.back_to_list') }}
                     </a>
                 </div>
             @endif

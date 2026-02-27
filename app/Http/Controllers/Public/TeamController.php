@@ -27,7 +27,9 @@ class TeamController extends Controller
 
     public function show(string $slug): View
     {
-        $team = \App\Models\Team::where('slug', $slug)->with('coaches')->firstOrFail();
+        $team = \App\Models\Team::where('slug', $slug)
+            ->with(['coaches', 'seo'])
+            ->firstOrFail();
 
         $randomPhotos = \App\Support\PhotoGallery::getRandomPhotos(8, $team->id);
 

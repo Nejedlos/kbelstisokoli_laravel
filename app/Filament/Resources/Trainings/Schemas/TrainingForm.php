@@ -17,9 +17,10 @@ class TrainingForm
             ->components([
                 Grid::make(2)
                     ->schema([
-                        Select::make('team_id')
-                            ->label('Tým')
-                            ->relationship('team', 'name')
+                        Select::make('teams')
+                            ->label('Týmy')
+                            ->relationship('teams', 'name')
+                            ->multiple()
                             ->searchable()
                             ->preload()
                             ->required(),

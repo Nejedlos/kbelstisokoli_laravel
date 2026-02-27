@@ -2,9 +2,9 @@
 
 @section('content')
     <x-page-header
-        title="Fotogalerie"
-        subtitle="Nahlédněte do života našeho oddílu Kbelští sokoli."
-        :breadcrumbs="['Galerie' => null]"
+        :title="__('gallery.title')"
+        :subtitle="__('gallery.subtitle')"
+        :breadcrumbs="[__('gallery.breadcrumb') => null]"
     />
 
     <div class="section-padding bg-bg">
@@ -13,8 +13,8 @@
             @if($randomPhotos->isNotEmpty())
                 <div class="mb-20">
                     <x-section-heading
-                        title="Náhodné momentky"
-                        subtitle="Průřez zajímavými okamžiky z našich akcí."
+                        :title="__('gallery.random_title')"
+                        :subtitle="__('gallery.random_subtitle')"
                         alignment="left"
                     />
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -46,8 +46,8 @@
             @if($pools->isNotEmpty())
                 <div class="mb-20">
                     <x-section-heading
-                        title="Sbírky fotografií"
-                        subtitle="Tématické kolekce snímků z turnajů, zápasů a tréninků."
+                        :title="__('gallery.pools_title')"
+                        :subtitle="__('gallery.pools_subtitle')"
                         alignment="left"
                     />
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -70,12 +70,12 @@
                                     @endif
                                     <div class="absolute top-4 left-4">
                                         <span class="px-3 py-1 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-full shadow-lg">
-                                            {{ $pool->mediaAssets->count() }} fotek
+                                            {{ $pool->mediaAssets->count() }} {{ __('gallery.photos') }}
                                         </span>
                                     </div>
                                     <div class="absolute top-4 right-4">
                                         <span class="px-3 py-1 bg-secondary/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                                            {{ $pool->event_date?->format('m/Y') }}
+                                            {{ $pool->event_date?->format('d. m. Y') }}
                                         </span>
                                     </div>
                                 </div>
@@ -96,7 +96,7 @@
                                         </p>
                                     @endif
                                     <div class="mt-auto pt-4 flex items-center text-primary text-sm font-black uppercase tracking-widest">
-                                        Prohlédnout sbírku &rarr;
+                                        {{ __('gallery.view_pool') }}
                                     </div>
                                 </div>
                             </a>
@@ -109,8 +109,8 @@
             @if($galleries->isNotEmpty())
                 <div>
                     <x-section-heading
-                        title="Ostatní galerie"
-                        subtitle="Další fotoalba z archivu a starších akcí."
+                        :title="__('gallery.other_galleries')"
+                        :subtitle="__('gallery.other_galleries_subtitle')"
                         alignment="left"
                     />
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -144,7 +144,7 @@
                                         </p>
                                     @endif
                                     <div class="mt-auto pt-4 flex items-center text-primary text-sm font-black uppercase tracking-widest">
-                                        Prohlédnout galerii &rarr;
+                                        {{ __('gallery.view_gallery') }}
                                     </div>
                                 </div>
                             </a>
@@ -155,8 +155,8 @@
 
             @if($galleries->isEmpty() && $pools->isEmpty())
                 <x-empty-state
-                    title="Žádné galerie"
-                    subtitle="Aktuálně zde nejsou žádné veřejné fotogalerie."
+                    :title="__('gallery.none_title')"
+                    :subtitle="__('gallery.none_subtitle')"
                 />
             @endif
         </div>

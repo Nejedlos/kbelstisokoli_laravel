@@ -68,6 +68,14 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
         return view('public.recruitment', compact('page', 'teams'));
     })->name('recruitment.index');
 
+    // Nábor – Samostatná stránka s formulářem
+    Route::get('/join/{team?}', function ($team = null) {
+        $homePage = \App\Models\Page::where('slug', 'home')->first();
+        $seo = app(\App\Services\SeoService::class)->getMetadata($homePage); // Základní SEO z homepage
+        $seo['title'] = 'Chci hrát za C & E | Kbelští sokoli';
+        return view('public.join', compact('team', 'seo'));
+    })->name('recruitment.join');
+
     // Nábor – POST (zpracování leadu)
     Route::post('/nabor', [\App\Http\Controllers\PublicLeadController::class, 'storeRecruitment'])->name('recruitment.store')->middleware('throttle:5,1');
 

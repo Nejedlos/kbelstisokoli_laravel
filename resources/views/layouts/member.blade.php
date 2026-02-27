@@ -14,6 +14,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @stack('head')
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white" x-data="{ sidebarOpen: false }">
     <x-announcement-bar :announcements="$announcements ?? []" />

@@ -106,11 +106,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn (): string => __('admin.navigation.groups.admin_tools')),
             ])
             ->widgets([
-                \App\Filament\Widgets\WelcomeBannerWidget::class,
-                \App\Filament\Widgets\ContactAdminWidget::class,
-                \App\Filament\Widgets\AdminKpiOverview::class,
-                \App\Filament\Widgets\SystemHealthWidget::class,
-                \App\Filament\Widgets\RecentActivityWidget::class,
+                // Widgets are now integrated into the custom Dashboard page view
             ])
             ->middleware([
                 EncryptCookies::class,

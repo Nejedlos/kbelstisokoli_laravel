@@ -59,7 +59,8 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\PlayerProfileRelationManager::class,
+            RelationManagers\UserSeasonConfigsRelationManager::class,
+            RelationManagers\PlayerProfilesRelationManager::class,
             RelationManagers\ParentsRelationManager::class,
             RelationManagers\ChildrenRelationManager::class,
             RelationManagers\ConsentsRelationManager::class,

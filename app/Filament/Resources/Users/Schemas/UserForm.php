@@ -354,6 +354,28 @@ class UserForm
 
                         Grid::make(1)
                             ->schema([
+                                Placeholder::make('active_profile_info')
+                                    ->hiddenLabel()
+                                    ->content(fn ($record) => $record?->activePlayerProfile
+                                        ? new HtmlString("<div class='bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 p-4 rounded-xl mb-4'>
+                                            <div class='flex items-center gap-3'>
+                                                <div class='p-2 bg-primary-100 dark:bg-primary-800 rounded-lg text-primary-600 dark:text-primary-400'>
+                                                    " . \App\Support\IconHelper::render(\App\Support\IconHelper::CLOCK) . "
+                                                </div>
+                                                <div>
+                                                    <p class='text-sm font-bold text-primary-900 dark:text-primary-100'>Aktuálně aktivní profil</p>
+                                                    <p class='text-xs text-primary-700 dark:text-primary-300'>
+                                                        Platnost od: <b>" . ($record->activePlayerProfile->valid_from?->format('d.m.Y') ?? 'neurčeno') . "</b>
+                                                        " . ($record->activePlayerProfile->valid_to ? " do: <b>" . $record->activePlayerProfile->valid_to->format('d.m.Y') . "</b>" : " (bez omezení)") . "
+                                                    </p>
+                                                </div>
+                                            </div>
+                                          </div>")
+                                        : new HtmlString("<div class='bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 p-4 rounded-xl mb-4 text-warning-800 dark:text-warning-200 text-sm'>
+                                            Uživatel aktuálně nemá žádný aktivní hráčský profil.
+                                          </div>")
+                                    ),
+
                                 Section::make(__('user.sections.basketball'))
                                     ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::BASKETBALL))
                                     ->description(__('user.sections.basketball_desc'))
@@ -453,7 +475,33 @@ class UserForm
                                     ->label(__('user.fields.is_active'))
                                     ->onColor('success')
                                     ->offColor('danger')
-                                    ->default(true),
+                                    ->default(true)
+                                    ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),
+                                Placeholder::make('is_active_status')
+                                    ->label(__('user.fields.is_active'))
+                                    ->content(fn ($record) => $record?->is_active
+                                        ? new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-bold uppercase">' . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK) . ' Aktivní účet</div>')
+                                        : new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-bold uppercase">' . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK) . ' Neaktivní účet</div>')
+                                    )
+                                    ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord)
+                                    ->hintAction(
+                                        Action::make('toggle_active_record')
+                                            ->label(fn ($record) => $record?->is_active ? 'Deaktivovat' : 'Aktivovat')
+                                            ->icon(fn ($record) => $record?->is_active ? \App\Support\IconHelper::get(\App\Support\IconHelper::DEACTIVATE) : \App\Support\IconHelper::get(\App\Support\IconHelper::ACTIVATE))
+                                            ->color(fn ($record) => $record?->is_active ? 'danger' : 'success')
+                                            ->requiresConfirmation()
+                                            ->modalHeading(fn ($record) => $record?->is_active ? 'Deaktivovat účet?' : 'Aktivovat účet?')
+                                            ->modalDescription('Změna stavu aktivity účtu má okamžitý vliv na možnost uživatele přihlásit se do systému.')
+                                            ->action(function ($record) {
+                                                $record->is_active = !$record->is_active;
+                                                $record->save();
+
+                                                Notification::make()
+                                                    ->title($record->is_active ? 'Účet aktivován' : 'Účet deaktivován')
+                                                    ->success()
+                                                    ->send();
+                                            })
+                                    ),
                             ]),
                     ]),
 

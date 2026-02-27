@@ -79,11 +79,15 @@ const isConfirmationField = (input) => {
 };
 
 const isValid = (input) => {
-    const val = input.value.trim();
-    if (!val) return false;
+    const isPassword = input.type === 'password' || input.classList.contains('fi-revealable');
+    const rawVal = input.value;
+    const val = isPassword ? rawVal : rawVal.trim();
+
+    if (!val && !isPassword) return false;
+    if (isPassword && val === '') return false;
+
     if (input.type === 'email') return !!val.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
 
-    const isPassword = input.type === 'password' || input.classList.contains('fi-revealable');
     if (isPassword) {
         if (isConfirmationField(input)) {
             const form = input.closest('form');
@@ -241,9 +245,9 @@ const validateInput = (input, isSubmit = false) => {
     const field = input.closest('.fi-fo-field') || input.closest('.fi-fo-field-wrp');
     if (!field) return;
 
-    const rawVal = input.value;
-    const val = rawVal.trim();
     const isPassword = input.type === 'password' || input.classList.contains('fi-revealable');
+    const rawVal = input.value;
+    const val = isPassword ? rawVal : rawVal.trim();
 
     if (isPassword) {
         field.classList.add('ks-password-field');
@@ -274,11 +278,9 @@ const validateInput = (input, isSubmit = false) => {
     }
 
     // Success logic (always on input/change)
-    if (!isConfirmationField(input)) {
-        if (isValid(input)) {
-            field.classList.add('ks-valid');
-            if (!isSubmit) showClientError(input, null);
-        }
+    if (isValid(input)) {
+        field.classList.add('ks-valid');
+        if (!isSubmit) showClientError(input, null);
     }
 
     // Error logic (only on submit)

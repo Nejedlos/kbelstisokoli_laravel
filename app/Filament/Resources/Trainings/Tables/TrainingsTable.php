@@ -14,8 +14,16 @@ class TrainingsTable
     {
         return $table
             ->columns([
-                TextColumn::make('team.name')
+                TextColumn::make('teams.name')
+                    ->label('Týmy')
+                    ->badge()
                     ->searchable(),
+                TextColumn::make('mismatches_count')
+                    ->label('Rozpory')
+                    ->counts('mismatches')
+                    ->badge()
+                    ->color(fn (int $state): string => $state > 0 ? 'danger' : 'gray')
+                    ->sortable(),
                 TextColumn::make('location')
                     ->searchable(),
                 TextColumn::make('starts_at')

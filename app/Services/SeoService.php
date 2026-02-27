@@ -57,6 +57,7 @@ class SeoService
         return [
             'title' => $title,
             'description' => $description,
+            'keywords' => $this->resolveKeywords($seo, $settings),
             'canonical' => $canonical,
             'robots' => $robots,
             'og_title' => $ogTitle,
@@ -79,6 +80,11 @@ class SeoService
             return $title;
         }
 
+        // Pokud titulek již obsahuje název klubu, nepřidáváme suffix
+        if (Str::contains($title, $siteName) || Str::contains($title, 'Sokol Kbely')) {
+            return $title;
+        }
+
         return $title . $titleSuffix;
     }
 
@@ -98,6 +104,15 @@ class SeoService
         }
 
         return $settings['seo_description'] ?? '';
+    }
+
+    protected function resolveKeywords(?SeoMetadata $seo, array $settings): string
+    {
+        if ($seo && $seo->keywords) {
+            return $seo->keywords;
+        }
+
+        return $settings['seo_keywords'] ?? '';
     }
 
     protected function resolveOgImage(?SeoMetadata $seo, ?Model $model, array $settings): ?string

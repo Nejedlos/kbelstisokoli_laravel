@@ -18,6 +18,7 @@
             <div @class([
                 'grid gap-8',
                 'grid-cols-1 md:grid-cols-2 lg:grid-cols-' . $columns,
+                'max-w-4xl mx-auto' => $columns == 2,
             ])>
                 @foreach($cards as $card)
                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
@@ -78,7 +79,7 @@
                                                 <i class="fa-light fa-arrow-up-right ml-2 text-[10px]"></i>
                                             </a>
                                         @else
-                                            <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest-responsive text-xs sm:text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1 underline decoration-slate-300 underline-offset-4 group-hover:decoration-primary">
+                                            <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest-responsive text-xs sm:text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1 underline decoration-slate-300 underline-offset-4 group-hover:decoration-primary" data-track-click="cards_grid_primary" data-track-label="{{ $card['title'] ?? '' }}">
                                                 <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>

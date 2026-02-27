@@ -95,12 +95,12 @@ class CmsContentSeeder extends Seeder
                 'is_visible' => true,
                 'seo' => [
                     'title' => [
-                        'cs' => 'Kbelští sokoli – Mužské týmy A–E | Basket Kbely Praha',
-                        'en' => 'Kbely Falcons – Men\'s teams A–E | Basketball Kbely Prague'
+                        'cs' => 'Kbelští sokoli – Týmy C & E | Basket Kbely Praha',
+                        'en' => 'Kbely Falcons – Teams C & E | Basketball Kbely Prague'
                     ],
                     'description' => [
-                        'cs' => 'Web mužských týmů Kbelští sokoli A–E v rámci TJ Sokol Kbely Basketbal. Zápasy, týmové informace, aktuality a odkazy na nábor a hlavní kbelský basket.',
-                        'en' => 'Website of Men\'s teams Kbely Falcons A–E within TJ Sokol Kbely Basketball. Matches, team info, news and links to recruitment.'
+                        'cs' => 'Web basketbalových týmů Kbelští sokoli C & E v rámci TJ Sokol Kbely Basketbal. Zápasy, týmové informace a nábor nových hráčů do Letňan.',
+                        'en' => 'Website of Basketball teams Kbely Falcons C & E within TJ Sokol Kbely Basketball. Matches, team info and recruitment.'
                     ],
                 ],
             ],
@@ -286,9 +286,9 @@ class CmsContentSeeder extends Seeder
                         'headline' => "Basketbal v Letňanech\npro týmy Sokol Kbely C & E",
                         'subheadline' => 'Vítejte na stránkách týmů C & E, které hrají v RumcajsAreně (Třinecká 650, Letňany). Jsme hrdou součástí TJ Sokol Kbely Basketball. Hledáte tým s tradicí, skvělou partou a chutí vyhrávat? Jste na správném místě.',
                         'cta_label' => 'Chci hrát za C & E',
-                        'cta_url' => '/nabor#join',
-                        'cta_secondary_label' => 'Hlavní web oddílu (A, B, D & Mládež)',
-                        'cta_secondary_url' => 'https://www.basketkbely.cz/',
+                        'cta_url' => '/join',
+                        'cta_secondary_label' => 'Ostatní týmy (Mládež & Elita)',
+                        'cta_secondary_url' => 'https://www.basketkbely.cz/zacnihrat',
                         'microtext' => 'Domácí hala: Letňany, Třinecká 650. Součást TJ Sokol Kbely.',
                         'image_url' => 'assets/img/home/home-hero.jpg',
                         'video_url' => 'assets/video/hero.mp4',
@@ -306,8 +306,8 @@ class CmsContentSeeder extends Seeder
                         'text' => 'Kbelští sokoli C & E jsou součástí širšího oddílu TJ Sokol Kbely Basketbal. Náš web se zaměřuje na týmy C a E – jejich zápasy, týmové dění a komunitu v Letňanech. Pokud hledáte elitní týmy (A, B) nebo mládežnické kategorie, pokračujte na hlavní web oddílu.',
                         'button_text' => 'Naše týmy (C & E)',
                         'button_url' => '/tymy',
-                        'secondary_button_text' => 'Hlavní web (A, B, D & Mládež)',
-                        'secondary_button_url' => 'https://www.basketkbely.cz/',
+                        'secondary_button_text' => 'Ostatní nábory (Mládež & Elita)',
+                        'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
                     ]
                 ],
                 [
@@ -368,7 +368,7 @@ class CmsContentSeeder extends Seeder
                                 'title' => 'Nábor do Týmu C',
                                 'description' => 'Hledáme zkušené parťáky pro Pražský přebor B. Pokud chceš hrát kvalitní basket a být součástí skvělé party v Letňanech, ozvi se.',
                                 'image_url' => 'assets/img/home/team-muzi-c.jpg',
-                                'link' => '/nabor?team=muzi-c#join',
+                                'link' => '/join/muzi-c',
                                 'link_label' => 'Chci hrát za C',
                                 'badge' => 'PŘEBOR B',
                             ],
@@ -376,7 +376,7 @@ class CmsContentSeeder extends Seeder
                                 'title' => 'Nábor do Týmu E',
                                 'description' => 'Hledáš pohodový basket ve 3. třídě? Do našeho týmu E v Letňanech rádi přivítáme nové tváře, co milují hru a dobrou partu.',
                                 'image_url' => 'assets/img/home/team-muzi-e.jpg',
-                                'link' => '/nabor?team=muzi-e#join',
+                                'link' => '/join/muzi-e',
                                 'link_label' => 'Chci hrát za E',
                                 'badge' => '3. TŘÍDA B',
                             ],
@@ -438,11 +438,11 @@ class CmsContentSeeder extends Seeder
                     'data' => [
                         'style' => 'light',
                         'title' => 'Hrajeme pro radost ze hry, tým a Kbely',
-                        'text' => 'Sledujte dění kolem našich mužských týmů A až E, fanděte s námi a pokud hledáte basket pro děti nebo mládež, navštivte hlavní stránky kbelského basketu.',
-                        'button_text' => 'Naše týmy',
-                        'button_url' => '/tymy',
-                        'secondary_button_text' => 'Hlavní web TJ Sokol Kbely Basketbal',
-                        'secondary_button_url' => 'https://www.basketkbely.cz/',
+                        'text' => 'Sledujte dění kolem našich mužských týmů C & E, fanděte s námi a pokud hledáte basket pro děti nebo mládež, navštivte hlavní stránky kbelského basketu.',
+                        'button_text' => 'Chci hrát za C & E',
+                        'button_url' => '/join',
+                        'secondary_button_text' => 'Nábor Mládež & Elita',
+                        'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
                     ]
                 ],
             ],
@@ -454,9 +454,9 @@ class CmsContentSeeder extends Seeder
                         'headline' => "Basketball in Letňany\nfor Sokol Kbely C & E teams",
                         'subheadline' => 'Welcome to the pages of teams C & E, playing in RumcajsArena (Třinecká 650, Letňany). We are proud members of TJ Sokol Kbely Basketball.',
                         'cta_label' => 'Join C & E',
-                        'cta_url' => '/nabor#join',
-                        'cta_secondary_label' => 'Main Club Web (A, B, D & Youth)',
-                        'cta_secondary_url' => 'https://www.basketkbely.cz/',
+                        'cta_url' => '/join',
+                        'cta_secondary_label' => 'Other Teams (Youth & Elite)',
+                        'cta_secondary_url' => 'https://www.basketkbely.cz/zacnihrat',
                         'microtext' => 'Home court: Letňany, Třinecká 650. Part of TJ Sokol Kbely.',
                         'image_url' => 'assets/img/home/home-hero.jpg',
                         'video_url' => 'assets/video/hero.mp4',
@@ -474,8 +474,8 @@ class CmsContentSeeder extends Seeder
                         'text' => 'Kbely Falcons C & E are part of the wider TJ Sokol Kbely Basketbal club. Our website focuses on teams C and E – their matches, team life and community in Letňany.',
                         'button_text' => 'Our Teams (C & E)',
                         'button_url' => '/tymy',
-                        'secondary_button_text' => 'Main Club Web (A, B, D & Youth)',
-                        'secondary_button_url' => 'https://www.basketkbely.cz/',
+                        'secondary_button_text' => 'Other Recruitments (Youth & Elite)',
+                        'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
                     ]
                 ],
                 [
@@ -536,7 +536,7 @@ class CmsContentSeeder extends Seeder
                                 'title' => 'Join Team C',
                                 'description' => 'Looking for experienced teammates for Prague Championship B. If you want to play quality basketball in Letňany, join us.',
                                 'image_url' => 'assets/img/home/team-muzi-c.jpg',
-                                'link' => '/nabor?team=muzi-c#join',
+                                'link' => '/join/muzi-c',
                                 'link_label' => 'Join Team C',
                                 'badge' => 'CHAMPIONSHIP B',
                             ],
@@ -544,7 +544,7 @@ class CmsContentSeeder extends Seeder
                                 'title' => 'Join Team E',
                                 'description' => 'Looking for relaxed basketball in 3rd Class? Our Team E in Letňany welcomes new faces who love the game and a great team.',
                                 'image_url' => 'assets/img/home/team-muzi-e.jpg',
-                                'link' => '/nabor?team=muzi-e#join',
+                                'link' => '/join/muzi-e',
                                 'link_label' => 'Join Team E',
                                 'badge' => '3RD CLASS B',
                             ],
@@ -606,11 +606,11 @@ class CmsContentSeeder extends Seeder
                     'data' => [
                         'style' => 'light',
                         'title' => 'We play for the joy of the game, the team and Kbely',
-                        'text' => 'Follow the Men C and Men E teams and cheer with us.',
-                        'button_text' => 'Our teams',
+                        'text' => 'Follow the activities of our C & E teams, cheer with us, and if you are looking for basketball for children or youth, visit the main pages of Kbely basketball.',
+                        'button_text' => 'Our Teams',
                         'button_url' => '/tymy',
-                        'secondary_button_text' => 'Main Club Website',
-                        'secondary_button_url' => 'https://www.basketkbely.cz/',
+                        'secondary_button_text' => 'Join Youth & Elite',
+                        'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
                     ]
                 ],
             ],
@@ -652,6 +652,32 @@ class CmsContentSeeder extends Seeder
                     ]
                 ],
                 [
+                    'type' => 'cards_grid',
+                    'data' => [
+                        'title' => 'Který tým je pro tebe?',
+                        'subtitle' => 'Vyber si podle svých zkušeností a časových možností. Oba týmy hrají v Letňanech (RumcajsArena).',
+                        'columns' => 2,
+                        'cards' => [
+                            [
+                                'title' => 'Tým Muži C',
+                                'description' => 'Hledáme zkušené parťáky pro Pražský přebor B. Pokud chceš hrát kvalitní basket, pravidelně trénovat a být součástí ambiciózního týmu v Letňanech, ozvi se nám. Naše zázemí v RumcajsAreně je připraveno pro hráče s chutí vyhrávat a posouvat se v tabulce výše.',
+                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
+                                'link' => '/join/muzi-c',
+                                'link_label' => 'Chci hrát za C',
+                                'badge' => 'PŘEBOR B',
+                            ],
+                            [
+                                'title' => 'Tým Muži E',
+                                'description' => 'Hledáš pohodový basket, ale stále se soutěžním duchem? Náš tým E hrající 3. třídu B v Letňanech je ideální volbou. Zakládáme si na skvělé partě, radosti ze hry a vítáme nové tváře, které se chtějí vrátit k basketbalu po pauze nebo hrát pro zábavu v super kolektivu.',
+                                'image_url' => 'assets/img/home/team-muzi-e.jpg',
+                                'link' => '/join/muzi-e',
+                                'link_label' => 'Chci hrát za E',
+                                'badge' => '3. TŘÍDA B',
+                            ],
+                        ]
+                    ]
+                ],
+                [
                     'type' => 'livewire',
                     'data' => [
                         'component' => 'recruitment-form',
@@ -673,10 +699,10 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'cta',
                     'data' => [
-                        'title' => 'Chceš se k nám přidat do C nebo E?',
-                        'text' => 'Neváhej nám napsat. Rádi tě uvidíme na tréninku, kde si můžeme vzájemně vyzkoušet, zda si sedneme na hřišti i v šatně.',
-                        'button_text' => 'Kontaktovat',
-                        'button_url' => '/kontakt',
+                        'title' => 'Chceš se k nám přidat do C nebo E?',
+                        'text' => 'Neváhej nám napsat přes náš náborový formulář. Rádi tě uvidíme na tréninku, kde si můžeme vzájemně vyzkoušet, zda si sedneme na hřišti i v šatně.',
+                        'button_text' => 'Chci se přidat',
+                        'button_url' => '/join',
                     ]
                 ],
             ],
@@ -687,6 +713,32 @@ class CmsContentSeeder extends Seeder
                         'headline' => 'Join Kbely Falcons C & E',
                         'subheadline' => 'We are looking for experienced players for our men\'s teams in the Prague Championship.',
                         'variant' => 'minimal',
+                    ]
+                ],
+                [
+                    'type' => 'cards_grid',
+                    'data' => [
+                        'title' => 'Which team is for you?',
+                        'subtitle' => 'Choose based on your experience and time availability. Both teams play in Letňany (RumcajsArena).',
+                        'columns' => 2,
+                        'cards' => [
+                            [
+                                'title' => 'Men C Team',
+                                'description' => 'Looking for experienced teammates for Prague Championship B. If you want to play quality basketball, train regularly and be part of an ambitious team in Letňany, join us. Our facilities in RumcajsArena are ready for players who want to win and move up the table.',
+                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
+                                'link' => '/join/muzi-c',
+                                'link_label' => 'Join Team C',
+                                'badge' => 'CHAMPIONSHIP B',
+                            ],
+                            [
+                                'title' => 'Men E Team',
+                                'description' => 'Looking for relaxed basketball but still with a competitive spirit? Our Team E playing in the 3rd Class B in Letňany is the ideal choice. We pride ourselves on a great community, joy of the game and welcome new faces who want to return to basketball after a break or play for fun.',
+                                'image_url' => 'assets/img/home/team-muzi-e.jpg',
+                                'link' => '/join/muzi-e',
+                                'link_label' => 'Join Team E',
+                                'badge' => '3RD CLASS B',
+                            ],
+                        ]
                     ]
                 ],
                 [
@@ -712,9 +764,9 @@ class CmsContentSeeder extends Seeder
                     'type' => 'cta',
                     'data' => [
                         'title' => 'Want to join C or E?',
-                        'text' => 'Don\'t hesitate to contact us. We\'d love to see you at practice.',
-                        'button_text' => 'Contact Us',
-                        'button_url' => '/kontakt',
+                        'text' => 'Don\'t hesitate to contact us via our recruitment form. We\'d love to see you at practice.',
+                        'button_text' => 'Join us',
+                        'button_url' => '/join',
                     ]
                 ],
             ],

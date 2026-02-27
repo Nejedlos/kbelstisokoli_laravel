@@ -36,10 +36,11 @@ class ClubEventForm
                                     ])
                                     ->default('other')
                                     ->required(),
-                                Select::make('team_id')
-                                    ->label('Určeno pro tým')
+                                Select::make('teams')
+                                    ->label('Určeno pro týmy')
                                     ->helperText('Ponechte prázdné, pokud je akce pro celý klub.')
-                                    ->relationship('team', 'name')
+                                    ->relationship('teams', 'name')
+                                    ->multiple()
                                     ->searchable()
                                     ->preload(),
                                 TextInput::make('location')

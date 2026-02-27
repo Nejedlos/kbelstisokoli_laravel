@@ -16,9 +16,25 @@
 - `BasketballMatch` patří pod `Team`, `Season` a `Opponent`.
 - `Training` patří pod `Team`.
 - `Team` má mnoho `BasketballMatch` a `Training`.
+- `Team` rozlišuje mezi všemi hráči v týmu a hráči na **oficiální soupisce** (`is_on_roster` v pivotu).
+- `User` může mít více `PlayerProfile` záznamů (historie působení).
 - `Attendance` (Docházka) má polymorfní vazbu na `Training`, `BasketballMatch` a `ClubEvent`.
 
-## 2. Docházka a RSVP (RSVP Modul)
+## 2. Hráčské profily a historie (Stinty)
+Účel: Sledování vývoje hráče v čase (změny týmu, čísla dresu, pozice).
+
+### Datový model
+- **PlayerProfile:** Obsahuje sportovní data (číslo dresu, pozice, výška, váha).
+- **Časová platnost:** Pole `valid_from` a `valid_to` určují, kdy byl profil aktivní.
+- **Vazba:** Uživatel má vždy jeden aktuálně aktivní profil (alias `playerProfile` v modelu User), ale v administraci je dostupná kompletní historie.
+
+### Transfery (Změna působení)
+Při změně týmu nebo čísla dresu se doporučuje použít akci **Transfer** v administraci uživatele:
+1. Původní profil se ukončí k zadanému datu (`valid_to`).
+2. Vytvoří se nový profil s novými údaji, platný od daného data.
+3. Tím je zachována integrita historických statistik a soupisek.
+
+## 3. Docházka a RSVP (RSVP Modul)
 Účel: Univerzální systém pro potvrzování účasti a evidenci docházky na všech typech klubových akcí.
 
 ### Datový návrh

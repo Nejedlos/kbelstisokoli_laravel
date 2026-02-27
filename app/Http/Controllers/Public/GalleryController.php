@@ -39,7 +39,7 @@ class GalleryController extends Controller
     public function show(string $slug): View
     {
         // Nejdřív zkusíme starou galerii
-        $gallery = Gallery::with(['mediaAssets', 'coverAsset'])
+        $gallery = Gallery::with(['mediaAssets', 'coverAsset', 'seo'])
             ->where('slug', $slug)
             ->where('is_public', true)
             ->first();
@@ -53,7 +53,7 @@ class GalleryController extends Controller
             $query->where('media_assets.is_public', true)
                 ->where('photo_pool_media_asset.is_visible', true)
                 ->orderBy('photo_pool_media_asset.sort_order');
-        }])
+        }, 'seo'])
             ->where('slug', $slug)
             ->where('is_public', true)
             ->firstOrFail();

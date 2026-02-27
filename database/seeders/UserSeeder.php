@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\MembershipStatus;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -21,6 +22,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('admin123'), // Na produkci bude změněno
                 'email_verified_at' => now(),
                 'is_active' => true,
+                'membership_status' => MembershipStatus::Active,
             ]
         );
 
@@ -37,6 +39,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('editor123'),
                 'email_verified_at' => now(),
                 'is_active' => true,
+                'membership_status' => MembershipStatus::Active,
             ]
         );
 
@@ -57,6 +60,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('ProcGesto?335'),
                 'email_verified_at' => now(),
                 'is_active' => true,
+                'membership_status' => MembershipStatus::Active,
             ]
         );
 

@@ -23,7 +23,8 @@ return new class extends Migration {
         // Volitelný FULLTEXT index pro MySQL
         try {
             if (DB::getDriverName() === 'mysql') {
-                DB::statement('ALTER TABLE ai_documents ADD FULLTEXT fulltext_title_content (title, content)');
+                $prefix = DB::getTablePrefix();
+                DB::statement("ALTER TABLE {$prefix}ai_documents ADD FULLTEXT fulltext_title_content (title, content)");
             }
         } catch (Throwable $e) {
             // Ignorovat, pokud DB fulltext nepodporuje

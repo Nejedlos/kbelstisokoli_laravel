@@ -28,6 +28,7 @@ Route::middleware(['member'])
 
         // Docházka / Program
         Route::get('/program', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/program/{type}/{id}', [AttendanceController::class, 'show'])->name('attendance.show');
         Route::get('/dochazka/historie', [AttendanceController::class, 'history'])->name('attendance.history');
         Route::post('/program/{type}/{id}/respond', [AttendanceController::class, 'store'])->name('attendance.store');
 

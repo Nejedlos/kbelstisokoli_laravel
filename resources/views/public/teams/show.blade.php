@@ -151,14 +151,14 @@
                                     </div>
                                     <div>
                                         <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.contact') }}</span>
-                                        <a href="{{ route('public.recruitment.index') }}" class="font-bold text-primary hover:underline">{{ app()->getLocale() === 'cs' ? 'Náborový kontakt' : 'Recruitment contact' }}</a>
+                                        <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="font-bold text-primary hover:underline">{{ app()->getLocale() === 'cs' ? 'Náborový kontakt' : 'Recruitment contact' }}</a>
                                     </div>
                                 </div>
                             @endif
                         </div>
 
                         <div class="space-y-3">
-                            <a href="{{ route('public.recruitment.index') }}" class="btn btn-primary w-full">
+                            <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="btn btn-primary w-full">
                                 <i class="fa-light fa-paper-plane mr-2"></i> {{ __('teams.detail.cta_join') }}
                             </a>
                             <a href="{{ route('public.matches.index') }}" class="btn btn-outline w-full border-slate-200 hover:border-primary">
@@ -228,7 +228,7 @@
                     <h2 class="text-3xl font-black uppercase tracking-tighter mb-2">{{ app()->getLocale() === 'cs' ? 'Chceš se stát součástí týmu' : 'Want to become part of the team' }} {{ $team->name }}?</h2>
                     <p class="text-white/80">{{ app()->getLocale() === 'cs' ? 'Ozvěte se nám a domluvíme se na prvním tréninku.' : 'Contact us and we will arrange the first training.' }}</p>
                 </div>
-                <a href="{{ route('public.recruitment.index') }}" class="btn bg-white text-primary hover:bg-secondary hover:text-white btn-lg">
+                <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="btn bg-white text-primary hover:bg-secondary hover:text-white btn-lg">
                     {{ app()->getLocale() === 'cs' ? 'Chci se přidat' : 'I want to join' }}
                 </a>
             </div>

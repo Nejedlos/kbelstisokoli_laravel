@@ -9,16 +9,17 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class Training extends Model
 {
     protected $fillable = [
-        'team_id',
         'location',
         'starts_at',
         'ends_at',
         'notes',
+        'metadata',
     ];
 
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     /**
@@ -29,8 +30,16 @@ class Training extends Model
         return $this->morphMany(Attendance::class, 'attendable');
     }
 
-    public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * Záznamy docházky s rozporem.
+     */
+    public function mismatches(): MorphMany
     {
-        return $this->belongsTo(Team::class);
+        return $this->attendances()->where('is_mismatch', true);
+    }
+
+    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'team_training');
     }
 }

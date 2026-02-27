@@ -61,6 +61,7 @@
                     </button>
 
                     <div x-show="userMenuOpen"
+                         x-cloak
                          @click.away="userMenuOpen = false"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-2"
@@ -111,6 +112,7 @@
 
     <!-- Search Overlay -->
     <div x-show="searchOpen"
+         x-cloak
          @keydown.escape.window="searchOpen = false"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 -translate-y-4"
@@ -140,6 +142,7 @@
     <!-- Mobile Menu Shell -->
     @if(!($branding['maintenance_mode'] ?? false))
     <div x-show="mobileMenuOpen"
+         x-cloak
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-4"
          x-transition:enter-end="opacity-100 translate-y-0"

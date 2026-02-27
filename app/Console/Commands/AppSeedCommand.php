@@ -154,6 +154,18 @@ class AppSeedCommand extends Command
                 // Používáme DB::table()->delete() pro maximální kompatibilitu napříč DB drivery
                 // (zejména SQLite na hostingu může mít s TRUNCATE problémy u cizích klíčů)
                 DB::table($table)->delete();
+
+                // Resetování auto-incrementu
+                try {
+                    $prefix = DB::getTablePrefix();
+                    if (config('database.default') === 'mysql') {
+                        DB::statement("ALTER TABLE `{$prefix}{$table}` AUTO_INCREMENT = 1");
+                    } elseif (config('database.default') === 'sqlite') {
+                        DB::statement("DELETE FROM sqlite_sequence WHERE name='{$prefix}{$table}'");
+                    }
+                } catch (\Throwable $e) {
+                    $this->warn("  - Nepodařilo se resetovat auto-increment pro: {$table}");
+                }
             }
         }
 

@@ -20,11 +20,13 @@ class FinancePayment extends Model
         'source_note',
         'status',
         'recorded_by_id',
+        'metadata',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     public function user(): BelongsTo

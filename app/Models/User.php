@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Notifications\Auth\ResetPasswordNotification;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
@@ -67,6 +68,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
         'admin_note',
         'notification_preferences',
         'onboarding_completed_at',
+        'metadata',
     ];
 
     /**
@@ -93,6 +95,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
             'last_login_at' => 'datetime',
             'notification_preferences' => 'array',
             'onboarding_completed_at' => 'datetime',
+            'metadata' => 'array',
             'two_factor_confirmed_at' => 'datetime',
             'date_of_birth' => 'date',
             'membership_started_at' => 'date',
@@ -129,11 +132,33 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     }
 
     /**
-     * Hráčský profil uživatele (volitelný).
+     * Hráčské profily uživatele (historie).
+     */
+    public function playerProfiles(): HasMany
+    {
+        return $this->hasMany(PlayerProfile::class);
+    }
+
+    /**
+     * Aktuálně aktivní hráčský profil.
+     */
+    public function activePlayerProfile(): HasOne
+    {
+        return $this->hasOne(PlayerProfile::class)
+            ->where('is_active', true)
+            ->where(function ($query) {
+                $query->whereNull('valid_to')
+                    ->orWhere('valid_to', '>=', now());
+            })
+            ->latest('valid_from');
+    }
+
+    /**
+     * Zpětná kompatibilita pro kód, který očekává jeden profil.
      */
     public function playerProfile(): HasOne
     {
-        return $this->hasOne(PlayerProfile::class);
+        return $this->activePlayerProfile();
     }
 
     /**
@@ -164,7 +189,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'coach_team')
-            ->withPivot(['email'])
+            ->withPivot(['email', 'phone'])
             ->withTimestamps();
     }
 
@@ -174,6 +199,30 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     public function consents(): HasMany
     {
         return $this->hasMany(UserConsent::class);
+    }
+
+    /**
+     * Předpisy plateb uživatele.
+     */
+    public function financeCharges(): HasMany
+    {
+        return $this->hasMany(FinanceCharge::class);
+    }
+
+    /**
+     * Skutečné platby uživatele.
+     */
+    public function financePayments(): HasMany
+    {
+        return $this->hasMany(FinancePayment::class);
+    }
+
+    /**
+     * Sezónní konfigurace uživatele.
+     */
+    public function userSeasonConfigs(): HasMany
+    {
+        return $this->hasMany(UserSeasonConfig::class);
     }
 
     /**
@@ -208,7 +257,8 @@ class User extends Authenticatable implements FilamentUser, HasMedia
      */
     public function canAccessAdmin(): bool
     {
-        return $this->is_active && ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach']));
+        return $this->is_active &&
+               ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach']));
     }
 
     /**
@@ -235,5 +285,13 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     public function getFormattedPhoneAttribute(): ?string
     {
         return $this->phone?->formatInternational();
+    }
+
+    /**
+     * Odeslání oznámení o resetu hesla v jazyce uživatele.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

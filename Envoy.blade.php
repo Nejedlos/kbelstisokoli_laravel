@@ -15,6 +15,7 @@
     $db_password_b64 = base64_encode($db_password ?? '');
     $db_prefix_b64 = base64_encode($db_prefix ?? '');
     $public_path_b64 = base64_encode($public_path ?? '');
+    $freshseed = $freshseed ?? false;
 @endsetup
 
 @task('setup', ['on' => 'web'])
@@ -232,7 +233,7 @@
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction
+    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
@@ -278,7 +279,7 @@
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction
+    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
 
     echo "Updating public/.env configuration..."
     {{ $php }} -r '
@@ -570,7 +571,7 @@
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction
+    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync

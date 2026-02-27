@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Mail\RecruitmentFormMail;
 use App\Models\Setting;
 use App\Models\Team;
-use App\Services\RecaptchaService;
+use App\Services\RecaptchaV3;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Url;
@@ -19,6 +19,11 @@ class RecruitmentForm extends Component
     #[Url(as: 'team')]
     public string $selectedTeam = 'muzi-c'; // Výchozí tým
 
+    public ?int $height = null;
+    public string $position = '';
+    public string $level = '';
+    public ?int $age = null;
+
     public string $message = '';
     public ?string $recaptchaToken = null;
 
@@ -30,26 +35,56 @@ class RecruitmentForm extends Component
         return [
             'name' => 'required|string|min:2|max:255',
             'email' => 'required|email|max:255',
-            'selectedTeam' => 'required|string|in:muzi-c,muzi-e',
+            'selectedTeam' => 'required|string|exists:teams,slug',
+            'height' => 'nullable|integer|min:100|max:250',
+            'position' => 'nullable|string|max:50',
+            'level' => 'nullable|string|max:255',
+            'age' => 'nullable|integer|min:15|max:99',
             'message' => 'required|string|min:10',
         ];
     }
 
-    public function mount(): void
+    public function mount(?string $team = null): void
     {
+        if ($team && Team::where('slug', $team)->exists()) {
+            $this->selectedTeam = $team;
+        }
+
         // Předvyplnění zprávy pro snazší vyplnění (user request: "formulář nějak předvyplněný")
         $this->message = "Dobrý den,\n\nměl bych zájem o hraní ve vašem týmu. Mám za sebou zkušenosti z...";
     }
 
-    public function submit(RecaptchaService $recaptchaService): void
+    public function updated($propertyName): void
+    {
+        $this->validateOnly($propertyName);
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'name' => __('user.fields.first_name'),
+            'email' => __('user.fields.email'),
+            'selectedTeam' => 'tým',
+            'height' => __('user.fields.height_cm'),
+            'position' => __('user.fields.position'),
+            'level' => 'úroveň',
+            'age' => 'věk',
+            'message' => 'zpráva',
+        ];
+    }
+
+    public function submit(RecaptchaV3 $recaptchaService): void
     {
         if ($this->success) return;
 
         $this->validate();
 
-        if ($recaptchaService->isEnabled()) {
-            if (!$this->recaptchaToken || !$recaptchaService->verify($this->recaptchaToken)) {
-                $this->errorMessage = 'Ověření reCAPTCHA selhalo. Zkuste to prosím znovu.';
+        if (config('recaptcha.enabled')) {
+            $result = $recaptchaService->verify($this->recaptchaToken ?? '', 'recruitment_form', request()->ip());
+            if (!$result->passed) {
+                $this->errorMessage = ($result->score !== null && $result->score < config('recaptcha.score_threshold'))
+                    ? trans('recaptcha.low_score')
+                    : trans('recaptcha.failed');
                 return;
             }
         }
@@ -66,10 +101,16 @@ class RecruitmentForm extends Component
                 teamName: $teamName,
                 messageBody: $this->message,
                 subjectText: "Nábor do týmu {$teamName}: {$this->name}",
+                extraData: [
+                    'height' => $this->height,
+                    'position' => $this->position,
+                    'level' => $this->level,
+                    'age' => $this->age,
+                ]
             ));
 
             $this->success = true;
-            $this->reset(['name', 'email', 'message', 'recaptchaToken']);
+            $this->reset(['name', 'email', 'message', 'recaptchaToken', 'height', 'position', 'level', 'age']);
 
         } catch (\Exception $e) {
             Log::error('Chyba při odesílání náborového formuláře: ' . $e->getMessage());
@@ -115,10 +156,11 @@ class RecruitmentForm extends Component
     public function render()
     {
         return view('livewire.recruitment-form', [
-            'teams' => [
-                'muzi-c' => 'Muži C',
-                'muzi-e' => 'Muži E',
-            ]
+            'teams' => Team::where('category', 'senior')
+                ->orderBy('slug')
+                ->get()
+                ->mapWithKeys(fn ($team) => [$team->slug => $team->getTranslation('name', app()->getLocale())])
+                ->toArray()
         ]);
     }
 }

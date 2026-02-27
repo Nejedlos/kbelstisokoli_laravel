@@ -32,6 +32,7 @@ class SeoMetadata extends Model
     public $translatable = [
         'title',
         'description',
+        'keywords',
         'og_title',
         'og_description',
     ];

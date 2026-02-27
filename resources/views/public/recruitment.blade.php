@@ -49,7 +49,13 @@
             {{-- Výběr týmu --}}
             <div class="mb-20">
                 <h2 class="text-3xl font-black uppercase tracking-tighter text-center mb-10">{{ __('recruitment.which_team_title') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div @class([
+                    'grid gap-8 mx-auto',
+                    'grid-cols-1 md:grid-cols-2' => count($teams ?? []) == 2,
+                    'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' => count($teams ?? []) != 2,
+                    'max-w-4xl' => count($teams ?? []) == 2,
+                    'max-w-6xl' => count($teams ?? []) != 2,
+                ])>
                     @foreach($teams ?? [] as $team)
                         <div class="card card-hover border-t-4 {{ $loop->index % 2 == 0 ? 'border-t-primary' : 'border-t-secondary' }} p-8 flex flex-col items-center text-center">
                             <h3 class="text-4xl font-black uppercase tracking-tighter mb-2">{{ $team->name }}</h3>
@@ -135,8 +141,10 @@
                     <p class="text-slate-300 mb-10">{{ __('recruitment.cta_text') }}</p>
 
                     <div class="flex flex-col gap-4">
-                        <a href="{{ route('public.contact.index') }}" class="btn btn-primary btn-lg w-full">{{ __('recruitment.contact_form') }}</a>
-                        <p class="text-xs text-white/40 mt-4 italic">{{ __('recruitment.form_prep') }}</p>
+                        <a href="{{ route('public.recruitment.join') }}" class="btn btn-primary btn-lg w-full">
+                            <i class="fa-light fa-paper-plane mr-2"></i> {{ __('recruitment.cta_join_button') }}
+                        </a>
+                        {{-- <p class="text-xs text-white/40 mt-4 italic">{{ __('recruitment.form_prep') }}</p> --}}
                     </div>
                 </div>
             </div>

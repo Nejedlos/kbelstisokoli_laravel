@@ -120,6 +120,33 @@ return [
             'team' => [
                 'label' => 'Team',
                 'plural_label' => 'Teams',
+                'fields' => [
+                    'name' => 'Team Name',
+                    'slug' => 'Identifier (Slug)',
+                    'category' => 'Category',
+                    'coaches_count' => 'Coaches',
+                    'players_count' => 'Players',
+                    'description' => 'Team Description',
+                    'coaches' => 'Coaches',
+                    'players' => 'Players',
+                    'coach_email' => 'Contact Email (for this team)',
+                    'coach_email_help' => 'If filled, it will be displayed on the web instead of the coach\'s main email.',
+                    'coach_phone' => 'Contact Phone (for this team)',
+                    'coach_phone_help' => 'If filled, it will be displayed on the web instead of the coach\'s main phone.',
+                    'role_in_team' => 'Role in team',
+                    'is_primary_team' => 'Primary team',
+                ],
+                'tabs' => [
+                    'general' => 'General Information',
+                ],
+                'actions' => [
+                    'view_public' => 'View on Web',
+                    'attach_coach' => 'Attach Coach',
+                    'attach_player' => 'Attach Player',
+                    'edit_coach_contact' => 'Edit contact info',
+                    'detach' => 'Detach',
+                    'detach_selected' => 'Detach selected',
+                ],
             ],
             'training' => [
                 'label' => 'Training',

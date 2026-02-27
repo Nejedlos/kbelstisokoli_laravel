@@ -20,8 +20,13 @@ return [
             'audit_log' => 'Audit Log',
             'audit_log_hint' => 'View system change history',
             'finance' => 'Finance',
-            'finance_hint' => 'Overview of payments and fees',
+            'finance_cta' => 'Go to Finance',
+            'finance_hint' => 'Overview of payments and member fees',
         ],
+    ],
+
+    'finance_summary' => [
+        'cta' => 'Go to Finance',
     ],
 
     'club_health' => [
@@ -30,9 +35,22 @@ return [
 
     'contact_admin' => [
         'title' => 'Need help from the administrator?',
-        'text' => 'For technical issues or system configuration, please contact the administrator directly. Coaches work in the admin, but the system is managed by the admin.',
-        'cta' => 'Write to Admin',
+        'text' => 'For technical issues or system configuration, please contact the administrator Michal Nejedlý directly.',
+        'cta' => 'Send Message',
         'mailto' => 'Send Email',
+        'success_title' => 'Message has been sent to the administrator.',
+        'fields' => [
+            'subject' => 'Subject',
+            'message' => 'Your message',
+            'placeholder_subject' => 'What do you need help with?',
+            'placeholder_message' => 'Describe your request in detail...',
+        ],
+        'subjects' => [
+            'technical' => 'Technical issue',
+            'access' => 'Access problem',
+            'finance' => 'Finance query',
+            'other' => 'Other',
+        ],
     ],
 
     'system' => [
@@ -55,6 +73,13 @@ return [
         'title' => 'Recent Activity',
         'empty' => 'No records to display.',
         'actor_system' => 'System',
+        'actions' => [
+            'created' => 'Created',
+            'updated' => 'Updated',
+            'deleted' => 'Deleted',
+            'login' => 'Login',
+            'password_reset' => 'Password Reset',
+        ],
     ],
 
     'kpi' => [
@@ -63,11 +88,30 @@ return [
         'players_total' => 'Player Profiles',
         'teams_total' => 'Teams',
         'matches_total' => 'Matches',
+        'matches_upcoming' => 'Upcoming matches',
         'matches_upcoming_desc' => 'Upcoming: :count',
         'trainings_total' => 'Trainings',
+        'trainings_upcoming' => 'Upcoming trainings',
         'trainings_upcoming_desc' => 'Upcoming: :count',
         'attendance_total' => 'RSVP/Attendance',
         'attendance_desc' => 'Total records',
+        'leads_total' => 'Leads / Contacts',
+        'leads_pending_desc' => 'Pending: :count',
+        'posts_total' => 'News',
+        'posts_active_desc' => 'Published: :count',
+    ],
+
+    'health' => [
+        'title' => 'System Status & Health',
+        'mismatches' => 'Mismatches',
+        'missing_configs' => 'No payment info',
+        'renewal_warning' => 'Attention! Missing payer configurations for the new season.',
+        'renewal_cta' => 'Set Payment Profiles :season',
+    ],
+
+    'agenda' => [
+        'title' => 'Club Agenda',
+        'empty' => 'No scheduled program.',
     ],
 
     'finance' => [

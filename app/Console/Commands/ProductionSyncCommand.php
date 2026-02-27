@@ -15,7 +15,7 @@ class ProductionSyncCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'app:sync {--ai-test}';
+    protected $signature = 'app:sync {--ai-test} {--freshseed : Smaže a znovu nahraje data na produkci pomocí seederů}';
 
     /**
      * The console command description.
@@ -23,6 +23,19 @@ class ProductionSyncCommand extends Command
      * @var string
      */
     protected $description = 'Sync configuration and run migrations on production (after FTP upload)';
+
+    /**
+     * Create a new command instance.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Skryjeme příkaz na produkci, aby byl vidět jen na localhostu
+        if (app()->environment('production')) {
+            $this->setHidden(true);
+        }
+    }
 
     /**
      * Execute the console command.
@@ -236,6 +249,10 @@ class ProductionSyncCommand extends Command
                 "--path=" . escapeshellarg($path),
             ];
 
+            if ($this->option('freshseed')) {
+                $params[] = "--freshseed=1";
+            }
+
             if ($publicPath) {
                 $params[] = "--public_path=" . escapeshellarg($publicPath);
             }
@@ -261,7 +278,7 @@ class ProductionSyncCommand extends Command
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
                 $this->line(' ✅ Synchronizace statických assetů (build, assets, img)');
                 $this->line(' ✅ Spuštění idempotentních databázových migrací');
-                $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
+                $this->line(' ✅ Spuštění ' . ($this->option('freshseed') ? 'ČERSTVÉHO (fresh)' : 'idempotentního') . ' seedování (včetně 2FA)');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
                 $this->line(' ✅ Reindexace AI vyhledávání (cs/en)');
@@ -288,6 +305,10 @@ class ProductionSyncCommand extends Command
                 "--path=" . escapeshellarg($path),
             ];
 
+            if ($this->option('freshseed')) {
+                $params[] = "--freshseed=1";
+            }
+
             if ($publicPath) {
                 $params[] = "--public_path=" . escapeshellarg($publicPath);
             }
@@ -313,7 +334,7 @@ class ProductionSyncCommand extends Command
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
                 $this->line(' ✅ Synchronizace statických assetů (vyčištění a kopírování do ' . ($publicPath ?: 'public') . ')');
                 $this->line(' ✅ Spuštění idempotentních databázových migrací');
-                $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
+                $this->line(' ✅ Spuštění ' . ($this->option('freshseed') ? 'ČERSTVÉHO (fresh)' : 'idempotentního') . ' seedování (včetně 2FA)');
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
                 $this->line(' ✅ Reindexace AI vyhledávání (cs/en)');

@@ -14,12 +14,17 @@ class AuthRedirect
     /**
      * Vrátí cílovou URL po úspěšném přihlášení nebo 2FA.
      *
-     * @param User $user
+     * @param User|null $user
      * @param Request|null $request
      * @return string
      */
-    public static function getTargetUrl(User $user, ?Request $request = null): string
+    public static function getTargetUrl(?User $user, ?Request $request = null): string
     {
+        if (! $user) {
+            \Illuminate\Support\Facades\Log::info('AuthRedirect.user_null_fallback');
+            return '/admin/login';
+        }
+
         $isAdmin = $user->canAccessAdmin();
         $adminPath = config('filament.panels.admin.path', 'admin');
         $adminPath = str_starts_with($adminPath, '/') ? $adminPath : '/' . $adminPath;

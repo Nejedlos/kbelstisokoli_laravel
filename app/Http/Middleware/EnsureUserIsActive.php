@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\MembershipStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,16 +16,22 @@ class EnsureUserIsActive
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && !auth()->user()->is_active) {
-            \Illuminate\Support\Facades\Log::warning('EnsureUserIsActive.deactivated', [
-                'user_id' => auth()->id(),
-                'email' => auth()->user()->email,
-            ]);
+        if (auth()->check()) {
+            $user = auth()->user();
+            $isInactive = !$user->is_active;
 
-            auth()->logout();
+            if ($isInactive) {
+                \Illuminate\Support\Facades\Log::warning('EnsureUserIsActive.account_inactive', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'is_active' => $user->is_active,
+                ]);
 
-            return redirect()->route('login')
-                ->withErrors(['email' => 'Účet je deaktivován. Kontaktujte správce.']);
+                auth()->logout();
+
+                return redirect()->route('login')
+                    ->withErrors(['email' => __('Váš účet byl deaktivován. Kontaktujte prosím správce.')]);
+            }
         }
 
         return $next($request);

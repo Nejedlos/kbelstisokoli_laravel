@@ -21,8 +21,16 @@ class UpdateLastLoginAt
      */
     public function handle(Login $event): void
     {
-        $event->user->update([
+        $user = $event->user;
+        $updates = [
             'last_login_at' => now(),
-        ]);
+        ];
+
+        // Automatická aktivace uživatele při prvním přihlášení do systému
+        if ($user->membership_status === \App\Enums\MembershipStatus::Pending) {
+            $updates['membership_status'] = \App\Enums\MembershipStatus::Active;
+        }
+
+        $user->update($updates);
     }
 }

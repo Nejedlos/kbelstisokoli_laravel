@@ -19,7 +19,7 @@ class AuditLogResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Audit Log';
+        return __('admin.resources.audit_log.plural_label');
     }
 
     public static function getNavigationIcon(): ?string
@@ -34,12 +34,12 @@ class AuditLogResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return 'Auditní záznam';
+        return __('admin.resources.audit_log.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Audit Logy';
+        return __('admin.resources.audit_log.plural_label');
     }
 
     public static function getNavigationGroup(): ?string

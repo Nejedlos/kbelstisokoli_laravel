@@ -23,6 +23,7 @@ class FinanceCharge extends Model
         'is_visible_to_member',
         'notes_internal',
         'created_by_id',
+        'metadata',
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class FinanceCharge extends Model
         'period_from' => 'date',
         'period_to' => 'date',
         'is_visible_to_member' => 'boolean',
+        'metadata' => 'array',
     ];
 
     public function user(): BelongsTo

@@ -13,6 +13,21 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class AdminKpiOverview extends BaseWidget
 {
+    protected static ?int $sort = -190;
+
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 1,
+    ];
+
+    protected function getColumns(): int|array
+    {
+        return [
+            'md' => 2,
+            'lg' => 3,
+        ];
+    }
+
     protected function getStats(): array
     {
         $users = User::count();

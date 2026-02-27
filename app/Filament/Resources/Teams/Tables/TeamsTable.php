@@ -40,13 +40,17 @@ class TeamsTable
                         default => 'gray',
                     })
                     ->searchable(),
-                TextColumn::make('coaches_count')
+                TextColumn::make('active_coaches_count')
                     ->label(new HtmlString(IconHelper::render(IconHelper::USERS_GROUP) . ' ' . __('admin.navigation.resources.team.fields.coaches_count')))
-                    ->counts('coaches')
+                    ->counts('activeCoaches')
                     ->sortable(),
-                TextColumn::make('players_count')
+                TextColumn::make('active_players_count')
                     ->label(new HtmlString(IconHelper::render(IconHelper::USERS) . ' ' . __('admin.navigation.resources.team.fields.players_count')))
-                    ->counts('players')
+                    ->counts('activePlayers')
+                    ->sortable(),
+                TextColumn::make('roster_players_count')
+                    ->label(new HtmlString(IconHelper::render(IconHelper::BASKETBALL) . ' ' . __('Soupiska')))
+                    ->counts('rosterPlayers')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()

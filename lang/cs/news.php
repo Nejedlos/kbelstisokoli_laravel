@@ -18,4 +18,6 @@ return [
     'starter_interviews' => 'Rozhovory',
     'starter_reports' => 'Reporty',
     'starter_updates' => 'Aktuality',
+    'coming_soon' => 'Připravujeme',
+    'suggest_topic' => 'Máte tip na článek?',
 ];

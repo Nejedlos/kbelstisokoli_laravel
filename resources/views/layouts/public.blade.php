@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $seo['title'] }}</title>
     <meta name="description" content="{{ $seo['description'] }}">
+    <meta name="keywords" content="{{ $seo['keywords'] }}">
     <link rel="canonical" href="{{ $seo['canonical'] }}">
     <meta name="robots" content="{{ $seo['robots'] }}">
 
@@ -51,6 +52,7 @@
     @endif
 
     @stack('head')
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
     <x-announcement-bar :announcements="$announcements ?? []" />

@@ -24,6 +24,12 @@ class PlayersRelationManager extends RelationManager
 {
     protected static string $relationship = 'players';
 
+    protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->where('player_profiles.is_active', true)
+            ->whereHas('user', fn ($q) => $q->where('users.is_active', true));
+    }
+
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
         return __('admin.navigation.resources.team.fields.players');
@@ -42,6 +48,8 @@ class PlayersRelationManager extends RelationManager
                     ->maxLength(255),
                 Checkbox::make('is_primary_team')
                     ->label(__('admin.navigation.resources.team.fields.is_primary_team')),
+                Checkbox::make('is_on_roster')
+                    ->label(__('Hráč je na soupisce')),
             ]);
     }
 
@@ -65,6 +73,10 @@ class PlayersRelationManager extends RelationManager
                     ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
                     ->boolean()
                     ->sortable(),
+                IconColumn::make('pivot.is_on_roster')
+                    ->label(__('Soupiska'))
+                    ->boolean()
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -80,6 +92,8 @@ class PlayersRelationManager extends RelationManager
                             ->label(__('admin.navigation.resources.team.fields.role_in_team')),
                         Checkbox::make('is_primary_team')
                             ->label(__('admin.navigation.resources.team.fields.is_primary_team')),
+                        Checkbox::make('is_on_roster')
+                            ->label(__('Hráč je na soupisce')),
                     ]),
             ])
             ->recordActions([

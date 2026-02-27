@@ -5,15 +5,15 @@
         :title="brand_text($gallery->title)"
         :subtitle="brand_text($gallery->description)"
         :image="$gallery->coverAsset ? $gallery->coverAsset->getUrl('large') : null"
-        :breadcrumbs="['Galerie' => route('public.galleries.index'), brand_text($gallery->title) => null]"
+        :breadcrumbs="[__('gallery.breadcrumb') => route('public.galleries.index'), brand_text($gallery->title) => null]"
     />
 
     <div class="section-padding bg-bg">
         <div class="container">
             @if($gallery->mediaAssets->isEmpty())
                 <x-empty-state
-                    title="Galerie je prázdná"
-                    subtitle="Tato galerie zatím neobsahuje žádné snímky."
+                    :title="__('gallery.empty_gallery_title')"
+                    :subtitle="__('gallery.empty_gallery_subtitle')"
                 />
             @else
                 <div @class([
@@ -56,7 +56,7 @@
 
                 <div class="mt-16 pt-8 border-t border-slate-200">
                     <a href="{{ route('public.galleries.index') }}" class="btn btn-outline">
-                        &larr; Zpět na seznam galerií
+                        &larr; {{ __('gallery.back_to_list') }}
                     </a>
                 </div>
             @endif

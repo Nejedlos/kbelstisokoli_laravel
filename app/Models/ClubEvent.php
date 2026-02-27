@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 use App\Traits\Auditable;
@@ -18,7 +18,6 @@ class ClubEvent extends Model
     protected $fillable = [
         'title',
         'event_type',
-        'team_id',
         'description',
         'location',
         'starts_at',
@@ -30,18 +29,21 @@ class ClubEvent extends Model
     public $translatable = ['title', 'description'];
 
     protected $casts = [
+        'title' => 'array',
+        'description' => 'array',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
         'is_public' => 'boolean',
         'rsvp_enabled' => 'boolean',
+        'metadata' => 'array',
     ];
 
     /**
-     * Tým, pro který je akce určena (pokud existuje).
+     * Týmy, pro které je akce určena.
      */
-    public function team(): BelongsTo
+    public function teams(): BelongsToMany
     {
-        return $this->belongsTo(Team::class);
+        return $this->belongsToMany(Team::class, 'club_event_team');
     }
 
     /**

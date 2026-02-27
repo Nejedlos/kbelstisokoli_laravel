@@ -20,6 +20,11 @@ class CoachesRelationManager extends RelationManager
 {
     protected static string $relationship = 'coaches';
 
+    protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->where('users.is_active', true);
+    }
+
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
         return __('admin.navigation.resources.team.fields.coaches');
@@ -37,9 +42,11 @@ class CoachesRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('pivot.email')
                     ->label(__('admin.navigation.resources.team.fields.coach_email'))
+                    ->placeholder(fn ($record) => $record->email)
                     ->searchable(),
-                TextColumn::make('phone')
-                    ->label(__('user.fields.phone'))
+                TextColumn::make('pivot.phone')
+                    ->label(__('admin.navigation.resources.team.fields.coach_phone'))
+                    ->placeholder(fn ($record) => (string) $record->phone)
                     ->searchable(),
             ])
             ->filters([
@@ -51,13 +58,43 @@ class CoachesRelationManager extends RelationManager
                     ->icon(IconHelper::get(IconHelper::PLUS))
                     ->preloadRecordSelect()
                     ->form(fn (AttachAction $action): array => [
-                        $action->getRecordSelect(),
+                        $action->getRecordSelect()
+                            ->live()
+                            ->afterStateUpdated(function ($state, $set) {
+                                if (! $state) {
+                                    return;
+                                }
+
+                                $user = \App\Models\User::find($state);
+
+                                if ($user) {
+                                    $set('email', $user->email);
+                                    $set('phone', (string) $user->phone);
+                                }
+                            }),
                         TextInput::make('email')
                             ->label(__('admin.navigation.resources.team.fields.coach_email'))
+                            ->helperText(__('admin.navigation.resources.team.fields.coach_email_help'))
                             ->email(),
+                        TextInput::make('phone')
+                            ->label(__('admin.navigation.resources.team.fields.coach_phone'))
+                            ->helperText(__('admin.navigation.resources.team.fields.coach_phone_help'))
+                            ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state),
                     ]),
             ])
             ->recordActions([
+                EditAction::make()
+                    ->label(__('admin.navigation.resources.team.actions.edit_coach_contact'))
+                    ->form([
+                        TextInput::make('email')
+                            ->label(__('admin.navigation.resources.team.fields.coach_email'))
+                            ->helperText(__('admin.navigation.resources.team.fields.coach_email_help'))
+                            ->email(),
+                        TextInput::make('phone')
+                            ->label(__('admin.navigation.resources.team.fields.coach_phone'))
+                            ->helperText(__('admin.navigation.resources.team.fields.coach_phone_help'))
+                            ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state),
+                    ]),
                 Action::make('edit_user')
                     ->label(__('user.actions.edit_user'))
                     ->icon(IconHelper::get(IconHelper::USER))

@@ -8,6 +8,15 @@
 
     <p><strong>Od:</strong> {{ $senderName }} (<a href="mailto:{{ $senderEmail }}">{{ $senderEmail }}</a>)</p>
     <p><strong>Tým:</strong> {{ $teamName }}</p>
+
+    <h3 style="color: #333; margin-top: 20px;">Základní údaje:</h3>
+    <ul>
+        <li><strong>Věk:</strong> {{ $extraData['age'] ?? 'neuvedeno' }}</li>
+        <li><strong>Výška:</strong> {{ $extraData['height'] ? $extraData['height'] . ' cm' : 'neuvedeno' }}</li>
+        <li><strong>Pozice:</strong> {{ $extraData['position'] ?? 'neuvedeno' }}</li>
+        <li><strong>Zkušenosti:</strong> {{ $extraData['level'] ?? 'neuvedeno' }}</li>
+    </ul>
+
     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
     <div style="white-space: pre-wrap;">{{ $messageBody }}</div>

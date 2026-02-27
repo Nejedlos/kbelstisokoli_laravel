@@ -5,8 +5,10 @@ return [
     'public' => [
         ['title' => 'nav.home', 'route' => 'public.home'],
         ['title' => 'nav.news', 'route' => 'public.news.index'],
+        ['title' => 'nav.gallery', 'route' => 'public.galleries.index'],
         ['title' => 'nav.matches', 'route' => 'public.matches.index'],
         ['title' => 'nav.team', 'route' => 'public.teams.index'],
+        ['title' => 'nav.recruitment', 'route' => 'public.recruitment.index'],
         ['title' => 'nav.trainings', 'route' => 'public.trainings.index'],
         ['title' => 'nav.history', 'route' => 'public.history.index'],
         ['title' => 'nav.contact', 'route' => 'public.contact.index'],

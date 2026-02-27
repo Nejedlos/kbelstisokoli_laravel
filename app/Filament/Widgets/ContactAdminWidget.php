@@ -11,13 +11,11 @@ class ContactAdminWidget extends Widget
 {
     protected string $view = 'filament.widgets.contact-admin-widget';
 
-    // Priorita řazení widgetů na dashboardu (nižší = výš). Chceme druhý hned vedle uvítacího.
-    protected static ?int $sort = -199;
+    // Priorita řazení widgetů na dashboardu (nižší = výš). Chceme na konci.
+    protected static ?int $sort = -160;
 
-    // Na menších displejích přes celou šířku, od md vedle sebe (poloviční šířka)
-    protected int|string|array $columnSpan = [
-        'md' => 1,
-    ];
+    // Na všech displejích přes celou šířku
+    protected int|string|array $columnSpan = 'full';
 
     // Výška placeholderu při lazy načítání – stabilizuje layout a brání přeskakování.
     protected ?string $placeholderHeight = '14rem';

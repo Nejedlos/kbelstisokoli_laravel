@@ -27,6 +27,8 @@ class PlayerProfile extends Model
         'public_bio',
         'private_note',
         'is_active',
+        'valid_from',
+        'valid_to',
         'joined_team_at',
         'primary_team_id',
         'metadata',
@@ -34,6 +36,8 @@ class PlayerProfile extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'valid_from' => 'date',
+        'valid_to' => 'date',
         'metadata' => 'array',
         'position' => BasketballPosition::class,
         'dominant_hand' => DominantHand::class,
@@ -64,7 +68,24 @@ class PlayerProfile extends Model
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'player_profile_team')
-            ->withPivot(['role_in_team', 'is_primary_team', 'active_from', 'active_to'])
+            ->withPivot(['role_in_team', 'is_primary_team', 'is_on_roster', 'active_from', 'active_to'])
             ->withTimestamps();
+    }
+
+    /**
+     * Scope pro profily platné k určitému datu.
+     */
+    public function scopeInEffect($query, $date = null)
+    {
+        $date = $date ?: now();
+        return $query->where('is_active', true)
+            ->where(function ($q) use ($date) {
+                $q->whereNull('valid_from')
+                    ->orWhere('valid_from', '<=', $date);
+            })
+            ->where(function ($q) use ($date) {
+                $q->whereNull('valid_to')
+                    ->orWhere('valid_to', '>=', $date);
+            });
     }
 }

@@ -15,6 +15,7 @@ class WelcomeBannerWidget extends Widget
 
     // Na menších displejích přes celou šířku, od md vedle sebe (poloviční šířka)
     protected int|string|array $columnSpan = [
+        'default' => 'full',
         'md' => 1,
     ];
 
@@ -35,11 +36,10 @@ class WelcomeBannerWidget extends Widget
 
     protected function getViewData(): array
     {
+        $userName = auth()->user()?->name ?: 'Admin';
         $activePlayers = class_exists(PlayerProfile::class)
             ? PlayerProfile::count()
             : 0;
-
-        $userName = auth()->user()?->name ?: 'Admin';
 
         // Quick actions URLs – use Filament Resource URLs if available, else fallback to admin path.
         $adminPath = config('filament.panels.admin.path', 'admin');

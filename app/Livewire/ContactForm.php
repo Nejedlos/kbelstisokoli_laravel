@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Mail\ContactFormMail;
-use App\Services\RecaptchaService;
+use App\Services\RecaptchaV3;
 use App\Support\EmailObfuscator;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
@@ -46,15 +46,18 @@ class ContactForm extends Component
         }
     }
 
-    public function submit(RecaptchaService $recaptchaService): void
+    public function submit(RecaptchaV3 $recaptchaService): void
     {
         if ($this->success) return;
 
         $this->validate();
 
-        if ($recaptchaService->isEnabled()) {
-            if (!$this->recaptchaToken || !$recaptchaService->verify($this->recaptchaToken)) {
-                $this->errorMessage = 'Ověření reCAPTCHA selhalo. Zkuste to prosím znovu.';
+        if (config('recaptcha.enabled')) {
+            $result = $recaptchaService->verify($this->recaptchaToken ?? '', 'contact_form', request()->ip());
+            if (!$result->passed) {
+                $this->errorMessage = ($result->score !== null && $result->score < config('recaptcha.score_threshold'))
+                    ? trans('recaptcha.low_score')
+                    : trans('recaptcha.failed');
                 return;
             }
         }

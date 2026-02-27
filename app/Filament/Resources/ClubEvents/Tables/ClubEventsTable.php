@@ -39,9 +39,10 @@ class ClubEventsTable
                         'volunteer' => 'primary',
                         default => 'gray',
                     }),
-                TextColumn::make('team.name')
-                    ->label('Tým')
+                TextColumn::make('teams.name')
+                    ->label('Týmy')
                     ->placeholder('Celý klub')
+                    ->badge()
                     ->searchable(),
                 TextColumn::make('starts_at')
                     ->label('Od')
@@ -64,9 +65,9 @@ class ClubEventsTable
                         'volunteer' => 'Dobrovolnická akce / Brigáda',
                         'other' => 'Ostatní',
                     ]),
-                SelectFilter::make('team')
+                SelectFilter::make('teams')
                     ->label('Tým')
-                    ->relationship('team', 'name'),
+                    ->relationship('teams', 'name'),
                 TernaryFilter::make('is_public')
                     ->label('Veřejnost'),
             ])

@@ -27,6 +27,7 @@ class BasketballMatch extends Model
         'score_away',
         'notes_internal',
         'notes_public',
+        'metadata',
     ];
 
     public $translatable = ['notes_public'];
@@ -36,6 +37,7 @@ class BasketballMatch extends Model
         'is_home' => 'boolean',
         'score_home' => 'integer',
         'score_away' => 'integer',
+        'metadata' => 'array',
     ];
 
     /**
@@ -44,6 +46,14 @@ class BasketballMatch extends Model
     public function attendances(): MorphMany
     {
         return $this->morphMany(Attendance::class, 'attendable');
+    }
+
+    /**
+     * Záznamy docházky s rozporem.
+     */
+    public function mismatches(): MorphMany
+    {
+        return $this->attendances()->where('is_mismatch', true);
     }
 
     public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo

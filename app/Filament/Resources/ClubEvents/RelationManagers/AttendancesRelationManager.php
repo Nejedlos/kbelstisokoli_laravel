@@ -41,8 +41,8 @@ class AttendancesRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->required(),
-                Select::make('status')
-                    ->label('Stav účasti')
+                Select::make('planned_status')
+                    ->label('RSVP (Plánováno)')
                     ->options([
                         'pending' => 'Čeká na vyjádření',
                         'confirmed' => 'Potvrzeno (Přijde)',
@@ -51,6 +51,14 @@ class AttendancesRelationManager extends RelationManager
                     ])
                     ->default('pending')
                     ->required(),
+                Select::make('actual_status')
+                    ->label('Realita (Trenér)')
+                    ->options([
+                        'attended' => 'Přítomen',
+                        'absent' => 'Nepřítomen (neomluven)',
+                        'excused' => 'Omluven (trenérem)',
+                    ])
+                    ->nullable(),
                 Textarea::make('note')
                     ->label('Poznámka člena / Důvod omluvenky')
                     ->placeholder('Zadáno členem...')
@@ -66,13 +74,14 @@ class AttendancesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('user.name')
+            ->recordClasses(fn (\App\Models\Attendance $record) => $record->is_mismatch ? 'bg-danger-50 dark:bg-danger-900/20' : null)
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Člen')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('status')
-                    ->label('Stav')
+                TextColumn::make('planned_status')
+                    ->label('RSVP')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
@@ -89,6 +98,29 @@ class AttendancesRelationManager extends RelationManager
                         default => $state,
                     })
                     ->sortable(),
+                TextColumn::make('actual_status')
+                    ->label('Realita')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'attended' => 'success',
+                        'absent' => 'danger',
+                        'excused' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'attended' => 'Byl',
+                        'absent' => 'Nebyl',
+                        'excused' => 'Omluven',
+                        default => '?',
+                    })
+                    ->sortable(),
+                \Filament\Tables\Columns\IconColumn::make('is_mismatch')
+                    ->label('Mismatch')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-exclamation-triangle')
+                    ->falseIcon(null)
+                    ->color('danger')
+                    ->sortable(),
                 TextColumn::make('note')
                     ->label('Poznámka')
                     ->limit(30)
@@ -104,7 +136,7 @@ class AttendancesRelationManager extends RelationManager
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('status')
+                SelectFilter::make('planned_status')
                     ->label('Stav RSVP')
                     ->options([
                         'pending' => 'Čeká',
@@ -112,6 +144,15 @@ class AttendancesRelationManager extends RelationManager
                         'declined' => 'Nepřijde',
                         'maybe' => 'Možná',
                     ]),
+                SelectFilter::make('actual_status')
+                    ->label('Stav Realita')
+                    ->options([
+                        'attended' => 'Byl',
+                        'absent' => 'Nebyl',
+                        'excused' => 'Omluven',
+                    ]),
+                \Filament\Tables\Filters\TernaryFilter::make('is_mismatch')
+                    ->label('Pouze mismatch'),
             ])
             ->headerActions([
                 CreateAction::make()

@@ -29,6 +29,32 @@ class AuditLogsTable
                     ->label('Událost')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('action')
+                    ->label('Akce')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'created' => 'success',
+                        'updated' => 'warning',
+                        'deleted' => 'danger',
+                        'login' => 'info',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'created' => 'heroicon-o-plus-circle',
+                        'updated' => 'heroicon-o-pencil-square',
+                        'deleted' => 'heroicon-o-trash',
+                        'login' => 'heroicon-o-arrow-right-on-rectangle',
+                        default => 'heroicon-o-information-circle',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match($state) {
+                        'created' => __('admin/dashboard.recent_activity.actions.created'),
+                        'updated' => __('admin/dashboard.recent_activity.actions.updated'),
+                        'deleted' => __('admin/dashboard.recent_activity.actions.deleted'),
+                        'login' => __('admin/dashboard.recent_activity.actions.login'),
+                        'password_reset' => __('admin/dashboard.recent_activity.actions.password_reset'),
+                        default => ucfirst($state),
+                    })
+                    ->sortable(),
                 TextColumn::make('actor.name')
                     ->label('Aktér')
                     ->description(fn ($record) => $record->is_system_event ? 'Systém' : ($record->actor?->email ?? 'Host'))
@@ -37,6 +63,18 @@ class AuditLogsTable
                     ->label('Předmět')
                     ->description(fn ($record) => $record->subject_type ? class_basename($record->subject_type) : null)
                     ->searchable(),
+                TextColumn::make('changes')
+                    ->label('Změny')
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state['after'])) return null;
+                        $keys = array_keys($state['after']);
+                        $labels = array_map(fn($k) => __("fields.$k") !== "fields.$k" ? __("fields.$k") : $k, $keys);
+                        return implode(', ', $labels);
+                    })
+                    ->color('gray')
+                    ->wrap()
+                    ->limit(50)
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('severity')
                     ->label('Závažnost')
                     ->badge()

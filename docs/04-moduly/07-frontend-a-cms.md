@@ -37,8 +37,11 @@ Stylové zobrazení informace o přípravě webu s basketbalovou tématikou.
 - **Výzva k akci (CTA):** Výrazné sekce pro nábor a kontakt.
 - **SEO optimalizace:** Každá sekce je navržena pro maximální indexovatelnost a obsahuje reálný, bilingvní obsah z klubu.
 
-## 7. Klíčové komponenty
-- `x-header` / `x-footer`: Globální navigace a patička.
-- `x-section-heading`: Sjednocené nadpisy sekcí.
-- `x-news-card` / `x-match-card`: Karty pro výpisy.
-- `x-empty-state`: Jednotný design pro prázdné stavy.
+## 8. Administrační Dashboard (Nástěnka)
+Dashboard v administraci byl kompletně redesignován jako moderní, bilingvní a funkční rozhraní (Bento Grid):
+- **Hero Sekce:** Dynamické uvítání (včetně personalizace pro admina), rychlé akce pro zápasy, uživatele a tréninky.
+- **KPI Statistiky:** Přehledné karty pro počet uživatelů, hráčů a týmů s vizuální indikací.
+- **Ekonomický Panel:** Reálný stav pohledávek, dluhů a příjmů za aktuální měsíc.
+- **Zdraví Systému:** Inteligentní monitoring Cron úloh, rozporů v docházce a chybějících finančních profilů (včetně alertu na inicializaci nové sezóny).
+- **Aktivita a Agenda:** Historie změn v systému a přehled nadcházejících zápasů a tréninků v bočním panelu.
+- **Bilingvnost:** Veškeré texty a metriky jsou plně lokalizovány (CZ/EN).

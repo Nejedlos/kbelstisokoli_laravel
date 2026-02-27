@@ -1,5 +1,4 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'spotlight.js';
@@ -8,8 +7,18 @@ import 'nprogress/nprogress.css';
 import { Spinner } from 'spin.js';
 import 'spin.js/spin.css';
 
-window.Alpine = Alpine;
-Alpine.start();
+// Alpine.js fallback: On public/member pages without Livewire, ensure Alpine is available.
+if (!window.Alpine) {
+    import('alpinejs')
+        .then(({ default: Alpine }) => {
+            window.Alpine = Alpine;
+            Alpine.start();
+            if (import.meta.env.DEV) {
+                console.log('[Alpine] Fallback instance started');
+            }
+        })
+        .catch((e) => console.error('[Alpine] Fallback load failed', e));
+}
 
 // Initialize AOS (Animate On Scroll)
 AOS.init({
@@ -34,7 +43,7 @@ window.initButtonSpinners = () => {
     };
 
     document.querySelectorAll('.fi-btn').forEach(btn => {
-        if (btn.dataset.spinnerInit) return;
+        if (btn.dataset.spinnerInit || btn.closest('.ks-auth-page')) return;
         btn.dataset.spinnerInit = "1";
 
         // Ensure relative positioning for absolute spinner

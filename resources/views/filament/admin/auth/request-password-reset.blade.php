@@ -1,1 +1,3 @@
-{{ $this->content }}
+<div>
+    {{ $this->content }}
+</div>

@@ -1,7 +1,6 @@
 @php
-    $recaptchaService = app(App\Services\RecaptchaService::class);
-    $siteKey = $recaptchaService->getSiteKey();
-    $recaptchaEnabled = $recaptchaService->isEnabled();
+    $siteKey = config('recaptcha.site_key');
+    $recaptchaEnabled = (bool) config('recaptcha.enabled');
 @endphp
 
 <div class="contact-form-wrapper"
@@ -9,33 +8,43 @@
     x-data="{
         isSubmitting: false,
         async getRecaptchaToken() {
+            console.log('[reCAPTCHA] Vyžaduji token pro akci: contact_form');
             return new Promise((resolve) => {
                 if (typeof grecaptcha === 'undefined') {
-                    console.error('reCAPTCHA not loaded');
+                    console.error('[reCAPTCHA] Chyba: grecaptcha není definováno (není načten script?)');
                     resolve(null);
                     return;
                 }
                 grecaptcha.ready(() => {
+                    console.log('[reCAPTCHA] API připraveno, spouštím execute...');
                     grecaptcha.execute('{{ $siteKey }}', {action: 'contact_form'}).then((token) => {
+                        if (token) {
+                            console.log('[reCAPTCHA] Token úspěšně získán');
+                        } else {
+                            console.warn('[reCAPTCHA] Token byl prázdný');
+                        }
                         resolve(token);
                     });
                 });
             });
         },
         async submitForm() {
+            console.log('[Form] Odesílám kontaktní formulář...');
             if (this.isSubmitting) return;
             this.isSubmitting = true;
             const token = await this.getRecaptchaToken();
             if (token) {
+                console.log('[Form] Token reCAPTCHA získán, odesílám data na server...');
                 @this.set('recaptchaToken', token);
                 @this.submit();
             } else {
+                console.error('[Form] Nepodařilo se získat reCAPTCHA token.');
                 this.isSubmitting = false;
                 alert('Chyba reCAPTCHA. Zkontrolujte prosím připojení nebo nastavení.');
             }
         }
     }"
-    x-on:livewire:initialized.window="isSubmitting = false"
+    x-on:livewire:initialized.window="console.log('[Form] Kontaktní formulář inicializován'); isSubmitting = false"
     @else
     x-data="{ isSubmitting: false }"
     @endif
@@ -164,11 +173,19 @@
             </div>
 
             @if($recaptchaEnabled && $siteKey)
-                <div class="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <i class="fa-light fa-shield-halved text-emerald-500"></i>
-                    <p class="text-[10px] text-slate-400 leading-tight">
-                        Tento web je chráněn pomocí reCAPTCHA a platí <a href="https://policies.google.com/privacy" class="underline hover:text-primary transition-colors">Zásady ochrany osobních údajů</a> a <a href="https://policies.google.com/terms" class="underline hover:text-primary transition-colors">Smluvní podmínky</a> společnosti Google.
-                    </p>
+                <div class="flex items-center gap-4 bg-emerald-50/50 p-5 rounded-[1.5rem] border border-emerald-100/50 group/captcha transition-all hover:bg-emerald-50 hover:border-emerald-200">
+                    <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm transition-transform group-hover/captcha:scale-110">
+                        <i class="fa-light fa-shield-check fa-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-emerald-800 mb-0.5 leading-none">Antispamová ochrana aktivní</p>
+                        <p class="text-[10px] text-emerald-600/80 leading-tight">
+                            Tento web je chráněn pomocí reCAPTCHA. Platí <a href="https://policies.google.com/privacy" class="font-bold underline hover:text-primary">Soukromí</a> a <a href="https://policies.google.com/terms" class="font-bold underline hover:text-primary">Podmínky</a> Google.
+                        </p>
+                    </div>
+                    <div class="hidden sm:block opacity-20 group-hover/captcha:opacity-40 transition-opacity">
+                        <i class="fa-brands fa-google fa-2x"></i>
+                    </div>
                 </div>
             @endif
         </form>
@@ -178,5 +195,13 @@
 @if($recaptchaEnabled && $siteKey)
     @push('scripts')
         <script src="https://www.google.com/recaptcha/api.js?render={{ $siteKey }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('[reCAPTCHA] Ochrana kontaktního formuláře aktivní (v3)');
+            });
+        </script>
+        <style>
+            .grecaptcha-badge { visibility: visible !important; }
+        </style>
     @endpush
 @endif

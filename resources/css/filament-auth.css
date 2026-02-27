@@ -423,7 +423,7 @@ body.fi-panel-admin .fi-simple-main-ctn {
     border: none !important;
     box-shadow: none !important;
     transition: all 0.2s ease !important;
-    display: flex !important;
+    display: flex;
     align-items: center !important;
     justify-content: center !important;
     width: 2.5rem !important;
@@ -501,14 +501,34 @@ button[type="submit"].fi-btn:active {
 .fi-btn.fi-color-primary.is-loading::after,
 .fi-btn-color-primary.is-loading::after {
     content: '';
+    position: absolute !important;
+    right: 1.5rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     width: 1.1rem;
     height: 1.1rem;
     border: 2px solid rgba(255,255,255,0.6);
     border-top-color: white;
     border-radius: 9999px;
     animation: spin 0.8s linear infinite;
+    box-sizing: border-box !important;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Skrytí nativních loaderů Filamentu/Livewire na auth stránkách k zabránění duplicity */
+.ks-auth-page .fi-btn svg.animate-spin,
+.ks-auth-page .fi-btn .fi-btn-spinner,
+.ks-auth-page .fi-btn .fi-loading-indicator,
+.ks-auth-page .fi-btn [wire\:loading],
+.ks-auth-page .fi-btn::before,
+.ks-auth-page [class*="fi-btn"] svg.animate-spin,
+.ks-auth-page [class*="fi-btn"] .fi-loading-indicator,
+.ks-auth-page [class*="fi-btn"]::before {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
 
 /* Checkbox Styling */
 .fi-fo-field-label:has(.fi-checkbox-input) {

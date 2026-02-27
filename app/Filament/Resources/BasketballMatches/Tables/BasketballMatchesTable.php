@@ -28,11 +28,17 @@ class BasketballMatchesTable
                     ->label('Soupeř')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('mismatches_count')
+                    ->label('Rozpory')
+                    ->counts('mismatches')
+                    ->badge()
+                    ->color(fn (int $state): string => $state > 0 ? 'danger' : 'gray')
+                    ->sortable(),
                 TextColumn::make('score')
                     ->label('Skóre')
-                    ->state(fn ($record) => $record->status === 'completed' ? "{$record->score_home} : {$record->score_away}" : '-')
+                    ->state(fn ($record) => in_array($record->status, ['completed', 'played']) ? "{$record->score_home} : {$record->score_away}" : '-')
                     ->badge()
-                    ->color(fn ($record) => $record->status === 'completed' ? ($record->score_home > $record->score_away ? 'success' : 'danger') : 'gray'),
+                    ->color(fn ($record) => in_array($record->status, ['completed', 'played']) ? ($record->score_home > $record->score_away ? 'success' : 'danger') : 'gray'),
                 TextColumn::make('status')
                     ->label('Stav')
                     ->badge()

@@ -40,8 +40,8 @@ return [
             'content' => 'Krátký návrat do republikové III. ligy (2001) a úspěchy dorosteneckých týmů v pražských přeborech.',
         ],
         'today' => [
-            'title' => 'Současnost: Týmy A až E',
-            'content' => 'Klub v současné době disponuje pěti mužskými týmy (A, B, C, D, E), které pokrývají široké spektrum výkonnosti od 2. ligy až po nejnižší pražské třídy.',
+            'title' => 'Současnost: Týmy oddílu',
+            'content' => 'Kbelský basketbalový oddíl v současné době disponuje širokou základnou. Elitní týmy A, B a D hrají pod hlavičkou TJ Sokol Kbely Basketbal na hlavním webu, zatímco náš web se specializuje na komunitu kolem týmů C a E v Letňanech.',
         ],
     ],
 
@@ -93,38 +93,27 @@ return [
             'title' => 'Nové tisíciletí',
             'paragraphs' => [
                 'V sezóně 2001/2002 si muži krátce vyzkoušeli republikovou III. ligu. Oddíl nadále pracoval s mládeží a udržoval několik mužských týmů v pražských soutěžích.',
-                'Dnes tradici nesou zejména týmy A, B, C, D a E. Každý tým má svou specifickou roli v klubu, od elitního "áčka" ve 2. lize až po rozvojové a hobby týmy v pražských soutěžích. Společně propojují různé generace kbelských basketbalistů.',
+                'Dnes tradici nesou zejména týmy C a E, které doplňují celkovou strukturu oddílu (včetně týmů A, B, D a mládeže). Každý tým má svou roli – od soutěžních přeborů až po rekreační basketbal, což společně propojují různé generace kbelských basketbalistů.',
             ],
         ],
     ],
-
     'current_teams' => [
-        'muzi_a' => [
-            'title' => 'Sokol Kbely A',
-            'competition' => '2. liga (skupina A)',
-            'link' => 'https://cz.basketball/tym/673',
-        ],
-        'muzi_b' => [
-            'title' => 'Sokol Kbely B',
-            'competition' => 'Pražský přebor',
-            'link' => 'https://cz.basketball/tym/7747',
-        ],
         'muzi_c' => [
             'title' => 'Sokol Kbely C',
             'competition' => 'Pražský přebor B',
             'link' => 'https://cz.basketball/tym/7761',
             'since' => 'Od roku 2015',
         ],
-        'muzi_d' => [
-            'title' => 'Sokol Kbely D',
-            'competition' => '1. třída',
-            'link' => 'https://cz.basketball/tym/7771',
-        ],
         'muzi_e' => [
             'title' => 'Sokol Kbely E',
             'competition' => '3. třída B',
             'link' => 'https://cz.basketball/tym/7738',
             'since' => 'Od roku 2022',
+        ],
+        'others' => [
+            'title' => 'Ostatní týmy (A, B, D)',
+            'competition' => 'Více informací na hlavním webu',
+            'link' => 'https://www.basketkbely.cz/druzstva',
         ],
     ],
 ];

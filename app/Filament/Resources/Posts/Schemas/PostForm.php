@@ -30,11 +30,6 @@ class PostForm
                                 Section::make('Základní informace')
                                     ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::INFO))
                                     ->schema([
-                                        TextInput::make('title')
-                                            ->label('Titulek novinky')
-                                            ->helperText('Hlavní nadpis článku.')
-                                            ->required(),
-
                                         TextInput::make('slug')
                                             ->label('URL adresa (slug)')
                                             ->helperText('Část URL za lomítkem. Musí být unikátní.')
@@ -49,18 +44,45 @@ class PostForm
                                             ->preload(),
                                     ])->columns(2),
 
-                                Section::make('Text článku')
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PEN_NIB))
-                                    ->schema([
-                                        Textarea::make('excerpt')
-                                            ->label('Perex (stručný výtah)')
-                                            ->helperText('Zobrazuje se v přehledu novinek. Krátký úvod do článku.')
-                                            ->rows(3)
-                                            ->columnSpanFull(),
+                                Tabs::make('Language Versions')
+                                    ->tabs([
+                                        Tabs\Tab::make('Čeština')
+                                            ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
+                                            ->schema([
+                                                TextInput::make('title.cs')
+                                                    ->label('Titulek novinky (CZ)')
+                                                    ->helperText('Hlavní nadpis článku v češtině.')
+                                                    ->required(),
 
-                                        RichEditor::make('content')
-                                            ->label('Hlavní obsah článku')
-                                            ->columnSpanFull(),
+                                                Textarea::make('excerpt.cs')
+                                                    ->label('Perex (stručný výtah CZ)')
+                                                    ->helperText('Zobrazuje se v přehledu novinek. Krátký úvod do článku v češtině.')
+                                                    ->rows(3)
+                                                    ->columnSpanFull(),
+
+                                                RichEditor::make('content.cs')
+                                                    ->label('Hlavní obsah článku (CZ)')
+                                                    ->columnSpanFull(),
+                                            ]),
+
+                                        Tabs\Tab::make('English')
+                                            ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
+                                            ->schema([
+                                                TextInput::make('title.en')
+                                                    ->label('News Title (EN)')
+                                                    ->helperText('Main heading of the article in English.')
+                                                    ->required(),
+
+                                                Textarea::make('excerpt.en')
+                                                    ->label('Excerpt (brief summary EN)')
+                                                    ->helperText('Shown in the news overview. Short introduction in English.')
+                                                    ->rows(3)
+                                                    ->columnSpanFull(),
+
+                                                RichEditor::make('content.en')
+                                                    ->label('Main article content (EN)')
+                                                    ->columnSpanFull(),
+                                            ]),
                                     ]),
                             ]),
 

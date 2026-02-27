@@ -20,8 +20,13 @@ return [
             'audit_log' => 'Auditní log',
             'audit_log_hint' => 'Prohlížet historii změn v systému',
             'finance' => 'Finance',
+            'finance_cta' => 'Přejít do financí',
             'finance_hint' => 'Přehled plateb a členských příspěvků',
         ],
+    ],
+
+    'finance_summary' => [
+        'cta' => 'Přejít do financí',
     ],
 
     'club_health' => [
@@ -30,9 +35,22 @@ return [
 
     'contact_admin' => [
         'title' => 'Potřebujete pomoc od administrátora?',
-        'text' => 'S technickými problémy nebo nastavením systému se prosím obracejte přímo na administrátora. Trenéři pracují v administraci, ale správu systému garantuje admin.',
-        'cta' => 'Napsat administrátorovi',
+        'text' => 'S technickými problémy nebo nastavením systému se prosím obracejte přímo na administrátora Michala Nejedlého.',
+        'cta' => 'Odeslat zprávu',
         'mailto' => 'Odeslat e‑mail',
+        'success_title' => 'Zpráva byla odeslána administrátorovi.',
+        'fields' => [
+            'subject' => 'Předmět',
+            'message' => 'Vaše zpráva',
+            'placeholder_subject' => 'S čím potřebujete pomoci?',
+            'placeholder_message' => 'Popište detailně váš požadavek...',
+        ],
+        'subjects' => [
+            'technical' => 'Technický problém',
+            'access' => 'Problém s přístupem',
+            'finance' => 'Dotaz k financím',
+            'other' => 'Ostatní',
+        ],
     ],
 
     'system' => [
@@ -55,6 +73,13 @@ return [
         'title' => 'Poslední aktivity',
         'empty' => 'Žádné záznamy k zobrazení.',
         'actor_system' => 'Systém',
+        'actions' => [
+            'created' => 'Vytvořeno',
+            'updated' => 'Upraveno',
+            'deleted' => 'Smazáno',
+            'login' => 'Přihlášení',
+            'password_reset' => 'Reset hesla',
+        ],
     ],
 
     'kpi' => [
@@ -63,11 +88,30 @@ return [
         'players_total' => 'Hráčské profily',
         'teams_total' => 'Týmy',
         'matches_total' => 'Zápasy',
+        'matches_upcoming' => 'Nadcházející zápasy',
         'matches_upcoming_desc' => 'Nadcházející: :count',
         'trainings_total' => 'Tréninky',
+        'trainings_upcoming' => 'Nadcházející tréninky',
         'trainings_upcoming_desc' => 'Nadcházející: :count',
         'attendance_total' => 'RSVP/Docházka',
         'attendance_desc' => 'Počet záznamů',
+        'leads_total' => 'Zájemci / Kontakty',
+        'leads_pending_desc' => 'K vyřízení: :count',
+        'posts_total' => 'Aktuality',
+        'posts_active_desc' => 'Publikováno: :count',
+    ],
+
+    'health' => [
+        'title' => 'Stav a zdraví systému',
+        'mismatches' => 'Rozpory',
+        'missing_configs' => 'Bez plátce',
+        'renewal_warning' => 'Pozor! Chybí konfigurace plátců pro novou sezónu.',
+        'renewal_cta' => 'Nastavit platební profily :season',
+    ],
+
+    'agenda' => [
+        'title' => 'Klubová agenda',
+        'empty' => 'Žádný naplánovaný program.',
     ],
 
     'finance' => [
