@@ -51,9 +51,9 @@
 
                         <!-- VS / Score -->
                         <div class="flex flex-col items-center min-w-[150px]">
-                            @if($match->status === 'completed')
+                            @if(in_array($match->status, ['completed', 'played']) && ($match->score_home !== null || $match->score_away !== null))
                                 <div class="text-6xl md:text-8xl font-black tabular-nums tracking-tighter leading-none mb-4">
-                                    {{ $match->score_home }}<span class="text-primary">:</span>{{ $match->score_away }}
+                                    {{ $match->score_home ?? 0 }}<span class="text-primary">:</span>{{ $match->score_away ?? 0 }}
                                 </div>
                             @else
                                 <div class="text-4xl md:text-5xl font-black opacity-30 mb-4 uppercase tracking-widest italic">VS</div>
@@ -161,3 +161,9 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Placeholder pro budoucí interaktivitu (např. auto-refresh skóre ze svazu)
+</script>
+@endpush

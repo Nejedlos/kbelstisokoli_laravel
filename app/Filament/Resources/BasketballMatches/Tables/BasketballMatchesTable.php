@@ -45,6 +45,8 @@ class BasketballMatchesTable
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'planned' => 'info',
+                        'scheduled' => 'info',
+                        'played' => 'success',
                         'completed' => 'success',
                         'cancelled' => 'danger',
                         'postponed' => 'warning',
@@ -52,6 +54,8 @@ class BasketballMatchesTable
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'planned' => 'Plánováno',
+                        'scheduled' => 'Naplánováno',
+                        'played' => 'Odehráno',
                         'completed' => 'Odehráno',
                         'cancelled' => 'Zrušeno',
                         'postponed' => 'Odloženo',
@@ -76,7 +80,9 @@ class BasketballMatchesTable
                     ->label('Stav')
                     ->options([
                         'planned' => 'Plánováno',
-                        'completed' => 'Odehráno',
+                        'scheduled' => 'Naplánováno',
+                        'played' => 'Odehráno',
+                        'completed' => 'Odehráno (ručně)',
                         'cancelled' => 'Zrušeno',
                         'postponed' => 'Odloženo',
                     ]),

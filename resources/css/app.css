@@ -41,6 +41,10 @@
     --color-border: var(--color-ui-border);
     --color-text: var(--color-ui-text);
     --color-text-muted: var(--color-ui-text-muted);
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-info: #3b82f6;
 
     /* Rozměry a tvary */
     --radius-club: 0.5rem;

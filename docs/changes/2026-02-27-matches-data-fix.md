@@ -17,7 +17,9 @@ V rámci tohoto úkolu byla vyřešena neúplnost dat, špatné zobrazení zápa
     *   **Zobrazení týmů:** Pokud má zápas více týmů nebo je označen jako celoklubový, v komponentě `x-match-card` se zobrazí výrazný štítek **"CELÝ KLUB"** nebo výčet týmů (např. "Muži C & Muži E").
     *   **Barevné rozlišení typů zápasů:** Mistrovské (modrá), Pohárové (fialová), Turnaj (zelená), Přátelské (šedá).
     *   **Zvýraznění v detailu:** Stránka detailu zápasu nyní také korektně zobrazuje názvy všech přiřazených týmů v nadpisu i meta informacích.
-    *   **Oprava zobrazení výsledků:** Pokud u odehraného zápasu chybí skóre (což je případ sezóny 2025/2026 ve staré DB), komponenta nyní nezobrazuje prázdné skóre a popisek "Remíza", ale pouze textový stav "Odehráno".
+    *   **Oprava zobrazení výsledků:** Vyřešen problém, kdy se u zápasů se stavem `played` (automaticky nastaveno u historických dat) nezobrazovalo skóre v seznamu i v detailu zápasu.
+    *   **Robustnější kontrola skóre:** V komponentě `x-match-card` i v detailu `show.blade.php` byla upravena podmínka pro zobrazení výsledků tak, aby správně pracovala s hodnotou `0` (pomocí `isset()` / `!is_null()`) a lépe detekovala vyplněné výsledky i pro stav `played`.
+    *   **Podpora stavů v administraci:** Filament administrace nyní plně podporuje stavy `played` (odehráno ze svazu) a `scheduled` (naplánováno ze svazu), včetně možnosti editace skóre u těchto stavů.
 
 4.  **Oprava stavů a historických dat:**
     *   Historické zápasy (přes 200 záznamů), které byly dříve neviditelné kvůli stavu `scheduled`, byly opraveny na `played`.
