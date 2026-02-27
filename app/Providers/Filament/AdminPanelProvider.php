@@ -78,8 +78,8 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
             ->brandName($branding['club_name'])
-            ->brandLogo($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : null)
-            ->favicon($branding['logo_path'] ? asset('storage/' . $branding['logo_path']) : asset('favicon.ico'))
+            ->brandLogo($branding['logo_path'] ? web_asset($branding['logo_path']) : null)
+            ->favicon($branding['logo_path'] ? web_asset($branding['logo_path']) : asset('favicon.ico'))
             ->font('Instrument Sans')
             ->userMenuItems([
                 'profile' => MenuItem::make()

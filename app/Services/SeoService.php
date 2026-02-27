@@ -118,15 +118,15 @@ class SeoService
     protected function resolveOgImage(?SeoMetadata $seo, ?Model $model, array $settings): ?string
     {
         if ($seo && $seo->og_image) {
-            return asset('storage/' . $seo->og_image);
+            return web_asset($seo->og_image);
         }
 
         if ($model && isset($model->featured_image) && $model->featured_image) {
-            return asset('storage/' . $model->featured_image);
+            return web_asset($model->featured_image);
         }
 
         if (isset($settings['seo_og_image_path']) && $settings['seo_og_image_path']) {
-            return asset('storage/' . $settings['seo_og_image_path']);
+            return web_asset($settings['seo_og_image_path']);
         }
 
         // Hardcoded fallback na kvalitní týmový obrázek v assetech
@@ -141,7 +141,7 @@ class SeoService
             }
         }
 
-        return $settings['logo_path'] ? asset('storage/' . $settings['logo_path']) : null;
+        return $settings['logo_path'] ? web_asset($settings['logo_path']) : null;
     }
 
     protected function resolveOgType(?Model $model): string
@@ -163,7 +163,7 @@ class SeoService
             '@type' => 'SportsOrganization',
             'name' => $settings['club_name'] ?? 'Kbelští sokoli',
             'url' => url('/'),
-            'logo' => $settings['logo_path'] ? asset('storage/' . $settings['logo_path']) : null,
+            'logo' => $settings['logo_path'] ? web_asset($settings['logo_path']) : null,
         ];
 
         // Address (jen pokud existují smysluplná data)
@@ -205,7 +205,7 @@ class SeoService
                 '@context' => 'https://schema.org',
                 '@type' => 'NewsArticle',
                 'headline' => $model->title,
-                'image' => $model->featured_image ? [asset('storage/' . $model->featured_image)] : null,
+                'image' => $model->featured_image ? [web_asset($model->featured_image)] : null,
                 'datePublished' => $model->publish_at?->toIso8601String() ?? $model->created_at->toIso8601String(),
                 'dateModified' => $model->updated_at->toIso8601String(),
                 'author' => [

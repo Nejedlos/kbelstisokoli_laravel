@@ -128,10 +128,12 @@ class BrandingSettings extends Page implements HasForms
                                 FileUpload::make('logo_path')
                                     ->label(__('admin/branding-settings.fields.logo'))
                                     ->image()
+                                    ->disk(config('filesystems.uploads.disk'))
                                     ->directory('branding'),
                                 FileUpload::make('alt_logo_path')
                                     ->label(__('admin/branding-settings.fields.alt_logo'))
                                     ->image()
+                                    ->disk(config('filesystems.uploads.disk'))
                                     ->directory('branding'),
                             ]),
                     ]),
@@ -156,10 +158,11 @@ class BrandingSettings extends Page implements HasForms
                                 TextInput::make('admin_contact_phone')
                                     ->label(__('admin/branding-settings.fields.admin_contact_phone')),
                                 FileUpload::make('admin_contact_photo_path')
-                                    ->label(__('admin/branding-settings.fields.admin_contact_photo'))
-                                    ->image()
-                                    ->directory('branding')
-                                    ->helperText(__('admin/branding-settings.fields.admin_contact_photo_help')),
+                                    	->label(__('admin/branding-settings.fields.admin_contact_photo'))
+                                    	->image()
+                                    	->disk(config('filesystems.uploads.disk'))
+                                    	->directory('branding')
+                                    	->helperText(__('admin/branding-settings.fields.admin_contact_photo_help')),
                             ]),
                     ]),
 

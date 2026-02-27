@@ -40,13 +40,13 @@
                             <div class="w-24 h-24 md:w-32 md:h-24 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20">
                                 @if($match->is_home)
                                     @if($branding['logo_path'] ?? null)
-                                        <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $branding['club_name'] ?? 'Sokoli' }}">
+                                        <img src="{{ web_asset($branding['logo_path']) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $branding['club_name'] ?? 'Sokoli' }}">
                                     @else
                                         <i class="fa-light fa-shield-halved text-4xl opacity-20"></i>
                                     @endif
                                 @else
                                     @if($match->opponent->logo)
-                                        <img src="{{ asset('storage/' . $match->opponent->logo) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $match->opponent->name }}">
+                                        <img src="{{ web_asset($match->opponent->logo) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $match->opponent->name }}">
                                     @else
                                         <i class="fa-light fa-shield-halved text-4xl opacity-20"></i>
                                     @endif
@@ -80,13 +80,13 @@
                             <div class="w-24 h-24 md:w-32 md:h-24 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20">
                                 @if(!$match->is_home)
                                     @if($branding['logo_path'] ?? null)
-                                        <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $branding['club_name'] ?? 'Sokoli' }}">
+                                        <img src="{{ web_asset($branding['logo_path']) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $branding['club_name'] ?? 'Sokoli' }}">
                                     @else
                                         <i class="fa-light fa-shield-halved text-4xl opacity-20"></i>
                                     @endif
                                 @else
                                     @if($match->opponent->logo)
-                                        <img src="{{ asset('storage/' . $match->opponent->logo) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $match->opponent->name }}">
+                                        <img src="{{ web_asset($match->opponent->logo) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $match->opponent->name }}">
                                     @else
                                         <i class="fa-light fa-shield-halved text-4xl opacity-20"></i>
                                     @endif

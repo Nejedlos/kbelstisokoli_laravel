@@ -16,7 +16,7 @@
 
                 <div class="flex flex-col items-center p-6 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 text-center">
                     @if(!empty($contact['photo']))
-                        <img src="{{ asset('storage/' . $contact['photo']) }}" alt="admin" class="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-md mb-4">
+                        <img src="{{ web_asset($contact['photo']) }}" alt="admin" class="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-md mb-4">
                     @else
                         <div class="w-20 h-20 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center text-3xl border-4 border-white dark:border-gray-800 shadow-md mb-4">
                             <i class="fa-light fa-user-shield"></i>

@@ -44,7 +44,7 @@
                 <a href="{{ route('member.dashboard') }}" class="flex items-center gap-3 group">
                     @if($branding['logo_path'] ?? null)
                         <div class="w-10 h-10 bg-white/10 rounded-club flex items-center justify-center p-1.5 transition-transform group-hover:scale-105">
-                            <img src="{{ asset('storage/' . $branding['logo_path']) }}" class="max-w-full max-h-full object-contain" alt="">
+                            <img src="{{ web_asset($branding['logo_path']) }}" class="max-w-full max-h-full object-contain" alt="">
                         </div>
                         <div class="flex flex-col leading-tight hidden sm:flex">
                             <span class="text-sm font-black uppercase tracking-tight">{{ $branding['club_short_name'] ?? 'Sokoli' }}</span>

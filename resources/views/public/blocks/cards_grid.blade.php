@@ -47,7 +47,7 @@
                                     <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all duration-300">
                                         {{-- Pokud je to cesta k souboru z FileUpload --}}
                                         @if(str_contains($card['icon'], '/'))
-                                            <img src="{{ asset('storage/' . $card['icon']) }}" class="w-8 h-8 md:w-10 md:h-10 object-contain" alt="" loading="lazy" decoding="async" width="40" height="40">
+                                            <img src="{{ web_asset($card['icon']) }}" class="w-8 h-8 md:w-10 md:h-10 object-contain" alt="" loading="lazy" decoding="async" width="40" height="40">
                                         @else
                                             {{-- Pokud je to název FontAwesome ikony --}}
                                             <i class="fa-light fa-{{ $card['icon'] }} text-2xl md:text-3xl"></i>

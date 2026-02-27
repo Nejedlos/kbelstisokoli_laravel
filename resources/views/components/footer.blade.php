@@ -38,7 +38,7 @@
                 @if($branding['logo_path'])
                     <a href="{{ route('public.home') }}" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl">
-                            <img src="{{ asset('storage/' . $branding['logo_path']) }}" alt="{{ $branding['club_name'] }}" class="h-10 w-auto">
+                            <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ $branding['club_name'] }}" class="h-10 w-auto">
                         </div>
                         <span class="text-xl font-black uppercase tracking-tighter text-white group-hover:text-primary transition-colors">
                             {{ __('footer.brand_title') }}

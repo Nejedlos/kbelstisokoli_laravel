@@ -113,7 +113,7 @@
                                         <div class="flex items-center gap-4">
                                             <div class="w-16 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                                                 @if(!empty($adminFallback['photo']))
-                                                    <img src="{{ asset('storage/' . $adminFallback['photo']) }}" alt="admin" class="w-full h-full object-contain bg-white">
+                                                    <img src="{{ web_asset($adminFallback['photo']) }}" alt="admin" class="w-full h-full object-contain bg-white">
                                                 @else
                                                     <i class="fa-light fa-user-gear text-2xl text-slate-400"></i>
                                                 @endif

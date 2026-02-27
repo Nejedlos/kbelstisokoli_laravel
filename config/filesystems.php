@@ -47,6 +47,16 @@ return [
             'report' => false,
         ],
 
+        // Disk ukazující přímo na public_path() – pro ukládání souborů dostupných přes asset()
+        'public_path' => [
+            'driver' => 'local',
+            'root' => public_path(),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/'),
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'media_public' => [
             'driver' => 'local',
             'root' => storage_path('app/public/media'),
@@ -104,7 +114,7 @@ return [
     */
 
     'uploads' => [
-        'disk' => env('UPLOADS_DISK', 'public'),
+        'disk' => env('UPLOADS_DISK', 'public_path'),
         'dir' => env('UPLOADS_DIR', 'uploads'),
     ],
 
