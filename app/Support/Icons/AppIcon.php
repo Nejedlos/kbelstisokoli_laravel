@@ -40,6 +40,7 @@ enum AppIcon: string
     case AI = 'sparkles';
     case RECAPTCHA = 'shield-halved';
     case SETTINGS = 'gear';
+    case GAUGE = 'gauge-high';
 
     // --- UI Akce a Stavy ---
     case CREATE = 'circle-plus';

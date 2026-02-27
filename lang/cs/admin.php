@@ -101,6 +101,10 @@ return [
                 'label' => 'Auditní log',
                 'plural_label' => 'Auditní logy',
             ],
+            'not_found_log' => [
+                'label' => '404 Log',
+                'plural_label' => 'Detekce 404',
+            ],
             'redirect' => [
                 'label' => 'Přesměrování',
                 'plural_label' => 'Přesměrování',

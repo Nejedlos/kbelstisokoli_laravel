@@ -63,6 +63,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'redirects' => \App\Http\Middleware\RedirectMiddleware::class,
+            'not_found_logger' => \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
 
         $middleware->appendToGroup('web', [
@@ -88,6 +89,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\FullPageCacheMiddleware::class,
             \App\Http\Middleware\PerformanceProfilingMiddleware::class,
             \App\Http\Middleware\SetLocaleMiddleware::class,
+            \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

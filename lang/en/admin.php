@@ -101,6 +101,10 @@ return [
                 'label' => 'Audit Log',
                 'plural_label' => 'Audit Logs',
             ],
+            'not_found_log' => [
+                'label' => '404 Log',
+                'plural_label' => '404 Detection',
+            ],
             'redirect' => [
                 'label' => 'Redirect',
                 'plural_label' => 'Redirects',

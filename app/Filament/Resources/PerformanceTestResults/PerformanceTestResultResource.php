@@ -9,16 +9,39 @@ use App\Filament\Resources\PerformanceTestResults\Schemas\PerformanceTestResultF
 use App\Filament\Resources\PerformanceTestResults\Tables\PerformanceTestResultsTable;
 use App\Models\PerformanceTestResult;
 use BackedEnum;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class PerformanceTestResultResource extends Resource
 {
     protected static ?string $model = PerformanceTestResult::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationIcon(): ?string
+    {
+        return IconHelper::get(\App\Support\Icons\AppIcon::GAUGE);
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.admin_tools');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Test výkonu';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Testy výkonu';
+    }
 
     public static function form(Schema $schema): Schema
     {
