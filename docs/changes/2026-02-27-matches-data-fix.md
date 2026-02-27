@@ -17,11 +17,12 @@ V rámci tohoto úkolu byla vyřešena neúplnost dat, špatné zobrazení zápa
     *   **Zobrazení týmů:** Pokud má zápas více týmů nebo je označen jako celoklubový, v komponentě `x-match-card` se zobrazí výrazný štítek **"CELÝ KLUB"** nebo výčet týmů (např. "Muži C & Muži E").
     *   **Barevné rozlišení typů zápasů:** Mistrovské (modrá), Pohárové (fialová), Turnaj (zelená), Přátelské (šedá).
     *   **Zvýraznění v detailu:** Stránka detailu zápasu nyní také korektně zobrazuje názvy všech přiřazených týmů v nadpisu i meta informacích.
+    *   **Oprava zobrazení výsledků:** Pokud u odehraného zápasu chybí skóre (což je případ sezóny 2025/2026 ve staré DB), komponenta nyní nezobrazuje prázdné skóre a popisek "Remíza", ale pouze textový stav "Odehráno".
 
 4.  **Oprava stavů a historických dat:**
     *   Historické zápasy (přes 200 záznamů), které byly dříve neviditelné kvůli stavu `scheduled`, byly opraveny na `played`.
     *   **Oprava prohazování skóre u zápasů venku:** V seederu byla opravena kritická chyba, kdy se skóre `naše:soupeř` ze staré DB ukládalo jako `home:away` bez ohledu na místo konání. Nyní se u zápasů venku skóre prohodí, aby odpovídalo skutečnému stavu (domácí soupeř : hostující Sokoli).
-    *   **Diagnostika chybějících výsledků pro 2025/2026:** Zjištěno, že v tabulce `zapasy` (stará DB) jsou u aktuální sezóny výsledky `NULL`.
+    *   **Diagnostika chybějících výsledků pro 2025/2026:** Potvrzeno, že v tabulce `zapasy` (stará DB) jsou u aktuální sezóny výsledky skutečně `NULL`. Data je nutné doplnit ručně nebo přes externí import.
     *   Seeder nyní automaticky detekuje stav na základě času konání.
 
 #### Technické detaily:

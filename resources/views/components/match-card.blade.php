@@ -108,7 +108,7 @@
 
             <!-- Result -->
             <div class="flex flex-col items-center sm:items-end min-w-[100px]">
-                @if(in_array($match->status, ['completed', 'played']))
+                @if(in_array($match->status, ['completed', 'played']) && $match->score_home !== null && $match->score_away !== null)
                     <div class="flex items-center gap-2">
                         <div class="text-3xl md:text-4xl font-black tabular-nums tracking-tighter text-secondary">
                             {{ $match->score_home }} : {{ $match->score_away }}
@@ -121,7 +121,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest mt-1 {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-slate-400') }}">
                         {{ $isWin ? __('matches.victory') : ($isLoss ? __('matches.loss') : __('matches.draw')) }}
                     </span>
-@else
+                @else
                     <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
                         {{ $statusLabels[$match->status] ?? $match->status }}
                     </span>
