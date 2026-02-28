@@ -69,44 +69,107 @@ class PhotoPoolResource extends Resource
             ->components([
                 Placeholder::make('ks_global_loader')
                     ->hiddenLabel()
-                    ->content(fn () => new HtmlString(Blade::render('
-                        <x-loader.basketball wire:target="processImportQueue">
+                    ->content(fn ($livewire) => new HtmlString(Blade::render('
+                        <x-loader.basketball wire:target="processImportQueue,cancelImportQueue,confirmCancelImportQueue,dismissCancelImportQueue" class="{{ $confirmingCancellation ? \'is-loading\' : \'\' }}">
                             <div class="text-center p-10 bg-white/5 dark:bg-black/40 backdrop-blur-2xl rounded-[3rem] border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] max-w-sm mx-auto overflow-hidden relative">
                                 <div class="relative z-10">
-                                    <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/10 text-white shadow-2xl border border-white/20 rotate-6 transition-transform duration-500">
-                                        <i class="fa-light fa-arrows-rotate fa-spin text-3xl text-primary-500"></i>
-                                    </div>
-                                    <strong class="text-3xl font-black block mb-3 text-white tracking-tight uppercase italic leading-none">Hromadný import</strong>
-                                    <p class="text-[14px] text-white/70 font-medium leading-relaxed mb-6">
-                                        Právě nahráváme a optimalizujeme vaše fotografie. Toto může chvíli trvat v závislosti na počtu souborů.
-                                    </p>
-                                    <div class="inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white text-[11px] font-black uppercase tracking-widest rounded-full animate-pulse shadow-xl shadow-red-600/40 border border-red-500/50">
-                                        <i class="fa-light fa-shield-exclamation text-base"></i>
-                                        Nezavírejte okno
-                                    </div>
+                                    @if($confirmingCancellation)
+                                        <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-red-500 text-white shadow-2xl border border-red-400">
+                                            <i class="fa-light fa-trash-can-xmark text-3xl animate-bounce"></i>
+                                        </div>
+                                        <strong class="text-2xl font-black block mb-2 text-white tracking-tight uppercase italic leading-none">Přerušit import?</strong>
+                                        <p class="text-[13px] text-white/80 font-medium leading-relaxed mb-8 px-4">
+                                            Opravdu chcete zastavit nahrávání? <br><strong class="text-red-400 uppercase tracking-wider">Zbývající fotografie ve frontě budou smazány!</strong>
+                                        </p>
 
-                                    <button
-                                        type="button"
-                                        wire:click="cancelImportQueue"
-                                        wire:confirm="Opravdu chcete přerušit import a smazat zbývající frontu?"
-                                        class="mt-6 flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-full border border-white/20 transition-all duration-300 mx-auto group"
-                                    >
-                                        <i class="fa-light fa-circle-xmark text-sm text-red-400 group-hover:scale-110 transition-transform"></i>
-                                        Zrušit import
-                                    </button>
+                                        <div class="flex flex-col gap-3 max-w-[200px] mx-auto">
+                                            <button
+                                                type="button"
+                                                wire:click="confirmCancelImportQueue"
+                                                class="flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-900/40 transition-all duration-300"
+                                            >
+                                                <i class="fa-light fa-check-double"></i>
+                                                Ano, smazat a zrušit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="dismissCancelImportQueue"
+                                                class="flex items-center justify-center gap-2 px-6 py-2 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300"
+                                            >
+                                                Zpět
+                                            </button>
+                                        </div>
+                                    @else
+                                        <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/10 text-white shadow-2xl border border-white/20 rotate-6 transition-transform duration-500">
+                                            <i class="fa-light fa-arrows-rotate fa-spin text-3xl text-primary-500"></i>
+                                        </div>
+                                        <strong class="text-3xl font-black block mb-3 text-white tracking-tight uppercase italic leading-none">Hromadný import</strong>
+                                        <p class="text-[14px] text-white/70 font-medium leading-relaxed mb-6">
+                                            Právě nahráváme a optimalizujeme vaše fotografie. Toto může chvíli trvat v závislosti na počtu souborů.
+                                        </p>
+                                        <div class="inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white text-[11px] font-black uppercase tracking-widest rounded-full animate-pulse shadow-xl shadow-red-600/40 border border-red-500/50">
+                                            <i class="fa-light fa-shield-exclamation text-base"></i>
+                                            Nezavírejte okno
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            wire:click="cancelImportQueue"
+                                            class="mt-6 flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-full border border-white/20 transition-all duration-300 mx-auto group"
+                                        >
+                                            <i class="fa-light fa-circle-xmark text-sm text-red-400 group-hover:scale-110 transition-transform"></i>
+                                            Zrušit import
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </x-loader.basketball>
-                    ')))
+                    ', ['confirmingCancellation' => $livewire->confirmingCancellation])))
                     ->columnSpanFull(),
 
                 Placeholder::make('processing_progress')
                     ->hiddenLabel()
                     ->visible(fn ($record) => $record && (! empty($record->pending_import_queue) || $record->is_processing_import))
-                    ->content(function ($record) {
+                    ->content(function ($record, $livewire) {
                         $count = count($record->pending_import_queue ?? []);
                         $status = $record->is_processing_import ? 'Probíhá import fotografií' : 'Čeká na zpracování';
                         $icon = $record->is_processing_import ? 'fa-spinner-third fa-spin' : 'fa-clock';
+                        $isConfirming = $livewire->confirmingCancellation;
+
+                        if ($isConfirming) {
+                            return new HtmlString("
+                                <div class='relative overflow-hidden p-8 bg-red-50 dark:bg-red-950/20 backdrop-blur-2xl border border-red-200 dark:border-red-900/50 rounded-[2.5rem] flex items-center gap-8 shadow-2xl shadow-red-200/20 dark:shadow-none transition-all duration-500'>
+                                    <div class='flex-shrink-0'>
+                                        <div class='w-20 h-20 rounded-[1.75rem] bg-red-600 flex items-center justify-center text-4xl text-white shadow-xl border border-red-500'>
+                                            <i class='fa-light fa-trash-can-xmark animate-pulse'></i>
+                                        </div>
+                                    </div>
+                                    <div class='flex-grow'>
+                                        <div class='text-2xl font-black text-red-900 dark:text-red-400 leading-tight mb-2 uppercase italic tracking-tight'>Přerušit import?</div>
+                                        <div class='text-sm text-red-700 dark:text-red-500 font-semibold mb-4'>
+                                            Zbývajících <strong>{$count}</strong> fotografií bude z fronty smazáno.
+                                        </div>
+                                        <div class='flex items-center gap-4'>
+                                            <button
+                                                type='button'
+                                                wire:click='confirmCancelImportQueue'
+                                                class='flex items-center gap-2 px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 shadow-lg shadow-red-600/30'
+                                            >
+                                                <i class='fa-light fa-check'></i>
+                                                Ano, smazat a zrušit
+                                            </button>
+                                            <button
+                                                type='button'
+                                                wire:click='dismissCancelImportQueue'
+                                                class='flex items-center gap-2 px-6 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-all duration-300'
+                                            >
+                                                Zpět
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ");
+                        }
 
                         return new HtmlString("
                             <div class='relative overflow-hidden p-8 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] flex items-center gap-8 shadow-2xl shadow-slate-200/20 dark:shadow-none transition-all duration-500' wire:poll.3s='processImportQueue'>
@@ -137,7 +200,6 @@ class PhotoPoolResource extends Resource
                                         <button
                                             type='button'
                                             wire:click='cancelImportQueue'
-                                            wire:confirm='Opravdu chcete přerušit import a smazat zbývající frontu?'
                                             class='ml-auto flex items-center gap-2 px-4 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 dark:border-red-900/50 transition-all duration-300 shadow-sm'
                                         >
                                             <i class='fa-light fa-circle-xmark'></i>
