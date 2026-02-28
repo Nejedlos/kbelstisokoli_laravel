@@ -112,16 +112,16 @@ class CreatePhotoPool extends CreateRecord
                     ]);
                     $asset->save();
 
-                    $asset
-                        ->addMedia($file)
-                        ->toMediaCollection('default');
-
-                    // Napojení do poolu
+                    // Napojení do poolu hned po uložení assetu (aby path generator mohl v DB vidět vazbu na pool)
                     $pool->mediaAssets()->attach($asset->id, [
                         'sort_order' => $sort,
                         'is_visible' => true,
                         'caption_override' => null,
                     ]);
+
+                    $asset
+                        ->addMedia($file)
+                        ->toMediaCollection('default');
                 } catch (\Throwable $e) {
                     \Log::error('Photo import failed in afterCreate: '.$e->getMessage());
                 }

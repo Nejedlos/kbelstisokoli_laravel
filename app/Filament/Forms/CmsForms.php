@@ -10,6 +10,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
+use Illuminate\Support\HtmlString;
 
 class CmsForms
 {
@@ -114,7 +117,7 @@ class CmsForms
 
                         FileUpload::make('og_image')
                             ->label('Sdílený obrázek (OG Image)')
-                            ->helperText('Doporučený rozměr 1200x630px. Pokud nevyberete, použije se náhledový obrázek stránky nebo globální logo.')
+                            ->placeholder(self::getUploadPlaceholder('Nahrajte obrázek pro sociální sítě', 'Doporučený rozměr 1200x630px'))
                             ->image()
                             ->disk(config('filesystems.uploads.disk'))
                             ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/seo/og-images'),
@@ -127,5 +130,35 @@ class CmsForms
             ])
             ->collapsible()
             ->collapsed();
+    }
+
+    public static function getUploadPlaceholder(?string $title = null, ?string $description = null, string|AppIcon $iconKey = IconHelper::UPLOAD): HtmlString
+    {
+        $title ??= 'Klikněte nebo přetáhněte soubory sem';
+        $icon = IconHelper::render($iconKey, 'fal')->toHtml();
+        // Nahradíme fa-fw za fa-2xl pro větší ikonu
+        $icon = str_replace('fa-fw', 'fa-2xl', $icon);
+
+        $html = <<<HTML
+            <div class="flex flex-col items-center justify-center py-12 px-6 group/dropzone transition-all duration-300">
+                <div class="w-20 h-20 mb-6 rounded-3xl bg-white dark:bg-gray-800 flex items-center justify-center border border-gray-100 dark:border-gray-700 text-primary-500 transition-all duration-500 group-hover/dropzone:scale-110 group-hover/dropzone:rotate-3 group-hover/dropzone:bg-primary-500 group-hover/dropzone:text-white group-hover/dropzone:border-primary-400 shadow-xl shadow-gray-200/50 dark:shadow-none">
+                    {$icon}
+                </div>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300 group-hover/dropzone:text-primary-600 dark:group-hover/dropzone:text-primary-400">
+                    {$title}
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 text-center max-w-[320px] leading-relaxed">
+                    {$description}
+                </p>
+                <div class="mt-6 flex flex-wrap justify-center gap-3 opacity-40 transition-all duration-300 group-hover/dropzone:opacity-100 group-hover/dropzone:translate-y-1">
+                    <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">JPG</span>
+                    <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">PNG</span>
+                    <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">WEBP</span>
+                    <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">HEIC</span>
+                </div>
+            </div>
+HTML;
+
+        return new HtmlString($html);
     }
 }

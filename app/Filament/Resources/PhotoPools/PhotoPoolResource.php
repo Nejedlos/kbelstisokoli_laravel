@@ -188,7 +188,7 @@ class PhotoPoolResource extends Resource
                             ->schema([
                                 FileUpload::make('photos')
                                     ->label('Hromadné nahrávání fotografií')
-                                    ->placeholder(new HtmlString('<div class="flex flex-col items-center justify-center py-4 text-gray-500 dark:text-gray-400">' . IconHelper::render(IconHelper::UPLOAD, 'fal')->toHtml() . '<span class="text-sm font-medium mt-3">Klikněte nebo přetáhněte fotografie sem</span><span class="text-xs mt-1">Podporuje hromadný výběr (až 200 souborů najednou)</span></div>'))
+                                    ->placeholder(CmsForms::getUploadPlaceholder('Klikněte nebo přetáhněte fotografie sem', 'Podporuje hromadný výběr (až 200 souborů najednou)'))
                                     ->multiple()
                                     ->image()
                                     ->reorderable()
@@ -199,19 +199,20 @@ class PhotoPoolResource extends Resource
                                     ->openable()
                                     ->maxFiles(200)
                                     ->maxSize(30720) // 30 MB
-                                    ->imageEditor()
-                                    ->imageEditorAspectRatios([
-                                        null,
-                                        '16:9',
-                                        '4:3',
-                                        '1:1',
-                                    ])
+                                    ->maxParallelUploads(10)
+                                    ->imageResizeTargetWidth('1920')
+                                    ->imageResizeTargetHeight('1920')
+                                    ->imageResizeMode('contain')
+                                    ->imageResizeUpscale(false)
                                     ->panelLayout('grid')
                                     ->uploadingMessage(__('admin.navigation.resources.photo_pool.notifications.uploading'))
                                     ->extraAttributes([
                                         'style' => 'max-height: 60vh; overflow-y: auto;',
+                                        'x-on:file-pond-init' => "console.log('KS DEBUG: FilePond inicializován')",
+                                        'x-on:file-pond-add-file' => "console.log('KS DEBUG: Soubor přidán do fronty:', \$event.detail.file.filename)",
+                                        'x-on:file-pond-process-file' => "console.log('KS DEBUG: Soubor úspěšně nahrán na server:', \$event.detail.file.filename)",
                                     ])
-                                    ->helperText(new HtmlString('<div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 flex items-start gap-3">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().'<div><strong>Informace k optimalizaci:</strong> Povolené typy: JPG, PNG, WEBP, HEIC. Fotografie budou po uložení automaticky optimalizovány pro web (převedeny na WebP a zmenšeny). Pokud nahráváte velké množství fotek, proces uložení může trvat déle.</div></div>'))
+                                    ->helperText(new HtmlString('<div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 flex items-start gap-3">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().'<div><strong>Informace k optimalizaci:</strong> Povolené typy: JPG, PNG, WEBP, HEIC. Fotografie jsou pro zvýšení rychlosti automaticky zmenšeny v prohlížeči a následně na serveru převedeny na WebP. Nahrávání probíhá paralelně (10 souborů najednou).</div></div>'))
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
                                     ->dehydrated(false)
                                     ->columnSpanFull(),

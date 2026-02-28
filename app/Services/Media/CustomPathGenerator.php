@@ -42,14 +42,29 @@ class CustomPathGenerator implements PathGenerator
         $uploadsRoot = trim(config('filesystems.uploads.dir', 'uploads'), '/');
         $modelName = class_basename($media->model_type);
 
-        // Zjednodušená cesta pro výchozí avatary v galerii
-        if ($modelName === 'MediaAsset' && $media->collection_name === 'default') {
-            return "{$uploadsRoot}/defaults/{$media->id}";
-        }
-
         // Zjednodušená cesta pro avatary uživatelů
         if ($modelName === 'User' && $media->collection_name === 'avatar') {
             return "{$uploadsRoot}/avatars/{$media->model_id}";
+        }
+
+        // Pro MediaAsset se snažíme najít, jestli nepatří do PhotoPoolu (pro lepší organizaci na disku)
+        if ($modelName === 'MediaAsset') {
+            /** @var \App\Models\MediaAsset $asset */
+            $asset = $media->model;
+
+            if ($asset instanceof \App\Models\MediaAsset) {
+                // Pokud má uploader_id === null a kolekce je default, považujeme to za systémovou věc (defaults)
+                // (např. výchozí avatary synchronizované příkazem)
+                if ($asset->uploaded_by_id === null && $media->collection_name === 'default') {
+                    return "{$uploadsRoot}/defaults/{$media->id}";
+                }
+
+                // Pokud patří do PhotoPoolu, dáme ho do složky daného poolu (podle prvního nalezeného)
+                $pool = $asset->photoPools()->first();
+                if ($pool) {
+                    return "{$uploadsRoot}/photo_pools/{$pool->id}/{$media->id}";
+                }
+            }
         }
 
         $model = Str::snake($modelName);
@@ -57,6 +72,8 @@ class CustomPathGenerator implements PathGenerator
         $collection = $media->collection_name ?: 'default';
         $id = $media->uuid ?: $media->id;
 
-        return "{$uploadsRoot}/media/{$model}/{$modelId}/{$collection}/{$id}";
+        // Výchozí struktura: uploads/{model}/{model_id}/{collection}/{id}
+        // Odstraněn segment /media/ pro zjednodušení dle požadavku "uploads/model/id"
+        return "{$uploadsRoot}/{$model}/{$modelId}/{$collection}/{$id}";
     }
 }

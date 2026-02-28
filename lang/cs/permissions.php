@@ -21,4 +21,11 @@ return [
     'logged_in_as' => 'Jste přihlášeni jako :name',
     'stop_impersonation' => 'Ukončit impersonaci',
     'impersonate_confirm' => 'Opravdu se chcete přepnout na uživatele: ',
+    'impersonation_switch_title' => 'Střídání uživatelů',
+    'impersonation_coach_decision' => 'Coach decision',
+    'impersonation_info_text' => 'Budete moci jednat jménem tohoto uživatele. Pro návrat použijte tlačítko v horní liště.',
+    'impersonation_enter_game' => 'Vstoupit do hry',
+    'impersonation_stay_bench' => 'Zůstat na střídačce',
+    'impersonation_return_success' => 'Vrátili jste se ke svému účtu.',
+    'impersonation_game_continues' => 'Hra pokračuje...',
 ];

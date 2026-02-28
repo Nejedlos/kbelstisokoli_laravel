@@ -68,6 +68,7 @@ class AdminPanelProvider extends PanelProvider
             ))
             ->renderHook('panels::body.start', fn (): string => Blade::render('
                 <x-impersonation-banner />
+                <x-impersonation-notification />
             '))
             ->renderHook('panels::body.end', fn (): string => Blade::render('
                 <x-back-to-top />

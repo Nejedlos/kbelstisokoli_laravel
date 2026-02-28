@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\PhotoPools\Pages;
 
+use App\Filament\Forms\CmsForms;
 use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\MediaAsset;
 use App\Models\PhotoPool;
 use App\Services\AiTextEnhancer;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
@@ -24,6 +26,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class ListPhotoPools extends ListRecords
 {
@@ -196,7 +199,7 @@ class ListPhotoPools extends ListRecords
                         ->schema([
                             FileUpload::make('photos')
                                 ->label(__('admin.navigation.resources.photo_pool.fields.photos'))
-                                ->placeholder(new \Illuminate\Support\HtmlString('<div class="flex flex-col items-center justify-center py-4 text-gray-500 dark:text-gray-400">' . \App\Support\IconHelper::render(\App\Support\IconHelper::UPLOAD, 'fal')->toHtml() . '<span class="text-sm font-medium mt-3">Klikněte nebo přetáhněte fotografie sem</span></div>'))
+                                ->placeholder(CmsForms::getUploadPlaceholder('Klikněte nebo přetáhněte fotografie sem'))
                                 ->multiple()
                                 ->image()
                                 ->panelLayout('grid')
@@ -205,12 +208,20 @@ class ListPhotoPools extends ListRecords
                                 ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/photo_pools/incoming')
                                 ->maxFiles(200)
                                 ->maxSize(30720)
+                                ->maxParallelUploads(10)
+                                ->imageResizeTargetWidth('1920')
+                                ->imageResizeTargetHeight('1920')
+                                ->imageResizeMode('contain')
+                                ->imageResizeUpscale(false)
                                 ->uploadingMessage(__('admin.navigation.resources.photo_pool.notifications.uploading'))
                                 ->extraAttributes([
                                     'style' => 'max-height: 60vh; overflow-y: auto;',
+                                    'x-on:file-pond-init' => "console.log('KS DEBUG: FilePond inicializován')",
+                                    'x-on:file-pond-add-file' => "console.log('KS DEBUG: Soubor přidán do fronty:', \$event.detail.file.filename)",
+                                    'x-on:file-pond-process-file' => "console.log('KS DEBUG: Soubor úspěšně nahrán na server:', \$event.detail.file.filename)",
                                 ])
-                                ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
-                                ->helperText('Maximálně 200 fotek, každá do 30 MB. Budou automaticky převedeny na WebP.')
+                                ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
+                                ->helperText(new HtmlString('<div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 flex items-start gap-3">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().'<div><strong>Informace k optimalizaci:</strong> Fotografie jsou pro zvýšení rychlosti automaticky zmenšeny v prohlížeči a následně na serveru převedeny na WebP. Nahrávání probíhá paralelně (10 souborů najednou).</div></div>'))
                                 ->required(),
                         ]),
                     ]),

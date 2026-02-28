@@ -452,6 +452,59 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
 
 
 /* Zviditelnění ikon po načtení stylů a stabilizačního CSS z head */
+/* ==========================
+   FileUpload (FilePond) - Modern KS Design
+   ========================== */
+.fi-fo-file-upload .filepond--root {
+    @apply cursor-pointer transition-all duration-300;
+    margin-bottom: 0 !important;
+}
+
+/* Skrytí standardního šedého FilePond panelu */
+.fi-fo-file-upload .filepond--panel-root {
+    background-color: transparent !important;
+    border: 2px dashed var(--color-gray-200) !important;
+    border-radius: 1rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.dark .fi-fo-file-upload .filepond--panel-root {
+    border-color: var(--color-gray-700) !important;
+    background-color: rgba(30, 41, 59, 0.2) !important;
+}
+
+/* Hover stav na celý kontejner */
+.fi-fo-file-upload .filepond--root:hover .filepond--panel-root {
+    border-color: var(--color-primary-400) !important;
+    background-color: rgba(var(--primary-50-rgb, 239, 68, 68), 0.05) !important;
+}
+
+.dark .fi-fo-file-upload .filepond--root:hover .filepond--panel-root {
+    border-color: var(--color-primary-500) !important;
+    background-color: rgba(var(--primary-900-rgb, 239, 68, 68), 0.1) !important;
+}
+
+/* Drop label centrování a velikost */
+.fi-fo-file-upload .filepond--drop-label {
+    @apply cursor-pointer;
+    min-height: 14rem !important;
+}
+
+/* Styling nahraných položek (v mřížce) */
+.fi-fo-file-upload .filepond--item-panel {
+    border-radius: 0.75rem !important;
+    background-color: var(--color-gray-100) !important;
+}
+
+.dark .fi-fo-file-upload .filepond--item-panel {
+    background-color: var(--color-gray-800) !important;
+}
+
+.fi-fo-file-upload .filepond--file-info-main {
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+}
+
 .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
     opacity: 1 !important;
     visibility: visible !important;

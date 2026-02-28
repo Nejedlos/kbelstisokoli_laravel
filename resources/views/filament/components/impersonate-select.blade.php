@@ -4,6 +4,8 @@
     query: '',
     results: [],
     loading: false,
+    confirmModal: false,
+    targetUser: { id: null, name: '' },
     search() {
         this.loading = true;
         fetch('{{ route('admin.impersonate.search') }}?q=' + encodeURIComponent(this.query))
@@ -17,10 +19,12 @@
             });
     },
     impersonate(userId, userName) {
-        if (confirm('{{ __('permissions.impersonate_confirm') }}' + userName + '?')) {
-            let url = '{{ route('admin.impersonate.start', ['userId' => 'USER_ID']) }}';
-            window.location.href = url.replace('USER_ID', userId);
-        }
+        this.targetUser = { id: userId, name: userName };
+        this.confirmModal = true;
+    },
+    confirmImpersonate() {
+        let url = '{{ route('admin.impersonate.start', ['userId' => 'USER_ID']) }}';
+        window.location.href = url.replace('USER_ID', this.targetUser.id);
     }
 }" class="relative flex items-center">
 
@@ -102,5 +106,87 @@
             </div>
         @endif
     </div>
+
+    <!-- Confirm Modal -->
+    <template x-teleport="body">
+        <div x-show="confirmModal"
+             class="fixed inset-0 z-[100000] flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto"
+             x-cloak>
+            <!-- Backdrop -->
+            <div x-show="confirmModal"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="confirmModal = false"
+                 class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+
+            <!-- Modal Content -->
+            <div x-show="confirmModal"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+                 class="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl overflow-hidden border border-white/20">
+
+                <!-- Basketball Decoration -->
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-red-600/5 rounded-full flex items-center justify-center rotate-12">
+                    <i class="fa-light fa-basketball text-[8rem] text-red-600/10"></i>
+                </div>
+
+                <div class="relative p-8">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600">
+                            <i class="fa-light fa-user-magnifying-glass text-3xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none mb-1">
+                                {{ __('permissions.impersonation_switch_title') }}
+                            </h2>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-red-600 italic">
+                                {{ __('permissions.impersonation_coach_decision') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                            {{ __('permissions.impersonate_confirm') }}
+                            <span class="font-black text-gray-900 dark:text-white bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded" x-text="targetUser.name"></span>?
+                        </p>
+                        <div class="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800">
+                            <i class="fa-light fa-circle-exclamation text-amber-600"></i>
+                            <p class="text-[11px] font-medium text-amber-800 dark:text-amber-400 leading-snug">
+                                {{ __('permissions.impersonation_info_text') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <button @click="confirmImpersonate()"
+                                class="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-red-500/25 flex items-center justify-center gap-2 group">
+                            <span>{{ __('permissions.impersonation_enter_game') }}</span>
+                            <i class="fa-light fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                        <button @click="confirmModal = false"
+                                class="w-full py-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 font-bold text-xs uppercase tracking-widest transition-colors">
+                            {{ __('permissions.impersonation_stay_bench') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom progress decoration -->
+                <div class="h-1.5 w-full bg-slate-100 dark:bg-gray-800 flex">
+                    <div class="h-full w-1/3 bg-red-600"></div>
+                    <div class="h-full w-1/3 bg-navy-600"></div>
+                    <div class="h-full w-1/3 bg-blue-500"></div>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
 @endif

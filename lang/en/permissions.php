@@ -21,4 +21,11 @@ return [
     'logged_in_as' => 'You are logged in as :name',
     'stop_impersonation' => 'Stop Impersonation',
     'impersonate_confirm' => 'Do you really want to switch to user: ',
+    'impersonation_switch_title' => 'Player Substitution',
+    'impersonation_coach_decision' => 'Coach decision',
+    'impersonation_info_text' => 'You will be able to act on behalf of this user. To return, use the button in the top bar.',
+    'impersonation_enter_game' => 'Enter the game',
+    'impersonation_stay_bench' => 'Stay on the bench',
+    'impersonation_return_success' => 'You have returned to your account.',
+    'impersonation_game_continues' => 'The game continues...',
 ];
