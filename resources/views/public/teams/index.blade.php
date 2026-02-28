@@ -8,6 +8,7 @@
         image="assets/img/teams/teams-header.jpg"
     />
 
+@cacheFragment('teams_index_content_' . app()->getLocale(), 3600)
     <div class="section-padding bg-bg">
         <div class="container">
             {{-- Hlavní týmy s náborem --}}
@@ -232,4 +233,5 @@
             </div>
         </div>
     </div>
+@endCacheFragment
 @endsection

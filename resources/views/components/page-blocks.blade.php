@@ -1,5 +1,6 @@
 @props(['blocks' => [], 'animate' => false, 'breadcrumbs' => null])
 
+@cacheFragment('page_blocks_' . md5(serialize($blocks)) . '_' . ($animate ? 'a' : 'n') . '_' . app()->getLocale(), 3600)
 <div class="page-blocks">
     @forelse($blocks as $block)
         @php
@@ -48,3 +49,4 @@
         <div class="container py-20 text-center text-slate-500">Zatím zde nejsou žádné bloky obsahu.</div>
     @endforelse
 </div>
+@endCacheFragment

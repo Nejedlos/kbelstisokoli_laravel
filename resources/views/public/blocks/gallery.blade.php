@@ -1,3 +1,4 @@
+@cacheFragment('block_gallery_' . ($data['gallery_id'] ?? 'none') . '_' . app()->getLocale(), 3600)
 @php
     $gallery = isset($data['gallery_id']) ? \App\Models\Gallery::with('mediaAssets')->find($data['gallery_id']) : null;
     $layout = $data['layout'] ?? 'grid';
@@ -51,3 +52,4 @@
         @endif
     </div>
 </section>
+@endCacheFragment

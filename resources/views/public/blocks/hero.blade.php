@@ -1,3 +1,4 @@
+@cacheFragment('block_hero_' . ($data['media_asset_id'] ?? 'none') . '_' . md5($data['headline'] ?? '') . '_' . app()->getLocale(), 3600)
 @php
     $asset = isset($data['media_asset_id']) ? \App\Models\MediaAsset::find($data['media_asset_id']) : null;
     $imageUrl = $asset ? $asset->getUrl('large') : ($data['image_url'] ?? null);
@@ -218,3 +219,4 @@
         </div>
     @endif
 </section>
+@endCacheFragment

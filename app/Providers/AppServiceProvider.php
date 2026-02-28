@@ -86,6 +86,14 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\Team::class,
             \App\Models\Training::class,
             \App\Models\Setting::class,
+            \App\Models\Page::class,
+            \App\Models\PageBlock::class,
+            \App\Models\Menu::class,
+            \App\Models\MenuItem::class,
+            \App\Models\Announcement::class,
+            \App\Models\MediaAsset::class,
+            \App\Models\Gallery::class,
+            \App\Models\PhotoPool::class,
         ];
 
         foreach ($models as $model) {
