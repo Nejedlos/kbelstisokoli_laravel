@@ -1,6 +1,6 @@
 <div x-data="{ searchOpen: false }" class="relative flex items-center">
     <!-- Desktop Trigger (Input-like) -->
-    <div class="hidden md:block relative group min-w-[280px] mr-1">
+    <div class="hidden lg:block relative group min-w-[280px] mr-1">
         <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400 group-hover:text-primary transition-colors">
             <i class="fa-light fa-magnifying-glass text-[13px]"></i>
         </div>
@@ -13,7 +13,7 @@
 
     <!-- Mobile Trigger (Icon) -->
     <button @click="searchOpen = !searchOpen"
-            class="md:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
+            class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
             title="{{ __('Search') }}">
         <i class="fa-light fa-magnifying-glass text-xl group-hover:scale-110 transition-transform"></i>
     </button>
@@ -26,7 +26,7 @@
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-         class="ks-search-overlay fixed inset-x-0 top-16 w-screen md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-full md:min-w-[450px] bg-white dark:bg-gray-900 rounded-none md:rounded-2xl shadow-2xl border-t md:border border-gray-100 dark:border-gray-800 p-2 z-50 overflow-hidden"
+         class="ks-search-overlay fixed inset-x-0 top-16 w-screen lg:absolute lg:inset-auto lg:right-0 lg:top-full lg:mt-3 lg:w-full lg:min-w-[450px] bg-white dark:bg-gray-900 rounded-none lg:rounded-2xl shadow-2xl border-t lg:border border-gray-100 dark:border-gray-800 p-2 z-50 overflow-hidden"
          style="display: none;">
 
         <div class="p-2 filament-standard-search-container">

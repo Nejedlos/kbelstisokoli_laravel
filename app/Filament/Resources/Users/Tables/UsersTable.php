@@ -35,6 +35,8 @@ class UsersTable
                 SpatieMediaLibraryImageColumn::make('avatar')
                     ->label(__('user.fields.avatar'))
                     ->collection('avatar')
+                    ->conversion('thumb')
+                    ->defaultImageUrl(asset('images/default-avatar-thumb.webp'))
                     ->circular()
                     ->toggleable(),
                 TextColumn::make('name')

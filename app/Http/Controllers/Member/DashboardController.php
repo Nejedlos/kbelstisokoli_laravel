@@ -25,7 +25,7 @@ class DashboardController extends Controller
         // Doplňková data pro moderní nástěnku
         $economySummary = app(FinanceService::class)->getMemberSummary($user);
         $notifications = $user->notifications()->latest()->limit(5)->get();
-        $avatarUrl = method_exists($user, 'getFirstMediaUrl') ? ($user->getFirstMediaUrl('avatar') ?: null) : null;
+        $avatarUrl = method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl('thumb') : null;
 
         $currentSeasonId = Season::where('is_active', true)->first()?->id;
         $trackedUserIds = $currentSeasonId

@@ -16,7 +16,7 @@ return [
     'manage_economy' => 'Správa ekonomiky (platby, tarify)',
     'manage_matches' => 'Správa zápasů',
     'manage_events' => 'Správa klubových akcí',
-    'impersonate_users' => 'Impersonace (přepínání za uživatele)',
+    'impersonate_users' => 'Impersonace',
     'impersonation_active' => 'Režim prohlížení aktivní',
     'logged_in_as' => 'Jste přihlášeni jako :name',
     'stop_impersonation' => 'Ukončit impersonaci',

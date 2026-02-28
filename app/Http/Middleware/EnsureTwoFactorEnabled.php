@@ -33,7 +33,13 @@ class EnsureTwoFactorEnabled
             'confirmed' => (bool) ($user?->two_factor_confirmed_at),
             'needs_confirmation' => \Laravel\Fortify\Fortify::confirmsTwoFactorAuthentication(),
             'session_id' => \Illuminate\Support\Facades\Session::getId(),
+            'impersonated_by' => $request->session()->get('impersonated_by'),
         ]);
+
+        // Pokud je impersonace aktivní, přeskakujeme kontrolu 2FA
+        if ($request->session()->has('impersonated_by')) {
+            return $next($request);
+        }
 
         if ($isAdmin && $isAdminRoute) {
             // A nemá AKTIVOVANÉ (potvrzené) 2FA

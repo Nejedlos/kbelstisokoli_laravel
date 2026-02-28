@@ -19,6 +19,8 @@ class AppSyncCommand extends Command
     protected $signature = 'app:sync
                             {--force : Přepíše existující data, pokud je to podporováno dílčími příkazy}
                             {--usersync : Synchronizovat avatary a hráčské fotky (z NextAI)}
+                            {--syncuser : Alias pro --usersync (překlep uživatele)}
+                            {--ai : Vynutit reindexaci AI (standardně se v app:sync přeskakuje)}
                             {--ai-test : Testovací režim pro AI (přeskočí interakce)}
                             {--freshseed : Smaže a znovu nahraje data na produkci pomocí seederů}';
 
@@ -65,6 +67,8 @@ class AppSyncCommand extends Command
     {
         $this->info('--- Running Environment Data Sync ---');
 
+        $usersync = $this->option('usersync') || $this->option('syncuser');
+
         // Ikony
         if (class_exists(\App\Console\Commands\IconsSyncCommand::class)) {
             $this->call('app:icons:sync');
@@ -81,7 +85,7 @@ class AppSyncCommand extends Command
         }
 
         // Avatary (uživatelské avatary a hráčské fotky z NextAI) - pouze s --usersync
-        if ($this->option('usersync') && class_exists(\App\Console\Commands\AvatarsSyncCommand::class)) {
+        if ($usersync && class_exists(\App\Console\Commands\AvatarsSyncCommand::class)) {
             $this->call('avatars:sync', [
                 '--force' => $this->option('force'),
             ]);
@@ -237,16 +241,36 @@ class AppSyncCommand extends Command
         // --- Nahrávání lokálních assetů ---
         \Laravel\Prompts\info("📤 Nahrávám lokální assety a build na server...");
 
+        $usersync = $this->option('usersync') || $this->option('syncuser');
+
         $ftpHost = env('PROD_FTP_HOST');
         $ftpUser = env('PROD_FTP_USER');
         $ftpPass = env('PROD_FTP_PASSWORD');
         $ftpPort = env('PROD_FTP_PORT', 21);
 
-        foreach (['public/assets/', 'public/build/', 'database/migrations/', 'database/seeders/', 'database/factories/'] as $dir) {
+        $syncDirs = [
+            'public/assets/',
+            'public/build/',
+            'public/uploads/defaults/',
+            'database/migrations/',
+            'database/seeders/',
+            'database/factories/'
+        ];
+
+        // Pokud synchronizujeme uživatele, nahrajeme i jejich lokálně stažená média
+        if ($usersync) {
+            $syncDirs[] = 'public/uploads/media/';
+            $syncDirs[] = 'public/uploads/avatars/';
+        }
+
+        foreach ($syncDirs as $dir) {
             $localDir = base_path($dir);
             if (file_exists($localDir)) {
                 $this->line("Syncing $dir...");
                 $synced = false;
+
+                // Zajistíme, že cílový adresář na serveru existuje
+                Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p " . escapeshellarg($path . "/" . $dir) . "'");
 
                 // 1. Rsync
                 $checkRsync = Process::run("rsync --version");
@@ -302,8 +326,12 @@ class AppSyncCommand extends Command
                 $params[] = "--freshseed=1";
             }
 
-            if ($this->option('usersync')) {
+            if ($usersync) {
                 $params[] = "--usersync=1";
+            }
+
+            if (!$this->option('ai')) {
+                $params[] = "--noai=1";
             }
 
             if ($publicPath) {
@@ -332,12 +360,17 @@ class AppSyncCommand extends Command
                 $this->line(' ✅ Synchronizace statických assetů');
                 $this->line(' ✅ Spuštění idempotentních databázových migrací');
                 $this->line(' ✅ Spuštění ' . ($this->option('freshseed') ? 'ČERSTVÉHO (fresh)' : 'idempotentního') . ' seedování');
-                if ($this->option('usersync')) {
+                if ($usersync) {
                     $this->line(' ✅ Synchronizace uživatelů (avatary)');
                 }
                 $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
-                $this->line(' ✅ Reindexace AI vyhledávání (cs/en)');
+
+                if ($this->option('ai')) {
+                    $this->line(' ✅ Reindexace AI vyhledávání (cs/en)');
+                } else {
+                    $this->line(' ⏩ Reindexace AI vyhledávání přeskočena (použijte --ai pro reindexaci)');
+                }
 
                 if ($this->option('ai-test')) {
                     break;

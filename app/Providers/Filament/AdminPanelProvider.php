@@ -73,16 +73,16 @@ class AdminPanelProvider extends PanelProvider
                 <x-back-to-top />
                 <livewire:member.avatar-modal />
             '))
-            ->renderHook('panels::user-menu.before', fn (): string => Blade::render('
-                <div class="fi-dropdown-list border-b border-gray-100 dark:border-gray-800">
-                    @include("filament.components.impersonate-select")
-                </div>
-            '))
             ->renderHook('panels::global-search.before', fn (): string => Blade::render('
-                <div class="flex items-center gap-1 sm:gap-2">
+                <div class="flex items-center gap-2 mr-3">
                     @include("filament.components.language-switch")
                     @include("filament.components.standard-search")
+                </div>
+            '))
+            ->renderHook('panels::global-search.after', fn (): string => Blade::render('
+                <div class="flex items-center gap-2 ml-2">
                     @include("filament.components.ai-search")
+                    @include("filament.components.impersonate-select")
                 </div>
             '))
             ->login(Login::class)
@@ -93,14 +93,14 @@ class AdminPanelProvider extends PanelProvider
             ->favicon($branding['logo_path'] ? web_asset($branding['logo_path']) : asset('favicon.ico'))
             ->font('Instrument Sans')
             ->userMenuItems([
-                'profile' => MenuItem::make()
-                    ->label(fn (): string => __('admin.navigation.pages.member_section'))
-                    ->url(fn (): string => route('member.dashboard'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::USERS_GROUP)),
-                MenuItem::make()
-                    ->label(fn (): string => __('admin.navigation.pages.public_web'))
-                    ->url(fn (): string => route('public.home'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::GLOBE)),
+                'member_section' => MenuItem::make()
+                    ->label(fn () => __('admin.navigation.pages.member_section'))
+                    ->url(fn() => route('member.dashboard'))
+                    ->icon(new HtmlString('<i class="fa-light fa-users-viewfinder fa-fw"></i>')),
+                'public_web' => MenuItem::make()
+                    ->label(fn () => __('admin.navigation.pages.public_web'))
+                    ->url(fn() => route('public.home'))
+                    ->icon(new HtmlString('<i class="fa-light fa-globe fa-fw"></i>')),
             ])
             ->colors([
                 'primary' => Color::hex($colors['red']),
@@ -111,7 +111,6 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-            ->globalSearch(\App\Filament\GlobalSearch\AiGlobalSearchProvider::class)
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->navigationGroups([
                 \Filament\Navigation\NavigationGroup::make()

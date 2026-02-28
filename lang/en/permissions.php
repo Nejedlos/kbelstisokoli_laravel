@@ -16,7 +16,7 @@ return [
     'manage_economy' => 'Manage Economy (Payments, Tariffs)',
     'manage_matches' => 'Manage Matches',
     'manage_events' => 'Manage Club Events',
-    'impersonate_users' => 'Impersonate Users',
+    'impersonate_users' => 'Impersonation',
     'impersonation_active' => 'Impersonation Mode Active',
     'logged_in_as' => 'You are logged in as :name',
     'stop_impersonation' => 'Stop Impersonation',

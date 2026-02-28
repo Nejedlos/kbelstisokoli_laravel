@@ -28,6 +28,11 @@ class CheckTwoFactorTimeout
             return $next($request);
         }
 
+        // Pokud je impersonace aktivní, přeskakujeme kontrolu timeoutu 2FA
+        if ($request->session()->has('impersonated_by')) {
+            return $next($request);
+        }
+
         // Kontrola 2FA potvrzení v session (např. timeout 24 hodin)
         $confirmedAt = $request->session()->get('auth.2fa_confirmed_at');
         $timeout = config('auth.2fa_timeout', 86400); // Výchozí 24 hodin
@@ -40,6 +45,7 @@ class CheckTwoFactorTimeout
             'now' => now()->timestamp,
             'diff' => $confirmedAt ? (now()->timestamp - $confirmedAt) : null,
             'session_id' => \Illuminate\Support\Facades\Session::getId(),
+            'impersonated_by' => $request->session()->get('impersonated_by'),
         ]);
 
         if ($confirmedAt && (now()->timestamp - $confirmedAt) < $timeout) {

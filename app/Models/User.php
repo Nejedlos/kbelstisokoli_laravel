@@ -258,6 +258,12 @@ class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
      */
     public function canAccessAdmin(): bool
     {
+        // Povolíme přístup, pokud je uživatel aktivní a má roli/oprávnění
+        // NEBO pokud je uživatel právě impersonován adminem (aby se mohl admin dívat na jeho účet v adminu, pokud je to potřeba)
+        if (session()->has('impersonated_by')) {
+            return true;
+        }
+
         return $this->is_active &&
                ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach']));
     }
@@ -265,9 +271,25 @@ class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
     /**
      * Get the URL to the user's avatar.
      */
-    public function getFilamentAvatarUrl(): ?string
+    public function getFilamentAvatarUrl(): string
     {
-        return $this->getFirstMediaUrl('avatar', 'thumb') ?: $this->getFirstMediaUrl('avatar');
+        return $this->getAvatarUrl('thumb');
+    }
+
+    /**
+     * Helper pro získání URL k avataru s fallbackem.
+     */
+    public function getAvatarUrl(string $conversion = ''): string
+    {
+        // Spatie Media Library getFirstMediaUrl by měl vracit fallbackURL, pokud je definována v registerMediaCollections
+        $url = $this->getFirstMediaUrl('avatar', $conversion);
+
+        if (! $url) {
+            $fallback = $conversion === 'thumb' ? 'default-avatar-thumb.webp' : 'default-avatar.webp';
+            return asset("images/{$fallback}");
+        }
+
+        return $url;
     }
 
     /**

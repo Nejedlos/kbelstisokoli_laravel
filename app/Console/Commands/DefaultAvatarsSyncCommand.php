@@ -14,6 +14,9 @@ class DefaultAvatarsSyncCommand extends Command
 
     public function handle()
     {
+        ini_set('memory_limit', '2G');
+        set_time_limit(0);
+
         $sourceDir = storage_path('app/defaults/avatars');
 
         if (!is_dir($sourceDir)) {
@@ -22,11 +25,20 @@ class DefaultAvatarsSyncCommand extends Command
         }
 
         $allFiles = File::allFiles($sourceDir);
-        $bar = $this->output->createProgressBar(count($allFiles));
+        $totalFiles = count($allFiles);
+        $this->info("Nalezeno {$totalFiles} souborů k synchronizaci.");
+
+        $bar = $this->output->createProgressBar($totalFiles);
 
         $countImported = 0;
         $countSkipped = 0;
         $disk = config('media-library.disk_name', 'public_path');
+
+        // Optimalizace: Načtení všech existujících názvů souborů do paměti najednou
+        $existingMedia = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('model_type', MediaAsset::class)
+            ->pluck('file_name', 'model_id')
+            ->toArray();
+        $existingFileNames = array_flip($existingMedia);
 
         foreach ($allFiles as $file) {
             // Ignorovat náhledy (thumbs)
@@ -42,20 +54,28 @@ class DefaultAvatarsSyncCommand extends Command
 
             $fileName = $file->getFilename();
 
-            // Kontrola, zda už neexistuje (podle názvu souboru v media tabulce)
-            $existing = MediaAsset::whereHas('media', function($query) use ($fileName) {
-                    $query->where('file_name', $fileName);
-                })->first();
+            // Rychlá kontrola v poli v paměti místo DB query
+            $existingId = $existingFileNames[$fileName] ?? null;
 
-            if ($existing && !$this->option('force')) {
+            if ($existingId && !$this->option('force')) {
                 $countSkipped++;
                 $bar->advance();
                 continue;
             }
 
-            if ($existing && $this->option('force')) {
-                $existing->clearMediaCollection('default');
-                $asset = $existing;
+            if ($existingId) {
+                $asset = MediaAsset::find($existingId);
+                if ($asset) {
+                    $asset->clearMediaCollection('default');
+                } else {
+                    // Pokud existuje záznam v media, ale ne model (sirotek), vytvoříme nový
+                    $asset = MediaAsset::create([
+                        'title' => 'Default Avatar ' . Str::random(6),
+                        'is_public' => true,
+                        'access_level' => 'public',
+                        'type' => 'image',
+                    ]);
+                }
             } else {
                 $asset = MediaAsset::create([
                     'title' => 'Default Avatar ' . Str::random(6),
@@ -65,12 +85,22 @@ class DefaultAvatarsSyncCommand extends Command
                 ]);
             }
 
-            $asset->addMedia($file->getPathname())
-                ->preservingOriginal()
-                ->toMediaCollection('default', $disk);
+            // Přidání média
+            try {
+                $asset->addMedia($file->getPathname())
+                    ->preservingOriginal()
+                    ->toMediaCollection('default', $disk);
+            } catch (\Exception $e) {
+                $this->error("\nChyba při zpracování souboru " . $file->getFilename() . ": " . $e->getMessage());
+            }
 
             $countImported++;
             $bar->advance();
+
+            // Uvolnění paměti po každém 10. souboru
+            if ($countImported % 10 === 0) {
+                gc_collect_cycles();
+            }
         }
 
         $bar->finish();

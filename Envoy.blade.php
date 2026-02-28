@@ -17,6 +17,7 @@
     $public_path_b64 = base64_encode($public_path ?? '');
     $freshseed = $freshseed ?? false;
     $usersync = $usersync ?? false;
+    $noai = $noai ?? false;
 @endsetup
 
 @task('setup', ['on' => 'web'])
@@ -238,7 +239,7 @@
 
     if [ "{{ $usersync }}" = "1" ]; then
         echo "Syncing users (avatars)..."
-        {{ $php }} artisan avatars:sync --force
+        {{ $php }} artisan avatars:sync --force || echo "⚠️ Warning: Avatars sync failed (probably missing source directory on server)."
     fi
 
     echo "Syncing icons..."
@@ -250,8 +251,10 @@
     echo "Optimizing application..."
     {{ $php }} artisan optimize
 
-    echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    if [ "{{ $noai }}" != "1" ]; then
+        echo "Reindexing AI..."
+        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    fi
 
     echo "✅ Setup finished successfully!"
 @endtask
@@ -446,8 +449,10 @@
     {{ $php }} artisan view:clear
     {{ $php }} artisan optimize
 
-    echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    if [ "{{ $noai }}" != "1" ]; then
+        echo "Reindexing AI..."
+        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    fi
 
     echo "✅ Deployment finished successfully!"
 @endtask
@@ -581,7 +586,7 @@
 
     if [ "{{ $usersync }}" = "1" ]; then
         echo "Syncing users (avatars)..."
-        {{ $php }} artisan avatars:sync --force
+        {{ $php }} artisan avatars:sync --force || echo "⚠️ Warning: Avatars sync failed (probably missing source directory on server)."
     fi
 
     echo "Syncing icons..."
@@ -593,8 +598,10 @@
     echo "Optimizing application..."
     {{ $php }} artisan optimize
 
-    echo "Reindexing AI..."
-    {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    if [ "{{ $noai }}" != "1" ]; then
+        echo "Reindexing AI..."
+        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    fi
 
     echo "✅ Sync finished successfully!"
 @endtask

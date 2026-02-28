@@ -20,11 +20,11 @@
                 <div class="flex flex-col xs:flex-row items-center gap-6 sm:gap-10 relative z-10">
                         <div class="relative group shrink-0"
                              x-data="{
-                                 avatarUrl: '{{ $user->getFirstMediaUrl('avatar') }}',
+                                 avatarUrl: '{{ $user->getAvatarUrl() }}',
                                  init() {
                                      window.addEventListener('avatarUpdated', (event) => {
                                          if (event.detail.userId == {{ $user->id }}) {
-                                             this.avatarUrl = event.detail.url || '{{ asset('images/default-avatar.webp') }}';
+                                             this.avatarUrl = event.detail.url || '{{ $user->getAvatarUrl() }}';
                                          }
                                      });
                                  }

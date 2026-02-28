@@ -65,11 +65,11 @@ class UserForm
                         ->content(fn ($record) => $record ? new HtmlString("
                             <div class='flex flex-col items-center gap-4 py-2'
                                  x-data='{
-                                     avatarUrl: \"" . ($record->getFirstMediaUrl('avatar', 'thumb') ?: asset('images/default-avatar-thumb.webp')) . "\",
+                                     avatarUrl: \"" . $record->getAvatarUrl('thumb') . "\",
                                      init() {
                                          window.addEventListener(\"avatarUpdated\", (event) => {
                                              if (event.detail.userId == {$record->id}) {
-                                                 this.avatarUrl = event.detail.url || \"" . asset('images/default-avatar-thumb.webp') . "\";
+                                                 this.avatarUrl = event.detail.url || \"" . $record->getAvatarUrl('thumb') . "\";
                                              }
                                          });
                                      }
@@ -163,11 +163,11 @@ class UserForm
                     ->content(fn ($record) => $record ? new HtmlString("
                         <div class='flex items-center gap-6'
                              x-data='{
-                                 avatarUrl: \"" . ($record->getFirstMediaUrl('avatar', 'thumb') ?: asset('images/default-avatar-thumb.webp')) . "\",
+                                 avatarUrl: \"" . $record->getAvatarUrl('thumb') . "\",
                                  init() {
                                      window.addEventListener(\"avatarUpdated\", (event) => {
                                          if (event.detail.userId == {$record->id}) {
-                                             this.avatarUrl = event.detail.url || \"" . asset('images/default-avatar-thumb.webp') . "\";
+                                             this.avatarUrl = event.detail.url || \"" . $record->getAvatarUrl('thumb') . "\";
                                          }
                                      });
                                  }

@@ -152,7 +152,9 @@
                                         <div class="font-bold text-secondary">{{ data_get($n->data, 'title', __('member.notifications.default_title')) }}</div>
                                         <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $n->created_at->diffForHumans() }}</div>
                                     </div>
-                                    <x-heroicon-o-chevron-right class="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors" />
+                                    <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                        <i class="fa-light fa-chevron-right text-[10px]"></i>
+                                    </div>
                                 </a>
                             @endforeach
                         </div>
@@ -209,7 +211,9 @@
                             @foreach($coachTeams as $team)
                                 <a href="{{ route('member.teams.show', $team) }}" class="card p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
                                     <span class="font-bold text-secondary">{{ $team->name }}</span>
-                                    <x-heroicon-o-chevron-right class="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors" />
+                                    <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                        <i class="fa-light fa-chevron-right text-[10px]"></i>
+                                    </div>
                                 </a>
                             @endforeach
                         </div>

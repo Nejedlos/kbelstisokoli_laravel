@@ -39,7 +39,7 @@ class ContactController extends Controller
                     'name' => $coach->display_name ?? $coach->name,
                     'email' => $coach->pivot->email ?: $coach->email,
                     'phone' => $coach->phone ?? null,
-                    'photo' => method_exists($coach, 'getFirstMediaUrl') ? ($coach->getFirstMediaUrl('avatar') ?: null) : null,
+                    'photo' => method_exists($coach, 'getAvatarUrl') ? $coach->getAvatarUrl('thumb') : null,
                 ];
             }
         }

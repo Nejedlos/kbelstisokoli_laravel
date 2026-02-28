@@ -86,7 +86,7 @@
                 </div>
 
                 <!-- AI Search (Desktop/Tablet) -->
-                <div x-data="{ searchOpen: false, loading: false }" class="hidden md:block relative">
+                <div x-data="{ searchOpen: false, loading: false }" class="hidden lg:block relative">
                     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
                     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
                             class="flex items-center gap-3 px-3 xl:px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-secondary transition-all group text-left shadow-lg shadow-slate-200 min-h-[40px]">
@@ -149,24 +149,32 @@
                     </div>
                 </div>
 
-                <!-- AI Search (Mobile/Tablet Trigger) -->
-                <div x-data="{ searchOpen: false, loading: false }" class="md:hidden flex items-center">
+                <!-- Search (Mobile/Tablet Trigger) -->
+                <div x-data="{ searchOpen: null, loading: false }" class="lg:hidden flex items-center">
                     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
                     <div class="flex items-center">
+                        <!-- Standard Search Mobile -->
+                        <button @click="searchOpen = (searchOpen === 'standard' ? null : 'standard'); if(searchOpen === 'standard') $nextTick(() => $refs.searchInputMobileStandard.focus())"
+                                class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                                :class="{ 'bg-primary/5 text-primary': searchOpen === 'standard' }">
+                            <i class="fa-light fa-magnifying-glass text-xl"></i>
+                        </button>
+
                         <!-- AI Search Mobile -->
-                        <button @click="searchOpen = 'ai'; $nextTick(() => $refs.searchInputMobileAi.focus())"
-                                class="p-2.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center">
+                        <button @click="searchOpen = (searchOpen === 'ai' ? null : 'ai'); if(searchOpen === 'ai') $nextTick(() => $refs.searchInputMobileAi.focus())"
+                                class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                                :class="{ 'bg-primary/5 text-primary': searchOpen === 'ai' }">
                             <i class="fa-light fa-sparkles text-xl"></i>
                         </button>
                     </div>
 
                     <!-- Standard Search Mobile Overlay -->
                     <div x-show="searchOpen === 'standard'"
-                         @click.away="searchOpen = false"
+                         @click.away="searchOpen = null"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="fixed inset-x-0 top-16 w-screen bg-white rounded-none shadow-2xl border-t border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
+                         class="fixed inset-x-0 top-18 w-screen bg-white shadow-2xl border-t border-slate-100 p-3 z-50 overflow-hidden"
                          style="display: none;">
                         <form action="{{ route('member.search') }}" method="GET" class="relative">
                             <input type="text"
@@ -182,11 +190,11 @@
 
                     <!-- AI Search Mobile Overlay -->
                     <div x-show="searchOpen === 'ai'"
-                         @click.away="searchOpen = false"
+                         @click.away="searchOpen = null"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="fixed inset-x-0 top-16 w-screen bg-white rounded-none shadow-2xl border-t border-slate-100 p-3 z-50 overflow-hidden ring-1 ring-black/5"
+                         class="fixed inset-x-0 top-18 w-screen bg-white shadow-2xl border-t border-slate-100 p-3 z-50 overflow-hidden"
                          style="display: none;">
                         <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInputMobileAi.value)">
                             <input type="text"
@@ -218,7 +226,7 @@
 
                 <div class="relative" x-data="{ userOpen: false }">
                     <button @click="userOpen = !userOpen" id="top-bar-avatar" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-slate-100 flex items-center justify-center text-secondary font-black border border-slate-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all overflow-hidden group min-w-[40px] min-h-[40px]">
-                        <img src="{{ auth()->user()->getFirstMediaUrl('avatar', 'thumb') }}" class="w-full h-full object-cover transition-transform group-hover:scale-110" alt="">
+                        <img src="{{ auth()->user()->getAvatarUrl('thumb') }}" class="w-full h-full object-cover transition-transform group-hover:scale-110" alt="">
                     </button>
 
                     <div x-show="userOpen" @click.away="userOpen = false"

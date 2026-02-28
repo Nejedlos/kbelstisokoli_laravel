@@ -3,16 +3,16 @@
 
     <!-- Desktop Trigger (Pill) -->
     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-            class="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:border-primary/30 transition-all group text-left shadow-sm min-w-[200px]"
+            class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:border-primary/30 transition-all group text-left shadow-sm min-w-[140px]"
             title="{{ __('search.ai_hint') }}">
         <i class="fa-light fa-sparkles text-primary group-hover:scale-110 transition-transform text-[10px]"></i>
-        <span class="text-[11px] truncate font-bold opacity-80 group-hover:opacity-100 transition-opacity">{{ __('search.ai_hint') }}</span>
+        <span class="text-[10px] truncate font-bold opacity-80 group-hover:opacity-100 transition-opacity">{{ __('search.ai_hint') }}</span>
         <span class="ml-auto text-[9px] font-black text-gray-400 group-hover:text-primary transition-colors">AI</span>
     </button>
 
     <!-- Mobile Trigger (Icon) -->
     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-            class="md:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
+            class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
             title="{{ __('search.ai_hint') }}">
         <i class="fa-light fa-sparkles text-xl group-hover:scale-110 transition-transform"></i>
         <span class="absolute -top-1 -right-1 flex h-3 w-3" x-show="!searchOpen">

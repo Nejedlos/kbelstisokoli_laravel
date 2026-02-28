@@ -115,9 +115,9 @@ class AvatarModal extends Component
         Storage::disk('local')->delete($tempPath);
 
         $user->refresh();
-        $avatarUrl = $user->getFirstMediaUrl('avatar', 'thumb');
-        if ($avatarUrl) {
-            $avatarUrl .= (strpos($avatarUrl, '?') === false ? '?' : '&') . 'v=' . time();
+        $avatarUrl = $user->getAvatarUrl('thumb');
+        if ($avatarUrl && !str_contains($avatarUrl, 'default-avatar')) {
+            $avatarUrl .= (str_contains($avatarUrl, '?') ? '&' : '?') . 'v=' . time();
         }
 
         $this->dispatch('avatarUpdated',

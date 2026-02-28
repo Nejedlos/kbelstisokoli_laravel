@@ -62,7 +62,7 @@
                 <h3 class="text-lg font-black uppercase tracking-tight text-secondary">{{ __('member.teams.attendance.trainings_title') }}</h3>
                 <div class="space-y-4">
                     @forelse($upcomingTrainings as $training)
-                        <div class="card p-5 flex items-center justify-between">
+                        <div class="card p-5 flex items-center justify-between group hover:bg-slate-50 transition-colors cursor-default">
                             <div>
                                 <h4 class="font-bold text-secondary">{{ $training->starts_at->translatedFormat('l d.m.') }}</h4>
                                 <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
@@ -73,7 +73,9 @@
                                 <div class="px-3 py-1 bg-success-50 text-success-700 rounded-full font-black text-xs">
                                     {{ __('member.teams.attendance.confirmed_count', ['count' => $training->confirmed_count]) }}
                                 </div>
-                                <x-heroicon-o-chevron-right class="w-4 h-4 text-slate-300" />
+                                <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                    <i class="fa-light fa-chevron-right text-[10px]"></i>
+                                </div>
                             </div>
                         </div>
                     @empty

@@ -51,7 +51,9 @@
                                     <p class="text-sm text-slate-500 line-clamp-1">{{ $result->snippet }}</p>
                                 </div>
                             </div>
-                            <i class="fa-light fa-chevron-right text-slate-300 group-hover:text-primary transition-all translate-x-0 group-hover:translate-x-1"></i>
+                            <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                <i class="fa-light fa-chevron-right text-[10px]"></i>
+                            </div>
                         </a>
                     @endforeach
                 </div>

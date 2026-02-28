@@ -91,6 +91,11 @@ class PerformanceProfilingMiddleware
     {
         // Kontrola, zda je uživatel admin (používáme Spatie Permission nebo jinou logiku)
         // V tomto projektu se zdá, že existuje oprávnění 'access_admin'
+        // Pokud je impersonován, považujeme ho za autorizovaného, pokud původní admin byl
+        if ($request->session()->has('impersonated_by')) {
+            return true;
+        }
+
         return Auth::check() && $request->user()->can('access_admin');
     }
 
