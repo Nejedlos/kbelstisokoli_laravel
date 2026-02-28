@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -49,15 +50,23 @@ class AiIndexService
 
         // Indexujeme pouze vybrané sekce
         if (!$section || $section === 'admin') {
+            Log::info("AI Indexing: Starting admin section for locale '{$locale}'");
             $count += $this->indexFilament($locale, $onProgress);
         }
 
         if (!$section || $section === 'member') {
+            Log::info("AI Indexing: Starting member section for locale '{$locale}'");
             $count += $this->indexMemberSection($locale, $onProgress);
         }
 
         if (!$section || $section === 'frontend') {
+            Log::info("AI Indexing: Starting frontend section for locale '{$locale}'");
             $count += $this->indexFrontend($locale, $onProgress);
+        }
+
+        if ($section === 'documentation') {
+            Log::info("AI Indexing: Starting documentation section for locale '{$locale}'");
+            $count += $this->indexDocumentation($locale, $onProgress);
         }
 
         // Smažeme dokumenty, které již nejsou aktivní
@@ -200,6 +209,9 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         if (str_starts_with($type, 'member.')) {
             return 'member';
         }
+        if (str_starts_with($type, 'documentation.')) {
+            return 'documentation';
+        }
 
         return 'frontend';
     }
@@ -226,6 +238,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     private function indexFilament(string $locale, ?\Closure $onProgress = null): int
     {
         $count = 0;
+        Log::info("AI Indexing: [Filament] Starting...");
         $admin = null;
         try {
             $admin = User::role('admin')->first() ?: User::find(1);
@@ -235,6 +248,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
         // 0. Indexování Photo Poolů
         $pools = \App\Models\PhotoPool::all();
+        Log::info("AI Indexing: [Filament] Indexing " . $pools->count() . " PhotoPools");
         foreach ($pools as $pool) {
             $title = $pool->getTranslation('title', $locale);
             $description = $pool->getTranslation('description', $locale);
@@ -259,6 +273,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
         // Indexování stránek (Pages)
         $pages = \Filament\Facades\Filament::getPanel('admin')->getPages();
+        Log::info("AI Indexing: [Filament] Indexing " . count($pages) . " Pages");
         foreach ($pages as $pageClass) {
             try {
                 // Přeskočíme naši AI vyhledávací stránku
@@ -315,6 +330,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
         // Indexování resources
         $resources = \Filament\Facades\Filament::getPanel('admin')->getResources();
+        Log::info("AI Indexing: [Filament] Indexing " . count($resources) . " Resources");
         foreach ($resources as $resourceClass) {
             try {
                 $title = $resourceClass::getNavigationLabel();
@@ -480,6 +496,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     private function indexMemberSection(string $locale, ?\Closure $onProgress = null): int
     {
         $count = 0;
+        Log::info("AI Indexing: [Member] Starting...");
         $member = null;
         try {
             $member = User::role('player')->first() ?: User::find(1);
@@ -496,6 +513,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             'member.teams.index' => ['title' => __('member.teams.title')],
         ];
 
+        Log::info("AI Indexing: [Member] Indexing " . count($routes) . " Routes");
         foreach ($routes as $routeName => $info) {
             try {
                 $url = route($routeName);
@@ -511,7 +529,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     'url' => $url,
                     'locale' => $locale,
                     'content' => $content ?: $info['title'],
-                    'checksum' => hash('sha256', $content.$url),
+                    'checksum' => hash('sha256', ($content ?: '').$url),
                 ]);
                 $count++;
             } catch (\Throwable $e) {
@@ -522,9 +540,53 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         return $count;
     }
 
+    private function indexDocumentation(string $locale, ?\Closure $onProgress = null): int
+    {
+        $count = 0;
+        $docsPath = base_path('docs');
+
+        if (!File::exists($docsPath)) {
+            return 0;
+        }
+
+        $files = File::allFiles($docsPath);
+
+        foreach ($files as $file) {
+            if ($file->getExtension() !== 'md') {
+                continue;
+            }
+
+            $relativePath = $file->getRelativePathname();
+            $content = File::get($file->getPathname());
+
+            // Základní extrakce titulku z Markdownu (# Title)
+            $title = $relativePath;
+            if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
+                $title = trim($matches[1]);
+            }
+
+            if ($onProgress) $onProgress("Documentation: {$title}");
+
+            $this->updateOrCreateDocument([
+                'type' => 'documentation.resource',
+                'source' => 'docs/' . $relativePath,
+                'title' => $title,
+                'url' => null, // Dokumentace nemá přímou URL v aplikaci, ale slouží jako kontext
+                'locale' => $locale, // Dokumentace je primárně česky, indexujeme do aktuálního locale
+                'content' => $content,
+                'checksum' => hash('sha256', $content . $relativePath),
+            ]);
+
+            $count++;
+        }
+
+        return $count;
+    }
+
     private function indexFrontend(string $locale, ?\Closure $onProgress = null): int
     {
         $count = 0;
+        Log::info("AI Indexing: [Frontend] Starting...");
 
         // 1. Indexace stránek (Pages)
         $pages = Page::query()
@@ -532,6 +594,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             ->where('status', 'published')
             ->get();
 
+        Log::info("AI Indexing: [Frontend] Indexing " . $pages->count() . " Pages");
         foreach ($pages as $page) {
             $title = $page->getTranslation('title', $locale);
             $url = $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug);
@@ -543,6 +606,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
             // Fallback pokud rendering selže
             if (empty($content)) {
+                Log::warning("AI Indexing: [Frontend] Rendering failed for Page: {$title} ({$url}), using fallback");
                 $rawContent = $page->getTranslation('content', $locale);
                 if (is_array($rawContent)) {
                     $content = $this->extractStringsFromBlocks($rawContent);
@@ -573,6 +637,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             })
             ->get();
 
+        Log::info("AI Indexing: [Frontend] Indexing " . $posts->count() . " Posts");
         foreach ($posts as $post) {
             $title = $post->getTranslation('title', $locale);
             $url = route('public.news.show', $post->slug);
@@ -584,6 +649,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
             // Fallback
             if (empty($content)) {
+                Log::warning("AI Indexing: [Frontend] Rendering failed for Post: {$title} ({$url}), using fallback");
                 $excerpt = $post->getTranslation('excerpt', $locale);
                 $rawContent = $post->getTranslation('content', $locale);
                 $content = strip_tags($excerpt.' '.$rawContent);
@@ -636,20 +702,30 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     public function search(string $query, string $locale = 'cs', int $limit = 8, ?string $section = null)
     {
         $q = Str::lower($query);
+        $words = array_filter(explode(' ', $q), fn($w) => mb_strlen($w) > 2);
 
-        // Jednoduché LIKE vyhledávání + heuristické seřazení v PHP (může být nahrazeno FULLTEXTem)
+        // Jednoduché LIKE vyhledávání + heuristické seřazení v PHP
         $queryBuilder = AiDocument::query()
             ->where('locale', $locale)
             ->where('is_active', true);
 
         if ($section) {
-            $queryBuilder->where('section', $section);
+            $queryBuilder->where(function ($w) use ($section) {
+                $w->where('section', $section)
+                    ->orWhere('section', 'documentation');
+            });
         }
 
-        $candidates = $queryBuilder->where(function ($w) use ($q) {
+        $candidates = $queryBuilder->where(function ($w) use ($q, $words) {
             $w->whereRaw('LOWER(title) LIKE ?', ['%'.$q.'%'])
                 ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$q.'%'])
                 ->orWhereRaw('LOWER(keywords) LIKE ?', ['%'.$q.'%']);
+
+            // Fallback na jednotlivá slova pro lepší match v přirozeném jazyce
+            foreach ($words as $word) {
+                $w->orWhereRaw('LOWER(title) LIKE ?', ['%'.$word.'%'])
+                    ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$word.'%']);
+            }
         })
             ->limit(100)
             ->get();

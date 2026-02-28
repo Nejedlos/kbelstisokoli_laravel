@@ -47,9 +47,13 @@ php artisan migrate --force --no-interaction
 - Proveďte první indexaci (viz níže).
 
 ## 6. Indexace obsahu
-- Inkrementální update (výchozí):
+- Inkrementální update (výchozí - indexuje frontend, member a admin, vynechává dokumentaci):
 ```
 php artisan ai:index --locale=cs
+```
+- Indexace konkrétní sekce (frontend/member/admin/documentation):
+```
+php artisan ai:index --section=documentation
 ```
 - Full reindex (smazání starých):
 ```
@@ -62,8 +66,8 @@ php artisan ai:index --enrich
 - Co se indexuje:
   - Filament: Navigace, Stránky, Resources (texty z formulářů a tabulek).
   - Member sekce: Stránky definované v routách.
-  - Blade: `resources/views/member/` – text očištěný od direktiv.
-  - Markdown: `docs/` – očištěný text.
+  - Frontend: Veřejné stránky a aktuality.
+  - Markdown: `docs/` – očištěný text (pouze při explicitním vyžádání sekce `documentation`).
 
 ## 7. Použití (uživatel)
 - V horní liště klikněte na AI pole (ikona se „sparkles“) nebo využijte overlay v globálním vyhledávání.

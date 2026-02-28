@@ -125,8 +125,8 @@ class AiSearchService
     private function buildSystemPrompt(string $locale, string $section = 'frontend'): string
     {
         $langInstruction = $locale === 'cs'
-            ? 'Odpovídej česky, stručně a jasně.'
-            : 'Respond in English, briefly and clearly.';
+            ? 'Odpovídej česky, stručně a jasně. Používej informace z poskytnutého kontextu.'
+            : 'Respond in English, briefly and clearly. Use information from the provided context.';
 
         $sectionName = match($section) {
             'admin' => 'Administrace (Filament)',
@@ -137,8 +137,9 @@ class AiSearchService
         return trim(
             $langInstruction . "\n" .
             "Jsi asistent pro web basketbalového klubu Kbelští sokoli. Právě se nacházíš v sekci: {$sectionName}." . "\n" .
-            'Tvým úkolem je pomáhat uživatelům s informacemi a navigací VÝHRADNĚ v rámci této sekce.' . "\n" .
+            'Tvým úkolem je pomáhat uživatelům s informacemi a navigací VÝHRADNĚ v rámci této sekce a dostupných dokumentů.' . "\n" .
             'DŮLEŽITÉ: Pokud je v kontextu u zdroje uvedena URL adresa, VŽDY ji zahrň do své odpovědi jako Markdown odkaz.' . "\n" .
+            'Pokud v kontextu vidíš návody z dokumentace (typ documentation.resource), řiď se jimi při radách uživateli.' . "\n" .
             'NIKDY nevymýšlej URL adresy, které nejsou v poskytnutém kontextu.' . "\n" .
             'Pokud uživatel položí dotaz, na který v kontextu není odpověď, slušně ho odkaž na kontakty klubu.'
         );

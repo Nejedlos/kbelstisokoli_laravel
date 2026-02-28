@@ -36,16 +36,19 @@ class AiReindexCommand extends Command
 
             $this->info("Indexing documents for locale '{$l}'" . ($section ? " section '{$section}'" : "") . ($fresh ? " (fresh)" : "") . "...");
 
-            // Pokud není fresh, aspoň promažeme typy, které už nechceme indexovat
+            // Pokud není fresh, aspoň promažeme typy, které už nechceme indexovat (staré dokumenty z docs)
             if (!$fresh) {
                 $query = \App\Models\AiDocument::where('locale', $l)
-                    ->whereIn('type', ['docs']); // 'admin.page' a 'admin.navigation' už nepromazáváme, řeší to reindex přes is_active
+                    ->where('section', 'documentation'); // Vyčistíme starou dokumentaci, pokud tam zbyla
 
                 if ($section) {
                     $query->where('section', $section);
                 }
 
-                $query->delete();
+                $deletedCount = $query->delete();
+                if ($deletedCount > 0) {
+                    $this->line("  - Cleaned up $deletedCount old documentation entries.");
+                }
             }
 
             $count = $index->reindex($l, $fresh, $section, function($message) {
