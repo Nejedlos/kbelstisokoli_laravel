@@ -14,10 +14,19 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Livewire\Attributes\On;
 
 class MediaAssetsRelationManager extends RelationManager
 {
     protected static string $relationship = 'mediaAssets';
+
+    #[On('refreshRelationManager')]
+    public function refreshRelationManager(string $relationship): void
+    {
+        if ($relationship === static::$relationship) {
+            $this->dispatch('$refresh');
+        }
+    }
 
     protected static ?string $recordTitleAttribute = 'title';
 
