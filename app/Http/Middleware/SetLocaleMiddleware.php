@@ -15,15 +15,6 @@ class SetLocaleMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        \Illuminate\Support\Facades\Log::debug('SetLocaleMiddleware.handle', [
-            'path' => $request->path(),
-            'method' => $request->method(),
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
-            'session_id' => $request->session()->getId(),
-            'impersonated_by' => $request->session()->get('impersonated_by'),
-            'referrer' => $request->header('referer'),
-        ]);
-
         $locale = $request->query('lang');
 
         if ($locale && in_array($locale, ['cs', 'en'])) {
