@@ -8,37 +8,31 @@ use Illuminate\Console\Command;
 
 class BackfillClubIdentifiers extends Command
 {
-    protected $signature = 'club:backfill-identifiers {--regenerate-existing : Regeneruje i u uživatelů, kteří již hodnoty mají}';
+    protected $signature = 'club:backfill-identifiers';
 
-    protected $description = 'Doplní uživatelům chybějící club_member_id a payment_vs. Volitelně přegeneruje existující.';
+    protected $description = 'Doplní uživatelům chybějící club_member_id a payment_vs.';
 
     public function handle(ClubIdentifierService $service): int
     {
-        $regenerate = (bool) $this->option('regenerate-existing');
-
-        $query = User::query();
-
-        if (! $regenerate) {
-            $query->where(function ($q) {
-                $q->whereNull('club_member_id')->orWhereNull('payment_vs');
-            });
-        }
+        $query = User::query()->where(function ($q) {
+            $q->whereNull('club_member_id')->orWhereNull('payment_vs');
+        });
 
         $bar = $this->output->createProgressBar($query->count());
         $bar->start();
 
         $updated = 0;
 
-        $query->chunkById(200, function ($users) use ($service, $regenerate, &$updated, $bar) {
+        $query->chunkById(200, function ($users) use ($service, &$updated, $bar) {
             foreach ($users as $user) {
                 $changed = false;
 
-                if ($regenerate || empty($user->club_member_id)) {
+                if (empty($user->club_member_id)) {
                     $user->club_member_id = $service->generateClubMemberId();
                     $changed = true;
                 }
 
-                if ($regenerate || empty($user->payment_vs)) {
+                if (empty($user->payment_vs)) {
                     $user->payment_vs = $service->generatePaymentVs();
                     $changed = true;
                 }

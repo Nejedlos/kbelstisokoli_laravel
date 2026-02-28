@@ -74,8 +74,52 @@ class ClubIdentifierGenerationTest extends TestCase
         ]);
 
         $user->refresh();
-
         $this->assertEquals($existingId, $user->club_member_id);
         $this->assertEquals($existingVs, $user->payment_vs);
+    }
+
+    /**
+     * Testuje, že i při ručním pokusu o změnu v kódu zůstanou ID zachována (díky modelu).
+     */
+    public function test_club_identifiers_cannot_be_overwritten_manually(): void
+    {
+        $existingId = 'KS-123456';
+        $existingVs = '20240001';
+
+        $user = User::factory()->create([
+            'club_member_id' => $existingId,
+            'payment_vs' => $existingVs,
+        ]);
+
+        // Pokus o přepsání
+        $user->club_member_id = 'KS-CHANGED';
+        $user->payment_vs = '99999999';
+        $user->save();
+
+        $user->refresh();
+
+        // Musí zůstat původní
+        $this->assertEquals($existingId, $user->club_member_id);
+        $this->assertEquals($existingVs, $user->payment_vs);
+    }
+
+    /**
+     * Testuje, že první vygenerování (z null) stále funguje.
+     */
+    public function test_first_generation_still_works(): void
+    {
+        $user = User::factory()->create([
+            'club_member_id' => null,
+            'payment_vs' => null,
+        ]);
+
+        $user->club_member_id = 'KS-NEW-ID';
+        $user->payment_vs = '20249999';
+        $user->save();
+
+        $user->refresh();
+
+        $this->assertEquals('KS-NEW-ID', $user->club_member_id);
+        $this->assertEquals('20249999', $user->payment_vs);
     }
 }

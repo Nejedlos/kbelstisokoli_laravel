@@ -348,9 +348,12 @@ class UserForm
                                 TextInput::make('club_member_id')
                                     ->label(__('user.fields.club_member_id'))
                                     ->unique(ignoreRecord: true)
+                                    ->disabled(fn ($record) => $record && !empty($record->club_member_id))
+                                    ->dehydrated()
                                     ->suffixAction(
                                         Action::make('generate_id')
                                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::REFRESH))
+                                            ->hidden(fn ($record) => $record && !empty($record->club_member_id))
                                             ->action(function ($set) {
                                                 $set('club_member_id', app(ClubIdentifierService::class)->generateClubMemberId());
                                             })
@@ -384,9 +387,12 @@ class UserForm
                                 TextInput::make('payment_vs')
                                     ->label(__('user.fields.payment_vs'))
                                     ->unique(ignoreRecord: true)
+                                    ->disabled(fn ($record) => $record && !empty($record->payment_vs))
+                                    ->dehydrated()
                                     ->suffixAction(
                                         Action::make('generate_vs')
                                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::REFRESH))
+                                            ->hidden(fn ($record) => $record && !empty($record->payment_vs))
                                             ->action(function ($set) {
                                                 $set('payment_vs', app(ClubIdentifierService::class)->generatePaymentVs());
                                             })

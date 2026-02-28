@@ -121,6 +121,18 @@ class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
             if ($user->first_name && $user->last_name) {
                 $user->name = $user->first_name . ' ' . $user->last_name;
             }
+
+            // Pojistka proti přepsání klubového ID a variabilního symbolu
+            // Jednou vygenerované údaje se nesmí změnit
+            if ($user->exists) {
+                if ($user->isDirty('club_member_id') && !empty($user->getOriginal('club_member_id'))) {
+                    $user->club_member_id = $user->getOriginal('club_member_id');
+                }
+
+                if ($user->isDirty('payment_vs') && !empty($user->getOriginal('payment_vs'))) {
+                    $user->payment_vs = $user->getOriginal('payment_vs');
+                }
+            }
         });
     }
 
