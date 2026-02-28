@@ -163,6 +163,8 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => [
                     '--fresh' => __('admin/system-console.commands.finance_sync.flags.--fresh'),
+                    '--import' => __('admin/system-console.commands.finance_sync.flags.--import'),
+                    '--force' => __('admin/system-console.commands.finance_sync.flags.--force'),
                 ],
                 'color' => 'gray',
                 'icon' => FilamentIcon::get('money-bill-transfer')
@@ -171,6 +173,9 @@ class SystemConsole extends Page
                 'label' => __('admin/system-console.commands.finance_cleanup.label'),
                 'desc' => __('admin/system-console.commands.finance_cleanup.desc'),
                 'type' => 'artisan',
+                'flags' => [
+                    '--force' => __('admin/system-console.commands.finance_cleanup.flags.--force'),
+                ],
                 'color' => 'danger',
                 'icon' => FilamentIcon::get('broom')
             ],
@@ -437,7 +442,7 @@ class SystemConsole extends Page
                 $this->streamDebugInfo($phpBinary, 'artisan');
 
                 // Sestavení commandu jako POLE pro Symfony Process (obchází /bin/sh)
-                $commandArray = [$phpBinary, 'artisan', $command];
+                $commandArray = [$phpBinary, 'artisan', $command, '--no-interaction'];
                 foreach ($selectedFlags as $flag) {
                     $commandArray[] = $flag;
                 }
@@ -487,9 +492,13 @@ class SystemConsole extends Page
                 ->status($success ? 'success' : 'danger')
                 ->send();
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->output .= "\nCHYBA: " . $e->getMessage();
-            Log::error("SystemConsole Error: " . $e->getMessage());
+            Log::error("SystemConsole Error: " . $e->getMessage(), [
+                'command' => $command,
+                'type' => $type,
+                'exception' => $e
+            ]);
 
             Notification::make()
                 ->title(__('admin/system-console.notifications.execution_error'))
@@ -501,12 +510,15 @@ class SystemConsole extends Page
 
     protected function runInternal(string $command, array $flags = [], ?string $selectName = null, ?string $selectValue = null): void
     {
+        set_time_limit(0);
+        @ini_set('memory_limit', '512M');
+        @ignore_user_abort(true);
         $timestamp = now()->format('H:i:s');
         $this->output .= "\n[$timestamp] > (Internal) artisan $command" . (empty($flags) ? "" : " " . implode(' ', $flags)) . ($selectValue ? " $selectValue" : "") . "\n";
         $this->stream(to: 'output', content: "\n[$timestamp] > (Internal) artisan $command" . (empty($flags) ? "" : " " . implode(' ', $flags)) . ($selectValue ? " $selectValue" : "") . "\n", replace: false);
 
         try {
-            $parameters = [];
+            $parameters = ['--no-interaction' => true];
             foreach ($flags as $flag) {
                 if (str_contains($flag, '=')) {
                     [$key, $value] = explode('=', $flag, 2);
@@ -563,11 +575,24 @@ class SystemConsole extends Page
                 ->title(__('admin/system-console.notifications.completed'))
                 ->success()
                 ->send();
-        } catch (\Exception $e) {
-            $this->output .= "\nCHYBA: " . $e->getMessage();
+        } catch (\Throwable $e) {
+            $errorMessage = $e->getMessage();
+            $stackTrace = $e->getTraceAsString();
+
+            $this->output .= "\nFATAL ERROR: " . $errorMessage;
+            if (config('app.debug')) {
+                $this->output .= "\n\nStack Trace:\n" . substr($stackTrace, 0, 1000) . "...";
+            }
+
+            Log::error("SystemConsole Internal Error: " . $errorMessage, [
+                'command' => $command,
+                'flags' => $flags,
+                'exception' => $e
+            ]);
+
             Notification::make()
                 ->title(__('admin/system-console.notifications.execution_error'))
-                ->body($e->getMessage())
+                ->body($errorMessage)
                 ->danger()
                 ->send();
         }

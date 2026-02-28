@@ -61,11 +61,15 @@ return [
             'flags' => [
                 '--fresh' => 'Fresh (clears old data + import)',
                 '--import' => 'Import (from legacy DB)',
+                '--force' => 'Force (skip confirmation)',
             ],
         ],
         'finance_cleanup' => [
             'label' => 'Finance: Cleanup',
             'desc' => 'DELETES all financial data (charges, payments). Reset only.',
+            'flags' => [
+                '--force' => 'Force (skip confirmation)',
+            ],
         ],
         'stats_import' => [
             'label' => 'Statistics: Import',
@@ -181,7 +185,7 @@ return [
     ],
     'ui' => [
         'internal_execution' => 'Internal Execution',
-        'internal_tooltip' => 'Runs the command directly in the application\'s PHP process (Artisan::call) instead of calling the shell. Recommended if the PHP CLI binary fails in the shell.',
+        'internal_tooltip' => 'Runs the command directly in the application\'s PHP process (Artisan::call) instead of calling the shell. Recommended if the PHP CLI binary fails in the shell. Not recommended for long-running operations (timeout).',
         'run' => 'Run',
         'working' => 'Working...',
     ],

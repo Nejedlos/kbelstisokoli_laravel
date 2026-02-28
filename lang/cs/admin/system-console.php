@@ -61,11 +61,15 @@ return [
             'flags' => [
                 '--fresh' => 'Fresh (vymaže stará data + import)',
                 '--import' => 'Importovat (z legacy DB)',
+                '--force' => 'Vynutit (přeskočit potvrzení)',
             ],
         ],
         'finance_cleanup' => [
             'label' => 'Finance: Vyčistit',
             'desc' => 'SMAŽE veškerá finanční data (předpisy, platby). Pouze pro reset.',
+            'flags' => [
+                '--force' => 'Vynutit (přeskočit potvrzení)',
+            ],
         ],
         'stats_import' => [
             'label' => 'Statistiky: Import',
@@ -181,7 +185,7 @@ return [
     ],
     'ui' => [
         'internal_execution' => 'Internal Execution',
-        'internal_tooltip' => 'Spustí příkaz přímo v PHP procesu aplikace (Artisan::call) místo volání shellu. Doporučeno, pokud selhává binárka PHP v shellu.',
+        'internal_tooltip' => 'Spustí příkaz přímo v PHP procesu aplikace (Artisan::call) místo volání shellu. Doporučeno, pokud selhává binárka PHP v shellu. Nedoporučuje se pro dlouhotrvající operace (timeout).',
         'run' => 'Spustit',
         'working' => 'Pracuji...',
     ],
