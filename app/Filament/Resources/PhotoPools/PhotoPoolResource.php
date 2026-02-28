@@ -71,21 +71,17 @@ class PhotoPoolResource extends Resource
                     ->hiddenLabel()
                     ->content(fn () => new HtmlString(Blade::render('
                         <x-loader.basketball wire:target="processImportQueue">
-                            <div class="text-center p-8 bg-white/10 dark:bg-black/20 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-2xl max-w-sm mx-auto overflow-hidden relative">
-                                <!-- Sokolský brand pattern na pozadí (přes pseudo-element by to bylo složitější, tak aspoň SVG blob) -->
-                                <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl"></div>
-                                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-red-500/10 rounded-full blur-2xl"></div>
-
+                            <div class="text-center p-10 bg-white/5 dark:bg-black/40 backdrop-blur-2xl rounded-[3rem] border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] max-w-sm mx-auto overflow-hidden relative">
                                 <div class="relative z-10">
-                                    <div class="mb-5 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 text-white shadow-xl rotate-3 border border-white/20">
-                                        <i class="fa-light fa-arrows-rotate fa-spin text-2xl"></i>
+                                    <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/10 text-white shadow-2xl border border-white/20 rotate-6 transition-transform duration-500">
+                                        <i class="fa-light fa-arrows-rotate fa-spin text-3xl text-primary-500"></i>
                                     </div>
-                                    <strong class="text-2xl font-black block mb-2 text-white tracking-tight uppercase italic leading-none">Hromadný import</strong>
-                                    <p class="text-[13px] text-white/80 font-medium leading-relaxed mb-4">
+                                    <strong class="text-3xl font-black block mb-3 text-white tracking-tight uppercase italic leading-none">Hromadný import</strong>
+                                    <p class="text-[14px] text-white/70 font-medium leading-relaxed mb-6">
                                         Právě nahráváme a optimalizujeme vaše fotografie. Toto může chvíli trvat v závislosti na počtu souborů.
                                     </p>
-                                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full animate-pulse shadow-lg shadow-red-600/30">
-                                        <i class="fa-light fa-triangle-exclamation"></i>
+                                    <div class="inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white text-[11px] font-black uppercase tracking-widest rounded-full animate-pulse shadow-xl shadow-red-600/40 border border-red-500/50">
+                                        <i class="fa-light fa-shield-exclamation text-base"></i>
                                         Nezavírejte okno
                                     </div>
                                 </div>
@@ -102,43 +98,43 @@ class PhotoPoolResource extends Resource
                         $status = $record->is_processing_import ? 'Probíhá import fotografií' : 'Čeká na zpracování';
                         $icon = $record->is_processing_import ? 'fa-spinner-third fa-spin' : 'fa-clock';
 
-                        // Sokolské barvy z CSS proměnných nebo Tailwindu
-                        // Brand Navy: #001F3F (přibližně slate-900)
-                        // Brand Red: #E41F18
-
                         return new HtmlString("
-                            <div class='relative overflow-hidden p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center gap-6 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all duration-500' wire:poll.3s='processImportQueue'>
-                                <div class='absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-primary-500/5 rounded-full blur-3xl'></div>
+                            <div class='relative overflow-hidden p-8 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] flex items-center gap-8 shadow-2xl shadow-slate-200/20 dark:shadow-none transition-all duration-500' wire:poll.3s='processImportQueue'>
+                                <div class='absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl'></div>
 
                                 <div class='relative flex-shrink-0'>
-                                    <div class='w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-3xl text-primary-600 dark:text-primary-400 shadow-inner overflow-hidden'>
+                                    <div class='w-20 h-20 rounded-[1.75rem] bg-white dark:bg-slate-800 flex items-center justify-center text-4xl text-primary-600 dark:text-primary-400 shadow-xl border border-white/50 dark:border-slate-700/50'>
                                         <i class='fa-light {$icon} transition-transform duration-700'></i>
-                                        <div class='absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full'></div>
+                                        <div class='absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-white dark:border-slate-900 rounded-full shadow-lg'></div>
                                     </div>
                                 </div>
 
                                 <div class='flex-grow'>
-                                    <div class='flex items-center gap-2 mb-1'>
-                                        <span class='text-xs font-black uppercase tracking-widest text-primary-600 dark:text-primary-400'>Status</span>
-                                        <div class='h-px flex-grow bg-slate-100 dark:bg-slate-800'></div>
+                                    <div class='flex items-center gap-3 mb-2'>
+                                        <span class='text-[10px] font-black uppercase tracking-[.25em] text-primary-600 dark:text-primary-400 opacity-80'>Status importu</span>
+                                        <div class='h-px flex-grow bg-slate-200 dark:bg-slate-700 opacity-30'></div>
                                     </div>
-                                    <div class='text-xl font-black text-slate-900 dark:text-white leading-tight mb-1'>{$status}</div>
-                                    <div class='text-sm text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2'>
-                                        <span>Zbývá zpracovat: <strong class='text-slate-900 dark:text-white'>{$count}</strong> fotografií</span>
-                                        <span class='w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600'></span>
-                                        <span class='text-red-600 dark:text-red-400 font-bold animate-pulse'>Nezavírejte toto okno!</span>
+                                    <div class='text-2xl font-black text-slate-900 dark:text-white leading-tight mb-2 uppercase italic tracking-tight'>{$status}</div>
+                                    <div class='text-sm text-slate-600 dark:text-slate-400 font-semibold flex items-center gap-3'>
+                                        <span class='px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700'>
+                                            Zbývá: <strong class='text-slate-900 dark:text-white'>{$count}</strong> fotek
+                                        </span>
+                                        <span class='flex items-center gap-2 text-red-600 dark:text-red-400 font-black uppercase text-[11px] tracking-wider animate-pulse'>
+                                            <i class='fa-light fa-triangle-exclamation text-base'></i>
+                                            Nezavírejte okno!
+                                        </span>
                                     </div>
                                 </div>
 
                                 <div class='flex-shrink-0' wire:loading wire:target='processImportQueue'>
-                                     <div class='flex flex-col items-center gap-1 text-primary-600 dark:text-primary-400 font-black italic text-[10px] uppercase tracking-tighter'>
-                                        <i class='fa-light fa-basketball fa-spin text-2xl'></i>
-                                        <span>Zápis...</span>
+                                     <div class='flex flex-col items-center gap-2 text-primary-600 dark:text-primary-400 font-black italic text-[10px] uppercase tracking-widest'>
+                                        <i class='fa-light fa-basketball fa-spin text-3xl'></i>
+                                        <span class='opacity-70'>Zapisuji...</span>
                                      </div>
                                 </div>
 
-                                <div class='absolute bottom-0 left-0 h-1 bg-primary-500/20 w-full overflow-hidden'>
-                                    <div class='h-full bg-primary-50 w-1/3 animate-[ks-progress-bar_2s_infinite_linear]'></div>
+                                <div class='absolute bottom-0 left-0 h-1.5 bg-slate-100 dark:bg-slate-800 w-full overflow-hidden'>
+                                    <div class='h-full bg-primary-600 w-1/3 shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.5)] animate-[ks-progress-bar_2s_infinite_linear]'></div>
                                 </div>
 
                                 <style>

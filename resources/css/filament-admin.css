@@ -295,9 +295,9 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     width: 100vw !important;
     height: 100dvh !important;
     z-index: 99999 !important; /* Maximální z-index pro garantované překrytí */
-    background: rgba(var(--color-brand-navy-rgb), 0.45) !important;
-    backdrop-filter: blur(4px) saturate(120%) !important;
-    -webkit-backdrop-filter: blur(4px) saturate(120%) !important;
+    background: radial-gradient(circle at center, rgba(var(--color-brand-navy-rgb), 0.75) 0%, rgba(var(--color-brand-navy-rgb), 0.95) 100%) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
     pointer-events: all !important;
     display: none;
 }
@@ -322,27 +322,45 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     to { opacity: 1; }
 }
 
+.ks-loader-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .ks-loader-text {
     margin-top: 3rem;
-    padding: 0.625rem 1.5rem;
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 1.25rem;
-    color: var(--color-brand-red);
+    padding: 0.75rem 1.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 100px;
+    color: white;
     font-weight: 900;
-    letter-spacing: .15em;
+    letter-spacing: .2em;
     text-transform: uppercase;
-    font-size: .65rem;
-    box-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, 0.2),
-        0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    font-size: .7rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
     animation:
-        ks-badge-appear 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        ks-badge-appear 0.6s cubic-bezier(0.16, 1, 0.3, 1),
         ks-badge-float 3s ease-in-out infinite alternate;
+}
+
+.ks-loader-custom {
+    margin-top: 2rem;
+    animation: ks-badge-appear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ks-loader-progress {
+    margin-top: 1rem;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.75rem;
 }
 
 @keyframes ks-badge-float {
@@ -354,9 +372,9 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     content: '';
     width: 8px;
     height: 8px;
-    background: var(--color-brand-red);
+    background: white;
     border-radius: 50%;
-    box-shadow: 0 0 10px var(--color-brand-red);
+    box-shadow: 0 0 10px white;
     animation: ks-dot-pulse 1.5s ease-in-out infinite;
 }
 
@@ -387,11 +405,11 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
 
 /* Minimalistická ikona v pohybu - Brand Edition */
 .ks-basketball-icon {
-    font-size: 3.5rem;
+    font-size: 4.5rem;
     color: var(--color-brand-red);
     position: relative;
     z-index: 2;
-    filter: drop-shadow(0 10px 18px rgba(255,255,255,0.6));
+    filter: drop-shadow(0 0 25px rgba(var(--color-brand-red-rgb), 0.5));
     animation: ks-bounce 0.8s cubic-bezier(.45, 0, .55, 1) infinite alternate;
 }
 

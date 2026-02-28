@@ -8,13 +8,17 @@
                 <i class="fa-light fa-basketball"></i>
             </div>
         </div>
-        <div class="ks-loader-text">
+        <div class="ks-loader-body">
             @if($slot->isEmpty())
-                {{ __('admin.navigation.resources.photo_pool.notifications.processing') }}
+                <div class="ks-loader-text">
+                    {{ __('admin.navigation.resources.photo_pool.notifications.processing') }}
+                </div>
             @else
-                {{ $slot }}
+                <div class="ks-loader-custom">
+                    {{ $slot }}
+                </div>
             @endif
-            <span wire:stream="ks-loader-progress"></span>
+            <div wire:stream="ks-loader-progress" class="ks-loader-progress"></div>
         </div>
     </div>
 </div>
