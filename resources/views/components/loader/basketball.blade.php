@@ -1,6 +1,12 @@
 @teleport('body')
-<div {{ $attributes->merge(['class' => 'ks-loader-overlay hidden']) }}
-     @if(!$attributes->has('x-show') && !$attributes->has('wire:loading')) wire:loading.delay wire:loading.class.remove="hidden" @endif
+<div {{ $attributes->merge(['class' => 'ks-loader-overlay']) }}
+     @if(!$attributes->has('x-show') && !$attributes->has('wire:loading'))
+         wire:loading.delay
+         wire:loading.class="is-loading"
+     @endif
+     @if($attributes->has('x-show'))
+         :class="{ 'is-loading': {{ $attributes->get('x-show') }} }"
+     @endif
      wire:key="ks-loader-{{ md5($attributes->get('wire:target', 'default')) }}">
     <div class="ks-loader-content">
         <div class="ks-ball-container">

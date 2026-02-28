@@ -298,14 +298,21 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     background: radial-gradient(circle at center, rgba(var(--color-brand-navy-rgb), 0.75) 0%, rgba(var(--color-brand-navy-rgb), 0.95) 100%) !important;
     backdrop-filter: blur(12px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-    pointer-events: all !important;
-    display: none;
+    pointer-events: none !important;
+    display: none !important;
 }
 
-.ks-loader-overlay:not(.hidden) {
+.ks-loader-overlay.is-loading,
+.ks-loader-overlay[wire\:loading]:not([style*="display: none"]),
+.ks-loader-overlay[wire\:loading\.delay]:not([style*="display: none"]),
+.ks-loader-overlay[wire\:loading\.delay\.shortest]:not([style*="display: none"]),
+.ks-loader-overlay[wire\:loading\.flex]:not([style*="display: none"]),
+.ks-loader-overlay[style*="display: block"],
+.ks-loader-overlay[style*="display: flex"] {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    pointer-events: all !important;
 }
 
 .ks-loader-content {

@@ -94,6 +94,15 @@ Vzhledem k tomu, že hosting Webglobe využívá starší verze MySQL/MariaDB (b
 - `->change()` (např. `$table->string('name')->nullable()->change()`)
 
 Tyto metody vyžadují hloubkovou introspekci schématu, která na tomto hostingu selhává. Místo nich:
+
+**Řešení introspekce schématu:**
+Pokud se v aplikaci nebo při spouštění Artisan příkazů (např. `model:show`) objeví chyba `Unknown column 'generation_expression'`, je to způsobeno pokusem o moderní introspekci na starší databázi. 
+Pro vyřešení tohoto problému je v `config/database.php` přidána podpora pro parametr `version`. V `.env` na produkci musí být nastaveno:
+```env
+DB_VERSION=5.7.0
+```
+Tím se Laravelu 12 sdělí, aby nepoužíval moderní sloupce v dotazech na `information_schema`.
+
 1. **Přidávání sloupců:** Provádějte přímo v `Schema::table` bez předchozí kontroly existence sloupce.
 2. **Změna typu sloupce:** Pokud je změna nezbytná, upravte původní `create` migraci (pokud ještě neproběhla na produkci) nebo použijte `DB::statement("ALTER TABLE ... MODIFY ...")`.
 

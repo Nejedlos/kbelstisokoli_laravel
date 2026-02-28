@@ -84,6 +84,16 @@ class PhotoPoolResource extends Resource
                                         <i class="fa-light fa-shield-exclamation text-base"></i>
                                         Nezavírejte okno
                                     </div>
+
+                                    <button
+                                        type="button"
+                                        wire:click="cancelImportQueue"
+                                        wire:confirm="Opravdu chcete přerušit import a smazat zbývající frontu?"
+                                        class="mt-6 flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-full border border-white/20 transition-all duration-300 mx-auto group"
+                                    >
+                                        <i class="fa-light fa-circle-xmark text-sm text-red-400 group-hover:scale-110 transition-transform"></i>
+                                        Zrušit import
+                                    </button>
                                 </div>
                             </div>
                         </x-loader.basketball>
@@ -123,6 +133,16 @@ class PhotoPoolResource extends Resource
                                             <i class='fa-light fa-triangle-exclamation text-base'></i>
                                             Nezavírejte okno!
                                         </span>
+
+                                        <button
+                                            type='button'
+                                            wire:click='cancelImportQueue'
+                                            wire:confirm='Opravdu chcete přerušit import a smazat zbývající frontu?'
+                                            class='ml-auto flex items-center gap-2 px-4 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 dark:border-red-900/50 transition-all duration-300 shadow-sm'
+                                        >
+                                            <i class='fa-light fa-circle-xmark'></i>
+                                            Zrušit import
+                                        </button>
                                     </div>
                                 </div>
 

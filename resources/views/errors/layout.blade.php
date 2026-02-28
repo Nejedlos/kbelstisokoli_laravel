@@ -13,11 +13,33 @@
         $brandingService = app(\App\Services\BrandingService::class);
         $branding = $brandingService->getSettings();
         $branding_css = $brandingService->getCssVariables();
+
+        // Detekce sekce pro navigaci a cíl tlačítka "Zpět"
+        $currentPath = request()->getPathInfo();
+        $is_admin = str_starts_with($currentPath, '/admin');
+        $is_member = str_starts_with($currentPath, '/clenska-sekce');
+        $is_auth = auth()->check();
+
+        $nav_config = config('navigation.public', []);
+        if ($is_auth) {
+            if ($is_admin) {
+                // Pro admin nebudeme renderovat standardní public navigaci,
+                // protože by to uživatele mátlo. Místo toho tam dáme jen logo a info o sekci.
+                $nav_config = [];
+            } elseif ($is_member) {
+                // Členská sekce má v configu podklíče (main, coach)
+                $member_nav = config('navigation.member', []);
+                $nav_config = array_merge($member_nav['main'] ?? [], $member_nav['coach'] ?? []);
+            }
+        }
     @endphp
 
     <meta name="theme-color" content="{{ $branding['colors']['red'] ?? '#e11d48' }}">
     <style>{!! $branding_css !!}</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if($is_admin)
+        @vite(['resources/css/filament-admin.css'])
+    @endif
     <style>
         .error-bg {
             background-image: radial-gradient(circle at 20% 30%, rgba(225, 29, 72, 0.05) 0%, transparent 50%),
@@ -28,7 +50,7 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 error-bg antialiased">
     <!-- Header -->
-    <x-header :branding="$branding" :navigation="config('navigation.public', [])" />
+    <x-header :branding="$branding" :navigation="$nav_config" />
 
     <main class="flex-1 flex flex-col items-center justify-center p-6 py-20 text-center">
         <div class="max-w-4xl w-full">
@@ -60,7 +82,7 @@
     </main>
 
     <!-- Footer -->
-    <x-footer :branding="$branding" :navigation="config('navigation.public', [])" />
+    <x-footer :branding="$branding" :navigation="$nav_config" />
 
     @stack('scripts')
 </body>

@@ -25,6 +25,9 @@ return new class extends Migration
                 if (! Schema::hasColumn('attendances', 'is_mismatch')) {
                     $table->boolean('is_mismatch')->default(false)->after('actual_status');
                 }
+                if (! Schema::hasColumn('attendances', 'metadata')) {
+                    $table->longText('metadata')->nullable()->after('responded_at');
+                }
             });
 
             Schema::table('finance_charges', function (Blueprint $table) {
@@ -64,6 +67,12 @@ return new class extends Migration
             $columnMismatch = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'is_mismatch'");
             if (empty($columnMismatch)) {
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN is_mismatch TINYINT(1) DEFAULT 0 NOT NULL AFTER actual_status");
+            }
+
+            // metadata
+            $columnMetadata = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'metadata'");
+            if (empty($columnMetadata)) {
+                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN metadata LONGTEXT NULL AFTER responded_at");
             }
         } catch (\Throwable $e) {
         }

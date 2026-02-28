@@ -12,8 +12,17 @@
 @section('tagline', 'Tým Sokolů se nevzdává a brzy budeme zpět ve hře.')
 
 @section('actions')
-    <a href="{{ url('/') }}" class="btn btn-primary px-8 text-white">
-        Zpět na hlavní stránku
+    @php
+        $backUrl = url('/');
+        $currentPath = request()->getPathInfo();
+        if (str_starts_with($currentPath, '/admin')) {
+            $backUrl = url('/admin');
+        } elseif (str_starts_with($currentPath, '/clenska-sekce')) {
+            $backUrl = route('member.dashboard');
+        }
+    @endphp
+    <a href="{{ $backUrl }}" class="btn btn-primary px-8 text-white">
+        Zpět na přehled
     </a>
     <button onclick="toggleTechnical()" class="btn btn-outline px-8 border-slate-200">
         Technická zpráva pro admina
