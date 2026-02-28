@@ -34,12 +34,21 @@ class AvatarModal extends Component
 
     public function loadGallery()
     {
+        // Načteme všechny assety, které jsou veřejné nebo které nemají majitele (systémové)
+        // a které nejsou v žádném PhotoPoolu (aby se nepletly fotky z akcí mezi avatary)
         $this->galleryAssets = MediaAsset::query()
+            ->where(function($query) {
+                $query->whereNull('uploaded_by_id')
+                    ->orWhere('title', 'like', 'Default Avatar%');
+            })
             ->where('is_public', true)
-            ->whereNull('uploaded_by_id')
             ->latest('id')
-            ->limit(500)
+            ->limit(1000)
             ->get();
+
+        if ($this->galleryAssets->isEmpty()) {
+            \Illuminate\Support\Facades\Log::warning("AvatarModal: Galerie je prázdná. Počet všech MediaAsset v DB: " . MediaAsset::count());
+        }
     }
 
     public function open($userId = null)

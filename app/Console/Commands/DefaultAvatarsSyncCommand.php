@@ -46,6 +46,11 @@ class DefaultAvatarsSyncCommand extends Command
         $limit = (int) $this->option('limit');
         $offset = (int) $this->option('offset');
 
+        if ($offset >= $totalFound && $totalFound > 0) {
+            $this->info("Všechny soubory ({$totalFound}) již byly zpracovány. Končím.");
+            return Command::SUCCESS;
+        }
+
         if ($limit > 0 || $offset > 0) {
             $filteredFiles = array_slice($filteredFiles, $offset, $limit ?: null);
         }
@@ -89,6 +94,12 @@ class DefaultAvatarsSyncCommand extends Command
                 if ($existingId) {
                     $asset = MediaAsset::find($existingId);
                     if ($asset) {
+                        // Zajistit, aby existující asset byl veřejný a měl správná metadata
+                        $asset->update([
+                            'is_public' => true,
+                            'access_level' => 'public',
+                            'type' => 'image',
+                        ]);
                         $asset->clearMediaCollection('default');
                     } else {
                         // Pokud existuje záznam v media, ale ne model (sirotek), vytvoříme nový

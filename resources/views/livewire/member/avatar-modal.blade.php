@@ -191,7 +191,9 @@ class="fixed inset-0 z-50 overflow-y-auto"
                                 <button wire:key="asset-{{ $asset->id }}" @click="selectFromGallery('{{ $asset->getUrl() }}')"
                                         class="group relative aspect-square rounded-xl overflow-hidden border-2 transition-all"
                                         :class="previewUrl === '{{ $asset->getUrl() }}' ? 'border-primary ring-2 ring-primary/20' : 'border-slate-100 hover:border-primary/50'">
-                                    <img src="{{ $asset->getUrl('thumb') }}" alt="" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                    <img src="{{ $asset->getUrl('thumb') }}"
+                                         onerror="this.src='{{ $asset->getUrl() }}'; this.onerror=null;"
+                                         alt="" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                     <div class="absolute inset-0 bg-secondary/40 flex items-center justify-center transition-opacity"
                                          :class="previewUrl === '{{ $asset->getUrl() }}' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
                                         <i class="fa-light fa-check text-white text-xl"></i>

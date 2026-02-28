@@ -94,9 +94,18 @@ class AppSyncCommand extends Command
 
         // Výchozí avatary (galerie ilustrací pro výběr) - vždy při syncu, pokud existuje command
         if (class_exists(\App\Console\Commands\DefaultAvatarsSyncCommand::class)) {
-            $this->call('sync:default-avatars', [
-                '--force' => $this->option('force'),
-            ]);
+            $this->info('Synchronizuji výchozí avatary...');
+            // Spouštíme v dávkách po 100, abychom předešli timeoutům na produkci
+            for ($offset = 0; $offset < 2000; $offset += 100) {
+                $this->call('sync:default-avatars', [
+                    '--force' => $this->option('force'),
+                    '--limit' => 100,
+                    '--offset' => $offset,
+                ]);
+
+                // Pokud už nejsou žádné další soubory, command vypíše info (my zde ale nemáme návratovou hodnotu o počtu)
+                // Tak to prostě zkusíme párkrát. 2000 souborů by mělo stačit.
+            }
         }
     }
 
