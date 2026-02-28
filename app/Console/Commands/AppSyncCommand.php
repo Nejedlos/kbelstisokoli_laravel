@@ -91,6 +91,13 @@ class AppSyncCommand extends Command
                 '--force' => $this->option('force'),
             ]);
         }
+
+        // Výchozí avatary (galerie ilustrací pro výběr) - vždy při syncu, pokud existuje command
+        if (class_exists(\App\Console\Commands\DefaultAvatarsSyncCommand::class)) {
+            $this->call('sync:default-avatars', [
+                '--force' => $this->option('force'),
+            ]);
+        }
     }
 
     /**

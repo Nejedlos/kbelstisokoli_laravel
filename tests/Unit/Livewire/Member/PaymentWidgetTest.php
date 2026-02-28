@@ -49,4 +49,36 @@ class PaymentWidgetTest extends TestCase
 
         $this->assertEquals('Prilis zlutoucky kun upel dabelske ody', $clean);
     }
+
+    /**
+     * Test sestavení SPAYD řetězce.
+     */
+    public function test_it_builds_correct_spayd_string(): void
+    {
+        $widget = new PaymentWidget();
+        $widget->vs = '26021234';
+        $widget->ss = '1234';
+        $widget->amount = '1500,50';
+        $widget->note = 'Clenske prispevky';
+        $widget->memberName = 'Jan Novak';
+
+        $method = new ReflectionMethod(PaymentWidget::class, 'buildSpaydString');
+        $method->setAccessible(true);
+
+        $iban = 'CZ6163630000006022854477';
+        $spayd = $method->invoke($widget, $iban);
+
+        $this->assertStringContainsString('SPD*1.0*', $spayd);
+        $this->assertStringContainsString('ACC:CZ6163630000006022854477', $spayd);
+        $this->assertStringContainsString('AM:1500.50', $spayd);
+        $this->assertStringContainsString('X-VS:26021234', $spayd);
+        $this->assertStringContainsString('X-SS:1234', $spayd);
+        $this->assertStringContainsString('MSG:Clenske prispevky', $spayd);
+
+        // Test sanitizace VS (pomlčky a jiné znaky)
+        $widget->vs = 'KS-26-02';
+        $spayd = $method->invoke($widget, $iban);
+        $this->assertStringContainsString('X-VS:2602', $spayd);
+        $this->assertStringNotContainsString('X-VS:KS', $spayd);
+    }
 }

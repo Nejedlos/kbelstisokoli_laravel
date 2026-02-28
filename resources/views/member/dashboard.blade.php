@@ -115,9 +115,6 @@
             />
         </div>
 
-        <!-- Bank Info & QR Payment -->
-        <livewire:member.payment-widget />
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <!-- Upcoming Program -->
             <div class="lg:col-span-2 space-y-6">
@@ -234,5 +231,8 @@
                 @endif
             </div>
         </div>
+
+        <!-- Bank Info & QR Payment -->
+        <livewire:member.payment-widget />
     </div>
 @endsection

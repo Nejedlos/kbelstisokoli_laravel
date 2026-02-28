@@ -175,6 +175,13 @@ return [
             'bank' => 'Banka',
             'recipient_message' => 'Zpráva pro příjemce',
             'qr_payment' => 'QR Platba',
+            'amount' => 'Částka (Kč)',
+            'note' => 'Poznámka (MSG)',
+            'ss' => 'Specifický symbol (SS)',
+            'note_placeholder' => 'Jméno člena',
+            'ss_placeholder' => 'Nepovinné',
+            'amount_placeholder' => '0.00',
+            'download_qr' => 'Uložit do zařízení',
         ],
     ],
     'notifications' => [

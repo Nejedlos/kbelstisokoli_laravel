@@ -30,6 +30,7 @@
 
     @stack('head')
     <style>[x-cloak] { display: none !important; }</style>
+    @livewireStyles
 </head>
 <body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50" x-data="{ sidebarOpen: false }">
     <x-impersonation-banner />
@@ -462,5 +463,6 @@
         });
     </script>
     @stack('scripts')
+    @livewireScripts
 </body>
 </html>

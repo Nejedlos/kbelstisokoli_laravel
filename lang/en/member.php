@@ -175,6 +175,13 @@ return [
             'bank' => 'Bank',
             'recipient_message' => 'Message for Recipient',
             'qr_payment' => 'QR Payment',
+            'amount' => 'Amount (CZK)',
+            'note' => 'Note (MSG)',
+            'ss' => 'Specific Symbol (SS)',
+            'note_placeholder' => 'Member name',
+            'ss_placeholder' => 'Optional',
+            'amount_placeholder' => '0.00',
+            'download_qr' => 'Save to device',
         ],
     ],
     'notifications' => [

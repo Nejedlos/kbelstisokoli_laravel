@@ -36,8 +36,9 @@ class AvatarModal extends Component
     {
         $this->galleryAssets = MediaAsset::query()
             ->where('is_public', true)
+            ->whereNull('uploaded_by_id')
             ->latest('id')
-            ->limit(200)
+            ->limit(500)
             ->get();
     }
 

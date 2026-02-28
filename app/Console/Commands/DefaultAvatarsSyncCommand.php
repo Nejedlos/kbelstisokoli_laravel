@@ -9,7 +9,11 @@ use Illuminate\Support\Str;
 
 class DefaultAvatarsSyncCommand extends Command
 {
-    protected $signature = 'sync:default-avatars {--force : Přepíše existující avatary, pokud již existují (vynutí update)}';
+    protected $signature = 'sync:default-avatars
+                            {--force : Přepíše existující avatary, pokud již existují (vynutí update)}
+                            {--limit=0 : Počet souborů ke zpracování v této dávce (0 = vše)}
+                            {--offset=0 : Od kterého souboru začít (pro postupné zpracování)}
+                            {--stop-on-error : Zastaví zpracování při první chybě}';
     protected $description = 'Jednorázový manuální import výchozích avatarů z lokálního úložiště do MediaAsset galerie.';
 
     public function handle()
@@ -25,13 +29,37 @@ class DefaultAvatarsSyncCommand extends Command
         }
 
         $allFiles = File::allFiles($sourceDir);
-        $totalFiles = count($allFiles);
-        $this->info("Nalezeno {$totalFiles} souborů k synchronizaci.");
 
-        $bar = $this->output->createProgressBar($totalFiles);
+        // Filtrování relevantních souborů (bez thumbs a jen obrázky)
+        $filteredFiles = [];
+        foreach ($allFiles as $file) {
+            if (Str::contains($file->getRelativePathname(), 'thumbs/')) {
+                continue;
+            }
+            if (!in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'])) {
+                continue;
+            }
+            $filteredFiles[] = $file;
+        }
+
+        $totalFound = count($filteredFiles);
+        $limit = (int) $this->option('limit');
+        $offset = (int) $this->option('offset');
+
+        if ($limit > 0 || $offset > 0) {
+            $filteredFiles = array_slice($filteredFiles, $offset, $limit ?: null);
+        }
+
+        $totalToProcess = count($filteredFiles);
+        $this->info("Nalezeno celkem {$totalFound} relevantních souborů.");
+        $this->info("Zpracovávám dávku {$totalToProcess} souborů (offset: {$offset}, limit: " . ($limit ?: 'vše') . ").");
+
+        $bar = $this->output->createProgressBar($totalToProcess);
+        $bar->start();
 
         $countImported = 0;
         $countSkipped = 0;
+        $countErrors = 0;
         $disk = config('media-library.disk_name', 'public_path');
 
         // Optimalizace: Načtení všech existujících názvů souborů do paměti najednou
@@ -40,19 +68,13 @@ class DefaultAvatarsSyncCommand extends Command
             ->toArray();
         $existingFileNames = array_flip($existingMedia);
 
-        foreach ($allFiles as $file) {
-            // Ignorovat náhledy (thumbs)
-            if (Str::contains($file->getRelativePathname(), 'thumbs/')) {
-                $bar->advance();
-                continue;
-            }
-
-            if (!in_array($file->getExtension(), ['jpg', 'jpeg', 'png', 'webp'])) {
-                $bar->advance();
-                continue;
-            }
-
+        foreach ($filteredFiles as $index => $file) {
             $fileName = $file->getFilename();
+            $currentPos = $offset + $index + 1;
+
+            // Logování aktuálního souboru (před zpracováním)
+            // Použijeme line přepisování pro přehlednost, nebo info pro debug
+            $this->info("\n[{$currentPos}/{$totalFound}] Zpracovávám: " . $file->getRelativePathname());
 
             // Rychlá kontrola v poli v paměti místo DB query
             $existingId = $existingFileNames[$fileName] ?? null;
@@ -63,12 +85,21 @@ class DefaultAvatarsSyncCommand extends Command
                 continue;
             }
 
-            if ($existingId) {
-                $asset = MediaAsset::find($existingId);
-                if ($asset) {
-                    $asset->clearMediaCollection('default');
+            try {
+                if ($existingId) {
+                    $asset = MediaAsset::find($existingId);
+                    if ($asset) {
+                        $asset->clearMediaCollection('default');
+                    } else {
+                        // Pokud existuje záznam v media, ale ne model (sirotek), vytvoříme nový
+                        $asset = MediaAsset::create([
+                            'title' => 'Default Avatar ' . Str::random(6),
+                            'is_public' => true,
+                            'access_level' => 'public',
+                            'type' => 'image',
+                        ]);
+                    }
                 } else {
-                    // Pokud existuje záznam v media, ale ne model (sirotek), vytvoříme nový
                     $asset = MediaAsset::create([
                         'title' => 'Default Avatar ' . Str::random(6),
                         'is_public' => true,
@@ -76,25 +107,23 @@ class DefaultAvatarsSyncCommand extends Command
                         'type' => 'image',
                     ]);
                 }
-            } else {
-                $asset = MediaAsset::create([
-                    'title' => 'Default Avatar ' . Str::random(6),
-                    'is_public' => true,
-                    'access_level' => 'public',
-                    'type' => 'image',
-                ]);
-            }
 
-            // Přidání média
-            try {
+                // Přidání média
                 $asset->addMedia($file->getPathname())
                     ->preservingOriginal()
                     ->toMediaCollection('default', $disk);
+
+                $countImported++;
             } catch (\Exception $e) {
-                $this->error("\nChyba při zpracování souboru " . $file->getFilename() . ": " . $e->getMessage());
+                $countErrors++;
+                $this->error("\nCHYBA u souboru " . $file->getRelativePathname() . ": " . $e->getMessage());
+
+                if ($this->option('stop-on-error')) {
+                    $this->error("Zastavuji zpracování kvůli chybě (--stop-on-error).");
+                    break;
+                }
             }
 
-            $countImported++;
             $bar->advance();
 
             // Uvolnění paměti po každém 10. souboru
@@ -104,7 +133,16 @@ class DefaultAvatarsSyncCommand extends Command
         }
 
         $bar->finish();
-        $this->info("\nSynchronizace dokončena. Importováno: {$countImported}, Přeskočeno: {$countSkipped}.");
+        $this->info("\n\nSynchronizace dávky dokončena.");
+        $this->info("Importováno: {$countImported}");
+        $this->info("Přeskočeno: {$countSkipped}");
+        $this->info("Chyby: {$countErrors}");
+
+        if ($totalToProcess + $offset < $totalFound) {
+            $nextOffset = $offset + $totalToProcess;
+            $this->warn("Zbývá ještě " . ($totalFound - $nextOffset) . " souborů. Spusťte znovu s --offset={$nextOffset}");
+        }
+
         return Command::SUCCESS;
     }
 }

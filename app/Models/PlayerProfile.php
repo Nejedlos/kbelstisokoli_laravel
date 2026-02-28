@@ -5,12 +5,15 @@ namespace App\Models;
 use App\Enums\BasketballPosition;
 use App\Enums\DominantHand;
 use App\Enums\JerseySize;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PlayerProfile extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'jersey_number',

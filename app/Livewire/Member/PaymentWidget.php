@@ -4,17 +4,24 @@ namespace App\Livewire\Member;
 
 use App\Models\Setting;
 use Livewire\Component;
+use Livewire\Attributes\Locked;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 
 class PaymentWidget extends Component
 {
-    public string $bankAccount;
-    public string $bankName;
-    public string $vs;
-    public string $memberName;
+    #[Locked]
+    public string $bankAccount = '';
+    #[Locked]
+    public string $bankName = '';
+    #[Locked]
+    public string $vs = '';
+    #[Locked]
+    public string $memberName = '';
+    public string $amount = '';
     public string $note = '';
     public string $ss = '';
+    #[Locked]
     public string $qrCodeDataUri = '';
 
     public function mount()
@@ -37,9 +44,7 @@ class PaymentWidget extends Component
 
     public function updated($propertyName)
     {
-        if (in_array($propertyName, ['note', 'ss'])) {
-            $this->generateQrCode();
-        }
+        $this->generateQrCode();
     }
 
     public function generateQrCode()
@@ -51,27 +56,11 @@ class PaymentWidget extends Component
             return;
         }
 
-        // SPAYD formát (Short Payment Descriptor)
-        // SPD*1.0*ACC:iban*CC:CZK*VS:variable_symbol*SS:specific_symbol*MSG:message
-        $spayd = "SPD*1.0*ACC:{$iban}*CC:CZK";
-
-        if ($this->vs) {
-            $spayd .= "*VS:{$this->vs}";
-        }
-
-        if ($this->ss) {
-            $spayd .= "*SS:{$this->ss}";
-        }
-
-        // Pokud není zadána poznámka, použijeme jméno člena jako výchozí
-        $message = $this->note ?: $this->memberName;
-        if ($message) {
-            $spayd .= "*MSG:" . $this->sanitizeMessage($message);
-        }
+        $spayd = $this->buildSpaydString($iban);
 
         try {
             $options = new QROptions([
-                'version'    => 4,
+                'version'    => QRCode::VERSION_AUTO,
                 'outputType' => QRCode::OUTPUT_IMAGE_PNG,
                 'eccLevel'   => QRCode::ECC_L,
                 'scale'      => 5,
@@ -83,6 +72,43 @@ class PaymentWidget extends Component
             \Illuminate\Support\Facades\Log::error('QR Code generation failed: ' . $e->getMessage());
             $this->qrCodeDataUri = '';
         }
+    }
+
+    protected function buildSpaydString(string $iban): string
+    {
+        // SPAYD formát (Short Payment Descriptor)
+        // SPD*1.0*ACC:iban*CC:CZK*AM:amount*X-VS:variable_symbol*X-SS:specific_symbol*MSG:message
+        $spayd = "SPD*1.0*ACC:{$iban}*CC:CZK";
+
+        if ($this->amount) {
+            $amountValue = str_replace(',', '.', $this->amount);
+            if (is_numeric($amountValue) && (float)$amountValue > 0) {
+                $formattedAmount = number_format((float)$amountValue, 2, '.', '');
+                $spayd .= "*AM:{$formattedAmount}";
+            }
+        }
+
+        if ($this->vs) {
+            $vsDigits = preg_replace('/[^0-9]/', '', $this->vs);
+            if ($vsDigits !== '') {
+                $spayd .= "*X-VS:" . mb_substr($vsDigits, 0, 10);
+            }
+        }
+
+        if ($this->ss) {
+            $ssDigits = preg_replace('/[^0-9]/', '', $this->ss);
+            if ($ssDigits !== '') {
+                $spayd .= "*X-SS:" . mb_substr($ssDigits, 0, 10);
+            }
+        }
+
+        // Pokud není zadána poznámka, použijeme jméno člena jako výchozí
+        $message = $this->note ?: $this->memberName;
+        if ($message) {
+            $spayd .= "*MSG:" . $this->sanitizeMessage($message);
+        }
+
+        return $spayd;
     }
 
     protected function sanitizeMessage(string $msg): string

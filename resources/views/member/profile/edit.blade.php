@@ -247,32 +247,22 @@
 
                         @if(! $user->two_factor_secret)
                             {{-- Enable 2FA --}}
-                            <form method="POST" action="{{ route('two-factor.enable') }}">
-                                @csrf
-                                <button type="submit" class="btn btn-primary px-8 py-3 w-full sm:w-auto">
-                                    <i class="fa-light fa-shield-check mr-2"></i> {{ __('member.profile.two_factor.enable') }}
-                                </button>
-                            </form>
+                            <button type="submit" form="two-factor-enable-form" class="btn btn-primary px-8 py-3 w-full sm:w-auto">
+                                <i class="fa-light fa-shield-check mr-2"></i> {{ __('member.profile.two_factor.enable') }}
+                            </button>
                         @else
                             {{-- 2FA Setup Flow (Confirming) --}}
                             @if($user->two_factor_confirmed_at)
                                 {{-- Show Recovery Codes --}}
                                 <div class="space-y-6 pt-2">
                                     <div class="flex flex-col sm:flex-row gap-3">
-                                        <form method="POST" action="{{ route('two-factor.recovery-codes') }}" class="w-full sm:w-auto">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline py-2.5 px-5 w-full justify-center">
-                                                <i class="fa-light fa-arrows-rotate mr-2 text-primary"></i> {{ __('member.profile.two_factor.regenerate_codes') }}
-                                            </button>
-                                        </form>
+                                        <button type="submit" form="two-factor-recovery-codes-form" class="btn btn-outline py-2.5 px-5 w-full justify-center sm:w-auto">
+                                            <i class="fa-light fa-arrows-rotate mr-2 text-primary"></i> {{ __('member.profile.two_factor.regenerate_codes') }}
+                                        </button>
 
-                                        <form method="POST" action="{{ route('two-factor.disable') }}" class="w-full sm:w-auto">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn bg-rose-50 text-rose-600 hover:bg-rose-100 py-2.5 px-5 border-transparent w-full justify-center font-bold">
-                                                <i class="fa-light fa-trash-can mr-2"></i> {{ __('member.profile.two_factor.disable') }}
-                                            </button>
-                                        </form>
+                                        <button type="submit" form="two-factor-disable-form" class="btn bg-rose-50 text-rose-600 hover:bg-rose-100 py-2.5 px-5 border-transparent w-full justify-center font-bold sm:w-auto">
+                                            <i class="fa-light fa-trash-can mr-2"></i> {{ __('member.profile.two_factor.disable') }}
+                                        </button>
                                     </div>
 
                                     @if(session('status') == 'two-factor-authentication-enabled' || session('status') == 'recovery-codes-generated')
@@ -311,18 +301,17 @@
                                         </div>
                                     </div>
 
-                                    <form method="POST" action="{{ route('two-factor.confirm') }}" class="flex flex-col sm:flex-row items-end gap-5 max-w-md mx-auto md:mx-0 border-t border-slate-200 pt-8">
-                                        @csrf
+                                    <div class="flex flex-col sm:flex-row items-end gap-5 max-w-md mx-auto md:mx-0 border-t border-slate-200 pt-8">
                                         <div class="w-full sm:flex-1 space-y-2">
                                             <label for="code" class="form-label text-center sm:text-left">{{ __('member.profile.two_factor.code_label') }}</label>
-                                            <input id="code" type="text" name="code" inputmode="numeric" required autofocus autocomplete="one-time-code"
+                                            <input id="code" type="text" name="code" form="two-factor-confirm-form" inputmode="numeric" required autofocus autocomplete="one-time-code"
                                                    class="form-input text-center tracking-[0.3em] sm:tracking-[0.5em] text-lg sm:text-xl py-4" placeholder="000 000">
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-full sm:w-auto h-[60px] px-8">
+                                        <button type="submit" form="two-factor-confirm-form" class="btn btn-primary w-full sm:w-auto h-[60px] px-8">
                                             {{ __('member.profile.two_factor.confirm_button') }}
                                         </button>
-                                    </form>
-                                    @error('code') <p class="text-[10px] text-danger-600 font-bold mt-2 uppercase tracking-wider text-center md:text-left">{{ $message }}</p> @enderror
+                                    </div>
+                                    @error('code', 'confirmTwoFactorAuthentication') <p class="text-[10px] text-danger-600 font-bold mt-2 uppercase tracking-wider text-center md:text-left">{{ $message }}</p> @enderror
                                 </div>
                             @endif
                         @endif
@@ -330,11 +319,33 @@
                 </section>
 
                 <div class="flex items-center justify-center sm:justify-end">
-                    <button type="submit" class="btn btn-primary px-12 py-4 w-full sm:w-auto shadow-xl shadow-primary/20">
+                    <button type="submit" name="action" value="update_profile" class="btn btn-primary px-12 py-4 w-full sm:w-auto shadow-xl shadow-primary/20">
                         {{ __('member.profile.save_changes') }}
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    {{-- Hidden forms for 2FA actions to avoid nested forms --}}
+    @if(! $user->two_factor_secret)
+        <form method="POST" action="{{ route('two-factor.enable') }}" id="two-factor-enable-form">
+            @csrf
+        </form>
+    @else
+        @if($user->two_factor_confirmed_at)
+            <form method="POST" action="{{ route('two-factor.recovery-codes') }}" id="two-factor-recovery-codes-form">
+                @csrf
+            </form>
+
+            <form method="POST" action="{{ route('two-factor.disable') }}" id="two-factor-disable-form">
+                @csrf
+                @method('DELETE')
+            </form>
+        @else
+            <form method="POST" action="{{ route('two-factor.confirm') }}" id="two-factor-confirm-form">
+                @csrf
+            </form>
+        @endif
+    @endif
 @endsection
