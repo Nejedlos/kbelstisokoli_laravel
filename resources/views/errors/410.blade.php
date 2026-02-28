@@ -9,9 +9,9 @@
         <h1 class="text-3xl md:text-4xl font-bold mb-4">Obsah byl odstraněn</h1>
         <p class="text-slate-600 mb-8">Požadovaná stránka už není k dispozici. Vyberte si prosím jinou sekci.</p>
         <div class="flex flex-wrap gap-3 justify-center">
-            <a href="{{ route('public.home') }}" class="btn btn-primary">Domů</a>
-            <a href="{{ route('public.news.index') }}" class="btn btn-outline">Novinky</a>
-            <a href="{{ route('public.matches.index') }}" class="btn btn-outline">Zápasy</a>
+            <a href="{{ url('/') }}" class="btn btn-primary">Domů</a>
+            <a href="{{ url('/novinky') }}" class="btn btn-outline">Novinky</a>
+            <a href="{{ url('/zapasy') }}" class="btn btn-outline">Zápasy</a>
         </div>
     </div>
 </section>

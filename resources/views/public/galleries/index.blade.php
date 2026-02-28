@@ -75,7 +75,11 @@
                                     </div>
                                     <div class="absolute top-4 right-4">
                                         <span class="px-3 py-1 bg-secondary/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                                            {{ $pool->event_date?->format('d. m. Y') }}
+                                            @if($pool->event_date?->day === 1 && $pool->event_date?->month === 1)
+                                                {{ $pool->event_date?->format('Y') }}
+                                            @else
+                                                {{ $pool->event_date?->format('d. m. Y') }}
+                                            @endif
                                         </span>
                                     </div>
                                 </div>

@@ -8,11 +8,11 @@
 
 @section('actions')
     @guest
-        <a href="{{ route('login') }}" class="btn btn-primary px-8 text-white">
+        <a href="{{ url('/login') }}" class="btn btn-primary px-8 text-white">
             {{ __('errors.403.login') }}
         </a>
     @else
-        <a href="{{ route('public.home') }}" class="btn btn-primary px-8 text-white">
+        <a href="{{ url('/') }}" class="btn btn-primary px-8 text-white">
             {{ __('errors.back_to_home') }}
         </a>
     @endguest

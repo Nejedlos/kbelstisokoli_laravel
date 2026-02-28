@@ -10,7 +10,7 @@
     $clubLinks = [
         ['label' => __('Muži C'), 'url' => '/tymy/muzi-c', 'is_external' => false],
         ['label' => __('Muži E'), 'url' => '/tymy/muzi-e', 'is_external' => false],
-        ['label' => __('Nábor - Kbelští sokoli'), 'url' => route('public.recruitment.index'), 'is_external' => false],
+        ['label' => __('Nábor - Kbelští sokoli'), 'url' => Route::has('public.recruitment.index') ? route('public.recruitment.index') : url('/nabor'), 'is_external' => false],
         ['label' => __('Ostatní kbelské týmy'), 'url' => 'https://www.basketkbely.cz/druzstva', 'is_external' => true],
         ['label' => __('Nábor - Mládež & Elita'), 'url' => 'https://www.basketkbely.cz/zacnihrat', 'is_external' => true],
         ['label' => __('Hlavní web oddílu'), 'url' => 'https://www.basketkbely.cz/', 'is_external' => true],
@@ -36,7 +36,7 @@
             {{-- Column 1: Brand & Identity --}}
             <div class="space-y-6 sm:col-span-2 lg:col-span-3">
                 @if($branding['logo_path'])
-                    <a href="{{ route('public.home') }}" class="inline-flex items-center gap-4 group">
+                    <a href="{{ url('/') }}" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl">
                             <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ $branding['club_name'] }}" class="h-10 w-auto">
                         </div>
@@ -86,7 +86,7 @@
                         {{-- Fallback na statickou navigaci z configu, pokud menu v DB není --}}
                         @foreach(config('navigation.public', []) as $item)
                             <li>
-                                <a href="{{ route($item['route']) }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs($item['route']) ? 'text-primary' : '' }}">
+                                <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ Route::has($item['route']) && request()->routeIs($item['route']) ? 'text-primary' : '' }}">
                                     <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
                                     <span class="font-medium">{{ __($item['title']) }}</span>
                                 </a>
@@ -94,7 +94,7 @@
                         @endforeach
                     @endforelse
                     <li>
-                        <a href="{{ route('public.search') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">
+                        <a href="{{ Route::has('public.search') ? route('public.search') : url('/hledat') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ Route::has('public.search') && request()->routeIs('public.search') ? 'text-primary' : '' }}">
                             <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
                             <span class="font-medium">{{ __('Search') }}</span>
                         </a>
@@ -186,7 +186,7 @@
                     </ul>
 
                     <div class="flex flex-wrap gap-3 sm:gap-4 pt-4 border-t border-white/5">
-                        <a href="{{ route('public.contact.index') }}" class="btn btn-primary btn-sm px-4 sm:px-6 grow sm:grow-0 justify-center">
+                        <a href="{{ Route::has('public.contact.index') ? route('public.contact.index') : url('/kontakt') }}" class="btn btn-primary btn-sm px-4 sm:px-6 grow sm:grow-0 justify-center">
                             <span>{{ __('footer.contact_page_cta') }}</span>
                         </a>
                         <a href="{{ $branding['main_club_url'] }}"
@@ -222,21 +222,21 @@
             </div>
 
             <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-4 sm:gap-x-8 sm:gap-y-6 md:gap-x-6 md:gap-y-4 w-full md:w-auto">
-                <a href="{{ route('public.contact.index') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
+                <a href="{{ Route::has('public.contact.index') ? route('public.contact.index') : url('/kontakt') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
                     <span class="w-1.5 h-1.5 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Kontakt') }}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
 
-                <a href="{{ route('login') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
+                <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     {!! str_replace(' ', '&nbsp;', __('Členská sekce')) !!}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
 
-                <a href="{{ route('public.pages.show', 'gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
+                <a href="{{ Route::has('public.pages.show') ? route('public.pages.show', 'gdpr') : url('/gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     {{ __('Ochrana soukromí') }}
                 </a>

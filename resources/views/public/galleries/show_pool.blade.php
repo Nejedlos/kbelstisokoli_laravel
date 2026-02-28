@@ -3,7 +3,7 @@
 @section('content')
     <x-page-header
         :title="brand_text($pool->getTranslation('title', app()->getLocale()))"
-        :subtitle="($pool->event_date ? $pool->event_date->format('d. m. Y') . ($pool->getTranslation('description', app()->getLocale()) ? ' • ' : '') : '') . brand_text($pool->getTranslation('description', app()->getLocale()))"
+        :subtitle="($pool->event_date ? ($pool->event_date->day === 1 && $pool->event_date->month === 1 ? $pool->event_date->format('Y') : $pool->event_date->format('d. m. Y')) . ($pool->getTranslation('description', app()->getLocale()) ? ' • ' : '') : '') . brand_text($pool->getTranslation('description', app()->getLocale()))"
         :image="$pool->mediaAssets->first() ? $pool->mediaAssets->first()->getUrl('optimized') : null"
         :breadcrumbs="[__('gallery.breadcrumb') => route('public.galleries.index'), brand_text($pool->getTranslation('title', app()->getLocale())) => null]"
     />

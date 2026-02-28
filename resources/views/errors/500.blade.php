@@ -12,7 +12,7 @@
 @section('tagline', 'Tým Sokolů se nevzdává a brzy budeme zpět ve hře.')
 
 @section('actions')
-    <a href="{{ route('public.home') }}" class="btn btn-primary px-8 text-white">
+    <a href="{{ url('/') }}" class="btn btn-primary px-8 text-white">
         Zpět na hlavní stránku
     </a>
     <button onclick="toggleTechnical()" class="btn btn-outline px-8 border-slate-200">

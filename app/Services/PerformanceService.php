@@ -41,16 +41,30 @@ class PerformanceService
             return $this->settings;
         }
 
-        return $this->settings = Cache::remember('performance_settings', 3600, function () {
-            try {
-                return Setting::where('key', 'like', 'perf_%')
-                    ->get()
-                    ->pluck('value', 'key')
-                    ->toArray();
-            } catch (\Throwable $e) {
-                return [];
-            }
-        });
+        try {
+            return $this->settings = Cache::remember('performance_settings', 3600, function () {
+                return $this->fetchSettingsFromDb();
+            });
+        } catch (\Throwable $e) {
+            // Pokud cache selže (např. lock timeout), načteme to přímo z DB bez cachování v tomto requestu
+            // Tím předejdeme QueryException, která by shodila celou aplikaci
+            return $this->settings = $this->fetchSettingsFromDb();
+        }
+    }
+
+    /**
+     * Načte nastavení přímo z databáze.
+     */
+    protected function fetchSettingsFromDb(): array
+    {
+        try {
+            return Setting::where('key', 'like', 'perf_%')
+                ->get()
+                ->pluck('value', 'key')
+                ->toArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     public function clearCache(): void

@@ -7,7 +7,7 @@
 @section('tagline', __('errors.404.tagline'))
 
 @section('actions')
-    <a href="{{ route('public.home') }}" class="btn btn-primary px-8 text-white">
+    <a href="{{ url('/') }}" class="btn btn-primary px-8 text-white">
         {{ __('errors.back_to_home') }}
     </a>
     <button onclick="window.history.back()" class="btn btn-outline px-8">

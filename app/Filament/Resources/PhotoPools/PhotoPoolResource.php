@@ -298,7 +298,14 @@ class PhotoPoolResource extends Resource
                     ->searchable(),
                 TextColumn::make('event_date')
                     ->label('Datum')
-                    ->date('d.m.Y')
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) return null;
+                        $date = \Carbon\Carbon::parse($state);
+                        if ($date->day === 1 && $date->month === 1) {
+                            return $date->format('Y');
+                        }
+                        return $date->format('d.m.Y');
+                    })
                     ->sortable(),
                 IconColumn::make('is_public')
                     ->label('Veř.')

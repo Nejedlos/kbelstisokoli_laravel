@@ -43,7 +43,12 @@ class GalleryService
 
             $caption = trim((string) brand_text($row->pool_title));
             if (!empty($row->event_date)) {
-                $caption .= ' — ' . (string) optional(\Carbon\Carbon::parse($row->event_date))->format('d.m.Y');
+                $date = \Carbon\Carbon::parse($row->event_date);
+                if ($date->day === 1 && $date->month === 1) {
+                    $caption .= ' — ' . $date->format('Y');
+                } else {
+                    $caption .= ' — ' . $date->format('d.m.Y');
+                }
             }
 
             DB::table('gallery_media')->insert([

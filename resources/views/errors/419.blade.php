@@ -10,7 +10,7 @@
     <button onclick="window.location.reload()" class="btn btn-primary px-8 text-white">
         {{ __('errors.419.button') }}
     </button>
-    <a href="{{ route('public.home') }}" class="btn btn-outline px-8">
+    <a href="{{ url('/') }}" class="btn btn-outline px-8">
         {{ __('errors.back_to_home') }}
     </a>
 @endsection

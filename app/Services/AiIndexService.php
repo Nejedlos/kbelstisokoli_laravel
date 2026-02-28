@@ -254,7 +254,16 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $description = $pool->getTranslation('description', $locale);
             $url = \App\Filament\Resources\PhotoPools\PhotoPoolResource::getUrl('edit', ['record' => $pool]);
 
-            $content = "Photo Pool (Galerie): {$title}. Datum: {$pool->event_date?->format('d.m.Y')}. Popis: {$description}. Typ: {$pool->event_type}.";
+            $dateStr = '';
+            if ($pool->event_date) {
+                if ($pool->event_date->day === 1 && $pool->event_date->month === 1) {
+                    $dateStr = $pool->event_date->format('Y');
+                } else {
+                    $dateStr = $pool->event_date->format('d.m.Y');
+                }
+            }
+
+            $content = "Photo Pool (Galerie): {$title}. Datum: {$dateStr}. Popis: {$description}. Typ: {$pool->event_type}.";
 
             if ($onProgress) {
                 $size = strlen($content);

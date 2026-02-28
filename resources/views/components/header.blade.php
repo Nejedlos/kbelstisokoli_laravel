@@ -4,7 +4,7 @@
 <header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container py-4 flex items-center justify-between gap-4">
         <!-- Logo -->
-        <a href="{{ route('public.home') }}" @wireNavigate class="flex items-center gap-3 shrink-0">
+        <a href="{{ url('/') }}" @wireNavigate class="flex items-center gap-3 shrink-0">
             @if($branding['logo_path'])
                 <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-12 w-auto">
                 <div class="hidden md:block">
@@ -18,11 +18,13 @@
         @if(!($branding['maintenance_mode'] ?? false))
         <nav class="hidden lg:grid lg:grid-flow-col lg:grid-rows-5 xl:flex items-center gap-x-12 gap-y-1 xl:gap-8">
             @foreach($navigation as $item)
+                @if(Route::has($item['route']))
                 <a href="{{ route($item['route']) }}"
                    @wireNavigate
                    class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition {{ request()->routeIs($item['route']) ? 'text-primary border-b-2 border-primary' : '' }}">
                     {{ __($item['title']) }}
                 </a>
+                @endif
             @endforeach
         </nav>
         @endif
@@ -36,14 +38,14 @@
 
             <!-- Language Switcher -->
             <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full text-[10px] font-black tracking-widest shadow-sm border border-slate-200">
-                <a href="{{ route('language.switch', ['lang' => 'cs']) }}"
+                <a href="{{ Route::has('language.switch') ? route('language.switch', ['lang' => 'cs']) : url('/language/cs') }}"
                    class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}"
                    data-track-click="language_switch"
                    data-track-label="CS"
                    data-track-category="ux">
                     CZ
                 </a>
-                <a href="{{ route('language.switch', ['lang' => 'en']) }}"
+                <a href="{{ Route::has('language.switch') ? route('language.switch', ['lang' => 'en']) : url('/language/en') }}"
                    class="px-3 py-1.5 rounded-full transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-white' }}"
                    data-track-click="language_switch"
                    data-track-label="EN"
@@ -53,6 +55,9 @@
             </div>
 
             @auth
+                @php
+                    $logoutRoute = Route::has('logout') ? route('logout') : url('/logout');
+                @endphp
                 <div x-data="{ userMenuOpen: false }" class="relative">
                     <button @click="userMenuOpen = !userMenuOpen" class="flex items-center gap-2 p-1 pr-3 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none">
                         <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs">
@@ -88,7 +93,7 @@
                         @endif
 
                         <div class="border-t border-slate-50 mt-1 pt-1">
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form method="POST" action="{{ $logoutRoute }}">
                                 @csrf
                                 <button type="submit" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors">
                                     <i class="fa-light fa-arrow-right-from-bracket w-5 text-center"></i>
@@ -99,7 +104,7 @@
                     </div>
                 </div>
             @else
-                <a href="{{ route('login') }}" class="btn btn-primary hidden sm:inline-flex py-2 px-4 text-xs">
+                <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="btn btn-primary hidden sm:inline-flex py-2 px-4 text-xs">
                     {{ __('nav.member_section') }}
                 </a>
             @endauth
@@ -124,7 +129,7 @@
          x-transition:leave-end="opacity-0 -translate-y-4"
          class="absolute inset-x-0 top-full bg-white border-t border-slate-100 shadow-2xl py-8 md:py-12 z-40">
         <div class="container relative">
-            <form action="{{ route('public.search') }}" method="GET" class="relative max-w-3xl mx-auto">
+            <form action="{{ Route::has('public.search') ? route('public.search') : url('/hledat') }}" method="GET" class="relative max-w-3xl mx-auto">
                 <input type="text"
                        name="q"
                        placeholder="{{ __('search.placeholder') }}"
@@ -155,13 +160,15 @@
          <div class="container py-6">
             <div class="grid grid-cols-2 gap-2">
                 @foreach($navigation as $item)
+                    @if(Route::has($item['route']))
                     <a href="{{ route($item['route']) }}"
                        class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 {{ request()->routeIs($item['route']) ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
                         {{ __($item['title']) }}
                     </a>
+                    @endif
                 @endforeach
             </div>
-            <a href="{{ route('login') }}" class="btn btn-primary mt-6 py-4 w-full">
+            <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="btn btn-primary mt-6 py-4 w-full">
                 {{ __('nav.login_member') }}
             </a>
         </div>
