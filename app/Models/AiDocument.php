@@ -12,8 +12,11 @@ class AiDocument extends Model
     protected $table = 'ai_documents';
 
     protected $fillable = [
+        'section',
         'type',
         'source',
+        'source_type',
+        'source_id',
         'title',
         'summary',
         'url',
@@ -22,10 +25,20 @@ class AiDocument extends Model
         'keywords',
         'metadata',
         'checksum',
+        'content_hash',
+        'is_active',
+        'last_indexed_at',
     ];
 
     protected $casts = [
         'keywords' => 'array',
         'metadata' => 'array',
+        'is_active' => 'boolean',
+        'last_indexed_at' => 'datetime',
     ];
+
+    public function chunks()
+    {
+        return $this->hasMany(AiChunk::class);
+    }
 }

@@ -118,23 +118,23 @@ class AppSyncCommand extends Command
 
         $this->initializeEnv();
 
-        $host = env('PROD_HOST');
-        $port = env('PROD_PORT', '22');
-        $user = env('PROD_USER');
-        $phpBinary = env('PROD_PHP_BINARY', 'php');
-        $nodeBinary = env('PROD_NODE_BINARY', 'node');
-        $path = env('PROD_PATH');
-        $publicPath = env('PROD_PUBLIC_PATH');
+        $host = config('app.prod_host', env('PROD_HOST'));
+        $port = config('app.prod_port', env('PROD_PORT', '22'));
+        $user = config('app.prod_user', env('PROD_USER'));
+        $phpBinary = config('app.prod_php_binary', env('PROD_PHP_BINARY', 'php'));
+        $nodeBinary = config('app.prod_node_binary', env('PROD_NODE_BINARY', 'node'));
+        $path = config('app.prod_path', env('PROD_PATH'));
+        $publicPath = config('app.prod_public_path', env('PROD_PUBLIC_PATH'));
 
         // DB config from env
         $dbConfig = [
-            'db_connection' => env('PROD_DB_CONNECTION'),
-            'db_host' => env('PROD_DB_HOST'),
-            'db_port' => env('PROD_DB_PORT'),
-            'db_database' => env('PROD_DB_DATABASE'),
-            'db_username' => env('PROD_DB_USERNAME'),
-            'db_password' => env('PROD_DB_PASSWORD'),
-            'db_prefix' => env('PROD_DB_PREFIX'),
+            'db_connection' => config('app.prod_db_connection', env('PROD_DB_CONNECTION')),
+            'db_host' => config('app.prod_db_host', env('PROD_DB_HOST')),
+            'db_port' => config('app.prod_db_port', env('PROD_DB_PORT')),
+            'db_database' => config('app.prod_db_database', env('PROD_DB_DATABASE')),
+            'db_username' => config('app.prod_db_username', env('PROD_DB_USERNAME')),
+            'db_password' => config('app.prod_db_password', env('PROD_DB_PASSWORD')),
+            'db_prefix' => config('app.prod_db_prefix', env('PROD_DB_PREFIX')),
         ];
 
         if (!$host || !$user || !$path) {
@@ -142,7 +142,7 @@ class AppSyncCommand extends Command
             return self::FAILURE;
         }
 
-        $currentPassword = env('PROD_DB_PASSWORD');
+        $currentPassword = config('app.prod_db_password', env('PROD_DB_PASSWORD'));
         $dbConfig['db_password'] = $currentPassword;
 
         // Ověření dostupnosti PHP na serveru
@@ -269,6 +269,7 @@ class AppSyncCommand extends Command
             'public/assets/',
             'public/build/',
             'public/uploads/defaults/',
+            'storage/app/defaults/',
             'database/migrations/',
             'database/seeders/',
             'database/factories/'

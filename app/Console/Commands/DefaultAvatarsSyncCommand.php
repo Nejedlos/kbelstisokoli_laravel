@@ -24,11 +24,14 @@ class DefaultAvatarsSyncCommand extends Command
         $sourceDir = storage_path('app/defaults/avatars');
 
         if (!is_dir($sourceDir)) {
-            $this->error("Zdrojový adresář neexistuje: {$sourceDir}. Ujistěte se, že jste nahráli avatary do storage/app/defaults/avatars/");
+            $msg = "Zdrojový adresář neexistuje: {$sourceDir}. Ujistěte se, že jste nahráli avatary do storage/app/defaults/avatars/";
+            $this->error($msg);
+            \Illuminate\Support\Facades\Log::error("DefaultAvatarsSyncCommand: " . $msg);
             return Command::FAILURE;
         }
 
         $allFiles = File::allFiles($sourceDir);
+        \Illuminate\Support\Facades\Log::info("DefaultAvatarsSyncCommand: Nalezeno celkem " . count($allFiles) . " souborů ve zdrojové složce: " . $sourceDir);
 
         // Filtrování relevantních souborů (bez thumbs a jen obrázky)
         $filteredFiles = [];
@@ -125,6 +128,9 @@ class DefaultAvatarsSyncCommand extends Command
                     ->toMediaCollection('default', $disk);
 
                 $countImported++;
+                if ($countImported % 50 === 0) {
+                    \Illuminate\Support\Facades\Log::info("DefaultAvatarsSyncCommand: Průběh: {$countImported} importováno...");
+                }
             } catch (\Exception $e) {
                 $countErrors++;
                 $this->error("\nCHYBA u souboru " . $file->getRelativePathname() . ": " . $e->getMessage());
@@ -144,10 +150,9 @@ class DefaultAvatarsSyncCommand extends Command
         }
 
         $bar->finish();
-        $this->info("\n\nSynchronizace dávky dokončena.");
-        $this->info("Importováno: {$countImported}");
-        $this->info("Přeskočeno: {$countSkipped}");
-        $this->info("Chyby: {$countErrors}");
+        $summary = "Synchronizace dávky dokončena. Importováno: {$countImported}, Přeskočeno: {$countSkipped}, Chyby: {$countErrors}.";
+        $this->info("\n\n" . $summary);
+        \Illuminate\Support\Facades\Log::info("DefaultAvatarsSyncCommand: " . $summary);
 
         if ($totalToProcess + $offset < $totalFound) {
             $nextOffset = $offset + $totalToProcess;

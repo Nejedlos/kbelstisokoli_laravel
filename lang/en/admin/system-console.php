@@ -168,4 +168,13 @@ return [
         'failed' => 'Command failed',
         'execution_error' => 'Execution error',
     ],
+    'actions' => [
+        'system_check' => 'System Check',
+    ],
+    'ui' => [
+        'internal_execution' => 'Internal Execution',
+        'internal_tooltip' => 'Runs the command directly in the application\'s PHP process (Artisan::call) instead of calling the shell. Recommended if the PHP CLI binary fails in the shell.',
+        'run' => 'Run',
+        'working' => 'Working...',
+    ],
 ];

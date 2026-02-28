@@ -19,7 +19,8 @@
                                 x-data="{
                                     flags: [],
                                     selectValue: '',
-                                    loading: false
+                                    loading: false,
+                                    useInternal: {{ (isset($config['can_be_internal']) && $config['can_be_internal']) ? 'true' : 'false' }}
                                 }"
                             >
                                 <div class="flex items-center gap-3 mb-3">
@@ -40,8 +41,23 @@
                                     {{ $config['desc'] ?? '' }}
                                 </p>
 
-                                @if(isset($config['flags']) || isset($config['select']))
+                                @if(isset($config['flags']) || isset($config['select']) || (isset($config['can_be_internal']) && $config['can_be_internal']))
                                     <div class="space-y-4 mb-4 p-3 bg-gray-50/50 dark:bg-white/[0.02] rounded-xl border border-gray-100/50 dark:border-white/5">
+                                        @if(isset($config['can_be_internal']) && $config['can_be_internal'])
+                                            <div class="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-white/5 mb-2">
+                                                <label class="flex items-center gap-2 cursor-pointer group/internal">
+                                                    <x-filament::input.checkbox
+                                                        x-model="useInternal"
+                                                        class="h-3 w-3 rounded text-amber-600 focus:ring-amber-500 border-gray-300"
+                                                    />
+                                                    <span class="text-[10px] font-bold text-amber-600/80 uppercase tracking-wider group-hover/internal:text-amber-500 transition-colors">
+                                                        {{ __('admin/system-console.ui.internal_execution') }}
+                                                    </span>
+                                                </label>
+                                                <x-filament::icon icon="heroicon-m-information-circle" class="h-3.5 w-3.5 text-gray-400 shrink-0" x-tooltip="'{{ __('admin/system-console.ui.internal_tooltip') }}'" />
+                                            </div>
+                                        @endif
+
                                         @if(isset($config['flags']))
                                             <div class="flex flex-wrap gap-x-4 gap-y-2">
                                                 @foreach($config['flags'] as $flag => $flagLabel)
@@ -77,7 +93,7 @@
                                     wire:loading.attr="disabled"
                                     x-on:click="
                                         loading = true;
-                                        $wire.run('{{ $cmdKey }}', '{{ $config['type'] }}', flags, '{{ $config['select']['name'] ?? '' }}', selectValue)
+                                        $wire.run('{{ $cmdKey }}', '{{ $config['type'] }}', flags, '{{ $config['select']['name'] ?? '' }}', selectValue, useInternal)
                                             .then(() => {
                                                 const outputEl = document.getElementById('console-output');
                                                 if (outputEl) outputEl.scrollTop = outputEl.scrollHeight;
@@ -97,13 +113,13 @@
                                         <template x-if="!loading">
                                             <div class="flex items-center gap-2">
                                                 <x-filament::icon icon="fal-play" class="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
-                                                <span x-text="'Spustit'"></span>
+                                                <span>{{ __('admin/system-console.ui.run') }}</span>
                                             </div>
                                         </template>
                                         <template x-if="loading">
                                             <div class="flex items-center gap-2">
                                                 <x-filament::loading-indicator class="h-3 w-3" />
-                                                <span x-text="'Pracuji...'"></span>
+                                                <span>{{ __('admin/system-console.ui.working') }}</span>
                                             </div>
                                         </template>
                                     </div>

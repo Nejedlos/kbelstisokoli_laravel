@@ -244,6 +244,7 @@
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
+    {{ $php }} artisan sync:default-avatars --force --limit=1000
     {{ $php }} artisan filament:clear-cached-components
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
@@ -444,6 +445,7 @@
     fi
 
     {{ $php }} artisan app:icons:sync
+    {{ $php }} artisan sync:default-avatars --force --limit=1000
     {{ $php }} artisan filament:clear-cached-components
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
@@ -591,6 +593,7 @@
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
+    {{ $php }} artisan sync:default-avatars --force --limit=1000
     {{ $php }} artisan filament:clear-cached-components
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear

@@ -126,25 +126,27 @@ class BackendSearchService
      */
     public function search(string $query, string $context = 'admin'): Collection
     {
-        if (empty($query) || strlen($query) < 3) {
+        if (empty($query) || strlen($query) < 2) {
             return collect();
         }
 
         $locale = app()->getLocale();
+
+        // Použijeme AiIndexService pro prohledávání indexu s filtrováním sekce
         $aiResults = $this->aiIndexService->search($query, $locale, 10, $context);
 
         if ($aiResults->isNotEmpty()) {
             return $aiResults->map(function ($doc) {
                 return new SearchResult(
                     title: $doc->title,
-                    snippet: $doc->summary ?: mb_substr(strip_tags($doc->content), 0, 160) . '...',
+                    snippet: $doc->summary ?: Str::limit(strip_tags($doc->content), 160),
                     url: $doc->url ?? '#',
                     type: $this->getDocTypeLabel($doc->type)
                 );
             });
         }
 
-        // Fallback na statické targety, pokud AI index nic nenašel
+        // Pokud v indexu nic není, zkusíme aspoň statické targety (fallback)
         return $this->fallbackSearch($query, $context);
     }
 

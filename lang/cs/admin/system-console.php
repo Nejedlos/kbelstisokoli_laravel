@@ -168,4 +168,13 @@ return [
         'failed' => 'Příkaz selhal',
         'execution_error' => 'Chyba při spouštění',
     ],
+    'actions' => [
+        'system_check' => 'System Check',
+    ],
+    'ui' => [
+        'internal_execution' => 'Internal Execution',
+        'internal_tooltip' => 'Spustí příkaz přímo v PHP procesu aplikace (Artisan::call) místo volání shellu. Doporučeno, pokud selhává binárka PHP v shellu.',
+        'run' => 'Spustit',
+        'working' => 'Pracuji...',
+    ],
 ];

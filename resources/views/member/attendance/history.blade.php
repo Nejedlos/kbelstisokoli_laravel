@@ -24,11 +24,11 @@
                                     <div class="font-bold text-secondary">
                                         @php $item = $attendance->attendable; @endphp
                                         @if($attendance->attendable_type === 'App\Models\BasketballMatch')
-                                            {{ $item->team->name }} vs {{ $item->opponent->name }}
+                                            {{ $item?->team?->name }} vs {{ $item?->opponent?->name }}
                                         @elseif($attendance->attendable_type === 'App\Models\Training')
-                                            {{ __('member.attendance.event_types.training') }} - {{ $item->team->name }}
+                                            {{ __('member.attendance.event_types.training') }} - {{ $item?->teams?->first()?->name }}
                                         @else
-                                            {{ $item->title ?? __('member.attendance.event_types.unknown') }}
+                                            {{ $item?->title ?? __('member.attendance.event_types.unknown') }}
                                         @endif
                                     </div>
                                     <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-0.5">

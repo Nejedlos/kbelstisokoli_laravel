@@ -53,6 +53,68 @@ return new class extends Migration {
         } catch (\Throwable $e) {
             // Log or ignore
         }
+
+        // Check and add 'section'
+        try {
+            $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'section'");
+            if (empty($columnExists)) {
+                DB::statement("ALTER TABLE {$table} ADD COLUMN section VARCHAR(191) NULL AFTER id");
+                DB::statement("CREATE INDEX ai_documents_section_index ON {$table} (section)");
+            }
+        } catch (\Throwable $e) {
+            // Log or ignore
+        }
+
+        // Check and add 'source_type'
+        try {
+            $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'source_type'");
+            if (empty($columnExists)) {
+                DB::statement("ALTER TABLE {$table} ADD COLUMN source_type VARCHAR(191) NULL AFTER source");
+            }
+        } catch (\Throwable $e) {
+            // Log or ignore
+        }
+
+        // Check and add 'source_id'
+        try {
+            $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'source_id'");
+            if (empty($columnExists)) {
+                DB::statement("ALTER TABLE {$table} ADD COLUMN source_id BIGINT UNSIGNED NULL AFTER source_type");
+            }
+        } catch (\Throwable $e) {
+            // Log or ignore
+        }
+
+        // Check and add 'content_hash'
+        try {
+            $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'content_hash'");
+            if (empty($columnExists)) {
+                DB::statement("ALTER TABLE {$table} ADD COLUMN content_hash CHAR(64) NULL AFTER checksum");
+            }
+        } catch (\Throwable $e) {
+            // Log or ignore
+        }
+
+        // Check and add 'is_active'
+        try {
+            $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'is_active'");
+            if (empty($columnExists)) {
+                DB::statement("ALTER TABLE {$table} ADD COLUMN is_active TINYINT(1) DEFAULT 1 NOT NULL AFTER content_hash");
+                DB::statement("CREATE INDEX ai_documents_section_is_active_index ON {$table} (section, is_active)");
+            }
+        } catch (\Throwable $e) {
+            // Log or ignore
+        }
+
+        // Check and add 'last_indexed_at'
+        try {
+            $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'last_indexed_at'");
+            if (empty($columnExists)) {
+                DB::statement("ALTER TABLE {$table} ADD COLUMN last_indexed_at TIMESTAMP NULL AFTER is_active");
+            }
+        } catch (\Throwable $e) {
+            // Log or ignore
+        }
     }
 
     /**

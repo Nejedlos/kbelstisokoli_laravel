@@ -105,6 +105,24 @@ return [
 
     'public_path' => env('APP_PUBLIC_PATH'),
 
+    'prod_php_binary' => env('PROD_PHP_BINARY'),
+    'local_php_binary' => env('LOCAL_PHP_BINARY'),
+    'prod_node_binary' => env('PROD_NODE_BINARY', 'node'),
+    'prod_npm_binary' => env('PROD_NPM_BINARY', 'npm'),
+    'prod_host' => env('PROD_HOST'),
+    'prod_port' => env('PROD_PORT', '22'),
+    'prod_user' => env('PROD_USER'),
+    'prod_path' => env('PROD_PATH'),
+    'prod_public_path' => env('PROD_PUBLIC_PATH'),
+    'prod_git_token' => env('PROD_GIT_TOKEN'),
+    'prod_db_connection' => env('PROD_DB_CONNECTION', 'mysql'),
+    'prod_db_host' => env('PROD_DB_HOST', '127.0.0.1'),
+    'prod_db_port' => env('PROD_DB_PORT', '3306'),
+    'prod_db_database' => env('PROD_DB_DATABASE'),
+    'prod_db_username' => env('PROD_DB_USERNAME'),
+    'prod_db_password' => env('PROD_DB_PASSWORD'),
+    'prod_db_prefix' => env('PROD_DB_PREFIX', 'new_'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

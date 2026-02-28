@@ -5,7 +5,10 @@ namespace App\Livewire\Member;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\MediaAsset;
+use App\Support\Media\VirtualAvatarAsset;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AvatarModal extends Component
@@ -16,7 +19,7 @@ class AvatarModal extends Component
     public $activeTab = 'gallery'; // 'upload' | 'gallery'
     public $avatarFile;
     public $cropData;
-    public $galleryAssets = [];
+    // public $galleryAssets = []; // Odstraněno - nyní se načítá dynamicky v render() pro snížení zátěže Livewire stavu
 
     public $confirmingDelete = false;
     public $userId;
@@ -29,26 +32,92 @@ class AvatarModal extends Component
     public function mount($userId = null)
     {
         $this->userId = $userId ?: auth()->id();
-        $this->loadGallery();
+        // $this->loadGallery(); // Odstraněno, načítá se v render()
     }
 
-    public function loadGallery()
+    public function getGalleryAssets()
     {
-        // Načteme všechny assety, které jsou veřejné nebo které nemají majitele (systémové)
-        // a které nejsou v žádném PhotoPoolu (aby se nepletly fotky z akcí mezi avatary)
-        $this->galleryAssets = MediaAsset::query()
+        // 1. Pokus o načtení z databáze (systémové avatary i photo pooly)
+        $query = MediaAsset::query()
             ->where(function($query) {
                 $query->whereNull('uploaded_by_id')
                     ->orWhere('title', 'like', 'Default Avatar%');
             })
-            ->where('is_public', true)
+            ->where('is_public', true);
+
+        $assets = $query
             ->latest('id')
             ->limit(1000)
             ->get();
 
-        if ($this->galleryAssets->isEmpty()) {
-            \Illuminate\Support\Facades\Log::warning("AvatarModal: Galerie je prázdná. Počet všech MediaAsset v DB: " . MediaAsset::count());
+        // 2. Fallback: Pokud je DB prázdná, prohledáme přímo disk (pro případ, že jsou soubory synchronizovány bez DB)
+        if ($assets->isEmpty()) {
+            $assets = $this->loadGalleryFromDisk();
         }
+
+        // 3. Logování, pokud je galerie stále prázdná
+        if ($assets->isEmpty()) {
+            \Illuminate\Support\Facades\Log::warning("AvatarModal: Galerie je prázdná i po pokusu o načtení z disku.");
+        }
+
+        return $assets;
+    }
+
+    /**
+     * Načte avatary přímo ze složky public/uploads/defaults, pokud chybí DB záznamy.
+     */
+    protected function loadGalleryFromDisk()
+    {
+        $path = public_path('uploads/defaults');
+        if (!is_dir($path)) {
+            return collect();
+        }
+
+        $assets = collect();
+        // Získáme složky, které jsou pojmenované čísly (ID media)
+        $directories = File::directories($path);
+
+        foreach ($directories as $dir) {
+            $mediaId = basename($dir);
+            if (!is_numeric($mediaId)) continue;
+
+            $files = File::files($dir);
+            if (empty($files)) continue;
+
+            // Najdeme hlavní soubor (první obrázek v rootu složky ID)
+            $mainFile = null;
+            foreach ($files as $file) {
+                if (in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'])) {
+                    $mainFile = $file;
+                    break;
+                }
+            }
+            if (!$mainFile) continue;
+
+            $fileName = $mainFile->getFilename();
+            $mainUrl = asset('uploads/defaults/' . $mediaId . '/' . $fileName);
+
+            // Náhled (zkusíme najít v podadresáři conversions)
+            $thumbUrl = $mainUrl; // Fallback na originál
+            $conversionsPath = $dir . '/conversions';
+            if (is_dir($conversionsPath)) {
+                $thumbFiles = File::files($conversionsPath);
+                foreach ($thumbFiles as $thumb) {
+                    // Spatie obvykle přidává suffix -thumb nebo -optimized
+                    $tName = $thumb->getFilename();
+                    if (str_contains($tName, 'thumb') || str_contains($tName, 'optimized') || str_contains($tName, 'preview')) {
+                        $thumbUrl = asset('uploads/defaults/' . $mediaId . '/conversions/' . $tName);
+                        break;
+                    }
+                }
+            }
+
+            // Vytvoříme regulérní objekt simulující MediaAsset model (aby šel serializovat Livewirem)
+            $assets->push(new VirtualAvatarAsset($mediaId, $mainUrl, $thumbUrl));
+        }
+
+        // Seřadíme podle ID sestupně (aby nové byly nahoře)
+        return $assets->sortByDesc('id')->values();
     }
 
     public function open($userId = null)
@@ -59,7 +128,7 @@ class AvatarModal extends Component
         $this->isOpen = true;
         $this->activeTab = 'gallery';
         $this->confirmingDelete = false;
-        $this->loadGallery();
+        // $this->loadGallery(); // Odstraněno, načítá se v render()
         $this->reset('avatarFile', 'cropData');
     }
 
@@ -142,6 +211,8 @@ class AvatarModal extends Component
 
     public function render()
     {
-        return view('livewire.member.avatar-modal');
+        return view('livewire.member.avatar-modal', [
+            'galleryAssets' => $this->getGalleryAssets()
+        ]);
     }
 }

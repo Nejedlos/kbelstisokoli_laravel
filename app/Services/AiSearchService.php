@@ -18,7 +18,7 @@ class AiSearchService
      * Chat s AI asistentem s podporou historie a lokálního kontextu.
      * Vrací pole: ['answer' => string, 'sources' => Collection<AiDocument>]
      */
-    public function chat(array $history, string $locale = 'cs', string $context = null): array
+    public function chat(array $history, string $locale = 'cs', string $section = 'frontend'): array
     {
         $settings = $this->aiSettings->getSettings();
 
@@ -40,17 +40,18 @@ class AiSearchService
 
         $sources = collect();
         if ($lastUserMessage) {
-            $sources = $this->index->search($lastUserMessage, $locale, 8, $context);
+            // Hledáme kandidáty v chunky pro danou sekci
+            $sources = $this->index->search($lastUserMessage, $locale, 10, $section);
         }
 
-        $system = $settings['system_prompt_search'] ?? $this->buildSystemPrompt($locale);
+        $system = $settings['system_prompt_search'] ?? $this->buildSystemPrompt($locale, $section);
         $context = $this->buildContextPrompt($sources, $locale);
 
         // Sestavení zpráv pro LLM
         $messages = [];
         $messages[] = ['role' => 'system', 'content' => $system . "\n\n" . $context];
 
-        // Přidáme historii (pokud je příliš dlouhá, mohli bychom ji oříznout, ale pro naše účely by to mělo stačit)
+        // Přidáme historii
         foreach ($history as $msg) {
             $messages[] = [
                 'role' => $msg['role'],
@@ -62,7 +63,7 @@ class AiSearchService
             'model' => $settings['default_chat_model'] ?? 'gpt-4o-mini',
             'messages' => $messages,
             'temperature' => (float) ($settings['temperature'] ?? 0.2),
-            'max_tokens' => (int) ($settings['max_output_tokens'] ?? 800),
+            'max_tokens' => (int) ($settings['max_output_tokens'] ?? 1000),
         ];
 
         $start = microtime(true);
@@ -85,7 +86,7 @@ class AiSearchService
 
             // Logování úspěchu
             $this->aiSettings->logRequest([
-                'context' => 'member_ai_chat',
+                'context' => $section . '_ai_chat',
                 'model' => $payload['model'],
                 'status' => 'success',
                 'prompt_preview' => Str::limit($lastUserMessage, 255),
@@ -101,7 +102,7 @@ class AiSearchService
 
             // Logování chyby
             $this->aiSettings->logRequest([
-                'context' => 'member_ai_chat',
+                'context' => $section . '_ai_chat',
                 'model' => $payload['model'] ?? 'unknown',
                 'status' => 'error',
                 'prompt_preview' => Str::limit($lastUserMessage, 255),
@@ -116,26 +117,30 @@ class AiSearchService
     /**
      * Položí dotaz AI asistentovi s využitím lokálního kontextu (zpětná kompatibilita).
      */
-    public function ask(string $query, string $locale = 'cs', string $context = null): array
+    public function ask(string $query, string $locale = 'cs', string $section = 'frontend'): array
     {
-        return $this->chat([['role' => 'user', 'content' => $query]], $locale, $context);
+        return $this->chat([['role' => 'user', 'content' => $query]], $locale, $section);
     }
 
-    private function buildSystemPrompt(string $locale): string
+    private function buildSystemPrompt(string $locale, string $section = 'frontend'): string
     {
         $langInstruction = $locale === 'cs'
             ? 'Odpovídej česky, stručně a jasně.'
             : 'Respond in English, briefly and clearly.';
 
+        $sectionName = match($section) {
+            'admin' => 'Administrace (Filament)',
+            'member' => 'Členská sekce (Hráči/Členové)',
+            default => 'Veřejný web (Frontend)',
+        };
+
         return trim(
             $langInstruction . "\n" .
-            'Jsi asistent pro web basketbalového klubu Kbelští sokoli. Tvým úkolem je pomáhat uživatelům se správou webu a navigací v administraci.' . "\n" .
-            'Zaměř se na informace relevantní pro členskou (hráčskou) a administrátorskou sekci (Filament admin).' . "\n" .
-            'Pokud dotaz vyžaduje navigaci, nabídni přesné kroky a názvy sekcí/stránek na základě poskytnutého kontextu.' . "\n" .
-            'VŽDY upřednostňuj názvy sekcí, které vidíš v kontextu (např. v type: admin.navigation).' . "\n" .
-            'DŮLEŽITÉ: Pokud je v kontextu u zdroje uvedena URL adresa, VŽDY ji zahrň do své odpovědi jako odkaz (Markdown formát), aby uživatel mohl přímo na danou stránku přejít.' . "\n" .
-            'Pokud uživatel chce změnit logo klubu, naviguj ho na stránku "Branding a vzhled" v sekci "Admin nástroje".' . "\n" .
-            'Jsi v režimu chatu, můžeš tedy navazovat na předchozí konverzaci.'
+            "Jsi asistent pro web basketbalového klubu Kbelští sokoli. Právě se nacházíš v sekci: {$sectionName}." . "\n" .
+            'Tvým úkolem je pomáhat uživatelům s informacemi a navigací VÝHRADNĚ v rámci této sekce.' . "\n" .
+            'DŮLEŽITÉ: Pokud je v kontextu u zdroje uvedena URL adresa, VŽDY ji zahrň do své odpovědi jako Markdown odkaz.' . "\n" .
+            'NIKDY nevymýšlej URL adresy, které nejsou v poskytnutém kontextu.' . "\n" .
+            'Pokud uživatel položí dotaz, na který v kontextu není odpověď, slušně ho odkaž na kontakty klubu.'
         );
     }
 

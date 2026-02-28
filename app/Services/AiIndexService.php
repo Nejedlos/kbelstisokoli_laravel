@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AiChunk;
 use App\Models\AiDocument;
 use App\Models\Page;
 use App\Models\Post;
@@ -9,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -16,26 +18,54 @@ use Illuminate\Support\Str;
 class AiIndexService
 {
     public function __construct(
-        protected AiSettingsService $aiSettings
+        protected AiSettingsService $aiSettings,
+        protected TextExtractionService $textExtraction
     ) {}
 
     /**
      * Provede kompletní reindex zdrojů (Blade views, DB záznamy).
      */
-    public function reindex(string $locale = 'cs', bool $fresh = false): int
+    public function reindex(string $locale = 'cs', bool $fresh = false, ?string $section = null, ?\Closure $onProgress = null): int
     {
         // Nastavíme locale pro korektní překlady během indexace
         App::setLocale($locale);
 
         if ($fresh) {
-            AiDocument::query()->where('locale', $locale)->delete();
+            $query = AiDocument::query()->where('locale', $locale);
+            if ($section) {
+                $query->where('section', $section);
+            }
+            $query->delete();
         }
 
+        // Deaktivujeme všechny dokumenty pro daný jazyk/sekci
+        $query = AiDocument::query()->where('locale', $locale);
+        if ($section) {
+            $query->where('section', $section);
+        }
+        $query->update(['is_active' => false]);
+
         $count = 0;
-        // Indexujeme pouze zdroje pro admin, member a frontend
-        $count += $this->indexFilament($locale);
-        $count += $this->indexMemberSection($locale);
-        $count += $this->indexFrontend($locale);
+
+        // Indexujeme pouze vybrané sekce
+        if (!$section || $section === 'admin') {
+            $count += $this->indexFilament($locale, $onProgress);
+        }
+
+        if (!$section || $section === 'member') {
+            $count += $this->indexMemberSection($locale, $onProgress);
+        }
+
+        if (!$section || $section === 'frontend') {
+            $count += $this->indexFrontend($locale, $onProgress);
+        }
+
+        // Smažeme dokumenty, které již nejsou aktivní
+        $query = AiDocument::query()->where('locale', $locale)->where('is_active', false);
+        if ($section) {
+            $query->where('section', $section);
+        }
+        $query->delete();
 
         return $count;
     }
@@ -128,25 +158,72 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
      */
     private function updateOrCreateDocument(array $data): AiDocument
     {
+        $section = $data['section'] ?? $this->determineSection($data['type']);
+        $locale = $data['locale'] ?? 'cs';
+
         $existing = AiDocument::where('source', $data['source'])
-            ->where('locale', $data['locale'] ?? 'cs')
-            ->where('type', $data['type'])
+            ->where('locale', $locale)
+            ->where('section', $section)
             ->first();
 
+        $contentPlain = $this->textExtraction->extractPlaintext($data['content'] ?? '');
+        $contentHash = hash('sha256', $contentPlain);
+
+        $data['section'] = $section;
+        $data['content'] = $contentPlain;
+        $data['content_hash'] = $contentHash;
+        $data['last_indexed_at'] = now();
+        $data['is_active'] = true;
+
         if ($existing) {
-            if ($existing->checksum !== $data['checksum']) {
+            if ($existing->content_hash !== $contentHash || ($data['checksum'] ?? null) !== $existing->checksum) {
                 $existing->update($data);
-                // Pokud se změnil obsah, vymažeme keywords, aby se znovu vygenerovaly (nebo je můžeme nechat a jen flagovat)
-                $existing->update(['keywords' => null]);
+                $this->updateChunks($existing);
+            } else {
+                $existing->update(['last_indexed_at' => now(), 'is_active' => true]);
             }
 
             return $existing;
         }
 
-        return AiDocument::create($data);
+        $doc = AiDocument::create($data);
+        $this->updateChunks($doc);
+
+        return $doc;
     }
 
-    private function indexFilament(string $locale): int
+    private function determineSection(string $type): string
+    {
+        if (str_starts_with($type, 'admin.')) {
+            return 'admin';
+        }
+        if (str_starts_with($type, 'member.')) {
+            return 'member';
+        }
+
+        return 'frontend';
+    }
+
+    private function updateChunks(AiDocument $doc): void
+    {
+        $doc->chunks()->delete();
+
+        if (config('ai.indexing.skip_chunks')) {
+            return;
+        }
+
+        $chunks = $this->textExtraction->chunkText($doc->content);
+        foreach ($chunks as $index => $text) {
+            $doc->chunks()->create([
+                'section' => $doc->section,
+                'chunk_index' => $index,
+                'chunk_text' => $text,
+                'chunk_hash' => hash('sha256', $text),
+            ]);
+        }
+    }
+
+    private function indexFilament(string $locale, ?\Closure $onProgress = null): int
     {
         $count = 0;
         $admin = null;
@@ -162,6 +239,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $title = $pool->getTranslation('title', $locale);
             $description = $pool->getTranslation('description', $locale);
             $url = \App\Filament\Resources\PhotoPools\PhotoPoolResource::getUrl('edit', ['record' => $pool]);
+
+            if ($onProgress) $onProgress("PhotoPool: {$title}");
 
             $content = "Photo Pool (Galerie): {$title}. Datum: {$pool->event_date?->format('d.m.Y')}. Popis: {$description}. Typ: {$pool->event_type}.";
 
@@ -190,6 +269,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $page = app($pageClass);
                 $title = $page->getTitle() ?: $pageClass;
                 $url = $pageClass::getUrl();
+
+                if ($onProgress) $onProgress("Page: {$title}");
 
                 // Zkusíme vyrenderovat obsah přes URL (Render-then-Analyze)
                 $content = $this->renderUrl($url, $admin);
@@ -239,6 +320,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $title = $resourceClass::getNavigationLabel();
                 $url = $resourceClass::getUrl();
                 $group = $resourceClass::getNavigationGroup();
+
+                if ($onProgress) $onProgress("Resource: {$title}");
 
                 // Pro resource zkusíme vyrenderovat index stránku
                 $content = $this->renderUrl($url, $admin);
@@ -394,7 +477,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         return implode(', ', array_filter(array_unique($texts)));
     }
 
-    private function indexMemberSection(string $locale): int
+    private function indexMemberSection(string $locale, ?\Closure $onProgress = null): int
     {
         $count = 0;
         $member = null;
@@ -416,6 +499,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         foreach ($routes as $routeName => $info) {
             try {
                 $url = route($routeName);
+                if ($onProgress) $onProgress("Member Route: {$info['title']}");
 
                 // Renderování stránky (Render-then-Analyze)
                 $content = $this->renderUrl($url, $member);
@@ -438,7 +522,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         return $count;
     }
 
-    private function indexFrontend(string $locale): int
+    private function indexFrontend(string $locale, ?\Closure $onProgress = null): int
     {
         $count = 0;
 
@@ -451,6 +535,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         foreach ($pages as $page) {
             $title = $page->getTranslation('title', $locale);
             $url = $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug);
+
+            if ($onProgress) $onProgress("Frontend Page: {$title}");
 
             // Renderování stránky (Render-then-Analyze)
             $content = $this->renderUrl($url);
@@ -490,6 +576,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         foreach ($posts as $post) {
             $title = $post->getTranslation('title', $locale);
             $url = route('public.news.show', $post->slug);
+
+            if ($onProgress) $onProgress("Frontend Post: {$title}");
 
             // Renderování stránky (Render-then-Analyze)
             $content = $this->renderUrl($url);
@@ -545,20 +633,17 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         }
     }
 
-    public function search(string $query, string $locale = 'cs', int $limit = 8, ?string $context = null)
+    public function search(string $query, string $locale = 'cs', int $limit = 8, ?string $section = null)
     {
         $q = Str::lower($query);
 
-        // Jednoduché LIKE vyhledávání + heuristické seřazení v PHP
+        // Jednoduché LIKE vyhledávání + heuristické seřazení v PHP (může být nahrazeno FULLTEXTem)
         $queryBuilder = AiDocument::query()
-            ->where('locale', $locale);
+            ->where('locale', $locale)
+            ->where('is_active', true);
 
-        if ($context === 'admin') {
-            $queryBuilder->where('type', 'like', 'admin.%');
-        } elseif ($context === 'member') {
-            $queryBuilder->where('type', 'like', 'member.%');
-        } elseif ($context === 'frontend') {
-            $queryBuilder->where('type', 'like', 'frontend.%');
+        if ($section) {
+            $queryBuilder->where('section', $section);
         }
 
         $candidates = $queryBuilder->where(function ($w) use ($q) {

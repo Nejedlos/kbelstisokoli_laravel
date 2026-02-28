@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DataTransferObjects\SearchResult;
+use App\Models\AiDocument;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -15,25 +16,41 @@ class SearchService
     /**
      * @return Collection<SearchResult>
      */
-    public function search(string $query, int $limit = 20): Collection
+    public function search(string $query, int $limit = 20, string $section = 'frontend'): Collection
     {
-        if (empty($query) || strlen($query) < 3) {
+        if (empty($query) || strlen($query) < 2) {
             return collect();
         }
 
         $locale = app()->getLocale();
-        $aiResults = $this->aiIndexService->search($query, $locale, $limit, 'frontend');
+        $q = Str::lower($query);
 
-        return $aiResults->map(function ($doc) {
-            $aiDocument = is_array($doc) ? $doc[0] : $doc;
+        // FULLTEXT vyhledávání v DB s filtrováním sekce
+        $queryBuilder = AiDocument::query()
+            ->where('locale', $locale)
+            ->where('section', $section)
+            ->where('is_active', true);
 
+        if (config('database.default') === 'mysql') {
+            $queryBuilder->whereRaw('MATCH(title, content) AGAINST(? IN NATURAL LANGUAGE MODE)', [$q]);
+        } else {
+            $queryBuilder->where(function ($w) use ($q) {
+                $w->whereRaw('LOWER(title) LIKE ?', ['%'.$q.'%'])
+                    ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$q.'%'])
+                    ->orWhereRaw('LOWER(keywords) LIKE ?', ['%'.$q.'%']);
+            });
+        }
+
+        $results = $queryBuilder->limit($limit)->get();
+
+        return $results->map(function ($doc) {
             return new SearchResult(
-                title: $aiDocument->title,
-                snippet: $aiDocument->summary ?: $this->makeSnippet($aiDocument->content),
-                url: $aiDocument->url,
-                type: $this->getDocTypeLabel($aiDocument->type),
-                image: $aiDocument->metadata['image'] ?? null,
-                date: $aiDocument->updated_at?->format('d.m.Y'),
+                title: $doc->title,
+                snippet: $doc->summary ?: $this->makeSnippet($doc->content),
+                url: $doc->url,
+                type: $this->getDocTypeLabel($doc->type),
+                image: $doc->metadata['image'] ?? null,
+                date: $doc->updated_at?->format('d.m.Y'),
             );
         });
     }

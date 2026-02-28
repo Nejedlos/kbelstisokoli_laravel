@@ -7,15 +7,26 @@ use Illuminate\Console\Command;
 
 class AiReindexCommand extends Command
 {
-    protected $signature = 'ai:index {--locale= : Jazyk indexu (cs/en/all)} {--fresh : Smazat existující index před reindexací} {--enrich : Obohatit dokumenty o AI shrnutí a klíčová slova (pomalé)}';
+    protected $signature = 'ai:index
+                            {--locale= : Jazyk indexu (cs/en/all)}
+                            {--section= : Sekce k indexaci (frontend/member/admin)}
+                            {--fresh : Smazat existující index před reindexací}
+                            {--enrich : Obohatit dokumenty o AI shrnutí a klíčová slova (pomalé)}
+                            {--no-ai : Přeskočit generování chunků pro AI hledání}';
 
     protected $description = 'Sestaví nebo aktualizuje AI vyhledávací index z obsahu sekcí';
 
     public function handle(AiIndexService $index): int
     {
         $locale = (string) $this->option('locale') ?: 'cs';
+        $section = $this->option('section');
         $fresh = (bool) $this->option('fresh');
         $enrich = (bool) $this->option('enrich');
+        $noAi = (bool) $this->option('no-ai');
+
+        if ($noAi) {
+            config(['ai.indexing.skip_chunks' => true]);
+        }
 
         $locales = $locale === 'all' ? ['cs', 'en'] : [$locale];
 
@@ -23,16 +34,24 @@ class AiReindexCommand extends Command
             // Nastavíme globální locale pro aktuální iteraci
             \Illuminate\Support\Facades\App::setLocale($l);
 
-            $this->info("Indexing AI documents for locale '{$l}'" . ($fresh ? " (fresh)" : "") . "...");
+            $this->info("Indexing documents for locale '{$l}'" . ($section ? " section '{$section}'" : "") . ($fresh ? " (fresh)" : "") . "...");
 
             // Pokud není fresh, aspoň promažeme typy, které už nechceme indexovat
             if (!$fresh) {
-                \App\Models\AiDocument::where('locale', $l)
-                    ->whereIn('type', ['docs', 'admin.page', 'admin.navigation'])
-                    ->delete();
+                $query = \App\Models\AiDocument::where('locale', $l)
+                    ->whereIn('type', ['docs']); // 'admin.page' a 'admin.navigation' už nepromazáváme, řeší to reindex přes is_active
+
+                if ($section) {
+                    $query->where('section', $section);
+                }
+
+                $query->delete();
             }
 
-            $count = $index->reindex($l, $fresh);
+            $count = $index->reindex($l, $fresh, $section, function($message) {
+                $this->line("  - $message");
+            });
+
             $this->info("Processed {$count} documents for locale '{$l}'.");
 
             if ($enrich) {

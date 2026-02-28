@@ -38,7 +38,7 @@ class ProductionDeploySetupCommand extends Command
 
         $connection = $this->argument('connection');
 
-        if (!$connection && !env('PROD_HOST')) {
+        if (!$connection && !config('app.prod_host', env('PROD_HOST'))) {
             $connection = text(
                 label: 'SSH příkaz nebo spojení (nepovinné)?',
                 placeholder: 'ssh -p 20001 ssh-588875@dw191.webglobe.com',
@@ -52,7 +52,7 @@ class ProductionDeploySetupCommand extends Command
             $host = text(
                 label: 'IP adresa nebo hostitel produkčního serveru?',
                 placeholder: 'dw191.webglobe.com',
-                default: $parsed['host'] ?? env('PROD_HOST', ''),
+                default: $parsed['host'] ?? config('app.prod_host', env('PROD_HOST', '')),
                 hint: 'Tyto údaje jsou nezbytné pro připojení k SSH konzoli, přes kterou se spouští všechny příkazy (git, composer, build).',
                 required: true
             );
@@ -60,7 +60,7 @@ class ProductionDeploySetupCommand extends Command
             $port = text(
                 label: 'SSH port?',
                 placeholder: '22',
-                default: $parsed['port'] ?? env('PROD_PORT', '22'),
+                default: $parsed['port'] ?? config('app.prod_port', env('PROD_PORT', '22')),
                 hint: 'Výchozí port je 22. U hostingu Webglobe se často používá 20001.',
                 required: true
             );
@@ -68,7 +68,7 @@ class ProductionDeploySetupCommand extends Command
             $user = text(
                 label: 'SSH uživatel na serveru?',
                 placeholder: 'ssh-588875',
-                default: $parsed['user'] ?? env('PROD_USER', ''),
+                default: $parsed['user'] ?? config('app.prod_user', env('PROD_USER', '')),
                 hint: 'Uživatelské jméno pro SSH přístup (např. ssh-XXXXXX).',
                 required: true
             );
@@ -95,9 +95,9 @@ class ProductionDeploySetupCommand extends Command
         }
 
         // --- Automatická detekce binárek po úspěšném připojení ---
-        $detectedPhp = env('PROD_PHP_BINARY', 'php');
-        $detectedNode = env('PROD_NODE_BINARY', 'node');
-        $detectedNpm = env('PROD_NPM_BINARY', 'npm');
+        $detectedPhp = config('app.prod_php_binary', env('PROD_PHP_BINARY', 'php'));
+        $detectedNode = config('app.prod_node_binary', env('PROD_NODE_BINARY', 'node'));
+        $detectedNpm = config('app.prod_npm_binary', env('PROD_NPM_BINARY', 'npm'));
 
         $this->discoverBinaries($host, $port, $user, $detectedPhp, $detectedNode, $detectedNpm);
 
@@ -147,7 +147,7 @@ class ProductionDeploySetupCommand extends Command
         // 2. Veřejný adresář (kam přijde obsah public)
         $publicPath = $this->browseServerPath($host, $port, $user, 'Zvolte VEŘEJNÝ ADRESÁŘ (kam přijdou veřejné soubory, obvykle www, public_html)', $defaultPublic);
 
-        $token = env('PROD_GIT_TOKEN');
+        $token = config('app.prod_git_token', env('PROD_GIT_TOKEN'));
         if ($token) {
             $choice = select(
                 label: 'Jak chcete naložit s GitHub Personal Access Tokenem?',
@@ -177,13 +177,13 @@ class ProductionDeploySetupCommand extends Command
         // 3. Konfigurace databáze
         $dbConfig = [];
         info("🗄️  Konfigurace databáze na produkci");
-        $dbConfig['db_connection'] = select('Typ databáze?', ['mysql', 'mariadb', 'pgsql', 'sqlite'], env('PROD_DB_CONNECTION', 'mysql'));
-        $dbConfig['db_host'] = text('DB Host', default: env('PROD_DB_HOST', '127.0.0.1'));
-        $dbConfig['db_port'] = text('DB Port', default: env('PROD_DB_PORT', '3306'));
-        $dbConfig['db_database'] = text('Název databáze', default: env('PROD_DB_DATABASE', ''), required: true);
-        $dbConfig['db_username'] = text('DB Uživatel', default: env('PROD_DB_USERNAME', ''), required: true);
+        $dbConfig['db_connection'] = select('Typ databáze?', ['mysql', 'mariadb', 'pgsql', 'sqlite'], config('app.prod_db_connection', env('PROD_DB_CONNECTION', 'mysql')));
+        $dbConfig['db_host'] = text('DB Host', default: config('app.prod_db_host', env('PROD_DB_HOST', '127.0.0.1')));
+        $dbConfig['db_port'] = text('DB Port', default: config('app.prod_db_port', env('PROD_DB_PORT', '3306')));
+        $dbConfig['db_database'] = text('Název databáze', default: config('app.prod_db_database', env('PROD_DB_DATABASE', '')), required: true);
+        $dbConfig['db_username'] = text('DB Uživatel', default: config('app.prod_db_username', env('PROD_DB_USERNAME', '')), required: true);
 
-        $dbPassword = env('PROD_DB_PASSWORD');
+        $dbPassword = config('app.prod_db_password', env('PROD_DB_PASSWORD'));
         if ($dbPassword) {
             $choice = select(
                 label: 'Jak chcete naložit s heslem k produkční databázi?',
@@ -209,7 +209,7 @@ class ProductionDeploySetupCommand extends Command
             );
         }
 
-        $dbConfig['db_prefix'] = text('Prefix tabulek (volitelné)', default: env('PROD_DB_PREFIX', 'new_'), hint: 'Např. new_ zajistí, že tabulky budou mít název new_users atd.');
+        $dbConfig['db_prefix'] = text('Prefix tabulek (volitelné)', default: config('app.prod_db_prefix', env('PROD_DB_PREFIX', 'new_')), hint: 'Např. new_ zajistí, že tabulky budou mít název new_users atd.');
 
         // Uložit do .env pro příště
         $envData = [

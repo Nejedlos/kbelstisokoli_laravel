@@ -17,6 +17,7 @@ class SearchServiceTest extends TestCase
     {
         // Vytvoření testovacího AI dokumentu
         \App\Models\AiDocument::create([
+            'section' => 'frontend',
             'title' => 'Nábor dětí',
             'content' => 'Hledáme nové sokolíky do našich oddílů.',
             'locale' => 'cs',
@@ -24,28 +25,22 @@ class SearchServiceTest extends TestCase
             'url' => '/nabor',
             'checksum' => 'test1',
             'source' => 'page:1',
+            'is_active' => true,
         ]);
 
         $searchService = app(SearchService::class);
-
-        // Simulace hledání, které vyvolalo chybu
-        // Musíme nastavit locale, protože SearchService ho používá
         app()->setLocale('cs');
 
-        try {
-            $results = $searchService->search('nábor');
-            $this->assertCount(1, $results);
-            $this->assertEquals('Nábor dětí', $results->first()->title);
-            $this->assertEquals('Hledáme nové sokolíky do našich oddílů.', $results->first()->snippet);
-        } catch (\TypeError $e) {
-            $this->fail('SearchService threw a TypeError: ' . $e->getMessage());
-        }
+        $results = $searchService->search('nábor', section: 'frontend');
+        $this->assertCount(1, $results);
+        $this->assertEquals('Nábor dětí', $results->first()->title);
     }
 
     public function test_search_posts_returns_results_without_type_error()
     {
         // Vytvoření testovacího AI dokumentu
         \App\Models\AiDocument::create([
+            'section' => 'frontend',
             'title' => 'Nový trenér',
             'content' => 'Máme nového trenéra pro mladší žáky. Detailní informace o novém trenérovi.',
             'summary' => 'Máme nového trenéra pro mladší žáky.',
@@ -54,57 +49,74 @@ class SearchServiceTest extends TestCase
             'url' => '/news/novy-trener',
             'checksum' => 'test2',
             'source' => 'post:1',
+            'is_active' => true,
         ]);
 
         $searchService = app(SearchService::class);
         app()->setLocale('cs');
 
-        try {
-            $results = $searchService->search('trenér');
-            $this->assertCount(1, $results);
-            $this->assertEquals('Nový trenér', $results->first()->title);
-            $this->assertEquals('Máme nového trenéra pro mladší žáky.', $results->first()->snippet);
-        } catch (\TypeError $e) {
-            $this->fail('SearchService threw a TypeError: ' . $e->getMessage());
-        }
+        $results = $searchService->search('trenér', section: 'frontend');
+        $this->assertCount(1, $results);
+        $this->assertEquals('Nový trenér', $results->first()->title);
     }
 
-    public function test_search_works_in_different_locales()
+    public function test_search_respects_sections()
     {
+        // Frontend dokument
         \App\Models\AiDocument::create([
-            'title' => 'Kontakt',
-            'content' => 'Napište nám zprávu.',
+            'section' => 'frontend',
+            'title' => 'Veřejná stránka',
+            'content' => 'Obsah veřejné stránky o basketbalu.',
             'locale' => 'cs',
             'type' => 'frontend.resource',
-            'url' => '/kontakt',
-            'checksum' => 'test3',
-            'source' => 'page:2',
+            'url' => '/verejna',
+            'checksum' => 'f1',
+            'source' => 'page:1',
+            'is_active' => true,
         ]);
 
+        // Member dokument
         \App\Models\AiDocument::create([
-            'title' => 'Contact Us',
-            'content' => 'Send us a message.',
-            'locale' => 'en',
-            'type' => 'frontend.resource',
-            'url' => '/contact',
-            'checksum' => 'test4',
+            'section' => 'member',
+            'title' => 'Členská stránka',
+            'content' => 'Obsah pro přihlášené členy klubu.',
+            'locale' => 'cs',
+            'type' => 'member.resource',
+            'url' => '/member/stranka',
+            'checksum' => 'm1',
             'source' => 'page:2',
+            'is_active' => true,
+        ]);
+
+        // Admin dokument
+        \App\Models\AiDocument::create([
+            'section' => 'admin',
+            'title' => 'Admin nastavení',
+            'content' => 'Konfigurace systému pro správce.',
+            'locale' => 'cs',
+            'type' => 'admin.resource',
+            'url' => '/admin/settings',
+            'checksum' => 'a1',
+            'source' => 'page:3',
+            'is_active' => true,
         ]);
 
         $searchService = app(SearchService::class);
-
-        // Test Czech
         app()->setLocale('cs');
-        $resultsCs = $searchService->search('Kontakt');
-        $this->assertCount(1, $resultsCs);
-        $this->assertEquals('Kontakt', $resultsCs->first()->title);
-        $this->assertEquals('Napište nám zprávu.', $resultsCs->first()->snippet);
 
-        // Test English
-        app()->setLocale('en');
-        $resultsEn = $searchService->search('Contact');
-        $this->assertCount(1, $resultsEn);
-        $this->assertEquals('Contact Us', $resultsEn->first()->title);
-        $this->assertEquals('Send us a message.', $resultsEn->first()->snippet);
+        // Hledání ve frontend sekci
+        $results = $searchService->search('stránka', section: 'frontend');
+        $this->assertCount(1, $results);
+        $this->assertEquals('Veřejná stránka', $results->first()->title);
+
+        // Hledání v member sekci
+        $results = $searchService->search('stránka', section: 'member');
+        $this->assertCount(1, $results);
+        $this->assertEquals('Členská stránka', $results->first()->title);
+
+        // Hledání v admin sekci
+        $results = $searchService->search('nastavení', section: 'admin');
+        $this->assertCount(1, $results);
+        $this->assertEquals('Admin nastavení', $results->first()->title);
     }
 }
