@@ -5,6 +5,7 @@
 
 @section('content')
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <livewire:member.avatar-modal />
         <!-- Main Edit Form -->
         <div class="lg:col-span-2 space-y-8">
             <form action="{{ route('member.profile.update') }}" method="POST" class="space-y-8">
@@ -195,6 +196,69 @@
 
         <!-- Sidebar Info -->
         <div class="space-y-8">
+            <!-- Avatar Management -->
+            <section class="card p-6 md:p-8 space-y-6 overflow-hidden relative">
+                <div class="absolute top-0 right-0 p-4 opacity-5">
+                    <i class="fa-light fa-user-circle text-6xl"></i>
+                </div>
+
+                <h3 class="text-lg font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-4 relative z-10">Avatar</h3>
+
+                <div class="flex flex-col sm:flex-row items-center gap-8 relative z-10">
+                    <div class="relative group" @click="$dispatch('open-avatar-modal')">
+                        <!-- Outer Ring -->
+                        <div class="absolute -inset-1.5 bg-gradient-to-tr from-primary to-accent rounded-full opacity-20 group-hover:opacity-40 blur transition-opacity duration-500"></div>
+
+                        <!-- Image Container -->
+                        <div class="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-xl cursor-pointer">
+                            <img id="avatarPreview"
+                                 src="{{ $user->getFirstMediaUrl('avatar') ?: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==' }}"
+                                 alt="Avatar"
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+
+                            <!-- Overlay -->
+                            <div class="absolute inset-0 bg-secondary/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white">
+                                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-1 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <i class="fa-light fa-camera-retro text-lg"></i>
+                                </div>
+                                <span class="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">Změnit</span>
+                            </div>
+                        </div>
+
+                        <!-- Badge -->
+                        <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-accent text-white rounded-full border-4 border-white flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform">
+                            <i class="fa-light fa-pen-nib text-[10px]"></i>
+                        </div>
+
+                        <!-- Delete Button -->
+                        <button type="button"
+                                id="avatar-delete-btn"
+                                onclick="event.stopPropagation(); Livewire.dispatch('deleteAvatar')"
+                                class="absolute -top-1 -right-1 w-8 h-8 bg-rose-500 text-white rounded-full border-4 border-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-colors z-20 {{ auth()->user()->hasMedia('avatar') ? '' : 'hidden' }}">
+                            <i class="fa-light fa-trash-can text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 text-center sm:text-left space-y-3">
+                        <div class="space-y-1">
+                            <p class="text-xs text-slate-600 font-bold leading-relaxed">
+                                Nahrajte svou fotku nebo si vyberte jeden z našich klubových avatarů.
+                            </p>
+                            <p class="text-[10px] text-slate-400 font-medium italic">
+                                Podporujeme formáty JPG, PNG a WebP. Maximální velikost 5 MB.
+                            </p>
+                        </div>
+
+                        <button type="button"
+                                @click="$dispatch('open-avatar-modal')"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-primary hover:text-white text-secondary text-[10px] font-black uppercase tracking-widest transition-all">
+                            <i class="fa-light fa-sparkles"></i>
+                            Otevřít galerii
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             <!-- Player Card Summary -->
             @if($profile)
                 <div class="card bg-secondary text-white overflow-hidden">

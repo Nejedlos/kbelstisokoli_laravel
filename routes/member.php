@@ -35,6 +35,8 @@ Route::middleware(['member'])
         // Profil
         Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profil', [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profil/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+        Route::post('/profil/avatar/select', [ProfileController::class, 'selectAvatarFromAsset'])->name('profile.avatar.select');
 
         // Ekonomika / Platby (Shell)
         Route::get('/platby', [EconomyController::class, 'index'])->name('economy.index');

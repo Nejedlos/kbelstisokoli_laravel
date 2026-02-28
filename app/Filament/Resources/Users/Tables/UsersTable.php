@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkAction;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
@@ -28,7 +29,8 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->deferredLoading()
+            ->deferLoading()
+            ->striped()
             ->columns([
                 SpatieMediaLibraryImageColumn::make('avatar')
                     ->collection('avatar')
@@ -118,25 +120,27 @@ class UsersTable
                     ->label(__('user.fields.gender'))
                     ->options(Gender::class),
             ])
-            ->actions([
-                Action::make('sendInvitation')
-                    ->label(__('user.actions.send_invitation'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAPER_PLANE))
-                    ->color('info')
-                    ->requiresConfirmation()
-                    ->action(function ($record) {
-                        $token = Password::createToken($record);
-                        $record->notify(new UserInvitationNotification($token));
+            ->recordActions([
+                ActionGroup::make([
+                    Action::make('sendInvitation')
+                        ->label(__('user.actions.send_invitation'))
+                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAPER_PLANE))
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            $token = Password::createToken($record);
+                            $record->notify(new UserInvitationNotification($token));
 
-                        FilamentNotification::make()
-                            ->title('Pozvánka byla odeslána')
-                            ->success()
-                            ->send();
-                    })
-                    ->visible(fn ($record) => $record->is_active && !$record->onboarding_completed_at),
-                EditAction::make(),
+                            FilamentNotification::make()
+                                ->title('Pozvánka byla odeslána')
+                                ->success()
+                                ->send();
+                        })
+                        ->visible(fn ($record) => $record->is_active && !$record->onboarding_completed_at),
+                    EditAction::make(),
+                ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     BulkAction::make('activate')

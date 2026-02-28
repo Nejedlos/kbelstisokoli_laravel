@@ -17,7 +17,8 @@ class PostsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->deferredLoading()
+            ->deferLoading()
+            ->striped()
             ->columns([
                 ImageColumn::make('featured_image')
                     ->label('Náhled')

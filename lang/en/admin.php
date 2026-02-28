@@ -197,9 +197,9 @@ return [
                     'general' => 'General Information',
                 ],
                 'actions' => [
-                    'view_public' => 'View on Web',
-                    'attach_coach' => 'Attach Coach',
-                    'attach_player' => 'Attach Player',
+                    'view_public' => 'Web',
+                    'attach_coach' => '+ Coach',
+                    'attach_player' => '+ Player',
                     'edit_coach_contact' => 'Edit contact info',
                     'detach' => 'Detach',
                     'detach_selected' => 'Detach selected',

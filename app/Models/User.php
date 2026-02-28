@@ -269,6 +269,9 @@ class User extends Authenticatable implements FilamentUser, HasMedia
         $this->addMediaCollection('avatar')
             ->useDisk('media_public')
             ->singleFile();
+
+        $this->addMediaCollection('player_photos')
+            ->useDisk('media_public');
     }
 
     /**
@@ -276,11 +279,29 @@ class User extends Authenticatable implements FilamentUser, HasMedia
      */
     public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
     {
+        // Společná miniatura pro avatar i hráčské fotky
         $this->addMediaConversion('thumb')
             ->width(100)
             ->height(100)
             ->format('webp')
-            ->sharpen(10);
+            ->sharpen(10)
+            ->performOnCollections('avatar', 'player_photos');
+
+        // Čtvercová varianta pro náhledy v soupiskách a galerii
+        $this->addMediaConversion('square')
+            ->width(800)
+            ->height(800)
+            ->format('webp')
+            ->sharpen(10)
+            ->performOnCollections('player_photos');
+
+        // Portrétní varianta pro soupisku
+        $this->addMediaConversion('roster')
+            ->width(1200)
+            ->height(1600)
+            ->format('webp')
+            ->optimize()
+            ->performOnCollections('player_photos');
     }
 
     /**

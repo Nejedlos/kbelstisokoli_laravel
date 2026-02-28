@@ -90,7 +90,7 @@ return [
         'replicate' => 'Duplikovat',
         'generate_vs' => 'Vygenerovat VS',
         'generate_member_id' => 'Vygenerovat ID',
-        'send_invitation' => 'Poslat pozvánku',
+        'send_invitation' => 'Pozvat',
         'reset_2fa' => 'Resetovat 2FA',
     ],
 ];

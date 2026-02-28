@@ -448,6 +448,22 @@ class UserForm
                                             ->label(__('user.fields.coach_note'))
                                             ->rows(3),
                                     ]),
+
+                                Section::make(__('user.sections.player_photos'))
+                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMAGE))
+                                    ->description(__('user.sections.player_photos_desc'))
+                                    ->schema([
+                                        SpatieMediaLibraryFileUpload::make('player_photos')
+                                            ->collection('player_photos')
+                                            ->multiple()
+                                            ->reorderable()
+                                            ->imageEditor()
+                                            ->hiddenLabel()
+                                            ->disk(config('filesystems.uploads.disk'))
+                                            ->helperText('Pořadí určuje primární fotografii pro soupisku – první je primární.')
+                                            ->panelLayout('grid')
+                                            ->responsiveImages(),
+                                    ]),
                             ])
                             ->visible(fn($get) => $get('player_profile_active')),
                     ]),

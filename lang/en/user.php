@@ -87,7 +87,7 @@ return [
         'delete_selected' => 'Delete selected',
         'generate_vs' => 'Generate VS',
         'generate_member_id' => 'Generate ID',
-        'send_invitation' => 'Send Invitation',
+        'send_invitation' => 'Invite',
         'reset_2fa' => 'Reset 2FA',
     ],
 ];

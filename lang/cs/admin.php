@@ -197,9 +197,9 @@ return [
                     'general' => 'Základní informace',
                 ],
                 'actions' => [
-                    'view_public' => 'Zobrazit na webu',
-                    'attach_coach' => 'Přiřadit trenéra',
-                    'attach_player' => 'Přiřadit hráče',
+                    'view_public' => 'Web',
+                    'attach_coach' => '+ Trenér',
+                    'attach_player' => '+ Hráč',
                     'edit_coach_contact' => 'Upravit kontaktní údaje',
                     'detach' => 'Odebrat',
                     'detach_selected' => 'Odebrat vybrané',

@@ -9,6 +9,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -18,7 +19,8 @@ class TeamsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->deferredLoading()
+            ->deferLoading()
+            ->striped()
             ->columns([
                 TextColumn::make('name')
                     ->label(__('admin.navigation.resources.team.fields.name'))
@@ -66,24 +68,26 @@ class TeamsTable
                 //
             ])
             ->recordActions([
-                Action::make('view_public')
-                    ->label(__('admin.navigation.resources.team.actions.view_public'))
-                    ->icon(IconHelper::get(IconHelper::GLOBE))
-                    ->url(fn ($record) => route('public.teams.show', $record->slug))
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make()
-                    ->label(__('user.actions.edit'))
-                    ->icon(IconHelper::get(IconHelper::EDIT)),
-                ReplicateAction::make()
-                    ->label(__('user.actions.replicate'))
-                    ->icon(IconHelper::get(IconHelper::COPY))
-                    ->color('warning'),
-                DeleteAction::make()
-                    ->label(__('user.actions.delete'))
-                    ->icon(IconHelper::get(IconHelper::TRASH)),
+                ActionGroup::make([
+                    Action::make('view_public')
+                        ->label(__('admin.navigation.resources.team.actions.view_public'))
+                        ->icon(IconHelper::get(IconHelper::GLOBE))
+                        ->url(fn ($record) => route('public.teams.show', $record->slug))
+                        ->openUrlInNewTab()
+                        ->color('gray'),
+                    EditAction::make()
+                        ->label(__('user.actions.edit'))
+                        ->icon(IconHelper::get(IconHelper::EDIT)),
+                    ReplicateAction::make()
+                        ->label(__('user.actions.replicate'))
+                        ->icon(IconHelper::get(IconHelper::COPY))
+                        ->color('warning'),
+                    DeleteAction::make()
+                        ->label(__('user.actions.delete'))
+                        ->icon(IconHelper::get(IconHelper::TRASH)),
+                ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label(__('user.actions.delete_selected')),

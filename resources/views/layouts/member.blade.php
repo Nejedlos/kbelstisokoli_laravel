@@ -24,6 +24,8 @@
         }
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-7iy7fS9870G/9p++Sdf3X56A1lJozX4Lly/6yM3eR92Rpj0yW/S63eBaoOa52pW5Yh1I+O0F0L2M1yW8v8H/2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9AORv1YPI6/R2D2K4zE6yOq0K/2fW8yW2Z6O/A1A9A+7S9k5m8F8v9A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     @stack('head')
     <style>[x-cloak] { display: none !important; }</style>
@@ -214,8 +216,12 @@
                 </div>
 
                 <div class="relative" x-data="{ userOpen: false }">
-                    <button @click="userOpen = !userOpen" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-black border-2 border-white/10 hover:border-white/30 transition-all">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    <button @click="userOpen = !userOpen" id="top-bar-avatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-black border-2 border-white/10 hover:border-white/30 transition-all overflow-hidden">
+                        @if(auth()->user()->hasMedia('avatar'))
+                            <img src="{{ auth()->user()->getFirstMediaUrl('avatar', 'thumb') }}" class="w-full h-full object-cover rounded-full" alt="">
+                        @else
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        @endif
                     </button>
 
                     <div x-show="userOpen" @click.away="userOpen = false"

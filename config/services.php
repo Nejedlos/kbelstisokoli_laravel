@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'nextai' => [
+        'uploads_base' => env('SYNC_NEXTAI_UPLOADS_PATH', base_path('../nextai.localhost/public/uploads')),
+    ],
+
 ];
