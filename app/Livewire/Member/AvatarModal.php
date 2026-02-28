@@ -19,14 +19,16 @@ class AvatarModal extends Component
     public $galleryAssets = [];
 
     public $confirmingDelete = false;
+    public $userId;
 
     protected $listeners = [
         'openAvatarModal' => 'open',
         'deleteAvatar' => 'confirmDelete'
     ];
 
-    public function mount()
+    public function mount($userId = null)
     {
+        $this->userId = $userId ?: auth()->id();
         $this->loadGallery();
     }
 
@@ -39,8 +41,11 @@ class AvatarModal extends Component
             ->get();
     }
 
-    public function open()
+    public function open($userId = null)
     {
+        if ($userId) {
+            $this->userId = $userId;
+        }
         $this->isOpen = true;
         $this->activeTab = 'gallery';
         $this->confirmingDelete = false;
@@ -54,24 +59,29 @@ class AvatarModal extends Component
         $this->confirmingDelete = false;
     }
 
-    public function confirmDelete()
+    public function confirmDelete($userId = null)
     {
+        if ($userId) {
+            $this->userId = $userId;
+        }
         $this->isOpen = true;
         $this->confirmingDelete = true;
     }
 
     public function deleteAvatar()
     {
-        $user = auth()->user();
+        $user = \App\Models\User::find($this->userId) ?: auth()->user();
         $user->clearMediaCollection('avatar');
+        $user->refresh();
 
         $this->dispatch('avatarUpdated',
             url: null,
-            initials: $this->getInitials($user->name)
+            initials: $this->getInitials($user->name),
+            userId: $user->id
         );
 
         $this->close();
-        session()->flash('status', 'Avatar byl úspěšně poslán na lavičku.');
+        session()->flash('status', __('member.profile.avatar.flash.deleted'));
     }
 
     protected function getInitials($name)
@@ -92,11 +102,11 @@ class AvatarModal extends Component
         if (count($imageData) < 2) return;
 
         $decodedImage = base64_decode($imageData[1]);
-        $tempPath = 'temp/' . auth()->id() . '_avatar_' . time() . '.webp';
+        $tempPath = 'temp/' . $this->userId . '_avatar_' . time() . '.webp';
         Storage::disk('local')->put($tempPath, $decodedImage);
         $fullPath = storage_path('app/private/' . $tempPath);
 
-        $user = auth()->user();
+        $user = \App\Models\User::find($this->userId) ?: auth()->user();
         $user->addMedia($fullPath)
             ->usingFileName('avatar-' . time() . '.webp')
             ->toMediaCollection('avatar');
@@ -104,14 +114,20 @@ class AvatarModal extends Component
         // Cleanup
         Storage::disk('local')->delete($tempPath);
 
+        $user->refresh();
         $avatarUrl = $user->getFirstMediaUrl('avatar', 'thumb');
+        if ($avatarUrl) {
+            $avatarUrl .= (strpos($avatarUrl, '?') === false ? '?' : '&') . 'v=' . time();
+        }
 
         $this->dispatch('avatarUpdated',
-            url: $avatarUrl
+            url: $avatarUrl,
+            initials: $this->getInitials($user->name),
+            userId: $user->id
         );
 
         $this->close();
-        session()->flash('status', 'Avatar byl úspěšně uložen.');
+        session()->flash('status', __('member.profile.avatar.flash.saved'));
     }
 
     public function render()

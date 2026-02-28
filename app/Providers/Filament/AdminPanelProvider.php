@@ -62,10 +62,21 @@ class AdminPanelProvider extends PanelProvider
                         opacity: 0;
                     }
                  </style>
-                 @vite(['resources/css/filament-admin.css'])"
+                 @vite(['resources/css/filament-admin.css'])
+                 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css' integrity='sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==' crossorigin='anonymous' referrerpolicy='no-referrer' />
+                 <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js' integrity='sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>"
             ))
+            ->renderHook('panels::body.start', fn (): string => Blade::render('
+                <x-impersonation-banner />
+            '))
             ->renderHook('panels::body.end', fn (): string => Blade::render('
                 <x-back-to-top />
+                <livewire:member.avatar-modal />
+            '))
+            ->renderHook('panels::user-menu.before', fn (): string => Blade::render('
+                <div class="fi-dropdown-list border-b border-gray-100 dark:border-gray-800">
+                    @include("filament.components.impersonate-select")
+                </div>
             '))
             ->renderHook('panels::global-search.before', fn (): string => Blade::render('
                 <div class="flex items-center gap-1 sm:gap-2">

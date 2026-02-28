@@ -85,6 +85,7 @@ class PlayersRelationManager extends RelationManager
                 AttachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.attach_player'))
                     ->icon(IconHelper::get(IconHelper::PLUS))
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
@@ -104,16 +105,18 @@ class PlayersRelationManager extends RelationManager
                     ->openUrlInNewTab(),
                 EditAction::make()
                     ->label(__('admin.navigation.resources.team.fields.role_in_team'))
-                    ->icon(IconHelper::get(IconHelper::EDIT)),
+                    ->icon(IconHelper::get(IconHelper::EDIT))
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
                 DetachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.detach'))
-                    ->icon(IconHelper::get(IconHelper::TRASH)),
+                    ->icon(IconHelper::get(IconHelper::TRASH))
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
                         ->label(__('admin.navigation.resources.team.actions.detach_selected')),
-                ]),
+                ])->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ]);
     }
 }

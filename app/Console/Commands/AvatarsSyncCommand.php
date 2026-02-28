@@ -27,11 +27,12 @@ class AvatarsSyncCommand extends Command
 
         $this->info('Zdroj: ' . $base);
         $force = (bool) $this->option('force');
+        $disk = config('media-library.disk_name', 'public_path');
 
         $count = 0;
         User::query()
             ->orderBy('id')
-            ->chunk(100, function ($users) use (&$count, $base, $force) {
+            ->chunk(100, function ($users) use (&$count, $base, $force, $disk) {
                 foreach ($users as $user) {
                     $userDir = rtrim($base, DIRECTORY_SEPARATOR) . '/users/' . $user->id;
 
@@ -44,7 +45,7 @@ class AvatarsSyncCommand extends Command
                                 $user->clearMediaCollection('avatar');
                                 $user->addMedia($avatarFile)
                                     ->usingFileName('avatar-imported-' . time() . '.' . pathinfo($avatarFile, PATHINFO_EXTENSION))
-                                    ->toMediaCollection('avatar');
+                                    ->toMediaCollection('avatar', $disk);
                                 $this->line("[User #{$user->id}] Avatar importován.");
                             }
                         }
@@ -66,7 +67,7 @@ class AvatarsSyncCommand extends Command
                         foreach ($images as $img) {
                             $user->addMedia($img)
                                 ->usingFileName('player-photo-' . Str::random(6) . '.' . pathinfo($img, PATHINFO_EXTENSION))
-                                ->toMediaCollection('player_photos');
+                                ->toMediaCollection('player_photos', $disk);
                         }
 
                         if (count($images)) {
@@ -84,7 +85,14 @@ class AvatarsSyncCommand extends Command
 
     protected function findLatestImage(string $dir): ?string
     {
-        $files = glob(rtrim($dir, DIRECTORY_SEPARATOR) . '/*.{jpg,jpeg,png,webp}', GLOB_BRACE) ?: [];
+        $files = [];
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && preg_match('/\.(jpg|jpeg|png|webp)$/i', $file->getFilename())) {
+                $files[] = $file->getRealPath();
+            }
+        }
+
         if (empty($files)) {
             return null;
         }
@@ -94,7 +102,16 @@ class AvatarsSyncCommand extends Command
 
     protected function findAllImages(string $dir): array
     {
-        $files = glob(rtrim($dir, DIRECTORY_SEPARATOR) . '/*.{jpg,jpeg,png,webp}', GLOB_BRACE) ?: [];
+        $files = [];
+        if (!is_dir($dir)) return [];
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && preg_match('/\.(jpg|jpeg|png|webp)$/i', $file->getFilename())) {
+                $files[] = $file->getRealPath();
+            }
+        }
+
         sort($files); // deterministické pořadí
         return $files;
     }

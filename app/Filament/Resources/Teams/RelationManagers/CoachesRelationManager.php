@@ -56,6 +56,7 @@ class CoachesRelationManager extends RelationManager
                 AttachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.attach_coach'))
                     ->icon(IconHelper::get(IconHelper::PLUS))
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect()
@@ -85,6 +86,7 @@ class CoachesRelationManager extends RelationManager
             ->recordActions([
                 EditAction::make()
                     ->label(__('admin.navigation.resources.team.actions.edit_coach_contact'))
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->form([
                         TextInput::make('email')
                             ->label(__('admin.navigation.resources.team.fields.coach_email'))
@@ -102,13 +104,14 @@ class CoachesRelationManager extends RelationManager
                     ->openUrlInNewTab(),
                 DetachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.detach'))
-                    ->icon(IconHelper::get(IconHelper::TRASH)),
+                    ->icon(IconHelper::get(IconHelper::TRASH))
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
                         ->label(__('admin.navigation.resources.team.actions.detach_selected')),
-                ]),
+                ])->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ]);
     }
 }

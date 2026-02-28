@@ -6,57 +6,80 @@
 @section('content')
     <div class="space-y-10">
         <!-- Profile Summary -->
-        <section class="card sport-card-accent p-6 md:p-8">
-            <div class="flex flex-col md:flex-row md:items-center gap-6">
-                <div class="relative">
-                    @if(!empty($avatarUrl))
-                        <img src="{{ $avatarUrl }}" alt="avatar" class="w-20 h-20 rounded-full object-cover border-4 border-slate-100">
-                    @else
-                        <div class="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-black border-4 border-slate-100">
-                            {{ strtoupper(substr($user->name, 0, 1)) }}
-                        </div>
-                    @endif
-                </div>
-                <div class="flex-1">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                        <div>
-                            <h2 class="text-2xl font-black text-secondary leading-none">{{ $user->display_name ?? $user->name }}</h2>
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                @foreach($user->roles->pluck('name') as $role)
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600">{{ $role }}</span>
-                                @endforeach
-                                @if($user->membership_status)
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-success-50 text-success-700">{{ __('member.profile.player_card.active_member') }}</span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
-                            <a href="{{ route('member.profile.edit') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-user-gear mr-1.5"></i> {{ __('member.dashboard.actions.edit_profile') }}</a>
-                            <a href="{{ route('member.attendance.index') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-calendar-star mr-1.5"></i> {{ __('member.dashboard.actions.my_program') }}</a>
-                            <a href="{{ route('member.economy.index') }}" class="btn btn-primary text-xs w-full sm:w-auto"><i class="fa-light fa-credit-card mr-1.5"></i> {{ __('member.dashboard.actions.payments') }}</a>
-                            <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-whistle mr-1.5"></i> {{ __('member.feedback.contact_coach_title') }}</a>
-                            <a href="{{ route('member.contact.admin.form') }}" class="btn btn-outline text-xs w-full sm:w-auto"><i class="fa-light fa-envelope mr-1.5"></i> {{ __('member.feedback.contact_admin_title') }}</a>
-                        </div>
+        <section class="relative overflow-hidden group">
+            <!-- Background Layer -->
+            <div class="absolute inset-0 bg-white rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/40"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-primary/10 transition-colors duration-700"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-3xl -ml-10 -mb-10"></div>
+
+            <div class="relative p-6 sm:p-8 md:p-12 flex flex-col lg:flex-row lg:items-center gap-6 sm:gap-10">
+                <!-- Avatar Section -->
+                <div class="relative flex-shrink-0 flex justify-center lg:justify-start">
+                    <div class="absolute -inset-2 bg-gradient-to-tr from-primary to-accent rounded-[2rem] opacity-20 blur-xl group-hover:opacity-40 transition-opacity duration-700"></div>
+                    <div class="relative w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl group-hover:scale-[1.02] transition-transform duration-500">
+                        <img src="{{ $avatarUrl }}" alt="avatar" class="w-full h-full object-cover">
+
+                        <!-- Edit Overlay -->
+                        <a href="{{ route('member.profile.edit') }}" class="absolute inset-0 bg-secondary/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white">
+                            <i class="fa-light fa-camera-retro text-2xl mb-2"></i>
+                            <span class="text-[10px] font-black uppercase tracking-widest">{{ __('member.profile.avatar.change') }}</span>
+                        </a>
                     </div>
 
-                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="p-3 rounded-club bg-slate-50 border border-slate-200">
-                            <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.dashboard.profile.payment_vs') }}</div>
-                            <div class="font-bold text-secondary">{{ $user->payment_vs ?: '-' }}</div>
+                    <!-- Status Badge -->
+                    <div class="absolute -bottom-2 right-1/2 translate-x-1/2 lg:right-0 lg:translate-x-1/4 px-3 sm:px-4 py-1.5 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-secondary">{{ __('member.profile.player_card.active_member') }}</span>
+                    </div>
+                </div>
+
+                <!-- Info Section -->
+                <div class="flex-1 space-y-6 text-center lg:text-left">
+                    <div class="space-y-2">
+                        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                            @foreach($user->roles->pluck('name') as $role)
+                                <span class="px-3 py-1 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-sm">{{ $role }}</span>
+                            @endforeach
+                            <span class="text-[10px] font-bold text-slate-400 italic">{{ __('member.dashboard.profile.member_id') }}: <span class="text-secondary">{{ $user->club_member_id ?: '-' }}</span></span>
                         </div>
-                        <div class="p-3 rounded-club bg-slate-50 border border-slate-200">
-                            <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.dashboard.profile.member_id') }}</div>
-                            <div class="font-bold text-secondary">{{ $user->club_member_id ?: '-' }}</div>
-                        </div>
-                        <div class="p-3 rounded-club bg-slate-50 border border-slate-200">
-                            <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.dashboard.profile.teams') }}</div>
-                            <div class="font-bold text-secondary">
-                                @if($myTeams->count() > 0)
-                                    {{ $myTeams->pluck('name')->implode(', ') }}
-                                @else
-                                    <span class="text-slate-400">{{ __('member.dashboard.profile.no_teams') }}</span>
-                                @endif
-                            </div>
+                        <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-secondary leading-tight tracking-tight">
+                            {{ $user->display_name ?? $user->name }}
+                        </h2>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+                        <a href="{{ route('member.attendance.index') }}" class="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-primary text-white text-[11px] font-black uppercase tracking-widest hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all w-full xs:w-auto">
+                            <i class="fa-light fa-calendar-star"></i>
+                            {{ __('member.dashboard.actions.my_program') }}
+                        </a>
+                        <a href="{{ route('member.economy.index') }}" class="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-white border border-slate-200 text-secondary text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 hover:-translate-y-0.5 transition-all shadow-sm w-full xs:w-auto">
+                            <i class="fa-light fa-credit-card"></i>
+                            {{ __('member.dashboard.actions.payments') }}
+                        </a>
+                        <div class="h-11 w-px bg-slate-100 mx-1 hidden md:block"></div>
+                        <a href="{{ route('member.profile.edit') }}" class="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-slate-100 text-slate-600 text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all w-full xs:w-auto">
+                            <i class="fa-light fa-user-gear"></i>
+                            {{ __('member.dashboard.actions.edit_profile') }}
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Secondary Stats -->
+                <div class="lg:w-64 space-y-4 pt-6 lg:pt-0 lg:border-l lg:border-slate-100 lg:pl-10 grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-0">
+                    <div class="group/stat">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1 block">{{ __('member.dashboard.profile.payment_vs') }}</span>
+                        <span class="text-xl font-black text-secondary group-hover/stat:text-primary transition-colors">{{ $user->payment_vs ?: '-' }}</span>
+                    </div>
+                    <div class="group/stat">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1 block">{{ __('member.dashboard.profile.teams') }}</span>
+                        <div class="flex flex-wrap gap-1.5 justify-center lg:justify-start">
+                            @if($myTeams->count() > 0)
+                                @foreach($myTeams as $team)
+                                    <span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold text-slate-600 border border-slate-200/50">{{ $team->name }}</span>
+                                @endforeach
+                            @else
+                                <span class="text-xs font-bold text-slate-400 italic">{{ __('member.dashboard.profile.no_teams') }}</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -68,21 +91,21 @@
             <x-member.kpi-card
                 :title="__('dashboard.kpi.pending')"
                 :value="$pendingCount"
-                icon="heroicon-o-exclamation-triangle"
+                icon="calendar-exclamation"
                 color="primary"
                 :route="route('member.attendance.index')"
             />
             <x-member.kpi-card
                 :title="__('dashboard.kpi.my_teams')"
                 :value="$myTeams->count()"
-                icon="heroicon-o-users"
+                icon="user-group"
                 color="secondary"
                 :route="route('member.teams.index')"
             />
             <x-member.kpi-card
                 :title="__('dashboard.kpi.my_payments')"
                 :value="number_format($economySummary['total_to_pay'] ?? 0, 0, ',', ' ') . ' Kč'"
-                icon="heroicon-o-credit-card"
+                icon="wallet"
                 color="info"
                 :route="route('member.economy.index')"
             />
@@ -151,18 +174,26 @@
                     </div>
                     <a href="{{ route('member.economy.index') }}" class="btn btn-outline w-full py-2 text-xs">{{ __('member.dashboard.economy.cta') }}</a>
 
-                    <div class="rounded-club bg-slate-50 border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                        <div class="text-xs text-slate-600 flex-1">
-                            <span class="font-bold text-secondary"><i class="fa-light fa-whistle mr-1.5"></i> {{ __('member.feedback.contact_coach_title') }}</span>
-                            <span class="ml-1">{{ __('member.feedback.hints.economy') }}</span>
+                    <div class="bg-gradient-to-br from-white to-slate-50/50 rounded-[2.5rem] border border-slate-200/60 p-6 shadow-sm relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                            <i class="fa-light fa-whistle text-6xl text-secondary"></i>
                         </div>
-                        <div class="flex gap-2 w-full sm:w-auto">
-                            <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline text-xs w-full sm:w-auto">
-                                {{ __('member.feedback.contact_coach_title') }}
-                            </a>
-                            <a href="{{ route('member.contact.admin.form') }}" class="btn btn-ghost text-xs w-full sm:w-auto">
-                                {{ __('member.feedback.contact_admin_title') }}
-                            </a>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-6 relative z-10">
+                            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm shadow-primary/5 group-hover:scale-110 transition-transform">
+                                <i class="fa-light fa-whistle text-xl"></i>
+                            </div>
+                            <div class="space-y-1 flex-1">
+                                <h4 class="text-sm font-black uppercase tracking-tight text-secondary leading-none">{{ __('member.feedback.contact_coach_title') }}</h4>
+                                <p class="text-[11px] text-slate-500 font-medium leading-relaxed italic opacity-80 mt-1.5">{{ __('member.feedback.hints.economy') }}</p>
+                            </div>
+                            <div class="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
+                                <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline py-2.5 px-5 text-[10px] w-full sm:w-auto bg-white hover:border-primary/30 hover:text-primary transition-all">
+                                    {{ __('member.feedback.contact_coach_title') }}
+                                </a>
+                                <a href="{{ route('member.contact.admin.form') }}" class="btn py-2.5 px-5 text-[10px] w-full sm:w-auto bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border-none shadow-none">
+                                    {{ __('member.feedback.contact_admin_title') }}
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </section>

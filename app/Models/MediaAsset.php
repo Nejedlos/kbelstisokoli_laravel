@@ -59,8 +59,10 @@ class MediaAsset extends Model implements HasMedia
      */
     public function registerMediaCollections(): void
     {
+        $publicDisk = config('media-library.disk_name', 'public_path');
+
         $this->addMediaCollection('default')
-            ->useDisk($this->access_level === 'public' ? 'media_public' : 'media_private')
+            ->useDisk($this->access_level === 'public' ? $publicDisk : 'media_private')
             ->singleFile();
     }
 

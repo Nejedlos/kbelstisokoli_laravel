@@ -9,6 +9,7 @@ use App\Enums\MembershipType;
 use App\Enums\PaymentMethod;
 use App\Traits\Auditable;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,7 +25,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser, HasMedia
+class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles, InteractsWithMedia, Auditable;
@@ -262,16 +263,30 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     }
 
     /**
+     * Get the URL to the user's avatar.
+     */
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('avatar', 'thumb') ?: $this->getFirstMediaUrl('avatar');
+    }
+
+    /**
      * Registrace media kolekcí.
      */
     public function registerMediaCollections(): void
     {
+        $disk = config('media-library.disk_name', 'public_path');
+
         $this->addMediaCollection('avatar')
-            ->useDisk('media_public')
-            ->singleFile();
+            ->useDisk($disk)
+            ->singleFile()
+            ->useFallbackUrl(asset('images/default-avatar.webp'))
+            ->useFallbackUrl(asset('images/default-avatar-thumb.webp'), 'thumb')
+            ->useFallbackPath(public_path('images/default-avatar.webp'))
+            ->useFallbackPath(public_path('images/default-avatar-thumb.webp'), 'thumb');
 
         $this->addMediaCollection('player_photos')
-            ->useDisk('media_public');
+            ->useDisk($disk);
     }
 
     /**

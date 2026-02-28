@@ -13,30 +13,30 @@
         </a>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <!-- Main Column: Details & RSVP Form -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Event Card (Detail) -->
             <div class="card overflow-hidden">
-                <div class="p-6 md:p-8 space-y-6">
+                <div class="p-6 sm:p-8 space-y-6">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-secondary border border-slate-100 shadow-inner">
-                                <span class="text-xs font-black uppercase tracking-tighter">{{ $time->translatedFormat('M') }}</span>
-                                <span class="text-2xl font-black">{{ $time->format('d') }}</span>
+                        <div class="flex items-center gap-4 sm:gap-5">
+                            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-secondary border border-slate-100 shadow-inner shrink-0">
+                                <span class="text-[10px] sm:text-xs font-black uppercase tracking-tighter text-slate-400 mb-0.5">{{ $time->translatedFormat('M') }}</span>
+                                <span class="text-xl sm:text-2xl font-black leading-none">{{ $time->format('d') }}</span>
                             </div>
-                            <div>
-                                <h2 class="text-2xl font-black text-secondary leading-tight">
+                            <div class="min-w-0">
+                                <h2 class="text-xl sm:text-2xl font-black text-secondary leading-tight tracking-tight">
                                     @if($type === 'match')
-                                        {{ $item->team?->name }} vs {{ $item->opponent?->name }}
+                                        {{ $item->team?->name }} <span class="text-primary italic mx-1">vs</span> {{ $item->opponent?->name }}
                                     @elseif($type === 'training')
                                         {{ __('member.attendance.event_types.training') }}
                                     @else
                                         {{ $item->getTranslation('title', app()->getLocale()) }}
                                     @endif
                                 </h2>
-                                <div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2 text-sm text-slate-500 font-medium">
-                                    <div class="flex items-center gap-1.5">
+                                <div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2 text-[11px] sm:text-sm text-slate-500 font-bold italic opacity-80">
+                                    <div class="flex items-center gap-1.5 whitespace-nowrap">
                                         <i class="fa-light fa-clock text-primary"></i>
                                         {{ $time->format('H:i') }}
                                         @if(isset($item->ends_at))
@@ -44,13 +44,13 @@
                                         @endif
                                     </div>
                                     @if($item->location)
-                                        <div class="flex items-center gap-1.5">
+                                        <div class="flex items-center gap-1.5 truncate">
                                             <i class="fa-light fa-map-pin text-primary"></i>
                                             {{ $item->location }}
                                         </div>
                                     @endif
                                     @if($type === 'training')
-                                        <div class="flex items-center gap-1.5">
+                                        <div class="flex items-center gap-1.5 truncate">
                                             <i class="fa-light fa-users-viewfinder text-primary"></i>
                                             {{ $item->teams->pluck('name')->join(', ') }}
                                         </div>
@@ -69,15 +69,15 @@
                                 'maybe' => 'bg-warning-100 text-warning-700',
                             ];
                         @endphp
-                        <div class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ $statusColors[$myStatus] }} border border-current opacity-80">
+                        <div class="px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest {{ $statusColors[$myStatus] }} border border-current opacity-80 self-start md:self-center text-center">
                             {{ __('member.attendance.status.' . $myStatus) }}
                         </div>
                     </div>
 
                     @if($item->notes || $item->notes_public || $item->description)
-                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 text-slate-600 text-sm leading-relaxed">
-                            <div class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-2 flex items-center gap-1.5">
-                                <i class="fa-light fa-align-left"></i>
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 text-slate-600 text-[13px] sm:text-sm leading-relaxed font-medium">
+                            <div class="font-black uppercase tracking-widest text-[9px] sm:text-[10px] text-slate-400 mb-2.5 flex items-center gap-1.5">
+                                <i class="fa-light fa-align-left text-primary"></i>
                                 {{ __('member.attendance.notes_label') ?? 'Poznámky k události' }}
                             </div>
                             {!! nl2br(e($item->notes ?? ($item->notes_public ?? ($item->description ?? '')))) !!}
@@ -86,36 +86,36 @@
                 </div>
 
                 <!-- RSVP Form -->
-                <div class="p-6 md:p-8 bg-slate-50/50 border-t border-slate-100">
-                    <h3 class="text-sm font-black uppercase tracking-tight text-secondary mb-4 flex items-center gap-2">
+                <div class="p-6 sm:p-8 bg-slate-50/50 border-t border-slate-100">
+                    <h3 class="text-xs sm:text-sm font-black uppercase tracking-tight text-secondary mb-5 flex items-center gap-2">
                         <i class="fa-light fa-pen-to-square text-primary"></i>
                         {{ __('member.attendance.update_status_title') ?? 'Upravit moji účast' }}
                     </h3>
 
-                    <form action="{{ route('member.attendance.store', ['type' => $type, 'id' => $item->id]) }}" method="POST" class="space-y-4" x-data="{ status: '{{ $myStatus }}' }">
+                    <form action="{{ route('member.attendance.store', ['type' => $type, 'id' => $item->id]) }}" method="POST" class="space-y-6" x-data="{ status: '{{ $myStatus }}' }">
                         @csrf
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 xs:grid-cols-3 gap-3">
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="confirmed" class="peer sr-only" x-model="status" {{ $myStatus === 'confirmed' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-success-200 peer-checked:border-success-500 peer-checked:bg-success-50">
-                                    <i class="fa-light fa-check-circle text-2xl text-slate-300 mb-1 block peer-checked:text-success-600"></i>
-                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-success-700">{{ __('member.attendance.status.confirmed') }}</span>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-success-200 peer-checked:border-success-500 peer-checked:bg-success-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-check-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-success-600"></i>
+                                    <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-success-700 leading-none">{{ __('member.attendance.status.confirmed') }}</span>
                                 </div>
                             </label>
 
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="declined" class="peer sr-only" x-model="status" {{ $myStatus === 'declined' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-danger-200 peer-checked:border-danger-500 peer-checked:bg-danger-50">
-                                    <i class="fa-light fa-times-circle text-2xl text-slate-300 mb-1 block peer-checked:text-danger-600"></i>
-                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-danger-700">{{ __('member.attendance.status.declined') }}</span>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-danger-200 peer-checked:border-danger-500 peer-checked:bg-danger-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-times-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-danger-600"></i>
+                                    <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-danger-700 leading-none">{{ __('member.attendance.status.declined') }}</span>
                                 </div>
                             </label>
 
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="maybe" class="peer sr-only" x-model="status" {{ $myStatus === 'maybe' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-warning-200 peer-checked:border-warning-500 peer-checked:bg-warning-50">
-                                    <i class="fa-light fa-question-circle text-2xl text-slate-300 mb-1 block peer-checked:text-warning-600"></i>
-                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-warning-700">{{ __('member.attendance.status.maybe') }}</span>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-warning-200 peer-checked:border-warning-500 peer-checked:bg-warning-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-question-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-warning-600"></i>
+                                    <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-warning-700 leading-none">{{ __('member.attendance.status.maybe') }}</span>
                                 </div>
                             </label>
                         </div>

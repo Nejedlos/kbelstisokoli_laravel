@@ -22,6 +22,7 @@ class RoleSeeder extends Seeder
             'manage_users',
             'manage_content',
             'manage_teams',
+            'manage_rosters',
             'manage_attendance',
             'view_member_section',
             'use_raw_html',
@@ -30,6 +31,10 @@ class RoleSeeder extends Seeder
             'manage_competitions',
             'manage_redirects',
             'manage_ai_settings',
+            'manage_economy',
+            'manage_matches',
+            'manage_events',
+            'impersonate_users',
         ];
 
         foreach ($permissions as $permission) {
@@ -42,21 +47,33 @@ class RoleSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $adminRole->syncPermissions(Permission::all());
 
-        // Editor - správa obsahu a základní admin přístup (bez přístupu do členské sekce)
+        // Coach - správa týmů, docházky, zápasů, akcí, ekonomiky atd. (vše kromě admin nástrojů)
+        $coachRole = Role::firstOrCreate(['name' => 'coach']);
+        $coachRole->syncPermissions([
+            'access_admin',
+            'manage_content',
+            'manage_teams',
+            'manage_rosters',
+            'manage_attendance',
+            'manage_stats',
+            'manage_competitions',
+            'manage_economy',
+            'manage_matches',
+            'manage_events',
+            'view_member_section',
+        ]);
+
+        // Editor - jako coach, ale nemůže měnit soupisky (manage_rosters) a týmy (manage_teams)
         $editorRole = Role::firstOrCreate(['name' => 'editor']);
         $editorRole->syncPermissions([
             'access_admin',
             'manage_content',
-        ]);
-
-        // Coach - správa týmů a docházky
-        $coachRole = Role::firstOrCreate(['name' => 'coach']);
-        $coachRole->syncPermissions([
-            'access_admin',
-            'manage_teams',
             'manage_attendance',
             'manage_stats',
             'manage_competitions',
+            'manage_economy',
+            'manage_matches',
+            'manage_events',
             'view_member_section',
         ]);
 

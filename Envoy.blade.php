@@ -16,6 +16,7 @@
     $db_prefix_b64 = base64_encode($db_prefix ?? '');
     $public_path_b64 = base64_encode($public_path ?? '');
     $freshseed = $freshseed ?? false;
+    $usersync = $usersync ?? false;
 @endsetup
 
 @task('setup', ['on' => 'web'])
@@ -234,6 +235,11 @@
 
     echo "Running database seeding..."
     {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
+
+    if [ "{{ $usersync }}" = "1" ]; then
+        echo "Syncing users (avatars)..."
+        {{ $php }} artisan avatars:sync --force
+    fi
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
@@ -572,6 +578,11 @@
 
     echo "Running database seeding..."
     {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
+
+    if [ "{{ $usersync }}" = "1" ]; then
+        echo "Syncing users (avatars)..."
+        {{ $php }} artisan avatars:sync --force
+    fi
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync

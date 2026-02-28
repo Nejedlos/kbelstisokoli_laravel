@@ -76,6 +76,8 @@ return [
         'coach_note' => 'Coach Note',
         'joined_team_at' => 'Joined Team At',
         'primary_team' => 'Primary Team',
+        'full_name' => 'Full Name',
+        'avatar' => 'Avatar / Photo',
     ],
     'helpers' => [
         'phone_9_digits' => 'Enter 9 digits without the prefix (e.g., 777666555).',

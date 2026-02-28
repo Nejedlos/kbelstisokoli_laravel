@@ -47,6 +47,22 @@ class UserSeeder extends Seeder
             $editor->assignRole('editor');
         }
 
+        // Testovací coach
+        $coach = User::updateOrCreate(
+            ['email' => 'coach@basketkbely.cz'],
+            [
+                'name' => 'Coach Sokoli',
+                'password' => Hash::make('coach123'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'membership_status' => MembershipStatus::Active,
+            ]
+        );
+
+        if (!$coach->hasRole('coach')) {
+            $coach->assignRole('coach');
+        }
+
         // Michal Nejedlý – požadovaný admin účet (lokál + produkce)
         $mn = User::updateOrCreate(
             ['email' => 'nejedlymi@gmail.com'],

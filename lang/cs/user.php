@@ -77,6 +77,7 @@ return [
         'joined_team_at' => 'V týmu od',
         'primary_team' => 'Primární tým',
         'full_name' => 'Celé jméno',
+        'avatar' => 'Avatar / Fotografie',
     ],
     'helpers' => [
         'phone_9_digits' => 'Zadejte 9 číslic bez předvolby (např. 777666555).',

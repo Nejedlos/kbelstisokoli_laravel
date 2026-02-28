@@ -33,6 +33,7 @@ class UsersTable
             ->striped()
             ->columns([
                 SpatieMediaLibraryImageColumn::make('avatar')
+                    ->label(__('user.fields.avatar'))
                     ->collection('avatar')
                     ->circular()
                     ->toggleable(),
@@ -137,6 +138,13 @@ class UsersTable
                                 ->send();
                         })
                         ->visible(fn ($record) => $record->is_active && !$record->onboarding_completed_at),
+                    Action::make('impersonate')
+                        ->label(__('permissions.impersonate_users'))
+                        ->icon('fa-light fa-user-secret')
+                        ->color('warning')
+                        ->requiresConfirmation(fn ($record) => __('permissions.impersonate_confirm') . $record->name . '?')
+                        ->url(fn ($record) => route('admin.impersonate.start', ['userId' => $record->id]))
+                        ->visible(fn ($record) => auth()->user()->can('impersonate_users') && auth()->user()->id !== $record->id),
                     EditAction::make(),
                 ]),
             ])

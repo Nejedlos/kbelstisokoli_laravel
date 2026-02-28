@@ -9,8 +9,11 @@
 :root {
     /* Fallbacky pro build a statickou analýzu */
     --color-brand-navy: #0b1f3a;
+    --color-brand-navy-rgb: 11, 31, 58;
     --color-brand-blue: #2563eb;
+    --color-brand-blue-rgb: 37, 99, 235;
     --color-brand-red: #e11d48;
+    --color-brand-red-rgb: 225, 29, 72;
     --color-brand-red-hover: #be123c;
     --color-brand-white: #ffffff;
     --color-ui-bg: #f8fafc;
@@ -22,38 +25,38 @@
 }
 
 @theme {
+    /* Breakpoints */
+    --breakpoint-xs: 480px;
+
     /* Design Tokens - Hypermoderní Sportovní Styl */
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-display: 'Oswald', 'Inter', sans-serif;
+    --font-sans: 'Instrument Sans', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif;
 
     /* Barvy navázané na Branding Tokens */
-    --color-primary: var(--color-brand-red);
+    --color-primary: #e11d48;
     --color-primary-hover: #be123c;
-    --color-secondary: var(--color-brand-navy);
-    --color-accent: var(--color-brand-navy);
+    --color-primary-light: #fb7185;
+    --color-secondary: #0b1f3a;
+    --color-secondary-light: #1e293b;
+    --color-accent: #0f172a;
     --color-dark: #020617;
-    --color-light: var(--color-brand-white);
+    --color-light: #ffffff;
 
-    /* UI barvy z Branding Tokens */
-    --color-bg: var(--color-ui-bg);
-    --color-surface: var(--color-ui-surface);
-    --color-surface-alt: var(--color-ui-surface-alt);
-    --color-border: var(--color-ui-border);
-    --color-text: var(--color-ui-text);
-    --color-text-muted: var(--color-ui-text-muted);
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-danger: #ef4444;
-    --color-info: #3b82f6;
+    /* UI barvy */
+    --color-bg: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f1f5f9;
+    --color-border: #e2e8f0;
+    --color-text: #0f172a;
+    --color-text-muted: #64748b;
 
     /* Rozměry a tvary */
-    --radius-club: 0.5rem;
-    --spacing-club: 1.25rem;
+    --radius-club: 1rem;
+    --spacing-club: 1.5rem;
 
     /* Stíny */
-    --shadow-club: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-glow-red: 0 0 25px -5px rgba(225, 29, 72, 0.4);
+    --shadow-club: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    --shadow-glow-red: 0 20px 25px -5px rgba(225, 29, 72, 0.1), 0 10px 10px -5px rgba(225, 29, 72, 0.04);
 
     /* Vzory */
     --pattern-mesh: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23ffffff' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
@@ -86,15 +89,11 @@
     }
 
     body {
-        @apply bg-bg text-text antialiased font-sans leading-relaxed;
+        @apply bg-bg text-text antialiased font-sans leading-relaxed tracking-tight;
     }
 
-    h1, h2 {
-        @apply font-display font-black uppercase tracking-wide leading-[1.2] md:leading-[1.15];
-    }
-
-    h3, h4, h5, h6 {
-        @apply font-display font-bold uppercase tracking-wide leading-snug;
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-display font-black tracking-tight leading-tight;
     }
 }
 
@@ -105,7 +104,15 @@
 
     /* Tlačítka */
     .btn {
-        @apply inline-flex items-center justify-center px-6 py-3 rounded-club font-bold uppercase tracking-widest transition duration-200 cursor-pointer text-sm md:text-base border-2 border-transparent outline-none;
+        @apply inline-flex items-center justify-center px-6 py-3 rounded-2xl font-black uppercase tracking-widest transition-all duration-300 cursor-pointer text-[11px] md:text-[12px] border-2 border-transparent outline-none shadow-sm;
+    }
+
+    .btn:hover {
+        @apply -translate-y-0.5 shadow-md;
+    }
+
+    .btn:active {
+        @apply translate-y-0 shadow-sm scale-[0.98];
     }
 
     .btn:focus-visible {
@@ -121,15 +128,15 @@
     }
 
     .btn-primary {
-        @apply bg-primary text-white border-primary hover:bg-primary-hover hover:border-primary-hover shadow-md hover:shadow-lg;
+        @apply bg-primary text-white border-primary hover:bg-primary-hover hover:border-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30;
     }
 
     .btn-secondary {
-        @apply bg-secondary text-white border-secondary hover:bg-dark hover:border-dark shadow-md hover:shadow-lg;
+        @apply bg-secondary text-white border-secondary hover:bg-slate-900 hover:border-slate-900 shadow-lg shadow-secondary/20 hover:shadow-secondary/30;
     }
 
     .btn-outline {
-        @apply border-primary text-primary hover:bg-primary hover:text-white;
+        @apply border-slate-200 text-slate-600 bg-white hover:border-primary/30 hover:text-primary hover:shadow-primary/5 hover:bg-slate-50;
     }
 
     .btn-outline-primary {
@@ -146,16 +153,20 @@
 
     /* Karty */
     .card {
-        @apply bg-white rounded-club shadow-club overflow-hidden border border-slate-100;
+        @apply bg-white rounded-[2.5rem] shadow-club overflow-hidden border border-slate-200/60;
     }
 
     .card-hover {
-        @apply transition duration-300 hover:shadow-lg hover:-translate-y-1;
+        @apply transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1;
     }
 
-    /* Sekce */
-    .section-padding {
-        @apply py-12 md:py-20;
+    /* Vstupy */
+    .form-input {
+        @apply w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary/30 transition-all font-bold text-secondary outline-none placeholder:text-slate-400 placeholder:font-medium;
+    }
+
+    .form-label {
+        @apply block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2;
     }
 
     .section-title {
@@ -169,6 +180,10 @@
 
     .section-title-center::after {
         @apply left-1/2 -translate-x-1/2;
+    }
+
+    .section-padding {
+        @apply py-16 md:py-24 lg:py-32;
     }
 
     /* Hero vylepšení */

@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <title>{{ $title ?? __('nav.member_section') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;700&family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 
     <style>{!! $branding_css !!}</style>
     <style>
@@ -24,73 +25,78 @@
         }
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-7iy7fS9870G/9p++Sdf3X56A1lJozX4Lly/6yM3eR92Rpj0yW/S63eBaoOa52pW5Yh1I+O0F0L2M1yW8v8H/2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9AORv1YPI6/R2D2K4zE6yOq0K/2fW8yW2Z6O/A1A9A+7S9k5m8F8v9A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     @stack('head')
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white" x-data="{ sidebarOpen: false }">
+<body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50" x-data="{ sidebarOpen: false }">
+    <x-impersonation-banner />
     <x-announcement-bar :announcements="$announcements ?? []" />
 
     <!-- Top Bar -->
-    <header class="member-topbar sticky top-0 z-30 shadow-md">
-        <div class="container-fluid px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-4">
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm h-18">
+        <div class="container-fluid px-4 sm:px-6 md:px-8 h-full flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                 <!-- Mobile Menu Trigger -->
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                    <i class="fa-light fa-bars text-xl"></i>
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center">
+                    <i class="fa-light fa-bars-staggered text-xl"></i>
                 </button>
 
                 <!-- Logo -->
-                <a href="{{ route('member.dashboard') }}" class="flex items-center gap-3 group">
+                <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2 sm:gap-3 group">
                     @if($branding['logo_path'] ?? null)
-                        <div class="w-10 h-10 bg-white/10 rounded-club flex items-center justify-center p-1.5 transition-transform group-hover:scale-105">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 bg-slate-50 rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 transition-all group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/5 group-hover:bg-white border border-slate-100">
                             <img src="{{ web_asset($branding['logo_path']) }}" class="max-w-full max-h-full object-contain" alt="">
                         </div>
-                        <div class="flex flex-col leading-tight hidden sm:flex">
-                            <span class="text-sm font-black uppercase tracking-tight">{{ $branding['club_short_name'] ?? 'Sokoli' }}</span>
-                            <span class="text-[10px] uppercase tracking-widest text-primary font-bold">{{ __('nav.member_zone') }}</span>
+                        <div class="flex flex-col leading-tight hidden xs:flex sm:flex">
+                            <span class="text-[12px] sm:text-sm font-black uppercase tracking-tight text-secondary group-hover:text-primary transition-colors">{{ $branding['club_short_name'] ?? 'Sokoli' }}</span>
+                            <span class="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-slate-400 font-bold group-hover:text-slate-600 transition-colors">{{ __('nav.member_zone') }}</span>
                         </div>
                     @endif
                 </a>
             </div>
 
             <!-- Search & User Menu -->
-            <div class="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
-                <!-- Language Switcher -->
-                <div class="flex items-center gap-1 bg-white/10 p-1 rounded-lg text-[10px] font-black tracking-widest shadow-sm border border-white/10">
+            <div class="flex items-center gap-2 sm:gap-4 md:gap-5 flex-1 justify-end">
+                <!-- Language Switcher (Desktop) -->
+                <div class="hidden sm:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl text-[10px] font-black tracking-widest border border-slate-200/50">
                     <a href="{{ route('language.switch', ['lang' => 'cs']) }}"
-                       class="px-2.5 py-1 rounded-md transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-accent text-white shadow-sm' : 'text-white/50 hover:text-white hover:bg-white/10' }}">
+                       class="px-2.5 py-1.5 rounded-lg transition-all cursor-pointer {{ app()->getLocale() === 'cs' ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600' }}">
                         CZ
                     </a>
                     <a href="{{ route('language.switch', ['lang' => 'en']) }}"
-                       class="px-2.5 py-1 rounded-md transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-accent text-white shadow-sm' : 'text-white/50 hover:text-white hover:bg-white/10' }}">
+                       class="px-2.5 py-1.5 rounded-lg transition-all cursor-pointer {{ app()->getLocale() === 'en' ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600' }}">
                         EN
                     </a>
                 </div>
 
                 <!-- Standard Search (Desktop) -->
-                <div class="hidden md:block flex-1 max-w-[320px] relative group">
+                <div class="hidden lg:block flex-1 max-w-[240px] xl:max-w-[320px] relative group">
                     <form action="{{ route('member.search') }}" method="GET" class="relative">
-                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/40 group-focus-within:text-accent transition-colors">
-                            <i class="fa-light fa-magnifying-glass text-[13px]"></i>
+                        <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                            <i class="fa-light fa-magnifying-glass text-sm"></i>
                         </div>
                         <input type="text"
                                name="q"
                                placeholder="{{ __('Search') }}..."
-                               class="w-full bg-black/20 border border-white/10 rounded-lg pl-9 pr-4 py-1.5 text-[12px] text-white placeholder:text-white/60 focus:bg-black/30 focus:border-primary/50 focus:ring-0 outline-none transition-all shadow-inner">
+                               class="w-full bg-slate-100/50 border border-slate-200/60 rounded-xl pl-10 pr-4 py-2 text-[12px] text-secondary placeholder:text-slate-400 focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/5 outline-none transition-all">
                     </form>
                 </div>
 
-                <!-- AI Search (Desktop) -->
+                <!-- AI Search (Desktop/Tablet) -->
                 <div x-data="{ searchOpen: false, loading: false }" class="hidden md:block relative">
                     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
                     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-                            class="flex items-center gap-3 px-3 py-1.5 bg-black/20 border border-white/10 rounded-lg text-white hover:bg-black/30 hover:border-white/20 transition-all group text-left shadow-inner">
-                        <i class="fa-light fa-sparkles text-primary group-hover:scale-110 transition-transform text-[10px]"></i>
-                        <span class="text-[11px] truncate font-bold opacity-80 group-hover:opacity-100 transition-opacity">{{ __('search.ai_hint') }}</span>
-                        <span class="ml-auto text-[9px] font-black text-white/20 group-hover:text-primary transition-colors">AI</span>
+                            class="flex items-center gap-3 px-3 xl:px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-secondary transition-all group text-left shadow-lg shadow-slate-200 min-h-[40px]">
+                        <i class="fa-light fa-sparkles text-primary group-hover:scale-110 group-hover:rotate-12 transition-transform text-[11px]"></i>
+                        <span class="text-[11px] truncate font-black uppercase tracking-widest hidden xl:inline">{{ __('search.ai_hint') }}</span>
+                        <span class="text-[11px] font-black uppercase tracking-widest xl:hidden">AI Search</span>
+                        <div class="ml-auto flex items-center gap-1.5">
+                            <span class="w-px h-3 bg-white/20"></span>
+                            <span class="text-[9px] font-black opacity-40 group-hover:text-primary transition-colors">AI</span>
+                        </div>
                     </button>
 
                     <div x-show="searchOpen"
@@ -143,18 +149,13 @@
                     </div>
                 </div>
 
-                <!-- AI Search (Mobile Trigger) -->
-                <div x-data="{ searchOpen: false, loading: false }" class="md:hidden relative">
+                <!-- AI Search (Mobile/Tablet Trigger) -->
+                <div x-data="{ searchOpen: false, loading: false }" class="md:hidden flex items-center">
                     <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
-                    <div class="flex items-center gap-1">
-                        <!-- Standard Search Mobile -->
-                        <button @click="searchOpen = 'standard'; $nextTick(() => $refs.searchInputMobileStandard.focus())"
-                                class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none">
-                            <i class="fa-light fa-magnifying-glass text-xl"></i>
-                        </button>
+                    <div class="flex items-center">
                         <!-- AI Search Mobile -->
                         <button @click="searchOpen = 'ai'; $nextTick(() => $refs.searchInputMobileAi.focus())"
-                                class="p-2 text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none">
+                                class="p-2.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center">
                             <i class="fa-light fa-sparkles text-xl"></i>
                         </button>
                     </div>
@@ -201,27 +202,23 @@
                 </div>
 
                 <!-- Notifications -->
-                <a href="{{ route('member.notifications.index') }}" class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors mr-2">
+                <a href="{{ route('member.notifications.index') }}" class="relative p-2.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center">
                     <i class="fa-light fa-bell text-xl"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
-                        <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-accent text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-secondary animate-pulse">
+                        <span class="absolute top-2.5 right-2.5 w-4.5 h-4.5 bg-primary text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-pulse">
                             {{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}
                         </span>
                     @endif
                 </a>
 
-                <div class="hidden sm:flex flex-col text-right leading-none">
-                    <span class="text-sm font-bold">{{ auth()->user()->name }}</span>
-                    <span class="text-[10px] uppercase tracking-widest text-white/50">{{ auth()->user()->roles->pluck('name')->first() ?? __('nav.member') }}</span>
+                <div class="hidden md:flex flex-col text-right leading-none gap-0.5">
+                    <span class="text-sm font-black text-secondary tracking-tight">{{ auth()->user()->name }}</span>
+                    <span class="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">{{ auth()->user()->roles->pluck('name')->first() ?? __('nav.member') }}</span>
                 </div>
 
                 <div class="relative" x-data="{ userOpen: false }">
-                    <button @click="userOpen = !userOpen" id="top-bar-avatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-black border-2 border-white/10 hover:border-white/30 transition-all overflow-hidden">
-                        @if(auth()->user()->hasMedia('avatar'))
-                            <img src="{{ auth()->user()->getFirstMediaUrl('avatar', 'thumb') }}" class="w-full h-full object-cover rounded-full" alt="">
-                        @else
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        @endif
+                    <button @click="userOpen = !userOpen" id="top-bar-avatar" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-slate-100 flex items-center justify-center text-secondary font-black border border-slate-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all overflow-hidden group min-w-[40px] min-h-[40px]">
+                        <img src="{{ auth()->user()->getFirstMediaUrl('avatar', 'thumb') }}" class="w-full h-full object-cover transition-transform group-hover:scale-110" alt="">
                     </button>
 
                     <div x-show="userOpen" @click.away="userOpen = false"
@@ -249,37 +246,54 @@
 
     <div class="flex-1 flex overflow-hidden">
         <!-- Sidebar Navigation (Desktop) -->
-        <aside class="hidden lg:flex w-64 flex-col bg-white border-r border-slate-200 shadow-sm">
-            <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+        <aside class="hidden lg:flex w-72 flex-col bg-white border-r border-slate-200/60 relative z-20">
+            <nav class="flex-1 overflow-y-auto p-6 space-y-1.5 custom-scrollbar">
                 @foreach (config('navigation.member.main', []) as $item)
                     <a href="{{ route($item['route']) }}"
-                       class="flex items-center gap-3 px-4 py-3 rounded-club text-sm font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-50 hover:text-secondary' }}">
-                        @if($item['icon'] ?? null)
-                            <x-dynamic-component :component="$item['icon']" class="w-5 h-5 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
+                       class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-secondary' }}">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm group-hover:text-primary' }}">
+                            @if($item['icon'] ?? null)
+                                <x-dynamic-component :component="$item['icon']" class="w-4 h-4" />
+                            @endif
+                        </div>
+                        <span class="uppercase tracking-widest text-[11px]">{{ __($item['title']) }}</span>
+                        @if(request()->routeIs($item['route']))
+                            <i class="fa-light fa-chevron-right ml-auto text-[10px] opacity-50"></i>
                         @endif
-                        {{ __($item['title']) }}
                     </a>
                 @endforeach
 
                 @if(auth()->user()->can('manage_teams') && !empty(config('navigation.member.coach')))
-                    <div class="mt-8 mb-2 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{{ __('nav.for_coaches') }}</div>
+                    <div class="pt-8 pb-3 px-4 flex items-center gap-3">
+                        <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 whitespace-nowrap">{{ __('nav.for_coaches') }}</span>
+                        <div class="h-px bg-slate-100 flex-1"></div>
+                    </div>
                     @foreach (config('navigation.member.coach', []) as $item)
                         <a href="{{ route($item['route']) }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-club text-sm font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-md' : 'text-slate-600 hover:bg-slate-50 hover:text-secondary' }}">
-                            @if($item['icon'] ?? null)
-                                <x-dynamic-component :component="$item['icon']" class="w-5 h-5 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
-                            @endif
-                            {{ __($item['title']) }}
+                           class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-xl shadow-secondary/20 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-secondary' }}">
+                            <div class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/10' : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm group-hover:text-primary' }}">
+                                @if($item['icon'] ?? null)
+                                    <x-dynamic-component :component="$item['icon']" class="w-4 h-4" />
+                                @endif
+                            </div>
+                            <span class="uppercase tracking-widest text-[11px]">{{ __($item['title']) }}</span>
                         </a>
                     @endforeach
                 @endif
             </nav>
 
             <!-- Bottom Action / Help -->
-            <div class="p-4 border-t border-slate-100">
-                <a href="{{ route('public.contact.index') }}" class="block p-4 rounded-club bg-slate-50 text-xs text-slate-500 hover:bg-slate-100 transition-colors">
-                    <span class="font-bold text-slate-700 block mb-1">{{ __('nav.need_help') }}</span>
-                    {{ __('nav.help_text') }}
+            <div class="p-6 border-t border-slate-100 bg-slate-50/30">
+                <a href="{{ route('public.contact.index') }}" class="group block p-5 rounded-2xl bg-white border border-slate-200/60 shadow-sm hover:shadow-md hover:border-primary/20 transition-all">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fa-light fa-headset text-sm"></i>
+                        </div>
+                        <span class="font-black text-secondary text-[11px] uppercase tracking-wider">{{ __('nav.need_help') }}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 leading-relaxed font-medium">
+                        {{ __('nav.help_text') }}
+                    </p>
                 </a>
             </div>
         </aside>
@@ -339,27 +353,34 @@
         </div>
 
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto overflow-x-hidden">
+        <main class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50/50">
             <!-- Breadcrumbs / Page Header -->
-            <div class="bg-white border-b border-slate-200 py-4 px-4 sm:px-8">
-                <div class="max-w-6xl mx-auto flex items-center justify-between">
-                    <div>
-                        <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight text-secondary">
+            <div class="bg-white/40 backdrop-blur-sm border-b border-slate-200/60 py-6 px-4 sm:px-6 md:px-10">
+                <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
+                            <a href="{{ route('member.dashboard') }}" class="hover:text-primary transition-colors">{{ __('nav.dashboard') }}</a>
+                            <i class="fa-light fa-chevron-right text-[8px]"></i>
+                            <span class="text-slate-300 italic">{{ $title ?? '' }}</span>
+                        </div>
+                        <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary leading-none">
                             {{ $title ?? __('nav.member_section') }}
                         </h1>
                         @if(isset($subtitle))
-                            <p class="text-xs md:text-sm text-slate-500 font-medium">{{ $subtitle }}</p>
+                            <p class="text-[11px] sm:text-[13px] md:text-sm text-slate-500 font-medium italic opacity-80 leading-relaxed">{{ $subtitle }}</p>
                         @endif
                     </div>
 
-                    <!-- Quick Action (Desktop) -->
-                    @yield('header_actions')
+                    <!-- Header Actions (Desktop) -->
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        @yield('header_actions')
+                    </div>
                 </div>
             </div>
 
             <!-- Page Content -->
-            <div class="py-8 px-4 sm:px-8">
-                <div class="max-w-6xl mx-auto">
+            <div class="py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-10">
+                <div class="max-w-7xl mx-auto">
                     @if (session('status'))
                         <div class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-2xl flex items-center gap-4 animate-fade-in">
                             <i class="fa-light fa-circle-check text-emerald-500 text-lg"></i>
@@ -381,27 +402,56 @@
     </div>
 
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="lg:hidden h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-30 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] relative">
-        <span class="absolute top-0 left-0 right-0 brand-stripe"></span>
-        <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.dashboard') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
+    <nav class="lg:hidden h-20 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 flex items-center justify-around px-2 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] relative">
+        <span class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-50"></span>
+        <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.dashboard') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
             <i class="fa-light fa-grid-2 text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.dashboard') }}</span>
+            <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ __('nav.dashboard') }}</span>
         </a>
-        <a href="{{ route('member.attendance.index') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.attendance.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
+        <a href="{{ route('member.attendance.index') }}" class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.attendance.*') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
             <i class="fa-light fa-calendar-star text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.program') }}</span>
+            <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ __('nav.program') }}</span>
         </a>
-        <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center gap-1.5 {{ request()->routeIs('member.profile.*') ? 'text-primary' : 'text-slate-400' }} transition-colors duration-300">
+        <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.profile.*') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
             <i class="fa-light fa-user-gear text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.profile') }}</span>
+            <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ __('nav.profile') }}</span>
         </a>
-        <button @click="sidebarOpen = true" class="flex flex-col items-center gap-1.5 text-slate-400 hover:text-primary transition-colors duration-300">
+        <button @click="sidebarOpen = true" class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-slate-400 hover:text-primary transition-all duration-300 min-w-[64px] min-h-[64px]">
             <i class="fa-light fa-circle-nodes text-xl"></i>
-            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('nav.more') }}</span>
+            <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ __('nav.more') }}</span>
         </button>
     </nav>
 
     <x-back-to-top />
+    <script>
+        window.addEventListener('avatarUpdated', (event) => {
+            const data = event.detail;
+            console.log('Avatar updated event received:', data);
+            const topAvatar = document.getElementById('top-bar-avatar');
+            const profileAvatar = document.getElementById('avatarPreview');
+            const deleteBtn = document.getElementById('avatar-delete-btn');
+
+            if (topAvatar) {
+                if (data.url) {
+                    topAvatar.innerHTML = `<img src='${data.url}' class='w-full h-full object-cover rounded-full'>`;
+                } else {
+                    topAvatar.innerHTML = `<div class='w-full h-full flex items-center justify-center bg-primary text-white font-black'>${data.initials}</div>`;
+                }
+            }
+
+            if (profileAvatar) {
+                profileAvatar.src = data.url || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+            }
+
+            if (deleteBtn) {
+                if (data.url) {
+                    deleteBtn.classList.remove('hidden');
+                } else {
+                    deleteBtn.classList.add('hidden');
+                }
+            }
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

@@ -11,18 +11,17 @@ use App\Enums\DominantHand;
 use App\Enums\JerseySize;
 use App\Services\ClubIdentifierService;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -61,17 +60,49 @@ class UserForm
                     'md' => 12,
                 ])
                 ->schema([
-                    SpatieMediaLibraryFileUpload::make('avatar')
-                        ->collection('avatar')
-                        ->disk(config('filesystems.uploads.disk'))
-                        ->avatar()
-                        ->alignLeft()
+                    Placeholder::make('avatar_placeholder')
                         ->hiddenLabel()
-                        ->imageEditor()
-                        ->getUploadedFileNameForStorageUsing(function ($file, $get) {
-                            $name = $get('last_name') ? \Illuminate\Support\Str::slug($get('last_name')) : 'avatar';
-                            return $name . '-' . time() . '.' . $file->getClientOriginalExtension();
-                        })
+                        ->content(fn ($record) => $record ? new HtmlString("
+                            <div class='flex flex-col items-center gap-4 py-2'
+                                 x-data='{
+                                     avatarUrl: \"" . ($record->getFirstMediaUrl('avatar', 'thumb') ?: asset('images/default-avatar-thumb.webp')) . "\",
+                                     init() {
+                                         window.addEventListener(\"avatarUpdated\", (event) => {
+                                             if (event.detail.userId == {$record->id}) {
+                                                 this.avatarUrl = event.detail.url || \"" . asset('images/default-avatar-thumb.webp') . "\";
+                                             }
+                                         });
+                                     }
+                                 }'>
+                                <div class='relative group cursor-pointer'
+                                     @click=\"\$dispatch('openAvatarModal', { userId: {$record->id} })\">
+                                    <!-- Outer Ring -->
+                                    <div class='absolute -inset-2 bg-gradient-to-tr from-primary-500 to-accent-500 rounded-full opacity-0 group-hover:opacity-20 blur-lg transition-opacity duration-500'></div>
+
+                                    <!-- Image Container -->
+                                    <div class='relative w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-lg bg-white dark:bg-gray-900 group-hover:scale-[1.05] transition-all duration-300'>
+                                        <img :src='avatarUrl'
+                                             alt='Avatar'
+                                             class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'>
+
+                                        <!-- Overlay -->
+                                        <div class='absolute inset-0 bg-gray-900/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white'>
+                                            <i class='fa-light fa-camera-retro text-lg mb-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300'></i>
+                                            <span class='text-[8px] font-black uppercase tracking-widest'>" . __('member.profile.avatar.change') . "</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Button (Floating) -->
+                                    <div class='absolute -bottom-1 -right-1 w-7 h-7 bg-primary-600 text-white rounded-lg border-2 border-white dark:border-gray-800 flex items-center justify-center shadow-md transform group-hover:rotate-12 transition-all'>
+                                        <i class='fa-light fa-pen-nib text-[10px]'></i>
+                                    </div>
+                                </div>
+                            </div>
+                        ") : new HtmlString("
+                            <div class='w-24 h-24 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400'>
+                                <i class='fa-light fa-user text-2xl'></i>
+                            </div>
+                        "))
                         ->columnSpan([
                             'default' => 1,
                             'md' => 2,
@@ -127,6 +158,43 @@ class UserForm
         return Tabs\Tab::make(__('user.tabs.overview'))
             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::VIEW))
             ->schema([
+                Placeholder::make('avatar_placeholder')
+                    ->label(__('user.fields.avatar'))
+                    ->content(fn ($record) => $record ? new HtmlString("
+                        <div class='flex items-center gap-6'
+                             x-data='{
+                                 avatarUrl: \"" . ($record->getFirstMediaUrl('avatar', 'thumb') ?: asset('images/default-avatar-thumb.webp')) . "\",
+                                 init() {
+                                     window.addEventListener(\"avatarUpdated\", (event) => {
+                                         if (event.detail.userId == {$record->id}) {
+                                             this.avatarUrl = event.detail.url || \"" . asset('images/default-avatar-thumb.webp') . "\";
+                                         }
+                                     });
+                                 }
+                             }'>
+                            <div class='relative group cursor-pointer shrink-0'
+                                 @click=\"\$dispatch('openAvatarModal', { userId: {$record->id} })\">
+                                <div class='relative w-20 h-20 rounded-xl overflow-hidden ring-2 ring-gray-100 dark:ring-gray-800 shadow-md'>
+                                    <img :src='avatarUrl' class='w-full h-full object-cover'>
+                                    <div class='absolute inset-0 bg-gray-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white'>
+                                        <i class='fa-light fa-pen-to-square'></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='space-y-1'>
+                                <button type='button'
+                                        @click=\"\$dispatch('openAvatarModal', { userId: {$record->id} })\"
+                                        class='text-xs font-bold text-primary-600 hover:text-primary-700 uppercase tracking-wider'>
+                                    " . __('member.profile.avatar.gallery_open') . "
+                                </button>
+                                <p class='text-[10px] text-gray-500 dark:text-gray-400 font-medium italic'>
+                                    " . __('member.profile.avatar.hint') . "
+                                </p>
+                            </div>
+                        </div>
+                    ") : '-')
+                    ->columnSpanFull(),
+
                 Section::make(__('user.sections.identity'))
                     ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IDENTITY))
                     ->description(__('user.sections.identity_desc'))

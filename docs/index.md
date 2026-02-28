@@ -22,6 +22,7 @@ Technické standardy, správa assetů a vizuálních prvků.
 8. [Lokalizované řádkování](./02-vyvoj-a-standardy/08-lokalizovane-radkovani.md)
 9. [Antispamová ochrana e-mailů](./02-vyvoj-a-standardy/09-antispamova-ochrana.md)
 10. [Error Pages a Empty States](./02-vyvoj-a-standardy/10-errors-a-empty-states.md)
+11. [Responzivita (Best Practices)](./02-vyvoj-a-standardy/11-responzivita.md)
 
 ### 03. [Administrace](./03-administrace)
 Vše o administrativním rozhraní postaveném na Filament PHP.
@@ -76,3 +77,7 @@ Návody pro nasazení na produkci a řešení provozních problémů.
 Uživatelské příručky a ostatní technické návody.
 1. [Renderování HTML](./08-manualy-a-ostatni/01-renderovani-html.md)
 2. [SEO Manuál](./08-manualy-a-ostatni/02-seo-manual.md)
+
+### [Změny v projektu](./changes)
+Historie významných změn a aktualizací.
+1. [Impersonace a Role (Únor 2026)](./changes/2026-02-impersonation-and-roles.md)

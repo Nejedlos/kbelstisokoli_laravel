@@ -62,4 +62,12 @@ class UserPolicy
     {
         return false;
     }
+
+    /**
+     * Determine whether the user can impersonate other users.
+     */
+    public function impersonate(User $user, User $model): bool
+    {
+        return $user->can('impersonate_users') && $user->id !== $model->id;
+    }
 }

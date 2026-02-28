@@ -45,6 +45,16 @@ Route::get('/auth/two-factor-setup', \App\Http\Controllers\Auth\TwoFactorSetupCo
 Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'])
     ->name('media.download');
 
+// Impersonifikace uživatelů (pro adminy)
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/admin/users/search-ajax', [\App\Http\Controllers\Admin\ImpersonateController::class, 'search'])
+        ->name('admin.impersonate.search');
+    Route::get('/admin/impersonate/{userId}', [\App\Http\Controllers\Admin\ImpersonateController::class, 'start'])
+        ->name('admin.impersonate.start');
+    Route::get('/admin/impersonate-stop', [\App\Http\Controllers\Admin\ImpersonateController::class, 'stop'])
+        ->name('admin.impersonate.stop');
+});
+
 
 
 // --- Override Fortify two-factor challenge routes to allow authenticated users ---
