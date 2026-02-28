@@ -26,6 +26,7 @@ class GlobalSeeder extends Seeder
         PostSeeder::class,
         CmsContentSeeder::class,
         GdprPageSeeder::class,
+        BrandingSeeder::class,
         SeoOptimizationSeeder::class,
     ];
 

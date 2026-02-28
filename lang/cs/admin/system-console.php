@@ -58,6 +58,14 @@ return [
         'finance_sync' => [
             'label' => 'Finance: Sync',
             'desc' => 'Synchronizuje platby a stavy účtů.',
+            'flags' => [
+                '--fresh' => 'Fresh (vymaže stará data + import)',
+                '--import' => 'Importovat (z legacy DB)',
+            ],
+        ],
+        'finance_cleanup' => [
+            'label' => 'Finance: Vyčistit',
+            'desc' => 'SMAŽE veškerá finanční data (předpisy, platby). Pouze pro reset.',
         ],
         'stats_import' => [
             'label' => 'Statistiky: Import',

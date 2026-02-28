@@ -26,7 +26,7 @@ class AiIndexService
     /**
      * Provede kompletní reindex zdrojů (Blade views, DB záznamy).
      */
-    public function reindex(string $locale = 'cs', bool $fresh = false, ?string $section = null, ?\Closure $onProgress = null): int
+    public function reindex(string $locale = 'cs', bool $fresh = false, ?string $section = null, ?\Closure $onProgress = null, bool $force = false): int
     {
         // Nastavíme locale pro korektní překlady během indexace
         App::setLocale($locale);
@@ -51,22 +51,22 @@ class AiIndexService
         // Indexujeme pouze vybrané sekce
         if (!$section || $section === 'admin') {
             Log::info("AI Indexing: Starting admin section for locale '{$locale}'");
-            $count += $this->indexFilament($locale, $onProgress);
+            $count += $this->indexFilament($locale, $onProgress, $force);
         }
 
         if (!$section || $section === 'member') {
             Log::info("AI Indexing: Starting member section for locale '{$locale}'");
-            $count += $this->indexMemberSection($locale, $onProgress);
+            $count += $this->indexMemberSection($locale, $onProgress, $force);
         }
 
         if (!$section || $section === 'frontend') {
             Log::info("AI Indexing: Starting frontend section for locale '{$locale}'");
-            $count += $this->indexFrontend($locale, $onProgress);
+            $count += $this->indexFrontend($locale, $onProgress, $force);
         }
 
         if ($section === 'documentation') {
             Log::info("AI Indexing: Starting documentation section for locale '{$locale}'");
-            $count += $this->indexDocumentation($locale, $onProgress);
+            $count += $this->indexDocumentation($locale, $onProgress, $force);
         }
 
         // Smažeme dokumenty, které již nejsou aktivní
@@ -165,7 +165,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     /**
      * Uloží nebo aktualizuje dokument s kontrolou checksumu.
      */
-    private function updateOrCreateDocument(array $data): AiDocument
+    private function updateOrCreateDocument(array $data, bool $force = false): AiDocument
     {
         $section = $data['section'] ?? $this->determineSection($data['type']);
         $locale = $data['locale'] ?? 'cs';
@@ -185,7 +185,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         $data['is_active'] = true;
 
         if ($existing) {
-            if ($existing->content_hash !== $contentHash || ($data['checksum'] ?? null) !== $existing->checksum) {
+            if ($force || $existing->content_hash !== $contentHash || ($data['checksum'] ?? null) !== $existing->checksum) {
                 $existing->update($data);
                 $this->updateChunks($existing);
             } else {
@@ -235,7 +235,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         }
     }
 
-    private function indexFilament(string $locale, ?\Closure $onProgress = null): int
+    private function indexFilament(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
         Log::info("AI Indexing: [Filament] Starting...");
@@ -254,9 +254,12 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $description = $pool->getTranslation('description', $locale);
             $url = \App\Filament\Resources\PhotoPools\PhotoPoolResource::getUrl('edit', ['record' => $pool]);
 
-            if ($onProgress) $onProgress("PhotoPool: {$title}");
-
             $content = "Photo Pool (Galerie): {$title}. Datum: {$pool->event_date?->format('d.m.Y')}. Popis: {$description}. Typ: {$pool->event_type}.";
+
+            if ($onProgress) {
+                $size = strlen($content);
+                $onProgress("PhotoPool: {$title} [internal, {$size} chars]");
+            }
 
             $this->updateOrCreateDocument([
                 'type' => 'admin.resource',
@@ -267,7 +270,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 'content' => $content,
                 'checksum' => hash('sha256', $content.$url),
                 'metadata' => ['group' => __('admin.navigation.groups.media'), 'model' => 'PhotoPool', 'id' => $pool->id],
-            ]);
+            ], $force);
             $count++;
         }
 
@@ -285,13 +288,13 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $title = $page->getTitle() ?: $pageClass;
                 $url = $pageClass::getUrl();
 
-                if ($onProgress) $onProgress("Page: {$title}");
-
                 // Zkusíme vyrenderovat obsah přes URL (Render-then-Analyze)
                 $content = $this->renderUrl($url, $admin);
+                $status = 'rendered';
 
                 // Pokud rendering nic nevrátil, zkusíme aspoň extrakci ze schématu (fallback)
                 if (empty($content)) {
+                    $status = 'schema';
                     // EXTRAKCE ZE SCHÉMATU (Formuláře na stránkách)
                     try {
                         if (method_exists($page, 'form')) {
@@ -301,6 +304,11 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                         }
                     } catch (\Throwable $e) {
                     }
+                }
+
+                if ($onProgress) {
+                    $size = strlen($content);
+                    $onProgress("Page: {$title} [{$status}, {$size} chars]");
                 }
 
                 // Zkusíme získat informaci o umístění v menu
@@ -321,10 +329,13 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     'content' => $navigationInfo.$typeInfo.($content ?: 'Administrační stránka '.$title),
                     'checksum' => hash('sha256', $content.$url.$group),
                     'metadata' => ['group' => $group],
-                ]);
+                ], $force);
                 $count++;
             } catch (\Throwable $e) {
+                Log::error("AI Indexing: Error indexing page {$pageClass}: " . $e->getMessage());
                 continue;
+            } finally {
+                gc_collect_cycles();
             }
         }
 
@@ -337,13 +348,13 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $url = $resourceClass::getUrl();
                 $group = $resourceClass::getNavigationGroup();
 
-                if ($onProgress) $onProgress("Resource: {$title}");
-
                 // Pro resource zkusíme vyrenderovat index stránku
                 $content = $this->renderUrl($url, $admin);
+                $status = 'rendered';
 
                 // Fallback na extrakci ze schématu
                 if (empty($content)) {
+                    $status = 'schema';
                     $content = "Správa sekce {$title}. Zde můžete přidávat, upravovat nebo mazat záznamy. ";
                     try {
                         $schema = app(\Filament\Schemas\Schema::class);
@@ -354,6 +365,11 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                         }
                     } catch (\Throwable $e) {
                     }
+                }
+
+                if ($onProgress) {
+                    $size = strlen($content);
+                    $onProgress("Resource: {$title} [{$status}, {$size} chars]");
                 }
 
                 $navigationInfo = $group ? "Sekce administrace: {$group}. " : '';
@@ -368,10 +384,13 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     'content' => $navigationInfo.$typeInfo.$content,
                     'checksum' => hash('sha256', $resourceClass.$url.$group.$content),
                     'metadata' => ['group' => $group],
-                ]);
+                ], $force);
                 $count++;
             } catch (\Throwable $e) {
+                Log::error("AI Indexing: Error indexing resource {$resourceClass}: " . $e->getMessage());
                 continue;
+            } finally {
+                gc_collect_cycles();
             }
         }
 
@@ -493,13 +512,17 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         return implode(', ', array_filter(array_unique($texts)));
     }
 
-    private function indexMemberSection(string $locale, ?\Closure $onProgress = null): int
+    private function indexMemberSection(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
         Log::info("AI Indexing: [Member] Starting...");
         $member = null;
         try {
-            $member = User::role('player')->first() ?: User::find(1);
+            // Pro indexaci členské sekce použijeme admina (má přístup i k trenérským přehledům)
+            // nebo prvního hráče s verifikovaným e-mailem.
+            $member = User::role('admin')->first()
+                      ?: User::role('player')->whereNotNull('email_verified_at')->first()
+                      ?: User::find(1);
         } catch (\Throwable $e) {
             $member = User::find(1);
         }
@@ -517,10 +540,15 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         foreach ($routes as $routeName => $info) {
             try {
                 $url = route($routeName);
-                if ($onProgress) $onProgress("Member Route: {$info['title']}");
 
                 // Renderování stránky (Render-then-Analyze)
                 $content = $this->renderUrl($url, $member);
+                $status = $content ? 'rendered' : 'empty';
+
+                if ($onProgress) {
+                    $size = strlen($content);
+                    $onProgress("Member Route: {$info['title']} [{$status}, {$size} chars]");
+                }
 
                 $this->updateOrCreateDocument([
                     'type' => 'member.resource',
@@ -530,17 +558,20 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     'locale' => $locale,
                     'content' => $content ?: $info['title'],
                     'checksum' => hash('sha256', ($content ?: '').$url),
-                ]);
+                ], $force);
                 $count++;
             } catch (\Throwable $e) {
+                Log::error("AI Indexing: Error indexing member route {$routeName}: " . $e->getMessage());
                 continue;
+            } finally {
+                gc_collect_cycles();
             }
         }
 
         return $count;
     }
 
-    private function indexDocumentation(string $locale, ?\Closure $onProgress = null): int
+    private function indexDocumentation(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
         $docsPath = base_path('docs');
@@ -575,7 +606,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 'locale' => $locale, // Dokumentace je primárně česky, indexujeme do aktuálního locale
                 'content' => $content,
                 'checksum' => hash('sha256', $content . $relativePath),
-            ]);
+            ], $force);
 
             $count++;
         }
@@ -583,7 +614,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         return $count;
     }
 
-    private function indexFrontend(string $locale, ?\Closure $onProgress = null): int
+    private function indexFrontend(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
         Log::info("AI Indexing: [Frontend] Starting...");
@@ -599,13 +630,13 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $title = $page->getTranslation('title', $locale);
             $url = $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug);
 
-            if ($onProgress) $onProgress("Frontend Page: {$title}");
-
             // Renderování stránky (Render-then-Analyze)
             $content = $this->renderUrl($url);
+            $status = 'rendered';
 
             // Fallback pokud rendering selže
             if (empty($content)) {
+                $status = 'fallback';
                 Log::warning("AI Indexing: [Frontend] Rendering failed for Page: {$title} ({$url}), using fallback");
                 $rawContent = $page->getTranslation('content', $locale);
                 if (is_array($rawContent)) {
@@ -613,6 +644,11 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 } else {
                     $content = strip_tags((string) $rawContent);
                 }
+            }
+
+            if ($onProgress) {
+                $size = strlen($content);
+                $onProgress("Frontend Page: {$title} [{$status}, {$size} chars]");
             }
 
             $this->updateOrCreateDocument([
@@ -623,7 +659,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 'locale' => $locale,
                 'content' => $content,
                 'checksum' => hash('sha256', $content.$url.$title),
-            ]);
+            ], $force);
             $count++;
         }
 
@@ -642,17 +678,22 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $title = $post->getTranslation('title', $locale);
             $url = route('public.news.show', $post->slug);
 
-            if ($onProgress) $onProgress("Frontend Post: {$title}");
-
             // Renderování stránky (Render-then-Analyze)
             $content = $this->renderUrl($url);
+            $status = 'rendered';
 
             // Fallback
             if (empty($content)) {
+                $status = 'fallback';
                 Log::warning("AI Indexing: [Frontend] Rendering failed for Post: {$title} ({$url}), using fallback");
                 $excerpt = $post->getTranslation('excerpt', $locale);
                 $rawContent = $post->getTranslation('content', $locale);
                 $content = strip_tags($excerpt.' '.$rawContent);
+            }
+
+            if ($onProgress) {
+                $size = strlen($content);
+                $onProgress("Frontend Post: {$title} [{$status}, {$size} chars]");
             }
 
             $this->updateOrCreateDocument([
@@ -666,7 +707,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     'image' => $post->featured_image,
                 ],
                 'checksum' => hash('sha256', $content.$url.$title.$post->featured_image),
-            ]);
+            ], $force);
             $count++;
         }
 
@@ -784,23 +825,56 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
      */
     public function renderUrl(string $url, ?User $user = null): string
     {
-        if ($user) {
-            Auth::login($user);
-        }
-
         // Vytvoříme request pro danou URL
         $request = Request::create($url, 'GET');
+
+        if ($user) {
+            Auth::login($user);
+            Auth::shouldUse('web');
+            Auth::setUser($user);
+
+            // Podvržení uživatele přímo do requestu pro middleware Authenticate a auth()->user()
+            $request->setUserResolver(fn () => $user);
+
+            // Pro jistotu nastavíme uživatele i do guardu
+            Auth::guard('web')->setUser($user);
+
+            // Pokusíme se zajistit session, pokud je k dispozici
+            try {
+                $request->setLaravelSession(session()->driver());
+            } catch (\Throwable $e) {
+                // V CLI nemusí být session driver k dispozici
+            }
+        }
 
         // Předáme informaci o jazyku do requestu pro middleware
         $locale = App::getLocale();
         $request->cookies->set('filament_language_switch_locale', $locale);
 
-        // Simulujeme, že jde o AJAX request pro Livewire (pokud by bylo potřeba),
-        // ale pro základní SEO/Search indexaci chceme čisté HTML.
-
         try {
+            // Dočasně vypneme middleware pro tento interní request, abychom se vyhnuli redirectům na login
+            // a dalším komplikacím s autentizací v CLI. Jelikož indexaci spouští administrátor,
+            // předpokládáme, že má právo k obsahu přistoupit.
+            app()->instance('middleware.disable', true);
+
+            // Podvrhneme prázdný ErrorBag, protože ShareErrorsFromSession middleware je vypnutý
+            \Illuminate\Support\Facades\View::share('errors', new \Illuminate\Support\ViewErrorBag);
+
             // Použijeme app()->handle pro interní zpracování requestu bez sítě
             $response = app()->handle($request);
+
+            // Vrátíme původní stav (pro jistotu, i když instance je per-request)
+            app()->forgetInstance('middleware.disable');
+
+            if (!$response->isSuccessful()) {
+                if ($response->isRedirection()) {
+                    Log::warning("Rendering redirected for {$url} to " . $response->headers->get('Location'));
+                } else {
+                    Log::warning("Rendering failed for {$url} with status {$response->getStatusCode()}");
+                }
+                return '';
+            }
+
             $html = $response->getContent();
 
             return $this->preprocessHtml($html);

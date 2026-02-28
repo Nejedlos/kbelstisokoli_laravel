@@ -15,7 +15,6 @@ class BasketballMatchesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->deferLoading()
             ->striped()
             ->columns([
                 TextColumn::make('scheduled_at')

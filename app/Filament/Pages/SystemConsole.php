@@ -161,8 +161,18 @@ class SystemConsole extends Page
                 'label' => __('admin/system-console.commands.finance_sync.label'),
                 'desc' => __('admin/system-console.commands.finance_sync.desc'),
                 'type' => 'artisan',
+                'flags' => [
+                    '--fresh' => __('admin/system-console.commands.finance_sync.flags.--fresh'),
+                ],
                 'color' => 'gray',
                 'icon' => FilamentIcon::get('money-bill-transfer')
+            ],
+            'finance:cleanup' => [
+                'label' => __('admin/system-console.commands.finance_cleanup.label'),
+                'desc' => __('admin/system-console.commands.finance_cleanup.desc'),
+                'type' => 'artisan',
+                'color' => 'danger',
+                'icon' => FilamentIcon::get('broom')
             ],
             'stats:import' => [
                 'label' => __('admin/system-console.commands.stats_import.label'),

@@ -58,6 +58,14 @@ return [
         'finance_sync' => [
             'label' => 'Finance: Sync',
             'desc' => 'Synchronizes payments and account balances.',
+            'flags' => [
+                '--fresh' => 'Fresh (clears old data + import)',
+                '--import' => 'Import (from legacy DB)',
+            ],
+        ],
+        'finance_cleanup' => [
+            'label' => 'Finance: Cleanup',
+            'desc' => 'DELETES all financial data (charges, payments). Reset only.',
         ],
         'stats_import' => [
             'label' => 'Statistics: Import',

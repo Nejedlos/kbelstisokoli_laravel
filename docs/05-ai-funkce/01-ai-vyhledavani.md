@@ -63,6 +63,10 @@ php artisan ai:index --locale=all --fresh
 ```
 php artisan ai:index --enrich
 ```
+- Vynucení reindexace (pokud se obsah nezměnil, ale chcete znovu přegenerovat chunky nebo vynutit AI obohacení):
+```
+php artisan ai:index --force --enrich
+```
 - Co se indexuje:
   - Filament: Navigace, Stránky, Resources (texty z formulářů a tabulek).
   - Member sekce: Stránky definované v routách.
@@ -111,6 +115,11 @@ Od verze 1.2 je AI vyhledávání integrováno i do veřejné části webu (fron
   - Výsledky obsahují náhledy (snippets) a u aktualit i náhledové obrázky.
   - Využívá stejný scoringový algoritmus jako admin vyhledávání (shoda v titulku > klíčová slova > obsah).
 
-## 14. Další kroky
+## 14. Technické požadavky a limity
+- **Paměť:** Indexace Filamentu je náročná na paměť, protože simuluje plné renderování stránek. Příkaz `ai:index` automaticky navyšuje `memory_limit` na **1024MB**.
+- **Garbage Collection:** Pro minimalizaci úniků paměti v dlouhých cyklech je po každé zaindexované stránce/resource vynuceno `gc_collect_cycles()`.
+- **Rychlost:** Renderování desítek stránek může trvat 1-2 minuty. Doporučuje se používat příznak `--no-ai` pro rychlou aktualizaci textů bez volání OpenAI API.
+
+## 15. Další kroky
 - Přidat indexer pro Eloquent modely a generovat smysluplné URL ke zdrojům.
 - Přidat Filament administrativní akci „Rebuild AI index“ dostupnou pouze adminům.

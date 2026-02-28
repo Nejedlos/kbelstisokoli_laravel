@@ -18,8 +18,18 @@ class TwoFactorLoginResponse implements TwoFactorLoginResponseContract
     {
         $user = auth()->user();
 
-        // Nastavíme čas potvrzení 2FA v session pro timeout (např. 24 hodin)
-        $request->session()->put('auth.2fa_confirmed_at', now()->timestamp);
+        // Zajistíme přítomnost password hashe v session pro Filament's AuthenticateSession middleware
+        $guard = auth()->getDefaultDriver();
+        $request->session()->put([
+            "password_hash_{$guard}" => $user->getAuthPassword(),
+            'auth.2fa_confirmed_at' => now()->timestamp,
+        ]);
+
+        \Illuminate\Support\Facades\Log::info('TwoFactorLoginResponse.session_prepared', [
+            'user_id' => $user->id,
+            'guard' => $guard,
+            'has_password_hash' => $request->session()->has("password_hash_{$guard}"),
+        ]);
 
         // Použijeme centrální logiku pro určení cíle
         $targetUrl = AuthRedirect::getTargetUrl($user, $request);

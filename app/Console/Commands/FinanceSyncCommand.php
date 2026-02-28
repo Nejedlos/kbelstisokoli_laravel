@@ -11,21 +11,36 @@ class FinanceSyncCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'finance:sync';
+    protected $signature = 'finance:sync {--fresh : Smaže finanční data před synchronizací} {--import : Spustí import dat ze staré DB} {--force : Vynutí akci bez potvrzení}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Synchronizuje finanční data, stavy předpisů a volitelně provádí import ze staré DB.';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->info('Spouštím synchronizaci financí...');
+        if ($this->option('fresh')) {
+            $this->warn('⚠️  Pozor: Příznak --fresh SMAŽE všechna finanční data!');
+
+            $confirmed = $this->option('force') || $this->confirm('Opravdu chcete smazat finanční data před synchronizací?', false);
+
+            if ($confirmed) {
+                $this->call('finance:cleanup', ['--force' => true]);
+            }
+        }
+
+        if ($this->option('import') || $this->option('fresh')) {
+            $this->info('Spouštím import finančních dat ze staré DB...');
+            $this->call('db:seed', ['--class' => 'FinanceMigrationSeeder', '--force' => true]);
+        }
+
+        $this->info('Spouštím synchronizaci statusů financí...');
         \App\Jobs\FinanceSyncJob::dispatchSync();
         $this->info('Hotovo.');
     }

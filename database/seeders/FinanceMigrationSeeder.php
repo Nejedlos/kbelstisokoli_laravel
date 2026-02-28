@@ -141,7 +141,10 @@ class FinanceMigrationSeeder extends Seeder
         $this->command->info('Vytvářím předpisy z konfigurací...');
         $configs = \App\Models\UserSeasonConfig::with(['tariff', 'season'])->get();
 
-        $existingCharges = \App\Models\FinanceCharge::all()->keyBy(fn($c) => $c->metadata['legacy_p_id'] ?? null)->forget(null);
+        $existingCharges = \App\Models\FinanceCharge::where('charge_type', 'membership_fee')
+            ->get()
+            ->keyBy(fn($c) => $c->metadata['legacy_p_id'] ?? null)
+            ->forget(null);
 
         foreach ($configs as $config) {
             if (!$config->tariff || $config->tariff->base_amount <= 0) continue;
@@ -182,7 +185,10 @@ class FinanceMigrationSeeder extends Seeder
         // Potřebujeme propojit p_id zpět na uživatele přes web_platici
         $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_platici')->get()->keyBy('id');
 
-        $existingFines = \App\Models\FinanceCharge::all()->keyBy(fn($c) => $c->metadata['legacy_fine_id'] ?? null)->forget(null);
+        $existingFines = \App\Models\FinanceCharge::where('charge_type', 'fine')
+            ->get()
+            ->keyBy(fn($c) => $c->metadata['legacy_fine_id'] ?? null)
+            ->forget(null);
 
         foreach ($fines as $fine) {
             $payer = $payers->get($fine->p_id);

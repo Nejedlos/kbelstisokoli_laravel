@@ -23,6 +23,7 @@ class AppSyncCommand extends Command
                             {--syncuser : Alias pro --usersync (překlep uživatele)}
                             {--ai : Vynutit reindexaci AI (standardně se v app:sync přeskakuje)}
                             {--ai-test : Testovací režim pro AI (přeskočí interakce)}
+                            {--finance-fresh : Smaže všechna finanční data před synchronizací}
                             {--freshseed : Smaže a znovu nahraje data na produkci pomocí seederů}';
 
     /**
@@ -70,6 +71,10 @@ class AppSyncCommand extends Command
 
         $usersync = $this->option('usersync') || $this->option('syncusers') || $this->option('syncuser');
 
+        // Branding a globální nastavení
+        $this->info('Seeduji branding nastavení...');
+        $this->call('db:seed', ['--class' => 'BrandingSeeder', '--force' => true]);
+
         // Ikony
         if (class_exists(\App\Console\Commands\IconsSyncCommand::class)) {
             $this->call('app:icons:sync');
@@ -82,7 +87,15 @@ class AppSyncCommand extends Command
 
         // Finance
         if (class_exists(\App\Console\Commands\FinanceSyncCommand::class)) {
-            $this->call('finance:sync');
+            $financeFlags = [];
+            if ($this->option('finance-fresh')) {
+                $this->warn('⚠️  Pozor: Příznak --finance-fresh SMAŽE všechna finanční data!');
+                if ($this->option('force') || $this->confirm('Opravdu chcete smazat finanční data před synchronizací?', false)) {
+                    $financeFlags['--fresh'] = true;
+                    $financeFlags['--force'] = true; // Předáme force, protože jsme se už zeptali (nebo máme globální force)
+                }
+            }
+            $this->call('finance:sync', $financeFlags);
         }
 
         // Avatary se synchronizují pouze přes FTP (viz handleProductionSync),
