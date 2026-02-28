@@ -41,12 +41,12 @@ class ListPhotoPools extends ListRecords
                 ->modalWidth('4xl')
                 ->form([
                     Placeholder::make('ks_global_loader')
-                        ->label('')
+                        ->hiddenLabel()
                         ->content(fn () => new HtmlString(Blade::render('<x-loader.basketball id="ks-basketball-loader" style="display: none;" />')))
                         ->columnSpanFull(),
 
                     Placeholder::make('processing_progress')
-                        ->label('')
+                        ->hiddenLabel()
                         ->content(fn () => new HtmlString('<div wire:stream="ks-loader-progress-text" class="text-sm font-bold text-primary-600 dark:text-primary-400 text-center animate-pulse"></div>'))
                         ->columnSpanFull(),
 
@@ -221,7 +221,7 @@ class ListPhotoPools extends ListRecords
                                     'x-on:file-pond-process-file' => "console.log('KS DEBUG: Soubor úspěšně nahrán na server:', \$event.detail.file.filename)",
                                 ])
                                 ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
-                                ->helperText(new HtmlString('<div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 flex items-start gap-3">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().'<div><strong>Informace k optimalizaci:</strong> Fotografie jsou pro zvýšení rychlosti automaticky zmenšeny v prohlížeči a následně na serveru převedeny na WebP. Nahrávání probíhá paralelně (10 souborů najednou).</div></div>'))
+                                ->helperText(new HtmlString('<div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-3">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().'<div><strong>Důležité:</strong> Fotografie jsou nahrávány hromadně. <strong>Během nahrávání a následného zpracování (po uložení) nezavírejte toto okno.</strong> Fotografie jsou automaticky optimalizovány pro web.</div></div>'))
                                 ->required(),
                         ]),
                     ]),

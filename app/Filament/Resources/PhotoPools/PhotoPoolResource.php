@@ -68,29 +68,39 @@ class PhotoPoolResource extends Resource
             ->columns(1)
             ->components([
                 Placeholder::make('ks_global_loader')
-                    ->label('')
-                    ->content(fn () => new HtmlString(Blade::render('<x-loader.basketball id="ks-basketball-loader" style="display: none;" />')))
+                    ->hiddenLabel()
+                    ->content(fn () => new HtmlString(Blade::render('
+                        <x-loader.basketball wire:target="processImportQueue">
+                            <div class="text-center">
+                                <strong class="text-lg block mb-1">Hromadné zpracování fotografií...</strong>
+                                <span class="text-sm opacity-90">Prosím nezavírejte toto okno a nepřerušujte spojení se serverem.</span>
+                            </div>
+                        </x-loader.basketball>
+                    ')))
                     ->columnSpanFull(),
 
                 Placeholder::make('processing_progress')
-                    ->label('')
+                    ->hiddenLabel()
                     ->visible(fn ($record) => $record && (!empty($record->pending_import_queue) || $record->is_processing_import))
                     ->content(function ($record) {
                         $count = count($record->pending_import_queue ?? []);
                         $status = $record->is_processing_import ? 'Probíhá zpracování...' : 'Čeká na zpracování...';
-                        $icon = $record->is_processing_import ? 'fa-spin fa-spinner-third' : 'fa-pause-circle';
+                        $icon = $record->is_processing_import ? 'fa-spinner-third fa-spin' : 'fa-clock';
 
                         return new HtmlString("
-                            <div class='p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-xl flex items-center gap-4' wire:poll.3s='processImportQueue'>
-                                <div class='flex-shrink-0 text-primary-600 dark:text-primary-400 text-2xl'>
+                            <div class='p-6 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-500 dark:border-amber-600 rounded-2xl flex items-center gap-6 shadow-lg animate-pulse' wire:poll.3s='processImportQueue'>
+                                <div class='flex-shrink-0 bg-amber-500 text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-inner'>
                                     <i class='fa-light {$icon}'></i>
                                 </div>
                                 <div class='flex-grow'>
-                                    <div class='text-sm font-bold text-primary-900 dark:text-primary-100'>{$status}</div>
-                                    <div class='text-xs text-primary-700 dark:text-primary-300'>Zbývá zpracovat: <strong>{$count}</strong> fotografií. Prosím nechte toto okno otevřené.</div>
+                                    <div class='text-lg font-bold text-amber-900 dark:text-amber-100 mb-1'>{$status}</div>
+                                    <div class='text-sm text-amber-800 dark:text-amber-200'>
+                                        Zbývá zpracovat: <strong>{$count}</strong> fotografií.
+                                        <div class='mt-1 font-semibold uppercase tracking-wider text-xs'>Důležité: Prosím nechte toto okno otevřené, dokud import neskončí!</div>
+                                    </div>
                                 </div>
-                                <div wire:loading wire:target='processImportQueue'>
-                                    <i class='fa-light fa-spinner-third fa-spin text-primary-600'></i>
+                                <div wire:loading wire:target='processImportQueue' class='text-amber-600'>
+                                    <i class='fa-light fa-arrows-rotate fa-spin text-2xl'></i>
                                 </div>
                             </div>
                         ");

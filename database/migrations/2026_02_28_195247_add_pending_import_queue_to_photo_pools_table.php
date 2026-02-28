@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('photo_pools', function (Blueprint $table) {
-            $table->json('pending_import_queue')->nullable()->after('is_visible');
+            $table->longText('pending_import_queue')->nullable()->after('is_visible');
             $table->boolean('is_processing_import')->default(false)->after('pending_import_queue');
         });
     }
