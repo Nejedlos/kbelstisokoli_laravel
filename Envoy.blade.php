@@ -238,13 +238,11 @@
     {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
 
     if [ "{{ $usersync }}" = "1" ]; then
-        echo "Syncing users (avatars)..."
-        {{ $php }} artisan avatars:sync --force || echo "⚠️ Warning: Avatars sync failed (probably missing source directory on server)."
+        echo "Syncing users (avatars) skipped (using FTP sync instead)..."
     fi
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
-    {{ $php }} artisan sync:default-avatars --force --limit=1000
     {{ $php }} artisan filament:clear-cached-components
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
@@ -445,7 +443,6 @@
     fi
 
     {{ $php }} artisan app:icons:sync
-    {{ $php }} artisan sync:default-avatars --force --limit=1000
     {{ $php }} artisan filament:clear-cached-components
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
@@ -587,13 +584,11 @@
     {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
 
     if [ "{{ $usersync }}" = "1" ]; then
-        echo "Syncing users (avatars)..."
-        {{ $php }} artisan avatars:sync --force || echo "⚠️ Warning: Avatars sync failed (probably missing source directory on server)."
+        echo "Syncing users (avatars) skipped (using FTP sync instead)..."
     fi
 
     echo "Syncing icons..."
     {{ $php }} artisan app:icons:sync
-    {{ $php }} artisan sync:default-avatars --force --limit=1000
     {{ $php }} artisan filament:clear-cached-components
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear

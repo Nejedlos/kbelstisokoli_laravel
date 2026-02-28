@@ -85,28 +85,8 @@ class AppSyncCommand extends Command
             $this->call('finance:sync');
         }
 
-        // Avatary (uživatelské avatary a hráčské fotky z NextAI) - pouze s --usersync
-        if ($usersync && class_exists(\App\Console\Commands\AvatarsSyncCommand::class)) {
-            $this->call('avatars:sync', [
-                '--force' => $this->option('force'),
-            ]);
-        }
-
-        // Výchozí avatary (galerie ilustrací pro výběr) - vždy při syncu, pokud existuje command
-        if (class_exists(\App\Console\Commands\DefaultAvatarsSyncCommand::class)) {
-            $this->info('Synchronizuji výchozí avatary...');
-            // Spouštíme v dávkách po 100, abychom předešli timeoutům na produkci
-            for ($offset = 0; $offset < 2000; $offset += 100) {
-                $this->call('sync:default-avatars', [
-                    '--force' => $this->option('force'),
-                    '--limit' => 100,
-                    '--offset' => $offset,
-                ]);
-
-                // Pokud už nejsou žádné další soubory, command vypíše info (my zde ale nemáme návratovou hodnotu o počtu)
-                // Tak to prostě zkusíme párkrát. 2000 souborů by mělo stačit.
-            }
-        }
+        // Avatary se synchronizují pouze přes FTP (viz handleProductionSync),
+        // již nepoužíváme pomalou synchronizaci přes MediaLibrary/Artisan příkazy.
     }
 
     /**
