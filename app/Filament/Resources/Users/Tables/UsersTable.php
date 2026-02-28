@@ -2,27 +2,25 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Enums\Gender;
 use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
-use App\Enums\Gender;
-use Illuminate\Support\HtmlString;
+use App\Notifications\UserInvitationNotification;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\BulkAction;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
+use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
-
-use Illuminate\Support\Facades\Password;
-use App\Notifications\UserInvitationNotification;
-use Filament\Notifications\Notification as FilamentNotification;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Password;
 
 class UsersTable
 {
@@ -39,8 +37,8 @@ class UsersTable
                     ->circular()
                     ->toggleable(),
                 TextColumn::make('name')
-                    ->label(__('user.fields.first_name') . ' ' . __('user.fields.last_name'))
-                    ->description(fn($record) => $record->email)
+                    ->label(__('user.fields.first_name').' '.__('user.fields.last_name'))
+                    ->description(fn ($record) => $record->email)
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
                     ->sortable(),
                 TextColumn::make('club_member_id')
@@ -80,7 +78,7 @@ class UsersTable
                     ->sortable(),
                 TextColumn::make('last_login_at')
                     ->label('Aktivita')
-                    ->description(fn($record) => $record->last_login_at?->diffForHumans() ?? '-')
+                    ->description(fn ($record) => $record->last_login_at?->diffForHumans() ?? '-')
                     ->dateTime('d.m.Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -138,12 +136,12 @@ class UsersTable
                                 ->success()
                                 ->send();
                         })
-                        ->visible(fn ($record) => $record->is_active && !$record->onboarding_completed_at),
+                        ->visible(fn ($record) => $record->is_active && ! $record->onboarding_completed_at),
                     Action::make('impersonate')
                         ->label(__('permissions.impersonate_users'))
-                        ->icon('fa-light fa-user-secret')
+                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMPERSONATE))
                         ->color('warning')
-                        ->requiresConfirmation(fn ($record) => __('permissions.impersonate_confirm') . $record->name . '?')
+                        ->requiresConfirmation(fn ($record) => __('permissions.impersonate_confirm').$record->name.'?')
                         ->url(fn ($record) => route('admin.impersonate.start', ['userId' => $record->id]))
                         ->visible(fn ($record) => auth()->user()->can('impersonate_users') && auth()->user()->id !== $record->id),
                     EditAction::make(),

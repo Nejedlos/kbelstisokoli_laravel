@@ -2,16 +2,15 @@
 
 namespace App\Http\Responses;
 
-use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as FilamentLogoutResponseContract;
 use Illuminate\Support\Facades\Cookie;
+use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Symfony\Component\HttpFoundation\Response;
 
-class LogoutResponse implements LogoutResponseContract, FilamentLogoutResponseContract
+class LogoutResponse implements FilamentLogoutResponseContract, LogoutResponseContract
 {
     /**
      * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request): Response
     {

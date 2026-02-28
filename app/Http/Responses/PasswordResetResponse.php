@@ -2,12 +2,10 @@
 
 namespace App\Http\Responses;
 
-use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse as FilamentPasswordResetResponseContract;
-use Illuminate\Http\RedirectResponse;
-use App\Http\Responses\LoginResponse;
+use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
 
-class PasswordResetResponse implements PasswordResetResponseContract, FilamentPasswordResetResponseContract
+class PasswordResetResponse implements FilamentPasswordResetResponseContract, PasswordResetResponseContract
 {
     /**
      * Create an HTTP response that represents the object.

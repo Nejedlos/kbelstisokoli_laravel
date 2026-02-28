@@ -41,7 +41,7 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
         return redirect('/tymy', 301);
     });
     Route::get('/tym/{slug}', function ($slug) {
-        return redirect('/tymy/' . $slug, 301);
+        return redirect('/tymy/'.$slug, 301);
     });
 
     // Galerie
@@ -65,6 +65,7 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     Route::get('/nabor', function () {
         $page = \App\Models\Page::where('slug', 'nabor')->first();
         $teams = \App\Models\Team::where('category', 'senior')->orderBy('slug')->get();
+
         return view('public.recruitment', compact('page', 'teams'));
     })->name('recruitment.index');
 
@@ -73,6 +74,7 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
         $homePage = \App\Models\Page::where('slug', 'home')->first();
         $seo = app(\App\Services\SeoService::class)->getMetadata($homePage); // Základní SEO z homepage
         $seo['title'] = 'Chci hrát za C & E | Kbelští sokoli';
+
         return view('public.join', compact('team', 'seo'));
     })->name('recruitment.join');
 

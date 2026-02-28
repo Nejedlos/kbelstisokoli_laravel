@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Statistic Sets (Sady statistik)
-        if (!Schema::hasTable('statistic_sets')) {
+        if (! Schema::hasTable('statistic_sets')) {
             Schema::create('statistic_sets', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -31,7 +31,7 @@ return new class extends Migration
         }
 
         // 2. Statistic Rows (Jednotlivé řádky s daty)
-        if (!Schema::hasTable('statistic_rows')) {
+        if (! Schema::hasTable('statistic_rows')) {
             Schema::create('statistic_rows', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('statistic_set_id')->constrained()->onDelete('cascade');
@@ -49,7 +49,7 @@ return new class extends Migration
         }
 
         // 3. External Statistic Sources (Konfigurace externích importů)
-        if (!Schema::hasTable('external_stat_sources')) {
+        if (! Schema::hasTable('external_stat_sources')) {
             Schema::create('external_stat_sources', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');

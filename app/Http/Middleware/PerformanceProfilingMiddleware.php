@@ -4,9 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class PerformanceProfilingMiddleware
@@ -18,7 +18,7 @@ class PerformanceProfilingMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$this->shouldProfile($request)) {
+        if (! $this->shouldProfile($request)) {
             return $next($request);
         }
 
@@ -108,14 +108,14 @@ class PerformanceProfilingMiddleware
             $sql = preg_replace('/(\'|").*?(\'|")/', '?', $sql);
             $sql = preg_replace('/\d+/', '?', $sql);
 
-            if (!isset($counts[$sql])) {
+            if (! isset($counts[$sql])) {
                 $counts[$sql] = 0;
             }
             $counts[$sql]++;
         }
 
         arsort($counts);
-        $counts = array_filter($counts, fn($count) => $count > 1);
+        $counts = array_filter($counts, fn ($count) => $count > 1);
 
         return array_slice($counts, 0, 10, true);
     }

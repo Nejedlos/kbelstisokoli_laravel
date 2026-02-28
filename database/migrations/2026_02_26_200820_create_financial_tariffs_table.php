@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('financial_tariffs')) {
+        if (! Schema::hasTable('financial_tariffs')) {
             Schema::create('financial_tariffs', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');

@@ -16,7 +16,7 @@ class RecaptchaService
         $enabledSetting = Setting::where('key', 'recaptcha_enabled')->first();
         $enabled = $enabledSetting ? (bool) $enabledSetting->value : false;
 
-        if (!$enabled) {
+        if (! $enabled) {
             return true;
         }
 
@@ -26,8 +26,9 @@ class RecaptchaService
         $thresholdSetting = Setting::where('key', 'recaptcha_threshold')->first();
         $threshold = $thresholdSetting ? (float) $thresholdSetting->value : 0.5;
 
-        if (!$secret || !$token) {
+        if (! $secret || ! $token) {
             Log::warning('reCAPTCHA verification failed: Missing secret or token.');
+
             return false;
         }
 
@@ -48,7 +49,7 @@ class RecaptchaService
 
             Log::error('reCAPTCHA API error:', $response->json() ?? []);
         } catch (\Exception $e) {
-            Log::error('reCAPTCHA verification exception: ' . $e->getMessage());
+            Log::error('reCAPTCHA verification exception: '.$e->getMessage());
         }
 
         return false;
@@ -60,6 +61,7 @@ class RecaptchaService
     public function getSiteKey(): ?string
     {
         $setting = Setting::where('key', 'recaptcha_site_key')->first();
+
         return $setting ? $setting->value : null;
     }
 
@@ -69,6 +71,7 @@ class RecaptchaService
     public function isEnabled(): bool
     {
         $setting = Setting::where('key', 'recaptcha_enabled')->first();
+
         return $setting ? (bool) $setting->value : false;
     }
 }

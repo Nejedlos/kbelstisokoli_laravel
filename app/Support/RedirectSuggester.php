@@ -2,10 +2,10 @@
 
 namespace App\Support;
 
+use App\Models\Gallery;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\Team;
-use App\Models\Gallery;
 use Illuminate\Support\Str;
 
 class RedirectSuggester
@@ -31,43 +31,55 @@ class RedirectSuggester
 
         // 1. Hledání v novinkách
         $post = Post::where('slug', $slug)
-            ->orWhere('slug', 'like', '%' . $slug . '%')
+            ->orWhere('slug', 'like', '%'.$slug.'%')
             ->first();
         if ($post) {
-            return '/novinky/' . $post->slug;
+            return '/novinky/'.$post->slug;
         }
 
         // 2. Hledání v týmech
         $team = Team::where('slug', $slug)
-            ->orWhere('slug', 'like', '%' . $slug . '%')
+            ->orWhere('slug', 'like', '%'.$slug.'%')
             ->first();
         if ($team) {
-            return '/tymy/' . $team->slug;
+            return '/tymy/'.$team->slug;
         }
 
         // 3. Hledání v galeriích
         $gallery = Gallery::where('slug', $slug)
-            ->orWhere('slug', 'like', '%' . $slug . '%')
+            ->orWhere('slug', 'like', '%'.$slug.'%')
             ->first();
         if ($gallery) {
-            return '/galerie/' . $gallery->slug;
+            return '/galerie/'.$gallery->slug;
         }
 
         // 4. Hledání v generických stránkách
         $page = Page::where('slug', $slug)
-            ->orWhere('slug', 'like', '%' . $slug . '%')
+            ->orWhere('slug', 'like', '%'.$slug.'%')
             ->first();
         if ($page) {
-            return '/' . $page->slug;
+            return '/'.$page->slug;
         }
 
         // 5. Zvláštní případy (časté chyby)
-        if (Str::contains($path, 'kontakt')) return '/kontakt';
-        if (Str::contains($path, 'trenink')) return '/treninky';
-        if (Str::contains($path, 'zapas')) return '/zapasy';
-        if (Str::contains($path, 'tym')) return '/tymy';
-        if (Str::contains($path, 'galer')) return '/galerie';
-        if (Str::contains($path, 'novin')) return '/novinky';
+        if (Str::contains($path, 'kontakt')) {
+            return '/kontakt';
+        }
+        if (Str::contains($path, 'trenink')) {
+            return '/treninky';
+        }
+        if (Str::contains($path, 'zapas')) {
+            return '/zapasy';
+        }
+        if (Str::contains($path, 'tym')) {
+            return '/tymy';
+        }
+        if (Str::contains($path, 'galer')) {
+            return '/galerie';
+        }
+        if (Str::contains($path, 'novin')) {
+            return '/novinky';
+        }
 
         return '/';
     }

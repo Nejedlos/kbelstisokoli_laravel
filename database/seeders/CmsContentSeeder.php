@@ -5,10 +5,8 @@ namespace Database\Seeders;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\Page;
-use App\Models\SeoMetadata;
 use App\Models\Setting;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class CmsContentSeeder extends Seeder
 {
@@ -66,8 +64,8 @@ class CmsContentSeeder extends Seeder
             'contact_fax' => '+420 266 315 868',
             'contact_email' => 'spanily@keep69.cz',
             'footer_text' => [
-                'cs' => '© ' . date('Y') . ' Basketbalový klub Kbelští sokoli. Všechna práva vyhrazena.',
-                'en' => '© ' . date('Y') . ' Basketball club Kbely Falcons. All rights reserved.',
+                'cs' => '© '.date('Y').' Basketbalový klub Kbelští sokoli. Všechna práva vyhrazena.',
+                'en' => '© '.date('Y').' Basketball club Kbely Falcons. All rights reserved.',
             ],
             'seo_description' => [
                 'cs' => 'Oficiální web basketbalového klubu Kbelští sokoli. Informace o týmech, trénincích, zápasech a náborech pro děti i dospělé v Praze 9.',
@@ -96,11 +94,11 @@ class CmsContentSeeder extends Seeder
                 'seo' => [
                     'title' => [
                         'cs' => 'Basketbal Letňany & Kbely – Týmy C & E | Kbelští sokoli',
-                        'en' => 'Basketball Letňany & Kbely – Teams C & E | Kbely Falcons'
+                        'en' => 'Basketball Letňany & Kbely – Teams C & E | Kbely Falcons',
                     ],
                     'description' => [
                         'cs' => 'Oficiální web basketbalových týmů Kbelští sokoli C & E (TJ Sokol Kbely). Hrajeme v Letňanech. Aktuální výsledky, tréninky a nábor nových hráčů.',
-                        'en' => 'Official website of basketball teams Kbely Falcons C & E (TJ Sokol Kbely). We play in Letňany. Match results, trainings and recruitment.'
+                        'en' => 'Official website of basketball teams Kbely Falcons C & E (TJ Sokol Kbely). We play in Letňany. Match results, trainings and recruitment.',
                     ],
                 ],
             ],
@@ -295,7 +293,7 @@ class CmsContentSeeder extends Seeder
                         'variant' => 'standard',
                         'alignment' => 'left',
                         'overlay' => true,
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -308,7 +306,7 @@ class CmsContentSeeder extends Seeder
                         'button_url' => '/tymy',
                         'secondary_button_text' => 'Ostatní nábory (Mládež & Elita)',
                         'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -345,8 +343,8 @@ class CmsContentSeeder extends Seeder
                                 'link_label' => 'Zobrazit na basketkbely.cz',
                                 'badge' => 'HLAVNÍ ODDÍL',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -355,7 +353,7 @@ class CmsContentSeeder extends Seeder
                         'title' => 'Navazujeme na tradici kbelského basketu',
                         'text' => 'TJ Sokol Kbely Basketbal sdružuje dospělé týmy i mládežnické kategorie a dlouhodobě buduje basketbalovou komunitu ve Kbelích. Naším cílem je držet kvalitní týmové prostředí, chuť hrát a dobré jméno klubu – na hřišti i mimo něj.',
                         'alignment' => 'center',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -388,8 +386,8 @@ class CmsContentSeeder extends Seeder
                                 'link_label' => 'Nábor dětí a elit',
                                 'badge' => 'HLAVNÍ ODDÍL',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -421,8 +419,8 @@ class CmsContentSeeder extends Seeder
                                 'icon' => 'lock',
                                 'link' => '/login',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'news_listing',
@@ -431,7 +429,7 @@ class CmsContentSeeder extends Seeder
                         'subtitle' => 'Aktuality budou průběžně doplňovány.',
                         'limit' => 3,
                         'layout' => 'grid',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -443,7 +441,7 @@ class CmsContentSeeder extends Seeder
                         'button_url' => '/join',
                         'secondary_button_text' => 'Nábor Mládež & Elita',
                         'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
-                    ]
+                    ],
                 ],
             ],
             'en' => [
@@ -463,7 +461,7 @@ class CmsContentSeeder extends Seeder
                         'variant' => 'standard',
                         'alignment' => 'left',
                         'overlay' => true,
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -476,7 +474,7 @@ class CmsContentSeeder extends Seeder
                         'button_url' => '/tymy',
                         'secondary_button_text' => 'Other Recruitments (Youth & Elite)',
                         'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -513,8 +511,8 @@ class CmsContentSeeder extends Seeder
                                 'link_label' => 'View on basketkbely.cz',
                                 'badge' => 'MAIN CLUB',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -523,7 +521,7 @@ class CmsContentSeeder extends Seeder
                         'title' => 'Following the tradition of Kbely basketball',
                         'text' => 'TJ Sokol Kbely Basketbal brings together adult teams and youth categories. Our goal is to maintain a quality team environment and the good name of the club.',
                         'alignment' => 'center',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -556,8 +554,8 @@ class CmsContentSeeder extends Seeder
                                 'link_label' => 'Youth & Elite Recruitment',
                                 'badge' => 'MAIN CLUB',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -589,8 +587,8 @@ class CmsContentSeeder extends Seeder
                                 'icon' => 'lock',
                                 'link' => '/login',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'news_listing',
@@ -599,7 +597,7 @@ class CmsContentSeeder extends Seeder
                         'subtitle' => 'News will be updated continuously.',
                         'limit' => 3,
                         'layout' => 'grid',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -611,7 +609,7 @@ class CmsContentSeeder extends Seeder
                         'button_url' => '/tymy',
                         'secondary_button_text' => 'Join Youth & Elite',
                         'secondary_button_url' => 'https://www.basketkbely.cz/zacnihrat',
-                    ]
+                    ],
                 ],
             ],
         ];
@@ -625,7 +623,7 @@ class CmsContentSeeder extends Seeder
                     'type' => 'rich_text',
                     'data' => [
                         'content' => '<h2>O nás</h2><p>Kbelští sokoli vznikli s vizí vytvořit místo, kde se děti i dospělí mohou věnovat basketbalu na profesionální i rekreační úrovni.</p><h3>Naše hodnoty</h3><ul><li>Týmovost</li><li>Respekt</li><li>Vytrvalost</li><li>Radost</li></ul>',
-                    ]
+                    ],
                 ],
             ],
             'en' => [
@@ -633,7 +631,7 @@ class CmsContentSeeder extends Seeder
                     'type' => 'rich_text',
                     'data' => [
                         'content' => '<h2>About Us</h2><p>Kbely Falcons were founded with a vision to create a place where children and adults can dedicate themselves to basketball on both professional and recreational levels.</p><h3>Our Values</h3><ul><li>Teamwork</li><li>Respect</li><li>Perseverance</li><li>Joy</li></ul>',
-                    ]
+                    ],
                 ],
             ],
         ];
@@ -649,7 +647,7 @@ class CmsContentSeeder extends Seeder
                         'headline' => 'Pojď hrát za Kbelští sokoli C a E',
                         'subheadline' => 'Hledáme zkušené hráče pro naše mužské týmy v Pražském přeboru. Staň se součástí naší basketbalové rodiny.',
                         'variant' => 'minimal',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -674,27 +672,27 @@ class CmsContentSeeder extends Seeder
                                 'link_label' => 'Chci hrát za E',
                                 'badge' => '3. TŘÍDA B',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'livewire',
                     'data' => [
                         'component' => 'recruitment-form',
                         'custom_id' => 'join',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'rich_text',
                     'data' => [
                         'content' => '<h2>Nábor do mužských týmů</h2><p>Tento web a náborový formulář slouží primárně pro zájemce o hraní v našich týmech <strong>Muži C</strong> a <strong>Muži E</strong>. Pokud máš za sebou basketbalovou minulost a chceš se vrátit k pravidelnému hraní v pohodovém, ale soutěživém kolektivu, jsi na správném místě.</p>',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'rich_text',
                     'data' => [
                         'content' => '<h3>Hledáte basketbal pro děti?</h3><p>Pokud hledáte přípravku, žákovské nebo mládežnické kategorie, pokračujte prosím na hlavní klubový web, kde najdete veškeré informace k náborům dětí:</p><p><a href="https://www.basketkbely.cz/zacnihrat" class="btn btn-primary">Nábor mládeže (basketkbely.cz)</a></p>',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -703,7 +701,7 @@ class CmsContentSeeder extends Seeder
                         'text' => 'Neváhej nám napsat přes náš náborový formulář. Rádi tě uvidíme na tréninku, kde si můžeme vzájemně vyzkoušet, zda si sedneme na hřišti i v šatně.',
                         'button_text' => 'Chci se přidat',
                         'button_url' => '/join',
-                    ]
+                    ],
                 ],
             ],
             'en' => [
@@ -713,7 +711,7 @@ class CmsContentSeeder extends Seeder
                         'headline' => 'Join Kbely Falcons C & E',
                         'subheadline' => 'We are looking for experienced players for our men\'s teams in the Prague Championship.',
                         'variant' => 'minimal',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cards_grid',
@@ -738,27 +736,27 @@ class CmsContentSeeder extends Seeder
                                 'link_label' => 'Join Team E',
                                 'badge' => '3RD CLASS B',
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 [
                     'type' => 'livewire',
                     'data' => [
                         'component' => 'recruitment-form',
                         'custom_id' => 'join',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'rich_text',
                     'data' => [
                         'content' => '<h2>Men\'s Team Recruitment</h2><p>This website and recruitment form are primarily for those interested in playing for our <strong>Men C</strong> and <strong>Men E</strong> teams. If you have a basketball background and want to return to regular playing in a relaxed but competitive team, you are in the right place.</p>',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'rich_text',
                     'data' => [
                         'content' => '<h3>Looking for basketball for kids?</h3><p>If you are looking for youth or mini-basketball categories, please proceed to the main club website:</p><p><a href="https://www.basketkbely.cz/zacnihrat" class="btn btn-primary">Youth Recruitment (basketkbely.cz)</a></p>',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'cta',
@@ -767,7 +765,7 @@ class CmsContentSeeder extends Seeder
                         'text' => 'Don\'t hesitate to contact us via our recruitment form. We\'d love to see you at practice.',
                         'button_text' => 'Join us',
                         'button_url' => '/join',
-                    ]
+                    ],
                 ],
             ],
         ];

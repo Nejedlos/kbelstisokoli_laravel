@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class EventMigrationSeeder extends Seeder
@@ -13,27 +12,29 @@ class EventMigrationSeeder extends Seeder
     public function run(): void
     {
         $oldDb = config('database.old_database');
-        if (!$oldDb) {
+        if (! $oldDb) {
             $this->command->error('Databáze pro migraci nebyla nalezena (DB_DATABASE_OLD ani DB_DATABASE).');
+
             return;
         }
 
         $this->command->info('Načítám zápasy a tréninky ze staré DB...');
 
         try {
-            $oldEvents = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.zapasy')->get();
+            $oldEvents = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.zapasy')->get();
             $seasons = \App\Models\Season::all()->keyBy('name');
             $teamC = \App\Models\Team::where('slug', 'muzi-c')->first();
             $teamE = \App\Models\Team::where('slug', 'muzi-e')->first();
             $teamKlub = \App\Models\Team::where('slug', 'klub')->first();
 
             // Načtení existujících událostí do paměti pro zamezení JSON dotazům v databázi
-            $existingMatches = \App\Models\BasketballMatch::all()->keyBy(fn($m) => $m->metadata['legacy_z_id'] ?? null)->forget(null);
-            $existingTrainings = \App\Models\Training::all()->keyBy(fn($t) => $t->metadata['legacy_z_id'] ?? null)->forget(null);
-            $existingClubEvents = \App\Models\ClubEvent::all()->keyBy(fn($e) => $e->metadata['legacy_z_id'] ?? null)->forget(null);
+            $existingMatches = \App\Models\BasketballMatch::all()->keyBy(fn ($m) => $m->metadata['legacy_z_id'] ?? null)->forget(null);
+            $existingTrainings = \App\Models\Training::all()->keyBy(fn ($t) => $t->metadata['legacy_z_id'] ?? null)->forget(null);
+            $existingClubEvents = \App\Models\ClubEvent::all()->keyBy(fn ($e) => $e->metadata['legacy_z_id'] ?? null)->forget(null);
 
-            if (!$teamC || !$teamE || !$teamKlub) {
+            if (! $teamC || ! $teamE || ! $teamKlub) {
                 $this->command->error('Týmy C, E nebo Klub nebyly nalezeny.');
+
                 return;
             }
 
@@ -46,20 +47,20 @@ class EventMigrationSeeder extends Seeder
                     $seasonName = $old->sezona ? trim(str_replace(['-', ' '], ['/', ''], $old->sezona)) : null;
 
                     // Pokud u historického záznamu chybí název sezóny, odvodíme jej podle data (sezóna začíná 1. září)
-                    if (!$seasonName && $old->datum) {
+                    if (! $seasonName && $old->datum) {
                         $date = \Carbon\Carbon::parse($old->datum);
                         $year = $date->year;
                         if ($date->month < 9) {
-                            $seasonName = ($year - 1) . '/' . $year;
+                            $seasonName = ($year - 1).'/'.$year;
                         } else {
-                            $seasonName = $year . '/' . ($year + 1);
+                            $seasonName = $year.'/'.($year + 1);
                         }
                     }
 
                     // Určení sezóny v DB
                     if ($seasonName) {
                         $season = $seasons->get($seasonName);
-                        if (!$season) {
+                        if (! $season) {
                             $season = \App\Models\Season::updateOrCreate(['name' => $seasonName], ['is_active' => false]);
                             $seasons->put($seasonName, $season);
                         }
@@ -81,9 +82,9 @@ class EventMigrationSeeder extends Seeder
                     // Normalizace času
                     $time = $old->cas ?: '00:00';
                     if (strlen($time) === 4 && str_contains($time, ':')) {
-                        $time = '0' . $time;
+                        $time = '0'.$time;
                     }
-                    $scheduledAt = \Carbon\Carbon::parse($old->datum . ' ' . $time);
+                    $scheduledAt = \Carbon\Carbon::parse($old->datum.' '.$time);
 
                     $matchTypes = ['MI', 'PO', 'PRATEL', 'TUR'];
                     if (in_array($old->druh, $matchTypes)) {
@@ -100,7 +101,8 @@ class EventMigrationSeeder extends Seeder
                         $this->migrateTraining($old, $targetTeamIds, $scheduledAt, $existingTrainings->get($old->id));
                     }
                 } catch (\Exception $e) {
-                    $this->command->error("\nChyba u záznamu ID {$old->id}: " . $e->getMessage());
+                    $this->command->error("\nChyba u záznamu ID {$old->id}: ".$e->getMessage());
+
                     continue;
                 }
 
@@ -111,7 +113,7 @@ class EventMigrationSeeder extends Seeder
             $this->command->info("\nMigrace událostí dokončena.");
 
         } catch (\Exception $e) {
-            $this->command->error("\nChyba při migraci událostí: " . $e->getMessage());
+            $this->command->error("\nChyba při migraci událostí: ".$e->getMessage());
         }
     }
 
@@ -203,8 +205,8 @@ class EventMigrationSeeder extends Seeder
         $teamIds = (array) $teamIds;
         $event = $existing;
 
-        if (!$event) {
-            $event = new \App\Models\ClubEvent();
+        if (! $event) {
+            $event = new \App\Models\ClubEvent;
             $event->metadata = ['legacy_z_id' => (int) $old->id];
         }
 

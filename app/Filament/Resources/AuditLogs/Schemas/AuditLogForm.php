@@ -50,7 +50,7 @@ class AuditLogForm
                                     ->label(__('admin.navigation.resources.audit_log.fields.actor'))
                                     ->disabled(),
                                 TextInput::make('actor_type')
-                                    ->label(__('admin.navigation.resources.audit_log.fields.actor') . ' (Type)')
+                                    ->label(__('admin.navigation.resources.audit_log.fields.actor').' (Type)')
                                     ->disabled(),
                             ]),
                         Grid::make()
@@ -59,10 +59,10 @@ class AuditLogForm
                                     ->label(__('admin.navigation.resources.audit_log.fields.subject'))
                                     ->disabled(),
                                 TextInput::make('subject_type')
-                                    ->label(__('admin.navigation.resources.audit_log.fields.subject') . ' (Type)')
+                                    ->label(__('admin.navigation.resources.audit_log.fields.subject').' (Type)')
                                     ->disabled(),
                                 TextInput::make('subject_id')
-                                    ->label(__('admin.navigation.resources.audit_log.fields.subject') . ' (ID)')
+                                    ->label(__('admin.navigation.resources.audit_log.fields.subject').' (ID)')
                                     ->disabled(),
                             ]),
                     ]),
@@ -74,7 +74,7 @@ class AuditLogForm
                             ->label(__('admin.navigation.resources.audit_log.fields.url'))
                             ->disabled(),
                         TextInput::make('route_name')
-                            ->label(__('admin.navigation.resources.audit_log.fields.url') . ' (Route)')
+                            ->label(__('admin.navigation.resources.audit_log.fields.url').' (Route)')
                             ->disabled(),
                         TextInput::make('ip_address')
                             ->label(__('admin.navigation.resources.audit_log.fields.ip_address'))
@@ -88,7 +88,7 @@ class AuditLogForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make(__('admin.navigation.resources.audit_log.fields.changes') . ' & ' . __('admin.navigation.resources.audit_log.fields.metadata'))
+                Section::make(__('admin.navigation.resources.audit_log.fields.changes').' & '.__('admin.navigation.resources.audit_log.fields.metadata'))
                     ->schema([
                         Textarea::make('changes')
                             ->label(__('admin.navigation.resources.audit_log.fields.changes'))

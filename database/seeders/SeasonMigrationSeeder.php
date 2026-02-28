@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SeasonMigrationSeeder extends Seeder
@@ -13,8 +12,9 @@ class SeasonMigrationSeeder extends Seeder
     public function run(): void
     {
         $oldDb = config('database.old_database');
-        if (!$oldDb) {
+        if (! $oldDb) {
             $this->command->error('Databáze pro migraci nebyla nalezena (DB_DATABASE_OLD ani DB_DATABASE).');
+
             return;
         }
 
@@ -26,8 +26,8 @@ class SeasonMigrationSeeder extends Seeder
 
             $tables = ['zapasy', 'dochazka', 'web_realna_dochazka', 'web_platici'];
             foreach ($tables as $table) {
-                if (\Illuminate\Support\Facades\Schema::hasTable($oldDb . '.' . $table)) {
-                    $names = \Illuminate\Support\Facades\DB::table($oldDb . '.' . $table)
+                if (\Illuminate\Support\Facades\Schema::hasTable($oldDb.'.'.$table)) {
+                    $names = \Illuminate\Support\Facades\DB::table($oldDb.'.'.$table)
                         ->select('sezona')
                         ->distinct()
                         ->pluck('sezona')
@@ -40,10 +40,11 @@ class SeasonMigrationSeeder extends Seeder
 
             if ($uniqueSeasons->isEmpty()) {
                 $this->command->warn('Nebyly nalezeny žádné sezóny k migraci.');
+
                 return;
             }
 
-            $this->command->info('Migrace ' . $uniqueSeasons->count() . ' sezón...');
+            $this->command->info('Migrace '.$uniqueSeasons->count().' sezón...');
 
             foreach ($uniqueSeasons as $name) {
                 $unifiedName = str_replace('-', '/', $name);
@@ -61,7 +62,7 @@ class SeasonMigrationSeeder extends Seeder
             }
 
         } catch (\Exception $e) {
-            $this->command->error('Chyba při migraci sezón: ' . $e->getMessage());
+            $this->command->error('Chyba při migraci sezón: '.$e->getMessage());
         }
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Dashboard as BaseDashboard;
 use App\Services\BackendSearchService;
 use Filament\GlobalSearch\GlobalSearchResult;
+use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
 {
@@ -21,6 +21,7 @@ class Dashboard extends BaseDashboard
     }
 
     public $contact_message = '';
+
     public $contact_subject = '';
 
     protected function getViewData(): array
@@ -81,13 +82,13 @@ class Dashboard extends BaseDashboard
         $usersWithoutConfig = 0;
         if ($currentSeason) {
             $usersWithoutConfig = \App\Models\User::where('is_active', true)
-                ->whereDoesntHave('userSeasonConfigs', fn($q) => $q->where('season_id', $currentSeason->id))
+                ->whereDoesntHave('userSeasonConfigs', fn ($q) => $q->where('season_id', $currentSeason->id))
                 ->count();
         }
 
         // Health & Season Renewal
         $expectedSeasonName = \App\Models\Season::getExpectedCurrentSeasonName();
-        $configsExist = \App\Models\UserSeasonConfig::whereHas('season', fn($q) => $q->where('name', $expectedSeasonName))->exists();
+        $configsExist = \App\Models\UserSeasonConfig::whereHas('season', fn ($q) => $q->where('name', $expectedSeasonName))->exists();
 
         $isSeptember = now()->month == 9;
         $showRenewalWarning = (! $configsExist && $isSeptember) || $debug;
@@ -108,8 +109,8 @@ class Dashboard extends BaseDashboard
             ->latest('created_at')
             ->limit(8)
             ->get()
-            ->map(function($log) {
-                $actionLabel = match($log->action) {
+            ->map(function ($log) {
+                $actionLabel = match ($log->action) {
                     'created' => __('admin/dashboard.recent_activity.actions.created'),
                     'updated' => __('admin/dashboard.recent_activity.actions.updated'),
                     'deleted' => __('admin/dashboard.recent_activity.actions.deleted'),
@@ -118,7 +119,7 @@ class Dashboard extends BaseDashboard
                     default => ucfirst($log->action),
                 };
 
-                $icon = match($log->action) {
+                $icon = match ($log->action) {
                     'created' => 'fa-circle-plus',
                     'updated' => 'fa-pen-to-square',
                     'deleted' => 'fa-trash-xmark',
@@ -127,7 +128,7 @@ class Dashboard extends BaseDashboard
                     default => 'fa-circle-dot',
                 };
 
-                $color = match($log->action) {
+                $color = match ($log->action) {
                     'created' => 'success',
                     'updated' => 'warning',
                     'deleted' => 'danger',
@@ -138,16 +139,18 @@ class Dashboard extends BaseDashboard
 
                 // Build a detail string
                 $details = null;
-                if ($log->action === 'updated' && !empty($log->changes)) {
+                if ($log->action === 'updated' && ! empty($log->changes)) {
                     $changedKeys = array_keys($log->changes['after'] ?? []);
-                    if (!empty($changedKeys)) {
-                        $details = 'Změněno: ' . implode(', ', array_map(fn($k) => __("fields.$k") !== "fields.$k" ? __("fields.$k") : $k, array_slice($changedKeys, 0, 3)));
-                        if (count($changedKeys) > 3) $details .= '...';
+                    if (! empty($changedKeys)) {
+                        $details = 'Změněno: '.implode(', ', array_map(fn ($k) => __("fields.$k") !== "fields.$k" ? __("fields.$k") : $k, array_slice($changedKeys, 0, 3)));
+                        if (count($changedKeys) > 3) {
+                            $details .= '...';
+                        }
                     }
                 }
 
                 $subject = $log->subject_label;
-                if (!$subject && $log->subject_type) {
+                if (! $subject && $log->subject_type) {
                     $subject = class_basename($log->subject_type);
                 }
 
@@ -249,7 +252,7 @@ class Dashboard extends BaseDashboard
                 title: $result->title,
                 url: $result->url,
                 details: [
-                    'AI Návrh' => $result->snippet
+                    'AI Návrh' => $result->snippet,
                 ],
             );
         }

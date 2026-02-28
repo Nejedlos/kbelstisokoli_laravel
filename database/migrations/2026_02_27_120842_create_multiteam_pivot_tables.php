@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // photo_pool_team
-        if (!Schema::hasTable('photo_pool_team')) {
+        if (! Schema::hasTable('photo_pool_team')) {
             Schema::create('photo_pool_team', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('photo_pool_id')->constrained()->cascadeOnDelete();
@@ -22,7 +22,7 @@ return new class extends Migration
         }
 
         // club_competition_entry_team
-        if (!Schema::hasTable('club_competition_entry_team')) {
+        if (! Schema::hasTable('club_competition_entry_team')) {
             Schema::create('club_competition_entry_team', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('entry_id');
@@ -35,7 +35,7 @@ return new class extends Migration
         }
 
         // statistic_row_team
-        if (!Schema::hasTable('statistic_row_team')) {
+        if (! Schema::hasTable('statistic_row_team')) {
             Schema::create('statistic_row_team', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('statistic_row_id')->constrained()->cascadeOnDelete();

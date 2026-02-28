@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // Pro SQLite (testy) použijeme standardní Schema, abychom se vyhnuli problémům s raw SQL
@@ -21,7 +22,7 @@ return new class extends Migration {
         // which fails on this production DB environment due to a Laravel/MariaDB bug
         // (Unknown column 'generation_expression').
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'ai_documents';
+        $table = $prefix.'ai_documents';
 
         try {
             $columnExists = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$table} LIKE 'keywords'");
@@ -53,7 +54,7 @@ return new class extends Migration {
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'ai_documents';
+        $table = $prefix.'ai_documents';
 
         try {
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} DROP COLUMN IF EXISTS keywords");

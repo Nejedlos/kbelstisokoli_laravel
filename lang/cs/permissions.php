@@ -1,4 +1,5 @@
 <?php
+
 return [
     'access_admin' => 'Přístup do administrace',
     'manage_users' => 'Správa uživatelů a rolí',

@@ -2,19 +2,16 @@
 
 namespace App\Filament\Resources\Trainings;
 
+use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
 use App\Filament\Resources\Trainings\Pages\CreateTraining;
 use App\Filament\Resources\Trainings\Pages\EditTraining;
 use App\Filament\Resources\Trainings\Pages\ListTrainings;
 use App\Filament\Resources\Trainings\Schemas\TrainingForm;
 use App\Filament\Resources\Trainings\Tables\TrainingsTable;
 use App\Models\Training;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-
-use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
 
 class TrainingResource extends Resource
 {

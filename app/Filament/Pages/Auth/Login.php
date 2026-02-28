@@ -2,16 +2,12 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Auth\Pages\Login as BaseLogin;
-use Filament\Schemas\Schema;
-use Illuminate\Contracts\Support\Htmlable;
-
-use Illuminate\Support\HtmlString;
-use Filament\Schemas\Components\Component;
-
-use Filament\Notifications\Notification;
-use Illuminate\Validation\ValidationException;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Component;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
@@ -21,17 +17,11 @@ class Login extends BaseLogin
     // DŮLEŽITÉ: `$view` musí být NEstatická vlastnost, aby odpovídala `Filament\Pages\SimplePage`
     protected string $view = 'filament.admin.auth.login';
 
-    /**
-     * @return string|Htmlable
-     */
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
         return __('Vstup do kabiny');
     }
 
-    /**
-     * @return string|Htmlable
-     */
     public function getSubheading(): string|Htmlable
     {
         return __('Z palubovky rovnou k taktické tabuli.');

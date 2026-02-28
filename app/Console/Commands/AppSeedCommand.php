@@ -47,9 +47,9 @@ class AppSeedCommand extends Command
         config(['app.seed_users' => $seedUsers]);
 
         if ($seedUsers) {
-            $this->line("🛡️  Seedování uživatelů: <info>POVOLENO</info>");
+            $this->line('🛡️  Seedování uživatelů: <info>POVOLENO</info>');
         } else {
-            $this->line("🛡️  Seedování uživatelů: <comment>PŘESKOČENO</comment> (použijte --users pro vynucení)");
+            $this->line('🛡️  Seedování uživatelů: <comment>PŘESKOČENO</comment> (použijte --users pro vynucení)');
         }
 
         // Informativní výpis aktivní DB
@@ -67,7 +67,7 @@ class AppSeedCommand extends Command
         $this->line("📄 Pages (před): <comment>{$pagesBefore}</comment>");
 
         // Normalizace názvu třídy, pokud uživatel zadá jen název
-        if (!str_contains($class, '\\')) {
+        if (! str_contains($class, '\\')) {
             $class = "Database\\Seeders\\{$class}";
         }
 
@@ -76,14 +76,16 @@ class AppSeedCommand extends Command
             $this->warn('Fresh režim smaže stávající produkční data v dotčených tabulkách.');
 
             // Na produkci vyžadujeme potvrzení nebo --no-interaction
-            if (app()->environment('production') && !$this->option('no-interaction')) {
-                if (!$this->confirm('Opravdu chcete smazat data na PRODUKCI?', false)) {
+            if (app()->environment('production') && ! $this->option('no-interaction')) {
+                if (! $this->confirm('Opravdu chcete smazat data na PRODUKCI?', false)) {
                     $this->info('Akce zrušena.');
+
                     return self::SUCCESS;
                 }
-            } elseif (!$this->option('no-interaction')) {
-                if (!$this->confirm('Opravdu chcete smazat stávající data v databázi?', false)) {
+            } elseif (! $this->option('no-interaction')) {
+                if (! $this->confirm('Opravdu chcete smazat stávající data v databázi?', false)) {
                     $this->info('Akce zrušena.');
+
                     return self::SUCCESS;
                 }
             }
@@ -128,10 +130,10 @@ class AppSeedCommand extends Command
 
             // Počty stránek po seedu a audit vybraných slugů
             $pagesAfter = Page::query()->count();
-            $this->line("📄 Pages (po): <comment>{$pagesAfter}</comment> (Δ " . ($pagesAfter - $pagesBefore) . ")");
-            $slugs = ['home','o-klubu','nabor','treninky','zapasy','tymy','kontakt','gdpr'];
+            $this->line("📄 Pages (po): <comment>{$pagesAfter}</comment> (Δ ".($pagesAfter - $pagesBefore).')');
+            $slugs = ['home', 'o-klubu', 'nabor', 'treninky', 'zapasy', 'tymy', 'kontakt', 'gdpr'];
             $found = Page::query()->whereIn('slug', $slugs)->pluck('slug')->all();
-            $this->line('🔎 Frontend slugs přítomné: <comment>' . implode(', ', $found) . '</comment>');
+            $this->line('🔎 Frontend slugs přítomné: <comment>'.implode(', ', $found).'</comment>');
 
             // Vyčistíme cache, aby se změny projevily hned
             $this->info('Čistím cache...');

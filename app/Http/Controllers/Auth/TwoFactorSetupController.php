@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Laravel\Fortify\Fortify;
 
 class TwoFactorSetupController extends Controller
 {
@@ -31,6 +30,7 @@ class TwoFactorSetupController extends Controller
                 'user_id' => $user?->id,
                 'email' => $user?->email,
             ]);
+
             return redirect()->to(config('fortify.home', '/clenska-sekce/dashboard'));
         }
 
@@ -40,12 +40,13 @@ class TwoFactorSetupController extends Controller
 
         // Pokud už má 2FA aktivní a potvrzené, redirect do adminu
         // ALE pokud jsme právě potvrdili (status v session), necháme ho zobrazit recovery kódy
-        if ($user->two_factor_secret && (!$needsConfirmation || $isConfirmed)) {
+        if ($user->two_factor_secret && (! $needsConfirmation || $isConfirmed)) {
             if (session('status') !== 'two-factor-authentication-confirmed') {
                 \Illuminate\Support\Facades\Log::info('TwoFactorSetupController.already_confirmed_redirect', [
                     'user_id' => $user?->id,
                     'email' => $user?->email,
                 ]);
+
                 return redirect()->intended(config('filament.panels.admin.path', 'admin'));
             }
         }

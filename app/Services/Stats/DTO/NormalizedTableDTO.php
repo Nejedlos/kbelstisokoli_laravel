@@ -5,7 +5,7 @@ namespace App\Services\Stats\DTO;
 class NormalizedTableDTO
 {
     /**
-     * @param NormalizedRowDTO[] $rows
+     * @param  NormalizedRowDTO[]  $rows
      */
     public function __construct(
         public string $name,
@@ -19,7 +19,7 @@ class NormalizedTableDTO
         return [
             'name' => $this->name,
             'columns' => $this->columns,
-            'rows' => array_map(fn($row) => $row->toArray(), $this->rows),
+            'rows' => array_map(fn ($row) => $row->toArray(), $this->rows),
             'metadata' => $this->metadata,
         ];
     }

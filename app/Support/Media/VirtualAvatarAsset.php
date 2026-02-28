@@ -11,7 +11,9 @@ use Livewire\Wireable;
 class VirtualAvatarAsset implements Wireable
 {
     public $id;
+
     public $mainUrl;
+
     public $thumbUrl;
 
     public function __construct($id, $mainUrl, $thumbUrl)
@@ -35,8 +37,9 @@ class VirtualAvatarAsset implements Wireable
     public function __get(string $name)
     {
         if ($name === 'title') {
-            return 'Default Avatar ' . $this->id;
+            return 'Default Avatar '.$this->id;
         }
+
         return null;
     }
 

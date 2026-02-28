@@ -8,10 +8,8 @@ use App\Filament\Resources\ExternalStatSources\Pages\ListExternalStatSources;
 use App\Filament\Resources\ExternalStatSources\Schemas\ExternalStatSourceForm;
 use App\Filament\Resources\ExternalStatSources\Tables\ExternalStatSourcesTable;
 use App\Models\ExternalStatSource;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class ExternalStatSourceResource extends Resource

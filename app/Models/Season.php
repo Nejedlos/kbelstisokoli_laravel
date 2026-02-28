@@ -26,11 +26,11 @@ class Season extends Model
 
         if ($now->month < 9) {
             // Jsme před zářím, sezóna začala loni
-            return ($year - 1) . '/' . $year;
+            return ($year - 1).'/'.$year;
         }
 
         // Jsme v září nebo později, sezóna začala letos
-        return $year . '/' . ($year + 1);
+        return $year.'/'.($year + 1);
     }
 
     /**
@@ -43,11 +43,11 @@ class Season extends Model
 
         if ($now->month < 9) {
             // Aktuální je (year-1)/year, předchozí je (year-2)/(year-1)
-            return ($year - 2) . '/' . ($year - 1);
+            return ($year - 2).'/'.($year - 1);
         }
 
         // Aktuální je year/(year+1), předchozí je (year-1)/year
-        return ($year - 1) . '/' . $year;
+        return ($year - 1).'/'.$year;
     }
 
     /**
@@ -58,9 +58,10 @@ class Season extends Model
         if (str_contains($name, '/')) {
             [$year1, $year2] = explode('/', $name);
             if (is_numeric($year1) && is_numeric($year2)) {
-                return ($year1 - 1) . '/' . ($year2 - 1);
+                return ($year1 - 1).'/'.($year2 - 1);
             }
         }
+
         return $name;
     }
 

@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Team;
 use App\Models\BasketballMatch;
+use App\Models\Team;
 use App\Models\Training;
-use App\Models\ClubEvent;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -33,14 +32,14 @@ class TeamController extends Controller
 
         $upcomingMatches = BasketballMatch::where('team_id', $team->id)
             ->where('scheduled_at', '>=', now())
-            ->withCount(['attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed')])
-            ->withCount(['attendances as declined_count' => fn($q) => $q->where('planned_status', 'declined')])
+            ->withCount(['attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed')])
+            ->withCount(['attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined')])
             ->orderBy('scheduled_at')
             ->get();
 
-        $upcomingTrainings = Training::whereHas('teams', fn($q) => $q->where('teams.id', $team->id))
+        $upcomingTrainings = Training::whereHas('teams', fn ($q) => $q->where('teams.id', $team->id))
             ->where('starts_at', '>=', now())
-            ->withCount(['attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed')])
+            ->withCount(['attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed')])
             ->orderBy('starts_at')
             ->get();
 

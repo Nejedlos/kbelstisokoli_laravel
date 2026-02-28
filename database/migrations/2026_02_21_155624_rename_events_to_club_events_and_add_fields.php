@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('events') && !Schema::hasTable('club_events')) {
+        if (Schema::hasTable('events') && ! Schema::hasTable('club_events')) {
             Schema::rename('events', 'club_events');
         }
 

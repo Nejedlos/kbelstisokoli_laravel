@@ -19,7 +19,7 @@ class MatchController extends Controller
         $query = BasketballMatch::with(['teams', 'opponent', 'season']);
 
         // Defaultní sezóna (aktuální), pokud není vybrána jiná
-        if (!$seasonId) {
+        if (! $seasonId) {
             $currentSeasonName = \App\Models\Season::getExpectedCurrentSeasonName();
             $currentSeason = \App\Models\Season::where('name', $currentSeasonName)->first();
             if ($currentSeason) {
@@ -32,7 +32,7 @@ class MatchController extends Controller
         }
 
         if ($teamId) {
-            $query->whereHas('teams', function($q) use ($teamId) {
+            $query->whereHas('teams', function ($q) use ($teamId) {
                 $q->where('teams.id', $teamId);
             });
         }
@@ -43,11 +43,11 @@ class MatchController extends Controller
 
         if ($type === 'latest') {
             $query->whereIn('status', ['completed', 'played'])
-                  ->orderBy('scheduled_at', 'desc');
+                ->orderBy('scheduled_at', 'desc');
         } else {
             $query->whereNotIn('status', ['completed', 'played'])
-                  ->where('scheduled_at', '>=', now()->subHours(3)) // Zobrazit i probíhající
-                  ->orderBy('scheduled_at', 'asc');
+                ->where('scheduled_at', '>=', now()->subHours(3)) // Zobrazit i probíhající
+                ->orderBy('scheduled_at', 'asc');
         }
 
         $matches = $query->paginate(15);

@@ -5,16 +5,13 @@ namespace App\Filament\Resources\ClubEvents;
 use App\Filament\Resources\ClubEvents\Pages\CreateClubEvent;
 use App\Filament\Resources\ClubEvents\Pages\EditClubEvent;
 use App\Filament\Resources\ClubEvents\Pages\ListClubEvents;
+use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
 use App\Filament\Resources\ClubEvents\Schemas\ClubEventForm;
 use App\Filament\Resources\ClubEvents\Tables\ClubEventsTable;
 use App\Models\ClubEvent;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-
-use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
 
 class ClubEventResource extends Resource
 {

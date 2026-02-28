@@ -3,31 +3,38 @@
 namespace App\Livewire\Member;
 
 use App\Models\Setting;
-use Livewire\Component;
-use Livewire\Attributes\Locked;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
 
 class PaymentWidget extends Component
 {
     #[Locked]
     public string $bankAccount = '';
+
     #[Locked]
     public string $bankName = '';
+
     #[Locked]
     public string $vs = '';
+
     #[Locked]
     public string $memberName = '';
+
     public string $amount = '';
+
     public string $note = '';
+
     public string $ss = '';
+
     #[Locked]
     public string $qrCodeDataUri = '';
 
     public function mount()
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -51,8 +58,9 @@ class PaymentWidget extends Component
     {
         // Převedeme bankovní účet na IBAN
         $iban = $this->convertToIban($this->bankAccount);
-        if (!$iban) {
+        if (! $iban) {
             $this->qrCodeDataUri = '';
+
             return;
         }
 
@@ -60,16 +68,16 @@ class PaymentWidget extends Component
 
         try {
             $options = new QROptions([
-                'version'    => QRCode::VERSION_AUTO,
+                'version' => QRCode::VERSION_AUTO,
                 'outputType' => QRCode::OUTPUT_IMAGE_PNG,
-                'eccLevel'   => QRCode::ECC_L,
-                'scale'      => 5,
+                'eccLevel' => QRCode::ECC_L,
+                'scale' => 5,
                 'addQuietzone' => true,
             ]);
 
             $this->qrCodeDataUri = (new QRCode($options))->render($spayd);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('QR Code generation failed: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('QR Code generation failed: '.$e->getMessage());
             $this->qrCodeDataUri = '';
         }
     }
@@ -82,8 +90,8 @@ class PaymentWidget extends Component
 
         if ($this->amount) {
             $amountValue = str_replace(',', '.', $this->amount);
-            if (is_numeric($amountValue) && (float)$amountValue > 0) {
-                $formattedAmount = number_format((float)$amountValue, 2, '.', '');
+            if (is_numeric($amountValue) && (float) $amountValue > 0) {
+                $formattedAmount = number_format((float) $amountValue, 2, '.', '');
                 $spayd .= "*AM:{$formattedAmount}";
             }
         }
@@ -91,21 +99,21 @@ class PaymentWidget extends Component
         if ($this->vs) {
             $vsDigits = preg_replace('/[^0-9]/', '', $this->vs);
             if ($vsDigits !== '') {
-                $spayd .= "*X-VS:" . mb_substr($vsDigits, 0, 10);
+                $spayd .= '*X-VS:'.mb_substr($vsDigits, 0, 10);
             }
         }
 
         if ($this->ss) {
             $ssDigits = preg_replace('/[^0-9]/', '', $this->ss);
             if ($ssDigits !== '') {
-                $spayd .= "*X-SS:" . mb_substr($ssDigits, 0, 10);
+                $spayd .= '*X-SS:'.mb_substr($ssDigits, 0, 10);
             }
         }
 
         // Pokud není zadána poznámka, použijeme jméno člena jako výchozí
         $message = $this->note ?: $this->memberName;
         if ($message) {
-            $spayd .= "*MSG:" . $this->sanitizeMessage($message);
+            $spayd .= '*MSG:'.$this->sanitizeMessage($message);
         }
 
         return $spayd;
@@ -124,13 +132,14 @@ class PaymentWidget extends Component
 
         // Odstranit vícenásobné mezery a oříznout
         $msg = preg_replace('/\s+/', ' ', $msg);
+
         return trim($msg);
     }
 
     protected function convertToIban(string $account): ?string
     {
         // Formát: [předčíslí-]číslo/banka
-        if (!preg_match('/^(?:(\d{1,6})-)?(\d{1,10})\/(\d{4})$/', $account, $matches)) {
+        if (! preg_match('/^(?:(\d{1,6})-)?(\d{1,10})\/(\d{4})$/', $account, $matches)) {
             return null;
         }
 
@@ -140,12 +149,12 @@ class PaymentWidget extends Component
 
         // IBAN CZ kód země (C=12, Z=35) + kontrolní číslice (zatím 00)
         // bbbb ssss sscc cccc cccc 12 35 00
-        $checkString = $bankCode . $prefix . $number . '123500';
+        $checkString = $bankCode.$prefix.$number.'123500';
 
         // Modulo 97 s velkým číslem
         $mod = 0;
         for ($i = 0; $i < strlen($checkString); $i++) {
-            $mod = ($mod * 10 + (int)$checkString[$i]) % 97;
+            $mod = ($mod * 10 + (int) $checkString[$i]) % 97;
         }
 
         $checkDigits = str_pad(98 - $mod, 2, '0', STR_PAD_LEFT);

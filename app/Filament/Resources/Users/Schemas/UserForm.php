@@ -2,31 +2,28 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Enums\BasketballPosition;
+use App\Enums\DominantHand;
 use App\Enums\Gender;
+use App\Enums\JerseySize;
 use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
 use App\Enums\PaymentMethod;
-use App\Enums\BasketballPosition;
-use App\Enums\DominantHand;
-use App\Enums\JerseySize;
 use App\Services\ClubIdentifierService;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Actions\Action;
-use Filament\Notifications\Notification;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Facades\Hash;
 
 class UserForm
 {
@@ -59,17 +56,17 @@ class UserForm
                     'default' => 1,
                     'md' => 12,
                 ])
-                ->schema([
-                    Placeholder::make('avatar_placeholder')
-                        ->hiddenLabel()
-                        ->content(fn ($record) => $record ? new HtmlString("
+                    ->schema([
+                        Placeholder::make('avatar_placeholder')
+                            ->hiddenLabel()
+                            ->content(fn ($record) => $record ? new HtmlString("
                             <div class='flex flex-col items-center gap-4 py-2'
                                  x-data='{
-                                     avatarUrl: \"" . $record->getAvatarUrl('thumb') . "\",
+                                     avatarUrl: \"".$record->getAvatarUrl('thumb')."\",
                                      init() {
                                          window.addEventListener(\"avatarUpdated\", (event) => {
                                              if (event.detail.userId == {$record->id}) {
-                                                 this.avatarUrl = event.detail.url || \"" . $record->getAvatarUrl('thumb') . "\";
+                                                 this.avatarUrl = event.detail.url || \"".$record->getAvatarUrl('thumb')."\";
                                              }
                                          });
                                      }
@@ -88,7 +85,7 @@ class UserForm
                                         <!-- Overlay -->
                                         <div class='absolute inset-0 bg-gray-900/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white'>
                                             <i class='fa-light fa-camera-retro text-lg mb-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300'></i>
-                                            <span class='text-[8px] font-black uppercase tracking-widest'>" . __('member.profile.avatar.change') . "</span>
+                                            <span class='text-[8px] font-black uppercase tracking-widest'>".__('member.profile.avatar.change')."</span>
                                         </div>
                                     </div>
 
@@ -103,53 +100,53 @@ class UserForm
                                 <i class='fa-light fa-user text-2xl'></i>
                             </div>
                         "))
-                        ->columnSpan([
-                            'default' => 1,
-                            'md' => 2,
-                        ]),
+                            ->columnSpan([
+                                'default' => 1,
+                                'md' => 2,
+                            ]),
 
-                    Placeholder::make('member_info')
-                        ->hiddenLabel()
-                        ->content(fn ($record) => new HtmlString("
+                        Placeholder::make('member_info')
+                            ->hiddenLabel()
+                            ->content(fn ($record) => new HtmlString("
                             <div class='py-2'>
-                                <h2 class='text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-tight'>" . ($record?->name ?? 'Nový člen klubu') . "</h2>
-                                " . ($record ? "
+                                <h2 class='text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-tight'>".($record?->name ?? 'Nový člen klubu').'</h2>
+                                '.($record ? "
                                 <div class='flex flex-wrap gap-1.5 mt-2'>
-                                    " . ($record->roles->map(fn($role) => "
+                                    ".($record->roles->map(fn ($role) => "
                                         <span class='px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-950 dark:text-primary-300 dark:border-primary-800 rounded-lg'>
                                             {$role->name}
                                         </span>
-                                    ")->implode('')) . "
+                                    ")->implode(''))."
                                 </div>
 
                                 <div class='mt-6 flex flex-wrap gap-x-12 gap-y-4'>
                                     <div class='flex flex-col'>
-                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>" . __('user.fields.club_member_id') . "</span>
+                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>".__('user.fields.club_member_id')."</span>
                                         <span class='font-mono font-black text-gray-900 dark:text-gray-100 text-xl'>{$record->club_member_id}</span>
                                     </div>
                                     <div class='flex flex-col'>
-                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>" . __('user.fields.payment_vs') . "</span>
+                                        <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>".__('user.fields.payment_vs')."</span>
                                         <span class='font-mono font-black text-primary-600 dark:text-primary-400 text-xl'>{$record->payment_vs}</span>
                                     </div>
                                     <div class='flex flex-col'>
                                         <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>Status</span>
-                                        <span class='font-black text-gray-900 dark:text-white text-xl uppercase'>" . ($record?->membership_status?->getLabel() ?? '-') . "</span>
+                                        <span class='font-black text-gray-900 dark:text-white text-xl uppercase'>".($record?->membership_status?->getLabel() ?? '-')."</span>
                                     </div>
                                     <div class='flex flex-col'>
                                         <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>Účet</span>
-                                        " . ($record?->is_active
-                                            ? "<span class='text-success-600 dark:text-success-400 font-black flex items-center gap-1.5 text-xl uppercase'>" . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK) . " Aktivní</span>"
-                                            : "<span class='text-danger-600 dark:text-danger-400 font-black flex items-center gap-1.5 text-xl uppercase'>" . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK) . " Neaktivní</span>") . "
+                                        ".($record?->is_active
+                                                ? "<span class='text-success-600 dark:text-success-400 font-black flex items-center gap-1.5 text-xl uppercase'>".\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK).' Aktivní</span>'
+                                                : "<span class='text-danger-600 dark:text-danger-400 font-black flex items-center gap-1.5 text-xl uppercase'>".\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK).' Neaktivní</span>').'
                                     </div>
                                 </div>
-                                " : "<p class='text-gray-500 dark:text-gray-400 mt-2'>Vyplňte základní údaje pro vytvoření nového člena.</p>") . "
+                                ' : "<p class='text-gray-500 dark:text-gray-400 mt-2'>Vyplňte základní údaje pro vytvoření nového člena.</p>").'
                             </div>
-                        "))
-                        ->columnSpan([
-                            'default' => 1,
-                            'md' => 10,
-                        ]),
-                ]),
+                        '))
+                            ->columnSpan([
+                                'default' => 1,
+                                'md' => 10,
+                            ]),
+                    ]),
             ]);
     }
 
@@ -163,11 +160,11 @@ class UserForm
                     ->content(fn ($record) => $record ? new HtmlString("
                         <div class='flex items-center gap-6'
                              x-data='{
-                                 avatarUrl: \"" . $record->getAvatarUrl('thumb') . "\",
+                                 avatarUrl: \"".$record->getAvatarUrl('thumb')."\",
                                  init() {
                                      window.addEventListener(\"avatarUpdated\", (event) => {
                                          if (event.detail.userId == {$record->id}) {
-                                             this.avatarUrl = event.detail.url || \"" . $record->getAvatarUrl('thumb') . "\";
+                                             this.avatarUrl = event.detail.url || \"".$record->getAvatarUrl('thumb')."\";
                                          }
                                      });
                                  }
@@ -185,14 +182,14 @@ class UserForm
                                 <button type='button'
                                         @click=\"\$dispatch('openAvatarModal', { userId: {$record->id} })\"
                                         class='text-xs font-bold text-primary-600 hover:text-primary-700 uppercase tracking-wider'>
-                                    " . __('member.profile.avatar.gallery_open') . "
+                                    ".__('member.profile.avatar.gallery_open')."
                                 </button>
                                 <p class='text-[10px] text-gray-500 dark:text-gray-400 font-medium italic'>
-                                    " . __('member.profile.avatar.hint') . "
+                                    ".__('member.profile.avatar.hint').'
                                 </p>
                             </div>
                         </div>
-                    ") : '-')
+                    ') : '-')
                     ->columnSpanFull(),
 
                 Section::make(__('user.sections.identity'))
@@ -348,12 +345,12 @@ class UserForm
                                 TextInput::make('club_member_id')
                                     ->label(__('user.fields.club_member_id'))
                                     ->unique(ignoreRecord: true)
-                                    ->disabled(fn ($record) => $record && !empty($record->club_member_id))
+                                    ->disabled(fn ($record) => $record && ! empty($record->club_member_id))
                                     ->dehydrated()
                                     ->suffixAction(
                                         Action::make('generate_id')
                                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::REFRESH))
-                                            ->hidden(fn ($record) => $record && !empty($record->club_member_id))
+                                            ->hidden(fn ($record) => $record && ! empty($record->club_member_id))
                                             ->action(function ($set) {
                                                 $set('club_member_id', app(ClubIdentifierService::class)->generateClubMemberId());
                                             })
@@ -387,12 +384,12 @@ class UserForm
                                 TextInput::make('payment_vs')
                                     ->label(__('user.fields.payment_vs'))
                                     ->unique(ignoreRecord: true)
-                                    ->disabled(fn ($record) => $record && !empty($record->payment_vs))
+                                    ->disabled(fn ($record) => $record && ! empty($record->payment_vs))
                                     ->dehydrated()
                                     ->suffixAction(
                                         Action::make('generate_vs')
                                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::REFRESH))
-                                            ->hidden(fn ($record) => $record && !empty($record->payment_vs))
+                                            ->hidden(fn ($record) => $record && ! empty($record->payment_vs))
                                             ->action(function ($set) {
                                                 $set('payment_vs', app(ClubIdentifierService::class)->generatePaymentVs());
                                             })
@@ -434,17 +431,17 @@ class UserForm
                                         ? new HtmlString("<div class='bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 p-4 rounded-xl mb-4'>
                                             <div class='flex items-center gap-3'>
                                                 <div class='p-2 bg-primary-100 dark:bg-primary-800 rounded-lg text-primary-600 dark:text-primary-400'>
-                                                    " . \App\Support\IconHelper::render(\App\Support\IconHelper::CLOCK) . "
+                                                    ".\App\Support\IconHelper::render(\App\Support\IconHelper::CLOCK)."
                                                 </div>
                                                 <div>
                                                     <p class='text-sm font-bold text-primary-900 dark:text-primary-100'>Aktuálně aktivní profil</p>
                                                     <p class='text-xs text-primary-700 dark:text-primary-300'>
-                                                        Platnost od: <b>" . ($record->activePlayerProfile->valid_from?->format('d.m.Y') ?? 'neurčeno') . "</b>
-                                                        " . ($record->activePlayerProfile->valid_to ? " do: <b>" . $record->activePlayerProfile->valid_to->format('d.m.Y') . "</b>" : " (bez omezení)") . "
+                                                        Platnost od: <b>".($record->activePlayerProfile->valid_from?->format('d.m.Y') ?? 'neurčeno').'</b>
+                                                        '.($record->activePlayerProfile->valid_to ? ' do: <b>'.$record->activePlayerProfile->valid_to->format('d.m.Y').'</b>' : ' (bez omezení)').'
                                                     </p>
                                                 </div>
                                             </div>
-                                          </div>")
+                                          </div>')
                                         : new HtmlString("<div class='bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 p-4 rounded-xl mb-4 text-warning-800 dark:text-warning-200 text-sm'>
                                             Uživatel aktuálně nemá žádný aktivní hráčský profil.
                                           </div>")
@@ -539,7 +536,7 @@ class UserForm
                                             ->responsiveImages(),
                                     ]),
                             ])
-                            ->visible(fn($get) => $get('player_profile_active')),
+                            ->visible(fn ($get) => $get('player_profile_active')),
                     ]),
             ]);
     }
@@ -570,8 +567,8 @@ class UserForm
                                 Placeholder::make('is_active_status')
                                     ->label(__('user.fields.is_active'))
                                     ->content(fn ($record) => $record?->is_active
-                                        ? new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-bold uppercase">' . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK) . ' Aktivní účet</div>')
-                                        : new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-bold uppercase">' . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK) . ' Neaktivní účet</div>')
+                                        ? new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-bold uppercase">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK).' Aktivní účet</div>')
+                                        : new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-bold uppercase">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK).' Neaktivní účet</div>')
                                     )
                                     ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord)
                                     ->hintAction(
@@ -583,7 +580,7 @@ class UserForm
                                             ->modalHeading(fn ($record) => $record?->is_active ? 'Deaktivovat účet?' : 'Aktivovat účet?')
                                             ->modalDescription('Změna stavu aktivity účtu má okamžitý vliv na možnost uživatele přihlásit se do systému.')
                                             ->action(function ($record) {
-                                                $record->is_active = !$record->is_active;
+                                                $record->is_active = ! $record->is_active;
                                                 $record->save();
 
                                                 Notification::make()
@@ -603,9 +600,9 @@ class UserForm
                         Placeholder::make('2fa_status_detailed')
                             ->label('Aktuální stav')
                             ->content(fn ($record) => match (true) {
-                                !$record?->two_factor_secret => new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-medium">' . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK) . ' Neaktivní</div>'),
-                                !$record->two_factor_confirmed_at => new HtmlString('<div class="flex items-center gap-2 text-warning-600 dark:text-warning-400 font-medium">' . \App\Support\IconHelper::render(\App\Support\IconHelper::INFO) . ' Čeká na potvrzení</div>'),
-                                default => new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-medium">' . \App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK) . ' Aktivní a ověřeno</div>'),
+                                ! $record?->two_factor_secret => new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-medium">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK).' Neaktivní</div>'),
+                                ! $record->two_factor_confirmed_at => new HtmlString('<div class="flex items-center gap-2 text-warning-600 dark:text-warning-400 font-medium">'.\App\Support\IconHelper::render(\App\Support\IconHelper::INFO).' Čeká na potvrzení</div>'),
+                                default => new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-medium">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK).' Aktivní a ověřeno</div>'),
                             }),
                         Placeholder::make('2fa_confirmed_at')
                             ->label('Datum aktivace')
@@ -663,13 +660,13 @@ class UserForm
                             ->schema([
                                 Placeholder::make('created_at')
                                     ->label('Vytvořeno')
-                                    ->content(fn($record) => $record?->created_at?->format('d.m.Y H:i') ?? '-'),
+                                    ->content(fn ($record) => $record?->created_at?->format('d.m.Y H:i') ?? '-'),
                                 Placeholder::make('updated_at')
                                     ->label('Upraveno')
-                                    ->content(fn($record) => $record?->updated_at?->format('d.m.Y H:i') ?? '-'),
+                                    ->content(fn ($record) => $record?->updated_at?->format('d.m.Y H:i') ?? '-'),
                                 Placeholder::make('last_login_at')
                                     ->label('Poslední přihlášení')
-                                    ->content(fn($record) => $record?->last_login_at?->format('d.m.Y H:i') ?? '-'),
+                                    ->content(fn ($record) => $record?->last_login_at?->format('d.m.Y H:i') ?? '-'),
                             ]),
                     ]),
             ]);

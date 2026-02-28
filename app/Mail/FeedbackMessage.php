@@ -14,10 +14,15 @@ class FeedbackMessage extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public string $type; // coach|admin
+
     public User $user;
+
     public ?Team $team;
+
     public string $bodyMessage;
+
     public ?string $attachmentDisk;
+
     public ?string $attachmentPath;
 
     public function __construct(

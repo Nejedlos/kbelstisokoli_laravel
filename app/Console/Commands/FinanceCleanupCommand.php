@@ -5,9 +5,6 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\FinanceCharge;
-use App\Models\FinancePayment;
-use App\Models\ChargePaymentAllocation;
 
 class FinanceCleanupCommand extends Command
 {
@@ -30,9 +27,10 @@ class FinanceCleanupCommand extends Command
      */
     public function handle()
     {
-        if (app()->environment('production') && !$this->option('force')) {
-            if (!$this->confirm('Opravdu chcete smazat VŠECHNA FINANČNÍ DATA na produkci? Tato akce je nevratná!', false)) {
+        if (app()->environment('production') && ! $this->option('force')) {
+            if (! $this->confirm('Opravdu chcete smazat VŠECHNA FINANČNÍ DATA na produkci? Tato akce je nevratná!', false)) {
                 $this->info('Akce zrušena.');
+
                 return self::SUCCESS;
             }
         }
@@ -62,7 +60,7 @@ class FinanceCleanupCommand extends Command
 
         $this->info('Finanční data byla úspěšně vymazána.');
 
-        if (!$this->option('force') && $this->confirm('Chcete nyní spustit synchronizaci statusů (finance:sync)?', true)) {
+        if (! $this->option('force') && $this->confirm('Chcete nyní spustit synchronizaci statusů (finance:sync)?', true)) {
             $this->call('finance:sync');
         }
     }

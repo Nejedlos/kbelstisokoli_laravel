@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Models\Season;
 use App\Models\UserSeasonConfig;
 use Filament\Widgets\Widget;
-use Illuminate\Support\Facades\Request;
 
 class SeasonRenewalWidget extends Widget
 {
@@ -55,7 +54,7 @@ class SeasonRenewalWidget extends Widget
         $usersWithoutConfig = 0;
         if ($currentSeason) {
             $usersWithoutConfig = \App\Models\User::where('is_active', true)
-                ->whereDoesntHave('userSeasonConfigs', fn($q) => $q->where('season_id', $currentSeason->id))
+                ->whereDoesntHave('userSeasonConfigs', fn ($q) => $q->where('season_id', $currentSeason->id))
                 ->count();
         }
 
@@ -83,7 +82,7 @@ class SeasonRenewalWidget extends Widget
             'renewalUrl' => route('filament.admin.pages.season-renewal'),
             'mismatchesCount' => $mismatchesCount,
             'usersWithoutConfig' => $usersWithoutConfig,
-            'totalDebt' => number_format($totalDebt, 0, ',', ' ') . ' Kč',
+            'totalDebt' => number_format($totalDebt, 0, ',', ' ').' Kč',
             'cronOk' => $cronOk,
             'lastCronRun' => $lastCronRun ? $lastCronRun->diffForHumans() : 'Nikdy',
             'isDebug' => $isDebug,

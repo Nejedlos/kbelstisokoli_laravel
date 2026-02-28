@@ -55,7 +55,7 @@ class MediaDownloadTest extends TestCase
         $media = $asset->addMedia($file)->toMediaCollection('default', 'media_private');
 
         // Musíme zajistit, aby soubor fyzicky existoval pro response()->download()
-        $relativeDiskPath = app(\App\Services\Media\CustomPathGenerator::class)->getPath($media) . $media->file_name;
+        $relativeDiskPath = app(\App\Services\Media\CustomPathGenerator::class)->getPath($media).$media->file_name;
         Storage::disk('media_private')->put($relativeDiskPath, 'content');
 
         $response = $this->get(route('media.download', ['uuid' => $media->uuid]));

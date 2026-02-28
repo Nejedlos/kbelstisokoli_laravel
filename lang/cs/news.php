@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Aktuality',
     'subtitle' => 'Sledujte nejnovější dění v našem basketbalovém oddíle.',

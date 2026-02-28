@@ -15,7 +15,7 @@ class HomeController extends Controller
         $isAdmin = auth()->check() && auth()->user()->canAccessAdmin();
 
         // 1. Priorita: Manuálně zapnutý režim přípravy v administraci (bypass pro adminy)
-        if (data_get($branding, 'maintenance_mode') && !$isAdmin) {
+        if (data_get($branding, 'maintenance_mode') && ! $isAdmin) {
             return view('public.under-construction', [
                 'branding' => $branding,
                 'branding_css' => $brandingService->getCssVariables(),
@@ -32,9 +32,9 @@ class HomeController extends Controller
             ->first();
 
         // 3. Priorita: Automatický režim přípravy, pokud neexistují žádné publikované stránky (bypass pro adminy)
-        if (!$homePage && !$isAdmin) {
+        if (! $homePage && ! $isAdmin) {
             $hasAnyContent = Page::where('status', 'published')->where('is_visible', true)->exists();
-            if (!$hasAnyContent) {
+            if (! $hasAnyContent) {
                 return view('public.under-construction', [
                     'branding' => $branding,
                     'branding_css' => $brandingService->getCssVariables(),

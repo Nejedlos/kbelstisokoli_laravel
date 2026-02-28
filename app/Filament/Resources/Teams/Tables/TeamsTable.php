@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\Teams\Tables;
 
 use App\Support\IconHelper;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -43,15 +43,15 @@ class TeamsTable
                     })
                     ->searchable(),
                 TextColumn::make('active_coaches_count')
-                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS_GROUP) . ' ' . __('admin.navigation.resources.team.fields.coaches_count')))
+                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS_GROUP).' '.__('admin.navigation.resources.team.fields.coaches_count')))
                     ->counts('activeCoaches')
                     ->sortable(),
                 TextColumn::make('active_players_count')
-                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS) . ' ' . __('admin.navigation.resources.team.fields.players_count')))
+                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS).' '.__('admin.navigation.resources.team.fields.players_count')))
                     ->counts('activePlayers')
                     ->sortable(),
                 TextColumn::make('roster_players_count')
-                    ->label(new HtmlString(IconHelper::render(IconHelper::BASKETBALL) . ' ' . __('Soupiska')))
+                    ->label(new HtmlString(IconHelper::render(IconHelper::BASKETBALL).' '.__('Soupiska')))
                     ->counts('rosterPlayers')
                     ->sortable(),
                 TextColumn::make('created_at')

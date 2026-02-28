@@ -8,10 +8,8 @@ use App\Filament\Resources\CronTasks\Pages\ListCronTasks;
 use App\Filament\Resources\CronTasks\Schemas\CronTaskForm;
 use App\Filament\Resources\CronTasks\Tables\CronTasksTable;
 use App\Models\CronTask;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class CronTaskResource extends Resource

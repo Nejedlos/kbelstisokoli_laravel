@@ -12,14 +12,12 @@ class TestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public string $messageContent)
-    {
-    }
+    public function __construct(public string $messageContent) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Zkušební e-mail z administrace ' . config('app.name'),
+            subject: 'Zkušební e-mail z administrace '.config('app.name'),
         );
     }
 

@@ -2,9 +2,8 @@
 
 namespace Tests\Feature\Member;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\PlayerProfile;
+use Tests\TestCase;
 
 class ProfileTest extends TestCase
 {

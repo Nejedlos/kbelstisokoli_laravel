@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Gallery;
-use App\Models\PhotoPool;
 use Illuminate\Support\Facades\DB;
 
 class GalleryService
@@ -19,7 +18,7 @@ class GalleryService
             ->join('photo_pools as pp', 'pp.id', '=', 'ppma.photo_pool_id')
             ->where('ppma.is_visible', true)
             ->where('ma.is_public', true)
-            ->when($poolId, fn($q) => $q->where('pp.id', $poolId), function ($q) {
+            ->when($poolId, fn ($q) => $q->where('pp.id', $poolId), function ($q) {
                 $q->where('pp.is_public', true)->where('pp.is_visible', true);
             })
             ->select('ma.id as media_id', 'pp.title as pool_title', 'pp.event_date')
@@ -42,12 +41,12 @@ class GalleryService
             }
 
             $caption = trim((string) brand_text($row->pool_title));
-            if (!empty($row->event_date)) {
+            if (! empty($row->event_date)) {
                 $date = \Carbon\Carbon::parse($row->event_date);
                 if ($date->day === 1 && $date->month === 1) {
-                    $caption .= ' — ' . $date->format('Y');
+                    $caption .= ' — '.$date->format('Y');
                 } else {
-                    $caption .= ' — ' . $date->format('d.m.Y');
+                    $caption .= ' — '.$date->format('d.m.Y');
                 }
             }
 

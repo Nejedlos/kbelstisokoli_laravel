@@ -7,14 +7,11 @@ use App\Filament\Resources\BasketballMatches\Pages\EditBasketballMatch;
 use App\Filament\Resources\BasketballMatches\Pages\ListBasketballMatches;
 use App\Filament\Resources\BasketballMatches\Schemas\BasketballMatchForm;
 use App\Filament\Resources\BasketballMatches\Tables\BasketballMatchesTable;
+use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
 use App\Models\BasketballMatch;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-
-use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
 
 class BasketballMatchResource extends Resource
 {

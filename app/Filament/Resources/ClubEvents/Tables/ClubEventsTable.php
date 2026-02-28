@@ -7,10 +7,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
 
 class ClubEventsTable
 {
@@ -43,7 +42,7 @@ class ClubEventsTable
                     ->label('Týmy')
                     ->placeholder('Celý klub')
                     ->badge()
-                    ->state(fn ($record) => $record->teams->reject(fn($team) => $team->category === 'all')->pluck('name'))
+                    ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
                     ->searchable(),
                 TextColumn::make('starts_at')
                     ->label('Od')

@@ -9,12 +9,12 @@ define('LARAVEL_START', microtime(true));
 $APP_BASE = '/home/html/kbelstisokoli.cz/public_html/secret';
 
 // Determine if the application is in maintenance mode...
-if (file_exists($maintenance = $APP_BASE . '/storage/framework/maintenance.php')) {
+if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
 // Register the Composer autoloader...
-require $APP_BASE . '/vendor/autoload.php';
+require $APP_BASE.'/vendor/autoload.php';
 
 // Nouzové hlášení chyb před bootem Laravelu (pre-boot)
 (function () use ($APP_BASE) {
@@ -28,27 +28,28 @@ require $APP_BASE . '/vendor/autoload.php';
 
     $env = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'production';
     $errorRecipient = $_ENV['ERROR_REPORT_EMAIL'] ?? getenv('ERROR_REPORT_EMAIL') ?: null;
-    if ($env !== 'production' || !$errorRecipient) {
+    if ($env !== 'production' || ! $errorRecipient) {
         return; // povoleno pouze na produkci a pokud je nastaven příjemce
     }
 
     $send = function (string $subject, string $body) use ($errorRecipient) {
         try {
             $host = $_ENV['MAIL_HOST'] ?? getenv('MAIL_HOST') ?? null;
-            $port = (int)($_ENV['MAIL_PORT'] ?? getenv('MAIL_PORT') ?? 25);
+            $port = (int) ($_ENV['MAIL_PORT'] ?? getenv('MAIL_PORT') ?? 25);
             $user = $_ENV['MAIL_USERNAME'] ?? getenv('MAIL_USERNAME') ?? null;
             $pass = $_ENV['MAIL_PASSWORD'] ?? getenv('MAIL_PASSWORD') ?? null;
             $enc = $_ENV['MAIL_ENCRYPTION'] ?? getenv('MAIL_ENCRYPTION') ?? null;
             $from = $_ENV['ERROR_REPORT_SENDER'] ?? getenv('ERROR_REPORT_SENDER') ?? ($user ?: 'noreply@localhost');
 
-            if (!$host || !$user || !$pass) {
+            if (! $host || ! $user || ! $pass) {
                 error_log('Pre-boot mail not sent: missing SMTP credentials');
+
                 return;
             }
 
             $params = [];
-            if (!empty($enc)) {
-                $params[] = 'encryption=' . $enc;
+            if (! empty($enc)) {
+                $params[] = 'encryption='.$enc;
             }
             $dsn = sprintf(
                 'smtp://%s:%s@%s:%d%s',
@@ -56,12 +57,12 @@ require $APP_BASE . '/vendor/autoload.php';
                 rawurlencode((string) $pass),
                 (string) $host,
                 $port,
-                $params ? ('?' . implode('&', $params)) : ''
+                $params ? ('?'.implode('&', $params)) : ''
             );
 
             $transport = \Symfony\Component\Mailer\Transport::fromDsn($dsn);
             $mailer = new \Symfony\Component\Mailer\Mailer($transport);
-            $email = (new \Symfony\Component\Mime\Email())
+            $email = (new \Symfony\Component\Mime\Email)
                 ->from($from)
                 ->to($errorRecipient)
                 ->subject($subject)
@@ -69,12 +70,12 @@ require $APP_BASE . '/vendor/autoload.php';
 
             $mailer->send($email);
         } catch (\Throwable $e) {
-            error_log('Pre-boot error email failed: ' . $e->getMessage());
+            error_log('Pre-boot error email failed: '.$e->getMessage());
         }
     };
 
     set_exception_handler(function ($e) use ($send) {
-        if (!$e instanceof \Throwable) {
+        if (! $e instanceof \Throwable) {
             return;
         }
         $server = [
@@ -85,7 +86,7 @@ require $APP_BASE . '/vendor/autoload.php';
             'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ];
         $subject = sprintf('[PreBoot][%s] %s (%s:%s)', $_ENV['APP_ENV'] ?? 'production', get_class($e), $e->getFile(), $e->getLine());
-        $body = "Message: {$e->getMessage()}\n\nTrace:\n" . $e->getTraceAsString() . "\n\nServer:\n" . print_r($server, true);
+        $body = "Message: {$e->getMessage()}\n\nTrace:\n".$e->getTraceAsString()."\n\nServer:\n".print_r($server, true);
         $send($subject, $body);
     });
 
@@ -100,7 +101,7 @@ require $APP_BASE . '/vendor/autoload.php';
                 'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'] ?? null,
             ];
             $subject = sprintf('[PreBoot][FATAL] %s (%s:%s)', $error['message'] ?? 'Fatal error', $error['file'] ?? 'unknown', $error['line'] ?? '');
-            $body = "Error:\n" . print_r($error, true) . "\n\nServer:\n" . print_r($server, true);
+            $body = "Error:\n".print_r($error, true)."\n\nServer:\n".print_r($server, true);
             $send($subject, $body);
         }
     });
@@ -108,6 +109,6 @@ require $APP_BASE . '/vendor/autoload.php';
 
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
-$app = require_once $APP_BASE . '/bootstrap/app.php';
+$app = require_once $APP_BASE.'/bootstrap/app.php';
 
 $app->handleRequest(Request::capture());

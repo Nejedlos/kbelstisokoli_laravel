@@ -9,8 +9,8 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
-use Tests\TestCase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class MemberFeedbackTest extends TestCase
 {
@@ -73,7 +73,7 @@ class MemberFeedbackTest extends TestCase
         $response = $this->post(route('member.contact.coach.send'), [
             'team_id' => $team->id,
             'subject' => 'Test coach feedback',
-            'message' => 'Hello coach!'
+            'message' => 'Hello coach!',
         ]);
 
         $response->assertRedirect(route('member.dashboard'));

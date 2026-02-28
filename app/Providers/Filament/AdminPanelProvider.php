@@ -2,41 +2,34 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EmailVerificationPrompt;
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\RequestPasswordReset;
+use App\Filament\Pages\Auth\ResetPassword;
+use App\Filament\Pages\Dashboard;
 use App\Services\BrandingService;
-use Illuminate\Support\Facades\Blade;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use App\Filament\Pages\Dashboard;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
-use Illuminate\Support\HtmlString;
 use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Js;
-use Filament\Support\Facades\FilamentAsset;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Support\Facades\FilamentView;
-use App\Filament\Pages\Auth\Login;
-use App\Filament\Pages\Auth\RequestPasswordReset;
-use App\Filament\Pages\Auth\ResetPassword;
-use App\Filament\Pages\Auth\EmailVerificationPrompt;
 
 class AdminPanelProvider extends PanelProvider
 {
     // Pozn.: Hooky a assety registrujeme přímo na panelu v metodě panel(),
     // aby se spolehlivě vykreslily i na auth stránkách.
-
-
 
     public function panel(Panel $panel): Panel
     {
@@ -48,44 +41,77 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
-            ->renderHook('panels::head.end', fn (): string => Blade::render(
-                "<style>
-                    {!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}
-                    /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
-                    .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
-                        display: inline-block;
-                        width: 1.25em;
-                        height: 1em;
-                        line-height: 1;
-                        vertical-align: -0.125em;
-                        overflow: hidden;
-                        opacity: 0;
-                    }
-                 </style>
-                 @vite(['resources/css/filament-admin.css'])
-                 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css' integrity='sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==' crossorigin='anonymous' referrerpolicy='no-referrer' />
-                 <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js' integrity='sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>"
-            ))
-            ->renderHook('panels::body.start', fn (): string => Blade::render('
-                <x-impersonation-banner />
-                <x-impersonation-notification />
-            '))
-            ->renderHook('panels::body.end', fn (): string => Blade::render('
-                <x-back-to-top />
-                <livewire:member.avatar-modal />
-            '))
-            ->renderHook('panels::global-search.before', fn (): string => Blade::render('
-                <div class="flex items-center gap-2 mr-3">
-                    @include("filament.components.language-switch")
-                    @include("filament.components.standard-search")
-                </div>
-            '))
-            ->renderHook('panels::global-search.after', fn (): string => Blade::render('
-                <div class="flex items-center gap-2 ml-2">
-                    @include("filament.components.ai-search")
-                    @include("filament.components.impersonate-select")
-                </div>
-            '))
+            ->renderHook('panels::head.end', function (): string {
+                if (request()->routeIs('filament.admin.auth.*')) {
+                    // Na auth stránkách barvy vkládá auth layout (resources/views/filament/admin/layouts/auth.blade.php) sám
+                    return '';
+                }
+
+                return Blade::render(
+                    "<style>
+                        {!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}
+                        /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
+                        .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+                            display: inline-block;
+                            width: 1.25em;
+                            height: 1em;
+                            line-height: 1;
+                            vertical-align: -0.125em;
+                            overflow: hidden;
+                            opacity: 0;
+                        }
+                     </style>
+                     @vite(['resources/css/filament-admin.css'])
+                     @if(auth()->check())
+                        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css' integrity='sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==' crossorigin='anonymous' referrerpolicy='no-referrer' />
+                        <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js' integrity='sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
+                     @endif"
+                );
+            })
+            ->renderHook('panels::body.start', function (): string {
+                if (! auth()->check() || request()->routeIs('filament.admin.auth.*')) {
+                    return '';
+                }
+
+                return Blade::render('
+                    <x-impersonation-banner />
+                    <x-impersonation-notification />
+                ');
+            })
+            ->renderHook('panels::body.end', function (): string {
+                if (! auth()->check() || request()->routeIs('filament.admin.auth.*')) {
+                    return '';
+                }
+
+                return Blade::render('
+                    <x-back-to-top />
+                    <livewire:member.avatar-modal />
+                ');
+            })
+            ->renderHook('panels::global-search.before', function (): string {
+                if (! auth()->check()) {
+                    return '';
+                }
+
+                return Blade::render('
+                    <div class="flex items-center gap-2 mr-3">
+                        @include("filament.components.language-switch")
+                        @include("filament.components.standard-search")
+                    </div>
+                ');
+            })
+            ->renderHook('panels::global-search.after', function (): string {
+                if (! auth()->check()) {
+                    return '';
+                }
+
+                return Blade::render('
+                    <div class="flex items-center gap-2 ml-2">
+                        @include("filament.components.ai-search")
+                        @include("filament.components.impersonate-select")
+                    </div>
+                ');
+            })
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
@@ -96,11 +122,11 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'member_section' => MenuItem::make()
                     ->label(fn () => __('admin.navigation.pages.member_section'))
-                    ->url(fn() => route('member.dashboard'))
+                    ->url(fn () => route('member.dashboard'))
                     ->icon(new HtmlString('<i class="fa-light fa-users-viewfinder fa-fw"></i>')),
                 'public_web' => MenuItem::make()
                     ->label(fn () => __('admin.navigation.pages.public_web'))
-                    ->url(fn() => route('public.home'))
+                    ->url(fn () => route('public.home'))
                     ->icon(new HtmlString('<i class="fa-light fa-globe fa-fw"></i>')),
             ])
             ->colors([
@@ -115,7 +141,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->navigationGroups([
                 \Filament\Navigation\NavigationGroup::make()
-                     ->label(fn (): string => __('admin.navigation.groups.sports_agenda')),
+                    ->label(fn (): string => __('admin.navigation.groups.sports_agenda')),
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.communication')),
                 \Filament\Navigation\NavigationGroup::make()

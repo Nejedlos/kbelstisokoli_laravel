@@ -4,18 +4,18 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use App\Services\BrandingService;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Schema;
-use Filament\Pages\Page;
-use Filament\Notifications\Notification;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class BrandingSettings extends Page implements HasForms
 {
@@ -129,12 +129,12 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.logo'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding'),
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),
                                 FileUpload::make('alt_logo_path')
                                     ->label(__('admin/branding-settings.fields.alt_logo'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding'),
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),
                             ]),
                     ]),
 
@@ -158,11 +158,11 @@ class BrandingSettings extends Page implements HasForms
                                 TextInput::make('admin_contact_phone')
                                     ->label(__('admin/branding-settings.fields.admin_contact_phone')),
                                 FileUpload::make('admin_contact_photo_path')
-                                    	->label(__('admin/branding-settings.fields.admin_contact_photo'))
-                                    	->image()
-                                    	->disk(config('filesystems.uploads.disk'))
-                                    	->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding')
-                                    	->helperText(__('admin/branding-settings.fields.admin_contact_photo_help')),
+                                    ->label(__('admin/branding-settings.fields.admin_contact_photo'))
+                                    ->image()
+                                    ->disk(config('filesystems.uploads.disk'))
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding')
+                                    ->helperText(__('admin/branding-settings.fields.admin_contact_photo_help')),
                             ]),
                     ]),
 
@@ -246,7 +246,7 @@ class BrandingSettings extends Page implements HasForms
                             ->label(__('admin/branding-settings.fields.seo_og_image'))
                             ->image()
                             ->disk(config('filesystems.uploads.disk'))
-                            ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/branding')
+                            ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding')
                             ->helperText(__('admin/branding-settings.fields.seo_og_image_help')),
                         Grid::make(2)
                             ->schema([

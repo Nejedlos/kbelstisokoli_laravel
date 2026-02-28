@@ -8,10 +8,8 @@ use App\Filament\Resources\FinancePayments\Pages\ListFinancePayments;
 use App\Filament\Resources\FinancePayments\Schemas\FinancePaymentForm;
 use App\Filament\Resources\FinancePayments\Tables\FinancePaymentsTable;
 use App\Models\FinancePayment;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class FinancePaymentResource extends Resource

@@ -3,7 +3,6 @@
 namespace App\Services\Cms;
 
 use App\Models\Redirect;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -35,18 +34,20 @@ class RedirectImporter
                 ]);
 
                 if ($validator->fails()) {
-                    $results['errors'][] = "Řádek {$index}: " . implode(', ', $validator->errors()->all());
+                    $results['errors'][] = "Řádek {$index}: ".implode(', ', $validator->errors()->all());
+
                     continue;
                 }
 
-                $source = '/' . ltrim($row['source'], '/');
+                $source = '/'.ltrim($row['source'], '/');
                 $target = $row['target'];
                 $isExternal = str_starts_with($target, 'http');
 
                 $existing = Redirect::where('source_path', $source)->first();
 
-                if ($existing && !$overwrite) {
+                if ($existing && ! $overwrite) {
                     $results['skipped']++;
+
                     continue;
                 }
 
@@ -54,7 +55,7 @@ class RedirectImporter
                     ['source_path' => $source],
                     [
                         'target_type' => $isExternal ? 'external' : 'internal',
-                        'target_path' => $isExternal ? null : '/' . ltrim($target, '/'),
+                        'target_path' => $isExternal ? null : '/'.ltrim($target, '/'),
                         'target_url' => $isExternal ? $target : null,
                         'status_code' => $row['code'] ?? 301,
                         'is_active' => true,

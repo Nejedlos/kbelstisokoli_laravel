@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Tréninkové informace',
     'subtitle' => 'Přehled tréninkových časů a míst pro jednotlivé věkové kategorie.',

@@ -21,7 +21,7 @@ return new class extends Migration
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'club_events';
+        $table = $prefix.'club_events';
 
         try {
             // Používáme LONGTEXT místo JSON pro Webglobe kompatibilitu.
@@ -48,7 +48,7 @@ return new class extends Migration
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'club_events';
+        $table = $prefix.'club_events';
 
         try {
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} MODIFY title LONGTEXT NOT NULL");

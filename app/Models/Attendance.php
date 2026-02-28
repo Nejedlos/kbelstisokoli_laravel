@@ -48,7 +48,7 @@ class Attendance extends Model
     {
         $seasonId = $this->getSeasonId();
 
-        if (!$seasonId) {
+        if (! $seasonId) {
             return true;
         }
 
@@ -58,7 +58,7 @@ class Attendance extends Model
 
         // Pokud config neexistuje, defaultně trackujeme (nebo ne?)
         // Prompt říká: "Pokud config neexistuje ... nastav is_mismatch = false."
-        if (!$config) {
+        if (! $config) {
             return false;
         }
 
@@ -72,7 +72,7 @@ class Attendance extends Model
     {
         $attendable = $this->attendable;
 
-        if (!$attendable) {
+        if (! $attendable) {
             // Pokud není relace načtená, zkusíme ji načíst (v booted saving by měla být dostupná nebo načitelná)
             $attendable = $this->attendable()->first();
         }
@@ -108,7 +108,7 @@ class Attendance extends Model
 
         // Hráč se nevyjádřil (pending), ale trenér zapsal cokoli
         // (Bereme jako mismatch, protože hráč má povinnost se vyjádřit)
-        if (($planned === 'pending' || empty($planned)) && !empty($actual)) {
+        if (($planned === 'pending' || empty($planned)) && ! empty($actual)) {
             return true;
         }
 

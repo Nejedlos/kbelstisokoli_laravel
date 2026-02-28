@@ -12,7 +12,7 @@ class RsvpChangedNotification extends BaseNotification
 
     protected function getNotificationData(): array
     {
-        $statusLabel = match($this->status) {
+        $statusLabel = match ($this->status) {
             'confirmed' => 'potvrzena',
             'declined' => 'zrušena (omluveno)',
             'maybe' => 'změněna na Možná',

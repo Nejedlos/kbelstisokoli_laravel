@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('redirects')) {
+        if (! Schema::hasTable('redirects')) {
             Schema::create('redirects', function (Blueprint $table) {
                 $table->id();
                 $table->string('source_path')->index();

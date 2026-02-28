@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\SeoMetadata;
-use App\Models\Setting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
@@ -47,7 +46,7 @@ class SeoService
             $index = false;
         }
 
-        $robots = ($index ? 'index' : 'noindex') . ',' . ($follow ? 'follow' : 'nofollow');
+        $robots = ($index ? 'index' : 'noindex').','.($follow ? 'follow' : 'nofollow');
 
         // OpenGraph & Twitter
         $ogTitle = $seo->og_title ?? $seo->title ?? ($model->title ?? $siteName);
@@ -85,7 +84,7 @@ class SeoService
             return $title;
         }
 
-        return $title . $titleSuffix;
+        return $title.$titleSuffix;
     }
 
     protected function resolveDescription(?SeoMetadata $seo, ?Model $model, array $settings): string
@@ -100,6 +99,7 @@ class SeoService
 
         if ($model && isset($model->content)) {
             $content = is_array($model->content) ? json_encode($model->content) : $model->content;
+
             return Str::limit(strip_tags($content), 160);
         }
 
@@ -172,7 +172,7 @@ class SeoService
             'streetAddress' => $settings['contact']['address'] ?? null,
         ];
         $address = $this->cleanSchema($address);
-        if (!empty($address)) {
+        if (! empty($address)) {
             $org['address'] = $address;
         }
 
@@ -184,7 +184,7 @@ class SeoService
             'email' => $settings['contact']['email'] ?? null,
         ];
         $contact = $this->cleanSchema($contact);
-        if (!empty($contact)) {
+        if (! empty($contact)) {
             $org['contactPoint'] = $contact;
         }
 
@@ -193,7 +193,7 @@ class SeoService
             $settings['socials']['instagram'] ?? null,
             $settings['socials']['youtube'] ?? null,
         ]);
-        if (!empty($sameAs)) {
+        if (! empty($sameAs)) {
             $org['sameAs'] = $sameAs;
         }
 
@@ -224,12 +224,13 @@ class SeoService
         }
 
         // Finální očištění prázdných záznamů
-        return array_values(array_filter($data, fn ($item) => !empty($item)));
+        return array_values(array_filter($data, fn ($item) => ! empty($item)));
     }
 
     protected function resolveOgLocale(): string
     {
         $locale = app()->getLocale();
+
         return match ($locale) {
             'cs' => 'cs_CZ',
             'en' => 'en_US',
@@ -257,8 +258,10 @@ class SeoService
                 }
                 $clean[$k] = $v;
             }
+
             return $clean;
         }
+
         return $value;
     }
 }

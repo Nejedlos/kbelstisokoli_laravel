@@ -8,10 +8,8 @@ use App\Filament\Resources\PlayerProfiles\Pages\ListPlayerProfiles;
 use App\Filament\Resources\PlayerProfiles\Schemas\PlayerProfileForm;
 use App\Filament\Resources\PlayerProfiles\Tables\PlayerProfilesTable;
 use App\Models\PlayerProfile;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class PlayerProfileResource extends Resource

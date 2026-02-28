@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources\CronLogs\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\Action;
-use Illuminate\Support\HtmlString;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 class CronLogsTable
 {

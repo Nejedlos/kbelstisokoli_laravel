@@ -81,6 +81,7 @@ class PlayerProfile extends Model
     public function scopeInEffect($query, $date = null)
     {
         $date = $date ?: now();
+
         return $query->where('is_active', true)
             ->where(function ($q) use ($date) {
                 $q->whereNull('valid_from')

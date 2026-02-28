@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources\MediaAssets\Schemas;
 
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class MediaAssetForm
@@ -33,9 +32,10 @@ class MediaAssetForm
                                 $title = $get('title');
                                 $ext = $file->getClientOriginalExtension();
                                 if ($title) {
-                                    return Str::slug($title) . '.' . $ext;
+                                    return Str::slug($title).'.'.$ext;
                                 }
-                                return Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+
+                                return Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$ext;
                             })
                             ->required()
                             ->columnSpanFull()

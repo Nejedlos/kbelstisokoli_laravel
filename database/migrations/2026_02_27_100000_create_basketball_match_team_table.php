@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('basketball_match_team')) {
+        if (! Schema::hasTable('basketball_match_team')) {
             Schema::create('basketball_match_team', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('basketball_match_id')->constrained('matches')->onDelete('cascade');
@@ -31,7 +31,7 @@ return new class extends Migration
                     ->where('team_id', $match->team_id)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('basketball_match_team')->insert([
                         'basketball_match_id' => $match->id,
                         'team_id' => $match->team_id,

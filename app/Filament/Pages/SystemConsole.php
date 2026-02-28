@@ -3,30 +3,29 @@
 namespace App\Filament\Pages;
 
 use App\Support\FilamentIcon;
-use App\Support\Icons\AppIcon;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Artisan;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Filament\Notifications\Notification;
-use Filament\Actions\Action;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\On;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\Process;
 
 class SystemConsole extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-command-line';
-    protected static string | \UnitEnum | null $navigationGroup = null;
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-command-line';
+
+    protected static string|\UnitEnum|null $navigationGroup = null;
+
     protected static ?string $navigationLabel = null;
+
     protected static ?string $title = null;
 
     protected string $view = 'filament.pages.system-console';
 
     public string $output = '';
 
-    public function mount(): void
-    {
-    }
+    public function mount(): void {}
 
     public static function getNavigationGroup(): ?string
     {
@@ -92,10 +91,10 @@ class SystemConsole extends Page
                     '--fresh' => __('admin/system-console.commands.ai_index.flags.fresh'),
                     '--enrich' => __('admin/system-console.commands.ai_index.flags.enrich'),
                     '--no-ai' => 'Jen standardní hledání (bez AI)',
-                    '--no-interaction' => __('admin/system-console.commands.ai_index.flags.no_interaction')
+                    '--no-interaction' => __('admin/system-console.commands.ai_index.flags.no_interaction'),
                 ],
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('sparkles')
+                'icon' => FilamentIcon::get('sparkles'),
             ],
         ];
 
@@ -107,28 +106,28 @@ class SystemConsole extends Page
                     'desc' => __('admin/system-console.commands.deploy.desc'),
                     'type' => 'artisan',
                     'color' => 'success',
-                    'icon' => FilamentIcon::get('rocket')
+                    'icon' => FilamentIcon::get('rocket'),
                 ],
                 'app:sync' => [
                     'label' => __('admin/system-console.commands.sync.label'),
                     'desc' => __('admin/system-console.commands.sync.desc'),
                     'type' => 'artisan',
                     'color' => 'warning',
-                    'icon' => FilamentIcon::get('rotate')
+                    'icon' => FilamentIcon::get('rotate'),
                 ],
                 'app:local:prepare' => [
                     'label' => __('admin/system-console.commands.local_prepare.label'),
                     'desc' => __('admin/system-console.commands.local_prepare.desc'),
                     'type' => 'artisan',
                     'color' => 'info',
-                    'icon' => FilamentIcon::get('file-export')
+                    'icon' => FilamentIcon::get('file-export'),
                 ],
                 'app:production:setup' => [
                     'label' => __('admin/system-console.commands.prod_setup.label'),
                     'desc' => __('admin/system-console.commands.prod_setup.desc'),
                     'type' => 'artisan',
                     'color' => 'gray',
-                    'icon' => FilamentIcon::get('gears')
+                    'icon' => FilamentIcon::get('gears'),
                 ],
             ];
         }
@@ -141,21 +140,21 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => ['--pro' => __('admin/system-console.commands.icons_sync.flags.pro')],
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('icons')
+                'icon' => FilamentIcon::get('icons'),
             ],
             'app:icons:doctor' => [
                 'label' => __('admin/system-console.commands.icons_doctor.label'),
                 'desc' => __('admin/system-console.commands.icons_doctor.desc'),
                 'type' => 'artisan',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('stethoscope')
+                'icon' => FilamentIcon::get('stethoscope'),
             ],
             'announcements:sync' => [
                 'label' => __('admin/system-console.commands.announcements_sync.label'),
                 'desc' => __('admin/system-console.commands.announcements_sync.desc'),
                 'type' => 'artisan',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('bullhorn')
+                'icon' => FilamentIcon::get('bullhorn'),
             ],
             'finance:sync' => [
                 'label' => __('admin/system-console.commands.finance_sync.label'),
@@ -167,7 +166,7 @@ class SystemConsole extends Page
                     '--force' => __('admin/system-console.commands.finance_sync.flags.--force'),
                 ],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('money-bill-transfer')
+                'icon' => FilamentIcon::get('money-bill-transfer'),
             ],
             'finance:cleanup' => [
                 'label' => __('admin/system-console.commands.finance_cleanup.label'),
@@ -177,14 +176,14 @@ class SystemConsole extends Page
                     '--force' => __('admin/system-console.commands.finance_cleanup.flags.--force'),
                 ],
                 'color' => 'danger',
-                'icon' => FilamentIcon::get('broom')
+                'icon' => FilamentIcon::get('broom'),
             ],
             'stats:import' => [
                 'label' => __('admin/system-console.commands.stats_import.label'),
                 'desc' => __('admin/system-console.commands.stats_import.desc'),
                 'type' => 'artisan',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('chart-line')
+                'icon' => FilamentIcon::get('chart-line'),
             ],
         ];
 
@@ -195,7 +194,7 @@ class SystemConsole extends Page
                 'desc' => __('admin/system-console.commands.system_cleanup.desc'),
                 'type' => 'artisan',
                 'color' => 'danger',
-                'icon' => FilamentIcon::get('broom')
+                'icon' => FilamentIcon::get('broom'),
             ],
             'audit:cleanup' => [
                 'label' => __('admin/system-console.commands.audit_cleanup.label'),
@@ -204,10 +203,10 @@ class SystemConsole extends Page
                 'flags' => [
                     '--days=30' => __('admin/system-console.commands.audit_cleanup.flags.30'),
                     '--days=90' => __('admin/system-console.commands.audit_cleanup.flags.90'),
-                    '--days=180' => __('admin/system-console.commands.audit_cleanup.flags.180')
+                    '--days=180' => __('admin/system-console.commands.audit_cleanup.flags.180'),
                 ],
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('clock-rotate-left')
+                'icon' => FilamentIcon::get('clock-rotate-left'),
             ],
             'club:backfill-identifiers' => [
                 'label' => __('admin/system-console.commands.backfill_ids.label'),
@@ -215,14 +214,14 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => ['--regenerate-existing' => __('admin/system-console.commands.backfill_ids.flags.regenerate')],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('user-check')
+                'icon' => FilamentIcon::get('user-check'),
             ],
             'rsvp:reminders' => [
                 'label' => __('admin/system-console.commands.rsvp_reminders.label'),
                 'desc' => __('admin/system-console.commands.rsvp_reminders.desc'),
                 'type' => 'artisan',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('bell')
+                'icon' => FilamentIcon::get('bell'),
             ],
         ];
 
@@ -234,10 +233,10 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => [
                     '--force' => __('admin/system-console.commands.migrate.flags.force'),
-                    '--seed' => __('admin/system-console.commands.migrate.flags.seed')
+                    '--seed' => __('admin/system-console.commands.migrate.flags.seed'),
                 ],
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('database')
+                'icon' => FilamentIcon::get('database'),
             ],
             'migrate:rollback' => [
                 'label' => __('admin/system-console.commands.migrate_rollback.label'),
@@ -245,10 +244,10 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => [
                     '--force' => __('admin/system-console.commands.migrate_rollback.flags.force'),
-                    '--step=1' => __('admin/system-console.commands.migrate_rollback.flags.step')
+                    '--step=1' => __('admin/system-console.commands.migrate_rollback.flags.step'),
                 ],
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('undo')
+                'icon' => FilamentIcon::get('undo'),
             ],
             'db:seed' => [
                 'label' => __('admin/system-console.commands.db_seed.label'),
@@ -258,10 +257,10 @@ class SystemConsole extends Page
                 'select' => [
                     'name' => '--class',
                     'label' => __('admin/system-console.commands.db_seed.select_label'),
-                    'options' => array_combine($seeders, $seeders)
+                    'options' => array_combine($seeders, $seeders),
                 ],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('seedling')
+                'icon' => FilamentIcon::get('seedling'),
             ],
             'app:seed' => [
                 'label' => __('admin/system-console.commands.app_seed.label'),
@@ -269,7 +268,7 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => ['--fresh' => __('admin/system-console.commands.app_seed.flags.fresh')],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('seedling')
+                'icon' => FilamentIcon::get('seedling'),
             ],
         ];
 
@@ -280,35 +279,35 @@ class SystemConsole extends Page
                 'desc' => __('admin/system-console.commands.optimize_clear.desc'),
                 'type' => 'internal',
                 'color' => 'danger',
-                'icon' => FilamentIcon::get('trash')
+                'icon' => FilamentIcon::get('trash'),
             ],
             'config:cache' => [
                 'label' => __('admin/system-console.commands.config_cache.label'),
                 'desc' => __('admin/system-console.commands.config_cache.desc'),
                 'type' => 'internal',
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('gear')
+                'icon' => FilamentIcon::get('gear'),
             ],
             'route:cache' => [
                 'label' => __('admin/system-console.commands.route_cache.label'),
                 'desc' => __('admin/system-console.commands.route_cache.desc'),
                 'type' => 'internal',
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('route')
+                'icon' => FilamentIcon::get('route'),
             ],
             'view:cache' => [
                 'label' => __('admin/system-console.commands.view_cache.label'),
                 'desc' => __('admin/system-console.commands.view_cache.desc'),
                 'type' => 'internal',
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('eye')
+                'icon' => FilamentIcon::get('eye'),
             ],
             'storage:link' => [
                 'label' => __('admin/system-console.commands.storage_link.label'),
                 'desc' => __('admin/system-console.commands.storage_link.desc'),
                 'type' => 'internal',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('link')
+                'icon' => FilamentIcon::get('link'),
             ],
         ];
 
@@ -320,41 +319,41 @@ class SystemConsole extends Page
                 'type' => 'shell',
                 'flags' => [
                     '--no-dev' => __('admin/system-console.commands.composer_install.flags.no_dev'),
-                    '--optimize-autoloader' => __('admin/system-console.commands.composer_install.flags.optimize')
+                    '--optimize-autoloader' => __('admin/system-console.commands.composer_install.flags.optimize'),
                 ],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('box-open')
+                'icon' => FilamentIcon::get('box-open'),
             ],
             'npm install' => [
                 'label' => __('admin/system-console.commands.npm_install.label'),
                 'desc' => __('admin/system-console.commands.npm_install.desc'),
                 'type' => 'shell',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('download')
+                'icon' => FilamentIcon::get('download'),
             ],
             'npm run build' => [
                 'label' => __('admin/system-console.commands.npm_build.label'),
                 'desc' => __('admin/system-console.commands.npm_build.desc'),
                 'type' => 'shell',
                 'color' => 'success',
-                'icon' => FilamentIcon::get('hammer')
+                'icon' => FilamentIcon::get('hammer'),
             ],
         ];
 
-        if (!$isLocal) {
+        if (! $isLocal) {
             $devTools['git status'] = [
                 'label' => __('admin/system-console.commands.git_status.label'),
                 'desc' => __('admin/system-console.commands.git_status.desc'),
                 'type' => 'shell',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('code-branch')
+                'icon' => FilamentIcon::get('code-branch'),
             ];
             $devTools['git pull'] = [
                 'label' => __('admin/system-console.commands.git_pull.label'),
                 'desc' => __('admin/system-console.commands.git_pull.desc'),
                 'type' => 'shell',
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('cloud-download')
+                'icon' => FilamentIcon::get('cloud-download'),
             ];
         }
 
@@ -367,35 +366,35 @@ class SystemConsole extends Page
                 'desc' => 'Komplexní diagnostika serveru, binárek a oprávnění.',
                 'type' => 'artisan',
                 'color' => 'success',
-                'icon' => FilamentIcon::get('stethoscope')
+                'icon' => FilamentIcon::get('stethoscope'),
             ],
             'php:basic' => [
                 'label' => 'PHP: Základní info',
                 'desc' => 'Verze PHP, SAPI, uživatel a webová binárka.',
                 'type' => 'internal',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('info-circle')
+                'icon' => FilamentIcon::get('info-circle'),
             ],
             'php:ini' => [
                 'label' => 'PHP: Konfigurace (INI)',
                 'desc' => 'Limity a omezení PHP (disable_functions, open_basedir).',
                 'type' => 'internal',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('sliders')
+                'icon' => FilamentIcon::get('sliders'),
             ],
             'php -v' => [
                 'label' => 'PHP CLI Version',
                 'desc' => 'Zobrazí verzi PHP v systémovém shellu.',
                 'type' => 'shell',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('php', 'fab')
+                'icon' => FilamentIcon::get('php', 'fab'),
             ],
             'node -v' => [
                 'label' => 'Node Version',
                 'desc' => 'Zobrazí verzi Node.js na serveru.',
                 'type' => 'shell',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('node-js', 'fab')
+                'icon' => FilamentIcon::get('node-js', 'fab'),
             ],
         ];
 
@@ -415,22 +414,24 @@ class SystemConsole extends Page
     {
         if ($command === 'system:check') {
             $this->runSystemCheck();
+
             return;
         }
 
         if ($type === 'internal' || ($useInternal && $type === 'artisan')) {
             $this->runInternal($command, $selectedFlags, $selectName, $selectValue);
+
             return;
         }
 
         set_time_limit(0);
         $timestamp = now()->format('H:i:s');
-        $this->output .= "\n[$timestamp] > $command" . (empty($selectedFlags) ? "" : " " . implode(' ', $selectedFlags)) . ($selectValue ? " $selectValue" : "") . "\n";
+        $this->output .= "\n[$timestamp] > $command".(empty($selectedFlags) ? '' : ' '.implode(' ', $selectedFlags)).($selectValue ? " $selectValue" : '')."\n";
 
         try {
             if ($type === 'artisan') {
                 // Zjištění cesty k PHP binárce (inteligentní finder + .env override)
-                $finder = new PhpExecutableFinder();
+                $finder = new PhpExecutableFinder;
                 $phpBinary = $finder->find(false) ?: PHP_BINARY;
 
                 if (config('app.env') === 'production') {
@@ -456,7 +457,7 @@ class SystemConsole extends Page
                 $commandArray = $this->parseCommandToArray($command);
 
                 // Mapování binárek na cesty (inteligentní finder + .env override)
-                $finder = new PhpExecutableFinder();
+                $finder = new PhpExecutableFinder;
                 $defaultPhp = $finder->find(false) ?: 'php';
 
                 $binaryMap = [
@@ -493,11 +494,11 @@ class SystemConsole extends Page
                 ->send();
 
         } catch (\Throwable $e) {
-            $this->output .= "\nCHYBA: " . $e->getMessage();
-            Log::error("SystemConsole Error: " . $e->getMessage(), [
+            $this->output .= "\nCHYBA: ".$e->getMessage();
+            Log::error('SystemConsole Error: '.$e->getMessage(), [
                 'command' => $command,
                 'type' => $type,
-                'exception' => $e
+                'exception' => $e,
             ]);
 
             Notification::make()
@@ -514,8 +515,8 @@ class SystemConsole extends Page
         @ini_set('memory_limit', '512M');
         @ignore_user_abort(true);
         $timestamp = now()->format('H:i:s');
-        $this->output .= "\n[$timestamp] > (Internal) artisan $command" . (empty($flags) ? "" : " " . implode(' ', $flags)) . ($selectValue ? " $selectValue" : "") . "\n";
-        $this->stream(to: 'output', content: "\n[$timestamp] > (Internal) artisan $command" . (empty($flags) ? "" : " " . implode(' ', $flags)) . ($selectValue ? " $selectValue" : "") . "\n", replace: false);
+        $this->output .= "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n";
+        $this->stream(to: 'output', content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n", replace: false);
 
         try {
             $parameters = ['--no-interaction' => true];
@@ -533,21 +534,21 @@ class SystemConsole extends Page
 
             // Podpora pro diagnostické interní příkazy (jako v kalkulačce)
             if ($command === 'php:basic' || $command === 'php:ini') {
-                $output = "";
+                $output = '';
                 if ($command === 'php:basic') {
-                    $output .= "PHP Version: " . PHP_VERSION . "\n";
-                    $output .= "PHP SAPI: " . php_sapi_name() . "\n";
-                    $output .= "PHP Binary: " . PHP_BINARY . "\n";
-                    $output .= "Current User: " . get_current_user() . " (UID: " . (function_exists('posix_getuid') ? posix_getuid() : 'N/A') . ")\n";
-                    $output .= "OS: " . PHP_OS . "\n";
-                    $output .= "CWD: " . getcwd() . "\n";
-                    $output .= "CWD Writeable: " . (is_writable(getcwd()) ? 'Yes' : 'No') . "\n";
+                    $output .= 'PHP Version: '.PHP_VERSION."\n";
+                    $output .= 'PHP SAPI: '.php_sapi_name()."\n";
+                    $output .= 'PHP Binary: '.PHP_BINARY."\n";
+                    $output .= 'Current User: '.get_current_user().' (UID: '.(function_exists('posix_getuid') ? posix_getuid() : 'N/A').")\n";
+                    $output .= 'OS: '.PHP_OS."\n";
+                    $output .= 'CWD: '.getcwd()."\n";
+                    $output .= 'CWD Writeable: '.(is_writable(getcwd()) ? 'Yes' : 'No')."\n";
                 } elseif ($command === 'php:ini') {
-                    $output .= "disable_functions: " . (ini_get('disable_functions') ?: '(none)') . "\n";
-                    $output .= "open_basedir: " . (ini_get('open_basedir') ?: '(none)') . "\n";
-                    $output .= "memory_limit: " . ini_get('memory_limit') . "\n";
-                    $output .= "max_execution_time: " . ini_get('max_execution_time') . "\n";
-                    $output .= "safe_mode: " . (ini_get('safe_mode') ? 'On' : 'Off') . "\n";
+                    $output .= 'disable_functions: '.(ini_get('disable_functions') ?: '(none)')."\n";
+                    $output .= 'open_basedir: '.(ini_get('open_basedir') ?: '(none)')."\n";
+                    $output .= 'memory_limit: '.ini_get('memory_limit')."\n";
+                    $output .= 'max_execution_time: '.ini_get('max_execution_time')."\n";
+                    $output .= 'safe_mode: '.(ini_get('safe_mode') ? 'On' : 'Off')."\n";
                 }
 
                 $this->output .= $output;
@@ -557,13 +558,14 @@ class SystemConsole extends Page
                     ->title(__('admin/system-console.notifications.completed'))
                     ->success()
                     ->send();
+
                 return;
             }
 
             // Použijeme BufferedOutput pro zachycení výstupu a budeme ho streamovat
             // Poznámka: Artisan::call je synchronní, takže streamování proběhne až PO dokončení,
             // pokud nepoužijeme vlastní Output třídu, která volá $this->stream().
-            $outputBuffer = new \Symfony\Component\Console\Output\BufferedOutput();
+            $outputBuffer = new \Symfony\Component\Console\Output\BufferedOutput;
 
             Artisan::call($command, $parameters, $outputBuffer);
             $result = $outputBuffer->fetch();
@@ -579,15 +581,15 @@ class SystemConsole extends Page
             $errorMessage = $e->getMessage();
             $stackTrace = $e->getTraceAsString();
 
-            $this->output .= "\nFATAL ERROR: " . $errorMessage;
+            $this->output .= "\nFATAL ERROR: ".$errorMessage;
             if (config('app.debug')) {
-                $this->output .= "\n\nStack Trace:\n" . substr($stackTrace, 0, 1000) . "...";
+                $this->output .= "\n\nStack Trace:\n".substr($stackTrace, 0, 1000).'...';
             }
 
-            Log::error("SystemConsole Internal Error: " . $errorMessage, [
+            Log::error('SystemConsole Internal Error: '.$errorMessage, [
                 'command' => $command,
                 'flags' => $flags,
-                'exception' => $e
+                'exception' => $e,
             ]);
 
             Notification::make()
@@ -604,9 +606,9 @@ class SystemConsole extends Page
         $this->output .= "\n[$timestamp] > System Check (Detailed Diagnostic)\n";
         $this->stream(to: 'output', content: "\n[$timestamp] > System Check (Detailed Diagnostic)\n", replace: false);
 
-        $out = "\n" . str_repeat('=', 60) . "\n";
+        $out = "\n".str_repeat('=', 60)."\n";
         $out .= "         SYSTÉMOVÁ DIAGNOSTIKA (KBELŠTÍ SOKOLI)\n";
-        $out .= str_repeat('=', 60) . "\n\n";
+        $out .= str_repeat('=', 60)."\n\n";
 
         // 1. ZÁKLADNÍ PROSTŘEDÍ
         $out .= "--- [1] PROSTŘEDÍ A UŽIVATEL ---\n";
@@ -629,7 +631,7 @@ class SystemConsole extends Page
         $out .= sprintf("%-25s: %s\n", 'Zakázané funkce', $disabled);
         $out .= sprintf("%-25s: %s\n", 'open_basedir', ini_get('open_basedir') ?: '(neomezeno)');
         $out .= sprintf("%-25s: %s\n", 'memory_limit', ini_get('memory_limit'));
-        $out .= sprintf("%-25s: %s\n", 'max_execution_time', ini_get('max_execution_time') . 's');
+        $out .= sprintf("%-25s: %s\n", 'max_execution_time', ini_get('max_execution_time').'s');
 
         $criticalFunctions = ['proc_open', 'proc_terminate', 'proc_get_status', 'proc_close', 'shell_exec', 'exec', 'system', 'passthru'];
         foreach ($criticalFunctions as $func) {
@@ -645,11 +647,11 @@ class SystemConsole extends Page
             $perms = substr(sprintf('%o', fileperms($artisanPath)), -4);
             $owner = function_exists('posix_getpwuid') ? posix_getpwuid(fileowner($artisanPath))['name'] : fileowner($artisanPath);
             $out .= sprintf("%-25s: Existuje (Oprávnění: %s, Vlastník: %s)\n", 'Soubor artisan', $perms, $owner);
-            if (!is_executable($artisanPath)) {
+            if (! is_executable($artisanPath)) {
                 $out .= "!!! VAROVÁNÍ: Soubor artisan není nastaven jako spustitelný (chmod +x) !!!\n";
             }
         } else {
-            $out .= "!!! CHYBA: Soubor artisan nebyl nalezen v " . base_path() . " !!!\n";
+            $out .= '!!! CHYBA: Soubor artisan nebyl nalezen v '.base_path()." !!!\n";
         }
         $out .= "\n";
 
@@ -679,8 +681,8 @@ class SystemConsole extends Page
         if (function_exists('shell_exec')) {
             $shorts = ['php8.4', 'php8.3', 'php', 'php84', 'php83'];
             foreach ($shorts as $s) {
-                $path = trim((string)shell_exec("which $s"));
-                if ($path && !in_array($path, $potentialBinaries)) {
+                $path = trim((string) shell_exec("which $s"));
+                if ($path && ! in_array($path, $potentialBinaries)) {
                     $potentialBinaries[] = $path;
                 }
             }
@@ -699,10 +701,12 @@ class SystemConsole extends Page
                 $exists = file_exists($cleanBin);
             } else {
                 // Pokud je to jen název, zkusíme 'which'
-                $exists = function_exists('shell_exec') && !empty(trim((string)shell_exec("which $cleanBin")));
+                $exists = function_exists('shell_exec') && ! empty(trim((string) shell_exec("which $cleanBin")));
             }
 
-            if (!$exists && $cleanBin !== PHP_BINARY && !str_contains($cleanBin, ' ')) continue;
+            if (! $exists && $cleanBin !== PHP_BINARY && ! str_contains($cleanBin, ' ')) {
+                continue;
+            }
 
             $foundAny = true;
             $isExecutable = is_executable($cleanBin) ? 'ANO' : 'NE';
@@ -722,43 +726,57 @@ class SystemConsole extends Page
                         // KONTROLA MODULŮ
                         $mods = $this->getPhpModules($cleanBin);
                         $features = [];
-                        if ($mods['pdo']) { $features[] = 'PDO'; $score += 10; }
-                        if ($mods['tokenizer']) { $features[] = 'Tokenizer'; $score += 5; }
-                        if ($mods['json']) { $features[] = 'JSON'; $score += 2; }
+                        if ($mods['pdo']) {
+                            $features[] = 'PDO';
+                            $score += 10;
+                        }
+                        if ($mods['tokenizer']) {
+                            $features[] = 'Tokenizer';
+                            $score += 5;
+                        }
+                        if ($mods['json']) {
+                            $features[] = 'JSON';
+                            $score += 2;
+                        }
 
                         // Preferujeme PHP 8.4
-                        if (str_contains($versionResult, '8.4')) $score += 20;
-                        elseif (str_contains($versionResult, '8.3')) $score += 15;
+                        if (str_contains($versionResult, '8.4')) {
+                            $score += 20;
+                        } elseif (str_contains($versionResult, '8.3')) {
+                            $score += 15;
+                        }
 
                         if ($score > $bestBinaryScore && is_executable($cleanBin)) {
                             $bestBinaryScore = $score;
                             $bestBinary = $cleanBin;
                         }
 
-                        if (!empty($features)) {
-                            $modulesInfo = "  - Moduly: " . implode(', ', $features);
+                        if (! empty($features)) {
+                            $modulesInfo = '  - Moduly: '.implode(', ', $features);
                         } else {
-                            $modulesInfo = "  - !!! VAROVÁNÍ: Chybí PDO/Tokenizer (Artisan selže) !!!";
+                            $modulesInfo = '  - !!! VAROVÁNÍ: Chybí PDO/Tokenizer (Artisan selže) !!!';
                         }
                     } else {
-                        $versionResult = "Selhalo (Kód: " . $process->getExitCode() . ") " . trim($process->getErrorOutput() ?: $process->getOutput());
+                        $versionResult = 'Selhalo (Kód: '.$process->getExitCode().') '.trim($process->getErrorOutput() ?: $process->getOutput());
                     }
                 } else {
-                    $versionResult = "Nelze testovat (proc_open zakázán)";
+                    $versionResult = 'Nelze testovat (proc_open zakázán)';
                 }
             } catch (\Throwable $e) {
-                $versionResult = "Exception: " . $e->getMessage();
+                $versionResult = 'Exception: '.$e->getMessage();
             }
 
             $out .= "Cesta: $cleanBin\n";
-            $out .= "  - Existuje: " . ($exists ? 'Ano' : 'Možná (v PATH)') . "\n";
+            $out .= '  - Existuje: '.($exists ? 'Ano' : 'Možná (v PATH)')."\n";
             $out .= "  - Spustitelná: $isExecutable\n";
             $out .= "  - Verze (-v): $versionResult\n";
-            if ($modulesInfo) $out .= $modulesInfo . "\n";
+            if ($modulesInfo) {
+                $out .= $modulesInfo."\n";
+            }
             $out .= "\n";
         }
 
-        if (!$foundAny) {
+        if (! $foundAny) {
             $out .= "!!! NIKDE NEBYLA NALEZENA ŽÁDNÁ PHP BINÁRKA !!!\n";
         }
 
@@ -767,14 +785,14 @@ class SystemConsole extends Page
             $out .= ">>> (Má nejlepší skóre kompatibility a verzování)\n\n";
         }
 
-        $out .= str_repeat('-', 60) . "\n";
+        $out .= str_repeat('-', 60)."\n";
         $out .= "DOPORUČENÍ:\n";
         $out .= "1. Pokud binárka vrací Code 126, uživatel webu na ni nemá práva pro spouštění.\n";
         $out .= "2. Pokud je Artisan hlášen jako ne-spustitelný, zkuste 'chmod +x artisan'.\n";
         $out .= "3. Nastavte v .env: PROD_PHP_BINARY=/cesta/k/funkcni/binarce (musí mít PDO!)\n";
         $out .= "4. Nezapomeňte poté vyčistit cache: 'php artisan optimize:clear'\n";
         $out .= "5. Pokud shell selhává, použijte u Artisan příkazů volbu 'Internal Execution'.\n";
-        $out .= str_repeat('=', 60) . "\n";
+        $out .= str_repeat('=', 60)."\n";
 
         $this->output .= $out;
         $this->stream(to: 'output', content: $out, replace: false);
@@ -792,13 +810,16 @@ class SystemConsole extends Page
             $process->run();
             if ($process->isSuccessful()) {
                 $output = strtolower($process->getOutput());
+
                 return [
                     'pdo' => str_contains($output, 'pdo'),
                     'tokenizer' => str_contains($output, 'tokenizer'),
                     'json' => str_contains($output, 'json'),
                 ];
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
+
         return ['pdo' => false, 'tokenizer' => false, 'json' => false];
     }
 
@@ -815,14 +836,14 @@ class SystemConsole extends Page
         $version = $this->getBinaryVersion($binaryPath);
 
         $debug = "\n[DEBUG] ------------------------------------------------------------\n";
-        $debug .= "[DEBUG] Akce: " . ($type === 'artisan' ? 'Artisan Command' : 'Shell Command') . "\n";
+        $debug .= '[DEBUG] Akce: '.($type === 'artisan' ? 'Artisan Command' : 'Shell Command')."\n";
         $debug .= "[DEBUG] Binárka: {$binaryPath}\n";
         $debug .= "[DEBUG] Verze: {$version}\n";
 
         // Kontrola PDO pro Artisan
         if ($type === 'artisan') {
             $mods = $this->getPhpModules($binaryPath);
-            if (!$mods['pdo'] || !$mods['tokenizer']) {
+            if (! $mods['pdo'] || ! $mods['tokenizer']) {
                 $debug .= "[DEBUG] !!! VAROVÁNÍ: Tato binárka postrádá PDO nebo Tokenizer !!!\n";
                 $debug .= "[DEBUG] !!! Doporučujeme použít 'Internal Execution' !!!\n";
             }
@@ -831,7 +852,7 @@ class SystemConsole extends Page
         $debug .= "[DEBUG] Adresář: {$dir}\n";
         $debug .= "[DEBUG] Uživatel: {$user}\n";
         $debug .= "[DEBUG] Prostředí: {$env}\n";
-        $debug .= "[DEBUG] PHP limit: " . ini_get('max_execution_time') . "s\n";
+        $debug .= '[DEBUG] PHP limit: '.ini_get('max_execution_time')."s\n";
         $debug .= "[DEBUG] ------------------------------------------------------------\n";
 
         $this->output .= $debug;
@@ -847,8 +868,8 @@ class SystemConsole extends Page
 
             // Pokud je to /usr/bin/php a jsme na produkci, zkusíme zjistit, zda je spustitelný
             if ($cleanBinary === '/usr/bin/php' && config('app.env') === 'production') {
-                if (!is_executable($cleanBinary)) {
-                    return "SOUBOR NENÍ SPUSTITELNÝ (Code 126 fallback)";
+                if (! is_executable($cleanBinary)) {
+                    return 'SOUBOR NENÍ SPUSTITELNÝ (Code 126 fallback)';
                 }
             }
 
@@ -871,12 +892,18 @@ class SystemConsole extends Page
                 // Kontrola modulů (PDO, Tokenizer)
                 $modules = $this->getPhpModules($cleanBinary);
                 $features = [];
-                if ($modules['pdo']) $features[] = 'PDO';
-                if ($modules['tokenizer']) $features[] = 'Tokenizer';
-                if ($modules['json']) $features[] = 'JSON';
+                if ($modules['pdo']) {
+                    $features[] = 'PDO';
+                }
+                if ($modules['tokenizer']) {
+                    $features[] = 'Tokenizer';
+                }
+                if ($modules['json']) {
+                    $features[] = 'JSON';
+                }
 
-                if (!empty($features)) {
-                    $v .= ' (' . implode(', ', $features) . ')';
+                if (! empty($features)) {
+                    $v .= ' ('.implode(', ', $features).')';
                 } else {
                     $v .= ' (!!! CHYBÍ PDO/TOKENIZER !!!)';
                 }
@@ -889,15 +916,15 @@ class SystemConsole extends Page
 
                 $msg = ($err ?: $out ?: 'Neznámá chyba');
                 if ($code === 126) {
-                    $msg = "Permission denied / Not executable (Code 126). Zkuste jinou binárku.";
+                    $msg = 'Permission denied / Not executable (Code 126). Zkuste jinou binárku.';
                 } elseif ($code === 127) {
-                    $msg = "Command not found (Code 127).";
+                    $msg = 'Command not found (Code 127).';
                 }
 
-                return $msg . ' (Exit Code: ' . $code . ')';
+                return $msg.' (Exit Code: '.$code.')';
             }
         } catch (\Throwable $e) {
-            return 'Chyba při zjišťování verze: ' . $e->getMessage();
+            return 'Chyba při zjišťování verze: '.$e->getMessage();
         }
 
         return 'Neznámá verze';
@@ -919,7 +946,7 @@ class SystemConsole extends Page
         // To obchází problémy s právy shellu a divnými zprávami typu "Success" při selhání.
         $process = new Process($cmd, base_path(), $env);
 
-        $cmdStr = implode(' ', array_map(function($arg) {
+        $cmdStr = implode(' ', array_map(function ($arg) {
             return str_contains($arg, ' ') ? escapeshellarg($arg) : $arg;
         }, $cmd));
 
@@ -946,7 +973,7 @@ class SystemConsole extends Page
         });
 
         $exitCode = $process->getExitCode();
-        $statusMsg = "\n[FINISHED] Exit code: $exitCode " . ($exitCode === 0 ? "(SUCCESS)" : "(FAILED)") . "\n";
+        $statusMsg = "\n[FINISHED] Exit code: $exitCode ".($exitCode === 0 ? '(SUCCESS)' : '(FAILED)')."\n";
         $this->output .= $statusMsg;
         $this->stream(to: 'output', content: $statusMsg, replace: false);
     }
@@ -960,11 +987,12 @@ class SystemConsole extends Page
 
         for ($i = 0; $i < strlen($cmd); $i++) {
             $char = $cmd[$i];
-            if ($char === ' ' && !$inQuotes) {
+            if ($char === ' ' && ! $inQuotes) {
                 if ($current !== '') {
                     $parts[] = $current;
                     $current = '';
                 }
+
                 continue;
             }
             if (($char === '"' || $char === "'") && ($i === 0 || $cmd[$i - 1] !== '\\')) {
@@ -978,6 +1006,7 @@ class SystemConsole extends Page
                     $inQuotes = true;
                     $quoteChar = $char;
                 }
+
                 continue;
             }
             $current .= $char;
@@ -985,6 +1014,7 @@ class SystemConsole extends Page
         if ($current !== '') {
             $parts[] = $current;
         }
+
         return $parts;
     }
 }

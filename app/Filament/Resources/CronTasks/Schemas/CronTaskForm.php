@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\CronTasks\Schemas;
 
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Schema;
 
 class CronTaskForm
@@ -65,7 +65,7 @@ class CronTaskForm
                         Placeholder::make('last_error_message')
                             ->label('Poslední chyba')
                             ->content(fn ($record) => $record?->last_error_message ?? 'Bez chyb')
-                            ->visible(fn ($record) => !empty($record?->last_error_message)),
+                            ->visible(fn ($record) => ! empty($record?->last_error_message)),
                     ])
                     ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord),
 

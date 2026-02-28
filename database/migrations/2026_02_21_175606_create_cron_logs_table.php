@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('cron_logs')) {
+        if (! Schema::hasTable('cron_logs')) {
             Schema::create('cron_logs', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('cron_task_id')->constrained()->onDelete('cascade');

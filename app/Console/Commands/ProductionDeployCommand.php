@@ -4,12 +4,12 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use function Laravel\Prompts\info;
-use function Laravel\Prompts\error;
+
 use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\warning;
 
 class ProductionDeployCommand extends Command
 {
@@ -42,20 +42,21 @@ class ProductionDeployCommand extends Command
         $token = config('app.prod_git_token', env('PROD_GIT_TOKEN'));
         $publicPath = config('app.prod_public_path', env('PROD_PUBLIC_PATH'));
 
-        if (!$host || !$user || !$path) {
+        if (! $host || ! $user || ! $path) {
             error('❌ Chybí konfigurace produkce v .env. Spusťte prosím: php artisan app:production:setup');
+
             return self::FAILURE;
         }
 
         $currentToken = env('PROD_GIT_TOKEN');
         $token = $currentToken;
 
-        if (!$this->option('ai-test')) {
+        if (! $this->option('ai-test')) {
             if ($currentToken) {
                 $choice = select(
                     label: 'Jak chcete naložit s GitHub Personal Access Tokenem?',
                     options: [
-                        'keep' => 'Použít uložený token (' . substr($currentToken, 0, 4) . '...' . substr($currentToken, -4) . ')',
+                        'keep' => 'Použít uložený token ('.substr($currentToken, 0, 4).'...'.substr($currentToken, -4).')',
                         'new' => 'Zadat nové token',
                     ],
                     default: 'keep'
@@ -77,7 +78,7 @@ class ProductionDeployCommand extends Command
             }
 
             if ($token !== $currentToken) {
-                if (confirm("Chcete tento token uložit do lokálního .env?", true)) {
+                if (confirm('Chcete tento token uložit do lokálního .env?', true)) {
                     $this->updateEnv(['PROD_GIT_TOKEN' => $token]);
                 }
             }
@@ -97,12 +98,12 @@ class ProductionDeployCommand extends Command
         $currentPassword = config('app.prod_db_password', env('PROD_DB_PASSWORD'));
         $dbConfig['db_password'] = $currentPassword;
 
-        if (!$this->option('ai-test')) {
+        if (! $this->option('ai-test')) {
             if ($currentPassword) {
                 $choice = select(
                     label: 'Jak chcete naložit s heslem k produkční databázi?',
                     options: [
-                        'keep' => 'Použít uložené heslo (' . str_repeat('*', 8) . ')',
+                        'keep' => 'Použít uložené heslo ('.str_repeat('*', 8).')',
                         'new' => 'Zadat nové heslo',
                     ],
                     default: 'keep'
@@ -122,34 +123,36 @@ class ProductionDeployCommand extends Command
             }
 
             if ($dbConfig['db_password'] !== $currentPassword) {
-                if (confirm("Chcete nové heslo uložit do lokálního .env?", true)) {
+                if (confirm('Chcete nové heslo uložit do lokálního .env?', true)) {
                     $this->updateEnv(['PROD_DB_PASSWORD' => $dbConfig['db_password']]);
                 }
             }
         }
 
         // Ověření dostupnosti binárek na serveru před spuštěním
-        info("🔍 Ověřuji dostupnost binárek na serveru...");
+        info('🔍 Ověřuji dostupnost binárek na serveru...');
         $checkPhp = Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
-        if (!$checkPhp->successful()) {
+        if (! $checkPhp->successful()) {
             error("❌ PHP binárka '{$phpBinary}' není na serveru dostupná nebo nefunguje.");
+
             return self::FAILURE;
         }
 
         // Pokud je nodeBinary jen 'node', zkusíme v session najít v18+ verzi,
         // protože i když je v PATH, může tam být dřív v14 (častý problém na Webglobe).
         if ($nodeBinary === 'node') {
-            info("🔍 Hledám optimální verzi Node.js (v18+)...");
+            info('🔍 Hledám optimální verzi Node.js (v18+)...');
             $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
-            if ($findNode->successful() && !empty(trim($findNode->output()))) {
+            if ($findNode->successful() && ! empty(trim($findNode->output()))) {
                 $nodeBinary = trim($findNode->output());
                 info("✅ Použiji: {$nodeBinary}");
             }
         }
 
         $checkNode = Process::run("ssh -p {$port} {$user}@{$host} '{$nodeBinary} -v'");
-        if (!$checkNode->successful()) {
+        if (! $checkNode->successful()) {
             error("❌ Node.js binárka '{$nodeBinary}' není na serveru dostupná.");
+
             return self::FAILURE;
         }
 
@@ -157,27 +160,27 @@ class ProductionDeployCommand extends Command
             info("🚀 Nasazuji na {$user}@{$host}:{$port}...");
 
             $params = [
-                "--host=" . escapeshellarg($host),
-                "--port=" . escapeshellarg($port),
-                "--user=" . escapeshellarg($user),
-                "--php=" . escapeshellarg($phpBinary),
-                "--node=" . escapeshellarg($nodeBinary),
-                "--npm=" . escapeshellarg($npmBinary),
-                "--path=" . escapeshellarg($path),
-                "--token=" . escapeshellarg($token),
+                '--host='.escapeshellarg($host),
+                '--port='.escapeshellarg($port),
+                '--user='.escapeshellarg($user),
+                '--php='.escapeshellarg($phpBinary),
+                '--node='.escapeshellarg($nodeBinary),
+                '--npm='.escapeshellarg($npmBinary),
+                '--path='.escapeshellarg($path),
+                '--token='.escapeshellarg($token),
             ];
 
             if ($publicPath) {
-                $params[] = "--public_path=" . escapeshellarg($publicPath);
+                $params[] = '--public_path='.escapeshellarg($publicPath);
             }
 
             foreach ($dbConfig as $key => $value) {
                 if ($value !== null) {
-                    $params[] = "--{$key}=" . escapeshellarg($value);
+                    $params[] = "--{$key}=".escapeshellarg($value);
                 }
             }
 
-            $command = base_path('vendor/bin/envoy') . " run deploy " . implode(' ', $params);
+            $command = base_path('vendor/bin/envoy').' run deploy '.implode(' ', $params);
 
             $process = Process::forever()->run($command, function (string $type, string $output) {
                 echo $output;
@@ -203,7 +206,7 @@ class ProductionDeployCommand extends Command
             } else {
                 error('❌ Nasazení selhalo. Zkontrolujte prosím chybové hlášky výše.');
 
-                if (!confirm('Chcete zkusit nasazení spustit znovu se stejným nastavením?', true)) {
+                if (! confirm('Chcete zkusit nasazení spustit znovu se stejným nastavením?', true)) {
                     return self::FAILURE;
                 }
             }
@@ -219,7 +222,7 @@ class ProductionDeployCommand extends Command
     {
         $path = base_path('.env');
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return;
         }
 

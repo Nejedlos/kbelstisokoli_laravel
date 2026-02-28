@@ -14,15 +14,23 @@ class ContactForm extends Component
     use WithFileUploads;
 
     public string $toEncoded = '';
+
     public string $toEmail = '';
+
     public string $name = '';
+
     public string $email = '';
+
     public string $subject = 'Zpráva z webu';
+
     public string $message = '';
+
     public $attachment;
+
     public ?string $recaptchaToken = null;
 
     public bool $success = false;
+
     public ?string $errorMessage = null;
 
     protected function rules(): array
@@ -48,22 +56,26 @@ class ContactForm extends Component
 
     public function submit(RecaptchaV3 $recaptchaService): void
     {
-        if ($this->success) return;
+        if ($this->success) {
+            return;
+        }
 
         $this->validate();
 
         if (config('recaptcha.enabled')) {
             $result = $recaptchaService->verify($this->recaptchaToken ?? '', 'contact_form', request()->ip());
-            if (!$result->passed) {
+            if (! $result->passed) {
                 $this->errorMessage = ($result->score !== null && $result->score < config('recaptcha.score_threshold'))
                     ? trans('recaptcha.low_score')
                     : trans('recaptcha.failed');
+
                 return;
             }
         }
 
         if (empty($this->toEmail)) {
             $this->errorMessage = 'Příjemce e-mailu není nastaven.';
+
             return;
         }
 
@@ -93,7 +105,7 @@ class ContactForm extends Component
             $this->reset(['name', 'email', 'message', 'attachment', 'recaptchaToken']);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Chyba při odesílání kontaktního formuláře: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Chyba při odesílání kontaktního formuláře: '.$e->getMessage());
             $this->errorMessage = 'Při odesílání e-mailu došlo k chybě. Zkuste to prosím později.';
         }
     }

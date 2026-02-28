@@ -4,7 +4,6 @@ namespace App\Support;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 
 /**
  * Centrální logika pro rozhodování o přesměrování po přihlášení a 2FA.
@@ -13,10 +12,6 @@ class AuthRedirect
 {
     /**
      * Vrátí cílovou URL po úspěšném přihlášení nebo 2FA.
-     *
-     * @param User|null $user
-     * @param Request|null $request
-     * @return string
      */
     public static function getTargetUrl(?User $user, ?Request $request = null): string
     {
@@ -26,7 +21,7 @@ class AuthRedirect
 
         $isAdmin = $user->canAccessAdmin();
         $adminPath = config('filament.panels.admin.path', 'admin');
-        $adminPath = str_starts_with($adminPath, '/') ? $adminPath : '/' . $adminPath;
+        $adminPath = str_starts_with($adminPath, '/') ? $adminPath : '/'.$adminPath;
 
         $memberDashboard = '/clenska-sekce/dashboard';
 
@@ -37,16 +32,19 @@ class AuthRedirect
         if ($intended) {
             if (Str_contains_any($intended, ['/login', '/logout', '/two-factor'])) {
                 \Illuminate\Support\Facades\Session::forget('url.intended');
+
                 return $fallback;
             }
 
-            if (!$isAdmin && str_contains($intended, $adminPath)) {
+            if (! $isAdmin && str_contains($intended, $adminPath)) {
                 \Illuminate\Support\Facades\Session::forget('url.intended');
+
                 return $memberDashboard;
             }
 
-            if ($isAdmin && ($intended === url($memberDashboard) || str_contains($intended, $memberDashboard . '/index') || $intended === url('/'))) {
+            if ($isAdmin && ($intended === url($memberDashboard) || str_contains($intended, $memberDashboard.'/index') || $intended === url('/'))) {
                 \Illuminate\Support\Facades\Session::forget('url.intended');
+
                 return $adminPath;
             }
 
@@ -67,5 +65,6 @@ function Str_contains_any(string $haystack, array $needles): bool
             return true;
         }
     }
+
     return false;
 }

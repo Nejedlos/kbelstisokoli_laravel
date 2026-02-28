@@ -1,13 +1,13 @@
 <?php
 
+use App\Jobs\RunCronTaskJob;
+use App\Models\CronTask;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Schema;
-use App\Models\CronTask;
-use App\Jobs\RunCronTaskJob;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -102,7 +102,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // Odeslání e-mailu s chybou na produkci (vynechá 4xx chyby)
         $exceptions->report(function (\Throwable $e) {
             try {
-                if (!app()->environment('production')) {
+                if (! app()->environment('production')) {
                     return;
                 }
 
@@ -122,6 +122,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                             $data[$k] = $sanitize($v);
                         }
                     }
+
                     return $data;
                 };
 
@@ -142,7 +143,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
                             'name' => $u->name ?? null,
                         ];
                     }
-                } catch (\Throwable $ignored) {}
+                } catch (\Throwable $ignored) {
+                }
 
                 $report = [
                     'timestamp' => now()->toIso8601String(),
@@ -189,13 +191,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
                         'message' => $ignored->getMessage(),
                         'exception' => get_class($ignored),
                     ]);
-                } catch (\Throwable $e2) {}
+                } catch (\Throwable $e2) {
+                }
             }
         });
 
         // Vlastní 500 stránka s kopírovatelnými debug informacemi (bez citlivých dat)
         $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
-            if (!app()->environment('production')) {
+            if (! app()->environment('production')) {
                 return null; // nezasahujeme mimo produkci
             }
 
@@ -214,6 +217,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                         $data[$k] = $sanitize($v);
                     }
                 }
+
                 return $data;
             };
 

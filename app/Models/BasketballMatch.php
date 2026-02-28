@@ -2,16 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Translatable\HasTranslations;
 
 class BasketballMatch extends Model
 {
-    use HasTranslations, Auditable;
+    use Auditable, HasTranslations;
 
     protected $table = 'matches';
 

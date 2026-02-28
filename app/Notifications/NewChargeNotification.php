@@ -14,9 +14,7 @@ class NewChargeNotification extends BaseNotification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public FinanceCharge $charge)
-    {
-    }
+    public function __construct(public FinanceCharge $charge) {}
 
     /**
      * Get the notification's delivery channels.
@@ -40,12 +38,12 @@ class NewChargeNotification extends BaseNotification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Nový platební předpis: ' . $this->charge->title)
-            ->greeting('Ahoj ' . $notifiable->name . '!')
+            ->subject('Nový platební předpis: '.$this->charge->title)
+            ->greeting('Ahoj '.$notifiable->name.'!')
             ->line('Byl ti vystaven nový platební předpis v klubovém systému ###TEAM_NAME###.')
-            ->line('Položka: ' . $this->charge->title)
-            ->line('Částka: ' . number_format($this->charge->amount_total, 0, ',', ' ') . ' Kč')
-            ->line('Splatnost: ' . ($this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : 'neuvedeno'))
+            ->line('Položka: '.$this->charge->title)
+            ->line('Částka: '.number_format($this->charge->amount_total, 0, ',', ' ').' Kč')
+            ->line('Splatnost: '.($this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : 'neuvedeno'))
             ->action('Zobrazit moje platby', route('member.economy.index'))
             ->line('Prosím o včasnou úhradu. Děkujeme!');
     }
@@ -58,7 +56,7 @@ class NewChargeNotification extends BaseNotification implements ShouldQueue
         return [
             'charge_id' => $this->charge->id,
             'title' => 'Nový platební předpis',
-            'message' => "Byl ti vystaven předpis '{$this->charge->title}' na částku " . number_format($this->charge->amount_total, 0, ',', ' ') . " Kč.",
+            'message' => "Byl ti vystaven předpis '{$this->charge->title}' na částku ".number_format($this->charge->amount_total, 0, ',', ' ').' Kč.',
             'action_url' => route('member.economy.index'),
             'type' => 'finance',
         ];

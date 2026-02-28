@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Str;
-
 class TextExtractionService
 {
     /**

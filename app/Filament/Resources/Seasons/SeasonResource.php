@@ -8,10 +8,8 @@ use App\Filament\Resources\Seasons\Pages\ListSeasons;
 use App\Filament\Resources\Seasons\Schemas\SeasonForm;
 use App\Filament\Resources\Seasons\Tables\SeasonsTable;
 use App\Models\Season;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class SeasonResource extends Resource

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
 
 class ImpersonateController extends Controller
 {
@@ -18,7 +17,7 @@ class ImpersonateController extends Controller
         /** @var User $admin */
         $admin = Auth::user();
 
-        if (!$admin || !$admin->can('impersonate_users')) {
+        if (! $admin || ! $admin->can('impersonate_users')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -28,11 +27,11 @@ class ImpersonateController extends Controller
             ->where('is_active', true)
             ->where('id', '!=', $admin->id);
 
-        if (!empty($query)) {
-            $usersQuery->where(function($q) use ($query) {
+        if (! empty($query)) {
+            $usersQuery->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('email', 'like', "%{$query}%")
-                  ->orWhere('club_member_id', 'like', "%{$query}%");
+                    ->orWhere('email', 'like', "%{$query}%")
+                    ->orWhere('club_member_id', 'like', "%{$query}%");
             });
         } else {
             // Výchozí výsledky (např. poslední přihlášení nebo prostě poslední uživatelé)
@@ -43,7 +42,7 @@ class ImpersonateController extends Controller
             ->get(['id', 'name', 'email']);
 
         return response()->json([
-            'results' => $users->map(fn($user) => [
+            'results' => $users->map(fn ($user) => [
                 'id' => $user->id,
                 'text' => $user->name,
             ]),
@@ -58,7 +57,7 @@ class ImpersonateController extends Controller
         /** @var User $admin */
         $admin = Auth::user();
 
-        if (!$admin) {
+        if (! $admin) {
             return redirect()->route('login');
         }
 
@@ -71,8 +70,9 @@ class ImpersonateController extends Controller
         ]);
 
         // Kontrola oprávnění
-        if (!$admin || !$admin->can('impersonate_users')) {
+        if (! $admin || ! $admin->can('impersonate_users')) {
             \Illuminate\Support\Facades\Log::warning('Impersonate.start.unauthorized', ['admin_id' => $admin?->id]);
+
             return redirect()->back()->with('error', 'Nemáte oprávnění k impersonaci.');
         }
 
@@ -128,6 +128,7 @@ class ImpersonateController extends Controller
         ]);
 
         $request->session()->put('impersonation_started', $userToImpersonate->name);
+
         return redirect()->to($targetRoute);
     }
 
@@ -136,7 +137,7 @@ class ImpersonateController extends Controller
      */
     public function stop(Request $request)
     {
-        if (!$request->session()->has('impersonated_by')) {
+        if (! $request->session()->has('impersonated_by')) {
             return redirect()->route('filament.admin.pages.dashboard');
         }
 
@@ -162,6 +163,7 @@ class ImpersonateController extends Controller
                 : route('member.dashboard');
 
             $request->session()->put('impersonation_stopped', true);
+
             return redirect()->to($targetRoute);
         }
 

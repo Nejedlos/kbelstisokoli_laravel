@@ -8,10 +8,8 @@ use App\Filament\Resources\ClubCompetitions\Pages\ListClubCompetitions;
 use App\Filament\Resources\ClubCompetitions\Schemas\ClubCompetitionForm;
 use App\Filament\Resources\ClubCompetitions\Tables\ClubCompetitionsTable;
 use App\Models\ClubCompetition;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class ClubCompetitionResource extends Resource

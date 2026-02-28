@@ -78,9 +78,9 @@ class GlobalSeeder extends Seeder
 
         // Pokud není povoleno seedování uživatelů, vynecháme je.
         // To je důležité, aby se při běžném syncu nepřepisovala hesla stávajícím uživatelům.
-        if (!config('app.seed_users', false)) {
+        if (! config('app.seed_users', false)) {
             $seeders = array_filter($seeders, function ($seeder) {
-                return !in_array($seeder, [UserSeeder::class, LegacyUserMigrationSeeder::class]);
+                return ! in_array($seeder, [UserSeeder::class, LegacyUserMigrationSeeder::class]);
             });
 
             // Re-indexujeme pole po filtrování

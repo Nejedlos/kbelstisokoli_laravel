@@ -15,12 +15,20 @@ Vytvořili jsme dedikovaný seeder `BrandingSeeder`, který naplňuje tabulku `s
 - **Výkon:** Nastavení optimalizací (cache, minifikace).
 
 ## Automatizace (app:sync)
-Příkaz `php artisan app:sync` byl rozšířen tak, aby při každém spuštění (na lokálu i na produkci) automaticky spustil `BrandingSeeder`.
+Příkaz `php artisan app:sync` byl rozšířen tak, aby při každém spuštění (na lokálu i na produkci) automaticky spustil `GlobalSeeder`.
 
 Tím je zajištěno, že:
-1. Při prvním nasazení je systém okamžitě připraven k použití.
-2. Pokud někdo omylem smaže nebo poškodí základní nastavení v administraci, další synchronizace jej vrátí do "oficiálního" stavu.
-3. Vývojáři mají na lokálním prostředí vždy aktuální produkční defaulty bez nutnosti ručního nastavování.
+1. Při prvním nasazení je systém okamžitě připraven k použití (role, sporty, nastavení).
+2. Branding a globální nastavení (včetně SEO a výkonu) jsou vždy v aktuálním "oficiálním" stavu.
+3. Pokud někdo omylem smaže nebo poškodí základní nastavení v administraci, další synchronizace jej vrátí do výchozího stavu.
+4. Vývojáři mají na lokálním prostředí vždy aktuální produkční defaulty bez nutnosti ručního nastavování.
+
+V rámci `GlobalSeeder` jsou spuštěny tyto komponenty nastavení:
+- **BrandingSeeder:** Základní identita, kontakty, ekonomika.
+- **SeoOptimizationSeeder:** SEO meta tagy a roboty.
+- **PerformanceSettingsSeeder:** Výkonnostní scénáře a cachování.
+- **SeasonUnifySeeder:** Sjednocení formátu sezón.
+- **RoleSeeder / SportSeeder:** Základní číselníky systému.
 
 ## Použití v kódu
 Nastavení jsou dostupná přes `BrandingService`:

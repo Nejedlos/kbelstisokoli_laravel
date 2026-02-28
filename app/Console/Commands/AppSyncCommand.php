@@ -4,10 +4,9 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\password;
-use function Laravel\Prompts\select;
-use function Laravel\Prompts\warning;
 
 class AppSyncCommand extends Command
 {
@@ -54,6 +53,7 @@ class AppSyncCommand extends Command
         // 2. Pokud jsme na produkci, zde končíme (nechceme rekurentně volat produkční sync)
         if (app()->environment('production')) {
             $this->info('== APP SYNC DONE (Production Mode) ==');
+
             return self::SUCCESS;
         }
 
@@ -132,8 +132,9 @@ class AppSyncCommand extends Command
             'db_prefix' => config('app.prod_db_prefix', env('PROD_DB_PREFIX')),
         ];
 
-        if (!$host || !$user || !$path) {
+        if (! $host || ! $user || ! $path) {
             $this->error('❌ Chybí konfigurace produkce v .env. Spusťte prosím: php artisan app:production:setup');
+
             return self::FAILURE;
         }
 
@@ -141,24 +142,25 @@ class AppSyncCommand extends Command
         $dbConfig['db_password'] = $currentPassword;
 
         // Ověření dostupnosti PHP na serveru
-        \Laravel\Prompts\info("🔍 Ověřuji dostupnost PHP na serveru...");
+        \Laravel\Prompts\info('🔍 Ověřuji dostupnost PHP na serveru...');
         $checkPhp = Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
-        if (!$checkPhp->successful()) {
+        if (! $checkPhp->successful()) {
             $this->error("❌ PHP binárka '{$phpBinary}' není na serveru dostupná nebo nefunguje.");
+
             return self::FAILURE;
         }
 
         while (true) {
             // Ověření DB připojení ze serveru
-            \Laravel\Prompts\info("🔍 Ověřuji DB připojení ze serveru...");
+            \Laravel\Prompts\info('🔍 Ověřuji DB připojení ze serveru...');
 
             $dbCheckPhp = '
                 mysqli_report(MYSQLI_REPORT_OFF);
-                $host = base64_decode("' . base64_encode($dbConfig['db_host']) . '");
-                $user = base64_decode("' . base64_encode($dbConfig['db_username']) . '");
-                $pass = base64_decode("' . base64_encode($dbConfig['db_password']) . '");
-                $db   = base64_decode("' . base64_encode($dbConfig['db_database']) . '");
-                $port = (int)base64_decode("' . base64_encode($dbConfig['db_port']) . '");
+                $host = base64_decode("'.base64_encode($dbConfig['db_host']).'");
+                $user = base64_decode("'.base64_encode($dbConfig['db_username']).'");
+                $pass = base64_decode("'.base64_encode($dbConfig['db_password']).'");
+                $db   = base64_decode("'.base64_encode($dbConfig['db_database']).'");
+                $port = (int)base64_decode("'.base64_encode($dbConfig['db_port']).'");
 
                 // Pokus o připojení s ošetřením chyb
                 $conn = @mysqli_init();
@@ -192,22 +194,22 @@ class AppSyncCommand extends Command
             $output = trim($checkDb->output());
 
             if ($output === 'OK') {
-                \Laravel\Prompts\info("✅ DB připojení je v pořádku.");
+                \Laravel\Prompts\info('✅ DB připojení je v pořádku.');
                 break;
             }
 
-            $this->error("❌ Nelze se připojit k produkční databázi ze serveru.");
-            if (!empty($output) && str_contains($output, 'FAIL:')) {
-                $this->line("Důvod: " . substr($output, strpos($output, 'FAIL:') + 5));
-            } elseif (!empty($checkDb->errorOutput())) {
-                $this->line("Chyba: " . trim($checkDb->errorOutput()));
+            $this->error('❌ Nelze se připojit k produkční databázi ze serveru.');
+            if (! empty($output) && str_contains($output, 'FAIL:')) {
+                $this->line('Důvod: '.substr($output, strpos($output, 'FAIL:') + 5));
+            } elseif (! empty($checkDb->errorOutput())) {
+                $this->line('Chyba: '.trim($checkDb->errorOutput()));
             }
 
             if ($this->option('ai-test')) {
                 return self::FAILURE;
             }
 
-            if (!confirm("Chcete zadat jiné heslo?", true)) {
+            if (! confirm('Chcete zadat jiné heslo?', true)) {
                 return self::FAILURE;
             }
 
@@ -216,7 +218,7 @@ class AppSyncCommand extends Command
                 required: true
             );
 
-            if (confirm("Chcete toto heslo uložit do lokálního .env?", true)) {
+            if (confirm('Chcete toto heslo uložit do lokálního .env?', true)) {
                 $this->updateEnv([
                     'PROD_DB_PASSWORD' => $dbConfig['db_password'],
                     'DB_PASSWORD' => $dbConfig['db_password'],
@@ -226,14 +228,14 @@ class AppSyncCommand extends Command
                 if (file_exists($rootEnv)) {
                     $content = file_get_contents($rootEnv);
                     $safeValue = $dbConfig['db_password'];
-                    if (str_contains($safeValue, ' ') && !str_starts_with($safeValue, '"')) {
-                        $safeValue = '"' . str_replace('"', '\"', $safeValue) . '"';
+                    if (str_contains($safeValue, ' ') && ! str_starts_with($safeValue, '"')) {
+                        $safeValue = '"'.str_replace('"', '\"', $safeValue).'"';
                     }
 
-                    if (preg_match("/^PROD_DB_PASSWORD=/m", $content)) {
-                        $content = preg_replace("/^PROD_DB_PASSWORD=.*/m", "PROD_DB_PASSWORD={$safeValue}", $content);
+                    if (preg_match('/^PROD_DB_PASSWORD=/m', $content)) {
+                        $content = preg_replace('/^PROD_DB_PASSWORD=.*/m', "PROD_DB_PASSWORD={$safeValue}", $content);
                     } else {
-                        $content = rtrim($content) . "\nPROD_DB_PASSWORD={$safeValue}\n";
+                        $content = rtrim($content)."\nPROD_DB_PASSWORD={$safeValue}\n";
                     }
                     file_put_contents($rootEnv, $content);
                 }
@@ -242,16 +244,16 @@ class AppSyncCommand extends Command
 
         // Node.js selection logic
         if ($nodeBinary === 'node' || empty($nodeBinary)) {
-            \Laravel\Prompts\info("🔍 Hledám optimální verzi Node.js (v18+)...");
+            \Laravel\Prompts\info('🔍 Hledám optimální verzi Node.js (v18+)...');
             $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node22 node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
-            if ($findNode->successful() && !empty(trim($findNode->output()))) {
+            if ($findNode->successful() && ! empty(trim($findNode->output()))) {
                 $nodeBinary = trim($findNode->output());
                 \Laravel\Prompts\info("✅ Použiji: {$nodeBinary}");
             }
         }
 
         // --- Nahrávání lokálních assetů ---
-        \Laravel\Prompts\info("📤 Nahrávám lokální assety a build na server...");
+        \Laravel\Prompts\info('📤 Nahrávám lokální assety a build na server...');
 
         $usersync = $this->option('usersync') || $this->option('syncusers') || $this->option('syncuser');
 
@@ -267,7 +269,7 @@ class AppSyncCommand extends Command
             'storage/app/defaults/',
             'database/migrations/',
             'database/seeders/',
-            'database/factories/'
+            'database/factories/',
         ];
 
         // Pokud synchronizujeme uživatele, nahrajeme i jejich lokálně stažená média
@@ -283,15 +285,15 @@ class AppSyncCommand extends Command
                 $synced = false;
 
                 // Zajistíme, že cílový adresář na serveru existuje
-                Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p " . escapeshellarg($path . "/" . $dir) . "'");
+                Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p ".escapeshellarg($path.'/'.$dir)."'");
 
                 // 1. Rsync
-                $checkRsync = Process::run("rsync --version");
+                $checkRsync = Process::run('rsync --version');
                 if ($checkRsync->successful()) {
-                    $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' " . escapeshellarg($localDir) . " {$user}@{$host}:" . escapeshellarg($path . "/" . $dir);
+                    $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($path.'/'.$dir);
                     $result = Process::forever()->run($rsyncCmd, function (string $type, string $output) {
                         if ($type === 'out' && strlen(trim($output)) > 0) {
-                            $this->line("  " . trim($output));
+                            $this->line('  '.trim($output));
                         }
                     });
                     if ($result->successful()) {
@@ -300,64 +302,64 @@ class AppSyncCommand extends Command
                 }
 
                 // 2. FTP Fallback
-                if (!$synced && $ftpHost && $ftpUser) {
+                if (! $synced && $ftpHost && $ftpUser) {
                     $this->line("  Trying FTP fallback for $dir...");
-                    if ($this->syncViaFtp($localDir, $path . "/" . $dir, $ftpHost, $ftpUser, $ftpPass, $ftpPort)) {
+                    if ($this->syncViaFtp($localDir, $path.'/'.$dir, $ftpHost, $ftpUser, $ftpPass, $ftpPort)) {
                         $synced = true;
                     }
                 }
 
                 // 3. SCP Fallback
-                if (!$synced) {
-                    $this->line("  Falling back to SCP...");
-                    $scpCmd = "scp -P {$port} -r " . escapeshellarg($localDir . ".") . " {$user}@{$host}:" . escapeshellarg($path . "/" . $dir);
+                if (! $synced) {
+                    $this->line('  Falling back to SCP...');
+                    $scpCmd = "scp -P {$port} -r ".escapeshellarg($localDir.'.')." {$user}@{$host}:".escapeshellarg($path.'/'.$dir);
                     Process::forever()->run($scpCmd);
                 }
             }
         }
-        \Laravel\Prompts\info("✅ Assety nahrány.");
+        \Laravel\Prompts\info('✅ Assety nahrány.');
 
         $npmBinary = 'npm';
         if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
-             $npmBinary = 'npm' . $m[1];
+            $npmBinary = 'npm'.$m[1];
         }
 
         while (true) {
             \Laravel\Prompts\info("🚀 Synchronizuji konfiguraci na {$user}@{$host}:{$port}...");
 
             $params = [
-                "--host=" . escapeshellarg($host),
-                "--port=" . escapeshellarg($port),
-                "--user=" . escapeshellarg($user),
-                "--php=" . escapeshellarg($phpBinary),
-                "--node=" . escapeshellarg($nodeBinary),
-                "--npm=" . escapeshellarg($npmBinary),
-                "--path=" . escapeshellarg($path),
+                '--host='.escapeshellarg($host),
+                '--port='.escapeshellarg($port),
+                '--user='.escapeshellarg($user),
+                '--php='.escapeshellarg($phpBinary),
+                '--node='.escapeshellarg($nodeBinary),
+                '--npm='.escapeshellarg($npmBinary),
+                '--path='.escapeshellarg($path),
             ];
 
             if ($this->option('freshseed')) {
-                $params[] = "--freshseed=1";
+                $params[] = '--freshseed=1';
             }
 
             if ($usersync) {
-                $params[] = "--usersync=1";
+                $params[] = '--usersync=1';
             }
 
-            if (!$this->option('ai')) {
-                $params[] = "--noai=1";
+            if (! $this->option('ai')) {
+                $params[] = '--noai=1';
             }
 
             if ($publicPath) {
-                $params[] = "--public_path=" . escapeshellarg($publicPath);
+                $params[] = '--public_path='.escapeshellarg($publicPath);
             }
 
             foreach ($dbConfig as $key => $value) {
                 if ($value !== null) {
-                    $params[] = "--{$key}=" . escapeshellarg($value);
+                    $params[] = "--{$key}=".escapeshellarg($value);
                 }
             }
 
-            $command = "php " . base_path('vendor/bin/envoy') . " run sync " . implode(' ', $params);
+            $command = 'php '.base_path('vendor/bin/envoy').' run sync '.implode(' ', $params);
 
             $process = Process::forever()->run($command, function (string $type, string $output) {
                 echo $output;
@@ -372,7 +374,7 @@ class AppSyncCommand extends Command
                 $this->line(' ✅ Propojení veřejné složky a oprava index.php');
                 $this->line(' ✅ Synchronizace statických assetů');
                 $this->line(' ✅ Spuštění idempotentních databázových migrací');
-                $this->line(' ✅ Spuštění ' . ($this->option('freshseed') ? 'ČERSTVÉHO (fresh)' : 'idempotentního') . ' seedování');
+                $this->line(' ✅ Spuštění '.($this->option('freshseed') ? 'ČERSTVÉHO (fresh)' : 'idempotentního').' seedování');
                 if ($usersync) {
                     $this->line(' ✅ Synchronizace uživatelů (avatary)');
                 }
@@ -389,13 +391,13 @@ class AppSyncCommand extends Command
                     break;
                 }
 
-                if (!confirm('Chcete synchronizaci spustit znovu?', false)) {
+                if (! confirm('Chcete synchronizaci spustit znovu?', false)) {
                     break;
                 }
             } else {
                 $this->error('❌ Synchronizace selhala.');
 
-                if ($this->option('ai-test') || !confirm('Chcete zkusit synchronizaci spustit znovu?', true)) {
+                if ($this->option('ai-test') || ! confirm('Chcete zkusit synchronizaci spustit znovu?', true)) {
                     return self::FAILURE;
                 }
             }
@@ -408,10 +410,13 @@ class AppSyncCommand extends Command
     {
         try {
             $conn = @ftp_connect($host, $port, 10);
-            if (!$conn || !@ftp_login($conn, $user, $pass)) return false;
+            if (! $conn || ! @ftp_login($conn, $user, $pass)) {
+                return false;
+            }
             ftp_pasv($conn, true);
             $this->uploadRecursive($conn, $localDir, $remoteDir);
             ftp_close($conn);
+
             return true;
         } catch (\Exception $e) {
             return false;
@@ -423,16 +428,18 @@ class AppSyncCommand extends Command
         $parts = explode('/', trim($remoteDir, '/'));
         $path = '';
         foreach ($parts as $part) {
-            $path .= '/' . $part;
-            if (!@ftp_chdir($conn, $path)) {
+            $path .= '/'.$part;
+            if (! @ftp_chdir($conn, $path)) {
                 @ftp_mkdir($conn, $path);
             }
         }
         $items = scandir($localDir);
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..') continue;
-            $localPath = $localDir . '/' . $item;
-            $remotePath = $remoteDir . '/' . $item;
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $localPath = $localDir.'/'.$item;
+            $remotePath = $remoteDir.'/'.$item;
             if (is_dir($localPath)) {
                 $this->uploadRecursive($conn, $localPath, $remotePath);
             } else {
@@ -444,7 +451,7 @@ class AppSyncCommand extends Command
     protected function updateEnv(array $data): void
     {
         $path = base_path('public/.env');
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             if (file_exists(base_path('.env.example'))) {
                 copy(base_path('.env.example'), $path);
             } else {
@@ -453,14 +460,14 @@ class AppSyncCommand extends Command
         }
         $content = file_get_contents($path);
         foreach ($data as $key => $value) {
-            $safeValue = (string)$value;
-            if (str_contains($safeValue, ' ') && !str_starts_with($safeValue, '"')) {
-                $safeValue = '"' . str_replace('"', '\"', $safeValue) . '"';
+            $safeValue = (string) $value;
+            if (str_contains($safeValue, ' ') && ! str_starts_with($safeValue, '"')) {
+                $safeValue = '"'.str_replace('"', '\"', $safeValue).'"';
             }
             if (preg_match("/^{$key}=/m", $content)) {
                 $content = preg_replace("/^{$key}=.*/m", "{$key}={$safeValue}", $content);
             } else {
-                $content = rtrim($content) . "\n{$key}={$safeValue}\n";
+                $content = rtrim($content)."\n{$key}={$safeValue}\n";
             }
         }
         file_put_contents($path, $content);
@@ -472,20 +479,26 @@ class AppSyncCommand extends Command
         $publicEnvPath = base_path('public/.env');
         $exampleEnvPath = base_path('.env.example');
 
-        if (!file_exists($publicEnvPath) && file_exists($exampleEnvPath)) {
+        if (! file_exists($publicEnvPath) && file_exists($exampleEnvPath)) {
             copy($exampleEnvPath, $publicEnvPath);
         }
 
-        if (!file_exists($publicEnvPath)) return;
+        if (! file_exists($publicEnvPath)) {
+            return;
+        }
 
         $toTransfer = [];
         if (file_exists($exampleEnvPath)) {
             $exampleVars = \Dotenv\Dotenv::parse(file_get_contents($exampleEnvPath));
             foreach (['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_PREFIX'] as $key) {
-                if (isset($exampleVars[$key])) $toTransfer[$key] = $exampleVars[$key];
+                if (isset($exampleVars[$key])) {
+                    $toTransfer[$key] = $exampleVars[$key];
+                }
             }
             foreach ($exampleVars as $key => $value) {
-                if (str_starts_with($key, 'PROD_')) $toTransfer[$key] = $value;
+                if (str_starts_with($key, 'PROD_')) {
+                    $toTransfer[$key] = $value;
+                }
             }
         }
 
@@ -493,7 +506,7 @@ class AppSyncCommand extends Command
             $rootVars = \Dotenv\Dotenv::parse(file_get_contents($rootEnvPath));
             foreach ($rootVars as $key => $value) {
                 if (str_starts_with($key, 'PROD_') || in_array($key, ['APP_KEY', 'FONTAWESOME_TOKEN', 'OPENAI_API_KEY', 'ERROR_REPORT_EMAIL', 'ERROR_REPORT_SENDER'])) {
-                    if (!empty($value) || $key === 'PROD_DB_PASSWORD') {
+                    if (! empty($value) || $key === 'PROD_DB_PASSWORD') {
                         $toTransfer[$key] = $value;
                         if (str_starts_with($key, 'PROD_DB_')) {
                             $toTransfer[str_replace('PROD_', '', $key)] = $value;
@@ -503,19 +516,22 @@ class AppSyncCommand extends Command
             }
         }
 
-        if (!empty($toTransfer)) $this->updateEnv($toTransfer);
+        if (! empty($toTransfer)) {
+            $this->updateEnv($toTransfer);
+        }
 
         if (file_exists($publicEnvPath)) {
             $content = file_get_contents($publicEnvPath);
-            if (!preg_match('/^APP_KEY="?base64:[^" \n]+"?/m', $content)) {
-                 $this->call('key:generate', ['--no-interaction' => true]);
+            if (! preg_match('/^APP_KEY="?base64:[^" \n]+"?/m', $content)) {
+                $this->call('key:generate', ['--no-interaction' => true]);
             }
         }
 
         if (file_exists($publicEnvPath)) {
-             try {
-                 \Dotenv\Dotenv::createMutable(base_path('public'), '.env')->load();
-             } catch (\Exception $e) {}
+            try {
+                \Dotenv\Dotenv::createMutable(base_path('public'), '.env')->load();
+            } catch (\Exception $e) {
+            }
         }
     }
 }

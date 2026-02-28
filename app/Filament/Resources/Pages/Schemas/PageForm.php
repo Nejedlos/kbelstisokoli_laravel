@@ -5,13 +5,13 @@ namespace App\Filament\Resources\Pages\Schemas;
 use App\Filament\Forms\CmsForms;
 use App\Services\Cms\BlockRegistry;
 use Filament\Forms\Components\Builder;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
 class PageForm

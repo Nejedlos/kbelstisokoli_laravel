@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Post Categories
-        if (!Schema::hasTable('post_categories')) {
+        if (! Schema::hasTable('post_categories')) {
             Schema::create('post_categories', function (Blueprint $table) {
                 $table->id();
                 $table->longText('name');
@@ -24,7 +24,7 @@ return new class extends Migration
         }
 
         // 2. Posts (Novinky)
-        if (!Schema::hasTable('posts')) {
+        if (! Schema::hasTable('posts')) {
             Schema::create('posts', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('category_id')->nullable()->constrained('post_categories')->onDelete('set null');
@@ -40,7 +40,7 @@ return new class extends Migration
         }
 
         // 3. Pages (Stránky)
-        if (!Schema::hasTable('pages')) {
+        if (! Schema::hasTable('pages')) {
             Schema::create('pages', function (Blueprint $table) {
                 $table->id();
                 $table->longText('title');
@@ -52,7 +52,7 @@ return new class extends Migration
         }
 
         // 4. Menus
-        if (!Schema::hasTable('menus')) {
+        if (! Schema::hasTable('menus')) {
             Schema::create('menus', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -62,7 +62,7 @@ return new class extends Migration
         }
 
         // 5. Menu Items
-        if (!Schema::hasTable('menu_items')) {
+        if (! Schema::hasTable('menu_items')) {
             Schema::create('menu_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('menu_id')->constrained()->onDelete('cascade');
@@ -77,7 +77,7 @@ return new class extends Migration
         }
 
         // 6. SEO Metadata (Elegantní polymorfní řešení)
-        if (!Schema::hasTable('seo_metadatas')) {
+        if (! Schema::hasTable('seo_metadatas')) {
             Schema::create('seo_metadatas', function (Blueprint $table) {
                 $table->id();
                 $table->morphs('seoable');

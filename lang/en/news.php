@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'News',
     'subtitle' => 'Follow the latest events in our basketball club.',

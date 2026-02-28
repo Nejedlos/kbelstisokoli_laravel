@@ -80,6 +80,7 @@ enum AppIcon: string
     case NOTE = 'comment-medical';
     case AUDIT = 'clock-rotate-left';
     case BANKNOTES = 'money-bill';
+    case USER_SECRET = 'user-secret';
 
     /**
      * Získá výchozí styl pro danou ikonu.

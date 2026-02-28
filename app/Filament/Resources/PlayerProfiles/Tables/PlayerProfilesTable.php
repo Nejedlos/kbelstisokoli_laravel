@@ -7,9 +7,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
 
 class PlayerProfilesTable
 {
@@ -34,7 +34,7 @@ class PlayerProfilesTable
                 TextColumn::make('teams.name')
                     ->label('Týmy')
                     ->badge()
-                    ->state(fn ($record) => $record->teams->reject(fn($team) => $team->category === 'all')->pluck('name'))
+                    ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
                     ->separator(','),
                 IconColumn::make('is_active')
                     ->label('Aktivní')

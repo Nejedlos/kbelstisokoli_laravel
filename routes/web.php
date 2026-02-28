@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Controllers\MediaDownloadController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
-use App\Http\Controllers\MediaDownloadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,8 +54,6 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/admin/impersonate-stop', [\App\Http\Controllers\Admin\ImpersonateController::class, 'stop'])
         ->name('admin.impersonate.stop');
 });
-
-
 
 // --- Override Fortify two-factor challenge routes to allow authenticated users ---
 // Důvod: standardní Fortify route používá 'guest' (RedirectIfAuthenticated),

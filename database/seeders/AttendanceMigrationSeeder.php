@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AttendanceMigrationSeeder extends Seeder
@@ -13,8 +12,9 @@ class AttendanceMigrationSeeder extends Seeder
     public function run(): void
     {
         $oldDb = config('database.old_database');
-        if (!$oldDb) {
+        if (! $oldDb) {
             $this->command->error('Databáze pro migraci nebyla nalezena (DB_DATABASE_OLD ani DB_DATABASE).');
+
             return;
         }
 
@@ -24,6 +24,7 @@ class AttendanceMigrationSeeder extends Seeder
             // 1. Mapování uživatelů
             $usersById = \App\Models\User::all()->mapWithKeys(function ($user) {
                 $legacyId = $user->metadata['legacy_r_id'] ?? null;
+
                 return $legacyId ? [$legacyId => $user] : [];
             });
 
@@ -32,16 +33,18 @@ class AttendanceMigrationSeeder extends Seeder
             // 2. Mapování událostí
             $matches = \App\Models\BasketballMatch::all()->mapWithKeys(function ($match) {
                 $legacyId = $match->metadata['legacy_z_id'] ?? null;
+
                 return $legacyId ? [(int) $legacyId => $match] : [];
             });
 
             $trainings = \App\Models\Training::all()->mapWithKeys(function ($training) {
                 $legacyId = $training->metadata['legacy_z_id'] ?? null;
+
                 return $legacyId ? [(int) $legacyId => $training] : [];
             });
 
             // 2.5 Mapování plátců (pro reálnou docházku)
-            $platiciToRid = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_platici')
+            $platiciToRid = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')
                 ->select('id', 'r_id')
                 ->get()
                 ->pluck('r_id', 'id');
@@ -55,7 +58,7 @@ class AttendanceMigrationSeeder extends Seeder
             $this->command->info('Migrace docházky dokončena.');
 
         } catch (\Exception $e) {
-            $this->command->error('Chyba při migraci docházky: ' . $e->getMessage());
+            $this->command->error('Chyba při migraci docházky: '.$e->getMessage());
             $this->command->error($e->getTraceAsString());
         }
     }
@@ -63,7 +66,7 @@ class AttendanceMigrationSeeder extends Seeder
     protected function migrateRsvp($oldDb, $usersById, $matches, $trainings)
     {
         $this->command->info('Migruji RSVP (plánovanou docházku)...');
-        $query = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.dochazka');
+        $query = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.dochazka');
         $total = $query->count();
 
         $bar = $this->command->getOutput()->createProgressBar($total);
@@ -77,14 +80,16 @@ class AttendanceMigrationSeeder extends Seeder
 
             foreach ($rsvps as $rsvp) {
                 $user = $usersById->get($rsvp->r_id);
-                if (!$user) {
+                if (! $user) {
                     $bar->advance();
+
                     continue;
                 }
 
                 $event = $matches->get($rsvp->id_zap) ?: $trainings->get($rsvp->id_zap);
-                if (!$event) {
+                if (! $event) {
                     $bar->advance();
+
                     continue;
                 }
 
@@ -112,11 +117,11 @@ class AttendanceMigrationSeeder extends Seeder
                 $bar->advance();
             }
 
-            if (!empty($batch)) {
+            if (! empty($batch)) {
                 try {
                     \Illuminate\Support\Facades\DB::table('attendances')->insertOrIgnore($batch);
                 } catch (\Exception $e) {
-                    $this->command->error("Chyba při insertu dávky: " . $e->getMessage());
+                    $this->command->error('Chyba při insertu dávky: '.$e->getMessage());
                 }
             }
 
@@ -131,15 +136,16 @@ class AttendanceMigrationSeeder extends Seeder
     protected function migrateActualAttendance($oldDb, $usersById, $usersByName, $matches, $trainings, $platiciToRid)
     {
         $this->command->info('Migruji reálnou docházku (zápisy trenéra)...');
-        $oldActual = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_realna_dochazka')->get();
+        $oldActual = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_realna_dochazka')->get();
 
         $bar = $this->command->getOutput()->createProgressBar($oldActual->count());
         $bar->start();
 
         foreach ($oldActual as $actual) {
             $event = $matches->get($actual->zap_id) ?: $trainings->get($actual->zap_id);
-            if (!$event) {
+            if (! $event) {
                 $bar->advance();
+
                 continue;
             }
 
@@ -161,7 +167,7 @@ class AttendanceMigrationSeeder extends Seeder
             }
 
             // C. Omluvení (podle jména)
-            $excusedNames = array_filter(explode('-', ($actual->omluveno ?? '') . '-' . ($actual->pokuta_zrusena ?? '')));
+            $excusedNames = array_filter(explode('-', ($actual->omluveno ?? '').'-'.($actual->pokuta_zrusena ?? '')));
             foreach ($excusedNames as $name) {
                 if ($user = $usersByName->get(trim($name))) {
                     $this->updateActualStatus($user, $event, 'excused', $actual->datum);
@@ -199,7 +205,7 @@ class AttendanceMigrationSeeder extends Seeder
                 'planned_status' => 'pending',
                 'actual_status' => $status,
                 'metadata' => $recordedAt ? [
-                    'legacy_recorded_at' => \Carbon\Carbon::createFromTimestamp($recordedAt)->toDateTimeString()
+                    'legacy_recorded_at' => \Carbon\Carbon::createFromTimestamp($recordedAt)->toDateTimeString(),
                 ] : null,
             ]);
         }

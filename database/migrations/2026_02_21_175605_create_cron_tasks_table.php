@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('cron_tasks')) {
+        if (! Schema::hasTable('cron_tasks')) {
             Schema::create('cron_tasks', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');

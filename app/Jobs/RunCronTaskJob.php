@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\CronTask;
 use App\Models\CronLog;
+use App\Models\CronTask;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Artisan;
@@ -17,16 +17,14 @@ class RunCronTaskJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public CronTask $task)
-    {
-    }
+    public function __construct(public CronTask $task) {}
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        if (!$this->task->is_active) {
+        if (! $this->task->is_active) {
             return;
         }
 
@@ -57,12 +55,12 @@ class RunCronTaskJob implements ShouldQueue
             ]);
 
         } catch (Throwable $e) {
-            Log::error("Cron task [{$this->task->name}] failed: " . $e->getMessage());
+            Log::error("Cron task [{$this->task->name}] failed: ".$e->getMessage());
 
             $log->update([
                 'finished_at' => now(),
                 'status' => 'failed',
-                'error_message' => $e->getMessage() . "\n" . $e->getTraceAsString(),
+                'error_message' => $e->getMessage()."\n".$e->getTraceAsString(),
                 'duration_ms' => (int) ((microtime(true) - $startTime) * 1000),
             ]);
 

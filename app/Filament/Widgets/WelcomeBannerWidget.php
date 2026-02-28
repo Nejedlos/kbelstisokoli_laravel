@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Models\PlayerProfile;
-use App\Models\User;
 use Filament\Widgets\Widget;
 
 class WelcomeBannerWidget extends Widget

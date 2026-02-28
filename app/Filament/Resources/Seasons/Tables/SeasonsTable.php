@@ -72,7 +72,7 @@ class SeasonsTable
                         }
 
                         Notification::make()
-                            ->title("Inicializace dokončena")
+                            ->title('Inicializace dokončena')
                             ->body("Bylo vytvořeno/aktualizováno {$count} konfigurací pro sezónu {$record->name}.")
                             ->success()
                             ->send();

@@ -2,16 +2,16 @@
 
 namespace App\Providers;
 
-use App\Listeners\UpdateLastLoginAt;
 use App\Listeners\SecurityAuthListener;
-use Illuminate\Auth\Events\Login;
+use App\Listeners\UpdateLastLoginAt;
 use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\PasswordReset;
-use Laravel\Fortify\Events\TwoFactorAuthenticationEnabled;
-use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
+use Laravel\Fortify\Events\TwoFactorAuthenticationEnabled;
 
 class EventServiceProvider extends ServiceProvider
 {

@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Laravel\Fortify\Fortify;
+use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTwoFactorEnabled
 {
@@ -47,7 +47,7 @@ class EnsureTwoFactorEnabled
             $isConfirmed = $user->two_factor_confirmed_at !== null;
             $needsConfirmation = \Laravel\Fortify\Fortify::confirmsTwoFactorAuthentication();
 
-            if (! $user->two_factor_secret || ($needsConfirmation && !$isConfirmed)) {
+            if (! $user->two_factor_secret || ($needsConfirmation && ! $isConfirmed)) {
 
                 // Pokud už není na stránce nastavení 2FA, přesměrujeme ho tam
                 if (! $request->routeIs('auth.two-factor-setup')) {
@@ -55,6 +55,7 @@ class EnsureTwoFactorEnabled
                         'user_id' => $user?->id,
                         'email' => $user?->email,
                     ]);
+
                     return redirect()->route('auth.two-factor-setup');
                 }
             }

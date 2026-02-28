@@ -3,16 +3,14 @@
 namespace App\Http\Responses;
 
 use App\Support\AuthRedirect;
-use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cookie;
+use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Symfony\Component\HttpFoundation\Response;
 
 class TwoFactorLoginResponse implements TwoFactorLoginResponseContract
 {
     /**
      * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request): Response
     {

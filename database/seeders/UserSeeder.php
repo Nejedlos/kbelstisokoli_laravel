@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
         );
 
         // Ujistíme se, že má roli admin
-        if (!$admin->hasRole('admin')) {
+        if (! $admin->hasRole('admin')) {
             $admin->assignRole('admin');
         }
 
@@ -43,7 +43,7 @@ class UserSeeder extends Seeder
             ]
         );
 
-        if (!$editor->hasRole('editor')) {
+        if (! $editor->hasRole('editor')) {
             $editor->assignRole('editor');
         }
 
@@ -59,7 +59,7 @@ class UserSeeder extends Seeder
             ]
         );
 
-        if (!$coach->hasRole('coach')) {
+        if (! $coach->hasRole('coach')) {
             $coach->assignRole('coach');
         }
 
@@ -80,7 +80,7 @@ class UserSeeder extends Seeder
             ]
         );
 
-        if (!$mn->hasRole('admin')) {
+        if (! $mn->hasRole('admin')) {
             $mn->assignRole('admin');
         }
     }

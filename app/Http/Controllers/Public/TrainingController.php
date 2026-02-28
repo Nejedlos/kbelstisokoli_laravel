@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Models\Training;
 use App\Models\Team;
 use Illuminate\View\View;
 
@@ -23,7 +22,7 @@ class TrainingController extends Controller
                     $sq->where('season_id', $currentSeasonId)
                         ->where('track_attendance', true);
                 });
-            }
+            },
         ])->get()->pluck('expected_count', 'id');
 
         // Vynecháme virtuální tým "Celý klub" z hlavního výpisu

@@ -70,14 +70,14 @@ class TeamCoachSeeder extends Seeder
                 );
 
                 // Přiřazení role trenéra
-                if (!$user->hasRole('coach')) {
+                if (! $user->hasRole('coach')) {
                     $user->assignRole('coach');
                 }
 
                 // Propojení trenéra s týmem v pivot tabulce
                 // Použijeme syncWithoutDetaching, aby se nepřidávali duplicitně
                 $team->coaches()->syncWithoutDetaching([
-                    $user->id => ['email' => $user->email]
+                    $user->id => ['email' => $user->email],
                 ]);
             }
         }

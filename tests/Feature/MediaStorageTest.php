@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\MediaAsset;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -43,7 +42,7 @@ class MediaStorageTest extends TestCase
         $month = now()->format('m');
         $id = $media->id;
 
-        $expectedPath = "default/{$year}/{$month}/{$id}/" . $media->file_name;
+        $expectedPath = "default/{$year}/{$month}/{$id}/".$media->file_name;
 
         Storage::disk('media_public')->assertExists($expectedPath);
     }

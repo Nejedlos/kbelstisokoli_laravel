@@ -3,15 +3,13 @@
 namespace App\Filament\Resources\AuditLogs\Tables;
 
 use App\Support\IconHelper;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
 use Filament\Actions\ViewAction;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\DatePicker;
-use Filament\Support\Colors\Color;
-use Filament\Support\Enums\IconSize;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AuditLogsTable
 {
@@ -68,9 +66,12 @@ class AuditLogsTable
                 TextColumn::make('changes')
                     ->label(__('admin.navigation.resources.audit_log.fields.changes'))
                     ->formatStateUsing(function ($state) {
-                        if (empty($state['after'])) return null;
+                        if (empty($state['after'])) {
+                            return null;
+                        }
                         $keys = array_keys($state['after']);
-                        $labels = array_map(fn($k) => __("fields.$k") !== "fields.$k" ? __("fields.$k") : $k, $keys);
+                        $labels = array_map(fn ($k) => __("fields.$k") !== "fields.$k" ? __("fields.$k") : $k, $keys);
+
                         return implode(', ', $labels);
                     })
                     ->color('gray')

@@ -32,7 +32,7 @@ class NotFoundLoggerMiddleware
     protected function logNotFound(Request $request): void
     {
         try {
-            $path = '/' . ltrim($request->getPathInfo(), '/');
+            $path = '/'.ltrim($request->getPathInfo(), '/');
 
             // Ignorujeme některé zbytečné cesty (pokud je potřeba)
             // Např. telemetry, health checky atd.
@@ -66,7 +66,7 @@ class NotFoundLoggerMiddleware
             }
         } catch (\Throwable $e) {
             // Tichý fail, nechceme aby logger shodil aplikaci
-            \Illuminate\Support\Facades\Log::error('NotFoundLoggerMiddleware error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('NotFoundLoggerMiddleware error: '.$e->getMessage());
         }
     }
 }

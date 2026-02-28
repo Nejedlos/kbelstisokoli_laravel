@@ -2,24 +2,20 @@
 
 namespace App\Filament\Resources\FinanceCharges\RelationManagers;
 
-use Filament\Actions\AssociateAction;
+use App\Services\Finance\FinanceService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DissociateAction;
-use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-
-use App\Services\Finance\FinanceService;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Textarea;
 
 class AllocationsRelationManager extends RelationManager
 {
@@ -39,9 +35,10 @@ class AllocationsRelationManager extends RelationManager
                     ->label('Platba')
                     ->relationship('payment', 'id', function ($query) {
                         $charge = $this->getOwnerRecord();
+
                         return $query->where('user_id', $charge->user_id)
-                                     ->orWhereNull('user_id')
-                                     ->orderBy('paid_at', 'desc');
+                            ->orWhereNull('user_id')
+                            ->orderBy('paid_at', 'desc');
                     })
                     ->getOptionLabelFromRecordUsing(fn ($record) => "VS: {$record->variable_symbol} | {$record->amount} CZK ({$record->paid_at->format('d.m.Y')})")
                     ->searchable()

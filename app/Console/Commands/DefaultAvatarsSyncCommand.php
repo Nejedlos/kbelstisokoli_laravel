@@ -14,6 +14,7 @@ class DefaultAvatarsSyncCommand extends Command
                             {--limit=0 : Počet souborů ke zpracování v této dávce (0 = vše)}
                             {--offset=0 : Od kterého souboru začít (pro postupné zpracování)}
                             {--stop-on-error : Zastaví zpracování při první chybě}';
+
     protected $description = 'Jednorázový manuální import výchozích avatarů z lokálního úložiště do MediaAsset galerie.';
 
     public function handle()
@@ -23,15 +24,16 @@ class DefaultAvatarsSyncCommand extends Command
 
         $sourceDir = storage_path('app/defaults/avatars');
 
-        if (!is_dir($sourceDir)) {
+        if (! is_dir($sourceDir)) {
             $msg = "Zdrojový adresář neexistuje: {$sourceDir}. Ujistěte se, že jste nahráli avatary do storage/app/defaults/avatars/";
             $this->error($msg);
-            \Illuminate\Support\Facades\Log::error("DefaultAvatarsSyncCommand: " . $msg);
+            \Illuminate\Support\Facades\Log::error('DefaultAvatarsSyncCommand: '.$msg);
+
             return Command::FAILURE;
         }
 
         $allFiles = File::allFiles($sourceDir);
-        \Illuminate\Support\Facades\Log::info("DefaultAvatarsSyncCommand: Nalezeno celkem " . count($allFiles) . " souborů ve zdrojové složce: " . $sourceDir);
+        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: Nalezeno celkem '.count($allFiles).' souborů ve zdrojové složce: '.$sourceDir);
 
         // Filtrování relevantních souborů (bez thumbs a jen obrázky)
         $filteredFiles = [];
@@ -39,7 +41,7 @@ class DefaultAvatarsSyncCommand extends Command
             if (Str::contains($file->getRelativePathname(), 'thumbs/')) {
                 continue;
             }
-            if (!in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'])) {
+            if (! in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'])) {
                 continue;
             }
             $filteredFiles[] = $file;
@@ -51,6 +53,7 @@ class DefaultAvatarsSyncCommand extends Command
 
         if ($offset >= $totalFound && $totalFound > 0) {
             $this->info("Všechny soubory ({$totalFound}) již byly zpracovány. Končím.");
+
             return Command::SUCCESS;
         }
 
@@ -60,7 +63,7 @@ class DefaultAvatarsSyncCommand extends Command
 
         $totalToProcess = count($filteredFiles);
         $this->info("Nalezeno celkem {$totalFound} relevantních souborů.");
-        $this->info("Zpracovávám dávku {$totalToProcess} souborů (offset: {$offset}, limit: " . ($limit ?: 'vše') . ").");
+        $this->info("Zpracovávám dávku {$totalToProcess} souborů (offset: {$offset}, limit: ".($limit ?: 'vše').').');
 
         $bar = $this->output->createProgressBar($totalToProcess);
         $bar->start();
@@ -82,14 +85,15 @@ class DefaultAvatarsSyncCommand extends Command
 
             // Logování aktuálního souboru (před zpracováním)
             // Použijeme line přepisování pro přehlednost, nebo info pro debug
-            $this->info("\n[{$currentPos}/{$totalFound}] Zpracovávám: " . $file->getRelativePathname());
+            $this->info("\n[{$currentPos}/{$totalFound}] Zpracovávám: ".$file->getRelativePathname());
 
             // Rychlá kontrola v poli v paměti místo DB query
             $existingId = $existingFileNames[$fileName] ?? null;
 
-            if ($existingId && !$this->option('force')) {
+            if ($existingId && ! $this->option('force')) {
                 $countSkipped++;
                 $bar->advance();
+
                 continue;
             }
 
@@ -107,7 +111,7 @@ class DefaultAvatarsSyncCommand extends Command
                     } else {
                         // Pokud existuje záznam v media, ale ne model (sirotek), vytvoříme nový
                         $asset = MediaAsset::create([
-                            'title' => 'Default Avatar ' . Str::random(6),
+                            'title' => 'Default Avatar '.Str::random(6),
                             'is_public' => true,
                             'access_level' => 'public',
                             'type' => 'image',
@@ -115,7 +119,7 @@ class DefaultAvatarsSyncCommand extends Command
                     }
                 } else {
                     $asset = MediaAsset::create([
-                        'title' => 'Default Avatar ' . Str::random(6),
+                        'title' => 'Default Avatar '.Str::random(6),
                         'is_public' => true,
                         'access_level' => 'public',
                         'type' => 'image',
@@ -133,10 +137,10 @@ class DefaultAvatarsSyncCommand extends Command
                 }
             } catch (\Exception $e) {
                 $countErrors++;
-                $this->error("\nCHYBA u souboru " . $file->getRelativePathname() . ": " . $e->getMessage());
+                $this->error("\nCHYBA u souboru ".$file->getRelativePathname().': '.$e->getMessage());
 
                 if ($this->option('stop-on-error')) {
-                    $this->error("Zastavuji zpracování kvůli chybě (--stop-on-error).");
+                    $this->error('Zastavuji zpracování kvůli chybě (--stop-on-error).');
                     break;
                 }
             }
@@ -151,12 +155,12 @@ class DefaultAvatarsSyncCommand extends Command
 
         $bar->finish();
         $summary = "Synchronizace dávky dokončena. Importováno: {$countImported}, Přeskočeno: {$countSkipped}, Chyby: {$countErrors}.";
-        $this->info("\n\n" . $summary);
-        \Illuminate\Support\Facades\Log::info("DefaultAvatarsSyncCommand: " . $summary);
+        $this->info("\n\n".$summary);
+        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: '.$summary);
 
         if ($totalToProcess + $offset < $totalFound) {
             $nextOffset = $offset + $totalToProcess;
-            $this->warn("Zbývá ještě " . ($totalFound - $nextOffset) . " souborů. Spusťte znovu s --offset={$nextOffset}");
+            $this->warn('Zbývá ještě '.($totalFound - $nextOffset)." souborů. Spusťte znovu s --offset={$nextOffset}");
         }
 
         return Command::SUCCESS;

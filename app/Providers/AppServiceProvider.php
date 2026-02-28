@@ -26,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\AuditLogService::class, function ($app) {
             return new \App\Services\AuditLogService;
         });
+
+        $this->app->singleton(\App\Services\BrandingService::class, function ($app) {
+            return new \App\Services\BrandingService;
+        });
     }
 
     /**
@@ -57,16 +61,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \Illuminate\Support\Facades\Blade::directive('endCacheFragment', function () {
-            return "<?php
+            return '<?php
                 endif;
-                if (!\$__skip_render) {
-                    \$__cache_content = ob_get_clean();
-                    if (\$__should_cache) {
-                        Cache::put(\$__cache_key, \$__cache_content, \$__cache_ttl);
+                if (!$__skip_render) {
+                    $__cache_content = ob_get_clean();
+                    if ($__should_cache) {
+                        Cache::put($__cache_key, $__cache_content, $__cache_ttl);
                     }
-                    echo \$__cache_content;
+                    echo $__cache_content;
                 }
-            ?>";
+            ?>';
         });
 
         \Illuminate\Support\Facades\Blade::directive('wireNavigate', function () {

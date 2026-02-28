@@ -3,15 +3,14 @@
 namespace App\Filament\Resources\CronTasks\Tables;
 
 use App\Jobs\RunCronTaskJob;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Actions\Action;
-use Filament\Notifications\Notification;
-use Illuminate\Support\HtmlString;
 
 class CronTasksTable
 {

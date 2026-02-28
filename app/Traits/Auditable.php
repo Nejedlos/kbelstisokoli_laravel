@@ -18,7 +18,7 @@ trait Auditable
             'two_factor_secret',
             'two_factor_recovery_codes',
             'two_factor_confirmed_at',
-            'updated_at'
+            'updated_at',
         ];
     }
 
@@ -32,7 +32,9 @@ trait Auditable
             $changes = [];
 
             foreach ($model->getAttributes() as $key => $value) {
-                if (in_array($key, $ignoreFields)) continue;
+                if (in_array($key, $ignoreFields)) {
+                    continue;
+                }
                 $changes[$key] = ['new' => $value];
             }
 
@@ -44,7 +46,9 @@ trait Auditable
             $changes = [];
 
             foreach ($model->getChanges() as $key => $newValue) {
-                if (in_array($key, $ignoreFields)) continue;
+                if (in_array($key, $ignoreFields)) {
+                    continue;
+                }
 
                 $changes[$key] = [
                     'old' => $model->getOriginal($key),
@@ -52,7 +56,7 @@ trait Auditable
                 ];
             }
 
-            if (!empty($changes)) {
+            if (! empty($changes)) {
                 app(AuditLogService::class)->crud($model, 'updated', $changes);
             }
         });
@@ -62,7 +66,9 @@ trait Auditable
             $data = [];
 
             foreach ($model->getAttributes() as $key => $value) {
-                if (in_array($key, $ignoreFields)) continue;
+                if (in_array($key, $ignoreFields)) {
+                    continue;
+                }
                 $data[$key] = $value;
             }
 

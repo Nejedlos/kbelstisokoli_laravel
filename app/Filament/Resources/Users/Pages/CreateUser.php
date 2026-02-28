@@ -10,7 +10,7 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
-    public function getMaxWidth(): MaxWidth | string | null
+    public function getMaxWidth(): MaxWidth|string|null
     {
         return MaxWidth::Full;
     }

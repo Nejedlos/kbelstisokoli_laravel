@@ -2,24 +2,20 @@
 
 namespace App\Filament\Resources\FinancePayments\RelationManagers;
 
-use Filament\Actions\AssociateAction;
+use App\Services\Finance\FinanceService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DissociateAction;
-use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-
-use App\Services\Finance\FinanceService;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Textarea;
 
 class AllocationsRelationManager extends RelationManager
 {
@@ -43,9 +39,10 @@ class AllocationsRelationManager extends RelationManager
                         if ($payment->user_id) {
                             $q->where('user_id', $payment->user_id);
                         }
+
                         return $q->orderBy('due_date', 'asc');
                     })
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->title} | Zbývá: {$record->amount_remaining} CZK (Splatnost: " . ($record->due_date ? $record->due_date->format('d.m.Y') : '-') . ")")
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->title} | Zbývá: {$record->amount_remaining} CZK (Splatnost: ".($record->due_date ? $record->due_date->format('d.m.Y') : '-').')')
                     ->searchable()
                     ->preload()
                     ->required()
@@ -57,6 +54,7 @@ class AllocationsRelationManager extends RelationManager
                     ->required()
                     ->default(function () {
                         $payment = $this->getOwnerRecord();
+
                         return min($payment->amount_available, 0); // Placeholder, v UI se upraví
                     }),
                 DateTimePicker::make('allocated_at')

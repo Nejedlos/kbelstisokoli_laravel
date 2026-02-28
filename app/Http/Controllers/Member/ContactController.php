@@ -12,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 
 class ContactController extends Controller
 {
@@ -71,7 +70,7 @@ class ContactController extends Controller
         $team = null;
         if ($teams->count() === 1) {
             $team = $teams->first();
-        } elseif (!empty($data['team_id'])) {
+        } elseif (! empty($data['team_id'])) {
             $team = Team::findOrFail($data['team_id']);
         }
 

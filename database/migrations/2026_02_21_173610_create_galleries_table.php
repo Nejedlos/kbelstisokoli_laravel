@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('galleries')) {
+        if (! Schema::hasTable('galleries')) {
             Schema::create('galleries', function (Blueprint $table) {
                 $table->id();
                 $table->longText('title');

@@ -20,7 +20,7 @@ return new class extends Migration
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'club_events';
+        $table = $prefix.'club_events';
 
         try {
             $columnExists = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$table} LIKE 'metadata'");
@@ -46,7 +46,7 @@ return new class extends Migration
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'club_events';
+        $table = $prefix.'club_events';
 
         try {
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} DROP COLUMN IF EXISTS metadata");

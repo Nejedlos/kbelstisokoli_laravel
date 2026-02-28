@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Historie klubu',
     'subtitle' => 'Sledujte cestu našeho basketbalového oddílu od jeho založení až po současnost.',

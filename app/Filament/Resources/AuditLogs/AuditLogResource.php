@@ -7,11 +7,9 @@ use App\Filament\Resources\AuditLogs\Pages\ViewAuditLog;
 use App\Filament\Resources\AuditLogs\Schemas\AuditLogForm;
 use App\Filament\Resources\AuditLogs\Tables\AuditLogsTable;
 use App\Models\AuditLog;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Support\HtmlString;
 
 class AuditLogResource extends Resource
 {

@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
 use App\Models\Redirect;
+use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,7 +16,7 @@ class RedirectMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $path = '/' . ltrim($request->getPathInfo(), '/');
+        $path = '/'.ltrim($request->getPathInfo(), '/');
 
         // 1. Hledání přesného match (nejrychlejší)
         $redirect = Redirect::where('is_active', true)
@@ -26,7 +26,7 @@ class RedirectMiddleware
             ->first();
 
         // 2. Pokud není exact, hledáme prefix match (volitelně)
-        if (!$redirect) {
+        if (! $redirect) {
             $redirects = Redirect::where('is_active', true)
                 ->where('match_type', 'prefix')
                 ->orderBy('priority', 'desc')

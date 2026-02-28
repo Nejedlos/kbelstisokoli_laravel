@@ -6,7 +6,6 @@ use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 use Spatie\Translatable\HasTranslations;
 
 class Gallery extends Model

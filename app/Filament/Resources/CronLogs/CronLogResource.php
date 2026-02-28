@@ -2,16 +2,12 @@
 
 namespace App\Filament\Resources\CronLogs;
 
-use App\Filament\Resources\CronLogs\Pages\CreateCronLog;
-use App\Filament\Resources\CronLogs\Pages\EditCronLog;
 use App\Filament\Resources\CronLogs\Pages\ListCronLogs;
 use App\Filament\Resources\CronLogs\Schemas\CronLogForm;
 use App\Filament\Resources\CronLogs\Tables\CronLogsTable;
 use App\Models\CronLog;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class CronLogResource extends Resource

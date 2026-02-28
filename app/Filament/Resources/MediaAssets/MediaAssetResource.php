@@ -5,13 +5,9 @@ namespace App\Filament\Resources\MediaAssets;
 use App\Filament\Resources\MediaAssets\Pages\CreateMediaAsset;
 use App\Filament\Resources\MediaAssets\Pages\EditMediaAsset;
 use App\Filament\Resources\MediaAssets\Pages\ListMediaAssets;
-use App\Filament\Resources\MediaAssets\Schemas\MediaAssetForm;
-use App\Filament\Resources\MediaAssets\Tables\MediaAssetsTable;
 use App\Models\MediaAsset;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class MediaAssetResource extends Resource

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Club History',
     'subtitle' => 'Follow the journey of our basketball department from its foundation to the present.',

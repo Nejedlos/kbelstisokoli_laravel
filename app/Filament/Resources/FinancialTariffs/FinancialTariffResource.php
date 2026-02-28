@@ -5,13 +5,9 @@ namespace App\Filament\Resources\FinancialTariffs;
 use App\Filament\Resources\FinancialTariffs\Pages\CreateFinancialTariff;
 use App\Filament\Resources\FinancialTariffs\Pages\EditFinancialTariff;
 use App\Filament\Resources\FinancialTariffs\Pages\ListFinancialTariffs;
-use App\Filament\Resources\FinancialTariffs\Schemas\FinancialTariffForm;
-use App\Filament\Resources\FinancialTariffs\Tables\FinancialTariffsTable;
 use App\Models\FinancialTariff;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class FinancialTariffResource extends Resource

@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
-use Illuminate\Support\Carbon;
 
 class SystemHealthWidget extends Widget
 {
@@ -38,7 +37,7 @@ class SystemHealthWidget extends Widget
         if (class_exists(\App\Models\AiSetting::class)) {
             try {
                 $ai = \App\Models\AiSetting::first();
-                $aiReady = (bool)($ai?->enabled ?? config('ai.enabled', true));
+                $aiReady = (bool) ($ai?->enabled ?? config('ai.enabled', true));
             } catch (\Throwable $e) {
                 $aiReady = (bool) config('ai.enabled', true);
             }

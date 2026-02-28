@@ -10,6 +10,7 @@ class ContactController extends Controller
     public function index(): View
     {
         $page = \App\Models\Page::where('slug', 'kontakt')->first();
+
         return view('public.contact.index', compact('page'));
     }
 }

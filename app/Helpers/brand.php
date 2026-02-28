@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('brand_text')) {
+if (! function_exists('brand_text')) {
     /**
      * Nahradí zástupné symboly brandingu v textu nebo poli.
      */

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Seasons (Sezóny)
-        if (!Schema::hasTable('seasons')) {
+        if (! Schema::hasTable('seasons')) {
             Schema::create('seasons', function (Blueprint $table) {
                 $table->id();
                 $table->string('name'); // např. 2023/2024
@@ -22,7 +22,7 @@ return new class extends Migration
         }
 
         // 2. Teams (Kategorie / Týmy)
-        if (!Schema::hasTable('teams')) {
+        if (! Schema::hasTable('teams')) {
             Schema::create('teams', function (Blueprint $table) {
                 $table->id();
                 $table->longText('name'); // např. U14 Kluci
@@ -34,7 +34,7 @@ return new class extends Migration
         }
 
         // 3. Opponents (Soupeři)
-        if (!Schema::hasTable('opponents')) {
+        if (! Schema::hasTable('opponents')) {
             Schema::create('opponents', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -45,7 +45,7 @@ return new class extends Migration
         }
 
         // 4. Matches (Zápasy)
-        if (!Schema::hasTable('matches')) {
+        if (! Schema::hasTable('matches')) {
             Schema::create('matches', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('team_id')->constrained()->onDelete('cascade');
@@ -64,7 +64,7 @@ return new class extends Migration
         }
 
         // 5. Trainings (Tréninky - jednotlivé termíny)
-        if (!Schema::hasTable('trainings')) {
+        if (! Schema::hasTable('trainings')) {
             Schema::create('trainings', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('team_id')->constrained()->onDelete('cascade');
@@ -77,7 +77,7 @@ return new class extends Migration
         }
 
         // 6. Events (Klubové akce)
-        if (!Schema::hasTable('events') && !Schema::hasTable('club_events')) {
+        if (! Schema::hasTable('events') && ! Schema::hasTable('club_events')) {
             Schema::create('events', function (Blueprint $table) {
                 $table->id();
                 $table->longText('title');

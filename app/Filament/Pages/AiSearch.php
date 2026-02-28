@@ -2,23 +2,30 @@
 
 namespace App\Filament\Pages;
 
-use App\Support\IconHelper;
 use App\Services\AiSearchService;
 use Filament\Pages\Page;
 use Illuminate\Http\Request;
 
 class AiSearch extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'fal-sparkles';
+    protected static string|\BackedEnum|null $navigationIcon = 'fal-sparkles';
+
     protected static ?string $navigationLabel = 'AI Vyhledávání';
+
     protected static ?string $title = 'AI Vyhledávání';
+
     protected string $view = 'filament.pages.ai-search';
+
     protected static bool $shouldRegisterNavigation = false;
 
     public string $query = '';
+
     public string $answer = '';
+
     public array $messages = [];
+
     public $sources;
+
     public bool $isProcessing = false;
 
     public function mount(Request $request): void
@@ -62,7 +69,7 @@ class AiSearch extends Page
         } catch (\Throwable $e) {
             $this->messages[] = [
                 'role' => 'assistant',
-                'content' => 'Omlouvám se, ale došlo k chybě při komunikaci s AI. Zkuste to prosím později. (' . $e->getMessage() . ')',
+                'content' => 'Omlouvám se, ale došlo k chybě při komunikaci s AI. Zkuste to prosím později. ('.$e->getMessage().')',
                 'time' => now()->format('H:i'),
             ];
         }

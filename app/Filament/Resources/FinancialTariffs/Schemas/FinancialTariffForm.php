@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\FinancialTariffs\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class FinancialTariffForm

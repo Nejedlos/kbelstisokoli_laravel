@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Roles;
 
 use App\Filament\Resources\Roles\Pages\ListRoles;
-use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

@@ -3,16 +3,16 @@
 namespace App\Services\Cms;
 
 use Filament\Forms\Components\Builder\Block;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Repeater;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\HtmlString;
 
 class BlockRegistry
@@ -274,7 +274,7 @@ class BlockRegistry
                             ->label('Ikona nebo obrázek')
                             ->image()
                             ->disk(config('filesystems.uploads.disk'))
-                            ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/blocks/cards'),
+                            ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/blocks/cards'),
                     ])
                     ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
                     ->collapsible()
@@ -288,7 +288,7 @@ class BlockRegistry
         return Block::make('stats_cards')
             ->label('Statistické údaje')
             ->icon('heroicon-o-chart-bar')
-            ->label(fn (array $state): ?string => 'Statistické údaje (' . count($state['stats'] ?? []) . ')')
+            ->label(fn (array $state): ?string => 'Statistické údaje ('.count($state['stats'] ?? []).')')
             ->schema(self::withAdvancedSettings([
                 Repeater::make('stats')
                     ->label('Statistiky')
@@ -305,7 +305,7 @@ class BlockRegistry
                             ->label('Heroicon (název)')
                             ->placeholder('user-group'),
                     ])
-                    ->itemLabel(fn (array $state): ?string => ($state['value'] ?? '') . ' ' . ($state['label'] ?? ''))
+                    ->itemLabel(fn (array $state): ?string => ($state['value'] ?? '').' '.($state['label'] ?? ''))
                     ->grid(3),
             ]));
     }
@@ -424,7 +424,7 @@ class BlockRegistry
                                     ->label('Telefonní číslo'),
                             ]),
                     ]),
-                        Toggle::make('show_map')
+                Toggle::make('show_map')
                     ->label('Zobrazit interaktivní mapu')
                     ->default(false),
             ]));
@@ -461,12 +461,12 @@ class BlockRegistry
                         : 'Vložte <iframe> kód nebo URL pro embed.')
                     ->rows(10)
                     ->required()
-                    ->disabled(fn ($get) => $get('mode') === 'raw' && !$canUseRawHtml),
+                    ->disabled(fn ($get) => $get('mode') === 'raw' && ! $canUseRawHtml),
 
                 Placeholder::make('permission_denied')
                     ->label('Přístup odepřen')
                     ->content(new HtmlString('<span class="text-danger-500">Nemáte oprávnění pro vkládání surového HTML kódu. Kontaktujte administrátora.</span>'))
-                    ->visible(fn ($get) => $get('mode') === 'raw' && !$canUseRawHtml),
+                    ->visible(fn ($get) => $get('mode') === 'raw' && ! $canUseRawHtml),
             ]));
     }
 

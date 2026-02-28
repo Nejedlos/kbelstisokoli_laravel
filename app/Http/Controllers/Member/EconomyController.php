@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-
-use App\Services\Finance\FinanceService;
 use App\Models\FinanceCharge;
 use App\Models\FinancePayment;
+use App\Services\Finance\FinanceService;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class EconomyController extends Controller
 {

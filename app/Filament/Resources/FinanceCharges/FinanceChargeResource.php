@@ -8,10 +8,8 @@ use App\Filament\Resources\FinanceCharges\Pages\ListFinanceCharges;
 use App\Filament\Resources\FinanceCharges\Schemas\FinanceChargeForm;
 use App\Filament\Resources\FinanceCharges\Tables\FinanceChargesTable;
 use App\Models\FinanceCharge;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class FinanceChargeResource extends Resource

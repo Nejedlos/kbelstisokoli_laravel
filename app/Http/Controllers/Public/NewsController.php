@@ -12,9 +12,9 @@ class NewsController extends Controller
         $posts = \App\Models\Post::with('category')
             ->where('status', 'published')
             ->where('is_visible', true)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('publish_at')
-                      ->orWhere('publish_at', '<=', now());
+                    ->orWhere('publish_at', '<=', now());
             })
             ->orderBy('publish_at', 'desc')
             ->orderBy('created_at', 'desc')

@@ -2,9 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Page;
-use App\Models\Post;
-use App\Models\PostCategory;
 use App\Services\SearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

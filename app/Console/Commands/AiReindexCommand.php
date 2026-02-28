@@ -39,10 +39,10 @@ class AiReindexCommand extends Command
             // Nastavíme globální locale pro aktuální iteraci
             \Illuminate\Support\Facades\App::setLocale($l);
 
-            $this->info("Indexing documents for locale '{$l}'" . ($section ? " section '{$section}'" : "") . ($fresh ? " (fresh)" : "") . ($force ? " (force)" : "") . "...");
+            $this->info("Indexing documents for locale '{$l}'".($section ? " section '{$section}'" : '').($fresh ? ' (fresh)' : '').($force ? ' (force)' : '').'...');
 
             // Pokud není fresh, aspoň promažeme typy, které už nechceme indexovat (staré dokumenty z docs)
-            if (!$fresh) {
+            if (! $fresh) {
                 $query = \App\Models\AiDocument::where('locale', $l)
                     ->where('section', 'documentation'); // Vyčistíme starou dokumentaci, pokud tam zbyla
 
@@ -56,14 +56,14 @@ class AiReindexCommand extends Command
                 }
             }
 
-            $count = $index->reindex($l, $fresh, $section, function($message) {
+            $count = $index->reindex($l, $fresh, $section, function ($message) {
                 // Extrahujeme status v hranatých závorkách
                 if (preg_match('/\[(rendered|fallback|schema|internal|empty), (\d+) chars\]$/', $message, $matches)) {
                     $status = $matches[1];
                     $size = $matches[2];
-                    $cleanMessage = str_replace($matches[0], "", $message);
+                    $cleanMessage = str_replace($matches[0], '', $message);
 
-                    $color = match($status) {
+                    $color = match ($status) {
                         'rendered' => 'info',
                         'fallback', 'schema' => 'comment',
                         'internal' => 'info',
@@ -71,7 +71,7 @@ class AiReindexCommand extends Command
                         default => 'line'
                     };
 
-                    $this->line("  - $cleanMessage <$color>[" . strtoupper($status) . ", $size chars]</$color>");
+                    $this->line("  - $cleanMessage <$color>[".strtoupper($status).", $size chars]</$color>");
                 } else {
                     $this->line("  - $message");
                 }
@@ -80,17 +80,17 @@ class AiReindexCommand extends Command
             $this->info("Processed {$count} documents for locale '{$l}'.");
 
             if ($enrich) {
-                $this->info("Enriching documents with AI summary and keywords for locale '{$l}'" . ($section ? " section '{$section}'" : "") . "...");
+                $this->info("Enriching documents with AI summary and keywords for locale '{$l}'".($section ? " section '{$section}'" : '').'...');
                 $query = \App\Models\AiDocument::where('locale', $l);
 
                 if ($section) {
                     $query->where('section', $section);
                 }
 
-                if (!$force) {
+                if (! $force) {
                     $query->where(function ($q) {
                         $q->whereNull('keywords')
-                          ->orWhereNull('summary');
+                            ->orWhereNull('summary');
                     });
                 }
 

@@ -37,13 +37,13 @@ class Redirect extends Model
     {
         static::saving(function (Redirect $redirect) {
             // Zajistíme, že cesta začíná lomítkem
-            if ($redirect->source_path && !str_starts_with($redirect->source_path, '/')) {
-                $redirect->source_path = '/' . $redirect->source_path;
+            if ($redirect->source_path && ! str_starts_with($redirect->source_path, '/')) {
+                $redirect->source_path = '/'.$redirect->source_path;
             }
 
             // Normalizace target path
-            if ($redirect->target_type === 'internal' && $redirect->target_path && !str_starts_with($redirect->target_path, '/')) {
-                $redirect->target_path = '/' . $redirect->target_path;
+            if ($redirect->target_type === 'internal' && $redirect->target_path && ! str_starts_with($redirect->target_path, '/')) {
+                $redirect->target_path = '/'.$redirect->target_path;
             }
         });
     }

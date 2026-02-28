@@ -3,15 +3,15 @@
 namespace App\Filament\Pages;
 
 use App\Models\Setting;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Schema;
-use Filament\Pages\Page;
-use Filament\Notifications\Notification;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
 class RecaptchaSettings extends Page implements HasForms
@@ -130,7 +130,7 @@ class RecaptchaSettings extends Page implements HasForms
                                     <code class="block bg-white p-2 rounded border">Secret key: 6LfRn3csAAAAAH7X7gs09H8TJ8VCTX7lCDJLvldN</code>
                                 </div>
                             </div>
-                        ')
+                        '),
                     ]),
             ]);
     }

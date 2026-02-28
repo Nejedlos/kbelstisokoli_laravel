@@ -2,22 +2,22 @@
 
 namespace App\Filament\Resources\NotFoundLogs\Tables;
 
-use App\Models\Redirect;
 use App\Models\NotFoundLog;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
+use App\Models\Redirect;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
@@ -32,7 +32,7 @@ class NotFoundLogsTable
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->description(fn (NotFoundLog $record) => $record->referer ? 'Referer: ' . $record->referer : null),
+                    ->description(fn (NotFoundLog $record) => $record->referer ? 'Referer: '.$record->referer : null),
 
                 TextColumn::make('hits_count')
                     ->label('Výskyty')
@@ -69,7 +69,7 @@ class NotFoundLogsTable
 
                 TextColumn::make('ip_address')
                     ->label('IP / Agent')
-                    ->description(fn ($record) => substr($record->user_agent, 0, 50) . '...')
+                    ->description(fn ($record) => substr($record->user_agent, 0, 50).'...')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

@@ -99,5 +99,5 @@ return [
     'categories' => [
         'senior' => 'Seniors',
         'youth' => 'Youth',
-    ]
+    ],
 ];

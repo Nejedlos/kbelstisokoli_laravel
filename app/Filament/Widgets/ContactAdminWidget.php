@@ -34,8 +34,11 @@ class ContactAdminWidget extends Widget
 
     // Vstupy formuláře (stack pod sebou)
     public ?string $senderName = null;
+
     public ?string $senderEmail = null;
+
     public ?string $senderPhone = null;
+
     public ?string $messageText = null;
 
     public function mount(): void
@@ -71,19 +74,21 @@ class ContactAdminWidget extends Widget
         $branding = app(BrandingService::class)->getSettings();
         $to = $branding['admin_contact_email'] ?? ($branding['contact']['email'] ?? null);
 
-        if (!$to) {
+        if (! $to) {
             Notification::make()
                 ->title('Kontakt administrátora není nastaven')
                 ->danger()
                 ->send();
+
             return;
         }
 
-        if (!filled($this->messageText)) {
+        if (! filled($this->messageText)) {
             Notification::make()
                 ->title('Prosím, napište zprávu.')
                 ->danger()
                 ->send();
+
             return;
         }
 

@@ -16,8 +16,9 @@ class CronController extends Controller
     {
         $token = config('system.cron.token');
 
-        if (!$token || $request->get('token') !== $token) {
-            Log::warning('Unauthorized cron run attempt from IP: ' . $request->ip());
+        if (! $token || $request->get('token') !== $token) {
+            Log::warning('Unauthorized cron run attempt from IP: '.$request->ip());
+
             return response()->json(['status' => 'unauthorized'], 401);
         }
 
@@ -29,13 +30,14 @@ class CronController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Scheduler finished.',
-                'output' => $output
+                'output' => $output,
             ]);
         } catch (\Exception $e) {
-            Log::error('Web-cron failed: ' . $e->getMessage());
+            Log::error('Web-cron failed: '.$e->getMessage());
+
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

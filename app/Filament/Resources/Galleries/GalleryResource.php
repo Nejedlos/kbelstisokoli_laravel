@@ -5,13 +5,9 @@ namespace App\Filament\Resources\Galleries;
 use App\Filament\Resources\Galleries\Pages\CreateGallery;
 use App\Filament\Resources\Galleries\Pages\EditGallery;
 use App\Filament\Resources\Galleries\Pages\ListGalleries;
-use App\Filament\Resources\Galleries\Schemas\GalleryForm;
-use App\Filament\Resources\Galleries\Tables\GalleriesTable;
 use App\Models\Gallery;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class GalleryResource extends Resource

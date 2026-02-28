@@ -39,10 +39,10 @@ return new class extends Migration
                 }
 
                 // Přidání časové platnosti profilu (pokud neexistují)
-                if (!Schema::hasColumn('player_profiles', 'valid_from')) {
+                if (! Schema::hasColumn('player_profiles', 'valid_from')) {
                     $table->date('valid_from')->nullable()->after('is_active');
                 }
-                if (!Schema::hasColumn('player_profiles', 'valid_to')) {
+                if (! Schema::hasColumn('player_profiles', 'valid_to')) {
                     $table->date('valid_to')->nullable()->after('valid_from');
                 }
             });
@@ -51,7 +51,7 @@ return new class extends Migration
         }
 
         // MySQL/MariaDB (Webglobe)
-        $table = $prefix . 'player_profiles';
+        $table = $prefix.'player_profiles';
         try {
             if ($hasForeign) {
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY player_profiles_user_id_foreign");
@@ -96,7 +96,7 @@ return new class extends Migration
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'player_profiles';
+        $table = $prefix.'player_profiles';
         try {
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY player_profiles_user_id_foreign");
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} ADD UNIQUE (user_id)");

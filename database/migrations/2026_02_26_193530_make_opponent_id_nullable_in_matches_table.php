@@ -20,7 +20,7 @@ return new class extends Migration
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'matches';
+        $table = $prefix.'matches';
 
         try {
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} MODIFY opponent_id BIGINT UNSIGNED NULL");
@@ -43,7 +43,7 @@ return new class extends Migration
         }
 
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
-        $table = $prefix . 'matches';
+        $table = $prefix.'matches';
 
         try {
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} MODIFY opponent_id BIGINT UNSIGNED NOT NULL");

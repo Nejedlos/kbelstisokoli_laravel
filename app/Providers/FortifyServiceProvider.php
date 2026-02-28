@@ -11,6 +11,9 @@ use App\Http\Responses\LogoutResponse;
 use App\Http\Responses\PasswordResetResponse;
 use App\Http\Responses\TwoFactorLoginResponse;
 use App\Models\User;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as FilamentLogoutResponseContract;
+use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse as FilamentPasswordResetResponseContract;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -23,9 +26,6 @@ use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Fortify;
-use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
-use Filament\Auth\Http\Responses\Contracts\LogoutResponse as FilamentLogoutResponseContract;
-use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse as FilamentPasswordResetResponseContract;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -61,11 +61,12 @@ class FortifyServiceProvider extends ServiceProvider
             $user = User::where('email', $request->email)->first();
 
             if ($user && Hash::check($request->password, $user->password)) {
-                if (!$user->is_active) {
+                if (! $user->is_active) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         Fortify::username() => ['Váš účet momentálně není aktivní. Kontaktujte prosím správce svého týmu.'],
                     ]);
                 }
+
                 return $user;
             }
 
@@ -78,6 +79,7 @@ class FortifyServiceProvider extends ServiceProvider
                 'session_id' => \Illuminate\Support\Facades\Session::getId(),
                 'intended' => session('url.intended'),
             ]);
+
             return view('auth.login');
         });
 
@@ -90,6 +92,7 @@ class FortifyServiceProvider extends ServiceProvider
                 'has_secret' => (bool) auth()->user()?->two_factor_secret,
                 'confirmed' => (bool) auth()->user()?->two_factor_confirmed_at,
             ]);
+
             return view('auth.two-factor-challenge');
         });
 

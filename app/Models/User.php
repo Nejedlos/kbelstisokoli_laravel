@@ -7,6 +7,7 @@ use App\Enums\Gender;
 use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
 use App\Enums\PaymentMethod;
+use App\Notifications\Auth\ResetPasswordNotification;
 use App\Traits\Auditable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -18,17 +19,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use App\Notifications\Auth\ResetPasswordNotification;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
-use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles, InteractsWithMedia, Auditable;
+    use Auditable, HasFactory, HasRoles, InteractsWithMedia, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -119,17 +118,17 @@ class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
     {
         static::saving(function ($user) {
             if ($user->first_name && $user->last_name) {
-                $user->name = $user->first_name . ' ' . $user->last_name;
+                $user->name = $user->first_name.' '.$user->last_name;
             }
 
             // Pojistka proti přepsání klubového ID a variabilního symbolu
             // Jednou vygenerované údaje se nesmí změnit
             if ($user->exists) {
-                if ($user->isDirty('club_member_id') && !empty($user->getOriginal('club_member_id'))) {
+                if ($user->isDirty('club_member_id') && ! empty($user->getOriginal('club_member_id'))) {
                     $user->club_member_id = $user->getOriginal('club_member_id');
                 }
 
-                if ($user->isDirty('payment_vs') && !empty($user->getOriginal('payment_vs'))) {
+                if ($user->isDirty('payment_vs') && ! empty($user->getOriginal('payment_vs'))) {
                     $user->payment_vs = $user->getOriginal('payment_vs');
                 }
             }
@@ -266,18 +265,27 @@ class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
     }
 
     /**
+     * Cache pro výsledek kontroly přístupu v rámci requestu.
+     */
+    protected ?bool $cachedCanAccessAdmin = null;
+
+    /**
      * Zkontroluje, zda má uživatel přístup k administraci (Filament nebo custom).
      */
     public function canAccessAdmin(): bool
     {
+        if ($this->cachedCanAccessAdmin !== null) {
+            return $this->cachedCanAccessAdmin;
+        }
+
         // Povolíme přístup, pokud je uživatel aktivní a má roli/oprávnění
         // NEBO pokud je uživatel právě impersonován adminem (aby se mohl admin dívat na jeho účet v adminu, pokud je to potřeba)
         if (session()->has('impersonated_by')) {
-            return true;
+            return $this->cachedCanAccessAdmin = true;
         }
 
-        return $this->is_active &&
-               ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach']));
+        return $this->cachedCanAccessAdmin = ($this->is_active &&
+               ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach'])));
     }
 
     /**
@@ -298,6 +306,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
 
         if (! $url) {
             $fallback = $conversion === 'thumb' ? 'default-avatar-thumb.webp' : 'default-avatar.webp';
+
             return asset("images/{$fallback}");
         }
 

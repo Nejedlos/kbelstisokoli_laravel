@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('gallery_media')) {
+        if (! Schema::hasTable('gallery_media')) {
             Schema::create('gallery_media', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('gallery_id')->constrained()->onDelete('cascade');

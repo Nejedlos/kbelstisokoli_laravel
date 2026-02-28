@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Support\Icons\AppIcon;
 use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use BladeUI\Icons\Factory as IconFactory;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -41,19 +41,19 @@ class IconsDoctorCommand extends Command
     protected function header(): void
     {
         $this->newLine();
-        $this->info("╔══════════════════════════════════════════════════════╗");
-        $this->info("║             Filament Icons Doctor 🩺                 ║");
-        $this->info("╚══════════════════════════════════════════════════════╝");
+        $this->info('╔══════════════════════════════════════════════════════╗');
+        $this->info('║             Filament Icons Doctor 🩺                 ║');
+        $this->info('╚══════════════════════════════════════════════════════╝');
     }
 
     protected function checkEnvironment(): void
     {
         $this->warn("\n[1] Kontrola prostředí:");
         $hasPro = config('app.fontawesome_pro', false);
-        $this->line("Font Awesome Pro: " . ($hasPro ? "✅ Aktivní" : "❌ Neaktivní (Fallback na Solid)"));
+        $this->line('Font Awesome Pro: '.($hasPro ? '✅ Aktivní' : '❌ Neaktivní (Fallback na Solid)'));
 
         $iconSets = app(IconFactory::class)->all();
-        $this->line("Dostupné sady ikon: " . implode(', ', array_keys($iconSets)));
+        $this->line('Dostupné sady ikon: '.implode(', ', array_keys($iconSets)));
     }
 
     protected function checkEnumIcons(): void
@@ -70,10 +70,12 @@ class IconsDoctorCommand extends Command
             $rows[] = [
                 $case->name,
                 $iconName,
-                $exists ? "✅ OK" : "❌ NENALEZENO",
+                $exists ? '✅ OK' : '❌ NENALEZENO',
             ];
 
-            if (!$exists) $errors++;
+            if (! $exists) {
+                $errors++;
+            }
         }
 
         $this->table(['Enum Klíč', 'Blade Icon Název', 'Stav'], $rows);
@@ -106,7 +108,7 @@ class IconsDoctorCommand extends Command
         }
 
         if ($found === 0) {
-            $this->line("✅ Žádné zjevné syntaktické chyby nenalezeny.");
+            $this->line('✅ Žádné zjevné syntaktické chyby nenalezeny.');
         }
     }
 

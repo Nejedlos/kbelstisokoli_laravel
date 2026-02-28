@@ -4,7 +4,6 @@ namespace App\Filament\Resources\PerformanceTestResults\Widgets;
 
 use App\Models\PerformanceTestResult;
 use Filament\Widgets\Widget;
-use Illuminate\Support\Facades\DB;
 
 class PerformanceComparisonWidget extends Widget
 {

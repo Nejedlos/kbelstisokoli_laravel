@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\AiChunk;
 use App\Models\AiDocument;
 use App\Models\Page;
 use App\Models\Post;
@@ -49,17 +48,17 @@ class AiIndexService
         $count = 0;
 
         // Indexujeme pouze vybrané sekce
-        if (!$section || $section === 'admin') {
+        if (! $section || $section === 'admin') {
             Log::info("AI Indexing: Starting admin section for locale '{$locale}'");
             $count += $this->indexFilament($locale, $onProgress, $force);
         }
 
-        if (!$section || $section === 'member') {
+        if (! $section || $section === 'member') {
             Log::info("AI Indexing: Starting member section for locale '{$locale}'");
             $count += $this->indexMemberSection($locale, $onProgress, $force);
         }
 
-        if (!$section || $section === 'frontend') {
+        if (! $section || $section === 'frontend') {
             Log::info("AI Indexing: Starting frontend section for locale '{$locale}'");
             $count += $this->indexFrontend($locale, $onProgress, $force);
         }
@@ -238,7 +237,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     private function indexFilament(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
-        Log::info("AI Indexing: [Filament] Starting...");
+        Log::info('AI Indexing: [Filament] Starting...');
         $admin = null;
         try {
             $admin = User::role('admin')->first() ?: User::find(1);
@@ -248,7 +247,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
         // 0. Indexování Photo Poolů
         $pools = \App\Models\PhotoPool::all();
-        Log::info("AI Indexing: [Filament] Indexing " . $pools->count() . " PhotoPools");
+        Log::info('AI Indexing: [Filament] Indexing '.$pools->count().' PhotoPools');
         foreach ($pools as $pool) {
             $title = $pool->getTranslation('title', $locale);
             $description = $pool->getTranslation('description', $locale);
@@ -285,7 +284,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
         // Indexování stránek (Pages)
         $pages = \Filament\Facades\Filament::getPanel('admin')->getPages();
-        Log::info("AI Indexing: [Filament] Indexing " . count($pages) . " Pages");
+        Log::info('AI Indexing: [Filament] Indexing '.count($pages).' Pages');
         foreach ($pages as $pageClass) {
             try {
                 // Přeskočíme naši AI vyhledávací stránku
@@ -341,7 +340,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 ], $force);
                 $count++;
             } catch (\Throwable $e) {
-                Log::error("AI Indexing: Error indexing page {$pageClass}: " . $e->getMessage());
+                Log::error("AI Indexing: Error indexing page {$pageClass}: ".$e->getMessage());
+
                 continue;
             } finally {
                 gc_collect_cycles();
@@ -350,7 +350,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
         // Indexování resources
         $resources = \Filament\Facades\Filament::getPanel('admin')->getResources();
-        Log::info("AI Indexing: [Filament] Indexing " . count($resources) . " Resources");
+        Log::info('AI Indexing: [Filament] Indexing '.count($resources).' Resources');
         foreach ($resources as $resourceClass) {
             try {
                 $title = $resourceClass::getNavigationLabel();
@@ -396,7 +396,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 ], $force);
                 $count++;
             } catch (\Throwable $e) {
-                Log::error("AI Indexing: Error indexing resource {$resourceClass}: " . $e->getMessage());
+                Log::error("AI Indexing: Error indexing resource {$resourceClass}: ".$e->getMessage());
+
                 continue;
             } finally {
                 gc_collect_cycles();
@@ -524,7 +525,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     private function indexMemberSection(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
-        Log::info("AI Indexing: [Member] Starting...");
+        Log::info('AI Indexing: [Member] Starting...');
         $member = null;
         try {
             // Pro indexaci členské sekce použijeme admina (má přístup i k trenérským přehledům)
@@ -545,7 +546,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             'member.teams.index' => ['title' => __('member.teams.title')],
         ];
 
-        Log::info("AI Indexing: [Member] Indexing " . count($routes) . " Routes");
+        Log::info('AI Indexing: [Member] Indexing '.count($routes).' Routes');
         foreach ($routes as $routeName => $info) {
             try {
                 $url = route($routeName);
@@ -570,7 +571,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 ], $force);
                 $count++;
             } catch (\Throwable $e) {
-                Log::error("AI Indexing: Error indexing member route {$routeName}: " . $e->getMessage());
+                Log::error("AI Indexing: Error indexing member route {$routeName}: ".$e->getMessage());
+
                 continue;
             } finally {
                 gc_collect_cycles();
@@ -585,7 +587,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         $count = 0;
         $docsPath = base_path('docs');
 
-        if (!File::exists($docsPath)) {
+        if (! File::exists($docsPath)) {
             return 0;
         }
 
@@ -605,16 +607,18 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $title = trim($matches[1]);
             }
 
-            if ($onProgress) $onProgress("Documentation: {$title}");
+            if ($onProgress) {
+                $onProgress("Documentation: {$title}");
+            }
 
             $this->updateOrCreateDocument([
                 'type' => 'documentation.resource',
-                'source' => 'docs/' . $relativePath,
+                'source' => 'docs/'.$relativePath,
                 'title' => $title,
                 'url' => null, // Dokumentace nemá přímou URL v aplikaci, ale slouží jako kontext
                 'locale' => $locale, // Dokumentace je primárně česky, indexujeme do aktuálního locale
                 'content' => $content,
-                'checksum' => hash('sha256', $content . $relativePath),
+                'checksum' => hash('sha256', $content.$relativePath),
             ], $force);
 
             $count++;
@@ -626,7 +630,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     private function indexFrontend(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
-        Log::info("AI Indexing: [Frontend] Starting...");
+        Log::info('AI Indexing: [Frontend] Starting...');
 
         // 1. Indexace stránek (Pages)
         $pages = Page::query()
@@ -634,7 +638,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             ->where('status', 'published')
             ->get();
 
-        Log::info("AI Indexing: [Frontend] Indexing " . $pages->count() . " Pages");
+        Log::info('AI Indexing: [Frontend] Indexing '.$pages->count().' Pages');
         foreach ($pages as $page) {
             $title = $page->getTranslation('title', $locale);
             $url = $page->slug === 'home' ? route('public.home') : route('public.pages.show', $page->slug);
@@ -682,7 +686,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             })
             ->get();
 
-        Log::info("AI Indexing: [Frontend] Indexing " . $posts->count() . " Posts");
+        Log::info('AI Indexing: [Frontend] Indexing '.$posts->count().' Posts');
         foreach ($posts as $post) {
             $title = $post->getTranslation('title', $locale);
             $url = route('public.news.show', $post->slug);
@@ -752,7 +756,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     public function search(string $query, string $locale = 'cs', int $limit = 8, ?string $section = null)
     {
         $q = Str::lower($query);
-        $words = array_filter(explode(' ', $q), fn($w) => mb_strlen($w) > 2);
+        $words = array_filter(explode(' ', $q), fn ($w) => mb_strlen($w) > 2);
 
         // Jednoduché LIKE vyhledávání + heuristické seřazení v PHP
         $queryBuilder = AiDocument::query()
@@ -875,12 +879,13 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             // Vrátíme původní stav (pro jistotu, i když instance je per-request)
             app()->forgetInstance('middleware.disable');
 
-            if (!$response->isSuccessful()) {
+            if (! $response->isSuccessful()) {
                 if ($response->isRedirection()) {
-                    Log::warning("Rendering redirected for {$url} to " . $response->headers->get('Location'));
+                    Log::warning("Rendering redirected for {$url} to ".$response->headers->get('Location'));
                 } else {
                     Log::warning("Rendering failed for {$url} with status {$response->getStatusCode()}");
                 }
+
                 return '';
             }
 

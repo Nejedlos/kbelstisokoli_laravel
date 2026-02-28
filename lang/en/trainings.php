@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Training Information',
     'subtitle' => 'Overview of training times and locations for individual age categories.',

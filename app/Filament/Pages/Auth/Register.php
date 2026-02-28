@@ -2,10 +2,9 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Auth\Pages\Register as BaseRegister;
-
-use Filament\Notifications\Notification;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Auth\Pages\Register as BaseRegister;
+use Filament\Notifications\Notification;
 
 class Register extends BaseRegister
 {
@@ -18,6 +17,7 @@ class Register extends BaseRegister
             ]))
             ->danger();
     }
+
     // Use custom full-page auth layout instead of Filament's simple layout
     protected static string $layout = 'filament.admin.layouts.auth';
 

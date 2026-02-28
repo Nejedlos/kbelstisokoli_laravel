@@ -2,9 +2,9 @@
 
 namespace App\Services\Finance;
 
+use App\Models\ChargePaymentAllocation;
 use App\Models\FinanceCharge;
 use App\Models\FinancePayment;
-use App\Models\ChargePaymentAllocation;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -114,14 +114,14 @@ class FinanceService
         // Optimalizováno: suma amount_total - suma alokací
         $totalChargesSum = (float) FinanceCharge::whereIn('status', ['open', 'partially_paid', 'overdue'])->sum('amount_total');
         $totalAllocationsSum = (float) DB::table('charge_payment_allocations')
-            ->whereIn('finance_charge_id', function($q) {
+            ->whereIn('finance_charge_id', function ($q) {
                 $q->select('id')->from('finance_charges')->whereIn('status', ['open', 'partially_paid', 'overdue']);
             })
             ->sum('amount');
 
         $overdueChargesSum = (float) FinanceCharge::where('status', 'overdue')->sum('amount_total');
         $overdueAllocationsSum = (float) DB::table('charge_payment_allocations')
-            ->whereIn('finance_charge_id', function($q) {
+            ->whereIn('finance_charge_id', function ($q) {
                 $q->select('id')->from('finance_charges')->where('status', 'overdue');
             })
             ->sum('amount');

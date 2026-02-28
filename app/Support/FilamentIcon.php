@@ -5,7 +5,6 @@ namespace App\Support;
 use App\Support\Icons\AppIcon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
 
 /**
  * Robustní správa ikon pro Filament.
@@ -16,10 +15,9 @@ class FilamentIcon
     /**
      * Získá název ikony pro Blade Icons.
      *
-     * @param string|AppIcon $icon Klíč ikony (Enum) nebo název ikony
-     * @param string $style Požadovaný styl (fal, fas, far, fab, fad, fat)
-     * @param string $fallback Bezpečná ikona pro případ chyby
-     * @return string
+     * @param  string|AppIcon  $icon  Klíč ikony (Enum) nebo název ikony
+     * @param  string  $style  Požadovaný styl (fal, fas, far, fab, fad, fat)
+     * @param  string  $fallback  Bezpečná ikona pro případ chyby
      */
     public static function get(string|AppIcon $icon, string $style = 'fal', string $fallback = 'heroicon-o-question-mark-circle'): string
     {
@@ -34,7 +32,7 @@ class FilamentIcon
         // Avoid container calls during early config bootstrap.
         // Use getenv instead of app()->environment() if possible.
         if (getenv('APP_ENV') === 'testing') {
-             return 'heroicon-o-stop';
+            return 'heroicon-o-stop';
         }
 
         // 1. Získání základního názvu ikony
@@ -46,11 +44,11 @@ class FilamentIcon
 
         // 2. Pokud už má prefix (např. heroicon-), vrátíme ji přímo
         if (\Illuminate\Support\Str::contains($iconName, ['-'])) {
-             $parts = explode('-', $iconName);
-             $prefix = $parts[0];
-             if (in_array($prefix, ['heroicon', 'fas', 'far', 'fab', 'fal', 'fad', 'fat', 'app'])) {
-                 return $iconName;
-             }
+            $parts = explode('-', $iconName);
+            $prefix = $parts[0];
+            if (in_array($prefix, ['heroicon', 'fas', 'far', 'fab', 'fal', 'fad', 'fat', 'app'])) {
+                return $iconName;
+            }
         }
 
         // 3. Validace stylu a Pro fallback
@@ -87,6 +85,7 @@ class FilamentIcon
         }
 
         $allowedStyles = ['fas', 'far', 'fab', 'fal', 'fad', 'fat'];
+
         return in_array($style, $allowedStyles) ? $style : 'fas';
     }
 
@@ -98,7 +97,8 @@ class FilamentIcon
         try {
             return self::get($icon);
         } catch (\Exception $e) {
-            Log::warning("Icon not found: " . (is_string($icon) ? $icon : $icon->value));
+            Log::warning('Icon not found: '.(is_string($icon) ? $icon : $icon->value));
+
             return $fallback;
         }
     }

@@ -2,10 +2,9 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
-
-use Filament\Notifications\Notification;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
+use Filament\Notifications\Notification;
 
 class ResetPassword extends BaseResetPassword
 {
@@ -18,6 +17,7 @@ class ResetPassword extends BaseResetPassword
             ]))
             ->danger();
     }
+
     // Use our custom auth layout for full control over the page shell
     protected static string $layout = 'filament.admin.layouts.auth';
 

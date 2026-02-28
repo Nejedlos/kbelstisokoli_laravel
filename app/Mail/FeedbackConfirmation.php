@@ -14,8 +14,11 @@ class FeedbackConfirmation extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public string $type; // coach|admin
+
     public User $user;
+
     public ?Team $team;
+
     public string $bodyMessage;
 
     public function __construct(

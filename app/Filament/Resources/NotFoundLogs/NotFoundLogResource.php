@@ -2,16 +2,12 @@
 
 namespace App\Filament\Resources\NotFoundLogs;
 
-use App\Filament\Resources\NotFoundLogs\Pages\CreateNotFoundLog;
-use App\Filament\Resources\NotFoundLogs\Pages\EditNotFoundLog;
 use App\Filament\Resources\NotFoundLogs\Pages\ListNotFoundLogs;
 use App\Filament\Resources\NotFoundLogs\Schemas\NotFoundLogForm;
 use App\Filament\Resources\NotFoundLogs\Tables\NotFoundLogsTable;
 use App\Models\NotFoundLog;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class NotFoundLogResource extends Resource

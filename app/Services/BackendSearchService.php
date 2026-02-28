@@ -6,7 +6,6 @@ use App\DataTransferObjects\SearchResult;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 class BackendSearchService
@@ -32,56 +31,56 @@ class BackendSearchService
                 'description' => 'Seznam uživatelů, editace profilů, reset hesla, přidávání nových členů.',
                 'url' => '/admin/users',
                 'permission' => 'view_any_user',
-                'keywords' => ['členové', 'lidé', 'registrace', 'heslo']
+                'keywords' => ['členové', 'lidé', 'registrace', 'heslo'],
             ],
             [
                 'title' => 'Správa stránek (CMS)',
                 'description' => 'Editace textů na webu, tvorba nových stránek, správa bloků a obsahu.',
                 'url' => '/admin/pages',
                 'permission' => 'view_any_page',
-                'keywords' => ['web', 'obsah', 'texty', 'cms']
+                'keywords' => ['web', 'obsah', 'texty', 'cms'],
             ],
             [
                 'title' => 'Aktuality a novinky',
                 'description' => 'Psaní článků, zprávy z klubu, blogové příspěvky.',
                 'url' => '/admin/posts',
                 'permission' => 'view_any_post',
-                'keywords' => ['blog', 'články', 'zprávy', 'novinky']
+                'keywords' => ['blog', 'články', 'zprávy', 'novinky'],
             ],
             [
                 'title' => 'Finance a platby',
                 'description' => 'Přehled plateb, členské příspěvky, bankovní výpisy, dlužníci.',
                 'url' => '/admin/finance-payments',
                 'permission' => 'view_any_finance_payment',
-                'keywords' => ['peníze', 'dluhy', 'příspěvky', 'banka', 'platby']
+                'keywords' => ['peníze', 'dluhy', 'příspěvky', 'banka', 'platby'],
             ],
             [
                 'title' => 'Tréninky a rozvrh',
                 'description' => 'Správa tréninkových jednotek, docházka, místa konání.',
                 'url' => '/admin/trainings',
                 'permission' => 'view_any_training',
-                'keywords' => ['kalendář', 'rozvrh', 'hala', 'tělocvična', 'docházka']
+                'keywords' => ['kalendář', 'rozvrh', 'hala', 'tělocvična', 'docházka'],
             ],
             [
                 'title' => 'Zápasy a výsledky',
                 'description' => 'Plánování utkání, statistiky zápasů, soupeři, skóre.',
                 'url' => '/admin/basketball-matches',
                 'permission' => 'view_any_basketball_match',
-                'keywords' => ['utkání', 'výsledky', 'basket', 'skóre', 'turnaje']
+                'keywords' => ['utkání', 'výsledky', 'basket', 'skóre', 'turnaje'],
             ],
             [
                 'title' => 'Nastavení brandingu',
                 'description' => 'Změna loga, barev webu, názvu klubu a sloganů.',
                 'url' => '/admin/branding-settings',
                 'permission' => 'manage_branding',
-                'keywords' => ['barvy', 'logo', 'design', 'vzhled']
+                'keywords' => ['barvy', 'logo', 'design', 'vzhled'],
             ],
             [
                 'title' => 'Role a oprávnění',
                 'description' => 'Nastavení kdo co může dělat, přístupy do adminu, definice rolí.',
                 'url' => '/admin/roles',
                 'permission' => 'view_any_role',
-                'keywords' => ['přístupy', 'práva', 'admini', 'role']
+                'keywords' => ['přístupy', 'práva', 'admini', 'role'],
             ],
             // ... další targety lze přidat
         ];
@@ -92,31 +91,31 @@ class BackendSearchService
                 'title' => 'Můj program a docházka',
                 'description' => 'Přehled nadcházejících tréninků a zápasů, omluvenky, historie docházky.',
                 'url' => '/member/program',
-                'keywords' => ['trénink', 'omluva', 'zápas', 'kdy mám trénink']
+                'keywords' => ['trénink', 'omluva', 'zápas', 'kdy mám trénink'],
             ],
             [
                 'title' => 'Moje platby',
                 'description' => 'Stav mých členských příspěvků, QR kódy pro platbu, historie plateb.',
                 'url' => '/member/platby',
-                'keywords' => ['platba', 'příspěvky', 'peníze', 'qr kód', 'dluh']
+                'keywords' => ['platba', 'příspěvky', 'peníze', 'qr kód', 'dluh'],
             ],
             [
                 'title' => 'Můj profil',
                 'description' => 'Změna osobních údajů, kontakty, změna hesla.',
                 'url' => '/member/profil',
-                'keywords' => ['nastavení', 'profil', 'údaje', 'heslo']
+                'keywords' => ['nastavení', 'profil', 'údaje', 'heslo'],
             ],
             [
                 'title' => 'Týmové přehledy',
                 'description' => 'Soupisky týmů, kontakty na spoluhráče a trenéry.',
                 'url' => '/member/tymove-prehledy',
-                'keywords' => ['tým', 'soupiska', 'kontakty', 'spoluhráči']
+                'keywords' => ['tým', 'soupiska', 'kontakty', 'spoluhráči'],
             ],
             [
                 'title' => 'Notifikace',
                 'description' => 'Upozornění na nové zprávy, platby nebo změny v programu.',
                 'url' => '/member/notifikace',
-                'keywords' => ['zprávy', 'upozornění', 'novinky']
+                'keywords' => ['zprávy', 'upozornění', 'novinky'],
             ],
         ];
     }
@@ -176,12 +175,12 @@ class BackendSearchService
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => "Jsi navigační asistent pro sportovní klubový systém. Na základě dotazu uživatele vyber ze seznamu cílů ty nejrelevantnější (max 3). Vrať pouze JSON pole indexů vybraných cílů ze seznamu. Pokud nic neodpovídá, vrať prázdné pole [].\n\nSeznam cílů:\n" . $targetsJson
+                            'content' => "Jsi navigační asistent pro sportovní klubový systém. Na základě dotazu uživatele vyber ze seznamu cílů ty nejrelevantnější (max 3). Vrať pouze JSON pole indexů vybraných cílů ze seznamu. Pokud nic neodpovídá, vrať prázdné pole [].\n\nSeznam cílů:\n".$targetsJson,
                         ],
                         [
                             'role' => 'user',
-                            'content' => $query
-                        ]
+                            'content' => $query,
+                        ],
                     ],
                     'response_format' => ['type' => 'json_object'],
                     'temperature' => 0.1,
@@ -208,7 +207,7 @@ class BackendSearchService
                 return $results;
             }
         } catch (\Exception $e) {
-            Log::error('AI Search failed: ' . $e->getMessage());
+            Log::error('AI Search failed: '.$e->getMessage());
         }
 
         return $this->fallbackSearch($query, $context);
@@ -226,11 +225,17 @@ class BackendSearchService
         foreach ($targets as $target) {
             $score = 0;
 
-            if (Str::contains(mb_strtolower($target['title']), $queryLower)) $score += 10;
-            if (Str::contains(mb_strtolower($target['description']), $queryLower)) $score += 5;
+            if (Str::contains(mb_strtolower($target['title']), $queryLower)) {
+                $score += 10;
+            }
+            if (Str::contains(mb_strtolower($target['description']), $queryLower)) {
+                $score += 5;
+            }
 
             foreach ($target['keywords'] ?? [] as $keyword) {
-                if (Str::contains(mb_strtolower($keyword), $queryLower)) $score += 8;
+                if (Str::contains(mb_strtolower($keyword), $queryLower)) {
+                    $score += 8;
+                }
             }
 
             if ($score > 0) {
@@ -241,12 +246,12 @@ class BackendSearchService
                         snippet: $target['description'],
                         url: $target['url'],
                         type: __('search.types.navigation')
-                    )
+                    ),
                 ]);
             }
         }
 
-        return $results->sortByDesc('score')->map(fn($item) => $item['result'])->values();
+        return $results->sortByDesc('score')->map(fn ($item) => $item['result'])->values();
     }
 
     /**
@@ -257,10 +262,15 @@ class BackendSearchService
         $targets = $this->searchTargets[$context] ?? [];
         $user = auth()->user();
 
-        if (!$user) return [];
+        if (! $user) {
+            return [];
+        }
 
         return array_values(array_filter($targets, function ($target) use ($user) {
-            if (!isset($target['permission'])) return true;
+            if (! isset($target['permission'])) {
+                return true;
+            }
+
             return $user->can($target['permission']);
         }));
     }

@@ -4,13 +4,14 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use function Laravel\Prompts\text;
-use function Laravel\Prompts\select;
-use function Laravel\Prompts\password;
+
 use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\info;
 use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\password;
+use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
+use function Laravel\Prompts\text;
 use function Laravel\Prompts\warning;
 
 class ProductionDeploySetupCommand extends Command
@@ -38,7 +39,7 @@ class ProductionDeploySetupCommand extends Command
 
         $connection = $this->argument('connection');
 
-        if (!$connection && !config('app.prod_host', env('PROD_HOST'))) {
+        if (! $connection && ! config('app.prod_host', env('PROD_HOST'))) {
             $connection = text(
                 label: 'SSH příkaz nebo spojení (nepovinné)?',
                 placeholder: 'ssh -p 20001 ssh-588875@dw191.webglobe.com',
@@ -86,7 +87,7 @@ class ProductionDeploySetupCommand extends Command
                 break;
             }
 
-            if (!confirm('Nepodařilo se navázat SSH spojení. Chcete upravit údaje a zkusit to znovu?', true)) {
+            if (! confirm('Nepodařilo se navázat SSH spojení. Chcete upravit údaje a zkusit to znovu?', true)) {
                 return self::FAILURE;
             }
 
@@ -132,14 +133,14 @@ class ProductionDeploySetupCommand extends Command
             'PROD_NPM_BINARY' => $npmBinary,
         ]);
 
-        if (!$this->checkServerRequirements($host, $port, $user, $phpBinary, $nodeBinary, $npmBinary)) {
-            if (!confirm('Server nesplňuje některé požadavky. Chcete přesto pokračovat?', false)) {
+        if (! $this->checkServerRequirements($host, $port, $user, $phpBinary, $nodeBinary, $npmBinary)) {
+            if (! confirm('Server nesplňuje některé požadavky. Chcete přesto pokračovat?', false)) {
                 return self::FAILURE;
             }
         }
 
         $detectedPaths = $this->detectPaths($host, $port, $user);
-        $defaultPublic = !empty($detectedPaths) ? $detectedPaths[0] : '.';
+        $defaultPublic = ! empty($detectedPaths) ? $detectedPaths[0] : '.';
 
         // 1. Funkční adresář (vše kromě public)
         $path = $this->browseServerPath($host, $port, $user, 'Zvolte FUNKČNÍ ADRESÁŘ (kam přijde jádro aplikace)');
@@ -152,7 +153,7 @@ class ProductionDeploySetupCommand extends Command
             $choice = select(
                 label: 'Jak chcete naložit s GitHub Personal Access Tokenem?',
                 options: [
-                    'keep' => 'Použít uložený token (' . substr($token, 0, 4) . '...' . substr($token, -4) . ')',
+                    'keep' => 'Použít uložený token ('.substr($token, 0, 4).'...'.substr($token, -4).')',
                     'new' => 'Zadat nový token',
                 ],
                 default: 'keep'
@@ -176,7 +177,7 @@ class ProductionDeploySetupCommand extends Command
 
         // 3. Konfigurace databáze
         $dbConfig = [];
-        info("🗄️  Konfigurace databáze na produkci");
+        info('🗄️  Konfigurace databáze na produkci');
         $dbConfig['db_connection'] = select('Typ databáze?', ['mysql', 'mariadb', 'pgsql', 'sqlite'], config('app.prod_db_connection', env('PROD_DB_CONNECTION', 'mysql')));
         $dbConfig['db_host'] = text('DB Host', default: config('app.prod_db_host', env('PROD_DB_HOST', '127.0.0.1')));
         $dbConfig['db_port'] = text('DB Port', default: config('app.prod_db_port', env('PROD_DB_PORT', '3306')));
@@ -188,7 +189,7 @@ class ProductionDeploySetupCommand extends Command
             $choice = select(
                 label: 'Jak chcete naložit s heslem k produkční databázi?',
                 options: [
-                    'keep' => 'Použít uložené heslo (' . str_repeat('*', 8) . ')',
+                    'keep' => 'Použít uložené heslo ('.str_repeat('*', 8).')',
                     'new' => 'Zadat nové heslo',
                 ],
                 default: 'keep'
@@ -280,10 +281,11 @@ class ProductionDeploySetupCommand extends Command
                 return true;
             }
 
-            warning("⚠️ Nepodařilo se připojit k serveru bez hesla (pravděpodobně chybí SSH klíče nebo je přístup zamítnut).");
+            warning('⚠️ Nepodařilo se připojit k serveru bez hesla (pravděpodobně chybí SSH klíče nebo je přístup zamítnut).');
 
-            if (!confirm("Chcete nyní (znovu) nastavit SSH klíče pro bezheslový přístup?", true)) {
-                error("Bez SSH klíčů nebude automatický deploy fungovat spolehlivě.");
+            if (! confirm('Chcete nyní (znovu) nastavit SSH klíče pro bezheslový přístup?', true)) {
+                error('Bez SSH klíčů nebude automatický deploy fungovat spolehlivě.');
+
                 return false;
             }
 
@@ -291,49 +293,52 @@ class ProductionDeploySetupCommand extends Command
             $home = getenv('HOME');
             $pubKeyPath = "{$home}/.ssh/id_rsa.pub";
 
-            if (!file_exists($pubKeyPath)) {
-                info("Klíč ~/.ssh/id_rsa.pub nenalezen. Generuji nový...");
+            if (! file_exists($pubKeyPath)) {
+                info('Klíč ~/.ssh/id_rsa.pub nenalezen. Generuji nový...');
                 $genProcess = Process::run("ssh-keygen -t rsa -b 4096 -f {$home}/.ssh/id_rsa -N ''");
-                if (!$genProcess->successful()) {
-                    error("Nepodařilo se vygenerovat SSH klíč.");
+                if (! $genProcess->successful()) {
+                    error('Nepodařilo se vygenerovat SSH klíč.');
+
                     return false;
                 }
             }
 
             // 3. Nahrání klíče na server (interaktivně - uživatel bude muset zadat heslo k serveru)
-            info("Nyní budete požádáni o HESLO k serveru pro nahrání veřejného klíče.");
-            info("Pokud nahrání selže (např. špatné heslo), budete moci pokus opakovat.");
+            info('Nyní budete požádáni o HESLO k serveru pro nahrání veřejného klíče.');
+            info('Pokud nahrání selže (např. špatné heslo), budete moci pokus opakovat.');
 
             // Zkusíme ssh-copy-id (běžné na Macu/Linuxu)
             $copyProcess = Process::forever()->tty()->run("ssh-copy-id -p {$port} -o StrictHostKeyChecking=no {$user}@{$host}");
 
-            if (!$copyProcess->successful()) {
-                warning("ssh-copy-id selhalo. Zkouším alternativní metodu (opět budete požádáni o heslo)...");
+            if (! $copyProcess->successful()) {
+                warning('ssh-copy-id selhalo. Zkouším alternativní metodu (opět budete požádáni o heslo)...');
                 $pubKey = file_get_contents($pubKeyPath);
                 $remoteCmd = "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '{$pubKey}' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys";
                 $altCopyProcess = Process::forever()->tty()->run("ssh -p {$port} -o StrictHostKeyChecking=no {$user}@{$host} \"{$remoteCmd}\"");
 
-                if (!$altCopyProcess->successful()) {
-                    error("Nepodařilo se nahrát SSH klíč na server. Zkontrolujte prosím přístupové údaje a heslo.");
-                    if (!confirm("Chcete zkusit nahrát klíč (zadat heslo) znovu?", true)) {
+                if (! $altCopyProcess->successful()) {
+                    error('Nepodařilo se nahrát SSH klíč na server. Zkontrolujte prosím přístupové údaje a heslo.');
+                    if (! confirm('Chcete zkusit nahrát klíč (zadat heslo) znovu?', true)) {
                         return false;
                     }
+
                     continue; // Zkusit znovu celou smyčku
                 }
             }
 
-            info("✅ SSH klíč byl úspěšně nahrán. Provádím finální test spojení...");
+            info('✅ SSH klíč byl úspěšně nahrán. Provádím finální test spojení...');
 
             // Finální test
             $finalCheck = Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'exit'");
 
             if ($finalCheck->successful()) {
-                info("✅ Připojení k serveru je nyní plně funkční.");
+                info('✅ Připojení k serveru je nyní plně funkční.');
+
                 return true;
             }
 
-            error("Ani po nahrání klíče se nepodařilo navázat bezheslové spojení.");
-            if (!confirm("Chcete zkusit nahrát klíč znovu (možná jiný problém se spojením)?", true)) {
+            error('Ani po nahrání klíče se nepodařilo navázat bezheslové spojení.');
+            if (! confirm('Chcete zkusit nahrát klíč znovu (možná jiný problém se spojením)?', true)) {
                 return false;
             }
         }
@@ -347,9 +352,9 @@ class ProductionDeploySetupCommand extends Command
             $dirs = [];
             if ($process->successful()) {
                 $output = trim($process->output());
-                if (!empty($output)) {
+                if (! empty($output)) {
                     $dirs = array_filter(explode("\n", $output));
-                    $dirs = array_map(fn($d) => trim($d, '/'), $dirs);
+                    $dirs = array_map(fn ($d) => trim($d, '/'), $dirs);
                 }
             }
 
@@ -358,16 +363,16 @@ class ProductionDeploySetupCommand extends Command
                 $options['..'] = '⬅️ Zpět (..)';
             }
 
-            $options['SELECT'] = "✅ VYBRAT TENTO ADRESÁŘ: " . ($currentPath === '.' ? '(domovský)' : $currentPath);
+            $options['SELECT'] = '✅ VYBRAT TENTO ADRESÁŘ: '.($currentPath === '.' ? '(domovský)' : $currentPath);
 
             foreach ($dirs as $dir) {
-                $options[$dir] = "📁 " . $dir;
+                $options[$dir] = '📁 '.$dir;
             }
 
             $options['MANUAL'] = '✍️ Zadat cestu ručně...';
 
             $choice = select(
-                label: "{$label} (Aktuálně: " . ($currentPath === '.' ? '/' : $currentPath) . ")",
+                label: "{$label} (Aktuálně: ".($currentPath === '.' ? '/' : $currentPath).')',
                 options: $options,
                 default: 'SELECT'
             );
@@ -376,13 +381,14 @@ class ProductionDeploySetupCommand extends Command
                 // Získáme absolutní cestu přes realpath na serveru
                 $realpathCmd = "ssh -p {$port} -o StrictHostKeyChecking=no {$user}@{$host} 'cd \"{$currentPath}\" && pwd'";
                 $realpathProcess = Process::run($realpathCmd);
+
                 return trim($realpathProcess->output());
             }
 
             if ($choice === 'MANUAL') {
                 return text(
-                    label: "Zadejte absolutní cestu k adresáři:",
-                    placeholder: "/var/www/vhosts/example.com/httpdocs",
+                    label: 'Zadejte absolutní cestu k adresáři:',
+                    placeholder: '/var/www/vhosts/example.com/httpdocs',
                     required: true
                 );
             }
@@ -390,7 +396,7 @@ class ProductionDeploySetupCommand extends Command
             if ($choice === '..') {
                 $currentPath = dirname($currentPath);
             } else {
-                $currentPath = ($currentPath === '.' ? '' : $currentPath . '/') . $choice;
+                $currentPath = ($currentPath === '.' ? '' : $currentPath.'/').$choice;
             }
         }
     }
@@ -416,7 +422,9 @@ class ProductionDeploySetupCommand extends Command
             $lines = array_filter(explode("\n", trim($process->output())));
             foreach ($lines as $line) {
                 $path = trim($line);
-                if (empty($path)) continue;
+                if (empty($path)) {
+                    continue;
+                }
 
                 $binaries[] = $path;
             }
@@ -435,10 +443,12 @@ class ProductionDeploySetupCommand extends Command
             foreach ($phpCandidates as $candidate) {
                 // Ignore some obvious non-php binaries if any
                 $bn = basename($candidate);
-                if (!preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') continue;
+                if (! preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') {
+                    continue;
+                }
 
                 $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
-                if ($process->successful() && !empty($process->output())) {
+                if ($process->successful() && ! empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
                     if (version_compare($matches[1] ?? '0', '8.4', '>=')) {
                         $php = $candidate;
@@ -455,10 +465,12 @@ class ProductionDeploySetupCommand extends Command
             $foundNode = false;
             foreach ($nodeCandidates as $candidate) {
                 $bn = basename($candidate);
-                if (!preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') continue;
+                if (! preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') {
+                    continue;
+                }
 
                 $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
-                if ($process->successful() && !empty($process->output())) {
+                if ($process->successful() && ! empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
                     if (version_compare($matches[1] ?? '0', '18.0', '>=')) {
                         $node = $candidate;
@@ -469,13 +481,15 @@ class ProductionDeploySetupCommand extends Command
                         $npmCandidates = array_unique(array_merge($remoteNpmBinaries, ['npm']));
 
                         if (preg_match('/node(\d+)/', $node, $m)) {
-                            array_unshift($npmCandidates, 'npm' . $m[1]);
+                            array_unshift($npmCandidates, 'npm'.$m[1]);
                         }
                         $npmCandidates = array_unique($npmCandidates);
 
                         foreach ($npmCandidates as $npmCandidate) {
                             $bn = basename($npmCandidate);
-                            if (!preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') continue;
+                            if (! preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') {
+                                continue;
+                            }
 
                             $npmProc = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
                             if ($npmProc->successful()) {
@@ -496,7 +510,7 @@ class ProductionDeploySetupCommand extends Command
             // Zkusíme najít adresáře v domovské složce, které vypadají jako webové kořeny
             $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'ls -F | grep / | head -n 10'");
 
-            if (!$process->successful()) {
+            if (! $process->successful()) {
                 return [];
             }
 
@@ -504,13 +518,14 @@ class ProductionDeploySetupCommand extends Command
             $lines = array_filter(explode("\n", $output));
 
             // Vyčistit lomítka na konci
-            $paths = array_map(fn($p) => trim($p, '/'), $lines);
+            $paths = array_map(fn ($p) => trim($p, '/'), $lines);
 
             // Seřadit tak, aby běžné názvy byly nahoře
-            usort($paths, function($a, $b) {
+            usort($paths, function ($a, $b) {
                 $common = ['www', 'public_html', 'web', 'domains'];
                 $aScore = in_array(strtolower($a), $common) ? 1 : 0;
                 $bScore = in_array(strtolower($b), $common) ? 1 : 0;
+
                 return $bScore <=> $aScore;
             });
 
@@ -532,10 +547,12 @@ class ProductionDeploySetupCommand extends Command
 
             foreach ($phpCandidates as $candidate) {
                 $bn = basename($candidate);
-                if (!preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') continue;
+                if (! preg_match('/^php[\d\.]*$/', $bn) && $bn !== 'php') {
+                    continue;
+                }
 
                 $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
-                if ($process->successful() && !empty($process->output())) {
+                if ($process->successful() && ! empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
                     $version = $matches[1] ?? '0';
                     if (version_compare($version, '8.4', '>=')) {
@@ -554,27 +571,27 @@ class ProductionDeploySetupCommand extends Command
                     $results[] = "<fg=green>✓</> PHP ({$phpBinary}): Verze {$bestPhpVer}";
                 }
             } else {
-                $results[] = "<fg=red>✗</> PHP: Žádná z verzí (8.4+) nebyla nalezena.";
+                $results[] = '<fg=red>✗</> PHP: Žádná z verzí (8.4+) nebyla nalezena.';
                 $allOk = false;
             }
 
             // 2. Git Check
             $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'git --version 2>/dev/null'");
-            if ($process->successful() && !empty($process->output())) {
+            if ($process->successful() && ! empty($process->output())) {
                 preg_match('/git version ([\d\.]+)/', $process->output(), $matches);
-                $results[] = "<fg=green>✓</> Git: Verze " . ($matches[1] ?? 'neznámá');
+                $results[] = '<fg=green>✓</> Git: Verze '.($matches[1] ?? 'neznámá');
             } else {
-                $results[] = "<fg=red>✗</> Git: Nenalezeno";
+                $results[] = '<fg=red>✗</> Git: Nenalezeno';
                 $allOk = false;
             }
 
             // 3. Composer Check
             $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'composer --version 2>/dev/null'");
-            if ($process->successful() && !empty($process->output())) {
+            if ($process->successful() && ! empty($process->output())) {
                 preg_match('/Composer version ([\d\.]+)/', $process->output(), $matches);
-                $results[] = "<fg=green>✓</> Composer: Verze " . ($matches[1] ?? 'neznámá');
+                $results[] = '<fg=green>✓</> Composer: Verze '.($matches[1] ?? 'neznámá');
             } else {
-                $results[] = "<fg=red>✗</> Composer: Nenalezeno";
+                $results[] = '<fg=red>✗</> Composer: Nenalezeno';
                 $allOk = false;
             }
 
@@ -586,10 +603,12 @@ class ProductionDeploySetupCommand extends Command
 
             foreach ($nodeCandidates as $candidate) {
                 $bn = basename($candidate);
-                if (!preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') continue;
+                if (! preg_match('/^node[\d]*$/', $bn) && $bn !== 'node') {
+                    continue;
+                }
 
                 $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
-                if ($process->successful() && !empty($process->output())) {
+                if ($process->successful() && ! empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
                     $version = $matches[1] ?? '0';
                     if (version_compare($version, '18.0', '>=')) {
@@ -608,7 +627,7 @@ class ProductionDeploySetupCommand extends Command
                     $results[] = "<fg=green>✓</> Node.js ({$nodeBinary}): Verze {$bestNodeVer}";
                 }
             } else {
-                $results[] = "<fg=red>✗</> Node.js: Žádná z verzí (18.0+) nebyla nalezena.";
+                $results[] = '<fg=red>✗</> Node.js: Žádná z verzí (18.0+) nebyla nalezena.';
                 $allOk = false;
             }
 
@@ -617,17 +636,19 @@ class ProductionDeploySetupCommand extends Command
             $npmCandidates = array_unique(array_merge($remoteNpmBinaries, [$npmBinary, 'npm']));
 
             if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
-                array_unshift($npmCandidates, 'npm' . $m[1]);
+                array_unshift($npmCandidates, 'npm'.$m[1]);
             }
             $npmCandidates = array_unique($npmCandidates);
 
             $bestNpm = null;
             foreach ($npmCandidates as $candidate) {
                 $bn = basename($candidate);
-                if (!preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') continue;
+                if (! preg_match('/^npm[\d]*$/', $bn) && $bn !== 'npm') {
+                    continue;
+                }
 
                 $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
-                if ($process->successful() && !empty($process->output())) {
+                if ($process->successful() && ! empty($process->output())) {
                     $bestNpm = $candidate;
                     $npmBinary = $candidate;
                     break;
@@ -635,7 +656,7 @@ class ProductionDeploySetupCommand extends Command
             }
 
             if ($bestNpm) {
-                $results[] = "<fg=green>✓</> NPM ({$npmBinary}): Verze " . trim($process->output());
+                $results[] = "<fg=green>✓</> NPM ({$npmBinary}): Verze ".trim($process->output());
             } else {
                 $results[] = "<fg=red>✗</> NPM ({$npmBinary}): Nenalezeno";
                 $allOk = false;
@@ -653,7 +674,7 @@ class ProductionDeploySetupCommand extends Command
     {
         $path = base_path('.env');
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return;
         }
 
@@ -701,28 +722,28 @@ class ProductionDeploySetupCommand extends Command
             info("🚀 Spouštím Envoy setup na {$user}@{$host}:{$port}...");
 
             $params = [
-                "--host=" . escapeshellarg($host),
-                "--port=" . escapeshellarg($port),
-                "--user=" . escapeshellarg($user),
-                "--php=" . escapeshellarg($phpBinary),
-                "--node=" . escapeshellarg($nodeBinary),
-                "--npm=" . escapeshellarg($npmBinary),
-                "--path=" . escapeshellarg($path),
-                "--token=" . escapeshellarg($token),
-                "--repository=" . escapeshellarg($repository),
+                '--host='.escapeshellarg($host),
+                '--port='.escapeshellarg($port),
+                '--user='.escapeshellarg($user),
+                '--php='.escapeshellarg($phpBinary),
+                '--node='.escapeshellarg($nodeBinary),
+                '--npm='.escapeshellarg($npmBinary),
+                '--path='.escapeshellarg($path),
+                '--token='.escapeshellarg($token),
+                '--repository='.escapeshellarg($repository),
             ];
 
             if ($publicPath) {
-                $params[] = "--public_path=" . escapeshellarg($publicPath);
+                $params[] = '--public_path='.escapeshellarg($publicPath);
             }
 
             foreach ($dbConfig as $key => $value) {
                 if ($value !== null) {
-                    $params[] = "--{$key}=" . escapeshellarg($value);
+                    $params[] = "--{$key}=".escapeshellarg($value);
                 }
             }
 
-            $command = base_path('vendor/bin/envoy') . " run setup " . implode(' ', $params);
+            $command = base_path('vendor/bin/envoy').' run setup '.implode(' ', $params);
 
             $process = Process::forever()->run($command, function (string $type, string $output) {
                 echo $output;
@@ -747,7 +768,7 @@ class ProductionDeploySetupCommand extends Command
             } else {
                 error('❌ Setup selhal. Zkontrolujte prosím SSH přístup a chybové hlášky výše.');
 
-                if (!confirm('Chcete zkusit setup spustit znovu se stejným nastavením?', true)) {
+                if (! confirm('Chcete zkusit setup spustit znovu se stejným nastavením?', true)) {
                     break;
                 }
             }

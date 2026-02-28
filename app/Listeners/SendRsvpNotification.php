@@ -20,7 +20,7 @@ class SendRsvpNotification implements ShouldQueue
         $user = $attendance->user;
         $eventModel = $attendance->attendable;
 
-        if (!$user || !$eventModel) {
+        if (! $user || ! $eventModel) {
             return;
         }
 

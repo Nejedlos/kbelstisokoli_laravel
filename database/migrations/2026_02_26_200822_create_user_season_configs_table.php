@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('user_season_configs')) {
+        if (! Schema::hasTable('user_season_configs')) {
             Schema::create('user_season_configs', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');

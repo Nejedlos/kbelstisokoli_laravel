@@ -17,7 +17,7 @@ class DataMigrationSeeder extends Seeder
     public function run(): void
     {
         $oldDb = config('database.old_database');
-        $this->command->info('Používám databázi pro migraci: ' . ($oldDb ?: 'NENASTAVENO'));
+        $this->command->info('Používám databázi pro migraci: '.($oldDb ?: 'NENASTAVENO'));
 
         $this->call([
             LegacyUserMigrationSeeder::class,     // Migrace uživatelů a profilů

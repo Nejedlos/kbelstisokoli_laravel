@@ -26,22 +26,24 @@ return new class extends Migration
         $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
 
         // Matches
-        $tableMatches = $prefix . 'matches';
+        $tableMatches = $prefix.'matches';
         try {
             $columnExists = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableMatches} LIKE 'metadata'");
             if (empty($columnExists)) {
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableMatches} ADD COLUMN metadata LONGTEXT NULL AFTER notes_public");
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         // Trainings
-        $tableTrainings = $prefix . 'trainings';
+        $tableTrainings = $prefix.'trainings';
         try {
             $columnExists = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableTrainings} LIKE 'metadata'");
             if (empty($columnExists)) {
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableTrainings} ADD COLUMN metadata LONGTEXT NULL AFTER notes");
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
     }
 
     /**
@@ -65,6 +67,7 @@ return new class extends Migration
         try {
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$prefix}trainings DROP COLUMN IF EXISTS metadata");
             \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$prefix}matches DROP COLUMN IF EXISTS metadata");
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
     }
 };

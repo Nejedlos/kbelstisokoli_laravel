@@ -51,7 +51,7 @@ class MediaAssetsRelationManager extends RelationManager
                 TextColumn::make('title')
                     ->label(__('user.fields.display_name'))
                     ->searchable()
-                    ->description(fn (MediaAsset $record): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('<span class="flex items-center gap-1">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().' ' . $record->type . ' | ' . number_format($record->getFirstMedia('default')?->size / 1024, 2) . ' KB</span>'))
+                    ->description(fn (MediaAsset $record): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('<span class="flex items-center gap-1">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().' '.$record->type.' | '.number_format($record->getFirstMedia('default')?->size / 1024, 2).' KB</span>'))
                     ->limit(50),
                 TextColumn::make('sort_order')
                     ->label('Pořadí')

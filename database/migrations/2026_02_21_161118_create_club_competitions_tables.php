@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Club Competitions (Klubové soutěže typu Lumír Trophy)
-        if (!Schema::hasTable('club_competitions')) {
+        if (! Schema::hasTable('club_competitions')) {
             Schema::create('club_competitions', function (Blueprint $table) {
                 $table->id();
                 $table->longText('name');
@@ -28,7 +28,7 @@ return new class extends Migration
         }
 
         // 2. Club Competition Entries (Jednotlivé body/záznamy soutěže)
-        if (!Schema::hasTable('club_competition_entries')) {
+        if (! Schema::hasTable('club_competition_entries')) {
             Schema::create('club_competition_entries', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('club_competition_id')->constrained()->onDelete('cascade');

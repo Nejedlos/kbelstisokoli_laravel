@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\Trainings\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 
 class TrainingForm

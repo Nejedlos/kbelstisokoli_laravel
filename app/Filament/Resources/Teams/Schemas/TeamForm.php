@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\Teams\Schemas;
 
 use App\Support\IconHelper;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
@@ -16,7 +16,7 @@ class TeamForm
     {
         return $schema
             ->components([
-                Section::make(new HtmlString(IconHelper::render(IconHelper::INFO) . ' ' . __('admin.navigation.resources.team.tabs.general')))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::INFO).' '.__('admin.navigation.resources.team.tabs.general')))
                     ->schema([
                         TextInput::make('name.cs')
                             ->label('Název týmu (CZ)')
@@ -42,7 +42,7 @@ class TeamForm
                             ->native(false),
                     ])->columns(2),
 
-                Section::make(new HtmlString(IconHelper::render(IconHelper::LIST) . ' ' . __('admin.navigation.resources.team.fields.description')))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::LIST_ICON).' '.__('admin.navigation.resources.team.fields.description')))
                     ->schema([
                         Textarea::make('description.cs')
                             ->label('Popis týmu (CZ)')

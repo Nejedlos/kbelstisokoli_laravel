@@ -7,23 +7,19 @@ use App\Services\GalleryService;
 use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
-use Filament\Tables\Columns\IconColumn;
 
 class MediaAssetsRelationManager extends RelationManager
 {
@@ -97,7 +93,7 @@ class MediaAssetsRelationManager extends RelationManager
                     ->action(function (array $data, GalleryService $service) {
                         /** @var \App\Models\Gallery $gallery */
                         $gallery = $this->getOwnerRecord();
-                        $added = $service->fillFromPoolRandom($gallery, (int)($data['count'] ?? 20), $data['photo_pool_id'] ?? null);
+                        $added = $service->fillFromPoolRandom($gallery, (int) ($data['count'] ?? 20), $data['photo_pool_id'] ?? null);
                         $this->notify('success', "$added fotek přidáno z poolu.");
                         $this->refreshTable();
                     }),

@@ -51,7 +51,7 @@ return new class extends Migration
                 'membership_status', 'membership_type', 'membership_started_at', 'membership_ended_at',
                 'finance_ok', 'payment_method', 'payment_note', 'address_street', 'address_city',
                 'address_zip', 'address_country', 'emergency_contact_name', 'emergency_contact_phone',
-                'public_contact_note', 'phone_secondary'
+                'public_contact_note', 'phone_secondary',
             ]);
         });
     }

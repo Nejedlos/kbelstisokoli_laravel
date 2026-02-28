@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('player_profiles')) {
+        if (! Schema::hasTable('player_profiles')) {
             Schema::create('player_profiles', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->unique()->constrained()->onDelete('cascade');
@@ -25,7 +25,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('player_profile_team')) {
+        if (! Schema::hasTable('player_profile_team')) {
             Schema::create('player_profile_team', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('player_profile_id')->constrained()->onDelete('cascade');

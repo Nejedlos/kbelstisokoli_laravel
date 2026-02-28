@@ -6,7 +6,6 @@ use App\Enums\CommunicationChannel;
 use App\Enums\RelationshipType;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachAction;
@@ -71,7 +70,7 @@ class ParentsRelationManager extends RelationManager
             ->headerActions([
                 AttachAction::make()
                     ->preloadRecordSelect()
-                    ->recordSelectSearchColumns(['name','email'])
+                    ->recordSelectSearchColumns(['name', 'email'])
                     ->form([
                         Select::make('relationship_type')
                             ->label('Vztah')

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Gallery;
 use App\Models\Page;
 use App\Models\Post;
-use App\Models\Gallery;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
@@ -18,9 +18,9 @@ class SitemapController extends Controller
 
         $posts = Post::where('status', 'published')
             ->where('is_visible', true)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('publish_at')
-                      ->orWhere('publish_at', '<=', now());
+                    ->orWhere('publish_at', '<=', now());
             })
             ->get();
 
@@ -49,7 +49,7 @@ class SitemapController extends Controller
             $robots .= "Allow: /\n";
             $robots .= "Disallow: /admin/\n";
             $robots .= "Disallow: /member/\n";
-            $robots .= "Sitemap: " . url('/sitemap.xml') . "\n";
+            $robots .= 'Sitemap: '.url('/sitemap.xml')."\n";
         } else {
             $robots .= "Disallow: /\n";
         }

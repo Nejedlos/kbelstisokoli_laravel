@@ -4,10 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\Fortify;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckTwoFactorTimeout
 {
@@ -61,6 +60,7 @@ class CheckTwoFactorTimeout
                     // Zařízení je zapamatováno, prodloužíme platnost potvrzení v session
                     \Illuminate\Support\Facades\Log::info('CheckTwoFactorTimeout.remember_cookie_found', ['user_id' => $user->id]);
                     $request->session()->put('auth.2fa_confirmed_at', now()->timestamp);
+
                     return $next($request);
                 }
             } catch (\Exception $e) {

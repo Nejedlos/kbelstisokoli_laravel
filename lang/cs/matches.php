@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Zápasy',
     'subtitle' => 'Sledujte výsledky a rozpis utkání našich týmů.',

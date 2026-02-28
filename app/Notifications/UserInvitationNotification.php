@@ -13,9 +13,7 @@ class UserInvitationNotification extends BaseNotification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $token)
-    {
-    }
+    public function __construct(public string $token) {}
 
     /**
      * Získá data pro in-app notifikaci.
@@ -46,13 +44,13 @@ class UserInvitationNotification extends BaseNotification implements ShouldQueue
         ], false));
 
         return (new MailMessage)
-            ->subject('Pozvánka do členské sekce | ' . $branding['club_name'])
-            ->greeting('Ahoj ' . $notifiable->name . '!')
-            ->line('Byl vám vytvořen přístup do členské sekce basketbalového klubu ' . $branding['club_name'] . '.')
+            ->subject('Pozvánka do členské sekce | '.$branding['club_name'])
+            ->greeting('Ahoj '.$notifiable->name.'!')
+            ->line('Byl vám vytvořen přístup do členské sekce basketbalového klubu '.$branding['club_name'].'.')
             ->line('Pro aktivaci účtu a nastavení hesla klikněte na tlačítko níže:')
             ->action('Nastavit přístupové heslo', $resetUrl)
             ->line('Tento odkaz je platný po omezenou dobu.')
             ->line('Pokud jste pozvánku nečekali, můžete tento e-mail ignorovat.')
-            ->salutation('Tvůj tým ' . $branding['club_name']);
+            ->salutation('Tvůj tým '.$branding['club_name']);
     }
 }

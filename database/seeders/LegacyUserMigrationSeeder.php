@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\PlayerProfile;
-use App\Models\Team;
 use App\Enums\BasketballPosition;
 use App\Enums\MembershipStatus;
+use App\Models\PlayerProfile;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,8 +21,9 @@ class LegacyUserMigrationSeeder extends Seeder
     public function run(): void
     {
         $oldDb = config('database.old_database');
-        if (!$oldDb) {
+        if (! $oldDb) {
             $this->command->error('Databáze pro migraci nebyla nalezena (DB_DATABASE_OLD ani DB_DATABASE).');
+
             return;
         }
 
@@ -30,25 +31,27 @@ class LegacyUserMigrationSeeder extends Seeder
         $teamC = Team::where('slug', 'muzi-c')->first();
         $teamE = Team::where('slug', 'muzi-e')->first();
 
-        if (!$teamC || !$teamE) {
+        if (! $teamC || ! $teamE) {
             $this->command->error('Nové týmy (muzi-c, muzi-e) nebyly nalezeny v DB. Spusťte nejdříve TeamSeeder.');
+
             return;
         }
 
         // Načtení dat ze staré databáze
         try {
-            $registrace = DB::connection('old_mysql')->table($oldDb . '.registrace')->get();
-            $soupiska = DB::connection('old_mysql')->table($oldDb . '.web_soupiska')->get()->keyBy(function ($item) {
+            $registrace = DB::connection('old_mysql')->table($oldDb.'.registrace')->get();
+            $soupiska = DB::connection('old_mysql')->table($oldDb.'.web_soupiska')->get()->keyBy(function ($item) {
                 return trim($item->jmeno);
             });
             // Načtení existujících uživatelů do paměti pro zamezení JSON dotazům
-            $existingUsersByLegacyId = User::all()->keyBy(fn($u) => $u->metadata['legacy_r_id'] ?? null)->forget(null);
+            $existingUsersByLegacyId = User::all()->keyBy(fn ($u) => $u->metadata['legacy_r_id'] ?? null)->forget(null);
         } catch (\Exception $e) {
-            $this->command->error('Nepodařilo se načíst data ze staré DB: ' . $e->getMessage());
+            $this->command->error('Nepodařilo se načíst data ze staré DB: '.$e->getMessage());
+
             return;
         }
 
-        $this->command->info('Migrace ' . $registrace->count() . ' uživatelů...');
+        $this->command->info('Migrace '.$registrace->count().' uživatelů...');
 
         $bar = $this->command->getOutput()->createProgressBar($registrace->count());
         $bar->start();
@@ -128,11 +131,11 @@ class LegacyUserMigrationSeeder extends Seeder
 
             // Přiřazení role
             if ($reg->admin === '1') {
-                if (!$user->hasRole('admin')) {
+                if (! $user->hasRole('admin')) {
                     $user->assignRole('admin');
                 }
             } else {
-                if (!$user->hasRole('player')) {
+                if (! $user->hasRole('player')) {
                     $user->assignRole('player');
                 }
             }
@@ -186,7 +189,7 @@ class LegacyUserMigrationSeeder extends Seeder
             }
 
             // Synchronizace s týmy v pivot tabulce
-            if (!empty($userTeams)) {
+            if (! empty($userTeams)) {
                 $syncData = [];
                 foreach ($userTeams as $teamId) {
                     $syncData[$teamId] = [

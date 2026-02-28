@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Crypt;
-
 class EmailObfuscator
 {
     /**
@@ -21,9 +19,10 @@ class EmailObfuscator
     {
         try {
             $decoded = base64_decode($encodedEmail, true);
-            if (!$decoded || !filter_var($decoded, FILTER_VALIDATE_EMAIL)) {
+            if (! $decoded || ! filter_var($decoded, FILTER_VALIDATE_EMAIL)) {
                 return null;
             }
+
             return $decoded;
         } catch (\Exception $e) {
             return null;

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Kontakt',
     'subtitle' => 'Zde nás najdete. Neváhejte se na nás obrátit s jakýmkoliv dotazem.',

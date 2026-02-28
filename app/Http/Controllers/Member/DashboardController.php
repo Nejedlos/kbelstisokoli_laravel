@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Models\BasketballMatch;
 use App\Models\ClubEvent;
-use App\Models\Training;
 use App\Models\Season;
+use App\Models\Training;
 use App\Models\UserSeasonConfig;
 use App\Services\Finance\FinanceService;
 use Illuminate\Http\Request;
@@ -35,7 +35,7 @@ class DashboardController extends Controller
 
             // Cache pro trackedUserIds napříč různými sezónami, pokud by se lišily, ale většinou nás zajímá aktuální
             $trackedUserIds = $currentSeasonId
-                ? Cache::remember("tracked_user_ids_{$currentSeasonId}", 3600, function() use ($currentSeasonId) {
+                ? Cache::remember("tracked_user_ids_{$currentSeasonId}", 3600, function () use ($currentSeasonId) {
                     return UserSeasonConfig::where('season_id', $currentSeasonId)
                         ->where('track_attendance', true)
                         ->pluck('user_id')
@@ -45,19 +45,19 @@ class DashboardController extends Controller
 
             // 1. Nejbližší akce (limit 3)
             $trainings = Training::with([
-                    'teams.activePlayers:player_profiles.id,user_id', // Načteme jen to nejdůležitější pro výpočet
-                    'attendances' => fn($q) => $q->where('user_id', $user->id)
-                ])
+                'teams.activePlayers:player_profiles.id,user_id', // Načteme jen to nejdůležitější pro výpočet
+                'attendances' => fn ($q) => $q->where('user_id', $user->id),
+            ])
                 ->withCount([
-                    'attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed'),
-                    'attendances as declined_count' => fn($q) => $q->where('planned_status', 'declined'),
-                    'attendances as maybe_count' => fn($q) => $q->where('planned_status', 'maybe'),
+                    'attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed'),
+                    'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
+                    'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
                 ])
                 ->where('starts_at', '>=', $now)
                 ->orderBy('starts_at')
                 ->limit(3)
                 ->get()
-                ->map(function($item) use ($trackedUserIds) {
+                ->map(function ($item) use ($trackedUserIds) {
                     $expectedIds = [];
                     foreach ($item->teams as $team) {
                         foreach ($team->activePlayers as $profile) {
@@ -67,28 +67,29 @@ class DashboardController extends Controller
                         }
                     }
                     $item->expected_players_count = count(array_unique($expectedIds));
+
                     return ['type' => 'training', 'data' => $item, 'time' => $item->starts_at];
                 });
 
             $matches = BasketballMatch::with([
-                    'team.activePlayers:player_profiles.id,user_id',
-                    'opponent',
-                    'attendances' => fn($q) => $q->where('user_id', $user->id)
-                ])
+                'team.activePlayers:player_profiles.id,user_id',
+                'opponent',
+                'attendances' => fn ($q) => $q->where('user_id', $user->id),
+            ])
                 ->withCount([
-                    'attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed'),
-                    'attendances as declined_count' => fn($q) => $q->where('planned_status', 'declined'),
-                    'attendances as maybe_count' => fn($q) => $q->where('planned_status', 'maybe'),
+                    'attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed'),
+                    'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
+                    'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
                 ])
                 ->where('scheduled_at', '>=', $now)
                 ->orderBy('scheduled_at')
                 ->limit(3)
                 ->get()
-                ->map(function($item) use ($currentSeasonId, $trackedUserIds) {
+                ->map(function ($item) use ($currentSeasonId, $trackedUserIds) {
                     $seasonId = $item->season_id ?: $currentSeasonId;
 
                     // Pokud je sezóna jiná než aktuální (což u budoucích zápasů je málo pravděpodobné, ale možné)
-                    $seasonTrackedIds = ($seasonId == $currentSeasonId) ? $trackedUserIds : Cache::remember("tracked_user_ids_{$seasonId}", 3600, function() use ($seasonId) {
+                    $seasonTrackedIds = ($seasonId == $currentSeasonId) ? $trackedUserIds : Cache::remember("tracked_user_ids_{$seasonId}", 3600, function () use ($seasonId) {
                         return UserSeasonConfig::where('season_id', $seasonId)
                             ->where('track_attendance', true)
                             ->pluck('user_id')
@@ -104,24 +105,25 @@ class DashboardController extends Controller
                         }
                     }
                     $item->expected_players_count = count(array_unique($expectedIds));
+
                     return ['type' => 'match', 'data' => $item, 'time' => $item->scheduled_at];
                 });
 
             $events = ClubEvent::with([
-                    'teams.activePlayers:player_profiles.id,user_id',
-                    'attendances' => fn($q) => $q->where('user_id', $user->id)
-                ])
+                'teams.activePlayers:player_profiles.id,user_id',
+                'attendances' => fn ($q) => $q->where('user_id', $user->id),
+            ])
                 ->withCount([
-                    'attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed'),
-                    'attendances as declined_count' => fn($q) => $q->where('planned_status', 'declined'),
-                    'attendances as maybe_count' => fn($q) => $q->where('planned_status', 'maybe'),
+                    'attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed'),
+                    'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
+                    'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
                 ])
                 ->where('starts_at', '>=', $now)
                 ->where('rsvp_enabled', true)
                 ->orderBy('starts_at')
                 ->limit(3)
                 ->get()
-                ->map(function($item) use ($trackedUserIds) {
+                ->map(function ($item) use ($trackedUserIds) {
                     $expectedIds = [];
                     foreach ($item->teams as $team) {
                         foreach ($team->activePlayers as $profile) {
@@ -131,6 +133,7 @@ class DashboardController extends Controller
                         }
                     }
                     $item->expected_players_count = count(array_unique($expectedIds));
+
                     return ['type' => 'event', 'data' => $item, 'time' => $item->starts_at];
                 });
 
@@ -146,13 +149,13 @@ class DashboardController extends Controller
                 $seasonId = ($itemType === 'match') ? $itemData->season_id : $currentSeasonId;
                 $seasonId = $seasonId ?: $currentSeasonId;
 
-                $isTracked = in_array($user->id, ($seasonId == $currentSeasonId) ? $trackedUserIds : Cache::remember("tracked_user_ids_{$seasonId}", 3600, function() use ($seasonId) {
+                $isTracked = in_array($user->id, ($seasonId == $currentSeasonId) ? $trackedUserIds : Cache::remember("tracked_user_ids_{$seasonId}", 3600, function () use ($seasonId) {
                     return UserSeasonConfig::where('season_id', $seasonId)->where('track_attendance', true)->pluck('user_id')->toArray();
                 }));
 
                 if ($isTracked) {
                     $att = $itemData->attendances->first();
-                    if (!$att || $att->planned_status === 'pending') {
+                    if (! $att || $att->planned_status === 'pending') {
                         $pendingCount++;
                     }
                 }

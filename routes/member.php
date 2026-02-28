@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Member\AttendanceController;
 use App\Http\Controllers\Member\DashboardController;
-use App\Http\Controllers\Member\ProfileController;
 use App\Http\Controllers\Member\EconomyController;
+use App\Http\Controllers\Member\ProfileController;
 use App\Http\Controllers\Member\TeamController;
 use Illuminate\Support\Facades\Route;
 

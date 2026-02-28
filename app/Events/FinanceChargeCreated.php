@@ -13,7 +13,5 @@ class FinanceChargeCreated
     /**
      * Create a new event instance.
      */
-    public function __construct(public FinanceCharge $charge)
-    {
-    }
+    public function __construct(public FinanceCharge $charge) {}
 }

@@ -14,6 +14,16 @@ class BrandingService
     protected ?array $settings = null;
 
     /**
+     * Cache pro vygenerované CSS proměnné.
+     */
+    protected ?string $cachedCssVariables = null;
+
+    /**
+     * Cache pro DB nastavení (aby se nevolal Cache::remember víckrát v requestu).
+     */
+    protected ?array $dbSettings = null;
+
+    /**
      * Získá globální nastavení brandingu.
      */
     public function getSettings(): array
@@ -94,6 +104,10 @@ class BrandingService
      */
     public function getCssVariables(): string
     {
+        if ($this->cachedCssVariables !== null) {
+            return $this->cachedCssVariables;
+        }
+
         $settings = $this->getSettings();
         $colors = $settings['colors'];
 
@@ -120,9 +134,9 @@ class BrandingService
         foreach ($vars as $key => $value) {
             $css .= "    {$key}: {$value};\n";
         }
-        $css .= "}";
+        $css .= '}';
 
-        return $css;
+        return $this->cachedCssVariables = $css;
     }
 
     /**
@@ -132,14 +146,15 @@ class BrandingService
     {
         $hex = str_replace('#', '', $hex);
         if (strlen($hex) === 3) {
-            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
-            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
-            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+            $r = hexdec(substr($hex, 0, 1).substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1).substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1).substr($hex, 2, 1));
         } else {
             $r = hexdec(substr($hex, 0, 2));
             $g = hexdec(substr($hex, 2, 2));
             $b = hexdec(substr($hex, 4, 2));
         }
+
         return "{$r}, {$g}, {$b}";
     }
 
@@ -148,6 +163,10 @@ class BrandingService
      */
     protected function getDbSettings(): array
     {
+        if ($this->dbSettings !== null) {
+            return $this->dbSettings;
+        }
+
         try {
             // Pokud jsme v konzoli a běží příkaz, který by neměl sahat do DB (např. package:discover)
             // nebo pokud soubor s SQLite databází neexistuje, vrátíme prázdné pole.
@@ -158,14 +177,14 @@ class BrandingService
                 if (($dbConfig['driver'] ?? '') === 'sqlite') {
                     $database = $dbConfig['database'] ?? '';
                     // V CI prostředí nemusí absolutní cesta k DB existovat při buildu/lintu
-                    if ($database !== ':memory:' && !empty($database) && !file_exists($database)) {
-                        return [];
+                    if ($database !== ':memory:' && ! empty($database) && ! file_exists($database)) {
+                        return $this->dbSettings = [];
                     }
                 }
             }
 
-            return Cache::remember('global_branding_settings_' . app()->getLocale(), 3600, function () {
-                if (!Schema::hasTable('settings')) {
+            return $this->dbSettings = Cache::remember('global_branding_settings_'.app()->getLocale(), 3600, function () {
+                if (! Schema::hasTable('settings')) {
                     return [];
                 }
 
@@ -174,11 +193,12 @@ class BrandingService
                 foreach ($settings as $setting) {
                     $mapped[$setting->key] = $setting->value;
                 }
+
                 return $mapped;
             });
         } catch (\Throwable $e) {
             // Bezpečný fallback v případě jakékoliv chyby (např. chybějící tabulka cache nebo settings)
-            return [];
+            return $this->dbSettings = [];
         }
     }
 
@@ -196,7 +216,7 @@ class BrandingService
      */
     public function replacePlaceholders(?string $text): string
     {
-        if (!$text) {
+        if (! $text) {
             return '';
         }
 

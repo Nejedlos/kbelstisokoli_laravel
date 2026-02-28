@@ -8,10 +8,8 @@ use App\Filament\Resources\StatisticSets\Pages\ListStatisticSets;
 use App\Filament\Resources\StatisticSets\Schemas\StatisticSetForm;
 use App\Filament\Resources\StatisticSets\Tables\StatisticSetsTable;
 use App\Models\StatisticSet;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class StatisticSetResource extends Resource

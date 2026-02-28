@@ -36,6 +36,7 @@ class BreadcrumbService
     public function generateForPage(\App\Models\Page $page): self
     {
         $this->addHome();
+
         // Zde by mohla být logika pro parent stránky, pokud by Page model měl parent_id
         return $this->add($page->title);
     }
@@ -44,6 +45,7 @@ class BreadcrumbService
     {
         $this->addHome();
         $this->add(__('nav.news'), route('public.news.index'));
+
         return $this->add($post->title);
     }
 }

@@ -8,7 +8,6 @@ use App\Filament\Resources\PerformanceTestResults\Pages\ListPerformanceTestResul
 use App\Filament\Resources\PerformanceTestResults\Schemas\PerformanceTestResultForm;
 use App\Filament\Resources\PerformanceTestResults\Tables\PerformanceTestResultsTable;
 use App\Models\PerformanceTestResult;
-use BackedEnum;
 use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

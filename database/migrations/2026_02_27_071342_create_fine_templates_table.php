@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('fine_templates')) {
+        if (! Schema::hasTable('fine_templates')) {
             Schema::create('fine_templates', function (Blueprint $table) {
                 $table->id();
                 $table->longText('name'); // Spatie Translatable používá JSON v LONGTEXT

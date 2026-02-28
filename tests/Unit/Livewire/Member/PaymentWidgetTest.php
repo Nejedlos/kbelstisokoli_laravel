@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Livewire\Member;
 
-use Tests\TestCase;
 use App\Livewire\Member\PaymentWidget;
 use ReflectionMethod;
+use Tests\TestCase;
 
 class PaymentWidgetTest extends TestCase
 {
@@ -13,7 +13,7 @@ class PaymentWidgetTest extends TestCase
      */
     public function test_it_converts_cz_account_to_iban(): void
     {
-        $widget = new PaymentWidget();
+        $widget = new PaymentWidget;
         $method = new ReflectionMethod(PaymentWidget::class, 'convertToIban');
         $method->setAccessible(true);
 
@@ -40,7 +40,7 @@ class PaymentWidgetTest extends TestCase
      */
     public function test_it_sanitizes_spayd_message(): void
     {
-        $widget = new PaymentWidget();
+        $widget = new PaymentWidget;
         $method = new ReflectionMethod(PaymentWidget::class, 'sanitizeMessage');
         $method->setAccessible(true);
 
@@ -55,7 +55,7 @@ class PaymentWidgetTest extends TestCase
      */
     public function test_it_builds_correct_spayd_string(): void
     {
-        $widget = new PaymentWidget();
+        $widget = new PaymentWidget;
         $widget->vs = '26021234';
         $widget->ss = '1234';
         $widget->amount = '1500,50';

@@ -16,13 +16,13 @@ return new class extends Migration
             $indexes = Schema::getIndexes('matches');
             $indexNames = array_column($indexes, 'name');
 
-            if (!in_array('matches_team_scheduled_idx', $indexNames)) {
+            if (! in_array('matches_team_scheduled_idx', $indexNames)) {
                 $table->index(['team_id', 'scheduled_at'], 'matches_team_scheduled_idx');
             }
-            if (!in_array('matches_season_status_scheduled_idx', $indexNames)) {
+            if (! in_array('matches_season_status_scheduled_idx', $indexNames)) {
                 $table->index(['season_id', 'status', 'scheduled_at'], 'matches_season_status_scheduled_idx');
             }
-            if (!in_array('matches_scheduled_at_idx', $indexNames)) {
+            if (! in_array('matches_scheduled_at_idx', $indexNames)) {
                 $table->index('scheduled_at', 'matches_scheduled_at_idx');
             }
         });
@@ -33,10 +33,10 @@ return new class extends Migration
                 $indexes = Schema::getIndexes('posts');
                 $indexNames = array_column($indexes, 'name');
 
-                if (!in_array('posts_status_publish_idx', $indexNames)) {
+                if (! in_array('posts_status_publish_idx', $indexNames)) {
                     $table->index(['status', 'publish_at'], 'posts_status_publish_idx');
                 }
-                if (!in_array('posts_publish_at_idx', $indexNames)) {
+                if (! in_array('posts_publish_at_idx', $indexNames)) {
                     $table->index('publish_at', 'posts_publish_at_idx');
                 }
             });
@@ -47,7 +47,7 @@ return new class extends Migration
             $indexes = Schema::getIndexes('trainings');
             $indexNames = array_column($indexes, 'name');
 
-            if (!in_array('trainings_starts_at_idx', $indexNames)) {
+            if (! in_array('trainings_starts_at_idx', $indexNames)) {
                 $table->index('starts_at', 'trainings_starts_at_idx');
             }
         });
@@ -58,7 +58,7 @@ return new class extends Migration
                 $indexes = Schema::getIndexes('team_training');
                 $indexNames = array_column($indexes, 'name');
 
-                if (!in_array('team_training_composite_idx', $indexNames)) {
+                if (! in_array('team_training_composite_idx', $indexNames)) {
                     $table->index(['team_id', 'training_id'], 'team_training_composite_idx');
                 }
             });
@@ -71,7 +71,7 @@ return new class extends Migration
                 $indexes = Schema::getIndexes($eventsTable);
                 $indexNames = array_column($indexes, 'name');
 
-                if (!in_array('events_dates_idx', $indexNames)) {
+                if (! in_array('events_dates_idx', $indexNames)) {
                     $table->index(['starts_at', 'ends_at'], 'events_dates_idx');
                 }
             });

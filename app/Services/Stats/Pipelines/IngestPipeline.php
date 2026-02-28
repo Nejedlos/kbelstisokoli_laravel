@@ -3,8 +3,8 @@
 namespace App\Services\Stats\Pipelines;
 
 use App\Models\ExternalStatSource;
-use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Contracts\StatExtractorInterface;
+use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Contracts\StatNormalizerInterface;
 
 class IngestPipeline

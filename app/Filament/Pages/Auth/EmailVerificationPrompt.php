@@ -2,10 +2,9 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Auth\Pages\EmailVerification\EmailVerificationPrompt as BaseEmailVerificationPrompt;
-
-use Filament\Notifications\Notification;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Auth\Pages\EmailVerification\EmailVerificationPrompt as BaseEmailVerificationPrompt;
+use Filament\Notifications\Notification;
 
 class EmailVerificationPrompt extends BaseEmailVerificationPrompt
 {
@@ -18,6 +17,7 @@ class EmailVerificationPrompt extends BaseEmailVerificationPrompt
             ]))
             ->danger();
     }
+
     // Override Filament's simple layout with our custom auth layout
     protected static string $layout = 'filament.admin.layouts.auth';
 

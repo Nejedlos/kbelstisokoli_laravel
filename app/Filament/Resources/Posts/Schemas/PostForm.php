@@ -4,15 +4,15 @@ namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Filament\Forms\CmsForms;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\RichEditor;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Tabs;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
@@ -128,9 +128,10 @@ class PostForm
                                                 $title = $get('title');
                                                 $ext = $file->getClientOriginalExtension();
                                                 if ($title) {
-                                                    return \Illuminate\Support\Str::slug($title) . '.' . $ext;
+                                                    return \Illuminate\Support\Str::slug($title).'.'.$ext;
                                                 }
-                                                return \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+
+                                                return \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$ext;
                                             }),
                                     ]),
                             ]),

@@ -17,6 +17,7 @@ class PageFactory extends Factory
     public function definition(): array
     {
         $title = $this->faker->sentence();
+
         return [
             'title' => ['cs' => $title, 'en' => $title],
             'slug' => \Illuminate\Support\Str::slug($title),

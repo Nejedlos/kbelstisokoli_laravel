@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('leads')) {
+        if (! Schema::hasTable('leads')) {
             Schema::create('leads', function (Blueprint $table) {
                 $table->id();
                 $table->string('type')->default('contact'); // contact, recruitment

@@ -1,18 +1,18 @@
 <?php
 
-if (!function_exists('media_url')) {
+if (! function_exists('media_url')) {
     /**
      * Získá URL k médiu z knihovny.
      */
     function media_url($id, string $conversion = ''): ?string
     {
-        if (!$id) {
+        if (! $id) {
             return null;
         }
 
         $asset = \App\Models\MediaAsset::find($id);
 
-        if (!$asset) {
+        if (! $asset) {
             return null;
         }
 
@@ -20,13 +20,13 @@ if (!function_exists('media_url')) {
     }
 }
 
-if (!function_exists('media_alt')) {
+if (! function_exists('media_alt')) {
     /**
      * Získá Alt text k médiu z knihovny.
      */
     function media_alt($id): string
     {
-        if (!$id) {
+        if (! $id) {
             return '';
         }
 
@@ -36,8 +36,7 @@ if (!function_exists('media_alt')) {
     }
 }
 
-
-if (!function_exists('web_asset')) {
+if (! function_exists('web_asset')) {
     /**
      * Vrátí veřejnou URL k souboru nahranému do public složky.
      *
@@ -47,7 +46,7 @@ if (!function_exists('web_asset')) {
      */
     function web_asset(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 

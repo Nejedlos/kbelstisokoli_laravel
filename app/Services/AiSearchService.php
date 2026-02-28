@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -22,7 +21,7 @@ class AiSearchService
     {
         $settings = $this->aiSettings->getSettings();
 
-        if (!($settings['enabled'] ?? true)) {
+        if (! ($settings['enabled'] ?? true)) {
             return [
                 'answer' => 'AI asistent je momentálně vypnutý.',
                 'sources' => collect(),
@@ -49,7 +48,7 @@ class AiSearchService
 
         // Sestavení zpráv pro LLM
         $messages = [];
-        $messages[] = ['role' => 'system', 'content' => $system . "\n\n" . $context];
+        $messages[] = ['role' => 'system', 'content' => $system."\n\n".$context];
 
         // Přidáme historii
         foreach ($history as $msg) {
@@ -86,7 +85,7 @@ class AiSearchService
 
             // Logování úspěchu
             $this->aiSettings->logRequest([
-                'context' => $section . '_ai_chat',
+                'context' => $section.'_ai_chat',
                 'model' => $payload['model'],
                 'status' => 'success',
                 'prompt_preview' => Str::limit($lastUserMessage, 255),
@@ -102,7 +101,7 @@ class AiSearchService
 
             // Logování chyby
             $this->aiSettings->logRequest([
-                'context' => $section . '_ai_chat',
+                'context' => $section.'_ai_chat',
                 'model' => $payload['model'] ?? 'unknown',
                 'status' => 'error',
                 'prompt_preview' => Str::limit($lastUserMessage, 255),
@@ -128,19 +127,19 @@ class AiSearchService
             ? 'Odpovídej česky, stručně a jasně. Používej informace z poskytnutého kontextu.'
             : 'Respond in English, briefly and clearly. Use information from the provided context.';
 
-        $sectionName = match($section) {
+        $sectionName = match ($section) {
             'admin' => 'Administrace (Filament)',
             'member' => 'Členská sekce (Hráči/Členové)',
             default => 'Veřejný web (Frontend)',
         };
 
         return trim(
-            $langInstruction . "\n" .
-            "Jsi asistent pro web basketbalového klubu Kbelští sokoli. Právě se nacházíš v sekci: {$sectionName}." . "\n" .
-            'Tvým úkolem je pomáhat uživatelům s informacemi a navigací VÝHRADNĚ v rámci této sekce a dostupných dokumentů.' . "\n" .
-            'DŮLEŽITÉ: Pokud je v kontextu u zdroje uvedena URL adresa, VŽDY ji zahrň do své odpovědi jako Markdown odkaz.' . "\n" .
-            'Pokud v kontextu vidíš návody z dokumentace (typ documentation.resource), řiď se jimi při radách uživateli.' . "\n" .
-            'NIKDY nevymýšlej URL adresy, které nejsou v poskytnutém kontextu.' . "\n" .
+            $langInstruction."\n".
+            "Jsi asistent pro web basketbalového klubu Kbelští sokoli. Právě se nacházíš v sekci: {$sectionName}."."\n".
+            'Tvým úkolem je pomáhat uživatelům s informacemi a navigací VÝHRADNĚ v rámci této sekce a dostupných dokumentů.'."\n".
+            'DŮLEŽITÉ: Pokud je v kontextu u zdroje uvedena URL adresa, VŽDY ji zahrň do své odpovědi jako Markdown odkaz.'."\n".
+            'Pokud v kontextu vidíš návody z dokumentace (typ documentation.resource), řiď se jimi při radách uživateli.'."\n".
+            'NIKDY nevymýšlej URL adresy, které nejsou v poskytnutém kontextu.'."\n".
             'Pokud uživatel položí dotaz, na který v kontextu není odpověď, slušně ho odkaž na kontakty klubu.'
         );
     }
@@ -152,11 +151,12 @@ class AiSearchService
             : 'Below is the local context from the project pages (selected relevant snippets):';
 
         $chunks = $sources->map(function ($doc, $i) {
-            $snippet = $doc->summary ? "Shrnutí: " . $doc->summary . "\nObsah: " . Str::limit($doc->content, 600) : Str::limit($doc->content, 800);
-            $urlInfo = $doc->url ? " (URL: " . $doc->url . ")" : "";
-            return ($i + 1) . ") [" . $doc->type . "] " . $doc->title . $urlInfo . "\n" . $snippet;
+            $snippet = $doc->summary ? 'Shrnutí: '.$doc->summary."\nObsah: ".Str::limit($doc->content, 600) : Str::limit($doc->content, 800);
+            $urlInfo = $doc->url ? ' (URL: '.$doc->url.')' : '';
+
+            return ($i + 1).') ['.$doc->type.'] '.$doc->title.$urlInfo."\n".$snippet;
         })->implode("\n\n");
 
-        return $intro . "\n\n" . $chunks;
+        return $intro."\n\n".$chunks;
     }
 }

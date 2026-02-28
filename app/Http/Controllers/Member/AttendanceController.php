@@ -6,12 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\BasketballMatch;
 use App\Models\ClubEvent;
-use App\Models\Training;
 use App\Models\Season;
-use App\Models\User;
+use App\Models\Training;
 use App\Models\UserSeasonConfig;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AttendanceController extends Controller
@@ -28,18 +27,18 @@ class AttendanceController extends Controller
             : [];
 
         $trainings = Training::with([
-                'teams.activePlayers',
-                'attendances' => fn($q) => $q->where('user_id', $user->id)
-            ])
+            'teams.activePlayers',
+            'attendances' => fn ($q) => $q->where('user_id', $user->id),
+        ])
             ->withCount([
-                'attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed'),
-                'attendances as declined_count' => fn($q) => $q->where('planned_status', 'declined'),
-                'attendances as maybe_count' => fn($q) => $q->where('planned_status', 'maybe'),
+                'attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed'),
+                'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
+                'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('starts_at', '>=', $now)
             ->orderBy('starts_at')
             ->get()
-            ->map(function($item) use ($trackedUserIds) {
+            ->map(function ($item) use ($trackedUserIds) {
                 // Počet lidí, od kterých se čeká odpověď (jsou v týmu a jsou trackovaní)
                 $expectedIds = collect();
                 foreach ($item->teams as $team) {
@@ -50,23 +49,24 @@ class AttendanceController extends Controller
                     }
                 }
                 $item->expected_players_count = $expectedIds->unique()->count();
+
                 return ['type' => 'training', 'data' => $item, 'time' => $item->starts_at];
             });
 
         $matches = BasketballMatch::with([
-                'team.activePlayers',
-                'opponent',
-                'attendances' => fn($q) => $q->where('user_id', $user->id)
-            ])
+            'team.activePlayers',
+            'opponent',
+            'attendances' => fn ($q) => $q->where('user_id', $user->id),
+        ])
             ->withCount([
-                'attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed'),
-                'attendances as declined_count' => fn($q) => $q->where('planned_status', 'declined'),
-                'attendances as maybe_count' => fn($q) => $q->where('planned_status', 'maybe'),
+                'attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed'),
+                'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
+                'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('scheduled_at', '>=', $now)
             ->orderBy('scheduled_at')
             ->get()
-            ->map(function($item) use ($currentSeasonId) {
+            ->map(function ($item) use ($currentSeasonId) {
                 // U zápasu může být jiná sezóna než aktuální, ale většinou je to stejné
                 $seasonId = $item->season_id ?: $currentSeasonId;
                 $trackedIds = UserSeasonConfig::where('season_id', $seasonId)->where('track_attendance', true)->pluck('user_id')->toArray();
@@ -80,23 +80,24 @@ class AttendanceController extends Controller
                     }
                 }
                 $item->expected_players_count = $expectedIds->unique()->count();
+
                 return ['type' => 'match', 'data' => $item, 'time' => $item->scheduled_at];
             });
 
         $events = ClubEvent::with([
-                'teams.activePlayers',
-                'attendances' => fn($q) => $q->where('user_id', $user->id)
-            ])
+            'teams.activePlayers',
+            'attendances' => fn ($q) => $q->where('user_id', $user->id),
+        ])
             ->withCount([
-                'attendances as confirmed_count' => fn($q) => $q->where('planned_status', 'confirmed'),
-                'attendances as declined_count' => fn($q) => $q->where('planned_status', 'declined'),
-                'attendances as maybe_count' => fn($q) => $q->where('planned_status', 'maybe'),
+                'attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed'),
+                'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
+                'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('starts_at', '>=', $now)
             ->where('rsvp_enabled', true)
             ->orderBy('starts_at')
             ->get()
-            ->map(function($item) use ($trackedUserIds) {
+            ->map(function ($item) use ($trackedUserIds) {
                 $expectedIds = collect();
                 foreach ($item->teams as $team) {
                     foreach ($team->activePlayers as $profile) {
@@ -106,6 +107,7 @@ class AttendanceController extends Controller
                     }
                 }
                 $item->expected_players_count = $expectedIds->unique()->count();
+
                 return ['type' => 'event', 'data' => $item, 'time' => $item->starts_at];
             });
 
@@ -153,14 +155,18 @@ class AttendanceController extends Controller
         // Získáme seznam všech unikátních aktivních hráčů, kteří jsou v týmu
         $teams = collect();
         if ($type === 'match') {
-            if ($item->team) $teams->push($item->team);
+            if ($item->team) {
+                $teams->push($item->team);
+            }
         } else {
             $teams = $item->teams;
         }
 
         $allTeamUsers = collect();
         foreach ($teams as $team) {
-            if (!$team) continue;
+            if (! $team) {
+                continue;
+            }
             foreach ($team->activePlayers as $profile) {
                 if ($profile->user) {
                     $allTeamUsers->put($profile->user_id, $profile->user);
@@ -204,7 +210,7 @@ class AttendanceController extends Controller
         // 2. Přidáme ty, kteří neodpověděli, ale HLÍDÁ se jim docházka (to jsou ti s otazníkem)
         foreach ($usersToTrack as $userId) {
             // Pokud už nejsou v potvrzených/omluvených/možná
-            if (!$confirmed->has($userId) && !$declined->has($userId) && !$maybe->has($userId)) {
+            if (! $confirmed->has($userId) && ! $declined->has($userId) && ! $maybe->has($userId)) {
                 $pending->put($userId, [
                     'user' => $allTeamUsers->get($userId),
                     'attendance' => null,
@@ -261,10 +267,10 @@ class AttendanceController extends Controller
 
         $note = $request->note;
         if ($request->status === 'declined' && $request->excuse_reason) {
-            $reasonLabel = __('member.attendance.excuse_reasons.' . $request->excuse_reason);
+            $reasonLabel = __('member.attendance.excuse_reasons.'.$request->excuse_reason);
             // Zkombinujeme vybraný důvod s textovou poznámkou
             if ($note) {
-                $note = $reasonLabel . ' (' . $note . ')';
+                $note = $reasonLabel.' ('.$note.')';
             } else {
                 $note = $reasonLabel;
             }

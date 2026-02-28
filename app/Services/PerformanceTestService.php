@@ -32,7 +32,7 @@ class PerformanceTestService
     {
         $fullUrl = url($url);
         // Přidáme query parametr pro vynucení scénáře (pokud je URL relativní)
-        $fullUrl .= (str_contains($fullUrl, '?') ? '&' : '?') . 'perf_scenario=' . $scenario;
+        $fullUrl .= (str_contains($fullUrl, '?') ? '&' : '?').'perf_scenario='.$scenario;
 
         $request = Http::withHeaders([
             'X-Performance-Test-Key' => config('app.key'),
@@ -49,10 +49,10 @@ class PerformanceTestService
             $response = $request->get($fullUrl);
 
             // Získáme data z headerů, které přidává PerformanceProfilingMiddleware
-            $duration = (float)$response->header('X-Perf-Duration-MS', 0);
-            $queryCount = (int)$response->header('X-Perf-Query-Count', 0);
-            $queryTime = (float)$response->header('X-Perf-Query-Time-MS', 0);
-            $memory = (float)$response->header('X-Perf-Memory-MB', 0);
+            $duration = (float) $response->header('X-Perf-Duration-MS', 0);
+            $queryCount = (int) $response->header('X-Perf-Query-Count', 0);
+            $queryTime = (float) $response->header('X-Perf-Query-Time-MS', 0);
+            $memory = (float) $response->header('X-Perf-Memory-MB', 0);
             $opcache = $response->header('X-Perf-Opcache') === 'enabled';
 
             if ($duration > 0) {
@@ -68,10 +68,10 @@ class PerformanceTestService
                     'opcache_enabled' => $opcache,
                 ]);
             } else {
-                Log::error("Performance test failed: no duration header in response for $fullUrl. Status: " . $response->status());
+                Log::error("Performance test failed: no duration header in response for $fullUrl. Status: ".$response->status());
             }
         } catch (\Throwable $e) {
-            Log::error("Performance test failed for $fullUrl: " . $e->getMessage());
+            Log::error("Performance test failed for $fullUrl: ".$e->getMessage());
         }
     }
 
@@ -86,8 +86,9 @@ class PerformanceTestService
                     'Zápasy' => '/zapasy',
                 ];
                 if ($post) {
-                    $urls['Detail článku'] = '/novinky/' . $post->slug;
+                    $urls['Detail článku'] = '/novinky/'.$post->slug;
                 }
+
                 return $urls;
 
             case 'member':

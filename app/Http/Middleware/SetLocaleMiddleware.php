@@ -26,7 +26,7 @@ class SetLocaleMiddleware
         }
 
         // Validace, aby se tam nedostalo něco nečekaného
-        if (!in_array($locale, ['cs', 'en'])) {
+        if (! in_array($locale, ['cs', 'en'])) {
             $locale = config('app.locale', 'cs');
         }
 

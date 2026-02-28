@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Contact',
     'subtitle' => 'This is where you can find us. Feel free to contact us with any questions.',

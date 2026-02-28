@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FinancePayment extends Model
 {
@@ -59,6 +59,7 @@ class FinancePayment extends Model
         if (array_key_exists('allocated_sum', $this->attributes)) {
             return (float) ($this->attributes['allocated_sum'] ?? 0);
         }
+
         return (float) $this->allocations()->sum('amount');
     }
 

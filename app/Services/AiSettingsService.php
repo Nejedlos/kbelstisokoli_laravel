@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\AiSetting;
 use App\Models\AiRequestLog;
+use App\Models\AiSetting;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Auth;
 
 class AiSettingsService
 {
     protected const CACHE_KEY = 'ai_global_settings';
+
     protected const CACHE_TTL = 3600;
 
     /**
@@ -29,7 +30,7 @@ class AiSettingsService
         // Priorita 2: Pokud je používání DB vynuceno v configu, ale záznam v DB neexistuje,
         // vrátíme sice config, ale se zapnutým use_database_settings pro UI
         if ($config['use_database_settings'] && $dbSettings) {
-             return $dbSettings;
+            return $dbSettings;
         }
 
         // Fallback: Data z config/env
@@ -43,12 +44,12 @@ class AiSettingsService
     {
         return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
             try {
-                if (!Schema::hasTable('ai_settings')) {
+                if (! Schema::hasTable('ai_settings')) {
                     return null;
                 }
 
                 $setting = AiSetting::first();
-                if (!$setting) {
+                if (! $setting) {
                     return null;
                 }
 
@@ -110,7 +111,7 @@ class AiSettingsService
     {
         $settings = $this->getSettings();
 
-        if (!($settings['debug_log_to_database'] ?? false)) {
+        if (! ($settings['debug_log_to_database'] ?? false)) {
             return;
         }
 
@@ -122,7 +123,7 @@ class AiSettingsService
             ], $data));
         } catch (\Throwable $e) {
             // Logování by nemělo shodit aplikaci
-            \Illuminate\Support\Facades\Log::error('AI Log Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('AI Log Error: '.$e->getMessage());
         }
     }
 
@@ -133,6 +134,7 @@ class AiSettingsService
     {
         // Vždy načteme nejaktuálnější nastavení (bez cache pro testy)
         $this->clearCache();
+
         return $this->getSettings();
     }
 }

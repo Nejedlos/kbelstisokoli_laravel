@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\FinancePayment;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class FinancePaymentPolicy
 {

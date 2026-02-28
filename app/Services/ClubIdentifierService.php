@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Str;
 
 class ClubIdentifierService
 {
@@ -18,7 +17,7 @@ class ClubIdentifierService
 
         do {
             $number = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-            $vs = $yearMonth . $number;
+            $vs = $yearMonth.$number;
         } while (User::where('payment_vs', $vs)->exists());
 
         return $vs;
@@ -34,7 +33,7 @@ class ClubIdentifierService
 
         do {
             $number = str_pad(mt_rand(1000, 9999), 4, '0', STR_PAD_LEFT);
-            $id = 'KS-' . $year . $number;
+            $id = 'KS-'.$year.$number;
         } while (User::where('club_member_id', $id)->exists());
 
         return $id;

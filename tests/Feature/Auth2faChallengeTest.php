@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 

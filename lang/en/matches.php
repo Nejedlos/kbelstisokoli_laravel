@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Matches',
     'subtitle' => 'Follow the results and schedule of our teams\' games.',

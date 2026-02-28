@@ -1,4 +1,5 @@
 <?php
+
 return [
     'access_admin' => 'Access Admin Panel',
     'manage_users' => 'Manage Users and Roles',

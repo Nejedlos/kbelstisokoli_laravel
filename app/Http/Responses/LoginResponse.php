@@ -2,35 +2,24 @@
 
 namespace App\Http\Responses;
 
+use App\Jobs\GenerateUserIdentifiersJob;
 use App\Support\AuthRedirect;
-use App\Services\ClubIdentifierService;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Livewire\Features\SupportRedirects\Redirector;
 
-class LoginResponse implements LoginResponseContract, FilamentLoginResponseContract
+class LoginResponse implements FilamentLoginResponseContract, LoginResponseContract
 {
     /**
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse|\Livewire\Features\SupportRedirects\Redirector
      */
     public function toResponse($request): RedirectResponse|Redirector
     {
         $user = auth()->user();
 
         if ($user && (empty($user->club_member_id) || empty($user->payment_vs))) {
-            $service = app(ClubIdentifierService::class);
-
-            if (empty($user->club_member_id)) {
-                $user->club_member_id = $service->generateClubMemberId();
-            }
-
-            if (empty($user->payment_vs)) {
-                $user->payment_vs = $service->generatePaymentVs();
-            }
-
-            $user->save();
+            GenerateUserIdentifiersJob::dispatch($user->id);
         }
 
         if ($user && $user->canAccessAdmin()) {

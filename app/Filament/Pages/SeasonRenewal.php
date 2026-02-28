@@ -12,21 +12,22 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Pages\Concerns\InteractsWithFormActions;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Schema;
-use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
 class SeasonRenewal extends Page implements HasForms
 {
-    use InteractsWithForms;
     use InteractsWithFormActions;
+    use InteractsWithForms;
+
     public static function getNavigationIcon(): ?string
     {
         return 'fal-arrows-rotate';
@@ -180,13 +181,14 @@ class SeasonRenewal extends Page implements HasForms
             ->orWhere('name', $altName)
             ->first();
 
-        if (!$sourceSeason) {
+        if (! $sourceSeason) {
             if ($notify) {
                 Notification::make()
                     ->title('Předchozí sezóna nebyla nalezena')
                     ->warning()
                     ->send();
             }
+
             return;
         }
 
@@ -195,13 +197,13 @@ class SeasonRenewal extends Page implements HasForms
 
     public function loadFromSeason(?int $seasonId, bool $notify = true): void
     {
-        if (!$seasonId) {
+        if (! $seasonId) {
             return;
         }
 
         $sourceSeason = Season::find($seasonId);
 
-        if (!$sourceSeason) {
+        if (! $sourceSeason) {
             return;
         }
 
@@ -221,7 +223,7 @@ class SeasonRenewal extends Page implements HasForms
         if ($notify) {
             Notification::make()
                 ->title('Data byla načtena')
-                ->body("Bylo načteno " . count($configs) . " záznamů ze sezóny {$sourceSeason->name}.")
+                ->body('Bylo načteno '.count($configs)." záznamů ze sezóny {$sourceSeason->name}.")
                 ->success()
                 ->send();
         }
@@ -239,6 +241,7 @@ class SeasonRenewal extends Page implements HasForms
                 ->body('Seznam konfigurací je prázdný.')
                 ->danger()
                 ->send();
+
             return;
         }
 

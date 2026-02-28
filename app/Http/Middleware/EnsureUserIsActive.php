@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\MembershipStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +17,7 @@ class EnsureUserIsActive
     {
         if (auth()->check()) {
             $user = auth()->user();
-            $isInactive = !$user->is_active;
+            $isInactive = ! $user->is_active;
 
             if ($isInactive) {
                 if ($request->session()->has('impersonated_by')) {
@@ -26,6 +25,7 @@ class EnsureUserIsActive
                         'user_id' => $user->id,
                         'email' => $user->email,
                     ]);
+
                     return $next($request);
                 }
 

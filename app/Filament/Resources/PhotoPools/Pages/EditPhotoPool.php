@@ -6,7 +6,6 @@ use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\PhotoPool;
 use App\Traits\HasPhotoPoolImport;
 use Filament\Actions\DeleteAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditPhotoPool extends EditRecord

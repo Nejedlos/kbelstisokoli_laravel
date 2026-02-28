@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('performance_test_results')) {
+        if (! Schema::hasTable('performance_test_results')) {
             Schema::create('performance_test_results', function (Blueprint $table) {
                 $table->id();
                 $table->string('scenario'); // standard, aggressive, ultra

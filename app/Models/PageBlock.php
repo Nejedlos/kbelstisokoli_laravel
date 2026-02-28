@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PageBlock extends Model
 {
     use Auditable;
+
     protected $fillable = [
         'page_id',
         'block_type',

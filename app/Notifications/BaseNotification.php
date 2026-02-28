@@ -41,12 +41,12 @@ abstract class BaseNotification extends Notification
         $data = $this->getNotificationData();
 
         return (new MailMessage)
-            ->subject($data['title'] ?? 'Upozornění | ' . $branding['club_name'])
-            ->greeting('Ahoj ' . $notifiable->name . '!')
+            ->subject($data['title'] ?? 'Upozornění | '.$branding['club_name'])
+            ->greeting('Ahoj '.$notifiable->name.'!')
             ->line($data['message'] ?? '')
             ->action($data['action_label'] ?? 'Zobrazit v portálu', $data['action_url'] ?? route('member.dashboard'))
             ->line('Děkujeme, že jsi součástí týmu!')
-            ->salutation('Tvůj tým ' . $branding['club_name']);
+            ->salutation('Tvůj tým '.$branding['club_name']);
     }
 
     /**

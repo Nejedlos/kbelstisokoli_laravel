@@ -8,14 +8,17 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class EmailDebug extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-envelope-open';
-    protected static string | \UnitEnum | null $navigationGroup = null;
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope-open';
+
+    protected static string|\UnitEnum|null $navigationGroup = null;
+
     protected static ?string $navigationLabel = null;
+
     protected static ?string $title = null;
 
     protected string $view = 'filament.pages.email-debug';
@@ -43,7 +46,7 @@ class EmailDebug extends Page
         if (isset($config['password'])) {
             $len = strlen($config['password']);
             $config['password'] = $len > 4
-                ? substr($config['password'], 0, 2) . str_repeat('*', $len - 4) . substr($config['password'], -2)
+                ? substr($config['password'], 0, 2).str_repeat('*', $len - 4).substr($config['password'], -2)
                 : '****';
         }
 
@@ -63,7 +66,7 @@ class EmailDebug extends Page
     public function getRecentLogs(): array
     {
         $logFile = storage_path('logs/laravel.log');
-        if (!file_exists($logFile)) {
+        if (! file_exists($logFile)) {
             return [];
         }
 
@@ -89,7 +92,7 @@ class EmailDebug extends Page
         }
         fclose($fp);
 
-        return array_filter($lines, function($line) {
+        return array_filter($lines, function ($line) {
             return str_contains(strtolower($line), 'mail') || str_contains(strtolower($line), 'error');
         });
     }
@@ -119,9 +122,9 @@ class EmailDebug extends Page
                             ->success()
                             ->send();
                     } catch (\Throwable $e) {
-                        Log::error('Email Debug Test Failed: ' . $e->getMessage(), [
+                        Log::error('Email Debug Test Failed: '.$e->getMessage(), [
                             'exception' => get_class($e),
-                            'trace' => $e->getTraceAsString()
+                            'trace' => $e->getTraceAsString(),
                         ]);
 
                         Notification::make()
@@ -138,11 +141,11 @@ class EmailDebug extends Page
                 ->color('danger')
                 ->requiresConfirmation()
                 ->modalHeading('Odeslat simulovaný report chyby 500')
-                ->modalDescription('Tato akce nasimuluje chybu 500 a pokusí se odeslat report na adresu ' . config('mail.error_reporting.email') . '. Tato logika přesně odpovídá tomu, co se děje při pádu aplikace.')
+                ->modalDescription('Tato akce nasimuluje chybu 500 a pokusí se odeslat report na adresu '.config('mail.error_reporting.email').'. Tato logika přesně odpovídá tomu, co se děje při pádu aplikace.')
                 ->action(function () {
                     try {
                         $to = config('mail.error_reporting.email');
-                        if (!$to) {
+                        if (! $to) {
                             throw new \Exception('V konfiguraci chybí ERROR_REPORT_EMAIL.');
                         }
 
@@ -184,12 +187,12 @@ class EmailDebug extends Page
                             ->send((new ErrorMail($report))->from($from, config('mail.from.name')));
 
                         Notification::make()
-                            ->title('Error report byl odeslán na ' . $to)
+                            ->title('Error report byl odeslán na '.$to)
                             ->success()
                             ->send();
 
                     } catch (\Throwable $e) {
-                        Log::error('Email Debug Error Report Failed: ' . $e->getMessage());
+                        Log::error('Email Debug Error Report Failed: '.$e->getMessage());
 
                         Notification::make()
                             ->title('Chyba při odesílání reportu')

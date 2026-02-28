@@ -11,7 +11,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Page extends Model
 {
-    use HasSeo, HasTranslations, Auditable, HasFactory;
+    use Auditable, HasFactory, HasSeo, HasTranslations;
 
     protected $fillable = [
         'title',

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\PhotoPools\Pages;
 use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\PhotoPool;
 use App\Traits\HasPhotoPoolImport;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Str;
 

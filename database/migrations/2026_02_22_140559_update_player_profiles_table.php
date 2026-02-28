@@ -36,7 +36,7 @@ return new class extends Migration
             $table->dropColumn([
                 'preferred_jersey_number', 'dominant_hand', 'height_cm', 'weight_kg',
                 'jersey_size', 'shorts_size', 'license_number', 'medical_note',
-                'coach_note', 'joined_team_at', 'primary_team_id'
+                'coach_note', 'joined_team_at', 'primary_team_id',
             ]);
         });
     }

@@ -2,33 +2,32 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\AiSetting;
 use App\Models\AiRequestLog;
+use App\Models\AiSetting;
 use App\Services\AiSettingsService;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Grid;
 use Filament\Notifications\Notification;
+use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class AiSettings extends Page implements HasForms
 {
-    use InteractsWithForms;
     use InteractsWithFormActions;
+    use InteractsWithForms;
 
     public static function canAccess(): bool
     {
@@ -99,7 +98,7 @@ class AiSettings extends Page implements HasForms
                 Tabs::make('Settings')
                     ->tabs([
                         Tab::make('General')
-                            ->label(new HtmlString('<i class="fa-light fa-gears fa-fw mr-1"></i> ' . __('admin/ai-settings.tabs.general')))
+                            ->label(new HtmlString('<i class="fa-light fa-gears fa-fw mr-1"></i> '.__('admin/ai-settings.tabs.general')))
                             ->schema([
                                 Section::make(__('admin/ai-settings.sections.status'))
                                     ->description(__('admin/ai-settings.sections.status_desc'))
@@ -129,7 +128,7 @@ class AiSettings extends Page implements HasForms
                             ]),
 
                         Tab::make('OpenAI')
-                            ->label(new HtmlString('<i class="fa-light fa-bolt fa-fw mr-1"></i> ' . __('admin/ai-settings.tabs.openai')))
+                            ->label(new HtmlString('<i class="fa-light fa-bolt fa-fw mr-1"></i> '.__('admin/ai-settings.tabs.openai')))
                             ->schema([
                                 Section::make(__('admin/ai-settings.sections.connection'))
                                     ->description(__('admin/ai-settings.sections.connection_desc'))
@@ -174,7 +173,7 @@ class AiSettings extends Page implements HasForms
                             ]),
 
                         Tab::make('Models')
-                            ->label(new HtmlString('<i class="fa-light fa-brain fa-fw mr-1"></i> ' . __('admin/ai-settings.tabs.models')))
+                            ->label(new HtmlString('<i class="fa-light fa-brain fa-fw mr-1"></i> '.__('admin/ai-settings.tabs.models')))
                             ->schema([
                                 Section::make(__('admin/ai-settings.sections.active_models'))
                                     ->description(__('admin/ai-settings.sections.active_models_desc'))
@@ -229,7 +228,7 @@ class AiSettings extends Page implements HasForms
                             ]),
 
                         Tab::make('Inference')
-                            ->label(new HtmlString('<i class="fa-light fa-sliders fa-fw mr-1"></i> ' . __('admin/ai-settings.tabs.inference')))
+                            ->label(new HtmlString('<i class="fa-light fa-sliders fa-fw mr-1"></i> '.__('admin/ai-settings.tabs.inference')))
                             ->schema([
                                 Section::make(__('admin/ai-settings.sections.inference_params'))
                                     ->schema([
@@ -264,7 +263,7 @@ class AiSettings extends Page implements HasForms
                             ]),
 
                         Tab::make('Performance')
-                            ->label(new HtmlString('<i class="fa-light fa-gauge-high fa-fw mr-1"></i> ' . __('admin/ai-settings.tabs.performance')))
+                            ->label(new HtmlString('<i class="fa-light fa-gauge-high fa-fw mr-1"></i> '.__('admin/ai-settings.tabs.performance')))
                             ->schema([
                                 Section::make(__('admin/ai-settings.sections.caching'))
                                     ->schema([
@@ -283,7 +282,7 @@ class AiSettings extends Page implements HasForms
                             ]),
 
                         Tab::make('Debug')
-                            ->label(new HtmlString('<i class="fa-light fa-bug fa-fw mr-1"></i> ' . __('admin/ai-settings.tabs.debug')))
+                            ->label(new HtmlString('<i class="fa-light fa-bug fa-fw mr-1"></i> '.__('admin/ai-settings.tabs.debug')))
                             ->schema([
                                 Section::make(__('admin/ai-settings.sections.debug_config'))
                                     ->description(__('admin/ai-settings.sections.debug_config_desc'))
@@ -353,19 +352,20 @@ class AiSettings extends Page implements HasForms
         $baseUrl = $this->data['openai_base_url'] ?? config('ai.openai.base_url');
         $model = $this->data['default_chat_model'] ?? 'gpt-4o-mini';
 
-        if (!$apiKey) {
+        if (! $apiKey) {
             Notification::make()
                 ->title(__('admin/ai-settings.notifications.missing_api_key'))
                 ->danger()
                 ->seconds(3)
                 ->send();
+
             return;
         }
 
         try {
             $response = Http::timeout(10)
                 ->withToken($apiKey)
-                ->post($baseUrl . '/chat/completions', [
+                ->post($baseUrl.'/chat/completions', [
                     'model' => $model,
                     'messages' => [['role' => 'user', 'content' => 'ping']],
                     'max_tokens' => 5,
@@ -470,8 +470,8 @@ class AiSettings extends Page implements HasForms
         return [
             \Filament\Actions\Action::make('save')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:settings-saved.window="success = true; setTimeout(() => success = false, 2500)">
-                    <span x-show="!success"><i class="fa-light fa-floppy-disk mr-1.5"></i> ' . __('admin/ai-settings.actions.save') . '</span>
-                    <span x-show="success" x-cloak class="text-white dark:text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> ' . __('admin/ai-settings.actions.saved') . '</span>
+                    <span x-show="!success"><i class="fa-light fa-floppy-disk mr-1.5"></i> '.__('admin/ai-settings.actions.save').'</span>
+                    <span x-show="success" x-cloak class="text-white dark:text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.saved').'</span>
                 </span>'))
                 ->submit('save')
                 ->successNotification(null)
@@ -479,9 +479,9 @@ class AiSettings extends Page implements HasForms
 
             \Filament\Actions\Action::make('test_connection')
                 ->label(new HtmlString('<span x-data="{ state: \'idle\' }" x-on:test-connection-success.window="state = \'success\'; setTimeout(() => state = \'idle\', 2500)" x-on:test-connection-error.window="state = \'error\'; setTimeout(() => state = \'idle\', 2500)">
-                    <span x-show="state === \'idle\'"><i class="fa-light fa-plug-circle-check mr-1.5"></i> ' . __('admin/ai-settings.actions.test_connection') . '</span>
-                    <span x-show="state === \'success\'" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> ' . __('admin/ai-settings.actions.test_success') . '</span>
-                    <span x-show="state === \'error\'" x-cloak class="text-white"><i class="fa-solid fa-circle-xmark mr-1.5 animate-pulse"></i> ' . __('admin/ai-settings.actions.test_error') . '</span>
+                    <span x-show="state === \'idle\'"><i class="fa-light fa-plug-circle-check mr-1.5"></i> '.__('admin/ai-settings.actions.test_connection').'</span>
+                    <span x-show="state === \'success\'" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.test_success').'</span>
+                    <span x-show="state === \'error\'" x-cloak class="text-white"><i class="fa-solid fa-circle-xmark mr-1.5 animate-pulse"></i> '.__('admin/ai-settings.actions.test_error').'</span>
                 </span>'))
                 ->color('info')
                 ->action('testConnection')
@@ -490,8 +490,8 @@ class AiSettings extends Page implements HasForms
 
             \Filament\Actions\Action::make('clear_cache')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:cache-cleared.window="success = true; setTimeout(() => success = false, 2500)">
-                    <span x-show="!success"><i class="fa-light fa-broom mr-1.5"></i> ' . __('admin/ai-settings.actions.clear_cache') . '</span>
-                    <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> ' . __('admin/ai-settings.actions.cache_cleared') . '</span>
+                    <span x-show="!success"><i class="fa-light fa-broom mr-1.5"></i> '.__('admin/ai-settings.actions.clear_cache').'</span>
+                    <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.cache_cleared').'</span>
                 </span>'))
                 ->color('warning')
                 ->requiresConfirmation()
@@ -501,8 +501,8 @@ class AiSettings extends Page implements HasForms
 
             \Filament\Actions\Action::make('reset_logs')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:logs-reset.window="success = true; setTimeout(() => success = false, 2500)">
-                    <span x-show="!success"><i class="fa-light fa-trash-can mr-1.5"></i> ' . __('admin/ai-settings.actions.reset_logs') . '</span>
-                    <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> ' . __('admin/ai-settings.actions.logs_reset') . '</span>
+                    <span x-show="!success"><i class="fa-light fa-trash-can mr-1.5"></i> '.__('admin/ai-settings.actions.reset_logs').'</span>
+                    <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.logs_reset').'</span>
                 </span>'))
                 ->color('danger')
                 ->requiresConfirmation()
@@ -512,8 +512,8 @@ class AiSettings extends Page implements HasForms
 
             \Filament\Actions\Action::make('reset_defaults')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:defaults-reset.window="success = true; setTimeout(() => success = false, 2500)">
-                    <span x-show="!success"><i class="fa-light fa-arrows-rotate mr-1.5"></i> ' . __('admin/ai-settings.actions.defaults') . '</span>
-                    <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> ' . __('admin/ai-settings.actions.defaults_reset') . '</span>
+                    <span x-show="!success"><i class="fa-light fa-arrows-rotate mr-1.5"></i> '.__('admin/ai-settings.actions.defaults').'</span>
+                    <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.defaults_reset').'</span>
                 </span>'))
                 ->color('gray')
                 ->requiresConfirmation()

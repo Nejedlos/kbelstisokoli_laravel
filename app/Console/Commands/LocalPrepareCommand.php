@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
+
 use function Laravel\Prompts\info;
-use function Laravel\Prompts\error;
 use function Laravel\Prompts\spin;
 
 class LocalPrepareCommand extends Command
@@ -34,8 +34,8 @@ class LocalPrepareCommand extends Command
         // 1. NPM Install
         spin(function () {
             $process = Process::run('npm install');
-            if (!$process->successful()) {
-                throw new \Exception("NPM install selhal: " . $process->errorOutput());
+            if (! $process->successful()) {
+                throw new \Exception('NPM install selhal: '.$process->errorOutput());
             }
         }, 'Instaluji NPM závislosti...');
         info('✓ NPM závislosti nainstalovány.');
@@ -43,8 +43,8 @@ class LocalPrepareCommand extends Command
         // 2. NPM Build
         spin(function () {
             $process = Process::run('npm run build');
-            if (!$process->successful()) {
-                throw new \Exception("NPM build selhal: " . $process->errorOutput());
+            if (! $process->successful()) {
+                throw new \Exception('NPM build selhal: '.$process->errorOutput());
             }
         }, 'Sestavuji produkční assety (Vite build)...');
         info('✓ Assety sestaveny (v public/build/).');

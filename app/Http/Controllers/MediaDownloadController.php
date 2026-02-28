@@ -9,9 +9,6 @@ class MediaDownloadController extends Controller
 {
     /**
      * Zabezpečené stahování média.
-     *
-     * @param string $uuid
-     * @return BinaryFileResponse
      */
     public function download(string $uuid): BinaryFileResponse
     {
@@ -23,7 +20,7 @@ class MediaDownloadController extends Controller
             $this->authorizeAccess($model);
         }
 
-        if (!file_exists($media->getPath())) {
+        if (! file_exists($media->getPath())) {
             abort(404, 'Soubor neexistuje.');
         }
 
@@ -32,9 +29,6 @@ class MediaDownloadController extends Controller
 
     /**
      * Ověření oprávnění pro přístup k médiu.
-     *
-     * @param \App\Models\MediaAsset $asset
-     * @return void
      */
     protected function authorizeAccess(\App\Models\MediaAsset $asset): void
     {
@@ -42,7 +36,7 @@ class MediaDownloadController extends Controller
             return;
         }
 
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             abort(401);
         }
 
@@ -55,14 +49,14 @@ class MediaDownloadController extends Controller
 
         // Kontrola přístupu pro členy
         if ($asset->access_level === 'member') {
-            if (!$user->can('view_member_media')) {
+            if (! $user->can('view_member_media')) {
                 abort(403, 'Nemáte oprávnění pro zobrazení členských souborů.');
             }
         }
 
         // Kontrola přístupu pro soukromé soubory
         if ($asset->access_level === 'private') {
-            if (!$user->can('view_private_media')) {
+            if (! $user->can('view_private_media')) {
                 abort(403, 'Nemáte oprávnění pro zobrazení soukromých souborů.');
             }
         }

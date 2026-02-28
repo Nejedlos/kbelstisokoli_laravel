@@ -34,6 +34,7 @@ class UpdatePastMatchesStatus extends Command
 
         if ($count === 0) {
             $this->info('Žádné zápasy k aktualizaci nebyly nalezeny.');
+
             return;
         }
 

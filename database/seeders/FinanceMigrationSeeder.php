@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class FinanceMigrationSeeder extends Seeder
@@ -13,8 +12,9 @@ class FinanceMigrationSeeder extends Seeder
     public function run(): void
     {
         $oldDb = config('database.old_database');
-        if (!$oldDb) {
+        if (! $oldDb) {
             $this->command->error('Databáze pro migraci nebyla nalezena (DB_DATABASE_OLD ani DB_DATABASE).');
+
             return;
         }
 
@@ -26,6 +26,7 @@ class FinanceMigrationSeeder extends Seeder
             // 1. Mapování uživatelů
             $usersByLegacyId = \App\Models\User::all()->mapWithKeys(function ($user) {
                 $legacyId = $user->metadata['legacy_r_id'] ?? null;
+
                 return $legacyId ? [$legacyId => $user] : [];
             });
 
@@ -36,6 +37,7 @@ class FinanceMigrationSeeder extends Seeder
             $this->migrateTariffs($oldDb);
             $tariffsByLegacyId = \App\Models\FinancialTariff::all()->mapWithKeys(function ($t) {
                 $legacyId = $t->metadata['legacy_id'] ?? 0;
+
                 return [$legacyId => $t];
             });
 
@@ -43,6 +45,7 @@ class FinanceMigrationSeeder extends Seeder
             $this->call(FineTemplateSeeder::class);
             $fineTemplatesByLegacyId = \App\Models\FineTemplate::all()->mapWithKeys(function ($t) {
                 $legacyId = $t->metadata['legacy_id'] ?? 0;
+
                 return [$legacyId => $t];
             });
 
@@ -64,7 +67,7 @@ class FinanceMigrationSeeder extends Seeder
             $this->command->info('Migrace financí dokončena.');
 
         } catch (\Exception $e) {
-            $this->command->error('Chyba při migraci financí: ' . $e->getMessage());
+            $this->command->error('Chyba při migraci financí: '.$e->getMessage());
             $this->command->error($e->getTraceAsString());
         }
     }
@@ -72,12 +75,12 @@ class FinanceMigrationSeeder extends Seeder
     protected function migrateTariffs($oldDb)
     {
         $this->command->info('Migruji finanční tarify...');
-        $oldTariffs = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_vypocty_platby')->get();
+        $oldTariffs = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_vypocty_platby')->get();
 
         $existingAll = \App\Models\FinancialTariff::all();
 
         foreach ($oldTariffs as $ot) {
-            $existing = $existingAll->first(fn($t) => ($t->metadata['legacy_id'] ?? null) == $ot->id);
+            $existing = $existingAll->first(fn ($t) => ($t->metadata['legacy_id'] ?? null) == $ot->id);
 
             $tariffData = [
                 'name' => $ot->nazev,
@@ -98,22 +101,26 @@ class FinanceMigrationSeeder extends Seeder
     protected function migrateUserSeasonConfigs($oldDb, $usersByLegacyId, $seasonsByName, $tariffsByLegacyId)
     {
         $this->command->info('Migruji sezónní konfigurace uživatelů...');
-        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_platici')->get();
+        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')->get();
 
         foreach ($payers as $payer) {
             $user = $usersByLegacyId->get($payer->r_id);
-            if (!$user) continue;
+            if (! $user) {
+                continue;
+            }
 
             $seasonName = str_replace('-', '/', $payer->sezona);
             $season = $seasonsByName->get($seasonName);
-            if (!$season) {
+            if (! $season) {
                 // Pokud sezóna neexistuje, vytvoříme ji
                 $season = \App\Models\Season::create(['name' => $seasonName, 'is_active' => false]);
                 $seasonsByName->put($season->name, $season);
             }
 
             $tariff = $tariffsByLegacyId->get($payer->druh);
-            if (!$tariff) continue;
+            if (! $tariff) {
+                continue;
+            }
 
             $existing = \App\Models\UserSeasonConfig::where(['user_id' => $user->id, 'season_id' => $season->id])->first();
 
@@ -143,22 +150,24 @@ class FinanceMigrationSeeder extends Seeder
 
         $existingCharges = \App\Models\FinanceCharge::where('charge_type', 'membership_fee')
             ->get()
-            ->keyBy(fn($c) => $c->metadata['legacy_p_id'] ?? null)
+            ->keyBy(fn ($c) => $c->metadata['legacy_p_id'] ?? null)
             ->forget(null);
 
         foreach ($configs as $config) {
-            if (!$config->tariff || $config->tariff->base_amount <= 0) continue;
+            if (! $config->tariff || $config->tariff->base_amount <= 0) {
+                continue;
+            }
 
             // Parsování roku pro datum splatnosti (podpora / i -)
             $seasonYear = explode('/', str_replace('-', '/', $config->season->name))[0] ?? date('Y');
-            $dueDate = \Carbon\Carbon::parse($seasonYear . '-01-01');
+            $dueDate = \Carbon\Carbon::parse($seasonYear.'-01-01');
 
             $existing = $existingCharges->get($config->metadata['legacy_id'] ?? null);
 
             $chargeData = [
                 'user_id' => $config->user_id,
-                'title' => 'Členské příspěvky ' . $config->season->name,
-                'description' => $config->tariff->name . ': ' . $config->tariff->description,
+                'title' => 'Členské příspěvky '.$config->season->name,
+                'description' => $config->tariff->name.': '.$config->tariff->description,
                 'amount_total' => $config->tariff->base_amount,
                 'currency' => 'CZK',
                 'due_date' => $dueDate,
@@ -180,25 +189,31 @@ class FinanceMigrationSeeder extends Seeder
     protected function migrateFines($oldDb, $usersByLegacyId, $fineTemplatesByLegacyId = null)
     {
         $this->command->info('Vytvářím předpisy z pokut...');
-        $fines = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_pokuty')->get();
+        $fines = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_pokuty')->get();
 
         // Potřebujeme propojit p_id zpět na uživatele přes web_platici
-        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_platici')->get()->keyBy('id');
+        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')->get()->keyBy('id');
 
         $existingFines = \App\Models\FinanceCharge::where('charge_type', 'fine')
             ->get()
-            ->keyBy(fn($c) => $c->metadata['legacy_fine_id'] ?? null)
+            ->keyBy(fn ($c) => $c->metadata['legacy_fine_id'] ?? null)
             ->forget(null);
 
         foreach ($fines as $fine) {
             $payer = $payers->get($fine->p_id);
-            if (!$payer) continue;
+            if (! $payer) {
+                continue;
+            }
 
             $user = $usersByLegacyId->get($payer->r_id);
-            if (!$user) continue;
+            if (! $user) {
+                continue;
+            }
 
             $amount = $fine->castka * ($fine->pocet ?: 1);
-            if ($amount <= 0) continue;
+            if ($amount <= 0) {
+                continue;
+            }
 
             $paidAt = $fine->kdy_zap > 0 ? \Carbon\Carbon::createFromTimestamp($fine->kdy_zap) : null;
 
@@ -208,7 +223,7 @@ class FinanceMigrationSeeder extends Seeder
 
             $fineData = [
                 'user_id' => $user->id,
-                'title' => 'Pokuta: ' . $fine->typ,
+                'title' => 'Pokuta: '.$fine->typ,
                 'description' => $fineTemplate ? "Šablona: {$fineTemplate->name}. Původní ID: {$fine->id}" : "Původní ID: {$fine->id}",
                 'charge_type' => 'fine',
                 'amount_total' => $amount,
@@ -234,17 +249,21 @@ class FinanceMigrationSeeder extends Seeder
     protected function migratePayments($oldDb, $usersByLegacyId)
     {
         $this->command->info('Migruji skutečné platby...');
-        $payments = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_platby')->get();
-        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb . '.web_platici')->get()->keyBy('id');
+        $payments = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platby')->get();
+        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')->get()->keyBy('id');
 
-        $existingPayments = \App\Models\FinancePayment::all()->keyBy(fn($p) => $p->metadata['legacy_pay_id'] ?? null)->forget(null);
+        $existingPayments = \App\Models\FinancePayment::all()->keyBy(fn ($p) => $p->metadata['legacy_pay_id'] ?? null)->forget(null);
 
         foreach ($payments as $payment) {
             $payer = $payers->get($payment->p_id);
-            if (!$payer) continue;
+            if (! $payer) {
+                continue;
+            }
 
             $user = $usersByLegacyId->get($payer->r_id);
-            if (!$user) continue;
+            if (! $user) {
+                continue;
+            }
 
             $existing = $existingPayments->get($payment->id);
 
@@ -285,11 +304,15 @@ class FinanceMigrationSeeder extends Seeder
 
             foreach ($payments as $payment) {
                 $available = $payment->amount_available;
-                if ($available <= 0) continue;
+                if ($available <= 0) {
+                    continue;
+                }
 
                 foreach ($charges as $charge) {
                     $remaining = $charge->amount_remaining;
-                    if ($remaining <= 0) continue;
+                    if ($remaining <= 0) {
+                        continue;
+                    }
 
                     $toAllocate = min($available, $remaining);
 
@@ -310,7 +333,9 @@ class FinanceMigrationSeeder extends Seeder
                         $charge->update(['status' => 'partially_paid']);
                     }
 
-                    if ($available <= 0) break;
+                    if ($available <= 0) {
+                        break;
+                    }
                 }
             }
         }

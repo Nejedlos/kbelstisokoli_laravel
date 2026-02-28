@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Team;
 use Tests\TestCase;
 
 class TeamControllerTest extends TestCase

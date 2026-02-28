@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\BrandingService;
 use Closure;
 use Illuminate\Http\Request;
-use App\Services\BrandingService;
 use Symfony\Component\HttpFoundation\Response;
 
 class PublicMaintenanceMiddleware
@@ -24,7 +24,7 @@ class PublicMaintenanceMiddleware
         // Pokud je zapnutý maintenance mode, přesměrujeme všechny veřejné podstránky na úvodní stránku
         if (data_get($branding, 'maintenance_mode') &&
             $request->routeIs('public.*') &&
-            !$request->routeIs('public.home')) {
+            ! $request->routeIs('public.home')) {
 
             \Illuminate\Support\Facades\Log::info('PublicMaintenanceMiddleware.redirect', [
                 'path' => $request->path(),

@@ -5,13 +5,9 @@ namespace App\Filament\Resources\UserSeasonConfigs;
 use App\Filament\Resources\UserSeasonConfigs\Pages\CreateUserSeasonConfig;
 use App\Filament\Resources\UserSeasonConfigs\Pages\EditUserSeasonConfig;
 use App\Filament\Resources\UserSeasonConfigs\Pages\ListUserSeasonConfigs;
-use App\Filament\Resources\UserSeasonConfigs\Schemas\UserSeasonConfigForm;
-use App\Filament\Resources\UserSeasonConfigs\Tables\UserSeasonConfigsTable;
 use App\Models\UserSeasonConfig;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class UserSeasonConfigResource extends Resource

@@ -14,20 +14,26 @@ use Livewire\Component;
 class RecruitmentForm extends Component
 {
     public string $name = '';
+
     public string $email = '';
 
     #[Url(as: 'team')]
     public string $selectedTeam = 'muzi-c'; // Výchozí tým
 
     public ?int $height = null;
+
     public string $position = '';
+
     public string $level = '';
+
     public ?int $age = null;
 
     public string $message = '';
+
     public ?string $recaptchaToken = null;
 
     public bool $success = false;
+
     public ?string $errorMessage = null;
 
     protected function rules(): array
@@ -75,16 +81,19 @@ class RecruitmentForm extends Component
 
     public function submit(RecaptchaV3 $recaptchaService): void
     {
-        if ($this->success) return;
+        if ($this->success) {
+            return;
+        }
 
         $this->validate();
 
         if (config('recaptcha.enabled')) {
             $result = $recaptchaService->verify($this->recaptchaToken ?? '', 'recruitment_form', request()->ip());
-            if (!$result->passed) {
+            if (! $result->passed) {
                 $this->errorMessage = ($result->score !== null && $result->score < config('recaptcha.score_threshold'))
                     ? trans('recaptcha.low_score')
                     : trans('recaptcha.failed');
+
                 return;
             }
         }
@@ -113,7 +122,7 @@ class RecruitmentForm extends Component
             $this->reset(['name', 'email', 'message', 'recaptchaToken', 'height', 'position', 'level', 'age']);
 
         } catch (\Exception $e) {
-            Log::error('Chyba při odesílání náborového formuláře: ' . $e->getMessage());
+            Log::error('Chyba při odesílání náborového formuláře: '.$e->getMessage());
             $this->errorMessage = 'Při odesílání žádosti došlo k chybě. Zkuste to prosím později.';
         }
     }
@@ -137,7 +146,7 @@ class RecruitmentForm extends Component
 
         // 2. Admin email z nastavení
         $adminEmail = Setting::where('key', 'admin_contact_email')->value('value');
-        if (!$adminEmail) {
+        if (! $adminEmail) {
             $adminEmail = Setting::where('key', 'contact_email')->value('value');
         }
 
@@ -146,6 +155,7 @@ class RecruitmentForm extends Component
             if (is_array($adminEmail)) {
                 return $adminEmail[app()->getLocale()] ?? reset($adminEmail);
             }
+
             return (string) $adminEmail;
         }
 
@@ -160,7 +170,7 @@ class RecruitmentForm extends Component
                 ->orderBy('slug')
                 ->get()
                 ->mapWithKeys(fn ($team) => [$team->slug => $team->getTranslation('name', app()->getLocale())])
-                ->toArray()
+                ->toArray(),
         ]);
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Filament\GlobalSearch;
 
 use App\Models\AiDocument;
-use Filament\GlobalSearch\Providers\Contracts\GlobalSearchProvider;
 use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\GlobalSearch\GlobalSearchResults;
+use Filament\GlobalSearch\Providers\Contracts\GlobalSearchProvider;
 use Illuminate\Support\Facades\App;
 
 class AiGlobalSearchProvider implements GlobalSearchProvider
@@ -23,8 +23,8 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
             ->where(function ($q) use ($query) {
                 $queryLower = mb_strtolower($query);
                 $q->whereRaw('LOWER(title) LIKE ?', ["%{$queryLower}%"])
-                  ->orWhereRaw('LOWER(content) LIKE ?', ["%{$queryLower}%"])
-                  ->orWhereRaw('LOWER(keywords) LIKE ?', ["%{$queryLower}%"]);
+                    ->orWhereRaw('LOWER(content) LIKE ?', ["%{$queryLower}%"])
+                    ->orWhereRaw('LOWER(keywords) LIKE ?', ["%{$queryLower}%"]);
             })
             ->orderBy('title')
             ->limit(10)
@@ -71,7 +71,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         }
 
         // AI vygenerované shrnutí (pokud existuje) nebo náhled obsahu
-        $summary = $doc->summary ?: mb_substr(strip_tags($doc->content), 0, 100) . '...';
+        $summary = $doc->summary ?: mb_substr(strip_tags($doc->content), 0, 100).'...';
         $details[__('admin.search.details.content')] = $summary;
 
         return $details;

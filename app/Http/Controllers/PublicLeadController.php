@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Rules\RecaptchaV3 as RecaptchaV3Rule;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class PublicLeadController extends Controller
 {
@@ -50,7 +49,7 @@ class PublicLeadController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:50',
-            'birth_year' => 'required|numeric|min:1900|max:' . date('Y'),
+            'birth_year' => 'required|numeric|min:1900|max:'.date('Y'),
             'message' => 'nullable|string',
             'consent' => 'required|accepted',
             'g-recaptcha-response' => [new RecaptchaV3Rule('recruitment_form')],
