@@ -18,9 +18,11 @@ class GlobalSeeder extends Seeder
         UserSecuritySeeder::class,
         TeamCoachSeeder::class,
         SeasonMigrationSeeder::class,
+        SeasonUnifySeeder::class,
         EventMigrationSeeder::class,
         AttendanceMigrationSeeder::class,
         FinanceMigrationSeeder::class,
+        FineTemplateSeeder::class,
         TrophyMigrationSeeder::class,
         CronTaskSeeder::class,
         PostSeeder::class,
@@ -28,6 +30,7 @@ class GlobalSeeder extends Seeder
         GdprPageSeeder::class,
         BrandingSeeder::class,
         SeoOptimizationSeeder::class,
+        PerformanceSettingsSeeder::class,
     ];
 
     /**

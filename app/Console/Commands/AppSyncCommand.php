@@ -71,9 +71,11 @@ class AppSyncCommand extends Command
 
         $usersync = $this->option('usersync') || $this->option('syncusers') || $this->option('syncuser');
 
-        // Branding a globální nastavení
-        $this->info('Seeduji branding nastavení...');
-        $this->call('db:seed', ['--class' => 'BrandingSeeder', '--force' => true]);
+        // Globální seeder aplikace (nastavení, branding, role, sporty, apod.)
+        $this->info('Spouštím GlobalSeeder (branding a nastavení)...');
+        // Předáme informaci o uživatelích do seederu (podle příznaku --usersync)
+        config(['app.seed_users' => $usersync]);
+        $this->call('db:seed', ['--class' => 'GlobalSeeder', '--force' => true]);
 
         // Ikony
         if (class_exists(\App\Console\Commands\IconsSyncCommand::class)) {
