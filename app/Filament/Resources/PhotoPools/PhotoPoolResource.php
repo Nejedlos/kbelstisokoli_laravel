@@ -8,13 +8,13 @@ use App\Filament\Resources\PhotoPools\Pages\EditPhotoPool;
 use App\Filament\Resources\PhotoPools\Pages\ListPhotoPools;
 use App\Models\PhotoPool;
 use App\Services\AiTextEnhancer;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use App\Support\IconHelper;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
@@ -71,9 +71,24 @@ class PhotoPoolResource extends Resource
                     ->hiddenLabel()
                     ->content(fn () => new HtmlString(Blade::render('
                         <x-loader.basketball wire:target="processImportQueue">
-                            <div class="text-center">
-                                <strong class="text-lg block mb-1">Hromadné zpracování fotografií...</strong>
-                                <span class="text-sm opacity-90">Prosím nezavírejte toto okno a nepřerušujte spojení se serverem.</span>
+                            <div class="text-center p-8 bg-white/10 dark:bg-black/20 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-2xl max-w-sm mx-auto overflow-hidden relative">
+                                <!-- Sokolský brand pattern na pozadí (přes pseudo-element by to bylo složitější, tak aspoň SVG blob) -->
+                                <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl"></div>
+                                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-red-500/10 rounded-full blur-2xl"></div>
+
+                                <div class="relative z-10">
+                                    <div class="mb-5 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 text-white shadow-xl rotate-3 border border-white/20">
+                                        <i class="fa-light fa-arrows-rotate fa-spin text-2xl"></i>
+                                    </div>
+                                    <strong class="text-2xl font-black block mb-2 text-white tracking-tight uppercase italic leading-none">Hromadný import</strong>
+                                    <p class="text-[13px] text-white/80 font-medium leading-relaxed mb-4">
+                                        Právě nahráváme a optimalizujeme vaše fotografie. Toto může chvíli trvat v závislosti na počtu souborů.
+                                    </p>
+                                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full animate-pulse shadow-lg shadow-red-600/30">
+                                        <i class="fa-light fa-triangle-exclamation"></i>
+                                        Nezavírejte okno
+                                    </div>
+                                </div>
                             </div>
                         </x-loader.basketball>
                     ')))
@@ -81,27 +96,57 @@ class PhotoPoolResource extends Resource
 
                 Placeholder::make('processing_progress')
                     ->hiddenLabel()
-                    ->visible(fn ($record) => $record && (!empty($record->pending_import_queue) || $record->is_processing_import))
+                    ->visible(fn ($record) => $record && (! empty($record->pending_import_queue) || $record->is_processing_import))
                     ->content(function ($record) {
                         $count = count($record->pending_import_queue ?? []);
-                        $status = $record->is_processing_import ? 'Probíhá zpracování...' : 'Čeká na zpracování...';
+                        $status = $record->is_processing_import ? 'Probíhá import fotografií' : 'Čeká na zpracování';
                         $icon = $record->is_processing_import ? 'fa-spinner-third fa-spin' : 'fa-clock';
 
+                        // Sokolské barvy z CSS proměnných nebo Tailwindu
+                        // Brand Navy: #001F3F (přibližně slate-900)
+                        // Brand Red: #E41F18
+
                         return new HtmlString("
-                            <div class='p-6 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-500 dark:border-amber-600 rounded-2xl flex items-center gap-6 shadow-lg animate-pulse' wire:poll.3s='processImportQueue'>
-                                <div class='flex-shrink-0 bg-amber-500 text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-inner'>
-                                    <i class='fa-light {$icon}'></i>
-                                </div>
-                                <div class='flex-grow'>
-                                    <div class='text-lg font-bold text-amber-900 dark:text-amber-100 mb-1'>{$status}</div>
-                                    <div class='text-sm text-amber-800 dark:text-amber-200'>
-                                        Zbývá zpracovat: <strong>{$count}</strong> fotografií.
-                                        <div class='mt-1 font-semibold uppercase tracking-wider text-xs'>Důležité: Prosím nechte toto okno otevřené, dokud import neskončí!</div>
+                            <div class='relative overflow-hidden p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center gap-6 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all duration-500' wire:poll.3s='processImportQueue'>
+                                <div class='absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-primary-500/5 rounded-full blur-3xl'></div>
+
+                                <div class='relative flex-shrink-0'>
+                                    <div class='w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-3xl text-primary-600 dark:text-primary-400 shadow-inner overflow-hidden'>
+                                        <i class='fa-light {$icon} transition-transform duration-700'></i>
+                                        <div class='absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full'></div>
                                     </div>
                                 </div>
-                                <div wire:loading wire:target='processImportQueue' class='text-amber-600'>
-                                    <i class='fa-light fa-arrows-rotate fa-spin text-2xl'></i>
+
+                                <div class='flex-grow'>
+                                    <div class='flex items-center gap-2 mb-1'>
+                                        <span class='text-xs font-black uppercase tracking-widest text-primary-600 dark:text-primary-400'>Status</span>
+                                        <div class='h-px flex-grow bg-slate-100 dark:bg-slate-800'></div>
+                                    </div>
+                                    <div class='text-xl font-black text-slate-900 dark:text-white leading-tight mb-1'>{$status}</div>
+                                    <div class='text-sm text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2'>
+                                        <span>Zbývá zpracovat: <strong class='text-slate-900 dark:text-white'>{$count}</strong> fotografií</span>
+                                        <span class='w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600'></span>
+                                        <span class='text-red-600 dark:text-red-400 font-bold animate-pulse'>Nezavírejte toto okno!</span>
+                                    </div>
                                 </div>
+
+                                <div class='flex-shrink-0' wire:loading wire:target='processImportQueue'>
+                                     <div class='flex flex-col items-center gap-1 text-primary-600 dark:text-primary-400 font-black italic text-[10px] uppercase tracking-tighter'>
+                                        <i class='fa-light fa-basketball fa-spin text-2xl'></i>
+                                        <span>Zápis...</span>
+                                     </div>
+                                </div>
+
+                                <div class='absolute bottom-0 left-0 h-1 bg-primary-500/20 w-full overflow-hidden'>
+                                    <div class='h-full bg-primary-50 w-1/3 animate-[ks-progress-bar_2s_infinite_linear]'></div>
+                                </div>
+
+                                <style>
+                                    @keyframes ks-progress-bar {
+                                        0% { transform: translateX(-100%); }
+                                        100% { transform: translateX(300%); }
+                                    }
+                                </style>
                             </div>
                         ");
                     })
@@ -223,7 +268,7 @@ class PhotoPoolResource extends Resource
                                     ->image()
                                     ->reorderable()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/') . '/photo_pools/incoming')
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/photo_pools/incoming')
                                     ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                     ->downloadable()
                                     ->openable()
@@ -304,16 +349,19 @@ class PhotoPoolResource extends Resource
                 TextColumn::make('teams.name')
                     ->label(__('admin.navigation.resources.team.plural_label'))
                     ->badge()
-                    ->state(fn ($record) => $record->teams->reject(fn($team) => $team->category === 'all')->pluck('name'))
+                    ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
                     ->searchable(),
                 TextColumn::make('event_date')
                     ->label('Datum')
                     ->formatStateUsing(function ($state) {
-                        if (!$state) return null;
+                        if (! $state) {
+                            return null;
+                        }
                         $date = \Carbon\Carbon::parse($state);
                         if ($date->day === 1 && $date->month === 1) {
                             return $date->format('Y');
                         }
+
                         return $date->format('d.m.Y');
                     })
                     ->sortable(),

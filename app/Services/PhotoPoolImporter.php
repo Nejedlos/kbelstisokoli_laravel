@@ -25,19 +25,19 @@ class PhotoPoolImporter
 
         // Cílová složka pro originály
         $targetBase = "{$uploadsDir}/photo_pools/{$pool->id}/originals";
-        if (!$disk->exists($targetBase)) {
+        if (! $disk->exists($targetBase)) {
             $disk->makeDirectory($targetBase);
         }
 
         $currentQueue = $pool->pending_import_queue ?? [];
 
         foreach ($filePaths as $path) {
-            if (!$disk->exists($path)) {
+            if (! $disk->exists($path)) {
                 continue;
             }
 
             $filename = basename($path);
-            $targetPath = $targetBase . '/' . $filename;
+            $targetPath = $targetBase.'/'.$filename;
 
             // Pokud už tam soubor není, přesuneme ho
             if ($path !== $targetPath) {
@@ -45,8 +45,8 @@ class PhotoPoolImporter
                 if ($disk->exists($targetPath)) {
                     $ext = pathinfo($filename, PATHINFO_EXTENSION);
                     $name = pathinfo($filename, PATHINFO_FILENAME);
-                    $filename = $name . '-' . Str::random(5) . '.' . $ext;
-                    $targetPath = $targetBase . '/' . $filename;
+                    $filename = $name.'-'.Str::random(5).'.'.$ext;
+                    $targetPath = $targetBase.'/'.$filename;
                 }
                 $disk->move($path, $targetPath);
             }
@@ -54,7 +54,7 @@ class PhotoPoolImporter
             $currentQueue[] = $targetPath;
         }
 
-        $pool->update([
+        $pool->updateQuietly([
             'pending_import_queue' => $currentQueue,
         ]);
     }
@@ -66,11 +66,12 @@ class PhotoPoolImporter
     {
         $queue = $pool->pending_import_queue ?? [];
         if (empty($queue)) {
-            $pool->update(['is_processing_import' => false]);
+            $pool->updateQuietly(['is_processing_import' => false]);
+
             return ['processed' => 0, 'remaining' => 0];
         }
 
-        $pool->update(['is_processing_import' => true]);
+        $pool->updateQuietly(['is_processing_import' => true]);
 
         $chunk = array_slice($queue, 0, $chunkSize);
         $remaining = array_slice($queue, $chunkSize);
@@ -88,8 +89,9 @@ class PhotoPoolImporter
 
         foreach ($chunk as $path) {
             try {
-                if (!$disk->exists($path)) {
+                if (! $disk->exists($path)) {
                     $processed++;
+
                     continue;
                 }
 
@@ -99,7 +101,7 @@ class PhotoPoolImporter
 
                 DB::transaction(function () use ($pool, $file, $sort, $userId) {
                     $asset = new MediaAsset([
-                        'title' => (string)(brand_text($pool->getTranslation('title', 'cs')) . ' #' . $sort),
+                        'title' => (string) (brand_text($pool->getTranslation('title', 'cs')).' #'.$sort),
                         'alt_text' => brand_text($pool->getTranslation('title', 'cs')),
                         'type' => 'image',
                         'access_level' => 'public',
@@ -121,16 +123,16 @@ class PhotoPoolImporter
 
                 $processed++;
             } catch (\Throwable $e) {
-                \Log::error('PhotoPool batch import failed: ' . $e->getMessage(), [
+                \Log::error('PhotoPool batch import failed: '.$e->getMessage(), [
                     'pool_id' => $pool->id,
-                    'path' => $path
+                    'path' => $path,
                 ]);
             }
         }
 
-        $pool->update([
+        $pool->updateQuietly([
             'pending_import_queue' => $remaining,
-            'is_processing_import' => !empty($remaining),
+            'is_processing_import' => ! empty($remaining),
         ]);
 
         return [

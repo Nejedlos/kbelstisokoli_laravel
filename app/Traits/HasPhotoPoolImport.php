@@ -12,15 +12,16 @@ trait HasPhotoPoolImport
         /** @var \App\Models\PhotoPool $record */
         $record = $this->getRecord();
 
-        if (!$record) {
+        if (! $record) {
             return;
         }
 
         // Pokud je fronta prázdná, už nic neděláme
         if (empty($record->pending_import_queue)) {
             if ($record->is_processing_import) {
-                $record->update(['is_processing_import' => false]);
+                $record->updateQuietly(['is_processing_import' => false]);
             }
+
             return;
         }
 
