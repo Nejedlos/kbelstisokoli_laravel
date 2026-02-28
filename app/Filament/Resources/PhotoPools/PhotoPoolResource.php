@@ -74,7 +74,27 @@ class PhotoPoolResource extends Resource
 
                 Placeholder::make('processing_progress')
                     ->label('')
-                    ->content(fn () => new HtmlString('<div wire:stream="ks-loader-progress-text" class="text-sm font-bold text-primary-600 dark:text-primary-400 text-center animate-pulse"></div>'))
+                    ->visible(fn ($record) => $record && (!empty($record->pending_import_queue) || $record->is_processing_import))
+                    ->content(function ($record) {
+                        $count = count($record->pending_import_queue ?? []);
+                        $status = $record->is_processing_import ? 'Probíhá zpracování...' : 'Čeká na zpracování...';
+                        $icon = $record->is_processing_import ? 'fa-spin fa-spinner-third' : 'fa-pause-circle';
+
+                        return new HtmlString("
+                            <div class='p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-xl flex items-center gap-4' wire:poll.3s='processImportQueue'>
+                                <div class='flex-shrink-0 text-primary-600 dark:text-primary-400 text-2xl'>
+                                    <i class='fa-light {$icon}'></i>
+                                </div>
+                                <div class='flex-grow'>
+                                    <div class='text-sm font-bold text-primary-900 dark:text-primary-100'>{$status}</div>
+                                    <div class='text-xs text-primary-700 dark:text-primary-300'>Zbývá zpracovat: <strong>{$count}</strong> fotografií. Prosím nechte toto okno otevřené.</div>
+                                </div>
+                                <div wire:loading wire:target='processImportQueue'>
+                                    <i class='fa-light fa-spinner-third fa-spin text-primary-600'></i>
+                                </div>
+                            </div>
+                        ");
+                    })
                     ->columnSpanFull(),
 
                 Tabs::make('PhotoPoolTabs')

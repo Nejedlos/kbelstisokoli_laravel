@@ -56,6 +56,9 @@ class FinancePayment extends Model
      */
     public function getAmountAllocatedAttribute(): float
     {
+        if (array_key_exists('allocated_sum', $this->attributes)) {
+            return (float) ($this->attributes['allocated_sum'] ?? 0);
+        }
         return (float) $this->allocations()->sum('amount');
     }
 

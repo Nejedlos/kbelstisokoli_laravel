@@ -56,7 +56,7 @@ class BrandingSeeder extends Seeder
 
             // Ekonomické údaje (Kritické pro platby)
             'bank_account' => '6022854477/6363',
-            'bank_name' => 'Komerční banka a.s.',
+            'bank_name' => 'Partners banka a.s.',
 
             // Hlavní hala a hrací termíny
             'venue_name' => 'RumcajsArena',

@@ -309,7 +309,7 @@ class BrandingSettings extends Page implements HasForms
                                 TextInput::make('bank_name')
                                     ->label(__('admin/branding-settings.fields.bank_name'))
                                     ->helperText(__('admin/branding-settings.fields.bank_name_help'))
-                                    ->placeholder('Komerční banka a.s.'),
+                                    ->placeholder('Partners banka a.s.'),
                             ]),
                     ]),
 

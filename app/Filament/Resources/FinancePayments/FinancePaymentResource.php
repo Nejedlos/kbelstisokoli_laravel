@@ -43,6 +43,13 @@ class FinancePaymentResource extends Resource
         return 2;
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['user'])
+            ->withSum('allocations as allocated_sum', 'amount');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return FinancePaymentForm::configure($schema);

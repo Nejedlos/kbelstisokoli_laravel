@@ -260,69 +260,19 @@ class ListPhotoPools extends ListRecords
                         return;
                     }
 
-                    $uploaderId = auth()->id();
+                    // Použijeme službu pro přípravu importu (přesun souborů a naplnění fronty)
+                    $importer = app(\App\Services\PhotoPoolImporter::class);
+                    $importer->prepareForImport($record, $files);
 
-                    DB::transaction(function () use ($files, $record, $uploaderId, $livewire) {
-                        $total = count($files);
-                        $sort = 0;
-                        $livewire->stream('ks-loader-progress', '', true);
-                        $livewire->stream('ks-loader-progress-text', '', true);
+                    // Informujeme uživatele
+                    \Filament\Notifications\Notification::make()
+                        ->title(__('admin.navigation.resources.photo_pool.notifications.uploading'))
+                        ->info()
+                        ->body('Fotografie byly nahrány. Budete přesměrováni na detail galerie pro dokončení zpracování.')
+                        ->send();
 
-                        $diskName = config('filesystems.uploads.disk');
-                        $disk = Storage::disk($diskName);
-                        $uploadsDir = trim(config('filesystems.uploads.dir', 'uploads'), '/');
-                        $targetBase = "{$uploadsDir}/photo_pools/{$record->id}/originals";
-
-                        if (! $disk->exists($targetBase)) {
-                            $disk->makeDirectory($targetBase);
-                        }
-
-                        foreach ($files as $path) {
-                            try {
-                                $sort++;
-                                $progressMsg = __("admin.navigation.resources.photo_pool.notifications.processing")." ($sort / $total)";
-                                $livewire->stream('ks-loader-progress', " ($sort / $total)");
-                                $livewire->stream('ks-loader-progress-text', $progressMsg);
-
-                                if (! $disk->exists($path)) {
-                                    continue;
-                                }
-
-                                // Přesun z incoming do trvalé složky pro originály
-                                $filename = basename($path);
-                                $targetPath = $targetBase . '/' . $filename;
-
-                                if ($path !== $targetPath) {
-                                    $disk->move($path, $targetPath);
-                                }
-
-                                $fullPath = $disk->path($targetPath);
-                                $file = new \Illuminate\Http\File($fullPath);
-
-                                $asset = new MediaAsset([
-                                    'title' => (string) (brand_text($record->getTranslation('title', 'cs')).' #'.($sort)),
-                                    'alt_text' => brand_text($record->getTranslation('title', 'cs')),
-                                    'type' => 'image',
-                                    'access_level' => 'public',
-                                    'is_public' => true,
-                                    'uploaded_by_id' => $uploaderId,
-                                ]);
-                                $asset->save();
-
-                                $asset
-                                    ->addMedia($file)
-                                    ->toMediaCollection('default');
-
-                                $record->mediaAssets()->attach($asset->id, [
-                                    'sort_order' => $sort,
-                                    'is_visible' => true,
-                                    'caption_override' => null,
-                                ]);
-                            } catch (\Throwable $e) {
-                                \Log::error('Photo import failed in CreateAction: '.$e->getMessage());
-                            }
-                        }
-                    });
+                    // Přesměrujeme na editaci, aby polling mohl začít pracovat
+                    return $livewire->redirect(PhotoPoolResource::getUrl('edit', ['record' => $record]));
                 }),
         ];
     }

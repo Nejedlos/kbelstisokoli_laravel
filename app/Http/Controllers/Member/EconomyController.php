@@ -26,6 +26,7 @@ class EconomyController extends Controller
         $openCharges = FinanceCharge::where('user_id', $user->id)
             ->where('is_visible_to_member', true)
             ->whereIn('status', ['open', 'partially_paid', 'overdue'])
+            ->withSum('allocations as paid_sum', 'amount')
             ->orderBy('due_date', 'asc')
             ->get();
 
@@ -33,6 +34,7 @@ class EconomyController extends Controller
         $paidCharges = FinanceCharge::where('user_id', $user->id)
             ->where('is_visible_to_member', true)
             ->where('status', 'paid')
+            ->withSum('allocations as paid_sum', 'amount')
             ->orderBy('updated_at', 'desc')
             ->limit(10)
             ->get();

@@ -75,7 +75,7 @@ return [
         'bank_account' => 'Bank Account Number',
         'bank_account_help' => 'e.g. 6022854477/6363',
         'bank_name' => 'Bank Name',
-        'bank_name_help' => 'e.g. Air Bank a.s.',
+        'bank_name_help' => 'e.g. Partners banka a.s.',
     ],
     'options' => [
         'header' => [

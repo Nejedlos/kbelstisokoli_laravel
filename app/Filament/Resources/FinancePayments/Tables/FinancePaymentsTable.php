@@ -29,7 +29,7 @@ class FinancePaymentsTable
                     ->sortable(),
                 TextColumn::make('allocated')
                     ->label('Alokováno')
-                    ->state(fn ($record) => $record->amount_allocated)
+                    ->state(fn ($record) => $record->allocated_sum ?? 0)
                     ->money('CZK')
                     ->color(fn ($state, $record) => $state >= $record->amount ? 'success' : ($state > 0 ? 'warning' : 'gray')),
                 TextColumn::make('variable_symbol')

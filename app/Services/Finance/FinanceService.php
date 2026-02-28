@@ -79,6 +79,7 @@ class FinanceService
         $charges = FinanceCharge::where('user_id', $user->id)
             ->where('is_visible_to_member', true)
             ->whereIn('status', ['open', 'partially_paid', 'overdue'])
+            ->withSum('allocations as paid_sum', 'amount')
             ->get();
 
         $totalToPay = 0;
@@ -110,10 +111,25 @@ class FinanceService
      */
     public function getAdminSummary(): array
     {
+        // Optimalizováno: suma amount_total - suma alokací
+        $totalChargesSum = (float) FinanceCharge::whereIn('status', ['open', 'partially_paid', 'overdue'])->sum('amount_total');
+        $totalAllocationsSum = (float) DB::table('charge_payment_allocations')
+            ->whereIn('finance_charge_id', function($q) {
+                $q->select('id')->from('finance_charges')->whereIn('status', ['open', 'partially_paid', 'overdue']);
+            })
+            ->sum('amount');
+
+        $overdueChargesSum = (float) FinanceCharge::where('status', 'overdue')->sum('amount_total');
+        $overdueAllocationsSum = (float) DB::table('charge_payment_allocations')
+            ->whereIn('finance_charge_id', function($q) {
+                $q->select('id')->from('finance_charges')->where('status', 'overdue');
+            })
+            ->sum('amount');
+
         return [
-            'total_receivables' => FinanceCharge::whereIn('status', ['open', 'partially_paid', 'overdue'])->get()->sum->amount_remaining,
-            'total_overdue' => FinanceCharge::where('status', 'overdue')->get()->sum->amount_remaining,
-            'payments_received_month' => FinancePayment::where('paid_at', '>=', now()->startOfMonth())->sum('amount'),
+            'total_receivables' => $totalChargesSum - $totalAllocationsSum,
+            'total_overdue' => $overdueChargesSum - $overdueAllocationsSum,
+            'payments_received_month' => (float) FinancePayment::where('paid_at', '>=', now()->startOfMonth())->sum('amount'),
             'active_charges_count' => FinanceCharge::whereIn('status', ['open', 'partially_paid', 'overdue'])->count(),
         ];
     }

@@ -75,7 +75,7 @@ return [
         'bank_account' => 'Číslo bankovního účtu',
         'bank_account_help' => 'Např. 6022854477/6363',
         'bank_name' => 'Název banky',
-        'bank_name_help' => 'Např. Komerční banka a.s.',
+        'bank_name_help' => 'Např. Partners banka a.s.',
     ],
     'options' => [
         'header' => [

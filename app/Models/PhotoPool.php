@@ -19,6 +19,8 @@ class PhotoPool extends Model
         'event_date',
         'is_public',
         'is_visible',
+        'pending_import_queue',
+        'is_processing_import',
     ];
 
     public $translatable = ['title', 'description'];
@@ -27,6 +29,8 @@ class PhotoPool extends Model
         'event_date' => 'date',
         'is_public' => 'boolean',
         'is_visible' => 'boolean',
+        'is_processing_import' => 'boolean',
+        'pending_import_queue' => 'array',
     ];
 
     /**

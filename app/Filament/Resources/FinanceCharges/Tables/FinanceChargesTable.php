@@ -30,24 +30,24 @@ class FinanceChargesTable
                     ->sortable(),
                 TextColumn::make('paid')
                     ->label('Zaplaceno')
-                    ->state(fn ($record) => $record->amount_paid)
+                    ->state(fn ($record) => $record->paid_sum ?? 0)
                     ->money('CZK')
                     ->color(fn ($state, $record) => $state >= $record->amount_total ? 'success' : ($state > 0 ? 'warning' : 'gray')),
                 TextColumn::make('status')
                     ->label('Stav')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn (string $state, $record): string => match ($state) {
                         'draft' => 'gray',
-                        'open' => 'info',
+                        'open' => ($record->due_date?->isPast() && ($record->amount_total - ($record->paid_sum ?? 0)) > 0) ? 'danger' : 'info',
                         'partially_paid' => 'warning',
                         'paid' => 'success',
                         'cancelled' => 'danger',
                         'overdue' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn (string $state, $record): string => match ($state) {
                         'draft' => 'Koncept',
-                        'open' => 'K úhradě',
+                        'open' => ($record->due_date?->isPast() && ($record->amount_total - ($record->paid_sum ?? 0)) > 0) ? 'Po splatnosti' : 'K úhradě',
                         'partially_paid' => 'Částečně',
                         'paid' => 'Zaplaceno',
                         'cancelled' => 'Zrušeno',
@@ -59,7 +59,7 @@ class FinanceChargesTable
                     ->label('Splatnost')
                     ->date('d.m.Y')
                     ->sortable()
-                    ->color(fn ($record) => $record->is_overdue ? 'danger' : null),
+                    ->color(fn ($record) => ($record->due_date?->isPast() && ($record->status !== 'paid' && $record->status !== 'cancelled') && ($record->amount_total - ($record->paid_sum ?? 0)) > 0) ? 'danger' : null),
                 IconColumn::make('is_visible_to_member')
                     ->label('Viditelné')
                     ->boolean()

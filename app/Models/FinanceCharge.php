@@ -62,6 +62,9 @@ class FinanceCharge extends Model
      */
     public function getAmountPaidAttribute(): float
     {
+        if (array_key_exists('paid_sum', $this->attributes)) {
+            return (float) ($this->attributes['paid_sum'] ?? 0);
+        }
         return (float) $this->allocations()->sum('amount');
     }
 
