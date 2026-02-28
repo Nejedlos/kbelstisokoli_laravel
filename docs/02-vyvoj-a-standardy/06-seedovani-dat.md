@@ -21,8 +21,9 @@ Projekt využívá hierarchický systém seederů s hlavním bodem v `GlobalSeed
 Pro usnadnění práce byl vytvořen speciální příkaz `php artisan app:seed`, který obaluje standardní `db:seed` a přidává užitečné funkce.
 
 ### Použití
-- `php artisan app:seed` – Spustí všechny seedery v pořadí definovaném v `GlobalSeeder`.
-- `php artisan app:seed --fresh` – Před spuštěním seederů **smaže všechna data** v tabulkách definovaných v `GlobalSeeder::TABLES_TO_WIPE`.
+- `php artisan app:seed` – Spustí všechny seedery v pořadí definovaném v `GlobalSeeder` **mimo** `UserSeeder` a `LegacyUserMigrationSeeder`.
+- `php artisan app:seed --users` – Spustí všechny seedery **včetně** uživatelů.
+- `php artisan app:seed --fresh` – Před spuštěním seederů **smaže všechna data** v tabulkách definovaných v `GlobalSeeder::TABLES_TO_WIPE` a **vždy** spustí i seedery uživatelů.
 - `php artisan app:seed --force` – Vynutí spuštění na produkci (předává se do vnitřního `db:seed`).
 - `php artisan app:seed --class=UserSeeder` – Spustí pouze konkrétní seeder.
 
@@ -34,10 +35,16 @@ Většina seederů používá metodu `updateOrCreate` nebo kontroluje existenci 
 Na produkčním prostředí je nutné dbát zvýšené opatrnosti, zejména při použití příznaku `--fresh`.
 
 ### Jak spustit hlavní seeder na produkci
-Pro spuštění seederů na produkci použijte příkaz:
+Pro spuštění seederů na produkci použijte příkaz (přeskočí uživatele):
 
 ```bash
 php artisan app:seed --force --no-interaction
+```
+
+Pro spuštění seederů **včetně uživatelů** na produkci:
+
+```bash
+php artisan app:seed --users --force --no-interaction
 ```
 
 Pokud byste z nějakého důvodu chtěli použít standardní Laravel příkaz (např. pokud custom command selže):
@@ -45,6 +52,7 @@ Pokud byste z nějakého důvodu chtěli použít standardní Laravel příkaz (
 ```bash
 php artisan db:seed --class=GlobalSeeder --force
 ```
+*Poznámka: Standardní `db:seed` nerespektuje příznak `--users` a spustí vše, co je v `GlobalSeeder`.*
 
 ### Fresh seed na produkci (VAROVÁNÍ)
 Pokud potřebujete uvést produkční databázi do čistého výchozího stavu (smaže to uživatele, nastavení i CMS obsah!):

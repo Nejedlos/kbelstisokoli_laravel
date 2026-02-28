@@ -8,7 +8,11 @@ Tento modul zajišťuje správu uživatelských účtů (přihlášení, role) a
 - **Rozšiřitelnost:** Lze přidat další typy profilů (např. CoachProfile, GuardianProfile) bez zásahu do jádra.
 
 ## 2. Datový model
-- **users:** Rozšířeno o `is_active`, `phone`, `last_login_at`, `admin_note`.
+- **users:** Rozšířeno o `is_active`, `phone`, `last_login_at`, `admin_note`, `club_member_id` a `payment_vs`.
+- **Automatické generování ID:** Při prvním přihlášení uživatele (pokud chybí) se automaticky vygeneruje:
+    - **ID člena (`club_member_id`):** Formát `KS-RRXXXX` (např. KS-261234).
+    - **Variabilní symbol (`payment_vs`):** Formát `RRMMXXXX` (např. 26021234).
+    - Generování zajišťuje `ClubIdentifierService` volaný v `LoginResponse`. Obě ID jsou v databázi unikátní.
 - **player_profiles:** `user_id` (unique), `jersey_number`, `position`, `public_bio`, `private_note`, `is_active`, `metadata` (JSON).
 - **player_profile_team (pivot):** `player_profile_id`, `team_id`, `role_in_team`, `is_primary_team`, `active_from`, `active_to`.
 

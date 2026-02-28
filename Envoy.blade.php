@@ -235,7 +235,7 @@
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
+    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
 
     if [ "{{ $usersync }}" = "1" ]; then
         echo "Syncing users (avatars)..."
@@ -288,7 +288,7 @@
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
+    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
 
     echo "Updating public/.env configuration..."
     {{ $php }} -r '
@@ -582,7 +582,7 @@
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }}
+    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
 
     if [ "{{ $usersync }}" = "1" ]; then
         echo "Syncing users (avatars)..."

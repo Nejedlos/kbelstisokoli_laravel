@@ -6,11 +6,15 @@
 @section('content')
     <div class="space-y-10">
         <!-- Profile Summary -->
-        <section class="relative overflow-hidden group">
+        <section class="relative group rounded-[2.5rem]">
             <!-- Background Layer -->
             <div class="absolute inset-0 bg-white rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/40"></div>
-            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-primary/10 transition-colors duration-700"></div>
-            <div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-3xl -ml-10 -mb-10"></div>
+
+            <!-- Decorative Elements (Clipped) -->
+            <div class="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-primary/10 transition-colors duration-700"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-3xl -ml-10 -mb-10"></div>
+            </div>
 
             <div class="relative p-6 sm:p-8 md:p-12 flex flex-col lg:flex-row lg:items-center gap-6 sm:gap-10">
                 <!-- Avatar Section -->
@@ -111,6 +115,9 @@
             />
         </div>
 
+        <!-- Bank Info & QR Payment -->
+        <livewire:member.payment-widget />
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <!-- Upcoming Program -->
             <div class="lg:col-span-2 space-y-6">
@@ -176,23 +183,37 @@
                     </div>
                     <a href="{{ route('member.economy.index') }}" class="btn btn-outline w-full py-2 text-xs">{{ __('member.dashboard.economy.cta') }}</a>
 
-                    <div class="bg-gradient-to-br from-white to-slate-50/50 rounded-[2.5rem] border border-slate-200/60 p-6 shadow-sm relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
-                            <i class="fa-light fa-whistle text-6xl text-secondary"></i>
+                    <div class="relative group rounded-[2.5rem]">
+                        <!-- Background with shadow -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-white to-slate-50/50 rounded-[2.5rem] border border-slate-200/60 shadow-sm transition-all duration-500 group-hover:shadow-md group-hover:border-primary/10"></div>
+
+                        <!-- Decorative background icon clipped -->
+                        <div class="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
+                            <div class="absolute -right-4 -top-4 opacity-[0.03] group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700">
+                                <i class="fa-light fa-whistle text-8xl text-secondary"></i>
+                            </div>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-6 relative z-10">
-                            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm shadow-primary/5 group-hover:scale-110 transition-transform">
-                                <i class="fa-light fa-whistle text-xl"></i>
+
+                        <div class="relative p-6 z-10 space-y-6">
+                            <!-- Icon and Text -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm shadow-primary/5 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+                                    <i class="fa-light fa-whistle text-xl"></i>
+                                </div>
+                                <div class="space-y-1.5 flex-1">
+                                    <h4 class="text-sm font-black uppercase tracking-tight text-secondary leading-tight">{{ __('member.feedback.contact_coach_title') }}</h4>
+                                    <p class="text-[11px] text-slate-500 font-medium leading-relaxed italic opacity-80">{{ __('member.feedback.hints.economy') }}</p>
+                                </div>
                             </div>
-                            <div class="space-y-1 flex-1">
-                                <h4 class="text-sm font-black uppercase tracking-tight text-secondary leading-none">{{ __('member.feedback.contact_coach_title') }}</h4>
-                                <p class="text-[11px] text-slate-500 font-medium leading-relaxed italic opacity-80 mt-1.5">{{ __('member.feedback.hints.economy') }}</p>
-                            </div>
-                            <div class="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
-                                <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline py-2.5 px-5 text-[10px] w-full sm:w-auto bg-white hover:border-primary/30 hover:text-primary transition-all">
+
+                            <!-- Buttons -->
+                            <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
+                                <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline py-2.5 px-4 text-[10px] bg-white hover:border-primary/30 hover:text-primary transition-all flex items-center justify-center gap-2">
+                                    <i class="fa-light fa-comment-dots text-xs"></i>
                                     {{ __('member.feedback.contact_coach_title') }}
                                 </a>
-                                <a href="{{ route('member.contact.admin.form') }}" class="btn py-2.5 px-5 text-[10px] w-full sm:w-auto bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border-none shadow-none">
+                                <a href="{{ route('member.contact.admin.form') }}" class="btn py-2.5 px-4 text-[10px] bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border-none shadow-none flex items-center justify-center gap-2">
+                                    <i class="fa-light fa-user-gear text-xs"></i>
                                     {{ __('member.feedback.contact_admin_title') }}
                                 </a>
                             </div>
@@ -200,25 +221,6 @@
                     </div>
                 </section>
 
-                <!-- Coach Tools (if applicable) -->
-                @if(auth()->user()->can('manage_teams') && count($coachTeams) > 0)
-                    <section class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-black uppercase tracking-tight text-secondary">{{ __('dashboard.coach_tools') }}</h3>
-                            <span class="text-[10px] px-2 py-0.5 bg-secondary text-white rounded-full font-black uppercase">{{ __('dashboard.coach_badge') }}</span>
-                        </div>
-                        <div class="space-y-2">
-                            @foreach($coachTeams as $team)
-                                <a href="{{ route('member.teams.show', $team) }}" class="card p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
-                                    <span class="font-bold text-secondary">{{ $team->name }}</span>
-                                    <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
-                                        <i class="fa-light fa-chevron-right text-[10px]"></i>
-                                    </div>
-                                </a>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
 
                 <!-- Profile Completion -->
                 @if(!auth()->user()->playerProfile)

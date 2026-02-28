@@ -142,19 +142,10 @@ class DashboardController extends Controller
         // 3. Týmy uživatele
         $myTeams = $user->playerProfile?->teams ?? collect();
 
-        // 4. Trenérské údaje (pokud je trenér)
-        $coachTeams = [];
-        if ($user->can('manage_teams')) {
-            // Zde by byla logika pro týmy, které trenér skutečně trénuje.
-            // Pro účely skeletonu použijeme všechny týmy nebo placeholder.
-            $coachTeams = \App\Models\Team::limit(3)->get();
-        }
-
         return view('member.dashboard', [
             'upcoming' => $upcoming,
             'pendingCount' => $pendingCount,
             'myTeams' => $myTeams,
-            'coachTeams' => $coachTeams,
             'economySummary' => $economySummary,
             'notifications' => $notifications,
             'avatarUrl' => $avatarUrl,

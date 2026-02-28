@@ -110,14 +110,16 @@ class AppServiceProvider extends ServiceProvider
                 $branding['club_short_name'] = $brandingService->replacePlaceholders($branding['club_short_name']);
                 $branding['slogan'] = $brandingService->replacePlaceholders($branding['slogan'] ?? '');
 
-                $cachedData = [
-                    'branding' => $branding,
-                    'branding_css' => $brandingService->getCssVariables(),
-                    'announcements_public' => $communicationService->getActiveAnnouncements('public'),
-                    'announcements_member' => $communicationService->getActiveAnnouncements('member'),
-                    'footerMenu' => \App\Models\Menu::where('location', 'footer')->with('items')->first()?->items ?? collect(),
-                    'footerClubMenu' => \App\Models\Menu::where('location', 'footer_club')->with('items')->first()?->items ?? collect(),
-                ];
+                $cachedData = \Illuminate\Support\Facades\Cache::remember('view_composer_data', 3600, function () use ($brandingService, $communicationService, $branding) {
+                    return [
+                        'branding' => $branding,
+                        'branding_css' => $brandingService->getCssVariables(),
+                        'announcements_public' => $communicationService->getActiveAnnouncements('public'),
+                        'announcements_member' => $communicationService->getActiveAnnouncements('member'),
+                        'footerMenu' => \App\Models\Menu::where('location', 'footer')->with('items')->first()?->items ?? collect(),
+                        'footerClubMenu' => \App\Models\Menu::where('location', 'footer_club')->with('items')->first()?->items ?? collect(),
+                    ];
+                });
             }
 
             $view->with('branding', $cachedData['branding']);

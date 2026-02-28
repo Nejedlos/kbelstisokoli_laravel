@@ -19,6 +19,7 @@ return [
         'public_contact' => 'Vedení týmu (Veřejný kontakt)',
         'public_contact_desc' => 'Podrobné kontaktní údaje pro veřejnost (stránka Kontakt).',
         'global_links' => 'Důležité odkazy',
+        'economy' => 'Ekonomika a platby',
     ],
     'fields' => [
         'theme_preset' => 'Barevné téma (Preset)',
@@ -71,6 +72,10 @@ return [
         'contact_fax' => 'Fax',
         'main_club_url' => 'Web hlavního oddílu (externí)',
         'recruitment_url' => 'URL náboru mládeže (externí)',
+        'bank_account' => 'Číslo bankovního účtu',
+        'bank_account_help' => 'Např. 6022854477/6363',
+        'bank_name' => 'Název banky',
+        'bank_name_help' => 'Např. Komerční banka a.s.',
     ],
     'options' => [
         'header' => [

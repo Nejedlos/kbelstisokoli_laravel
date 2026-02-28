@@ -1,8 +1,11 @@
 @props(['title', 'value', 'icon', 'color' => 'primary', 'route' => '#'])
 
-<a href="{{ $route }}" class="relative overflow-hidden group">
+<a href="{{ $route }}" class="relative group rounded-[2.5rem]">
     <div class="absolute inset-0 bg-white rounded-[2.5rem] border border-slate-200/60 shadow-lg shadow-slate-200/20 group-hover:shadow-xl group-hover:shadow-primary/5 group-hover:border-primary/20 transition-all duration-500"></div>
-    <div class="absolute top-0 right-0 w-32 h-32 bg-{{ $color === 'primary' ? 'rose' : ($color === 'secondary' ? 'slate' : 'blue') }}-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
+
+    <div class="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-{{ $color === 'primary' ? 'rose' : ($color === 'secondary' ? 'slate' : 'blue') }}-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
+    </div>
 
     <div class="relative p-6 sm:p-7 flex items-center gap-4 sm:gap-6">
         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-{{ $color === 'primary' ? 'rose' : ($color === 'secondary' ? 'slate' : 'blue') }}-50 text-{{ $color === 'primary' ? 'rose' : ($color === 'secondary' ? 'slate' : 'blue') }}-600 flex items-center justify-center flex-shrink-0 transition-all group-hover:scale-110 group-hover:rotate-3">

@@ -298,6 +298,21 @@ class BrandingSettings extends Page implements HasForms
                             ]),
                     ]),
 
+                Section::make(__('admin/branding-settings.sections.economy'))
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('bank_account')
+                                    ->label(__('admin/branding-settings.fields.bank_account'))
+                                    ->helperText(__('admin/branding-settings.fields.bank_account_help'))
+                                    ->placeholder('6022854477/6363'),
+                                TextInput::make('bank_name')
+                                    ->label(__('admin/branding-settings.fields.bank_name'))
+                                    ->helperText(__('admin/branding-settings.fields.bank_name_help'))
+                                    ->placeholder('Komerční banka a.s.'),
+                            ]),
+                    ]),
+
                 Section::make(__('Výkon a optimalizace'))
                     ->schema([
                         Select::make('perf_scenario')

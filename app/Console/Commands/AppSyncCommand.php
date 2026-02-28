@@ -18,7 +18,8 @@ class AppSyncCommand extends Command
      */
     protected $signature = 'app:sync
                             {--force : Přepíše existující data, pokud je to podporováno dílčími příkazy}
-                            {--usersync : Synchronizovat avatary a hráčské fotky (z NextAI)}
+                            {--usersync : Synchronizovat avatary, hráčské fotky a seedovat uživatele (UserSeeder)}
+                            {--syncusers : Alias pro --usersync}
                             {--syncuser : Alias pro --usersync (překlep uživatele)}
                             {--ai : Vynutit reindexaci AI (standardně se v app:sync přeskakuje)}
                             {--ai-test : Testovací režim pro AI (přeskočí interakce)}
@@ -67,7 +68,7 @@ class AppSyncCommand extends Command
     {
         $this->info('--- Running Environment Data Sync ---');
 
-        $usersync = $this->option('usersync') || $this->option('syncuser');
+        $usersync = $this->option('usersync') || $this->option('syncusers') || $this->option('syncuser');
 
         // Ikony
         if (class_exists(\App\Console\Commands\IconsSyncCommand::class)) {
@@ -241,7 +242,7 @@ class AppSyncCommand extends Command
         // --- Nahrávání lokálních assetů ---
         \Laravel\Prompts\info("📤 Nahrávám lokální assety a build na server...");
 
-        $usersync = $this->option('usersync') || $this->option('syncuser');
+        $usersync = $this->option('usersync') || $this->option('syncusers') || $this->option('syncuser');
 
         $ftpHost = env('PROD_FTP_HOST');
         $ftpUser = env('PROD_FTP_USER');

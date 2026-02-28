@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use App\Support\AuthRedirect;
+use App\Services\ClubIdentifierService;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
@@ -17,6 +18,21 @@ class LoginResponse implements LoginResponseContract, FilamentLoginResponseContr
     public function toResponse($request): RedirectResponse|Redirector
     {
         $user = auth()->user();
+
+        // --- Generování chybějících klubových ID ---
+        if ($user && (empty($user->club_member_id) || empty($user->payment_vs))) {
+            $service = app(ClubIdentifierService::class);
+
+            if (empty($user->club_member_id)) {
+                $user->club_member_id = $service->generateClubMemberId();
+            }
+
+            if (empty($user->payment_vs)) {
+                $user->payment_vs = $service->generatePaymentVs();
+            }
+
+            $user->save();
+        }
 
         // --- Hardened admin 2FA flow ---
         // Pokud má uživatel přístup do adminu, zajistíme, že 2FA challenge/setting proběhne

@@ -13,11 +13,11 @@ class PerformanceSettingsSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            'perf_scenario' => 'standard',
+            'perf_scenario' => 'aggressive',
             'perf_full_page_cache' => '0',
-            'perf_fragment_cache' => '0',
-            'perf_html_minification' => '0',
-            'perf_livewire_navigate' => '0',
+            'perf_fragment_cache' => '1',
+            'perf_html_minification' => '1',
+            'perf_livewire_navigate' => '1',
             'perf_lazy_load_images' => '1',
         ];
 

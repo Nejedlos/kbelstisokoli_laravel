@@ -21,6 +21,7 @@ class AppSeedCommand extends Command
     protected $signature = 'app:seed
                             {--fresh : Smaže všechna data v dotčených tabulkách před seedováním}
                             {--force : Vynutí spuštění na produkci}
+                            {--users : Povolí seedování uživatelů (UserSeeder, LegacyUserMigrationSeeder)}
                             {--frontend-only : Spustí pouze seedery frontendového obsahu (CmsContentSeeder, GdprPageSeeder)}
                             {--class=Database\\Seeders\\GlobalSeeder : Třída seederu, který se má spustit}';
 
@@ -37,8 +38,19 @@ class AppSeedCommand extends Command
     public function handle()
     {
         $fresh = $this->option('fresh');
+        $users = (bool) $this->option('users');
         $frontendOnly = (bool) $this->option('frontend-only');
         $class = $this->option('class');
+
+        // Seedování uživatelů povolíme buď explicitně příznakem, nebo automaticky při fresh seedu
+        $seedUsers = $users || $fresh;
+        config(['app.seed_users' => $seedUsers]);
+
+        if ($seedUsers) {
+            $this->line("🛡️  Seedování uživatelů: <info>POVOLENO</info>");
+        } else {
+            $this->line("🛡️  Seedování uživatelů: <comment>PŘESKOČENO</comment> (použijte --users pro vynucení)");
+        }
 
         // Informativní výpis aktivní DB
         try {

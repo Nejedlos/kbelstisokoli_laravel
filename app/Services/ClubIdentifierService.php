@@ -9,16 +9,16 @@ class ClubIdentifierService
 {
     /**
      * Vygeneruje unikátní variabilní symbol.
-     * Formát: RRXXXX (RR = rok, XXXX = náhodné číslo nebo sekvence)
-     * Pro jednoduchost a unikátnost v tomto zadání použijeme rok + 4 náhodné číslice a ověříme v DB.
+     * Formát: RRMMXXXX (RR = rok, MM = měsíc, XXXX = náhodné číslo)
+     * Celkem 8 cifer pro "hezký" variabilní symbol.
      */
     public function generatePaymentVs(): string
     {
-        $year = date('y');
+        $yearMonth = date('ym');
 
         do {
             $number = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-            $vs = $year . $number;
+            $vs = $yearMonth . $number;
         } while (User::where('payment_vs', $vs)->exists());
 
         return $vs;
@@ -26,14 +26,14 @@ class ClubIdentifierService
 
     /**
      * Vygeneruje unikátní ID člena.
-     * Formát: KS-RRXXXX
+     * Formát: KS-RRXXXX (RR = rok, XXXX = náhodné číslo)
      */
     public function generateClubMemberId(): string
     {
         $year = date('y');
 
         do {
-            $number = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $number = str_pad(mt_rand(1000, 9999), 4, '0', STR_PAD_LEFT);
             $id = 'KS-' . $year . $number;
         } while (User::where('club_member_id', $id)->exists());
 

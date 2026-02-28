@@ -131,45 +131,7 @@
             </div>
         </div>
 
-        <!-- Bank Info (Placeholder) -->
-        <div class="card p-6 sm:p-10 bg-secondary text-white relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-6 opacity-[0.05] group-hover:scale-110 transition-transform duration-1000">
-                <i class="fa-light fa-bank text-[120px] sm:text-[180px]"></i>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center relative z-10">
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-primary leading-none mb-3">{{ __('member.economy.bank_info.title') }}</h3>
-                        <p class="text-[13px] sm:text-sm text-slate-300 font-medium leading-relaxed italic opacity-80">{{ __('member.economy.bank_info.text') }}</p>
-                    </div>
-
-                    <div class="space-y-3 pt-2">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-3 gap-1">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ __('member.economy.bank_info.account_number') }}</span>
-                            <span class="font-bold text-base sm:text-lg">123456789 / 0100</span>
-                        </div>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-3 gap-1">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ __('member.economy.bank_info.bank') }}</span>
-                            <span class="font-bold text-sm">Komerční banka a.s.</span>
-                        </div>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-3 gap-1">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ __('member.economy.bank_info.recipient_message') }}</span>
-                            <span class="font-bold text-sm">Jméno a příjmení člena</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col items-center justify-center gap-4">
-                    <div class="w-40 h-40 sm:w-48 sm:h-48 bg-white rounded-[2rem] p-4 flex items-center justify-center shadow-2xl relative group/qr">
-                        <x-heroicon-o-qr-code class="w-32 h-32 text-secondary" />
-                        <div class="absolute inset-0 bg-secondary/80 backdrop-blur-[2px] opacity-0 group-hover/qr:opacity-100 transition-all rounded-[2rem] flex flex-col items-center justify-center p-6 text-center">
-                            <i class="fa-light fa-magnifying-glass-plus text-2xl mb-2"></i>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-white leading-tight">{{ __('member.economy.bank_info.qr_payment') }}</span>
-                        </div>
-                    </div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-white/40 italic">{{ __('member.economy.bank_info.qr_payment') }}</span>
-                </div>
-            </div>
-        </div>
+        <!-- Bank Info (Livewire Widget) -->
+        <livewire:member.payment-widget />
     </div>
 @endsection
