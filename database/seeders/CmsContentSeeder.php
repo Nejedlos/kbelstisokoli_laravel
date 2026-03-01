@@ -365,7 +365,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Nábor do Týmu C',
                                 'description' => 'Hledáme zkušené parťáky pro Pražský přebor B. Pokud chceš hrát kvalitní basket a být součástí skvělé party v Letňanech, ozvi se.',
-                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-c-nabor.webp',
                                 'link' => '/join/muzi-c',
                                 'link_label' => 'Chci hrát za C',
                                 'badge' => 'PŘEBOR B',
@@ -373,7 +373,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Nábor do Týmu E',
                                 'description' => 'Hledáš pohodový basket ve 3. třídě? Do našeho týmu E v Letňanech rádi přivítáme nové tváře, co milují hru a dobrou partu.',
-                                'image_url' => 'assets/img/home/team-muzi-e.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-e-nabor.webp',
                                 'link' => '/join/muzi-e',
                                 'link_label' => 'Chci hrát za E',
                                 'badge' => '3. TŘÍDA B',
@@ -533,7 +533,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Join Team C',
                                 'description' => 'Looking for experienced teammates for Prague Championship B. If you want to play quality basketball in Letňany, join us.',
-                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-c-nabor.webp',
                                 'link' => '/join/muzi-c',
                                 'link_label' => 'Join Team C',
                                 'badge' => 'CHAMPIONSHIP B',
@@ -541,7 +541,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Join Team E',
                                 'description' => 'Looking for relaxed basketball in 3rd Class? Our Team E in Letňany welcomes new faces who love the game and a great team.',
-                                'image_url' => 'assets/img/home/team-muzi-e.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-e-nabor.webp',
                                 'link' => '/join/muzi-e',
                                 'link_label' => 'Join Team E',
                                 'badge' => '3RD CLASS B',
@@ -659,7 +659,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Tým Muži C',
                                 'description' => 'Hledáme zkušené parťáky pro Pražský přebor B. Pokud chceš hrát kvalitní basket, pravidelně trénovat a být součástí ambiciózního týmu v Letňanech, ozvi se nám. Naše zázemí v RumcajsAreně je připraveno pro hráče s chutí vyhrávat a posouvat se v tabulce výše.',
-                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-c-nabor.webp',
                                 'link' => '/join/muzi-c',
                                 'link_label' => 'Chci hrát za C',
                                 'badge' => 'PŘEBOR B',
@@ -667,7 +667,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Tým Muži E',
                                 'description' => 'Hledáš pohodový basket, ale stále se soutěžním duchem? Náš tým E hrající 3. třídu B v Letňanech je ideální volbou. Zakládáme si na skvělé partě, radosti ze hry a vítáme nové tváře, které se chtějí vrátit k basketbalu po pauze nebo hrát pro zábavu v super kolektivu.',
-                                'image_url' => 'assets/img/home/team-muzi-e.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-e-nabor.webp',
                                 'link' => '/join/muzi-e',
                                 'link_label' => 'Chci hrát za E',
                                 'badge' => '3. TŘÍDA B',
@@ -723,7 +723,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Men C Team',
                                 'description' => 'Looking for experienced teammates for Prague Championship B. If you want to play quality basketball, train regularly and be part of an ambitious team in Letňany, join us. Our facilities in RumcajsArena are ready for players who want to win and move up the table.',
-                                'image_url' => 'assets/img/home/team-muzi-c.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-c-nabor.webp',
                                 'link' => '/join/muzi-c',
                                 'link_label' => 'Join Team C',
                                 'badge' => 'CHAMPIONSHIP B',
@@ -731,7 +731,7 @@ class CmsContentSeeder extends Seeder
                             [
                                 'title' => 'Men E Team',
                                 'description' => 'Looking for relaxed basketball but still with a competitive spirit? Our Team E playing in the 3rd Class B in Letňany is the ideal choice. We pride ourselves on a great community, joy of the game and welcome new faces who want to return to basketball after a break or play for fun.',
-                                'image_url' => 'assets/img/home/team-muzi-e.jpg',
+                                'image_url' => 'assets/img/home/team-muzi-e-nabor.webp',
                                 'link' => '/join/muzi-e',
                                 'link_label' => 'Join Team E',
                                 'badge' => '3RD CLASS B',

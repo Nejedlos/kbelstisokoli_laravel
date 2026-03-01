@@ -40,17 +40,23 @@ class AvatarModal extends Component
 
     public function getGalleryAssets()
     {
-        // 1. Pokus o načtení z databáze (systémové avatary i photo pooly)
+        if (! $this->isOpen) {
+            return collect();
+        }
+
+        // 1. Pokus o načtení z databáze (systémové avatary)
         $query = MediaAsset::query()
             ->where(function ($query) {
-                $query->whereNull('uploaded_by_id')
-                    ->orWhere('title', 'like', 'Default Avatar%');
+                // Pouze ty, co mají v názvu "Avatar", abychom odfiltrovali např. fotky z importu photo poolů
+                $query->where('title', 'like', '%Avatar%')
+                    ->orWhere('title', 'like', 'Default%');
             })
+            ->whereNull('uploaded_by_id')
             ->where('is_public', true);
 
         $assets = $query
             ->latest('id')
-            ->limit(1000)
+            ->limit(100) // Stačí 100, ne tisíce
             ->get();
 
         // 2. Fallback: Pokud je DB prázdná, prohledáme přímo disk (pro případ, že jsou soubory synchronizovány bez DB)

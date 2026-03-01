@@ -621,14 +621,21 @@ body.fi-panel-admin > [wire\:key="fls-outside-panels"] {
     background: rgba(11, 31, 58, 0.45) !important;
     backdrop-filter: blur(4px) saturate(120%) !important;
     -webkit-backdrop-filter: blur(4px) saturate(120%) !important;
-    pointer-events: all !important;
-    display: none;
+    pointer-events: none !important;
+    display: none !important;
     align-items: center !important;
     justify-content: center !important;
 }
 
-.ks-loader-overlay:not(.hidden) {
+.ks-loader-overlay.is-loading,
+.ks-loader-overlay[wire\:loading]:not([style*="display: none"]),
+.ks-loader-overlay[wire\:loading\.delay]:not([style*="display: none"]),
+.ks-loader-overlay[wire\:loading\.delay\.shortest]:not([style*="display: none"]),
+.ks-loader-overlay[wire\:loading\.flex]:not([style*="display: none"]),
+.ks-loader-overlay[style*="display: block"],
+.ks-loader-overlay[style*="display: flex"] {
     display: flex !important;
+    pointer-events: all !important;
 }
 
 .ks-loader-content {

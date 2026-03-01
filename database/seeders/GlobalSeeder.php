@@ -74,6 +74,12 @@ class GlobalSeeder extends Seeder
      */
     public function run(): void
     {
+        ini_set('memory_limit', '1024M');
+
+        if (class_exists(\Laravel\Telescope\Telescope::class)) {
+            \Laravel\Telescope\Telescope::stopRecording();
+        }
+
         $seeders = self::SEEDERS;
 
         // Pokud není povoleno seedování uživatelů, vynecháme je.

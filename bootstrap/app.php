@@ -202,6 +202,17 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 return null; // nezasahujeme mimo produkci
             }
 
+            // Pokud je to chyba 419 (CSRF token mismatch), vracíme null, aby proběhlo standardní ošetření
+            // (pokud není request na logout, což už je ošetřeno výše)
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $e->getStatusCode() === 419) {
+                // Pokud je uživatel přihlášen, zkusíme mu zachovat session tím, že ho jen přesměrujeme zpět s hláškou
+                if ($request->user()) {
+                    return redirect()->back()->withErrors(['error' => __('Platnost relace vypršela, zkuste akci zopakovat.')]);
+                }
+
+                return null;
+            }
+
             // Pouze pro neošetřené chyby 500+
             if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $e->getStatusCode() < 500) {
                 return null;
