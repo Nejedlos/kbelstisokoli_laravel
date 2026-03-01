@@ -70,7 +70,7 @@ class PhotoPoolResource extends Resource
                 Placeholder::make('ks_global_loader')
                     ->hiddenLabel()
                     ->content(fn ($livewire) => new HtmlString(Blade::render('
-                        <x-loader.basketball wire:target="processImportQueue,cancelImportQueue,confirmCancelImportQueue,dismissCancelImportQueue" class="{{ $confirmingCancellation ? \'is-loading\' : \'\' }}">
+                        <x-loader.basketball wire:target="create,save,cancelImportQueue,confirmCancelImportQueue,dismissCancelImportQueue,regenerateAi" class="{{ ($confirmingCancellation ?? false) ? \'is-loading\' : \'\' }}">
                             <div class="text-center p-10 bg-white/5 dark:bg-black/40 backdrop-blur-2xl rounded-[3rem] border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] max-w-sm mx-auto overflow-hidden relative">
                                 <div class="relative z-10">
                                     @if($confirmingCancellation)
@@ -124,17 +124,17 @@ class PhotoPoolResource extends Resource
                                 </div>
                             </div>
                         </x-loader.basketball>
-                    ', ['confirmingCancellation' => $livewire->confirmingCancellation])))
+                    ', ['confirmingCancellation' => $livewire->confirmingCancellation ?? false])))
                     ->columnSpanFull(),
 
                 Placeholder::make('processing_progress')
                     ->hiddenLabel()
-                    ->visible(fn ($record) => $record && (! empty($record->pending_import_queue) || $record->is_processing_import))
+                    ->visible(fn ($record, $livewire) => $record !== null && (! empty($record->pending_import_queue) || $record->is_processing_import || ($livewire->confirmingCancellation ?? false)))
                     ->content(function ($record, $livewire) {
                         $count = count($record->pending_import_queue ?? []);
                         $status = $record->is_processing_import ? 'Probíhá import fotografií' : 'Čeká na zpracování';
                         $icon = $record->is_processing_import ? 'fa-spinner-third fa-spin' : 'fa-clock';
-                        $isConfirming = $livewire->confirmingCancellation;
+                        $isConfirming = $livewire->confirmingCancellation ?? false;
 
                         if ($isConfirming) {
                             return new HtmlString("

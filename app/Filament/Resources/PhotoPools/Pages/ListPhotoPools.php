@@ -39,13 +39,27 @@ class ListPhotoPools extends ListRecords
                 ->form([
                     Placeholder::make('ks_global_loader')
                         ->hiddenLabel()
-                        ->content(fn () => new HtmlString(Blade::render('<x-loader.basketball id="ks-basketball-loader" style="display: none;" />')))
+                        ->content(fn () => new HtmlString(Blade::render('
+                            <x-loader.basketball wire:target="mountAction,callMountedAction,nextStep,regenerateAi">
+                                <div class="text-center p-10 bg-white/5 dark:bg-black/40 backdrop-blur-2xl rounded-[3rem] border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] max-w-sm mx-auto overflow-hidden relative">
+                                    <div class="relative z-10">
+                                        <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/10 text-white shadow-2xl border border-white/20 rotate-6 transition-transform duration-500">
+                                            <i class="fa-light fa-sparkles fa-spin text-3xl text-primary-500"></i>
+                                        </div>
+                                        <strong class="text-2xl font-black block mb-2 text-white tracking-tight uppercase italic leading-none">Příprava galerie</strong>
+                                        <p class="text-[13px] text-white/80 font-medium leading-relaxed mb-4 px-4">
+                                            AI právě analyzuje vaše zadání a připravuje metadata. <strong>Během nahrávání a následného zpracování nezavírejte toto okno.</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </x-loader.basketball>
+                        ')))
                         ->columnSpanFull(),
 
                     Placeholder::make('processing_progress')
                         ->hiddenLabel()
                         ->content(fn () => new HtmlString('
-                            <div class="relative py-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+                            <div wire:loading wire:target="nextStep,callMountedAction,regenerateAi" class="relative py-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
                                 <div wire:stream="ks-loader-progress-text" class="text-xs font-black text-primary-600 dark:text-primary-400 text-center italic tracking-widest uppercase mb-2">Příprava nahrávání...</div>
                                 <div class="mx-auto w-48 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                                     <div class="h-full bg-primary-600 w-1/3 animate-[ks-modal-progress_1.5s_infinite_linear]"></div>
