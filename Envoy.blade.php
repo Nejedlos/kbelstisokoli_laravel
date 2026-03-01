@@ -172,8 +172,8 @@
     else
         # Prefer v18+ versions if found
         NODE_BIN_PATH=""
-        for n in $(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
-            VER=$($n -v | sed "s/v//")
+        for n in $(which -a node22 node20 node18 "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
+            VER=$($n -v 2>/dev/null | sed "s/v//")
             if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
                 NODE_BIN_PATH=$n
                 break
@@ -189,7 +189,16 @@
     if [[ "{{ $npm }}" == /* ]]; then
         NPM_BIN_PATH="{{ $npm }}"
     else
-        NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        NPM_BIN_PATH=""
+        # Try to find a matching npm if we have a specific node version (e.g. node20 -> npm20)
+        N_VER=$(echo "$NODE_BIN_PATH" | sed -E 's/.*node([0-9]+).*/\1/' | grep -E '^[0-9]+$')
+        if [ ! -z "$N_VER" ]; then
+            NPM_BIN_PATH=$(which -a "npm$N_VER" 2>/dev/null | grep -v "{{ $path }}/.node_bin" | head -n1)
+        fi
+
+        if [ -z "$NPM_BIN_PATH" ]; then
+            NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        fi
     fi
     ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
@@ -386,8 +395,8 @@
     else
         # Prefer v18+ versions if found
         NODE_BIN_PATH=""
-        for n in $(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
-            VER=$($n -v | sed "s/v//")
+        for n in $(which -a node22 node20 node18 "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
+            VER=$($n -v 2>/dev/null | sed "s/v//")
             if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
                 NODE_BIN_PATH=$n
                 break
@@ -403,7 +412,16 @@
     if [[ "{{ $npm }}" == /* ]]; then
         NPM_BIN_PATH="{{ $npm }}"
     else
-        NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        NPM_BIN_PATH=""
+        # Try to find a matching npm if we have a specific node version (e.g. node20 -> npm20)
+        N_VER=$(echo "$NODE_BIN_PATH" | sed -E 's/.*node([0-9]+).*/\1/' | grep -E '^[0-9]+$')
+        if [ ! -z "$N_VER" ]; then
+            NPM_BIN_PATH=$(which -a "npm$N_VER" 2>/dev/null | grep -v "{{ $path }}/.node_bin" | head -n1)
+        fi
+
+        if [ -z "$NPM_BIN_PATH" ]; then
+            NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+        fi
     fi
     ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
