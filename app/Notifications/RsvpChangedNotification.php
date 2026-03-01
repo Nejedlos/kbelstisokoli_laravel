@@ -4,12 +4,31 @@ namespace App\Notifications;
 
 class RsvpChangedNotification extends BaseNotification
 {
+    /**
+     * @var string
+     */
+    protected string $notificationType = 'attendance';
+
     public function __construct(
         protected string $eventTitle,
         protected string $status,
         protected ?\App\Models\User $user = null,
-        protected ?string $actionUrl = null
+        protected ?string $actionUrl = null,
+        protected string $eventLabel = 'akci'
     ) {}
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        // Pro RSVP změny používáme pouze databázový kanál (in-app dropdown).
+        // E-maily pro každou změnu docházky jsou příliš frekventované (spamující)
+        // a způsobují technické problémy s limity SMTP serveru při odesílání více notifikací najednou.
+        return ['database'];
+    }
 
     protected function getNotificationData(): array
     {
@@ -21,9 +40,9 @@ class RsvpChangedNotification extends BaseNotification
         };
 
         if ($this->user) {
-            $message = "Změna účasti na akci \"{$this->eventTitle}\" na: {$statusLabel}.";
+            $message = "Změna účasti na {$this->eventLabel} \"{$this->eventTitle}\" na: {$statusLabel}.";
         } else {
-            $message = "Tvoje účast na akci \"{$this->eventTitle}\" byla {$statusLabel}.";
+            $message = "Tvoje účast na {$this->eventLabel} \"{$this->eventTitle}\" byla {$statusLabel}.";
         }
 
         return [

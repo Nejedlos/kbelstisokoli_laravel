@@ -3,34 +3,19 @@
 namespace App\Notifications;
 
 use App\Models\FinanceCharge;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class NewChargeNotification extends BaseNotification implements ShouldQueue
+class NewChargeNotification extends BaseNotification
 {
-    use Queueable;
+    /**
+     * @var string
+     */
+    protected string $notificationType = 'finance';
 
     /**
      * Create a new notification instance.
      */
     public function __construct(public FinanceCharge $charge) {}
-
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        $channels = ['database'];
-
-        if ($notifiable->prefersNotification('finance', 'mail')) {
-            $channels[] = 'mail';
-        }
-
-        return $channels;
-    }
 
     /**
      * Get the mail representation of the notification.
@@ -40,7 +25,7 @@ class NewChargeNotification extends BaseNotification implements ShouldQueue
         return (new MailMessage)
             ->subject('Nový platební předpis: '.$this->charge->title)
             ->greeting('Ahoj '.$notifiable->name.'!')
-            ->line('Byl ti vystaven nový platební předpis v klubovém systému ###TEAM_NAME###.')
+            ->line('Byl ti vystaven nový platební předpis v klubovém systému.')
             ->line('Položka: '.$this->charge->title)
             ->line('Částka: '.number_format($this->charge->amount_total, 0, ',', ' ').' Kč')
             ->line('Splatnost: '.($this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : 'neuvedeno'))

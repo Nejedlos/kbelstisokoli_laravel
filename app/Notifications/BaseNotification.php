@@ -4,12 +4,18 @@ namespace App\Notifications;
 
 use App\Services\BrandingService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-abstract class BaseNotification extends Notification
+abstract class BaseNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    /**
+     * Typ notifikace pro preference.
+     */
+    protected string $notificationType = 'general';
 
     /**
      * Získá data pro in-app notifikaci.
@@ -25,7 +31,7 @@ abstract class BaseNotification extends Notification
     {
         $channels = ['database'];
 
-        if (method_exists($notifiable, 'prefersNotification') && $notifiable->prefersNotification('general', 'mail')) {
+        if (method_exists($notifiable, 'prefersNotification') && $notifiable->prefersNotification($this->notificationType, 'mail')) {
             $channels[] = 'mail';
         }
 
