@@ -22,28 +22,42 @@
             @forelse($notifications as $notification)
                 <div class="p-4 border-b border-slate-100 last:border-0 flex items-start justify-between gap-4 {{ $notification->unread() ? 'bg-primary/5' : '' }}">
                     <div class="flex gap-4">
-                        <div class="mt-1">
-                            @php
-                                $icon = match($notification->data['type'] ?? 'info') {
-                                    'success' => 'heroicon-o-check-circle',
-                                    'warning' => 'heroicon-o-exclamation-triangle',
-                                    'urgent' => 'heroicon-o-bolt',
-                                    default => 'heroicon-o-information-circle',
-                                };
-                                $color = match($notification->data['type'] ?? 'info') {
-                                    'success' => 'text-emerald-500',
-                                    'warning' => 'text-amber-500',
-                                    'urgent' => 'text-red-500',
-                                    default => 'text-blue-500',
-                                };
-                            @endphp
-                            <svg class="w-6 h-6 {{ $color }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div class="shrink-0 mt-1">
+                            @if(!empty($notification->data['user_avatar']))
+                                <div class="relative">
+                                    <img src="{{ $notification->data['user_avatar'] }}" alt="{{ $notification->data['user_name'] ?? '' }}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm ring-1 ring-slate-100">
+                                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100">
+                                        @php
+                                            $iconClass = match($notification->data['type'] ?? 'info') {
+                                                'success' => 'fa-circle-check text-emerald-500',
+                                                'warning' => 'fa-triangle-exclamation text-amber-500',
+                                                'urgent' => 'fa-bolt text-red-500',
+                                                default => 'fa-circle-info text-blue-500',
+                                            };
+                                        @endphp
+                                        <i class="fa-light {{ $iconClass }} text-[10px]"></i>
+                                    </div>
+                                </div>
+                            @else
+                                @php
+                                    $iconClass = match($notification->data['type'] ?? 'info') {
+                                        'success' => 'fa-circle-check text-emerald-500',
+                                        'warning' => 'fa-triangle-exclamation text-amber-500',
+                                        'urgent' => 'fa-bolt text-red-500',
+                                        default => 'fa-circle-info text-blue-500',
+                                    };
+                                @endphp
+                                <div class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100 shadow-sm text-xl">
+                                    <i class="fa-light {{ $iconClass }}"></i>
+                                </div>
+                            @endif
                         </div>
                         <div>
                             <div class="flex items-center gap-2 mb-1">
                                 <h3 class="font-bold text-secondary leading-tight">
+                                    @if(!empty($notification->data['user_name']))
+                                        <span class="text-primary">{{ $notification->data['user_name'] }}:</span>
+                                    @endif
                                     {{ $notification->data['title'] ?? __('member.notifications.default_title') }}
                                 </h3>
                                 @if($notification->unread())

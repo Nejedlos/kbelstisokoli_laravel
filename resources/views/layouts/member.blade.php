@@ -212,14 +212,7 @@
                 </div>
 
                 <!-- Notifications -->
-                <a href="{{ route('member.notifications.index') }}" class="relative p-2.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center">
-                    <i class="fa-light fa-bell text-xl"></i>
-                    @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
-                        <span class="absolute top-2.5 right-2.5 w-4.5 h-4.5 bg-primary text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-pulse">
-                            {{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}
-                        </span>
-                    @endif
-                </a>
+                <livewire:member.notification-dropdown />
 
                 <div class="hidden md:flex flex-col text-right leading-none gap-0.5">
                     <span class="text-sm font-black text-secondary tracking-tight">{{ auth()->user()->name }}</span>

@@ -103,6 +103,8 @@ return [
 
     'key' => env('APP_KEY'),
 
+    'public_path_mode' => env('PUBLIC_PATH_MODE', 'default'),
+
     'public_path' => env('APP_PUBLIC_PATH'),
 
     'prod_php_binary' => env('PROD_PHP_BINARY'),

@@ -191,6 +191,7 @@ return [
         'mark_read' => 'Mark as read',
         'default_title' => 'Alert',
         'default_action_label' => 'Show detail',
+        'view_all' => 'View all notifications',
         'no_notifications' => 'No new notifications',
         'no_notifications_text' => 'You currently have no unresolved alerts.',
     ],

@@ -71,7 +71,16 @@ class LocalAssetsDeployCommand extends Command
 
         foreach ($dirsToUpload as $dir) {
             $localDir = base_path($dir);
-            $remoteDir = rtrim($prodPath, '/') . '/' . $dir;
+            $dirNameOnly = basename($dir); // 'build' nebo 'assets'
+
+            // Určení cílové cesty na produkci
+            // Pokud máme PROD_PUBLIC_PATH, nahráváme přímo do ní (např. /subdomains/new/build)
+            // Pokud nemáme, nahráváme do relativní cesty v rámci PROD_PATH (např. /secret/public/build)
+            if ($remotePublicPath) {
+                $remoteDir = rtrim($remotePublicPath, '/') . '/' . $dirNameOnly;
+            } else {
+                $remoteDir = rtrim($prodPath, '/') . '/' . $dir;
+            }
 
             if (! is_dir($localDir)) {
                 $this->warn("⚠️ Složka {$localDir} neexistuje, přeskakuji.");
@@ -89,18 +98,6 @@ class LocalAssetsDeployCommand extends Command
             if (! $success) {
                 error("❌ FTP transfer složky {$dir} selhal.");
                 return self::FAILURE;
-            }
-
-            // Pokud máme definovanou externí public cestu (např. /www), nahrajeme to i tam
-            if ($remotePublicPath && $remotePublicPath !== rtrim($prodPath, '/') . '/public') {
-                $dirNameOnly = basename($dir); // např. 'build'
-                $secondaryRemoteDir = rtrim($remotePublicPath, '/') . '/' . $dirNameOnly;
-
-                info("📤 Nahrávám také do sekundární public cesty: {$secondaryRemoteDir}");
-                spin(
-                    fn () => $this->syncViaFtp($localDir, $secondaryRemoteDir, $ftpHost, $ftpUser, $ftpPass, $ftpPort),
-                    "Synchronizuji {$dirNameOnly} do sekundární cesty..."
-                );
             }
         }
 

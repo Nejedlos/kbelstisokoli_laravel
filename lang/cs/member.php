@@ -191,7 +191,8 @@ return [
         'mark_read' => 'Označit jako přečtené',
         'default_title' => 'Upozornění',
         'default_action_label' => 'Zobrazit detail',
-        'no_notifications' => 'Žádné nové notifikace',
+        'view_all' => 'Zobrazit všechna oznámení',
+        'no_notifications' => 'Žádná nová oznámení',
         'no_notifications_text' => 'Aktuálně nemáte žádná neřešená upozornění.',
     ],
     'teams' => [

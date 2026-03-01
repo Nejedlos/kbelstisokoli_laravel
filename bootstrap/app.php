@@ -275,26 +275,29 @@ $app = Application::configure(basePath: dirname(__DIR__))
 $app->useEnvironmentPath(file_exists(base_path('.env')) ? base_path() : base_path('public'));
 
 // Nastavení public_path pro subdomény a specifické hostingy (Webglobe)
-// Priorita 1: Explicitní konstanta (např. z index.php)
-// Priorita 2: Detekce z aktuálního skriptu (index.php) pokud běží přes web
-// Priorita 3: .env proměnná APP_PUBLIC_PATH
-// Priorita 4: Výchozí base_path('public')
+// PUBLIC_PATH_MODE: 'default' (použije project/public) nebo 'external' (použije PROD_PUBLIC_PATH)
+$publicPathMode = env('PUBLIC_PATH_MODE', 'default');
 $finalPublicPath = null;
 
-if (defined('LARAVEL_PUBLIC_PATH')) {
-    $finalPublicPath = LARAVEL_PUBLIC_PATH;
-} elseif (isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
+if ($publicPathMode === 'external') {
+    $finalPublicPath = env('PROD_PUBLIC_PATH');
+}
+
+// Fallback na detekci z aktuálního skriptu (index.php) pokud běží přes web
+if (!$finalPublicPath && isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
     $finalPublicPath = dirname($_SERVER['SCRIPT_FILENAME']);
 }
 
-// Možnost přebít z configu (může být užitečné pro Artisan v CLI a config cache)
+// Pokud nic nebylo nalezeno a máme APP_PUBLIC_PATH (starý pattern), použijeme ho jako fallback
 if (!$finalPublicPath) {
-    $finalPublicPath = config('app.public_path') ?: env('APP_PUBLIC_PATH');
+    $finalPublicPath = env('APP_PUBLIC_PATH');
 }
 
 if ($finalPublicPath) {
-    // Použijeme cestu přímo, abychom zachovali symlinky (důležité pro subdomény na Webglobe)
+    // Pro Laravel 12 nastavíme public path pomocí kontejneru a metody usePublicPath
+    // Toto zajistí, že public_path() v celém frameworku (včetně Vite a Storage) bude mířit správně
     $app->usePublicPath($finalPublicPath);
+    $app->instance('path.public', $finalPublicPath);
 }
 
 return $app;

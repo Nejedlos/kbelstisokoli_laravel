@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Livewire\Member;
+
+use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
+
+class NotificationDropdown extends Component
+{
+    public function getListeners()
+    {
+        return [
+            'echo-private:App.Models.User.' . Auth::id() . ',NotificationSent' => '$refresh',
+        ];
+    }
+
+    public function markAllAsRead()
+    {
+        Auth::user()->unreadNotifications->markAsRead();
+    }
+
+    public function render()
+    {
+        $user = Auth::user();
+        $unreadCount = $user->unreadNotifications()->count();
+        $latestNotifications = $user->notifications()->take(5)->get();
+
+        return view('livewire.member.notification-dropdown', [
+            'unreadCount' => $unreadCount,
+            'latestNotifications' => $latestNotifications,
+        ]);
+    }
+}
