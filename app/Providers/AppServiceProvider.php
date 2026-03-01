@@ -133,6 +133,7 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
             static $cachedData = null;
+            static $unreadCount = null;
 
             $brandingService = app(\App\Services\BrandingService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);
@@ -188,7 +189,10 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if (auth()->check()) {
-                $view->with('unreadNotificationsCount', auth()->user()->unreadNotifications->count());
+                if ($unreadCount === null) {
+                    $unreadCount = auth()->user()->unreadNotifications()->count();
+                }
+                $view->with('unreadNotificationsCount', $unreadCount);
             }
         });
     }

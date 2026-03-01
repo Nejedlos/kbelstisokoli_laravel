@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClubEvents\RelationManagers;
 
+use App\Enums\ExcuseReason;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -9,6 +10,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Get;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -44,7 +46,13 @@ class AttendancesRelationManager extends RelationManager
                         'maybe' => 'Možná',
                     ])
                     ->default('pending')
-                    ->required(),
+                    ->required()
+                    ->live(),
+                Select::make('excuse_reason')
+                    ->label('Důvod omluvy')
+                    ->options(ExcuseReason::class)
+                    ->hidden(fn ($get) => $get('planned_status') !== 'declined')
+                    ->nullable(),
                 Select::make('actual_status')
                     ->label('Realita (Trenér)')
                     ->options([
@@ -91,6 +99,7 @@ class AttendancesRelationManager extends RelationManager
                         'maybe' => 'Možná',
                         default => $state,
                     })
+                    ->description(fn (\App\Models\Attendance $record): ?string => $record->excuse_reason?->getLabel())
                     ->sortable(),
                 TextColumn::make('actual_status')
                     ->label('Realita')

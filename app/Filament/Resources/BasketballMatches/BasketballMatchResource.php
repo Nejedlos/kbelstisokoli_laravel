@@ -45,7 +45,8 @@ class BasketballMatchResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()
-            ->with(['team', 'opponent', 'season']);
+            ->with(['teams', 'opponent', 'season'])
+            ->withCount(['mismatches']);
     }
 
     public static function form(Schema $schema): Schema

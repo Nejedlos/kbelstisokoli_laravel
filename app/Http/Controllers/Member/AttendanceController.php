@@ -9,6 +9,7 @@ use App\Models\ClubEvent;
 use App\Models\Season;
 use App\Models\Training;
 use App\Models\UserSeasonConfig;
+use App\Enums\ExcuseReason;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -265,17 +266,6 @@ class AttendanceController extends Controller
 
         $item = $modelClass::findOrFail($id);
 
-        $note = $request->note;
-        if ($request->status === 'declined' && $request->excuse_reason) {
-            $reasonLabel = __('member.attendance.excuse_reasons.'.$request->excuse_reason);
-            // Zkombinujeme vybraný důvod s textovou poznámkou
-            if ($note) {
-                $note = $reasonLabel.' ('.$note.')';
-            } else {
-                $note = $reasonLabel;
-            }
-        }
-
         $attendance = Attendance::updateOrCreate(
             [
                 'user_id' => auth()->id(),
@@ -284,7 +274,8 @@ class AttendanceController extends Controller
             ],
             [
                 'planned_status' => $request->status,
-                'note' => $note,
+                'excuse_reason' => $request->status === 'declined' ? $request->excuse_reason : null,
+                'note' => $request->note,
                 'responded_at' => now(),
             ]
         );

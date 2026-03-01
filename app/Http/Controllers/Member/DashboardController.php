@@ -26,6 +26,8 @@ class DashboardController extends Controller
 
         $cacheKey = "member_dashboard_{$user->id}_{$locale}";
         $data = Cache::remember($cacheKey, 600, function () use ($user, $now) {
+            $user->loadMissing(['playerProfile.teams']);
+
             // Doplňková data pro moderní nástěnku
             $economySummary = app(FinanceService::class)->getMemberSummary($user);
             $notifications = $user->notifications()->latest()->limit(5)->get();

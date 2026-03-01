@@ -24,7 +24,8 @@ class PlayersRelationManager extends RelationManager
 
     protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where('player_profiles.is_active', true)
+        return $query->with(['user'])
+            ->where('player_profiles.is_active', true)
             ->whereHas('user', fn ($q) => $q->where('users.is_active', true));
     }
 

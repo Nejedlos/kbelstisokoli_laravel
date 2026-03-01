@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ExcuseReason;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -15,6 +16,7 @@ class Attendance extends Model
         'planned_status',
         'actual_status',
         'is_mismatch',
+        'excuse_reason',
         'note',
         'internal_note',
         'responded_at',
@@ -24,6 +26,7 @@ class Attendance extends Model
     protected $casts = [
         'responded_at' => 'datetime',
         'is_mismatch' => 'boolean',
+        'excuse_reason' => ExcuseReason::class,
         'metadata' => 'array',
     ];
 

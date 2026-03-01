@@ -1,6 +1,6 @@
 @props(['blocks' => [], 'animate' => false, 'breadcrumbs' => null])
 
-@cacheFragment('page_blocks_' . md5(serialize($blocks)) . '_' . ($animate ? 'a' : 'n') . '_' . app()->getLocale(), 3600)
+@cacheFragment('fragment_page_blocks_' . md5(serialize($blocks)) . '_' . ($animate ? 'a' : 'n') . '_' . app()->getLocale(), 3600)
 <div class="page-blocks">
     @forelse($blocks as $block)
         @php

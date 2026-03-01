@@ -129,7 +129,7 @@
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     @foreach(__('member.attendance.excuse_reasons') as $key => $label)
                                         <label class="cursor-pointer">
-                                            <input type="radio" name="excuse_reason" value="{{ $key }}" class="peer sr-only">
+                                            <input type="radio" name="excuse_reason" value="{{ $key }}" class="peer sr-only" {{ $myAttendance?->excuse_reason?->value === $key ? 'checked' : '' }}>
                                             <div class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-center text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 peer-checked:border-danger-500 peer-checked:text-danger-700 peer-checked:bg-danger-50/50">
                                                 {{ $label }}
                                             </div>
@@ -215,6 +215,11 @@
                                             {{ $p['user']->name }}
                                             @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
                                         </div>
+                                        @if($p['attendance']?->note)
+                                            <div class="text-[9px] text-success-600/70 italic font-medium truncate mt-0.5">
+                                                {{ $p['attendance']->note }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
@@ -248,13 +253,13 @@
                                             </div>
                                             @if($p['attendance']?->excuse_reason)
                                                 <div class="text-[9px] font-black uppercase tracking-tighter text-danger-500/70">
-                                                    {{ __('member.attendance.excuse_reasons.' . $p['attendance']->excuse_reason) ?? $p['attendance']->excuse_reason }}
+                                                    {{ $p['attendance']->excuse_reason->getLabel() }}
                                                 </div>
                                             @endif
                                         </div>
                                     </div>
                                     @if($p['attendance']?->note)
-                                        <div class="ml-11 mt-1.5 p-2 rounded-lg bg-slate-50 border border-slate-100 text-[10px] text-slate-500 italic leading-snug group-hover:bg-danger-50 group-hover:border-danger-100 transition-colors">
+                                        <div class="ml-11 mt-1.5 p-2 rounded-lg bg-white/50 border border-danger-100/30 text-[10px] text-slate-500 italic leading-snug group-hover:bg-danger-50 group-hover:border-danger-100 transition-colors">
                                             {{ $p['attendance']->note }}
                                         </div>
                                     @endif
@@ -287,6 +292,11 @@
                                             {{ $p['user']->name }}
                                             @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
                                         </div>
+                                        @if($p['attendance']?->note)
+                                            <div class="text-[9px] text-warning-600/70 italic font-medium truncate mt-0.5">
+                                                {{ $p['attendance']->note }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

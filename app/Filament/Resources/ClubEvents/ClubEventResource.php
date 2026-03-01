@@ -42,6 +42,12 @@ class ClubEventResource extends Resource
         return 4;
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['teams']);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ClubEventForm::configure($schema);

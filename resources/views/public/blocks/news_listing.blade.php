@@ -1,4 +1,4 @@
-@cacheFragment('block_news_listing_' . ($data['limit'] ?? 3) . '_' . app()->getLocale(), 3600)
+@cacheFragment('fragment_block_news_listing_' . ($data['limit'] ?? 3) . '_' . app()->getLocale(), 3600)
 @php
     $news = \App\Models\Post::where('is_visible', true)
         ->where('status', 'published')
