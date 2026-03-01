@@ -117,4 +117,33 @@ class BinaryHelper
 
         return self::$cache['npm'] = $configured ?: 'npm';
     }
+
+    /**
+     * Vrátí pole environment proměnných potřebných pro běh binárek (zejména NPM).
+     */
+    public static function getEnvironmentVariables(): array
+    {
+        $vars = [];
+
+        if ($token = config('app.fontawesome_token')) {
+            $vars['FONTAWESOME_TOKEN'] = $token;
+        }
+
+        return $vars;
+    }
+
+    /**
+     * Vrátí řetězec pro export proměnných v shellu (např. export KEY=VAL; export ...).
+     */
+    public static function getShellExportString(): string
+    {
+        $vars = self::getEnvironmentVariables();
+        $exports = [];
+
+        foreach ($vars as $key => $val) {
+            $exports[] = "export {$key}='{$val}'";
+        }
+
+        return implode('; ', $exports);
+    }
 }

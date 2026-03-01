@@ -115,6 +115,7 @@ return [
     'prod_path' => env('PROD_PATH'),
     'prod_public_path' => env('PROD_PUBLIC_PATH'),
     'prod_git_token' => env('PROD_GIT_TOKEN'),
+    'fontawesome_token' => env('FONTAWESOME_TOKEN'),
     'prod_db_connection' => env('PROD_DB_CONNECTION', 'mysql'),
     'prod_db_host' => env('PROD_DB_HOST', '127.0.0.1'),
     'prod_db_port' => env('PROD_DB_PORT', '3306'),

@@ -130,4 +130,12 @@ class Attendance extends Model
     {
         return $this->morphTo();
     }
+
+    /**
+     * Alias pro planned_status pro zpětnou kompatibilitu a UI.
+     */
+    public function getStatusAttribute(): string
+    {
+        return $this->planned_status ?? 'pending';
+    }
 }

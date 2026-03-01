@@ -274,13 +274,27 @@ $app = Application::configure(basePath: dirname(__DIR__))
 // Na lokále preferujeme .env v kořeni, na produkci (dle Envoy/Sync) může být v public/
 $app->useEnvironmentPath(file_exists(base_path('.env')) ? base_path() : base_path('public'));
 
-// Oprava kompatibility: usePublicPath voláme až na instanci Application,
-// protože ApplicationBuilder ji v této verzi frameworku nemusí podporovat.
-$publicPath = env('APP_PUBLIC_PATH');
-if ($publicPath) {
-    // Na některých hostinzích může realpath selhat kvůli open_basedir, proto fallback na původní hodnotu
-    $resolvedPath = realpath($publicPath) ?: $publicPath;
-    $app->usePublicPath($resolvedPath);
+// Nastavení public_path pro subdomény a specifické hostingy (Webglobe)
+// Priorita 1: Explicitní konstanta (např. z index.php)
+// Priorita 2: Detekce z aktuálního skriptu (index.php) pokud běží přes web
+// Priorita 3: .env proměnná APP_PUBLIC_PATH
+// Priorita 4: Výchozí base_path('public')
+$finalPublicPath = null;
+
+if (defined('LARAVEL_PUBLIC_PATH')) {
+    $finalPublicPath = LARAVEL_PUBLIC_PATH;
+} elseif (isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
+    $finalPublicPath = dirname($_SERVER['SCRIPT_FILENAME']);
+}
+
+// Možnost přebít z configu (může být užitečné pro Artisan v CLI a config cache)
+if (!$finalPublicPath) {
+    $finalPublicPath = config('app.public_path') ?: env('APP_PUBLIC_PATH');
+}
+
+if ($finalPublicPath) {
+    // Použijeme cestu přímo, abychom zachovali symlinky (důležité pro subdomény na Webglobe)
+    $app->usePublicPath($finalPublicPath);
 }
 
 return $app;

@@ -268,12 +268,36 @@ class AppSyncCommand extends Command
         $syncDirs = [
             'public/assets/',
             'public/build/',
+            'public/css/',
+            'public/js/',
+            'public/fonts/',
+            'public/vendor/',
             'public/uploads/defaults/',
+            'public/images/',
             'storage/app/defaults/',
             'database/migrations/',
             'database/seeders/',
             'database/factories/',
         ];
+
+        // Seznam souborů v kořeni public (bez index.php)
+        $rootPublicFiles = [
+            'favicon.ico',
+            'robots.txt',
+            'manifest.json',
+            'site.webmanifest',
+            'apple-touch-icon.png',
+            'android-chrome-192x192.png',
+            'android-chrome-512x512.png',
+            'favicon-16x16.png',
+            'favicon-32x32.png',
+        ];
+
+        foreach ($rootPublicFiles as $file) {
+            if (file_exists(base_path('public/' . $file))) {
+                $syncDirs[] = 'public/' . $file;
+            }
+        }
 
         // Pokud synchronizujeme uživatele, nahrajeme i jejich lokálně stažená média
         if ($usersync) {
@@ -287,36 +311,47 @@ class AppSyncCommand extends Command
                 $this->line("Syncing $dir...");
                 $synced = false;
 
-                // Zajistíme, že cílový adresář na serveru existuje
-                Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p ".escapeshellarg($path.'/'.$dir)."'");
+                // Určení cílového adresáře na serveru
+                $remoteDirs = [$path . '/' . $dir];
 
-                // 1. Rsync
-                $checkRsync = Process::run('rsync --version');
-                if ($checkRsync->successful()) {
-                    $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($path.'/'.$dir);
-                    $result = Process::forever()->run($rsyncCmd, function (string $type, string $output) {
-                        if ($type === 'out' && strlen(trim($output)) > 0) {
-                            $this->line('  '.trim($output));
+                // Pokud adresář začíná na 'public/', zkusíme synchronizovat i do alternativní public_path
+                if (str_starts_with($dir, 'public/') && $publicPath && $publicPath !== rtrim($path, '/') . '/public') {
+                    $dirNameOnly = substr($dir, 7); // Odstraníme 'public/' prefix
+                    $remoteDirs[] = rtrim($publicPath, '/') . '/' . $dirNameOnly;
+                }
+
+                foreach ($remoteDirs as $remoteDir) {
+                    // Zajistíme, že cílový adresář na serveru existuje
+                    Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p " . escapeshellarg($remoteDir) . "'");
+
+                    // 1. Rsync
+                    $checkRsync = Process::run('rsync --version');
+                    if ($checkRsync->successful()) {
+                        $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' " . escapeshellarg($localDir) . " {$user}@{$host}:" . escapeshellarg($remoteDir);
+                        $result = Process::forever()->run($rsyncCmd, function (string $type, string $output) {
+                            if ($type === 'out' && strlen(trim($output)) > 0) {
+                                $this->line('  ' . trim($output));
+                            }
+                        });
+                        if ($result->successful()) {
+                            $synced = true;
                         }
-                    });
-                    if ($result->successful()) {
-                        $synced = true;
                     }
-                }
 
-                // 2. FTP Fallback
-                if (! $synced && $ftpHost && $ftpUser) {
-                    $this->line("  Trying FTP fallback for $dir...");
-                    if ($this->syncViaFtp($localDir, $path.'/'.$dir, $ftpHost, $ftpUser, $ftpPass, $ftpPort)) {
-                        $synced = true;
+                    // 2. FTP Fallback
+                    if (! $synced && $ftpHost && $ftpUser) {
+                        $this->line("  Trying FTP fallback for $remoteDir...");
+                        if ($this->syncViaFtp($localDir, $remoteDir, $ftpHost, $ftpUser, $ftpPass, $ftpPort)) {
+                            $synced = true;
+                        }
                     }
-                }
 
-                // 3. SCP Fallback
-                if (! $synced) {
-                    $this->line('  Falling back to SCP...');
-                    $scpCmd = "scp -P {$port} -r ".escapeshellarg($localDir.'.')." {$user}@{$host}:".escapeshellarg($path.'/'.$dir);
-                    Process::forever()->run($scpCmd);
+                    // 3. SCP Fallback
+                    if (! $synced) {
+                        $this->line('  Falling back to SCP...');
+                        $scpCmd = "scp -P {$port} -r " . escapeshellarg($localDir . '.') . " {$user}@{$host}:" . escapeshellarg($remoteDir);
+                        Process::forever()->run($scpCmd);
+                    }
                 }
             }
         }
@@ -453,7 +488,7 @@ class AppSyncCommand extends Command
 
     protected function updateEnv(array $data): void
     {
-        $path = base_path('public/.env');
+        $path = base_path('.env');
         if (! file_exists($path)) {
             if (file_exists(base_path('.env.example'))) {
                 copy(base_path('.env.example'), $path);
@@ -479,14 +514,13 @@ class AppSyncCommand extends Command
     protected function initializeEnv(): void
     {
         $rootEnvPath = base_path('.env');
-        $publicEnvPath = base_path('public/.env');
         $exampleEnvPath = base_path('.env.example');
 
-        if (! file_exists($publicEnvPath) && file_exists($exampleEnvPath)) {
-            copy($exampleEnvPath, $publicEnvPath);
+        if (! file_exists($rootEnvPath) && file_exists($exampleEnvPath)) {
+            copy($exampleEnvPath, $rootEnvPath);
         }
 
-        if (! file_exists($publicEnvPath)) {
+        if (! file_exists($rootEnvPath)) {
             return;
         }
 
@@ -523,16 +557,16 @@ class AppSyncCommand extends Command
             $this->updateEnv($toTransfer);
         }
 
-        if (file_exists($publicEnvPath)) {
-            $content = file_get_contents($publicEnvPath);
+        if (file_exists($rootEnvPath)) {
+            $content = file_get_contents($rootEnvPath);
             if (! preg_match('/^APP_KEY="?base64:[^" \n]+"?/m', $content)) {
                 $this->call('key:generate', ['--no-interaction' => true]);
             }
         }
 
-        if (file_exists($publicEnvPath)) {
+        if (file_exists($rootEnvPath)) {
             try {
-                \Dotenv\Dotenv::createMutable(base_path('public'), '.env')->load();
+                \Dotenv\Dotenv::createMutable(base_path(), '.env')->load();
             } catch (\Exception $e) {
             }
         }

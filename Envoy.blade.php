@@ -18,6 +18,7 @@
     $freshseed = $freshseed ?? false;
     $usersync = $usersync ?? false;
     $noai = $noai ?? false;
+    $fontawesome_token = $fontawesome_token ?? '';
 @endsetup
 
 @task('setup', ['on' => 'web'])
@@ -52,15 +53,15 @@
         git clean -df
     fi
 
-    echo "Preparing public/.env file..."
-    if [ ! -f "public/.env" ]; then
-        echo "Creating public/.env from .env.example..."
-        cp .env.example public/.env
+    echo "Preparing .env file..."
+    if [ ! -f ".env" ]; then
+        echo "Creating .env from .env.example..."
+        cp .env.example .env
     fi
 
-    echo "Updating public/.env configuration..."
+    echo "Updating .env configuration..."
     {{ $php }} -r '
-        $envFile = "public/.env";
+        $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [
@@ -97,9 +98,9 @@
         }
         file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
-    echo "✅ public/.env updated."
+    echo "✅ .env updated."
 
-    if ! grep -q "APP_KEY=base64" public/.env; then
+    if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
     fi
@@ -115,45 +116,10 @@
             ln -sf "{{ $path }}/public" "{{ $public_path }}"
             echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
         fi
-
-        echo "Patching index.php in project root for absolute paths..."
-        {{ $php }} -r '
-            $path = "{{ $path }}/public/index.php";
-            if (!file_exists($path)) { exit(0); }
-            $content = file_get_contents($path);
-            $base = "{{ $path }}";
-
-            // 1. Fix autoload.php reference
-            $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
-                "require \"$base/vendor/autoload.php\";",
-                $content
-            );
-
-            // 2. Fix bootstrap/app.php reference and ensure usePublicPath(__DIR__)
-            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
-
-            $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
-                "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
-                $content
-            );
-
-            // 3. Fix maintenance mode path
-            $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
-                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
-                $content
-            );
-
-            file_put_contents($path, $content);
-        '
-        echo "✅ index.php patched with absolute paths."
     fi
 
-    # Use custom production index if present
+    # Determine and patch entry point
     if [ -f "public/index.production.php" ]; then
-        echo "Using index.production.php as production index..."
         if [ -z "{{ $public_path ?? '' }}" ] || [ "{{ $public_path }}" = "{{ $path }}/public" ]; then
             DEST="{{ $path }}/public/index.php"
         else
@@ -161,7 +127,51 @@
         fi
         cp public/index.production.php "$DEST"
         echo "✅ index.php replaced by index.production.php"
+    else
+        DEST="{{ $path }}/public/index.php"
     fi
+
+    echo "Patching entry points for absolute paths..."
+    {{ $php }} -r '
+        $targets = ["{{ $path }}/public/index.php", "'$DEST'"];
+        $base = "{{ $path }}";
+        $public = "{{ $public_path ?? $path . "/public" }}";
+
+        foreach (array_unique($targets) as $target) {
+            if (!file_exists($target)) continue;
+            $content = file_get_contents($target);
+
+            // 1. Fix $APP_BASE if exists
+            $content = preg_replace("/\\\$APP_BASE\\s*=\\s*['\"].*?['\"];/", "\$APP_BASE = \"$base\";", $content);
+
+            // 2. Fix autoload.php reference
+            $content = preg_replace(
+                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
+                "require \"$base/vendor/autoload.php\";",
+                $content
+            );
+
+            // 3. Fix bootstrap/app.php reference and ensure LARAVEL_PUBLIC_PATH is defined
+            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
+            $content = preg_replace("/define\('LARAVEL_PUBLIC_PATH'.*?\);\\s*/", "", $content);
+
+            $content = preg_replace(
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
+                "define(\"LARAVEL_PUBLIC_PATH\", \"$public\");\n            \$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(\"$public\");",
+                $content
+            );
+
+            // 4. Fix maintenance mode path
+            $content = preg_replace(
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
+                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
+                $content
+            );
+
+            file_put_contents($target, $content);
+        }
+    '
+    echo "✅ Entry points patched."
 
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
@@ -203,6 +213,10 @@
     ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
     export PATH="{{ $path }}/.node_bin:$PATH"
+
+    if [ ! -z "{{ $fontawesome_token }}" ]; then
+        export FONTAWESOME_TOKEN="{{ $fontawesome_token }}"
+    fi
 
     # Node.js version check
     NODE_VERSION=$(node -v | sed 's/v//')
@@ -298,9 +312,9 @@
     echo "Running database seeding..."
     {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
 
-    echo "Updating public/.env configuration..."
+    echo "Updating .env configuration..."
     {{ $php }} -r '
-        $envFile = "public/.env";
+        $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [];
@@ -334,7 +348,7 @@
         }
         file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
-    echo "✅ public/.env updated."
+    echo "✅ .env updated."
 
     if [ ! -z "{{ $public_path ?? '' }}" ] && [ "{{ $public_path }}" != "{{ $path }}/public" ]; then
         echo "Ensuring custom public path is configured: {{ $public_path }}"
@@ -342,41 +356,10 @@
             ln -sf "{{ $path }}/public" "{{ $public_path }}"
             echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
         fi
-
-        echo "Patching index.php in project root for absolute paths..."
-        {{ $php }} -r '
-            $path = "{{ $path }}/public/index.php";
-            if (!file_exists($path)) { exit(0); }
-            $content = file_get_contents($path);
-            $base = "{{ $path }}";
-
-            $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
-                "require \"$base/vendor/autoload.php\";",
-                $content
-            );
-
-            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
-
-            $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
-                "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
-                $content
-            );
-
-            $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
-                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
-                $content
-            );
-
-            file_put_contents($path, $content);
-        '
     fi
 
-    # Use custom production index if present
+    # Determine and patch entry point
     if [ -f "public/index.production.php" ]; then
-        echo "Using index.production.php as production index..."
         if [ -z "{{ $public_path ?? '' }}" ] || [ "{{ $public_path }}" = "{{ $path }}/public" ]; then
             DEST="{{ $path }}/public/index.php"
         else
@@ -384,7 +367,51 @@
         fi
         cp public/index.production.php "$DEST"
         echo "✅ index.php replaced by index.production.php"
+    else
+        DEST="{{ $path }}/public/index.php"
     fi
+
+    echo "Patching entry points for absolute paths..."
+    {{ $php }} -r '
+        $targets = ["{{ $path }}/public/index.php", "'$DEST'"];
+        $base = "{{ $path }}";
+        $public = "{{ $public_path ?? $path . "/public" }}";
+
+        foreach (array_unique($targets) as $target) {
+            if (!file_exists($target)) continue;
+            $content = file_get_contents($target);
+
+            // 1. Fix $APP_BASE if exists
+            $content = preg_replace("/\\\$APP_BASE\\s*=\\s*['\"].*?['\"];/", "\$APP_BASE = \"$base\";", $content);
+
+            // 2. Fix autoload.php reference
+            $content = preg_replace(
+                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
+                "require \"$base/vendor/autoload.php\";",
+                $content
+            );
+
+            // 3. Fix bootstrap/app.php reference and ensure LARAVEL_PUBLIC_PATH is defined
+            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
+            $content = preg_replace("/define\('LARAVEL_PUBLIC_PATH'.*?\);\\s*/", "", $content);
+
+            $content = preg_replace(
+                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
+                "define(\"LARAVEL_PUBLIC_PATH\", \"$public\");\n            \$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(\"$public\");",
+                $content
+            );
+
+            // 4. Fix maintenance mode path
+            $content = preg_replace(
+                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
+                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
+                $content
+            );
+
+            file_put_contents($target, $content);
+        }
+    '
+    echo "✅ Entry points patched."
 
     echo "Installing NPM dependencies..."
     mkdir -p .node_bin
@@ -426,6 +453,10 @@
     ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
     export PATH="{{ $path }}/.node_bin:$PATH"
+
+    if [ ! -z "{{ $fontawesome_token }}" ]; then
+        export FONTAWESOME_TOKEN="{{ $fontawesome_token }}"
+    fi
 
     # Node.js version check
     NODE_VERSION=$(node -v | sed 's/v//')
@@ -485,15 +516,15 @@
 
     cd {{ $path }}
 
-    echo "Preparing public/.env file..."
-    if [ ! -f "public/.env" ]; then
-        echo "Creating public/.env from .env.example..."
-        cp .env.example public/.env
+    echo "Preparing .env file..."
+    if [ ! -f ".env" ]; then
+        echo "Creating .env from .env.example..."
+        cp .env.example .env
     fi
 
-    echo "Updating public/.env configuration..."
+    echo "Updating .env configuration..."
     {{ $php }} -r '
-        $envFile = "public/.env";
+        $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [
@@ -530,9 +561,9 @@
         }
         file_put_contents($envFile, implode("\n", $lines) . "\n");
     '
-    echo "✅ public/.env updated."
+    echo "✅ .env updated."
 
-    if ! grep -q "APP_KEY=base64" public/.env; then
+    if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
     fi
@@ -560,39 +591,46 @@
             find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
         fi
 
-        echo "Patching index.php for absolute paths..."
+        echo "Patching entry points for absolute paths..."
         {{ $php }} -r '
-            $target = "{{ $path }}/public/index.php";
+            $targets = ["{{ $path }}/public/index.php"];
             if ("{{ $public_path ?? "" }}" && !is_link("{{ $public_path }}") && file_exists("{{ $public_path }}/index.php")) {
-                $target = "{{ $public_path }}/index.php";
+                $targets[] = "{{ $public_path }}/index.php";
             }
-            if (!file_exists($target)) { exit(0); }
-            $content = file_get_contents($target);
             $base = "{{ $path }}";
+            $public = "{{ $public_path ?? $path . '/public' }}";
 
-            $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
-                "require \"$base/vendor/autoload.php\";",
-                $content
-            );
+            foreach (array_unique($targets) as $target) {
+                if (!file_exists($target)) continue;
+                $content = file_get_contents($target);
 
-            $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
+                $content = preg_replace("/\\\$APP_BASE\\s*=\\s*['\"].*?['\"];/", "\$APP_BASE = \"$base\";", $content);
 
-            $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
-                "\$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(__DIR__);",
-                $content
-            );
+                $content = preg_replace(
+                    "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
+                    "require \"$base/vendor/autoload.php\";",
+                    $content
+                );
 
-            $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
-                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
-                $content
-            );
+                $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
+                $content = preg_replace("/define\('LARAVEL_PUBLIC_PATH'.*?\);\\s*/", "", $content);
 
-            file_put_contents($target, $content);
+                $content = preg_replace(
+                    "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
+                    "define(\"LARAVEL_PUBLIC_PATH\", \"$public\");\n            \$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(\"$public\");",
+                    $content
+                );
+
+                $content = preg_replace(
+                    "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
+                    "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
+                    $content
+                );
+
+                file_put_contents($target, $content);
+            }
         '
-        echo "✅ index.php patched."
+        echo "✅ Entry points patched."
     fi
 
     echo "Running idempotent database migrations..."

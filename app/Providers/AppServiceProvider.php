@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +30,29 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(\App\Services\BrandingService::class, function ($app) {
             return new \App\Services\BrandingService;
+        });
+
+        // Robustní fix pro Vite manifest na Webglobe hostingu (subdomény vs. root)
+        $this->app->singleton(Vite::class, function ($app) {
+            return new class extends Vite {
+                protected function manifestPath($buildDirectory): string
+                {
+                    $path = parent::manifestPath($buildDirectory);
+
+                    if (file_exists($path)) {
+                        return $path;
+                    }
+
+                    // Fallback: Pokud manifest není v public_path (subdoména),
+                    // zkusíme ho najít v base_path('public/build/manifest.json') - root aplikace.
+                    $fallback = base_path('public/' . $buildDirectory . '/manifest.json');
+                    if (file_exists($fallback)) {
+                        return $fallback;
+                    }
+
+                    return $path;
+                }
+            };
         });
     }
 

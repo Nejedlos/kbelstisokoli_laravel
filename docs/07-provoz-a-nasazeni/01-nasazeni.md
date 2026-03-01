@@ -60,6 +60,7 @@ Tento příkaz automaticky:
 ### 3. Nasazení přes FTP Sync (Alternativa)
 Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na serveru** (např. při potížích s verzemi) nebo pokud preferujete nahrávání souborů přes FTP.
 
+#### A) Kompletní synchronizace (Doporučeno)
 1. **Lokálně** ve svém počítači připravte vše potřebné jedním příkazem:
    ```bash
    php artisan app:local:prepare
@@ -72,16 +73,21 @@ Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na se
    php artisan app:sync
    ```
 
-Tento příkaz automaticky:
-1. Ověří verzi PHP na serveru.
-2. Vytvoří nebo aktualizuje `.env` soubor podle vašeho lokálního nastavení.
-3. **Nahrává lokální assety a build** (`public/assets/`, `public/build/`) na server. Prioritně používá `rsync`, jako fallback pak **FTP** (pokud je nakonfigurováno) nebo `scp`.
-4. Synchronizuje veškerý obsah složky `public` do veřejného adresáře (webrootu), přičemž cílové složky nejprve vyčistí, aby odpovídaly lokálnímu stavu.
-5. Spustí migrace databáze (`migrate --force`) a automaticky provede seedování (`app:seed --force`).
-6. Provede synchronizaci ikon a optimalizaci mezipaměti (`optimize`).
-7. Reindexuje AI vyhledávání.
+#### B) Pouze sestavení a nahrání assetů (Rychlá volba)
+Pokud měníte pouze CSS/JS a nechcete provádět celou synchronizaci, můžete použít specializovaný příkaz:
+```bash
+php artisan app:deploy:local-assets
+```
+Tento příkaz:
+1. Lokálně spustí `npm run build`.
+2. Automaticky nahraje složku `public/build` na produkci přes FTP (vyžaduje `PROD_FTP_*` v `.env`).
 
-Na konci příkazu se zobrazí přehledný souhrn všech provedených kroků s potvrzením úspěšnosti.
+Volitelně můžete nahrát i statické obrázky ze složky `public/assets`:
+```bash
+php artisan app:deploy:local-assets --with-assets
+```
+
+---
 
 Je to **nejjednodušší a nejrobustnější cesta**, pokud nechcete na serveru řešit Git, NPM nebo verze Node.js.
 

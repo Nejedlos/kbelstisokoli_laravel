@@ -675,6 +675,7 @@ class SystemConsole extends Page
         $out .= sprintf("%-25s: %s\n", 'PHP (BinaryHelper)', BinaryHelper::getPhpBinary());
         $out .= sprintf("%-25s: %s\n", 'Node.js (BinaryHelper)', BinaryHelper::getNodeBinary());
         $out .= sprintf("%-25s: %s\n", 'NPM (BinaryHelper)', BinaryHelper::getNpmBinary());
+        $out .= sprintf("%-25s: %s\n", 'FONTAWESOME_TOKEN', config('app.fontawesome_token') ? 'Nastaven ('.substr(config('app.fontawesome_token'), 0, 4).'...) ✅' : 'Chybí ❌');
         $out .= "\n";
 
         $potentialBinaries = [
@@ -955,6 +956,12 @@ class SystemConsole extends Page
         $env = [
             'HOME' => storage_path('app'),
         ];
+
+        // Přidání environment proměnných z BinaryHelper (např. FONTAWESOME_TOKEN)
+        $extraVars = BinaryHelper::getEnvironmentVariables();
+        foreach ($extraVars as $key => $val) {
+            $env[$key] = $val;
+        }
 
         // Zkusíme předat PATH z aktuálního procesu, aby byly dostupné všechny binárky (Herd, Homebrew atd.)
         $currentPath = getenv('PATH');

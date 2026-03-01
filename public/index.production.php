@@ -18,18 +18,35 @@ require $APP_BASE.'/vendor/autoload.php';
 
 // Nouzové hlášení chyb před bootem Laravelu (pre-boot)
 (function () use ($APP_BASE) {
+    // Definujeme cesty k .env (v rootu i v public)
+    $envPath = file_exists($APP_BASE . '/.env') ? $APP_BASE : (file_exists($APP_BASE . '/public/.env') ? $APP_BASE . '/public' : null);
+
     try {
-        if (class_exists(\Dotenv\Dotenv::class)) {
-            \Dotenv\Dotenv::createImmutable($APP_BASE)->safeLoad();
+        if ($envPath && class_exists(\Dotenv\Dotenv::class)) {
+            \Dotenv\Dotenv::createImmutable($envPath)->safeLoad();
         }
     } catch (\Throwable $e) {
         // Ignorovat chyby při načítání .env
     }
 
     $env = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'production';
+    $debug = ($_ENV['APP_DEBUG'] ?? getenv('APP_DEBUG') ?? 'false') === 'true';
     $errorRecipient = $_ENV['ERROR_REPORT_EMAIL'] ?? getenv('ERROR_REPORT_EMAIL') ?: null;
-    if ($env !== 'production' || ! $errorRecipient) {
-        return; // povoleno pouze na produkci a pokud je nastaven příjemce
+
+    // Pokud nejsme na produkci nebo máme zapnutý debug, zobrazujeme chyby
+    if ($env !== 'production' || $debug) {
+        ini_set('display_errors', '1');
+        ini_set('display_startup_errors', '1');
+        error_reporting(E_ALL);
+    }
+
+    if (! $errorRecipient || ($env !== 'production' && ! $debug)) {
+        // Pokud nemáme kam posílat reporty, nebo nejsme v módu pro hlášení, končíme SMTP logiku
+        if ($env === 'production' && ! $debug) {
+             // Na produkci bez debugu a bez mailu raději chyby skryjeme (pokud nebyly povoleny výše)
+             ini_set('display_errors', '0');
+        }
+        return;
     }
 
     $send = function (string $subject, string $body) use ($errorRecipient) {
@@ -42,8 +59,6 @@ require $APP_BASE.'/vendor/autoload.php';
             $from = $_ENV['ERROR_REPORT_SENDER'] ?? getenv('ERROR_REPORT_SENDER') ?? ($user ?: 'noreply@localhost');
 
             if (! $host || ! $user || ! $pass) {
-                error_log('Pre-boot mail not sent: missing SMTP credentials');
-
                 return;
             }
 
@@ -74,10 +89,19 @@ require $APP_BASE.'/vendor/autoload.php';
         }
     };
 
-    set_exception_handler(function ($e) use ($send) {
+    set_exception_handler(function ($e) use ($send, $env, $debug) {
         if (! $e instanceof \Throwable) {
             return;
         }
+
+        // Pokud máme zobrazovat chyby, vypíšeme je i do výstupu
+        if ($env !== 'production' || $debug) {
+            echo "<h1>Pre-boot Exception</h1>";
+            echo "<p><strong>".get_class($e)."</strong>: {$e->getMessage()}</p>";
+            echo "<p>File: {$e->getFile()}:{$e->getLine()}</p>";
+            echo "<pre>{$e->getTraceAsString()}</pre>";
+        }
+
         $server = [
             'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'] ?? null,
             'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? null,
@@ -90,9 +114,14 @@ require $APP_BASE.'/vendor/autoload.php';
         $send($subject, $body);
     });
 
-    register_shutdown_function(function () use ($send) {
+    register_shutdown_function(function () use ($send, $env, $debug) {
         $error = error_get_last();
         if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+            if ($env !== 'production' || $debug) {
+                echo "<h1>Pre-boot Fatal Error</h1>";
+                echo "<pre>".print_r($error, true)."</pre>";
+            }
+
             $server = [
                 'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'] ?? null,
                 'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? null,
@@ -107,8 +136,13 @@ require $APP_BASE.'/vendor/autoload.php';
     });
 })();
 
+define('LARAVEL_PUBLIC_PATH', __DIR__);
+
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
 $app = require_once $APP_BASE.'/bootstrap/app.php';
+
+// Nastavíme public path na adresář, kde se nachází tento index.php (pro jistotu i explicitně)
+$app->usePublicPath(__DIR__);
 
 $app->handleRequest(Request::capture());

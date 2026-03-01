@@ -191,7 +191,7 @@
             </div>
 
             <!-- Attendance List Groups -->
-            <div class="space-y-6 max-h-[1000px] overflow-y-auto pr-2 custom-scrollbar">
+            <div class="space-y-6 max-h-[1000px] overflow-y-auto px-1 pr-2 custom-scrollbar">
                 @if($confirmed->isNotEmpty())
                     <div class="space-y-3">
                         <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-success-600 border-b border-success-100 pb-2 ml-1">

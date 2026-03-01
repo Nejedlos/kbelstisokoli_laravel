@@ -182,6 +182,7 @@ class ProductionDeployCommand extends Command
                 '--npm='.escapeshellarg($npmBinary),
                 '--path='.escapeshellarg($path),
                 '--token='.escapeshellarg($token),
+                '--fontawesome_token='.escapeshellarg(config('app.fontawesome_token')),
             ];
 
             if ($publicPath) {
