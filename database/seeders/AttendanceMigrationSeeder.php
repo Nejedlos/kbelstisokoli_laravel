@@ -18,6 +18,15 @@ class AttendanceMigrationSeeder extends Seeder
             return;
         }
 
+        $isFresh = config('app.seed_fresh', false);
+
+        if ($isFresh) {
+            $this->command->warn('Režim FRESH: Mažu existující docházku...');
+            \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+            \App\Models\Attendance::truncate();
+            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+        }
+
         $this->command->info('Načítám data o docházce ze staré DB...');
 
         try {
@@ -94,9 +103,8 @@ class AttendanceMigrationSeeder extends Seeder
                 }
 
                 $plannedStatus = match ($rsvp->dochazka) {
-                    'ano' => 'confirmed',
-                    'ne' => 'declined',
-                    'omluven' => 'declined',
+                    '1', 'ucast', 'ano' => 'confirmed',
+                    '0', 'omluva', 'ne', 'omluven' => 'declined',
                     default => 'pending',
                 };
 
@@ -157,6 +165,10 @@ class AttendanceMigrationSeeder extends Seeder
                     $this->updateActualStatus($user, $event, 'attended', $actual->datum);
                 }
             }
+
+            // A2. Přítomní (pokud jsou ve staré DB uloženi jako 1 v poli ucast nebo podobně - ošetření různých formátů)
+            // Poznámka: Zadání zmiňuje ucast -> 1. Pokud je to v jiné tabulce, je to už ošetřeno v RSVP výše.
+            // Zde v realné docházce jsou ID plátců v pomlčkovém seznamu.
 
             // B. Nepřítomní bez omluvy (podle jména)
             $absentNames = array_filter(explode('-', $actual->nebili));

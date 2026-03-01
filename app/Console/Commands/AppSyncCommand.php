@@ -45,6 +45,9 @@ class AppSyncCommand extends Command
      */
     public function handle(): int
     {
+        // Zvýšíme memory limit pro náročné synchronizační úlohy (migrace tisíců záznamů v seederech)
+        ini_set('memory_limit', '512M');
+
         $this->info('== APP SYNC START ==');
 
         // 1. Lokální synchronizační úlohy (ikony, finance, oznámení)

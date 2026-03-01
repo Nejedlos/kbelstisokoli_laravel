@@ -21,7 +21,7 @@ class AppSeedCommand extends Command
     protected $signature = 'app:seed
                             {--fresh : Smaže všechna data v dotčených tabulkách před seedováním}
                             {--force : Vynutí spuštění na produkci}
-                            {--users : Povolí seedování uživatelů (UserSeeder, LegacyUserMigrationSeeder)}
+                            {--users : Povolí seedování uživatelů (UserSeeder, MemberMigrationSeeder)}
                             {--frontend-only : Spustí pouze seedery frontendového obsahu (CmsContentSeeder, GdprPageSeeder)}
                             {--class=Database\\Seeders\\GlobalSeeder : Třída seederu, který se má spustit}';
 

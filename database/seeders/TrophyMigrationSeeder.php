@@ -29,6 +29,9 @@ class TrophyMigrationSeeder extends Seeder
         $usersByName = User::all()->keyBy('name');
         $seasons = Season::all();
 
+        $competitions = ClubCompetition::all();
+        $entries = ClubCompetitionEntry::all();
+
         try {
             $oldTrophies = DB::connection('old_mysql')->table($oldDb.'.web_trophy')->get();
 
@@ -45,19 +48,22 @@ class TrophyMigrationSeeder extends Seeder
                     $seasons->push($season);
                 }
 
-                $competition = ClubCompetition::updateOrCreate(
-                    [
-                        'name->cs' => $ot->nazev,
-                        'season_id' => $season->id,
-                    ],
-                    [
-                        'name' => ['cs' => $ot->nazev],
-                        'slug' => Str::slug($ot->nazev.'-'.$seasonName),
-                        'description' => ['cs' => $ot->popis],
-                        'is_public' => true,
-                        'status' => 'completed',
-                    ]
-                );
+                $competition = $competitions->first(fn ($c) => $c->getTranslation('name', 'cs') === $ot->nazev && $c->season_id === $season->id);
+
+                $competitionData = [
+                    'name' => ['cs' => $ot->nazev],
+                    'slug' => Str::slug($ot->nazev.'-'.$seasonName),
+                    'description' => ['cs' => $ot->popis],
+                    'is_public' => true,
+                    'status' => 'completed',
+                ];
+
+                if ($competition) {
+                    $competition->update($competitionData);
+                } else {
+                    $competition = ClubCompetition::create(array_merge(['season_id' => $season->id], $competitionData));
+                    $competitions->push($competition);
+                }
 
                 // Zpracování oceněných (1., 2., 3. místo)
                 $winners = [
@@ -74,25 +80,33 @@ class TrophyMigrationSeeder extends Seeder
                     $winnerName = trim($winnerName);
                     $user = $usersByName->get($winnerName);
 
-                    ClubCompetitionEntry::updateOrCreate(
-                        [
-                            'club_competition_id' => $competition->id,
-                            'metadata->legacy_trophy_id' => $ot->id,
-                            'metadata->legacy_position' => $position,
-                        ],
-                        [
-                            'player_id' => $user?->id,
-                            'label' => $user ? null : $winnerName,
-                            'value' => (float) (4 - $position), // 1. místo = 3 body, 2. = 2 body, 3. = 1 bod
-                            'value_type' => 'rank',
-                            'source_note' => "Migrováno z trofejí: Pozice {$position}",
-                            'metadata' => [
-                                'legacy_trophy_id' => $ot->id,
-                                'legacy_position' => $position,
-                                'original_name' => $winnerName,
-                            ],
-                        ]
+                    $entry = $entries->first(fn ($e) =>
+                        $e->club_competition_id === $competition->id &&
+                        ($e->metadata['legacy_trophy_id'] ?? null) == $ot->id &&
+                        ($e->metadata['legacy_position'] ?? null) == $position
                     );
+
+                    $entryData = [
+                        'player_id' => $user?->id,
+                        'label' => $user ? null : $winnerName,
+                        'value' => (float) (4 - $position), // 1. místo = 3 body, 2. = 2 body, 3. = 1 bod
+                        'value_type' => 'rank',
+                        'source_note' => "Migrováno z trofejí: Pozice {$position}",
+                        'metadata' => [
+                            'legacy_trophy_id' => $ot->id,
+                            'legacy_position' => $position,
+                            'original_name' => $winnerName,
+                        ],
+                    ];
+
+                    if ($entry) {
+                        $entry->update($entryData);
+                    } else {
+                        $entry = ClubCompetitionEntry::create(array_merge([
+                            'club_competition_id' => $competition->id,
+                        ], $entryData));
+                        $entries->push($entry);
+                    }
                 }
             }
 

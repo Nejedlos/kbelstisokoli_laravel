@@ -20,7 +20,7 @@ class DataMigrationSeeder extends Seeder
         $this->command->info('Používám databázi pro migraci: '.($oldDb ?: 'NENASTAVENO'));
 
         $this->call([
-            LegacyUserMigrationSeeder::class,     // Migrace uživatelů a profilů
+            MemberMigrationSeeder::class,     // Migrace uživatelů a profilů
             SeasonMigrationSeeder::class,         // Migrace sezón a konfigurací
             EventMigrationSeeder::class,          // Migrace zápasů a tréninků
             AttendanceMigrationSeeder::class,     // Migrace docházky

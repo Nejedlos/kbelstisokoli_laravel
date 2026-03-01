@@ -18,6 +18,17 @@ class FinanceMigrationSeeder extends Seeder
             return;
         }
 
+        $isFresh = config('app.seed_fresh', false);
+
+        if ($isFresh) {
+            $this->command->warn('Režim FRESH: Mažu existující finanční data...');
+            \App\Models\ChargePaymentAllocation::truncate();
+            \App\Models\FinancePayment::where('metadata', 'LIKE', '%"legacy_pay_id"%')->delete();
+            \App\Models\FinanceCharge::where('metadata', 'LIKE', '%"legacy_fine_id"%')->orWhere('metadata', 'LIKE', '%"legacy_p_id"%')->delete();
+            \App\Models\UserSeasonConfig::where('metadata', 'LIKE', '%"legacy_id"%')->delete();
+            \App\Models\FinancialTariff::where('metadata', 'LIKE', '%"legacy_id"%')->delete();
+        }
+
         $this->command->info('Migruji finanční data ze staré DB...');
 
         \Illuminate\Support\Facades\DB::disableQueryLog();

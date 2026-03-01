@@ -10,6 +10,7 @@ return [
         'optimization' => '⚡ Optimization & Cache',
         'dev_tools' => '🛠️ Developer Tools',
         'diagnostics' => '📊 Diagnostics',
+        'legacy' => '💾 Legacy Data',
     ],
     'commands' => [
         'ai_index' => [
@@ -173,6 +174,21 @@ return [
         'git_pull' => [
             'label' => 'Git: Pull',
             'desc' => 'Downloads the latest changes from GitHub.',
+        ],
+        'legacy_sync' => [
+            'label' => 'Legacy: Full Sync',
+            'desc' => 'Complete data synchronization from the old system (members, events, attendance, finance).',
+            'flags' => [
+                '--fresh' => 'Fresh (delete and reload)',
+                '--users' => '⚠️ User sync (may overwrite accounts!)',
+            ],
+        ],
+        'legacy_attendance_sync' => [
+            'label' => 'Legacy: Attendance only',
+            'desc' => 'Separate synchronization only for attendance and related events.',
+            'flags' => [
+                '--fresh' => 'Fresh (delete and reload)',
+            ],
         ],
     ],
     'notifications' => [

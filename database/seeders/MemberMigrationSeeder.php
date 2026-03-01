@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
-class LegacyUserMigrationSeeder extends Seeder
+class MemberMigrationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -25,6 +25,19 @@ class LegacyUserMigrationSeeder extends Seeder
             $this->command->error('Databáze pro migraci nebyla nalezena (DB_DATABASE_OLD ani DB_DATABASE).');
 
             return;
+        }
+
+        $isFresh = config('app.seed_fresh', false);
+        $syncUsers = config('app.seed_users', false);
+
+        if ($isFresh && $syncUsers) {
+            $this->command->warn('Režim FRESH: Mažu existující profily a uživatele (kromě administrátora)...');
+            // Smažeme pouze ty, kteří mají legacy metadata nebo nejsou admini
+            // Pozor na integritu, PlayerProfile má cizí klíč na User.
+            \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+            \App\Models\PlayerProfile::where('metadata', 'LIKE', '%"legacy_r_id"%')->delete();
+            // User::where('metadata', 'LIKE', '%"legacy_r_id"%')->delete(); // Raději nebudeme mazat uživatele úplně, jen profily.
+            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
         }
 
         // Načtení nových týmů
@@ -120,23 +133,32 @@ class LegacyUserMigrationSeeder extends Seeder
             $user = User::where('email', $reg->email)->first() ?: $existingUsersByLegacyId->get($reg->id);
 
             if ($user) {
-                // Pokud uživatel už existuje (např. byl vytvořen v UserSeeder),
-                // aktualizujeme údaje, ale NIKDY nepřepisujeme heslo náhodným.
-                $user->update($userData);
+                // Pokud uživatel už existuje, aktualizujeme údaje pouze pokud je povolen sync users
+                if ($syncUsers) {
+                    $user->update($userData);
+                }
             } else {
-                // Nový uživatel z migrace - nastavíme mu náhodné heslo
-                $userData['password'] = Hash::make(Str::random(16));
-                $user = User::create(array_merge(['email' => $reg->email], $userData));
+                // Nový uživatel z migrace - vytvoříme ho pouze pokud je povolen sync users
+                if ($syncUsers) {
+                    $userData['password'] = Hash::make(Str::random(16));
+                    $user = User::create(array_merge(['email' => $reg->email], $userData));
+                } else {
+                    $bar->advance();
+
+                    continue;
+                }
             }
 
             // Přiřazení role
-            if ($reg->admin === '1') {
-                if (! $user->hasRole('admin')) {
-                    $user->assignRole('admin');
-                }
-            } else {
-                if (! $user->hasRole('player')) {
-                    $user->assignRole('player');
+            if ($syncUsers) {
+                if ($reg->admin === '1') {
+                    if (! $user->hasRole('admin')) {
+                        $user->assignRole('admin');
+                    }
+                } else {
+                    if (! $user->hasRole('player')) {
+                        $user->assignRole('player');
+                    }
                 }
             }
 

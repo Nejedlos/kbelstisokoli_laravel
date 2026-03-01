@@ -25,16 +25,23 @@ class FineTemplateSeeder extends Seeder
         try {
             $oldFineTypes = DB::connection('old_mysql')->table($oldDb.'.web_vypocty_pokuty')->get();
 
+            $existingAll = FineTemplate::all();
+
             foreach ($oldFineTypes as $oft) {
-                FineTemplate::updateOrCreate(
-                    ['metadata->legacy_id' => $oft->id],
-                    [
-                        'name' => ['cs' => $oft->nazev],
-                        'default_amount' => $oft->pausal,
-                        'unit' => $oft->jednotka,
-                        'metadata' => ['legacy_id' => $oft->id],
-                    ]
-                );
+                $existing = $existingAll->first(fn ($t) => ($t->metadata['legacy_id'] ?? null) == $oft->id);
+
+                $templateData = [
+                    'name' => ['cs' => $oft->nazev],
+                    'default_amount' => $oft->pausal,
+                    'unit' => $oft->jednotka,
+                    'metadata' => ['legacy_id' => $oft->id],
+                ];
+
+                if ($existing) {
+                    $existing->update($templateData);
+                } else {
+                    FineTemplate::create($templateData);
+                }
             }
 
             $this->command->info('Migrace šablon pokut dokončena.');

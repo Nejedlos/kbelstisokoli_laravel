@@ -18,6 +18,17 @@ class EventMigrationSeeder extends Seeder
             return;
         }
 
+        $isFresh = config('app.seed_fresh', false);
+
+        if ($isFresh) {
+            $this->command->warn('Režim FRESH: Mažu existující události (zápasy, tréninky, klubové akce)...');
+            \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+            \App\Models\BasketballMatch::where('metadata', 'LIKE', '%"legacy_z_id"%')->delete();
+            \App\Models\Training::where('metadata', 'LIKE', '%"legacy_z_id"%')->delete();
+            \App\Models\ClubEvent::where('metadata', 'LIKE', '%"legacy_z_id"%')->delete();
+            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+        }
+
         $this->command->info('Načítám zápasy a tréninky ze staré DB...');
 
         try {

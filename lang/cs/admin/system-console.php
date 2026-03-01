@@ -10,6 +10,7 @@ return [
         'optimization' => '⚡ Optimalizace & Cache',
         'dev_tools' => '🛠️ Vývojářské nástroje',
         'diagnostics' => '📊 Diagnostika',
+        'legacy' => '💾 Data ze starého systému',
     ],
     'commands' => [
         'ai_index' => [
@@ -173,6 +174,21 @@ return [
         'git_pull' => [
             'label' => 'Git: Pull',
             'desc' => 'Stáhne nejnovější změny z GitHubu.',
+        ],
+        'legacy_sync' => [
+            'label' => 'Legacy: Kompletní Sync',
+            'desc' => 'Kompletní synchronizace dat ze starého systému (členové, akce, docházka, finance).',
+            'flags' => [
+                '--fresh' => 'Fresh (smazat a znovu načíst)',
+                '--users' => '⚠️ Sync uživatelů (může přepsat účty!)',
+            ],
+        ],
+        'legacy_attendance_sync' => [
+            'label' => 'Legacy: Jen docházka',
+            'desc' => 'Samostatná synchronizace pouze pro docházku a související události.',
+            'flags' => [
+                '--fresh' => 'Fresh (smazat a znovu načíst)',
+            ],
         ],
     ],
     'notifications' => [

@@ -14,7 +14,7 @@ class GlobalSeeder extends Seeder
         RoleSeeder::class,
         SportSeeder::class,
         UserSeeder::class,
-        LegacyUserMigrationSeeder::class,
+        MemberMigrationSeeder::class,
         UserSecuritySeeder::class,
         TeamCoachSeeder::class,
         SeasonMigrationSeeder::class,
@@ -80,7 +80,7 @@ class GlobalSeeder extends Seeder
         // To je důležité, aby se při běžném syncu nepřepisovala hesla stávajícím uživatelům.
         if (! config('app.seed_users', false)) {
             $seeders = array_filter($seeders, function ($seeder) {
-                return ! in_array($seeder, [UserSeeder::class, LegacyUserMigrationSeeder::class]);
+                return ! in_array($seeder, [UserSeeder::class, MemberMigrationSeeder::class]);
             });
 
             // Re-indexujeme pole po filtrování

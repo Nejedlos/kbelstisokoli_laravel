@@ -187,6 +187,31 @@ class SystemConsole extends Page
             ],
         ];
 
+        // 4. Data ze starého systému (Vždy)
+        $groups[__('admin/system-console.groups.legacy')] = [
+            'app:legacy:sync' => [
+                'label' => __('admin/system-console.commands.legacy_sync.label'),
+                'desc' => __('admin/system-console.commands.legacy_sync.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--fresh' => __('admin/system-console.commands.legacy_sync.flags.--fresh'),
+                    '--users' => __('admin/system-console.commands.legacy_sync.flags.--users'),
+                ],
+                'color' => 'warning',
+                'icon' => new \Illuminate\Support\HtmlString('<i class="fa-light fa-database"></i>'),
+            ],
+            'app:attendance:sync' => [
+                'label' => __('admin/system-console.commands.legacy_attendance_sync.label'),
+                'desc' => __('admin/system-console.commands.legacy_attendance_sync.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--fresh' => __('admin/system-console.commands.legacy_attendance_sync.flags.--fresh'),
+                ],
+                'color' => 'info',
+                'icon' => new \Illuminate\Support\HtmlString('<i class="fa-light fa-calendar-check"></i>'),
+            ],
+        ];
+
         // 4. Údržba & Čištění (Vždy)
         $groups[__('admin/system-console.groups.maintenance')] = [
             'system:cleanup' => [
