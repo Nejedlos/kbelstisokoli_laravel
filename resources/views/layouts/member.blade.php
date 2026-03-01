@@ -409,18 +409,56 @@
             <!-- Breadcrumbs / Page Header -->
             <div class="bg-white/40 backdrop-blur-sm border-b border-slate-200/60 py-6 px-4 sm:px-6 md:px-10">
                 <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
-                            <a href="{{ route('member.dashboard') }}" class="hover:text-primary transition-colors">{{ __('nav.dashboard') }}</a>
-                            <i class="fa-light fa-chevron-right text-[8px]"></i>
-                            <span class="text-slate-300 italic">{{ brand_text($title ?? '') }}</span>
+                    <div class="flex items-start gap-4 sm:gap-6">
+                        @php
+                            $activeTeamId = app(\App\Services\Member\MemberContext::class)->getActiveTeamId();
+                            $activeTeam = $activeTeamId ? \App\Models\Team::find($activeTeamId) : null;
+                        @endphp
+
+                        <!-- Team Badge (Prominent) -->
+                        <div class="hidden sm:flex flex-col items-center gap-1.5 shrink-0">
+                            @if($activeTeam)
+                                <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/10 transition-transform hover:scale-105 group" title="{{ $activeTeam->name }}">
+                                    <i class="fa-light fa-users-viewfinder text-xl md:text-2xl group-hover:rotate-12 transition-transform"></i>
+                                </div>
+                                <span class="text-[9px] font-black uppercase tracking-wider text-primary/70 text-center max-w-[70px] leading-tight">
+                                    {{ $activeTeam->name }}
+                                </span>
+                            @else
+                                <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-secondary/10 border-2 border-secondary/20 flex items-center justify-center text-secondary shadow-lg shadow-secondary/10 transition-transform hover:scale-105 group" title="{{ __('member.profile.section_settings.view_all') }}">
+                                    <i class="fa-light fa-layer-group text-xl md:text-2xl group-hover:rotate-12 transition-transform"></i>
+                                </div>
+                                <span class="text-[9px] font-black uppercase tracking-wider text-secondary/70 text-center max-w-[70px] leading-tight">
+                                    {{ __('member.profile.section_settings.view_all_short') }}
+                                </span>
+                            @endif
                         </div>
-                        <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary leading-none">
-                            {{ brand_text($title ?? __('nav.member_section')) }}
-                        </h1>
-                        @if(isset($subtitle))
-                            <p class="text-[11px] sm:text-[13px] md:text-sm text-slate-500 font-medium italic opacity-80 leading-relaxed">{{ brand_text($subtitle) }}</p>
-                        @endif
+
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
+                                <a href="{{ route('member.dashboard') }}" class="hover:text-primary transition-colors">{{ __('nav.dashboard') }}</a>
+                                <i class="fa-light fa-chevron-right text-[8px]"></i>
+                                <span class="text-slate-300 italic">{{ brand_text($title ?? '') }}</span>
+
+                                <!-- Mobile Badge (Small) -->
+                                <span class="sm:hidden flex items-center gap-1 px-1.5 py-0.5 rounded-md @if($activeTeam) bg-primary/10 text-primary @else bg-secondary/10 text-secondary @endif font-black uppercase tracking-widest text-[8px] ml-1">
+                                    <i class="fa-light @if($activeTeam) fa-users-viewfinder @else fa-layer-group @endif"></i>
+                                    {{ $activeTeam ? $activeTeam->name : __('member.profile.section_settings.view_all') }}
+                                </span>
+                            </div>
+                            <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary leading-none flex items-center gap-3">
+                                {{ brand_text($title ?? __('nav.member_section')) }}
+                                @if($activeTeam)
+                                    <span class="hidden sm:inline-flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-full text-[10px] tracking-[0.2em] text-primary/70 animate-fade-in">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                        {{ $activeTeam->name }}
+                                    </span>
+                                @endif
+                            </h1>
+                            @if(isset($subtitle))
+                                <p class="text-[11px] sm:text-[13px] md:text-sm text-slate-500 font-medium italic opacity-80 leading-relaxed">{{ brand_text($subtitle) }}</p>
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Header Actions (Desktop) -->
@@ -506,14 +544,23 @@
     </script>
     @stack('scripts')
     <script>
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.hook('request', ({ start, finish, fail }) => {
-                start(() => {
-                    window.dispatchEvent(new CustomEvent('loading-start'));
-                });
-                finish(() => {
+        document.addEventListener('livewire:init', () => {
+            Livewire.hook('request', ({ respond, succeed, fail, options }) => {
+                // Nepouštět loader pro polling nebo tiché požadavky
+                if (options.method === 'POLL' || options.silent) {
+                    return;
+                }
+
+                window.dispatchEvent(new CustomEvent('loading-start'));
+
+                respond(() => {
                     window.dispatchEvent(new CustomEvent('loading-stop'));
                 });
+
+                succeed(() => {
+                    window.dispatchEvent(new CustomEvent('loading-stop'));
+                });
+
                 fail(() => {
                     window.dispatchEvent(new CustomEvent('loading-stop'));
                 });
