@@ -146,6 +146,7 @@ return [
             'view_all' => 'Všechny týmy',
             'view_all_help' => 'Pokud zaškrtnete, uvidíte v přehledech defaultně tréninky a zápasy všech týmů (lze kdykoliv přepnout v záhlaví).',
             'my_teams_only' => 'Defaultně jen moje týmy',
+            'active_view' => 'Aktivní zobrazení',
         ],
         'help' => [
             'title' => 'Potřebujete pomoc?',

@@ -146,6 +146,7 @@ return [
             'view_all' => 'All teams',
             'view_all_help' => 'If checked, you will see trainings and matches for all teams by default (can be switched in the header at any time).',
             'my_teams_only' => 'Default to my teams only',
+            'active_view' => 'Active View',
         ],
         'help' => [
             'title' => 'Need help?',

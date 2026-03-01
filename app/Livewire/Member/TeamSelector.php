@@ -27,9 +27,11 @@ class TeamSelector extends Component
     {
         $context = app(MemberContext::class);
         $teams = $context->getAvailableTeams();
+        $activeTeam = $this->activeTeamId ? $teams->firstWhere('id', $this->activeTeamId) : null;
 
         return view('livewire.member.team-selector', [
             'teams' => $teams,
+            'activeTeam' => $activeTeam,
         ]);
     }
 }

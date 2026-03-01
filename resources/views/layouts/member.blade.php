@@ -355,6 +355,9 @@
 
             <!-- Team Selector (Mobile) -->
             <div class="px-6 py-4 border-b border-slate-50 bg-slate-50/50">
+                <div class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    {{ __('member.profile.section_settings.active_view') }}
+                </div>
                 <livewire:member.team-selector />
             </div>
 
