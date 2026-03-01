@@ -201,6 +201,43 @@
                     @endif
                 </section>
 
+                <!-- Member Section Settings -->
+                <section class="card p-6 sm:p-8 space-y-6">
+                    <h3 class="text-xl font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-5 leading-none">{{ __('member.profile.section_settings.title') }}</h3>
+
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label for="member_default_team_id" class="form-label">{{ __('member.profile.section_settings.default_team') }}</label>
+                            <select name="member_default_team_id" id="member_default_team_id" class="form-input min-h-[44px]">
+                                <option value="">{{ __('member.profile.section_settings.my_teams_only') }}</option>
+                                @foreach($availableTeams as $team)
+                                    <option value="{{ $team->id }}" {{ old('member_default_team_id', $user->member_default_team_id) == $team->id ? 'selected' : '' }}>
+                                        {{ $team->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-[10px] text-slate-400 font-medium italic mt-1.5 opacity-80 leading-tight">{{ __('member.profile.section_settings.default_team_help') }}</p>
+                            @error('member_default_team_id') <p class="text-[10px] text-danger-600 font-bold mt-1.5 uppercase tracking-wider italic">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div class="flex items-center h-5">
+                                <input type="hidden" name="member_view_all_by_default" value="0">
+                                <input id="member_view_all_by_default" name="member_view_all_by_default" type="checkbox" value="1" {{ old('member_view_all_by_default', $user->member_view_all_by_default) ? 'checked' : '' }}
+                                       class="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary/20 transition-all">
+                            </div>
+                            <div class="text-sm">
+                                <label for="member_view_all_by_default" class="font-black text-secondary uppercase tracking-tight text-[11px] block cursor-pointer leading-none mb-1">
+                                    {{ __('member.profile.section_settings.view_all') }}
+                                </label>
+                                <p class="text-[10px] text-slate-500 font-medium leading-tight italic">
+                                    {{ __('member.profile.section_settings.view_all_help') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Password Change -->
                 <section class="card p-6 sm:p-8 space-y-6">
                     <h3 class="text-xl font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-5 leading-none">{{ __('member.profile.password_change') }}</h3>

@@ -62,6 +62,11 @@
 
             <!-- Search & User Menu -->
             <div class="flex items-center gap-2 sm:gap-4 md:gap-5 flex-1 justify-end">
+                <!-- Team Selector (Desktop) -->
+                <div class="hidden md:block">
+                    <livewire:member.team-selector />
+                </div>
+
                 <!-- Language Switcher (Desktop) -->
                 <div class="hidden sm:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl text-[10px] font-black tracking-widest border border-slate-200/50">
                     <a href="{{ route('language.switch', ['lang' => 'cs']) }}"
@@ -327,6 +332,12 @@
                     <i class="fa-light fa-xmark text-2xl"></i>
                 </button>
             </div>
+
+            <!-- Team Selector (Mobile) -->
+            <div class="px-6 py-4 border-b border-slate-50 bg-slate-50/50">
+                <livewire:member.team-selector />
+            </div>
+
             <nav class="flex-1 overflow-y-auto p-6 space-y-2">
                 @foreach (config('navigation.member.main', []) as $item)
                     <a href="{{ route($item['route']) }}"
@@ -364,13 +375,13 @@
                         <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
                             <a href="{{ route('member.dashboard') }}" class="hover:text-primary transition-colors">{{ __('nav.dashboard') }}</a>
                             <i class="fa-light fa-chevron-right text-[8px]"></i>
-                            <span class="text-slate-300 italic">{{ $title ?? '' }}</span>
+                            <span class="text-slate-300 italic">{{ brand_text($title ?? '') }}</span>
                         </div>
                         <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary leading-none">
-                            {{ $title ?? __('nav.member_section') }}
+                            {{ brand_text($title ?? __('nav.member_section')) }}
                         </h1>
                         @if(isset($subtitle))
-                            <p class="text-[11px] sm:text-[13px] md:text-sm text-slate-500 font-medium italic opacity-80 leading-relaxed">{{ $subtitle }}</p>
+                            <p class="text-[11px] sm:text-[13px] md:text-sm text-slate-500 font-medium italic opacity-80 leading-relaxed">{{ brand_text($subtitle) }}</p>
                         @endif
                     </div>
 

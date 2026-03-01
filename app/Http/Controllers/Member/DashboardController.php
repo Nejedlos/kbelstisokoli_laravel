@@ -9,6 +9,7 @@ use App\Models\Season;
 use App\Models\Training;
 use App\Models\UserSeasonConfig;
 use App\Services\Finance\FinanceService;
+use App\Services\Member\MemberContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
@@ -23,9 +24,10 @@ class DashboardController extends Controller
         $user = auth()->user();
         $now = now();
         $locale = app()->getLocale();
+        $activeTeamId = app(MemberContext::class)->getActiveTeamId();
 
-        $cacheKey = "member_dashboard_{$user->id}_{$locale}";
-        $data = Cache::remember($cacheKey, 600, function () use ($user, $now) {
+        $cacheKey = "member_dashboard_{$user->id}_{$locale}_{$activeTeamId}";
+        $data = Cache::remember($cacheKey, 600, function () use ($user, $now, $activeTeamId) {
             $user->loadMissing(['playerProfile.teams']);
 
             // Doplňková data pro moderní nástěnku
@@ -56,6 +58,7 @@ class DashboardController extends Controller
                     'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
                 ])
                 ->where('starts_at', '>=', $now)
+                ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
                 ->orderBy('starts_at')
                 ->limit(3)
                 ->get()
@@ -84,6 +87,7 @@ class DashboardController extends Controller
                     'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
                 ])
                 ->where('scheduled_at', '>=', $now)
+                ->when($activeTeamId, fn($q) => $q->where('team_id', $activeTeamId))
                 ->orderBy('scheduled_at')
                 ->limit(3)
                 ->get()
@@ -122,6 +126,7 @@ class DashboardController extends Controller
                 ])
                 ->where('starts_at', '>=', $now)
                 ->where('rsvp_enabled', true)
+                ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
                 ->orderBy('starts_at')
                 ->limit(3)
                 ->get()

@@ -10,6 +10,7 @@ use App\Models\Season;
 use App\Models\Training;
 use App\Models\UserSeasonConfig;
 use App\Enums\ExcuseReason;
+use App\Services\Member\MemberContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,6 +22,7 @@ class AttendanceController extends Controller
         $user = auth()->user();
         $now = now();
         $currentSeasonId = Season::where('is_active', true)->first()?->id;
+        $activeTeamId = app(MemberContext::class)->getActiveTeamId();
 
         // Načteme ID uživatelů, kterým se hlídá docházka v této sezóně
         $trackedUserIds = $currentSeasonId
@@ -37,6 +39,7 @@ class AttendanceController extends Controller
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('starts_at', '>=', $now)
+            ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
             ->orderBy('starts_at')
             ->get()
             ->map(function ($item) use ($trackedUserIds) {
@@ -65,6 +68,7 @@ class AttendanceController extends Controller
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('scheduled_at', '>=', $now)
+            ->when($activeTeamId, fn($q) => $q->where('team_id', $activeTeamId))
             ->orderBy('scheduled_at')
             ->get()
             ->map(function ($item) use ($currentSeasonId) {
@@ -96,6 +100,7 @@ class AttendanceController extends Controller
             ])
             ->where('starts_at', '>=', $now)
             ->where('rsvp_enabled', true)
+            ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
             ->orderBy('starts_at')
             ->get()
             ->map(function ($item) use ($trackedUserIds) {

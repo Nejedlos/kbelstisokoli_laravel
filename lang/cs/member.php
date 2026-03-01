@@ -139,6 +139,14 @@ return [
             'status' => 'Status',
             'active_member' => 'Aktivní člen',
         ],
+        'section_settings' => [
+            'title' => 'Nastavení členské sekce',
+            'default_team' => 'Výchozí tým k zobrazení',
+            'default_team_help' => 'Tento tým se vám automaticky vybere po přihlášení na nástěnce a v programu.',
+            'view_all' => 'Všechny týmy',
+            'view_all_help' => 'Pokud zaškrtnete, uvidíte v přehledech defaultně tréninky a zápasy všech týmů (lze kdykoliv přepnout v záhlaví).',
+            'my_teams_only' => 'Defaultně jen moje týmy',
+        ],
         'help' => [
             'title' => 'Potřebujete pomoc?',
             'text' => 'Pokud potřebujete změnit citlivé údaje (jako je role v klubu nebo přiřazení k týmu), obraťte se prosím na své trenéry nebo vedení klubu.',

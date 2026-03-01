@@ -139,6 +139,14 @@ return [
             'status' => 'Status',
             'active_member' => 'Active Member',
         ],
+        'section_settings' => [
+            'title' => 'Member Section Settings',
+            'default_team' => 'Default team to display',
+            'default_team_help' => 'This team will be automatically selected for you after login on the dashboard and in the program.',
+            'view_all' => 'All teams',
+            'view_all_help' => 'If checked, you will see trainings and matches for all teams by default (can be switched in the header at any time).',
+            'my_teams_only' => 'Default to my teams only',
+        ],
         'help' => [
             'title' => 'Need help?',
             'text' => 'If you need to change sensitive data (such as club role or team assignment), please contact your coaches or club management.',
