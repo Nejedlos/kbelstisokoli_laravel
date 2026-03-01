@@ -23,6 +23,19 @@ class NotificationController extends Controller
     }
 
     /**
+     * Označí konkrétní notifikaci jako přečtenou a přesměruje na cílovou URL.
+     */
+    public function readAndRedirect(string $id): RedirectResponse
+    {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+
+        $actionUrl = $notification->data['action_url'] ?? route('member.dashboard');
+
+        return redirect($actionUrl);
+    }
+
+    /**
      * Označí konkrétní notifikaci jako přečtenou.
      */
     public function markAsRead(string $id): RedirectResponse

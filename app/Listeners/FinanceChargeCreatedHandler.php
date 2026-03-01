@@ -7,7 +7,7 @@ use App\Notifications\NewChargeNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendFinanceNotification implements ShouldQueue
+class FinanceChargeCreatedHandler implements ShouldQueue
 {
     use InteractsWithQueue;
 

@@ -43,6 +43,7 @@ Route::middleware(['member'])
 
         // Notifikace
         Route::get('/notifikace', [\App\Http\Controllers\Member\NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifikace/{id}/go', [\App\Http\Controllers\Member\NotificationController::class, 'readAndRedirect'])->name('notifications.redirect');
         Route::post('/notifikace/mark-all-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
         Route::post('/notifikace/{id}/mark-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAsRead'])->name('notifications.markRead');
 

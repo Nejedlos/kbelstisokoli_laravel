@@ -72,7 +72,7 @@
                             </div>
 
                             @if(isset($notification->data['action_url']))
-                                <a href="{{ $notification->data['action_url'] }}" class="inline-block mt-3 text-xs font-black uppercase tracking-widest text-primary hover:text-secondary transition-colors">
+                                <a href="{{ route('member.notifications.redirect', $notification->id) }}" class="inline-block mt-3 text-xs font-black uppercase tracking-widest text-primary hover:text-secondary transition-colors">
                                     {{ $notification->data['action_label'] ?? __('member.notifications.default_action_label') }} &rarr;
                                 </a>
                             @endif

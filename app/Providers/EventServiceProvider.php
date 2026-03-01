@@ -40,12 +40,6 @@ class EventServiceProvider extends ServiceProvider
         TwoFactorAuthenticationDisabled::class => [
             SecurityAuthListener::class,
         ],
-        \App\Events\RsvpChanged::class => [
-            \App\Listeners\SendRsvpNotification::class,
-        ],
-        \App\Events\FinanceChargeCreated::class => [
-            \App\Listeners\SendFinanceNotification::class,
-        ],
     ];
 
     /**
