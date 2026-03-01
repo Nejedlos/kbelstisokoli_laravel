@@ -1,3 +1,4 @@
+@props(['custom' => false])
 @php
     $hasWireLoading = false;
     foreach($attributes->getAttributes() as $key => $value) {
@@ -27,13 +28,17 @@
             </div>
         </div>
         <div class="ks-loader-body">
-            @if($slot->isEmpty())
-                <div class="ks-loader-text">
-                    {{ __('admin.navigation.resources.photo_pool.notifications.processing') }}
-                </div>
-            @else
+            @if($custom)
                 <div class="ks-loader-custom">
                     {{ $slot }}
+                </div>
+            @else
+                <div class="ks-loader-text">
+                    @if($slot->isEmpty())
+                        {{ __('admin.navigation.resources.photo_pool.notifications.processing') }}
+                    @else
+                        {{ $slot }}
+                    @endif
                 </div>
             @endif
             <div wire:stream="ks-loader-progress" class="ks-loader-progress"></div>

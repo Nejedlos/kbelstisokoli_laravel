@@ -289,16 +289,61 @@ return [
     ],
 
     'loading' => [
-        'generic' => 'Working on it...',
+        'generic' => [
+            'Working on it...',
+            'Dribbling to the goal...',
+            'Passing the data...',
+            'Falcon is flying for the answer...',
+        ],
         'page' => 'Loading section :title...',
-        'dashboard' => 'Preparing your dashboard...',
-        'attendance' => 'Updating your program and attendance...',
-        'profile' => 'Saving profile changes...',
-        'economy' => 'Loading your financial overview...',
-        'teams' => 'Preparing team stats and rosters...',
-        'notifications' => 'Loading your notifications...',
-        'search' => 'Searching for best results...',
-        'ai' => 'AI Falcon is thinking...',
+        'dashboard' => [
+            'Inflating balls for your overview...',
+            'Polishing the court on your dashboard...',
+            'Dribbling to your stats...',
+            'Setting up today\'s roster...',
+        ],
+        'attendance' => [
+            'Blowing the whistle for training...',
+            'Checking who didn\'t oversleep...',
+            'Adding you to the scoresheet...',
+            'Looking for your shoes in the locker room...',
+        ],
+        'profile' => [
+            'Tailoring your jersey...',
+            'Changing the number on your back...',
+            'Taking your photo for the player card...',
+            'Cleaning up your stats...',
+        ],
+        'economy' => [
+            'Counting bribes for the refs... (just kidding!)',
+            'Collecting for new basketballs...',
+            'Searching for lost coins in the locker room...',
+            'Printing club currency...',
+        ],
+        'teams' => [
+            'Setting up the starting five...',
+            'Drawing tactics on the board...',
+            'Motivating the team in the locker room...',
+            'Fine-tuning the form for the next game...',
+        ],
+        'notifications' => [
+            'Sending out game invites...',
+            'Passing secret signals...',
+            'Sounding the alarm...',
+            'Falcon is bringing a new message...',
+        ],
+        'search' => [
+            'Looking for an open teammate...',
+            'Scouting for new talents...',
+            'Searching the whole arena...',
+            'Going on a fast break for results...',
+        ],
+        'ai' => [
+            'Falcon is taking a timeout to think...',
+            'Coach AI is drawing a new play...',
+            'Falcon is analyzing your crossover...',
+            'AI Falcon is dunking into the bucket of knowledge...',
+        ],
     ],
 
     'feedback' => [

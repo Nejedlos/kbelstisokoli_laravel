@@ -70,7 +70,7 @@ class PhotoPoolResource extends Resource
                 Placeholder::make('ks_global_loader')
                     ->hiddenLabel()
                     ->content(fn ($livewire) => new HtmlString(Blade::render('
-                        <x-loader.basketball wire:target="create,save,cancelImportQueue,confirmCancelImportQueue,dismissCancelImportQueue,regenerateAi" class="{{ ($confirmingCancellation ?? false) ? \'is-loading\' : \'\' }}">
+                        <x-loader.basketball custom wire:target="create,save,cancelImportQueue,confirmCancelImportQueue,dismissCancelImportQueue,regenerateAi" class="{{ ($confirmingCancellation ?? false) ? \'is-loading\' : \'\' }}">
                             <div class="text-center p-10 bg-white/5 dark:bg-black/40 backdrop-blur-2xl rounded-[3rem] border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] max-w-sm mx-auto overflow-hidden relative">
                                 <div class="relative z-10">
                                     @if($confirmingCancellation)

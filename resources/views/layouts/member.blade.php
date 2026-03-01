@@ -46,14 +46,29 @@
     };
 
     $loadingTitle = brand_text($title ?? __('nav.member_section'));
-    $loadingText = __('member.loading.' . $loadingKey, ['title' => $loadingTitle]);
+    $loadingMessages = __('member.loading.' . $loadingKey);
+
+    if ($loadingKey === 'page') {
+        $loadingMessages = [__('member.loading.page', ['title' => $loadingTitle])];
+    } elseif (!is_array($loadingMessages)) {
+        $loadingMessages = [$loadingMessages ?: __('member.loading.generic')];
+    }
 @endphp
 <body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50"
-      x-data="{ sidebarOpen: false, globalLoading: false }"
-      @loading-start.window="globalLoading = true"
+      x-data="{
+          sidebarOpen: false,
+          globalLoading: false,
+          loadingMessages: {{ json_encode($loadingMessages) }},
+          currentLoadingMessage: '',
+          updateLoadingMessage() {
+              this.currentLoadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
+          }
+      }"
+      x-init="updateLoadingMessage()"
+      @loading-start.window="globalLoading = true; updateLoadingMessage()"
       @loading-stop.window="globalLoading = false">
     <x-loader.basketball x-show="globalLoading" x-cloak class="z-[100]">
-        {{ $loadingText }}
+        <span x-text="currentLoadingMessage"></span>
     </x-loader.basketball>
     <x-impersonation-banner />
     <x-impersonation-notification />

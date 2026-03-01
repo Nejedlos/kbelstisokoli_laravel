@@ -289,16 +289,61 @@ return [
     ],
 
     'loading' => [
-        'generic' => 'Pracuji na tom...',
+        'generic' => [
+            'Pracuji na tom...',
+            'Dribluji k cíli...',
+            'Přihrávám data...',
+            'Sokol letí pro odpověď...',
+        ],
         'page' => 'Načítám sekci :title...',
-        'dashboard' => 'Připravuji tvůj přehled...',
-        'attendance' => 'Aktualizuji tvůj program a docházku...',
-        'profile' => 'Ukládám změny ve tvém profilu...',
-        'economy' => 'Načítám tvůj finanční přehled...',
-        'teams' => 'Připravuji týmové statistiky a soupisky...',
-        'notifications' => 'Načítám tvá oznámení...',
-        'search' => 'Hledám nejlepší výsledky...',
-        'ai' => 'AI Sokol právě přemýšlí...',
+        'dashboard' => [
+            'Nafukuji míče pro tvůj přehled...',
+            'Leštím palubovku na nástěnce...',
+            'Dribluji k tvým statistikám...',
+            'Sestavuji tvou dnešní soupisku...',
+        ],
+        'attendance' => [
+            'Pískám nástup na trénink...',
+            'Kontroluji, kdo nezaspal...',
+            'Zapisuji tě do soupisky...',
+            'Hledám tvoje boty v šatně...',
+        ],
+        'profile' => [
+            'Upravuji dres na míru...',
+            'Měním číslo na zádech...',
+            'Fotím tě na kartičku...',
+            'Čistím tvoje statistiky...',
+        ],
+        'economy' => [
+            'Počítám úplatky pro rozhodčí... (vtip!)',
+            'Skládám se na nové míče...',
+            'Hledám zapomenuté koruny v šatně...',
+            'Tisknu klubové peníze...',
+        ],
+        'teams' => [
+            'Sestavuji vítěznou pětku...',
+            'Kreslím taktiku na tabuli...',
+            'Motivuji tým v šatně...',
+            'Ladíme formu na další zápas...',
+        ],
+        'notifications' => [
+            'Rozesílám pozvánky na zápas...',
+            'Předávám tajné signály...',
+            'Bubnuji na poplach...',
+            'Sokol nese novou zprávu...',
+        ],
+        'search' => [
+            'Hledám volného spoluhráče...',
+            'Skautuji nové talenty...',
+            'Prohledávám celou halu...',
+            'Vybíhám do protiútoku pro výsledky...',
+        ],
+        'ai' => [
+            'Sokol si bere oddechový čas na přemýšlení...',
+            'Trenér AI kreslí novou akci...',
+            'Sokol analyzuje tvůj crossover...',
+            'AI Sokol právě smečuje do koše vědění...',
+        ],
     ],
 
     'feedback' => [
