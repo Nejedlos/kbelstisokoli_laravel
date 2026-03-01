@@ -35,16 +35,15 @@ class EventMigrationSeeder extends Seeder
             $oldEvents = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.zapasy')->get();
             $seasons = \App\Models\Season::all()->keyBy('name');
             $teamC = \App\Models\Team::where('slug', 'muzi-c')->first();
-            $teamE = \App\Models\Team::where('slug', 'muzi-e')->first();
-            $teamKlub = \App\Models\Team::where('slug', 'klub')->first();
+            $teamD = \App\Models\Team::where('slug', 'muzi-d')->first();
 
             // Načtení existujících událostí do paměti pro zamezení JSON dotazům v databázi
             $existingMatches = \App\Models\BasketballMatch::all()->keyBy(fn ($m) => $m->metadata['legacy_z_id'] ?? null)->forget(null);
             $existingTrainings = \App\Models\Training::all()->keyBy(fn ($t) => $t->metadata['legacy_z_id'] ?? null)->forget(null);
             $existingClubEvents = \App\Models\ClubEvent::all()->keyBy(fn ($e) => $e->metadata['legacy_z_id'] ?? null)->forget(null);
 
-            if (! $teamC || ! $teamE || ! $teamKlub) {
-                $this->command->error('Týmy C, E nebo Klub nebyly nalezeny.');
+            if (! $teamC || ! $teamD) {
+                $this->command->error('Týmy C nebo D nebyly nalezeny.');
 
                 return;
             }
@@ -82,13 +81,13 @@ class EventMigrationSeeder extends Seeder
                     // Mapování týmu
                     $targetTeamIds = match ((int) $old->team) {
                         1 => [$teamC->id],
-                        2 => [$teamE->id],
-                        3 => [$teamC->id, $teamE->id, $teamKlub->id],
+                        2 => [$teamD->id],
+                        3 => [$teamC->id, $teamD->id],
                         default => [$teamC->id], // Fallback
                     };
 
                     // Pro zápas potřebujeme jeden hlavní team_id
-                    $mainTeamId = (int) $old->team === 3 ? $teamKlub->id : $targetTeamIds[0];
+                    $mainTeamId = $targetTeamIds[0];
 
                     // Normalizace času
                     $time = $old->cas ?: '00:00';

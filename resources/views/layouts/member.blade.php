@@ -32,7 +32,29 @@
     <style>[x-cloak] { display: none !important; }</style>
     @livewireStyles
 </head>
-<body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50" x-data="{ sidebarOpen: false }">
+@php
+    $loadingKey = match(true) {
+        request()->routeIs('member.dashboard') => 'dashboard',
+        request()->routeIs('member.attendance.*') => 'attendance',
+        request()->routeIs('member.profile.*') => 'profile',
+        request()->routeIs('member.economy.*') => 'economy',
+        request()->routeIs('member.teams.*') => 'teams',
+        request()->routeIs('member.notifications.*') => 'notifications',
+        request()->routeIs('member.search') => 'search',
+        request()->routeIs('member.ai') => 'ai',
+        default => 'page'
+    };
+
+    $loadingTitle = brand_text($title ?? __('nav.member_section'));
+    $loadingText = __('member.loading.' . $loadingKey, ['title' => $loadingTitle]);
+@endphp
+<body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50"
+      x-data="{ sidebarOpen: false, globalLoading: false }"
+      @loading-start.window="globalLoading = true"
+      @loading-stop.window="globalLoading = false">
+    <x-loader.basketball x-show="globalLoading" x-cloak class="z-[100]">
+        {{ $loadingText }}
+    </x-loader.basketball>
     <x-impersonation-banner />
     <x-impersonation-notification />
     <x-announcement-bar :announcements="$announcements ?? []" />
@@ -93,8 +115,7 @@
                 </div>
 
                 <!-- AI Search (Desktop/Tablet) -->
-                <div x-data="{ searchOpen: false, loading: false }" class="hidden lg:block relative">
-                    <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
+                <div x-data="{ searchOpen: false }" class="hidden lg:block relative">
                     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
                             class="flex items-center gap-3 px-3 xl:px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-secondary transition-all group text-left shadow-lg shadow-slate-200 min-h-[40px]">
                         <i class="fa-light fa-sparkles text-primary group-hover:scale-110 group-hover:rotate-12 transition-transform text-[11px]"></i>
@@ -119,7 +140,7 @@
                             <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-900">{{ __('search.ai_suggestion') }}</h3>
                         </div>
 
-                        <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInput.value)">
+                        <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="$dispatch('loading-start'); window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInput.value)">
                             <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-light fa-sparkles text-sm animate-pulse text-primary"></i>
                             </div>
@@ -141,7 +162,7 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach(['omluva', 'zapas', 'platba', 'heslo'] as $key)
-                                    <button @click.stop="loading = true; $refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
+                                    <button @click.stop="$dispatch('loading-start'); $refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
                                             class="flex items-start gap-2 text-left p-2.5 rounded-xl bg-slate-50 hover:bg-accent/5 border border-slate-100 hover:border-accent/20 transition-all group/tip">
                                         <div class="w-5 h-5 rounded bg-white flex items-center justify-center shadow-sm text-[10px] text-accent group-hover/tip:bg-accent group-hover/tip:text-white transition-colors">
                                             <i class="fa-light @if($key === 'omluva') fa-calendar-xmark @elseif($key === 'zapas') fa-basketball @elseif($key === 'platba') fa-wallet @else fa-key @endif"></i>
@@ -157,8 +178,7 @@
                 </div>
 
                 <!-- Search (Mobile/Tablet Trigger) -->
-                <div x-data="{ searchOpen: null, loading: false }" class="lg:hidden flex items-center">
-                    <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
+                <div x-data="{ searchOpen: null }" class="lg:hidden flex items-center">
                     <div class="flex items-center">
                         <!-- Standard Search Mobile -->
                         <button @click="searchOpen = (searchOpen === 'standard' ? null : 'standard'); if(searchOpen === 'standard') $nextTick(() => $refs.searchInputMobileStandard.focus())"
@@ -203,7 +223,7 @@
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                          class="fixed inset-x-0 top-18 w-screen bg-white shadow-2xl border-t border-slate-100 p-3 z-50 overflow-hidden"
                          style="display: none;">
-                        <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="loading = true; window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInputMobileAi.value)">
+                        <form action="{{ route('member.ai') }}" method="GET" class="relative" @submit.prevent="$dispatch('loading-start'); window.location.href = '{{ route('member.ai') }}?q=' + encodeURIComponent($refs.searchInputMobileAi.value)">
                             <input type="text"
                                    name="q"
                                    x-ref="searchInputMobileAi"
@@ -467,6 +487,25 @@
         });
     </script>
     @stack('scripts')
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.hook('request', ({ start, finish, fail }) => {
+                start(() => {
+                    window.dispatchEvent(new CustomEvent('loading-start'));
+                });
+                finish(() => {
+                    window.dispatchEvent(new CustomEvent('loading-stop'));
+                });
+                fail(() => {
+                    window.dispatchEvent(new CustomEvent('loading-stop'));
+                });
+            });
+        });
+
+        window.addEventListener('beforeunload', () => {
+            window.dispatchEvent(new CustomEvent('loading-start'));
+        });
+    </script>
     @livewireScripts
 </body>
 </html>

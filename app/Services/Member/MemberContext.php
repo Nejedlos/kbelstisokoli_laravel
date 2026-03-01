@@ -22,7 +22,7 @@ class MemberContext
         }
 
         // 1. Zkusíme session (null v session znamená "Všechny týmy")
-        if (Session::has(self::SESSION_KEY)) {
+        if (Session::exists(self::SESSION_KEY)) {
             return Session::get(self::SESSION_KEY);
         }
 

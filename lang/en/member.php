@@ -287,6 +287,19 @@ return [
         'send_feedback' => 'Send feedback',
     ],
 
+    'loading' => [
+        'generic' => 'Working on it...',
+        'page' => 'Loading section :title...',
+        'dashboard' => 'Preparing your dashboard...',
+        'attendance' => 'Updating your program and attendance...',
+        'profile' => 'Saving profile changes...',
+        'economy' => 'Loading your financial overview...',
+        'teams' => 'Preparing team stats and rosters...',
+        'notifications' => 'Loading your notifications...',
+        'search' => 'Searching for best results...',
+        'ai' => 'AI Falcon is thinking...',
+    ],
+
     'feedback' => [
         'contact_coach_title' => 'Contact Coach',
         'contact_coach_subtitle' => 'Send a message to your team coaches.',

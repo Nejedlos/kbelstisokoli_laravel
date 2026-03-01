@@ -287,6 +287,19 @@ return [
         'send_feedback' => 'Poslat zpětnou vazbu',
     ],
 
+    'loading' => [
+        'generic' => 'Pracuji na tom...',
+        'page' => 'Načítám sekci :title...',
+        'dashboard' => 'Připravuji tvůj přehled...',
+        'attendance' => 'Aktualizuji tvůj program a docházku...',
+        'profile' => 'Ukládám změny ve tvém profilu...',
+        'economy' => 'Načítám tvůj finanční přehled...',
+        'teams' => 'Připravuji týmové statistiky a soupisky...',
+        'notifications' => 'Načítám tvá oznámení...',
+        'search' => 'Hledám nejlepší výsledky...',
+        'ai' => 'AI Sokol právě přemýšlí...',
+    ],
+
     'feedback' => [
         'contact_coach_title' => 'Kontaktovat trenéra',
         'contact_coach_subtitle' => 'Napište zprávu trenérům svého týmu.',
