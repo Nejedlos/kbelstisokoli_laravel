@@ -97,24 +97,24 @@
                         <div class="grid grid-cols-1 xs:grid-cols-3 gap-3">
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="confirmed" class="peer sr-only" x-model="status" {{ $myStatus === 'confirmed' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-success-200 group-hover:bg-success-50/30 peer-checked:border-success-500 peer-checked:bg-success-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
-                                    <i class="fa-light fa-check-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-success-600 group-hover:text-success-400"></i>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-success-200 group-hover:bg-success-50/30 peer-checked:border-success-500 peer-checked:bg-success-50 peer-checked:shadow-inner peer-checked:shadow-success-500/10 shadow-sm min-h-[90px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-check-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-success-600 group-hover:text-success-400 peer-checked:scale-110 transition-transform"></i>
                                     <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-success-700 leading-none">{{ __('member.attendance.status.confirmed') }}</span>
                                 </div>
                             </label>
 
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="declined" class="peer sr-only" x-model="status" {{ $myStatus === 'declined' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-danger-200 group-hover:bg-danger-50/30 peer-checked:border-danger-500 peer-checked:bg-danger-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
-                                    <i class="fa-light fa-times-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-danger-600 group-hover:text-danger-400"></i>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-danger-200 group-hover:bg-danger-50/30 peer-checked:border-danger-500 peer-checked:bg-danger-50 peer-checked:shadow-inner peer-checked:shadow-danger-500/10 shadow-sm min-h-[90px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-times-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-danger-600 group-hover:text-danger-400 peer-checked:scale-110 transition-transform"></i>
                                     <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-danger-700 leading-none">{{ __('member.attendance.status.declined') }}</span>
                                 </div>
                             </label>
 
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="maybe" class="peer sr-only" x-model="status" {{ $myStatus === 'maybe' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-warning-200 group-hover:bg-warning-50/30 peer-checked:border-warning-500 peer-checked:bg-warning-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
-                                    <i class="fa-light fa-question-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-warning-600 group-hover:text-warning-400"></i>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-warning-200 group-hover:bg-warning-50/30 peer-checked:border-warning-500 peer-checked:bg-warning-50 peer-checked:shadow-inner peer-checked:shadow-warning-500/10 shadow-sm min-h-[90px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-question-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-warning-600 group-hover:text-warning-400 peer-checked:scale-110 transition-transform"></i>
                                     <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-warning-700 leading-none">{{ __('member.attendance.status.maybe') }}</span>
                                 </div>
                             </label>

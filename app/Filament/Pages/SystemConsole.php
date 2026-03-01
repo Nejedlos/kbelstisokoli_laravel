@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Support\BinaryHelper;
 use App\Support\FilamentIcon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -455,15 +456,7 @@ class SystemConsole extends Page
 
         try {
             if ($type === 'artisan') {
-                // Zjištění cesty k PHP binárce (inteligentní finder + .env override)
-                $finder = new PhpExecutableFinder;
-                $phpBinary = $finder->find(false) ?: PHP_BINARY;
-
-                if (config('app.env') === 'production') {
-                    $phpBinary = config('app.prod_php_binary', $phpBinary);
-                } else {
-                    $phpBinary = config('app.local_php_binary', $phpBinary);
-                }
+                $phpBinary = BinaryHelper::getPhpBinary();
 
                 $this->streamDebugInfo($phpBinary, 'artisan');
 
@@ -482,13 +475,10 @@ class SystemConsole extends Page
                 $commandArray = $this->parseCommandToArray($command);
 
                 // Mapování binárek na cesty (inteligentní finder + .env override)
-                $finder = new PhpExecutableFinder;
-                $defaultPhp = $finder->find(false) ?: 'php';
-
                 $binaryMap = [
-                    'php' => config('app.env') === 'production' ? (config('app.prod_php_binary') ?: $defaultPhp) : (config('app.local_php_binary') ?: $defaultPhp),
-                    'node' => config('app.env') === 'production' ? (config('app.prod_node_binary') ?: 'node') : 'node',
-                    'npm' => config('app.env') === 'production' ? (config('app.prod_npm_binary') ?: 'npm') : 'npm',
+                    'php' => BinaryHelper::getPhpBinary(),
+                    'node' => BinaryHelper::getNodeBinary(),
+                    'npm' => BinaryHelper::getNpmBinary(),
                     'composer' => 'composer',
                     'git' => 'git',
                 ];
@@ -680,8 +670,13 @@ class SystemConsole extends Page
         }
         $out .= "\n";
 
-        // 4. HLEDÁNÍ PHP BINÁREK
-        $out .= "--- [4] HLEDÁNÍ FUNKČNÍ PHP BINÁRKY ---\n";
+        // 4. HLEDÁNÍ BINÁREK (PHP, NODE, NPM)
+        $out .= "--- [4] BINÁRKY (PHP, NODE, NPM) ---\n";
+        $out .= sprintf("%-25s: %s\n", 'PHP (BinaryHelper)', BinaryHelper::getPhpBinary());
+        $out .= sprintf("%-25s: %s\n", 'Node.js (BinaryHelper)', BinaryHelper::getNodeBinary());
+        $out .= sprintf("%-25s: %s\n", 'NPM (BinaryHelper)', BinaryHelper::getNpmBinary());
+        $out .= "\n";
+
         $potentialBinaries = [
             PHP_BINARY,
             'php8.4',
