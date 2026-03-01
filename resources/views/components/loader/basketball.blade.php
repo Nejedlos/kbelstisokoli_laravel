@@ -1,11 +1,23 @@
+@php
+    $hasWireLoading = false;
+    foreach($attributes->getAttributes() as $key => $value) {
+        if(str_starts_with($key, 'wire:loading')) {
+            $hasWireLoading = true;
+            break;
+        }
+    }
+@endphp
+
 @teleport('body')
-<div {{ $attributes->merge(['class' => 'ks-loader-overlay']) }}
-     @if(!$attributes->has('x-show') && !$attributes->has('wire:loading'))
+<div {{ $attributes->merge(['class' => 'ks-loader-overlay hidden', 'style' => 'display: none']) }}
+     @if(!$attributes->has('x-show') && !$hasWireLoading)
          wire:loading.delay
-         wire:loading.class="is-loading"
+         wire:loading.class.remove="hidden"
      @endif
      @if($attributes->has('x-show'))
-         :class="{ 'is-loading': {{ $attributes->get('x-show') }} }"
+         x-show="{{ $attributes->get('x-show') }}"
+         x-cloak
+         :class="{ 'is-loading': {{ $attributes->get('x-show') }}, 'hidden': !({{ $attributes->get('x-show') }}) }"
      @endif
      wire:key="ks-loader-{{ md5($attributes->get('wire:target', 'default')) }}">
     <div class="ks-loader-content">

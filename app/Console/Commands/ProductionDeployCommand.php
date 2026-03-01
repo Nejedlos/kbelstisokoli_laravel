@@ -142,10 +142,24 @@ class ProductionDeployCommand extends Command
         // protože i když je v PATH, může tam být dřív v14 (častý problém na Webglobe).
         if ($nodeBinary === 'node') {
             info('🔍 Hledám optimální verzi Node.js (v18+)...');
-            $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
+            $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node22 node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
             if ($findNode->successful() && ! empty(trim($findNode->output()))) {
                 $nodeBinary = trim($findNode->output());
-                info("✅ Použiji: {$nodeBinary}");
+                info("✅ Použiji Node: {$nodeBinary}");
+
+                // Zkusíme najít odpovídající npm (např. node20 -> npm20)
+                if ($npmBinary === 'npm') {
+                    $npmPart = '';
+                    if (preg_match('/node(\d+)/', $nodeBinary, $m)) {
+                        $npmPart = $m[1];
+                    }
+
+                    $findNpm = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a npm{$npmPart} npm); do if \$n -v >/dev/null 2>&1; then echo \$n; break; fi; done'");
+                    if ($findNpm->successful() && ! empty(trim($findNpm->output()))) {
+                        $npmBinary = trim($findNpm->output());
+                        info("✅ Použiji NPM: {$npmBinary}");
+                    }
+                }
             }
         }
 

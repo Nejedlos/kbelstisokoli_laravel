@@ -97,24 +97,24 @@
                         <div class="grid grid-cols-1 xs:grid-cols-3 gap-3">
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="confirmed" class="peer sr-only" x-model="status" {{ $myStatus === 'confirmed' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-success-200 peer-checked:border-success-500 peer-checked:bg-success-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
-                                    <i class="fa-light fa-check-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-success-600"></i>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-success-200 group-hover:bg-success-50/30 peer-checked:border-success-500 peer-checked:bg-success-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-check-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-success-600 group-hover:text-success-400"></i>
                                     <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-success-700 leading-none">{{ __('member.attendance.status.confirmed') }}</span>
                                 </div>
                             </label>
 
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="declined" class="peer sr-only" x-model="status" {{ $myStatus === 'declined' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-danger-200 peer-checked:border-danger-500 peer-checked:bg-danger-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
-                                    <i class="fa-light fa-times-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-danger-600"></i>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-danger-200 group-hover:bg-danger-50/30 peer-checked:border-danger-500 peer-checked:bg-danger-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-times-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-danger-600 group-hover:text-danger-400"></i>
                                     <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-danger-700 leading-none">{{ __('member.attendance.status.declined') }}</span>
                                 </div>
                             </label>
 
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="status" value="maybe" class="peer sr-only" x-model="status" {{ $myStatus === 'maybe' ? 'checked' : '' }}>
-                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-warning-200 peer-checked:border-warning-500 peer-checked:bg-warning-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
-                                    <i class="fa-light fa-question-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-warning-600"></i>
+                                <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-center transition-all group-hover:border-warning-200 group-hover:bg-warning-50/30 peer-checked:border-warning-500 peer-checked:bg-warning-50 shadow-sm min-h-[80px] flex flex-col items-center justify-center">
+                                    <i class="fa-light fa-question-circle text-2xl text-slate-300 mb-1.5 block peer-checked:text-warning-600 group-hover:text-warning-400"></i>
                                     <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 peer-checked:text-warning-700 leading-none">{{ __('member.attendance.status.maybe') }}</span>
                                 </div>
                             </label>
@@ -156,105 +156,170 @@
 
         <!-- Sidebar: Attendance List -->
         <div class="space-y-6">
-            <h3 class="text-lg font-black uppercase tracking-tight text-secondary flex items-center gap-2">
-                <i class="fa-light fa-users text-primary"></i>
-                {{ __('member.attendance.who_comes_title') ?? 'Kdo přijde?' }}
-            </h3>
+            <div class="flex items-center justify-between gap-2">
+                <h3 class="text-lg font-black uppercase tracking-tight text-secondary flex items-center gap-2">
+                    <i class="fa-light fa-users text-primary"></i>
+                    {{ __('member.attendance.who_comes_title') ?? 'Kdo přijde?' }}
+                </h3>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest border border-slate-200 shadow-sm">
+                    {{ $confirmed->count() + $declined->count() + $maybe->count() + $pending->count() }}
+                </span>
+            </div>
 
             <!-- Stats Overview -->
             <div class="grid grid-cols-4 gap-2">
-                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm" title="{{ __('member.attendance.status.confirmed') }}">
-                    <div class="text-lg font-black text-success-600 leading-none">{{ $confirmed->count() }}</div>
-                    <i class="fa-solid fa-circle-check text-[10px] text-success-200 mt-1"></i>
+                <div class="bg-success-50/50 p-3 rounded-2xl border border-success-100 text-center shadow-sm relative group overflow-hidden transition-all hover:shadow-md hover:bg-success-100/50" title="{{ __('member.attendance.status.confirmed') }}">
+                    <div class="absolute inset-x-0 bottom-0 h-1 bg-success-500 opacity-20"></div>
+                    <div class="text-xl font-black text-success-600 leading-none mb-1">{{ $confirmed->count() }}</div>
+                    <div class="text-[8px] font-black uppercase tracking-tighter text-success-500/70 group-hover:text-success-600 transition-colors">{{ __('member.attendance.status.confirmed') }}</div>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm" title="{{ __('member.attendance.status.declined') }}">
-                    <div class="text-lg font-black text-danger-600 leading-none">{{ $declined->count() }}</div>
-                    <i class="fa-solid fa-circle-xmark text-[10px] text-danger-200 mt-1"></i>
+                <div class="bg-danger-50/50 p-3 rounded-2xl border border-danger-100 text-center shadow-sm relative group overflow-hidden transition-all hover:shadow-md hover:bg-danger-100/50" title="{{ __('member.attendance.status.declined') }}">
+                    <div class="absolute inset-x-0 bottom-0 h-1 bg-danger-500 opacity-20"></div>
+                    <div class="text-xl font-black text-danger-600 leading-none mb-1">{{ $declined->count() }}</div>
+                    <div class="text-[8px] font-black uppercase tracking-tighter text-danger-500/70 group-hover:text-danger-600 transition-colors">{{ __('member.attendance.status.declined') }}</div>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm" title="{{ __('member.attendance.status.maybe') }}">
-                    <div class="text-lg font-black text-warning-600 leading-none">{{ $maybe->count() }}</div>
-                    <i class="fa-solid fa-circle-question text-[10px] text-warning-200 mt-1"></i>
+                <div class="bg-warning-50/50 p-3 rounded-2xl border border-warning-100 text-center shadow-sm relative group overflow-hidden transition-all hover:shadow-md hover:bg-warning-100/50" title="{{ __('member.attendance.status.maybe') }}">
+                    <div class="absolute inset-x-0 bottom-0 h-1 bg-warning-500 opacity-20"></div>
+                    <div class="text-xl font-black text-warning-600 leading-none mb-1">{{ $maybe->count() }}</div>
+                    <div class="text-[8px] font-black uppercase tracking-tighter text-warning-500/70 group-hover:text-warning-600 transition-colors">{{ __('member.attendance.status.maybe') }}</div>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm" title="{{ __('member.attendance.status.pending') }}">
-                    <div class="text-lg font-black text-slate-400 leading-none">{{ $pending->count() }}</div>
-                    <i class="fa-solid fa-circle-minus text-[10px] text-slate-200 mt-1"></i>
+                <div class="bg-slate-50/50 p-3 rounded-2xl border border-slate-100 text-center shadow-sm relative group overflow-hidden transition-all hover:shadow-md hover:bg-slate-100/50" title="{{ __('member.attendance.status.pending') }}">
+                    <div class="absolute inset-x-0 bottom-0 h-1 bg-slate-400 opacity-20"></div>
+                    <div class="text-xl font-black text-slate-400 leading-none mb-1">{{ $pending->count() }}</div>
+                    <div class="text-[8px] font-black uppercase tracking-tighter text-slate-400 group-hover:text-slate-500 transition-colors">{{ __('member.attendance.status.pending') }}</div>
                 </div>
             </div>
 
             <!-- Attendance List Groups -->
-            <div class="space-y-6 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
+            <div class="space-y-6 max-h-[1000px] overflow-y-auto pr-2 custom-scrollbar">
                 @if($confirmed->isNotEmpty())
-                    <div class="space-y-2">
-                        <div class="text-[10px] font-black uppercase tracking-widest text-success-600 flex items-center gap-1.5 ml-1">
-                            <i class="fa-solid fa-circle-check"></i>
-                            {{ __('member.attendance.who_comes_title') }}
-                        </div>
-                        @foreach($confirmed as $p)
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 shadow-sm {{ $p['is_me'] ? 'ring-1 ring-primary-100 bg-primary/5' : '' }}">
-                                <div class="w-8 h-8 rounded-full bg-success-50 text-success-600 flex items-center justify-center text-xs font-black">
-                                    {{ strtoupper(substr($p['user']->name, 0, 1)) }}
-                                </div>
-                                <span class="text-sm font-bold text-secondary {{ $p['is_me'] ? 'text-primary' : '' }}">{{ $p['user']->name }} @if($p['is_me']) (Já) @endif</span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-success-600 border-b border-success-100 pb-2 ml-1">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-check"></i>
+                                {{ __('member.attendance.who_comes_title') }}
                             </div>
-                        @endforeach
+                            <span>{{ $confirmed->count() }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2">
+                            @foreach($confirmed as $p)
+                                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-success-50/30 border border-success-100 shadow-sm transition-all hover:bg-success-50/60 hover:border-success-200 {{ $p['is_me'] ? 'ring-2 ring-primary bg-primary/5 border-primary/20' : '' }}">
+                                    <div class="relative">
+                                        <img src="{{ $p['user']->getAvatarUrl('thumb') }}" alt="{{ $p['user']->name }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover">
+                                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success-500 border-2 border-white flex items-center justify-center">
+                                            <i class="fa-solid fa-check text-[8px] text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-bold text-secondary truncate {{ $p['is_me'] ? 'text-primary' : '' }}">
+                                            {{ $p['user']->name }}
+                                            @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
 
                 @if($declined->isNotEmpty())
-                    <div class="space-y-2">
-                        <div class="text-[10px] font-black uppercase tracking-widest text-danger-600 flex items-center gap-1.5 ml-1">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                            {{ __('member.attendance.who_not_comes_title') }}
-                        </div>
-                        @foreach($declined as $p)
-                            <div class="flex flex-col p-3 rounded-xl bg-white border border-slate-100 shadow-sm opacity-80 {{ $p['is_me'] ? 'ring-1 ring-primary-100 bg-primary/5' : '' }}">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-danger-50 text-danger-400 flex items-center justify-center text-xs font-black">
-                                        {{ strtoupper(substr($p['user']->name, 0, 1)) }}
-                                    </div>
-                                    <span class="text-sm font-bold text-slate-600">{{ $p['user']->name }}</span>
-                                </div>
-                                @if($p['attendance']?->note)
-                                    <div class="ml-11 mt-1.5 p-2 rounded-lg bg-slate-50 border border-slate-100 text-[10px] text-slate-500 italic leading-snug">
-                                        {{ $p['attendance']->note }}
-                                    </div>
-                                @endif
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-danger-600 border-b border-danger-100 pb-2 ml-1">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                                {{ __('member.attendance.who_not_comes_title') }}
                             </div>
-                        @endforeach
+                            <span>{{ $declined->count() }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2">
+                            @foreach($declined as $p)
+                                <div class="group flex flex-col p-2.5 rounded-xl bg-danger-50/30 border border-danger-100 shadow-sm opacity-80 transition-all hover:opacity-100 hover:bg-danger-50/60 hover:border-danger-200 {{ $p['is_me'] ? 'ring-2 ring-primary bg-primary/5 border-primary/20' : '' }}">
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative">
+                                            <img src="{{ $p['user']->getAvatarUrl('thumb') }}" alt="{{ $p['user']->name }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover grayscale">
+                                            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-danger-500 border-2 border-white flex items-center justify-center">
+                                                <i class="fa-solid fa-times text-[8px] text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-sm font-bold text-slate-600 truncate">
+                                                {{ $p['user']->name }}
+                                                @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
+                                            </div>
+                                            @if($p['attendance']?->excuse_reason)
+                                                <div class="text-[9px] font-black uppercase tracking-tighter text-danger-500/70">
+                                                    {{ __('member.attendance.excuse_reasons.' . $p['attendance']->excuse_reason) ?? $p['attendance']->excuse_reason }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @if($p['attendance']?->note)
+                                        <div class="ml-11 mt-1.5 p-2 rounded-lg bg-slate-50 border border-slate-100 text-[10px] text-slate-500 italic leading-snug group-hover:bg-danger-50 group-hover:border-danger-100 transition-colors">
+                                            {{ $p['attendance']->note }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
 
                 @if($maybe->isNotEmpty())
-                    <div class="space-y-2">
-                        <div class="text-[10px] font-black uppercase tracking-widest text-warning-600 flex items-center gap-1.5 ml-1">
-                            <i class="fa-solid fa-circle-question"></i>
-                            {{ __('member.attendance.status.maybe') }}
-                        </div>
-                        @foreach($maybe as $p)
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 shadow-sm {{ $p['is_me'] ? 'ring-1 ring-primary-100 bg-primary/5' : '' }}">
-                                <div class="w-8 h-8 rounded-full bg-warning-50 text-warning-600 flex items-center justify-center text-xs font-black">
-                                    {{ strtoupper(substr($p['user']->name, 0, 1)) }}
-                                </div>
-                                <span class="text-sm font-bold text-secondary">{{ $p['user']->name }}</span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-warning-600 border-b border-warning-100 pb-2 ml-1">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-question"></i>
+                                {{ __('member.attendance.status.maybe') }}
                             </div>
-                        @endforeach
+                            <span>{{ $maybe->count() }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2">
+                            @foreach($maybe as $p)
+                                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-warning-50/30 border border-warning-100 shadow-sm transition-all hover:bg-warning-50/60 hover:border-warning-200 {{ $p['is_me'] ? 'ring-2 ring-primary bg-primary/5 border-primary/20' : '' }}">
+                                    <div class="relative">
+                                        <img src="{{ $p['user']->getAvatarUrl('thumb') }}" alt="{{ $p['user']->name }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover">
+                                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-warning-500 border-2 border-white flex items-center justify-center">
+                                            <i class="fa-solid fa-question text-[8px] text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-bold text-secondary truncate">
+                                            {{ $p['user']->name }}
+                                            @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
 
                 @if($pending->isNotEmpty())
-                    <div class="space-y-2">
-                        <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 ml-1">
-                            <i class="fa-solid fa-circle-minus"></i>
-                            {{ __('member.attendance.who_pending_title') }}
-                        </div>
-                        @foreach($pending as $p)
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-dashed border-slate-200 opacity-60">
-                                <div class="w-8 h-8 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center text-xs font-black border border-slate-100">
-                                    {{ strtoupper(substr($p['user']->name, 0, 1)) }}
-                                </div>
-                                <span class="text-sm font-bold text-slate-400">{{ $p['user']->name }}</span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2 ml-1">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-minus"></i>
+                                {{ __('member.attendance.who_pending_title') }}
                             </div>
-                        @endforeach
+                            <span>{{ $pending->count() }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2">
+                            @foreach($pending as $p)
+                                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-dashed border-slate-200 opacity-60 transition-all hover:opacity-100 hover:bg-white hover:border-slate-300">
+                                    <div class="relative">
+                                        <img src="{{ $p['user']->getAvatarUrl('thumb') }}" alt="{{ $p['user']->name }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover grayscale opacity-50">
+                                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-slate-300 border-2 border-white flex items-center justify-center">
+                                            <i class="fa-solid fa-minus text-[8px] text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-bold text-slate-400 truncate">
+                                            {{ $p['user']->name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
             </div>
