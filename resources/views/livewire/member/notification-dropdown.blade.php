@@ -68,7 +68,7 @@
                                     @if(!empty($notification->data['user_name']))
                                         <span class="text-primary">{{ $notification->data['user_name'] }}:</span>
                                     @endif
-                                    {{ $notification->data['title'] ?? __('member.notifications.default_title') }}
+                                    {{ !empty($notification->data['title']) ? __($notification->data['title']) : __('member.notifications.default_title') }}
                                 </h4>
                                 @if($notification->unread())
                                     <span class="shrink-0 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_5px_rgba(225,29,72,0.5)]"></span>

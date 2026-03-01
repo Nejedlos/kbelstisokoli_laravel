@@ -32,11 +32,11 @@ class RsvpChangedHandler implements ShouldQueue
         }
 
         // --- Identifikace události a štítku ---
-        $eventLabel = match (get_class($eventModel)) {
-            \App\Models\Training::class => 'trénink',
-            \App\Models\BasketballMatch::class => 'zápas',
-            \App\Models\ClubEvent::class => 'klubovou akci',
-            default => 'akci',
+        $eventLabelKey = match (get_class($eventModel)) {
+            \App\Models\Training::class => 'training',
+            \App\Models\BasketballMatch::class => 'match',
+            \App\Models\ClubEvent::class => 'club_event',
+            default => 'event',
         };
 
         $eventTitle = match (get_class($eventModel)) {
@@ -119,7 +119,7 @@ class RsvpChangedHandler implements ShouldQueue
                 $attendance->status,
                 $concernedUser,
                 $actionUrl,
-                $eventLabel
+                $eventLabelKey
             ));
         }
     }

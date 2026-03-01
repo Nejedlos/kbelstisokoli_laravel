@@ -14,7 +14,7 @@ class RsvpChangedNotification extends BaseNotification
         protected string $status,
         protected ?\App\Models\User $user = null,
         protected ?string $actionUrl = null,
-        protected string $eventLabel = 'akci'
+        protected string $eventLabelKey = 'event'
     ) {}
 
     /**
@@ -33,26 +33,36 @@ class RsvpChangedNotification extends BaseNotification
     protected function getNotificationData(): array
     {
         $statusLabel = match ($this->status) {
-            'confirmed' => 'potvrzena',
-            'declined' => 'zrušena (omluveno)',
-            'maybe' => 'změněna na Možná',
-            default => 'změněna',
+            'confirmed' => __('member.notifications.rsvp_statuses.confirmed'),
+            'declined' => __('member.notifications.rsvp_statuses.declined'),
+            'maybe' => __('member.notifications.rsvp_statuses.maybe'),
+            default => __('member.notifications.rsvp_statuses.changed'),
         };
 
+        $label = __("member.notifications.event_labels.{$this->eventLabelKey}");
+
         if ($this->user) {
-            $message = "Změna účasti na {$this->eventLabel} \"{$this->eventTitle}\" na: {$statusLabel}.";
+            $message = __('member.notifications.rsvp_message_user', [
+                'label' => $label,
+                'title' => $this->eventTitle,
+                'status' => $statusLabel,
+            ]);
         } else {
-            $message = "Tvoje účast na {$this->eventLabel} \"{$this->eventTitle}\" byla {$statusLabel}.";
+            $message = __('member.notifications.rsvp_message_self', [
+                'label' => $label,
+                'title' => $this->eventTitle,
+                'status' => $statusLabel,
+            ]);
         }
 
         return [
             'type' => 'info',
-            'title' => 'Změna účasti na akci',
+            'title' => 'member.notifications.rsvp_changed_title',
             'message' => $message,
             'user_id' => $this->user?->id,
             'user_name' => $this->user?->name,
             'user_avatar' => $this->user?->getAvatarUrl('thumb'),
-            'action_label' => 'Zobrazit program',
+            'action_label' => 'member.notifications.view_program',
             'action_url' => $this->actionUrl ?? route('member.attendance.index'),
         ];
     }

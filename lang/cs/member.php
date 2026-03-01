@@ -189,11 +189,51 @@ return [
         'subtitle' => 'Přehled vašich upozornění a zpráv.',
         'mark_all_read' => 'Označit vše jako přečtené',
         'mark_read' => 'Označit jako přečtené',
+        'new' => 'Nové',
         'default_title' => 'Upozornění',
         'default_action_label' => 'Zobrazit detail',
         'view_all' => 'Zobrazit všechna oznámení',
         'no_notifications' => 'Žádná nová oznámení',
         'no_notifications_text' => 'Aktuálně nemáte žádná neřešená upozornění.',
+        'marked_read' => 'Oznámení bylo označeno jako přečtené.',
+        'marked_all_read' => 'Všechna oznámení byla označena jako přečtená.',
+
+        'rsvp_changed_title' => 'Změna účasti na akci',
+        'view_program' => 'Zobrazit program',
+        'rsvp_message_user' => 'Změna účasti na :label ":title" na: :status.',
+        'rsvp_message_self' => 'Tvoje účast na :label ":title" byla :status.',
+
+        'event_labels' => [
+            'training' => 'trénink',
+            'match' => 'zápas',
+            'club_event' => 'klubovou akci',
+            'event' => 'akci',
+        ],
+
+        'rsvp_statuses' => [
+            'confirmed' => 'potvrzena',
+            'declined' => 'zrušena (omluveno)',
+            'maybe' => 'změněna na Možná',
+            'changed' => 'změněna',
+        ],
+
+        'new_charge_title' => 'Nový platební předpis',
+        'new_charge_message' => 'Byl ti vystaven předpis ":title" na částku :amount Kč.',
+        'view_payments' => 'Zobrazit moje platby',
+
+        'mail' => [
+            'subject_default' => 'Upozornění | :club',
+            'greeting' => 'Ahoj :name!',
+            'footer' => 'Děkujeme, že jsi součástí týmu!',
+            'salutation' => 'Tvůj tým :club',
+            'view_portal' => 'Zobrazit v portálu',
+            'new_charge_subject' => 'Nový platební předpis: :title',
+            'charge_item' => 'Položka: :title',
+            'charge_amount' => 'Částka: :amount Kč',
+            'charge_due_date' => 'Splatnost: :date',
+            'charge_due_date_unknown' => 'neuvedeno',
+            'charge_please_pay' => 'Prosím o včasnou úhradu. Děkujeme!',
+        ],
     ],
     'teams' => [
         'title' => 'Týmové přehledy',

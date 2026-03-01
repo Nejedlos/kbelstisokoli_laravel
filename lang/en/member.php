@@ -189,11 +189,51 @@ return [
         'subtitle' => 'Overview of your alerts and messages.',
         'mark_all_read' => 'Mark all as read',
         'mark_read' => 'Mark as read',
+        'new' => 'New',
         'default_title' => 'Alert',
         'default_action_label' => 'Show detail',
         'view_all' => 'View all notifications',
         'no_notifications' => 'No new notifications',
         'no_notifications_text' => 'You currently have no unresolved alerts.',
+        'marked_read' => 'Notification has been marked as read.',
+        'marked_all_read' => 'All notifications have been marked as read.',
+
+        'rsvp_changed_title' => 'RSVP Change',
+        'view_program' => 'View program',
+        'rsvp_message_user' => 'RSVP change for :label ":title" to: :status.',
+        'rsvp_message_self' => 'Your RSVP for :label ":title" was :status.',
+
+        'event_labels' => [
+            'training' => 'training',
+            'match' => 'match',
+            'club_event' => 'club event',
+            'event' => 'event',
+        ],
+
+        'rsvp_statuses' => [
+            'confirmed' => 'confirmed',
+            'declined' => 'canceled (excused)',
+            'maybe' => 'changed to Maybe',
+            'changed' => 'changed',
+        ],
+
+        'new_charge_title' => 'New Charge',
+        'new_charge_message' => 'New charge ":title" issued for amount :amount CZK.',
+        'view_payments' => 'View my payments',
+
+        'mail' => [
+            'subject_default' => 'Alert | :club',
+            'greeting' => 'Hi :name!',
+            'footer' => 'Thank you for being part of the team!',
+            'salutation' => 'Your :club team',
+            'view_portal' => 'View in portal',
+            'new_charge_subject' => 'New Charge: :title',
+            'charge_item' => 'Item: :title',
+            'charge_amount' => 'Amount: :amount CZK',
+            'charge_due_date' => 'Due date: :date',
+            'charge_due_date_unknown' => 'not specified',
+            'charge_please_pay' => 'Please pay on time. Thank you!',
+        ],
     ],
     'teams' => [
         'title' => 'Team Overviews',

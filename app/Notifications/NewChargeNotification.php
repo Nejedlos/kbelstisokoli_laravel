@@ -22,15 +22,25 @@ class NewChargeNotification extends BaseNotification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $branding = app(\App\Services\BrandingService::class)->getSettings();
+        $clubName = $branding['club_name'];
+
         return (new MailMessage)
-            ->subject('Nový platební předpis: '.$this->charge->title)
-            ->greeting('Ahoj '.$notifiable->name.'!')
-            ->line('Byl ti vystaven nový platební předpis v klubovém systému.')
-            ->line('Položka: '.$this->charge->title)
-            ->line('Částka: '.number_format($this->charge->amount_total, 0, ',', ' ').' Kč')
-            ->line('Splatnost: '.($this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : 'neuvedeno'))
-            ->action('Zobrazit moje platby', route('member.economy.index'))
-            ->line('Prosím o včasnou úhradu. Děkujeme!');
+            ->subject(__('member.notifications.mail.new_charge_subject', ['title' => $this->charge->title]))
+            ->greeting(__('member.notifications.mail.greeting', ['name' => $notifiable->name]))
+            ->line(__('member.notifications.new_charge_message', [
+                'title' => $this->charge->title,
+                'amount' => number_format($this->charge->amount_total, 0, ',', ' '),
+            ]))
+            ->line(__('member.notifications.mail.charge_item', ['title' => $this->charge->title]))
+            ->line(__('member.notifications.mail.charge_amount', ['amount' => number_format($this->charge->amount_total, 0, ',', ' ')]))
+            ->line(__('member.notifications.mail.charge_due_date', [
+                'date' => $this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : __('member.notifications.mail.charge_due_date_unknown')
+            ]))
+            ->action(__('member.notifications.view_payments'), route('member.economy.index'))
+            ->line(__('member.notifications.mail.charge_please_pay'))
+            ->line(__('member.notifications.mail.footer'))
+            ->salutation(__('member.notifications.mail.salutation', ['club' => $clubName]));
     }
 
     /**
@@ -40,24 +50,12 @@ class NewChargeNotification extends BaseNotification
     {
         return [
             'charge_id' => $this->charge->id,
-            'title' => 'Nový platební předpis',
-            'message' => "Byl ti vystaven předpis '{$this->charge->title}' na částku ".number_format($this->charge->amount_total, 0, ',', ' ').' Kč.',
-            'action_url' => route('member.economy.index'),
-            'type' => 'finance',
-        ];
-    }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
-    {
-        return [
-            'charge_id' => $this->charge->id,
-            'title' => 'Nový platební předpis',
-            'message' => "Byl ti vystaven předpis '{$this->charge->title}' na částku {$this->charge->amount_total} Kč.",
+            'title' => 'member.notifications.new_charge_title',
+            'message' => __('member.notifications.new_charge_message', [
+                'title' => $this->charge->title,
+                'amount' => number_format($this->charge->amount_total, 0, ',', ' '),
+            ]),
+            'action_label' => 'member.notifications.view_payments',
             'action_url' => route('member.economy.index'),
             'type' => 'finance',
         ];

@@ -141,7 +141,7 @@
 
                         <div class="space-y-2">
                             <label for="note" class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{{ __('member.attendance.note_field') ?? 'Důvod omluvy / Poznámka' }}</label>
-                            <textarea id="note" name="note" rows="2" class="w-full rounded-xl border-slate-200 focus:border-primary focus:ring-primary text-sm shadow-sm" placeholder="{{ __('member.attendance.note_placeholder') ?? 'Např. nemoc, práce, dovolená...' }}">{{ $myAttendance?->note }}</textarea>
+                            <textarea id="note" name="note" rows="2" class="w-full rounded-xl border-slate-200 focus:border-primary focus:ring-primary px-4 py-3 text-sm shadow-sm placeholder:text-slate-400 placeholder:font-medium" placeholder="{{ __('member.attendance.note_placeholder') ?? 'Např. nemoc, práce, dovolená...' }}">{{ $myAttendance?->note }}</textarea>
                         </div>
 
                         <div class="flex justify-end">

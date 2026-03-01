@@ -16,7 +16,7 @@ class NotificationDropdown extends Component
 
     public function markAllAsRead()
     {
-        Auth::user()->unreadNotifications->markAsRead();
+        Auth::user()->unreadNotifications()->update(['read_at' => now()]);
     }
 
     public function render()

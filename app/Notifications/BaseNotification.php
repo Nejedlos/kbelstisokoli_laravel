@@ -44,15 +44,25 @@ abstract class BaseNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $branding = app(BrandingService::class)->getSettings();
+        $clubName = $branding['club_name'];
         $data = $this->getNotificationData();
 
-        return (new MailMessage)
-            ->subject($data['title'] ?? 'Upozornění | '.$branding['club_name'])
-            ->greeting('Ahoj '.$notifiable->name.'!')
-            ->line($data['message'] ?? '')
-            ->action($data['action_label'] ?? 'Zobrazit v portálu', $data['action_url'] ?? route('member.dashboard'))
-            ->line('Děkujeme, že jsi součástí týmu!')
-            ->salutation('Tvůj tým '.$branding['club_name']);
+        $subject = !empty($data['title'])
+            ? (__($data['title']) . ' | ' . $clubName)
+            : __('member.notifications.mail.subject_default', ['club' => $clubName]);
+
+        $mail = (new MailMessage)
+            ->subject($subject)
+            ->greeting(__('member.notifications.mail.greeting', ['name' => $notifiable->name]))
+            ->line(!empty($data['message']) ? $data['message'] : '')
+            ->action(
+                !empty($data['action_label']) ? __($data['action_label']) : __('member.notifications.mail.view_portal'),
+                $data['action_url'] ?? route('member.dashboard')
+            )
+            ->line(__('member.notifications.mail.footer'))
+            ->salutation(__('member.notifications.mail.salutation', ['club' => $clubName]));
+
+        return $mail;
     }
 
     /**

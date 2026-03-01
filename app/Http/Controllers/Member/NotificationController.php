@@ -27,8 +27,12 @@ class NotificationController extends Controller
      */
     public function readAndRedirect(string $id): RedirectResponse
     {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
+        $user = auth()->user();
+        $notification = $user->notifications()->findOrFail($id);
+
+        if (!$notification->read_at) {
+            $user->unreadNotifications()->where('id', $id)->update(['read_at' => now()]);
+        }
 
         $actionUrl = $notification->data['action_url'] ?? route('member.dashboard');
 
@@ -40,10 +44,9 @@ class NotificationController extends Controller
      */
     public function markAsRead(string $id): RedirectResponse
     {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
+        auth()->user()->unreadNotifications()->where('id', $id)->update(['read_at' => now()]);
 
-        return back()->with('status', 'Notifikace byla označena jako přečtená.');
+        return back()->with('status', __('member.notifications.marked_read'));
     }
 
     /**
@@ -51,8 +54,8 @@ class NotificationController extends Controller
      */
     public function markAllAsRead(): RedirectResponse
     {
-        auth()->user()->unreadNotifications->markAsRead();
+        auth()->user()->unreadNotifications()->update(['read_at' => now()]);
 
-        return back()->with('status', 'Všechny notifikace byly označeny jako přečtené.');
+        return back()->with('status', __('member.notifications.marked_all_read'));
     }
 }
