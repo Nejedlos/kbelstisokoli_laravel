@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\MediaAsset;
+use App\Models\Team;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +24,9 @@ class ProfileController extends Controller
             ->limit(12)
             ->get();
 
-        return view('member.profile.edit', compact('user', 'profile', 'galleryAssets'));
+        $availableTeams = Team::query()->orderBy('name')->get();
+
+        return view('member.profile.edit', compact('user', 'profile', 'galleryAssets', 'availableTeams'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -38,12 +41,16 @@ class ProfileController extends Controller
             'jersey_number' => ['nullable', 'string', 'max:5'],
             'current_password' => ['nullable', 'required_with:new_password', 'current_password'],
             'new_password' => ['nullable', 'confirmed', Password::defaults()],
+            'member_default_team_id' => ['nullable', Rule::exists('teams', 'id')],
+            'member_view_all_by_default' => ['boolean'],
         ]);
 
         // Update User
         $user->update([
             'name' => $request->name,
             'phone' => $request->phone,
+            'member_default_team_id' => $request->member_default_team_id,
+            'member_view_all_by_default' => $request->boolean('member_view_all_by_default'),
         ]);
 
         if ($request->filled('new_password')) {

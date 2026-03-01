@@ -32,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
             return new \App\Services\BrandingService;
         });
 
+        $this->app->singleton(\App\Services\Member\MemberContext::class);
+
         // Robustní fix pro Vite manifest na Webglobe hostingu (subdomény vs. root)
         $this->app->singleton(Vite::class, function ($app) {
             return new class extends Vite {

@@ -543,6 +543,10 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             'member.profile.edit' => ['title' => __('member.profile.title')],
             'member.economy.index' => ['title' => __('member.economy.title')],
             'member.notifications.index' => ['title' => __('member.notifications.title')],
+            'member.statistics.index' => ['title' => __('nav.statistics')],
+            'member.statistics.me' => ['title' => __('nav.my_statistics')],
+            'member.statistics.players' => ['title' => __('nav.players_statistics')],
+            'member.statistics.matches' => ['title' => __('nav.matches_statistics')],
             'member.teams.index' => ['title' => __('member.teams.title')],
         ];
 

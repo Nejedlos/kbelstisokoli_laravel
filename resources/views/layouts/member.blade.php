@@ -266,12 +266,12 @@
                     </a>
                 @endforeach
 
-                @if(auth()->user()->can('manage_teams') && !empty(config('navigation.member.coach')))
+                @if(!empty(config('navigation.member.statistics')))
                     <div class="pt-8 pb-3 px-4 flex items-center gap-3">
-                        <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 whitespace-nowrap">{{ __('nav.for_coaches') }}</span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 whitespace-nowrap">{{ __('nav.statistics') }}</span>
                         <div class="h-px bg-slate-100 flex-1"></div>
                     </div>
-                    @foreach (config('navigation.member.coach', []) as $item)
+                    @foreach (config('navigation.member.statistics', []) as $item)
                         <a href="{{ route($item['route']) }}"
                            class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-xl shadow-secondary/20 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-secondary' }}">
                             <div class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/10' : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm group-hover:text-primary' }}">
@@ -339,9 +339,9 @@
                     </a>
                 @endforeach
 
-                @if(auth()->user()->can('manage_teams'))
-                    <div class="mt-8 mb-2 px-4 text-xs font-black uppercase tracking-[0.2em] text-slate-400">{{ __('nav.for_coaches') }}</div>
-                    @foreach (config('navigation.member.coach', []) as $item)
+                @if(!empty(config('navigation.member.statistics')))
+                    <div class="mt-8 mb-2 px-4 text-xs font-black uppercase tracking-[0.2em] text-slate-400">{{ __('nav.statistics') }}</div>
+                    @foreach (config('navigation.member.statistics', []) as $item)
                         <a href="{{ route($item['route']) }}"
                            @click="sidebarOpen = false"
                            class="flex items-center gap-4 px-4 py-4 rounded-club text-base font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50' }}">

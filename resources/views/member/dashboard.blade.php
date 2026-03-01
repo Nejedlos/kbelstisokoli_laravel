@@ -104,7 +104,7 @@
                 :value="$myTeams->count()"
                 icon="user-group"
                 color="secondary"
-                :route="route('member.teams.index')"
+                :route="route('member.statistics.players')"
             />
             <x-member.kpi-card
                 :title="__('dashboard.kpi.my_payments')"

@@ -23,8 +23,10 @@ return [
             ['title' => 'nav.my_profile', 'route' => 'member.profile.edit', 'icon' => 'heroicon-o-user'],
             ['title' => 'nav.payments', 'route' => 'member.economy.index', 'icon' => 'heroicon-o-credit-card'],
         ],
-        'coach' => [
-            ['title' => 'nav.team_overviews', 'route' => 'member.teams.index', 'icon' => 'heroicon-o-user-group'],
+        'statistics' => [
+            ['title' => 'nav.my_statistics', 'route' => 'member.statistics.me', 'icon' => 'heroicon-o-chart-bar'],
+            ['title' => 'nav.players_statistics', 'route' => 'member.statistics.players', 'icon' => 'heroicon-o-users'],
+            ['title' => 'nav.matches_statistics', 'route' => 'member.statistics.matches', 'icon' => 'heroicon-o-trophy'],
         ],
     ],
 

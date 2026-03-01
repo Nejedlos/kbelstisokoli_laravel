@@ -53,7 +53,15 @@ Route::middleware(['member'])
         // AI vyhledávání
         Route::get('/ai', \App\Http\Controllers\Member\AiController::class)->name('ai');
 
-        // Trenérské přehledy
+        // Statistiky
+        Route::prefix('statistiky')->name('statistics.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Member\StatisticsController::class, 'index'])->name('index');
+            Route::get('/moje', [\App\Http\Controllers\Member\StatisticsController::class, 'me'])->name('me');
+            Route::get('/hraci', [\App\Http\Controllers\Member\StatisticsController::class, 'players'])->name('players');
+            Route::get('/zapasy', [\App\Http\Controllers\Member\StatisticsController::class, 'matches'])->name('matches');
+        });
+
+        // Týmové přehledy (původní trenérské, ponecháno pro kompatibilitu, odstraněno z menu)
         Route::get('/tymove-prehledy', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/tymove-prehledy/{team}', [TeamController::class, 'show'])->name('teams.show');
 
