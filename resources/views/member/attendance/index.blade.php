@@ -9,29 +9,29 @@
             $hasActiveFilters = collect($filters)->filter(fn($v, $k) => $k === 'year' || $k === 'month' ? !empty($v) : $v !== 'all')->isNotEmpty();
         @endphp
 
-        <div x-data="{ open: false }" class="card mb-4 sm:mb-8 overflow-visible">
+        <div x-data="{ open: window.innerWidth >= 640 }" class="card mb-4 sm:mb-8 overflow-visible">
             <div class="p-4 sm:p-6">
                 <div
                     @click="open = !open"
-                    class="flex items-center justify-between cursor-pointer sm:cursor-default"
-                    :class="{'mb-4': open, 'sm:mb-6': true}"
+                    class="flex items-center justify-between cursor-pointer group/filter"
+                    :class="open ? 'mb-4 sm:mb-6' : ''"
                 >
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg sm:rounded-xl flex items-center justify-center text-primary text-sm sm:text-base">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg sm:rounded-xl flex items-center justify-center text-primary text-sm sm:text-base group-hover/filter:bg-primary group-hover/filter:text-white transition-all duration-300">
                             <i class="fa-light fa-filter"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-secondary text-sm sm:text-base leading-tight">{{ __('member.attendance.filter.title') }}</h3>
+                            <h3 class="font-bold text-secondary text-sm sm:text-base leading-tight group-hover/filter:text-primary transition-colors duration-300">{{ __('member.attendance.filter.title') }}</h3>
                             <p class="text-[10px] sm:text-xs text-slate-500 leading-tight">{{ __('member.attendance.subtitle') }}</p>
                         </div>
                     </div>
 
-                    <div class="sm:hidden text-slate-400">
-                        <i class="fa-light text-[10px]" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    <div class="text-slate-400 group-hover/filter:text-primary transition-all duration-300" :class="open ? 'rotate-180' : ''">
+                        <i class="fa-light fa-chevron-down text-[10px] sm:text-xs"></i>
                     </div>
                 </div>
 
-                <div x-show="open" x-cloak class="sm:!block">
+                <div x-show="open" x-cloak>
                     <form action="{{ route('member.attendance.index') }}" method="GET">
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         <!-- Typ akce -->

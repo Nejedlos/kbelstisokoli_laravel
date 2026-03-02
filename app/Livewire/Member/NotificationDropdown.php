@@ -2,18 +2,12 @@
 
 namespace App\Livewire\Member;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationDropdown extends Component
 {
-    public function getListeners()
-    {
-        return [
-            'echo-private:App.Models.User.' . Auth::id() . ',NotificationSent' => '$refresh',
-        ];
-    }
-
     public function markAllAsRead()
     {
         Auth::user()->unreadNotifications()->update(['read_at' => now()]);

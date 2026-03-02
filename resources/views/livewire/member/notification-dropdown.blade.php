@@ -27,7 +27,7 @@
             @endif
         </div>
 
-        <div class="max-h-[60vh] sm:max-h-[480px] overflow-y-auto custom-scrollbar" wire:poll.30s>
+        <div class="max-h-[60vh] sm:max-h-[480px] overflow-y-auto custom-scrollbar" wire:poll.30s.keep-alive>
             @forelse($latestNotifications as $notification)
                 <a href="{{ route('member.notifications.redirect', $notification->id) }}"
                    class="block p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/80 transition-all {{ $notification->unread() ? 'bg-primary/5' : '' }}">

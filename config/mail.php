@@ -127,6 +127,11 @@ return [
     'error_reporting' => [
         'email' => env('ERROR_REPORT_EMAIL'),
         'sender' => env('ERROR_REPORT_SENDER'),
+        'environments' => explode(',', env('ERROR_REPORT_ENVIRONMENTS', 'production')),
+        'dedup_enabled' => env('ERROR_MAIL_DEDUP_ENABLED', true),
+        'dedup_ttl' => env('ERROR_MAIL_DEDUP_TTL_SECONDS', 900),
+        'dedup_environments' => explode(',', env('ERROR_MAIL_DEDUP_ENVIRONMENTS', 'production,staging')),
+        'always_send' => env('ERROR_MAIL_ALWAYS_SEND', false),
     ],
 
 ];

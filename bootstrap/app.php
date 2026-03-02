@@ -102,7 +102,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // Odeslání e-mailu s chybou na produkci (vynechá 4xx chyby)
         $exceptions->report(function (\Throwable $e) {
             try {
-                if (! app()->environment('production')) {
+                $reportEnvs = config('mail.error_reporting.environments', ['production']);
+                if (! in_array(app()->environment(), $reportEnvs)) {
                     return;
                 }
 
@@ -181,6 +182,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 $from = config('mail.error_reporting.sender', config('mail.from.address'));
 
                 if ($to) {
+                    // Kontrola throttling / deduplikace chybových e-mailů
+                    if (\App\Support\ErrorMailThrottle::shouldThrottle($e, $request ? $request->fullUrl() : null)) {
+                        return;
+                    }
+
                     \Illuminate\Support\Facades\Mail::to($to)
                         ->send((new \App\Mail\ErrorMail($report))->from($from, config('mail.from.name')));
                 }

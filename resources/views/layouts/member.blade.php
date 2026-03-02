@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <title>{{ $title ?? __('nav.member_section') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
 
     <!-- Fonts -->
@@ -415,45 +415,19 @@
                             $activeTeam = $activeTeamId ? \App\Models\Team::find($activeTeamId) : null;
                         @endphp
 
-                        <!-- Team Badge (Prominent) -->
-                        <div class="hidden sm:flex flex-col items-center gap-1.5 shrink-0">
-                            @if($activeTeam)
-                                <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/10 transition-transform hover:scale-105 group" title="{{ $activeTeam->name }}">
-                                    <i class="fa-light fa-users-viewfinder text-xl md:text-2xl group-hover:rotate-12 transition-transform"></i>
-                                </div>
-                                <span class="text-[9px] font-black uppercase tracking-wider text-primary/70 text-center max-w-[70px] leading-tight">
-                                    {{ $activeTeam->name }}
-                                </span>
-                            @else
-                                <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-secondary/10 border-2 border-secondary/20 flex items-center justify-center text-secondary shadow-lg shadow-secondary/10 transition-transform hover:scale-105 group" title="{{ __('member.profile.section_settings.view_all') }}">
-                                    <i class="fa-light fa-layer-group text-xl md:text-2xl group-hover:rotate-12 transition-transform"></i>
-                                </div>
-                                <span class="text-[9px] font-black uppercase tracking-wider text-secondary/70 text-center max-w-[70px] leading-tight">
-                                    {{ __('member.profile.section_settings.view_all_short') }}
-                                </span>
-                            @endif
-                        </div>
-
                         <div class="space-y-1">
                             <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
                                 <a href="{{ route('member.dashboard') }}" class="hover:text-primary transition-colors">{{ __('nav.dashboard') }}</a>
                                 <i class="fa-light fa-chevron-right text-[8px]"></i>
                                 <span class="text-slate-300 italic">{{ brand_text($title ?? '') }}</span>
-
-                                <!-- Mobile Badge (Small) -->
-                                <span class="sm:hidden flex items-center gap-1 px-1.5 py-0.5 rounded-md @if($activeTeam) bg-primary/10 text-primary @else bg-secondary/10 text-secondary @endif font-black uppercase tracking-widest text-[8px] ml-1">
-                                    <i class="fa-light @if($activeTeam) fa-users-viewfinder @else fa-layer-group @endif"></i>
-                                    {{ $activeTeam ? $activeTeam->name : __('member.profile.section_settings.view_all') }}
-                                </span>
                             </div>
-                            <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary leading-none flex items-center gap-3">
+                            <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary leading-none flex flex-wrap items-center gap-3">
                                 {{ brand_text($title ?? __('nav.member_section')) }}
-                                @if($activeTeam)
-                                    <span class="hidden sm:inline-flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-full text-[10px] tracking-[0.2em] text-primary/70 animate-fade-in">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                                        {{ $activeTeam->name }}
-                                    </span>
-                                @endif
+                                <span class="inline-flex items-center gap-3 px-5 py-2 @if($activeTeam) bg-primary/10 border-primary/30 text-primary @else bg-secondary/10 border-secondary/30 text-secondary @endif border-2 rounded-full text-[12px] font-black uppercase tracking-[0.2em] animate-fade-in shadow-xl shadow-primary/5 transition-all">
+                                    <i class="fa-light @if($activeTeam) fa-users-viewfinder @else fa-layer-group @endif text-lg"></i>
+                                    {{ $activeTeam ? $activeTeam->name : __('member.profile.section_settings.view_all_short') }}
+                                    <span class="w-2 h-2 rounded-full @if($activeTeam) bg-primary @else bg-secondary @endif animate-pulse ml-1"></span>
+                                </span>
                             </h1>
                             @if(isset($subtitle))
                                 <p class="text-[11px] sm:text-[13px] md:text-sm text-slate-500 font-medium italic opacity-80 leading-relaxed">{{ brand_text($subtitle) }}</p>
@@ -544,26 +518,46 @@
     </script>
     @stack('scripts')
     <script>
+        // Detekce uživatelské interakce pro odlišení od automatických Livewire requestů (polling, Echo)
+        let lastUserInteraction = 0;
+        ['mousedown', 'keydown', 'submit', 'change', 'click', 'touchstart'].forEach(type => {
+            window.addEventListener(type, () => {
+                lastUserInteraction = Date.now();
+            }, true);
+        });
+
         document.addEventListener('livewire:init', () => {
             Livewire.hook('request', ({ respond, succeed, fail, options }) => {
-                // Nepouštět loader pro polling nebo tiché požadavky
-                if (options.method === 'POLL' || options.silent) {
+                // 1. Základní Livewire flagy pro tiché požadavky
+                if (options.method === 'POLL' || options.silent || options.background) {
+                    return;
+                }
+
+                // 2. Detekce, zda požadavek vyvolal uživatel nebo jde o navigaci
+                const isUserAction = (Date.now() - lastUserInteraction) < 150;
+                const isNavigation = !!options.navigate;
+
+                // 3. Pokud nejde o akci uživatele ani navigaci, loader nepouštíme
+                // Toto odfiltruje veškerý polling, Echo listenery a automatické refreshy
+                if (!isUserAction && !isNavigation) {
+                    return;
+                }
+
+                // 4. Pojistka pro specifické background komponenty
+                const isNotificationComponent = (options.fingerprint && options.fingerprint.name === 'member.notification-dropdown') ||
+                                                (options.name === 'member.notification-dropdown') ||
+                                                (options.updates && options.updates.some(u => u.name === 'member.notification-dropdown'));
+
+                if (isNotificationComponent && !isUserAction) {
                     return;
                 }
 
                 window.dispatchEvent(new CustomEvent('loading-start'));
 
-                respond(() => {
-                    window.dispatchEvent(new CustomEvent('loading-stop'));
-                });
-
-                succeed(() => {
-                    window.dispatchEvent(new CustomEvent('loading-stop'));
-                });
-
-                fail(() => {
-                    window.dispatchEvent(new CustomEvent('loading-stop'));
-                });
+                const stopLoading = () => window.dispatchEvent(new CustomEvent('loading-stop'));
+                respond(stopLoading);
+                succeed(stopLoading);
+                fail(stopLoading);
             });
         });
 

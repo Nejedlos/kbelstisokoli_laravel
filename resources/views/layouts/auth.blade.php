@@ -24,7 +24,7 @@
     <title>{{ $title ?? ($branding['club_name'] ?? 'Kbelští sokoli') }}</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <meta name="theme-color" content="{{ $colors['red'] ?? '#e11d48' }}">
     <style>{!! app(\App\Services\BrandingService::class)->getCssVariables() !!}</style>

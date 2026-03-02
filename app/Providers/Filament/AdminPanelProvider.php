@@ -117,7 +117,7 @@ class AdminPanelProvider extends PanelProvider
             ->emailVerification(EmailVerificationPrompt::class)
             ->brandName($branding['club_name'])
             ->brandLogo($branding['logo_path'] ? web_asset($branding['logo_path']) : null)
-            ->favicon($branding['logo_path'] ? web_asset($branding['logo_path']) : asset('favicon.ico'))
+            ->favicon($branding['logo_path'] ? web_asset($branding['logo_path']) : '/favicon.ico')
             ->font('Instrument Sans')
             ->userMenuItems([
                 'member_section' => MenuItem::make()

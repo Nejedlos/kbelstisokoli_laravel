@@ -452,6 +452,17 @@ class AppSyncCommand extends Command
                 return false;
             }
             ftp_pasv($conn, true);
+
+            // Zabezpečení cílové cesty (vytvoření pouze jednou)
+            $parts = explode('/', trim($remoteDir, '/'));
+            $path = '';
+            foreach ($parts as $part) {
+                $path .= '/' . $part;
+                if (! @ftp_chdir($conn, $path)) {
+                    @ftp_mkdir($conn, $path);
+                }
+            }
+
             $this->uploadRecursive($conn, $localDir, $remoteDir);
             ftp_close($conn);
 
@@ -463,22 +474,17 @@ class AppSyncCommand extends Command
 
     protected function uploadRecursive($conn, $localDir, $remoteDir): void
     {
-        $parts = explode('/', trim($remoteDir, '/'));
-        $path = '';
-        foreach ($parts as $part) {
-            $path .= '/'.$part;
-            if (! @ftp_chdir($conn, $path)) {
-                @ftp_mkdir($conn, $path);
-            }
-        }
         $items = scandir($localDir);
         foreach ($items as $item) {
             if ($item === '.' || $item === '..') {
                 continue;
             }
-            $localPath = $localDir.'/'.$item;
-            $remotePath = $remoteDir.'/'.$item;
+            $localPath = $localDir . '/' . $item;
+            $remotePath = $remoteDir . '/' . $item;
             if (is_dir($localPath)) {
+                if (! @ftp_chdir($conn, $remotePath)) {
+                    @ftp_mkdir($conn, $remotePath);
+                }
                 $this->uploadRecursive($conn, $localPath, $remotePath);
             } else {
                 @ftp_put($conn, $remotePath, $localPath, FTP_BINARY);

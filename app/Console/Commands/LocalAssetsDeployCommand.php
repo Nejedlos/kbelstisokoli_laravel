@@ -73,7 +73,6 @@ class LocalAssetsDeployCommand extends Command
             $localDir = base_path($dir);
             $dirNameOnly = basename($dir); // 'build' nebo 'assets'
 
-            // Určení cílové cesty na produkci
             // Pokud máme PROD_PUBLIC_PATH, nahráváme přímo do ní (např. /subdomains/new/build)
             // Pokud nemáme, nahráváme do relativní cesty v rámci PROD_PATH (např. /secret/public/build)
             if ($remotePublicPath) {
@@ -87,12 +86,12 @@ class LocalAssetsDeployCommand extends Command
                 continue;
             }
 
-            info("📤 Zahajuji FTP transfer složky {$dir} do {$remoteDir}...");
+            info("📤 Nahrávám {$dir} do {$remoteDir}...");
             note("Tento proces může trvat několik minut v závislosti na rychlosti připojení.");
 
             $success = spin(
                 fn () => $this->syncViaFtp($localDir, $remoteDir, $ftpHost, $ftpUser, $ftpPass, $ftpPort),
-                "Nahrávám {$dir} na server..."
+                "Synchronizuji {$dir}..."
             );
 
             if (! $success) {
@@ -119,10 +118,21 @@ class LocalAssetsDeployCommand extends Command
             }
             ftp_pasv($conn, true);
 
-            // Před nahráváním se pokusíme promazat starý manifest, aby nedošlo k mismatchi
+            // 1. Zabezpečení cílové cesty (vytvoření pouze jednou)
+            $parts = explode('/', trim($remoteDir, '/'));
+            $path = '';
+            foreach ($parts as $part) {
+                $path .= '/' . $part;
+                if (! @ftp_chdir($conn, $path)) {
+                    @ftp_mkdir($conn, $path);
+                }
+            }
+
+            // 2. Před nahráváním se pokusíme promazat starý manifest, aby nedošlo k mismatchi
             $manifestPath = $remoteDir . '/manifest.json';
             @ftp_delete($conn, $manifestPath);
 
+            // 3. Samotné nahrávání (již bez opětovného mkdir/chdir v rekurzi)
             $this->uploadRecursive($conn, $localDir, $remoteDir);
 
             ftp_close($conn);
@@ -134,20 +144,10 @@ class LocalAssetsDeployCommand extends Command
     }
 
     /**
-     * Rekurzivní nahrávání složky přes FTP.
+     * Rekurzivní nahrávání souborů přes FTP.
      */
     protected function uploadRecursive($conn, $localDir, $remoteDir): void
     {
-        // Vytvoření cílové složky, pokud neexistuje
-        $parts = explode('/', trim($remoteDir, '/'));
-        $path = '';
-        foreach ($parts as $part) {
-            $path .= '/' . $part;
-            if (! @ftp_chdir($conn, $path)) {
-                @ftp_mkdir($conn, $path);
-            }
-        }
-
         $items = scandir($localDir);
         foreach ($items as $item) {
             if ($item === '.' || $item === '..') {
@@ -158,15 +158,13 @@ class LocalAssetsDeployCommand extends Command
             $remotePath = $remoteDir . '/' . $item;
 
             if (is_dir($localPath)) {
+                // Pro podložky vytvoříme adresář a pokračujeme rekurzivně
+                if (! @ftp_chdir($conn, $remotePath)) {
+                    @ftp_mkdir($conn, $remotePath);
+                }
                 $this->uploadRecursive($conn, $localPath, $remotePath);
             } else {
-                // Před nahráním souboru se ujistíme, že jsme ve správné složce
-                // (uploadRecursive pro podložky už kmkdir/chdir udělal)
-                $uploaded = @ftp_put($conn, $remotePath, $localPath, FTP_BINARY);
-                if (!$uploaded) {
-                    // Try one more time with a fresh connection if it's a large file or connection dropped?
-                    // For now just log it would be better but we are in a spin()
-                }
+                @ftp_put($conn, $remotePath, $localPath, FTP_BINARY);
             }
         }
     }
