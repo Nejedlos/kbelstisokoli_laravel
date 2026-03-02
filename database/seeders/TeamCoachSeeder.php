@@ -24,12 +24,12 @@ class TeamCoachSeeder extends Seeder
                     'en' => 'The Team C competes in the Prague Championship B. We are the core of our basketball community in Letňany (Třinecká 650). We focus on team spirit and aim to move up the table in the 2025/2026 season.',
                 ],
             ],
-            'muzi-d' => [
-                'name' => ['cs' => 'Tým D', 'en' => 'Team D'],
+            'muzi-e' => [
+                'name' => ['cs' => 'Tým E', 'en' => 'Team E'],
                 'category' => 'senior',
                 'description' => [
-                    'cs' => 'Tým D hraje 3. třídu B v naší RumcajsAreně v Letňanech. Ideální místo pro ty, co milují basketbal, dobrou partu a chtějí hrát pro radost i v soutěžním tempu.',
-                    'en' => 'The Team D plays the 3rd Class B in our RumcajsArena in Letňany. Perfect place for those who love basketball, a great community, and want to play for joy even at a competitive pace.',
+                    'cs' => 'Tým E hraje 3. třídu B v naší RumcajsAreně v Letňanech. Ideální místo pro ty, co milují basketbal, dobrou partu a chtějí hrát pro radost i v soutěžním tempu.',
+                    'en' => 'The Team E plays the 3rd Class B in our RumcajsArena in Letňany. Perfect place for those who love basketball, a great community, and want to play for joy even at a competitive pace.',
                 ],
             ],
         ];
@@ -42,7 +42,7 @@ class TeamCoachSeeder extends Seeder
                 'email' => 'spanily@pro-nemo.cz',
                 'phone' => '+420602285447',
             ],
-            'muzi-d' => [
+            'muzi-e' => [
                 'first_name' => 'Lubor',
                 'last_name' => 'Viktorin',
                 'email' => 'lubor.viktorin@avikotime.cz',

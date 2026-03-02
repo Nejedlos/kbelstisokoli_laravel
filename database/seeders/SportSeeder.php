@@ -35,8 +35,8 @@ class SportSeeder extends Seeder
 
     protected function seedTeams(): void
     {
-        // Ponecháme pouze týmy Tým C a Tým D
-        $allowedSlugs = ['muzi-c', 'muzi-d'];
+        // Ponecháme pouze týmy Tým C a Tým E
+        $allowedSlugs = ['muzi-c', 'muzi-e'];
 
         // Smažeme případné jiné týmy, aby zůstaly jen požadované
         Team::whereNotIn('slug', $allowedSlugs)->delete();
@@ -52,12 +52,12 @@ class SportSeeder extends Seeder
                 ],
             ],
             [
-                'name' => ['cs' => 'Tým D', 'en' => 'Team D'],
-                'slug' => 'muzi-d',
+                'name' => ['cs' => 'Tým E', 'en' => 'Team E'],
+                'slug' => 'muzi-e',
                 'category' => 'senior',
                 'description' => [
-                    'cs' => 'Tým D hraje 3. třídu B v naší RumcajsAreně v Letňanech. Ideální místo pro ty, co milují basketbal, dobrou partu a chtějí hrát pro radost i v soutěžním tempu.',
-                    'en' => 'The Team D plays the 3rd Class B in our RumcajsArena in Letňany. Perfect place for those who love basketball, a great community, and want to play for joy even at a competitive pace.',
+                    'cs' => 'Tým E hraje 3. třídu B v naší RumcajsAreně v Letňanech. Ideální místo pro ty, co milují basketbal, dobrou partu a chtějí hrát pro radost i v soutěžním tempu.',
+                    'en' => 'The Team E plays the 3rd Class B in our RumcajsArena in Letňany. Perfect place for those who love basketball, a great community, and want to play for joy even at a competitive pace.',
                 ],
             ],
         ];

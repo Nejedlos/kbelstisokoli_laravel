@@ -48,12 +48,12 @@ class MinifyHtmlMiddleware
             $htmlMin->doRemoveDefaultMediaTypeFromStyleAndLinkTag(true);
             $htmlMin->doRemoveDefaultTypeFromButton(true);
             $htmlMin->doRemoveEmptyAttributes(true);
-            $htmlMin->doSortHtmlAttributes(true);
-            $htmlMin->doSortCssClassNames(true);
-            $htmlMin->doOptimizeViaHtmlDomParser(true);
+            $htmlMin->doSortHtmlAttributes(false); // Vypnuto pro výkon (vyžaduje DOM parser)
+            $htmlMin->doSortCssClassNames(false); // Vypnuto pro výkon (vyžaduje DOM parser)
+            $htmlMin->doOptimizeViaHtmlDomParser(false); // VYPÍNÁME - HLAVNÍ BRZDA (8+ sekund na request)
             $htmlMin->doRemoveSpacesBetweenTags(true);
-            $htmlMin->doRemoveOmittedHtmlTags(true);
-            $htmlMin->doRemoveOmittedQuotes(true);
+            $htmlMin->doRemoveOmittedHtmlTags(false); // Bezpečnější nechat tagy (někdy rozbíjí CSS)
+            $htmlMin->doRemoveOmittedQuotes(false); // Bezpečnější nechat uvozovky
             $htmlMin->doRemoveValueFromEmptyInput(true);
 
             $content = $htmlMin->minify($content);

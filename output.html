@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Míč v autu! (500) | Kbelští sokoli</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    
+    <meta name="theme-color" content="#E11D48">
+    <style>:root {
+    --color-brand-navy: #0B1F3A;
+    --color-brand-navy-rgb: 11, 31, 58;
+    --color-brand-blue: #2563EB;
+    --color-brand-blue-rgb: 37, 99, 235;
+    --color-brand-red: #E11D48;
+    --color-brand-red-rgb: 225, 29, 72;
+    --color-brand-white: #FFFFFF;
+    --color-brand-white-rgb: 255, 255, 255;
+    --color-ui-bg: #F8FAFC;
+    --color-ui-surface: #FFFFFF;
+    --color-ui-surface-alt: #EEF2F7;
+    --color-ui-border: #DCE3EC;
+    --color-ui-text: #0F172A;
+    --color-ui-text-muted: #64748B;
+    --color-primary: #E11D48;
+    --color-primary-rgb: 225, 29, 72;
+}</style>
+    <link rel="preload" as="style" href="https://new.kbelstisokoli.cz/build/assets/app-ByyJX7LS.css" /><link rel="preload" as="style" href="https://new.kbelstisokoli.cz/build/assets/app-B27Da3fw.css" /><link rel="modulepreload" as="script" href="https://new.kbelstisokoli.cz/build/assets/app-BTujcUz3.js" /><link rel="stylesheet" href="https://new.kbelstisokoli.cz/build/assets/app-ByyJX7LS.css" data-navigate-track="reload" /><link rel="stylesheet" href="https://new.kbelstisokoli.cz/build/assets/app-B27Da3fw.css" data-navigate-track="reload" /><script type="module" src="https://new.kbelstisokoli.cz/build/assets/app-BTujcUz3.js" data-navigate-track="reload"></script>        <style>
+        .error-bg {
+            background-image: radial-gradient(circle at 20% 30%, rgba(225, 29, 72, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 70%, rgba(22, 30, 47, 0.05) 0%, transparent 50%);
+        }
+    </style>
+    </head>
+<body class="min-h-screen flex flex-col bg-slate-50 error-bg antialiased">
+    <!-- Header -->
+    <header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container py-4 flex items-center justify-between gap-4">
+        <!-- Logo -->
+        <a href="https://new.kbelstisokoli.cz" wire:navigate class="flex items-center gap-3 shrink-0">
+                    </a>
+
+        <!-- Desktop Navigation -->
+                <nav class="hidden lg:grid lg:grid-flow-col lg:grid-rows-5 xl:flex items-center gap-x-12 gap-y-1 xl:gap-8">
+                                            <a href="https://new.kbelstisokoli.cz"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition text-primary border-b-2 border-primary">
+                    Úvod
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/novinky"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Novinky
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/tymy"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Týmy
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/zapasy"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Zápasy
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/treninky"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Tréninky
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/nabor"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Nábor
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/galerie"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Fotogalerie
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/historie"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Historie
+                </a>
+                                                            <a href="https://new.kbelstisokoli.cz/kontakt"
+                   wire:navigate                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition ">
+                    Kontakt
+                </a>
+                                    </nav>
+        
+        <!-- Right Side / CTA -->
+        <div class="flex items-center gap-2 sm:gap-4">
+            <!-- Search Toggle -->
+            <button @click="searchOpen = !searchOpen" class="p-2 text-slate-700 hover:text-primary focus:outline-none transition-colors" title="Vyhledávání">
+                <i class="fa-light fa-magnifying-glass text-xl"></i>
+            </button>
+
+            <!-- Language Switcher -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full text-[10px] font-black tracking-widest shadow-sm border border-slate-200">
+                <a href="https://new.kbelstisokoli.cz/language/cs"
+                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer bg-primary text-white shadow-sm"
+                   data-track-click="language_switch"
+                   data-track-label="CS"
+                   data-track-category="ux">
+                    CZ
+                </a>
+                <a href="https://new.kbelstisokoli.cz/language/en"
+                   class="px-3 py-1.5 rounded-full transition-all cursor-pointer text-slate-500 hover:text-primary hover:bg-white"
+                   data-track-click="language_switch"
+                   data-track-label="EN"
+                   data-track-category="ux">
+                    EN
+                </a>
+            </div>
+
+                            <a href="https://new.kbelstisokoli.cz/login" class="btn btn-primary hidden sm:inline-flex py-2 px-4 text-xs">
+                    Členská sekce
+                </a>
+            
+            <!-- Mobile Toggle -->
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-3 -mr-2 text-slate-700 hover:text-primary focus:outline-none transition-colors" aria-label="Menu">
+                <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
+                <i x-show="mobileMenuOpen" class="fa-light fa-xmark text-2xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div x-show="searchOpen"
+         x-cloak
+         @keydown.escape.window="searchOpen = false"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         class="absolute inset-x-0 top-full bg-white border-t border-slate-100 shadow-2xl py-8 md:py-12 z-40">
+        <div class="container relative">
+            <form action="https://new.kbelstisokoli.cz/hledat" method="GET" class="relative max-w-3xl mx-auto">
+                <input type="text"
+                       name="q"
+                       placeholder="Co hledáte?"
+                       class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-5 md:py-4 text-lg md:text-xl focus:border-primary focus:ring-0 transition-all outline-none pr-16 shadow-inner"
+                       x-init="$watch('searchOpen', value => value && setTimeout(() => $el.focus(), 100))">
+                <button type="submit" class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors p-2" aria-label="Hledat">
+                    <i class="fa-light fa-magnifying-glass text-2xl"></i>
+                </button>
+            </form>
+
+            <button @click="searchOpen = false" class="absolute -top-4 right-0 p-2 text-slate-400 hover:text-primary transition-colors md:hidden">
+                <i class="fa-light fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Shell -->
+        <div x-show="mobileMenuOpen"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         class="lg:hidden bg-white border-t border-slate-100 py-4 absolute w-full shadow-xl">
+         <div class="container py-6">
+            <div class="grid grid-cols-2 gap-2">
+                                                        <a href="https://new.kbelstisokoli.cz"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-primary bg-primary/5">
+                        Úvod
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/novinky"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Novinky
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/tymy"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Týmy
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/zapasy"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Zápasy
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/treninky"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Tréninky
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/nabor"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Nábor
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/galerie"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Fotogalerie
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/historie"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Historie
+                    </a>
+                                                                            <a href="https://new.kbelstisokoli.cz/kontakt"
+                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 text-slate-700">
+                        Kontakt
+                    </a>
+                                                </div>
+            <a href="https://new.kbelstisokoli.cz/login" class="btn btn-primary mt-6 py-4 w-full">
+                Přihlášení pro členy
+            </a>
+        </div>
+    </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-6 py-20 text-center">
+        <div class="max-w-4xl w-full">
+            <!-- Error Code -->
+            <div class="mb-6 inline-block px-4 py-1 rounded-full bg-primary/10 text-primary font-black text-sm uppercase tracking-widest">
+                500            </div>
+
+            <!-- Content -->
+            <h1 class="text-4xl md:text-7xl font-display font-black uppercase tracking-tighter mb-8 text-secondary leading-none">
+                Míč skončil v autu!            </h1>
+
+            <p class="text-xl md:text-2xl text-slate-600 mb-6 leading-relaxed max-w-2xl mx-auto text-balance">
+                    Něco nám v obraně nevyšlo a došlo k neočekávané chybě.
+    Náš tým adminů už o tom ví, střídá na hřiště a pracuje na opravě.
+            </p>
+
+            <p class="text-slate-400 font-medium italic mb-12">
+                Tým Sokolů se nevzdává a brzy budeme zpět ve hře.            </p>
+
+            <!-- Actions -->
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                        <a href="https://new.kbelstisokoli.cz" class="btn btn-primary px-8 text-white">
+        Zpět na přehled
+    </a>
+    <button onclick="toggleTechnical()" class="btn btn-outline px-8 border-slate-200">
+        Technická zpráva pro admina
+    </button>
+            </div>
+
+                <div id="technical-section" class="mt-20 text-left hidden opacity-0 transition-all duration-500 transform translate-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 mb-6">
+                Pokud chcete adminům pomoci s rychlejší opravou, můžete jim poslat tuto diagnostickou zprávu:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <strong class="block text-[10px] uppercase tracking-wider text-slate-400 mb-1">Čas</strong>
+                    <span class="text-sm font-mono">2026-03-02T13:37:34+01:00</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <strong class="block text-[10px] uppercase tracking-wider text-slate-400 mb-1">URL</strong>
+                    <span class="text-sm font-mono break-all">https://new.kbelstisokoli.cz</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <strong class="block text-[10px] uppercase tracking-wider text-slate-400 mb-1">Soubor</strong>
+                    <span class="text-sm font-mono">Request.php:610</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <strong class="block text-[10px] uppercase tracking-wider text-slate-400 mb-1">Chyba</strong>
+                    <span class="text-sm font-mono">RuntimeException</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mb-6">
+                <button onclick="copyReport()" class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors">
+                    <i class="fa-light fa-copy"></i>
+                    Zkopírovat kompletní zprávu
+                </button>
+                <button onclick="toggleTrace()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors">
+                    <i class="fa-light fa-magnifying-glass"></i>
+                    Zobrazit stack trace
+                </button>
+            </div>
+
+            <pre id="report-content" class="hidden bg-slate-900 text-slate-300 p-6 rounded-xl overflow-auto text-xs leading-relaxed max-h-[400px]"><code>{
+    &quot;timestamp&quot;: &quot;2026-03-02T13:37:34+01:00&quot;,
+    &quot;app&quot;: {
+        &quot;name&quot;: &quot;Kbelští sokoli&quot;,
+        &quot;env&quot;: &quot;production&quot;,
+        &quot;url&quot;: &quot;https:\/\/new.kbelstisokoli.cz&quot;
+    },
+    &quot;exception&quot;: {
+        &quot;class&quot;: &quot;RuntimeException&quot;,
+        &quot;message&quot;: &quot;Session store not set on request.&quot;,
+        &quot;code&quot;: 0,
+        &quot;file&quot;: &quot;\/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Http\/Request.php&quot;,
+        &quot;line&quot;: 610,
+        &quot;trace&quot;: &quot;#0 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/app\/Http\/Middleware\/PerformanceProfilingMiddleware.php(120): Illuminate\\Http\\Request-&gt;session()\n#1 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/app\/Http\/Middleware\/PerformanceProfilingMiddleware.php(112): App\\Http\\Middleware\\PerformanceProfilingMiddleware-&gt;isAuthorized(Object(Illuminate\\Http\\Request))\n#2 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/app\/Http\/Middleware\/PerformanceProfilingMiddleware.php(41): App\\Http\\Middleware\\PerformanceProfilingMiddleware-&gt;shouldProfile(Object(Illuminate\\Http\\Request))\n#3 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): App\\Http\\Middleware\\PerformanceProfilingMiddleware-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#4 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#5 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Routing\/Router.php(821): Illuminate\\Pipeline\\Pipeline-&gt;then(Object(Closure))\n#6 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Routing\/Router.php(800): Illuminate\\Routing\\Router-&gt;runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))\n#7 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Routing\/Router.php(764): Illuminate\\Routing\\Router-&gt;runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))\n#8 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Routing\/Router.php(753): Illuminate\\Routing\\Router-&gt;dispatchToRoute(Object(Illuminate\\Http\\Request))\n#9 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Kernel.php(200): Illuminate\\Routing\\Router-&gt;dispatch(Object(Illuminate\\Http\\Request))\n#10 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(180): Illuminate\\Foundation\\Http\\Kernel-&gt;{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():197}(Object(Illuminate\\Http\\Request))\n#11 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/livewire\/livewire\/src\/Features\/SupportDisablingBackButtonCache\/DisableBackButtonCacheMiddleware.php(19): Illuminate\\Pipeline\\Pipeline-&gt;{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(Object(Illuminate\\Http\\Request))\n#12 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Livewire\\Features\\SupportDisablingBackButtonCache\\DisableBackButtonCacheMiddleware-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#13 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Middleware\/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#14 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Middleware\/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#15 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#16 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Middleware\/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#17 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Middleware\/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#18 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#19 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Http\/Middleware\/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#20 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePostSize-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#21 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Middleware\/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#22 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#23 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Http\/Middleware\/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#24 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Http\\Middleware\\HandleCors-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#25 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Http\/Middleware\/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#26 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Http\\Middleware\\TrustProxies-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#27 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Middleware\/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#28 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#29 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Http\/Middleware\/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#30 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePathEncoding-&gt;handle(Object(Illuminate\\Http\\Request), Object(Closure))\n#31 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Pipeline\/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline-&gt;{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))\n#32 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Kernel.php(175): Illuminate\\Pipeline\\Pipeline-&gt;then(Object(Closure))\n#33 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Http\/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel-&gt;sendRequestThroughRouter(Object(Illuminate\\Http\\Request))\n#34 \/home\/html\/kbelstisokoli.cz\/public_html\/secret\/vendor\/laravel\/framework\/src\/Illuminate\/Foundation\/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel-&gt;handle(Object(Illuminate\\Http\\Request))\n#35 \/home\/html\/kbelstisokoli.cz\/public_html\/subdomains\/new\/index.php(148): Illuminate\\Foundation\\Application-&gt;handleRequest(Object(Illuminate\\Http\\Request))\n#36 {main}&quot;
+    },
+    &quot;request&quot;: {
+        &quot;url&quot;: &quot;https:\/\/new.kbelstisokoli.cz&quot;,
+        &quot;method&quot;: &quot;GET&quot;,
+        &quot;ip&quot;: &quot;128.0.178.250&quot;,
+        &quot;query&quot;: [],
+        &quot;input&quot;: []
+    },
+    &quot;headers&quot;: {
+        &quot;accept&quot;: &quot;*\/*&quot;,
+        &quot;user-agent&quot;: &quot;curl\/8.7.1&quot;,
+        &quot;x-forwarded-port&quot;: &quot;443&quot;,
+        &quot;x-forwarded-host&quot;: &quot;new.kbelstisokoli.cz&quot;,
+        &quot;x-forwarded-proto&quot;: &quot;https&quot;,
+        &quot;x-forwarded-for&quot;: &quot;128.0.178.250&quot;,
+        &quot;x-real-ip&quot;: &quot;128.0.178.250&quot;,
+        &quot;host&quot;: &quot;new.kbelstisokoli.cz&quot;,
+        &quot;connection&quot;: &quot;upgrade&quot;
+    },
+    &quot;server&quot;: {
+        &quot;php&quot;: &quot;8.4.18&quot;,
+        &quot;sapi&quot;: &quot;fpm-fcgi&quot;,
+        &quot;memory_usage&quot;: 46661632
+    }
+}</code></pre>
+            <pre id="trace-content" class="hidden bg-slate-900 text-slate-300 p-6 rounded-xl overflow-auto text-xs leading-relaxed mt-4 max-h-[400px]"><code>#0 /home/html/kbelstisokoli.cz/public_html/secret/app/Http/Middleware/PerformanceProfilingMiddleware.php(120): Illuminate\Http\Request-&gt;session()
+#1 /home/html/kbelstisokoli.cz/public_html/secret/app/Http/Middleware/PerformanceProfilingMiddleware.php(112): App\Http\Middleware\PerformanceProfilingMiddleware-&gt;isAuthorized(Object(Illuminate\Http\Request))
+#2 /home/html/kbelstisokoli.cz/public_html/secret/app/Http/Middleware/PerformanceProfilingMiddleware.php(41): App\Http\Middleware\PerformanceProfilingMiddleware-&gt;shouldProfile(Object(Illuminate\Http\Request))
+#3 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\Http\Middleware\PerformanceProfilingMiddleware-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#4 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#5 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#6 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\Routing\Router-&gt;runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#7 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\Routing\Router-&gt;runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#8 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\Routing\Router-&gt;dispatchToRoute(Object(Illuminate\Http\Request))
+#9 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\Routing\Router-&gt;dispatch(Object(Illuminate\Http\Request))
+#10 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\Foundation\Http\Kernel-&gt;{closure:Illuminate\Foundation\Http\Kernel::dispatchToRouter():197}(Object(Illuminate\Http\Request))
+#11 /home/html/kbelstisokoli.cz/public_html/secret/vendor/livewire/livewire/src/Features/SupportDisablingBackButtonCache/DisableBackButtonCacheMiddleware.php(19): Illuminate\Pipeline\Pipeline-&gt;{closure:Illuminate\Pipeline\Pipeline::prepareDestination():178}(Object(Illuminate\Http\Request))
+#12 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Livewire\Features\SupportDisablingBackButtonCache\DisableBackButtonCacheMiddleware-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#13 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#14 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#15 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#16 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#17 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#18 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\TrimStrings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#19 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#20 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\ValidatePostSize-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#21 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#22 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#23 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#24 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\HandleCors-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#25 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#26 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\TrustProxies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#27 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#28 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#29 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#30 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\ValidatePathEncoding-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#31 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#32 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#33 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\Foundation\Http\Kernel-&gt;sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#34 /home/html/kbelstisokoli.cz/public_html/secret/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\Foundation\Http\Kernel-&gt;handle(Object(Illuminate\Http\Request))
+#35 /home/html/kbelstisokoli.cz/public_html/subdomains/new/index.php(148): Illuminate\Foundation\Application-&gt;handleRequest(Object(Illuminate\Http\Request))
+#36 {main}</code></pre>
+        </div>
+    </div>
+
+    <script>
+        function toggleTechnical() {
+            const el = document.getElementById('technical-section');
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                setTimeout(() => {
+                    el.classList.remove('opacity-0', 'translate-y-4');
+                }, 10);
+                el.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                el.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => {
+                    el.classList.add('hidden');
+                }, 500);
+            }
+        }
+        function copyReport() {
+            const el = document.getElementById('report-content');
+            const text = el.innerText || el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Zpráva byla zkopírována do schránky. Můžete ji vložit do e-mailu nebo chatu správci.');
+            }).catch(() => {
+                alert('Chyba při kopírování. Zkuste zprávu vybrat ručně.');
+            });
+        }
+        function toggleTrace() {
+            const el = document.getElementById('trace-content');
+            el.classList.toggle('hidden');
+        }
+    </script>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary pt-6 pb-6 text-slate-300 relative overflow-hidden">
+    
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
+
+    
+    <div class="absolute top-0 right-0 w-1/3 h-full pointer-events-none opacity-[0.03] overflow-hidden">
+        <i class="fa-light fa-basketball text-[15rem] md:text-[30rem] translate-x-1/2 -translate-y-1/4"></i>
+    </div>
+
+    <div class="container pt-12 md:pt-20 pb-6 relative z-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-x-8 lg:gap-y-16">
+            
+            <div class="space-y-6 sm:col-span-2 lg:col-span-3">
+                                    <div class="text-2xl font-black uppercase tracking-tighter text-white">
+                        Kbelští sokoli
+                    </div>
+                
+                <div class="space-y-4">
+                    <p class="font-bold text-white leading-snug">
+                        Web mužských týmů C &amp; E v rámci TJ Sokol Kbely Basketbal.
+                    </p>
+                    <p class="text-sm leading-relaxed text-white/60">
+                        Informace o týmech C &amp; E, zápasech v Letňanech i Kbelích, dění v klubu a členské sekci.
+                    </p>
+                </div>
+
+                <div class="inline-flex items-center bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest-responsive text-white/50 max-w-full overflow-hidden">
+                    <span class="flex items-center justify-center h-2 w-2 mr-2.5 shrink-0 relative translate-y-[0.5px]">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
+                    <span class="leading-tight">Praha-Kbely • Praha-Letňany • basketbal</span>
+                </div>
+            </div>
+
+            
+            <div class="lg:col-span-3">
+                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
+                    <span class="w-8 h-px bg-primary mr-3"></span>
+                    Navigace
+                </h3>
+                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
+                                            
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz" wire:navigate class="hover:text-primary transition-all flex items-center group text-primary">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Úvod</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/novinky" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Novinky</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/tymy" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Týmy</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/zapasy" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Zápasy</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/treninky" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Tréninky</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/nabor" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Nábor</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/galerie" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Fotogalerie</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/historie" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Historie</span>
+                                </a>
+                            </li>
+                                                    <li>
+                                <a href="https://new.kbelstisokoli.cz/kontakt" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                    <span class="font-medium">Kontakt</span>
+                                </a>
+                            </li>
+                                                                <li>
+                        <a href="https://new.kbelstisokoli.cz/hledat" wire:navigate class="hover:text-primary transition-all flex items-center group ">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">Hledat</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            
+            <div class="lg:col-span-3">
+                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
+                    <span class="w-8 h-px bg-primary mr-3"></span>
+                    Týmy a klub
+                </h3>
+                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
+                                                                    <li class="">
+                            <a href="/tymy/muzi-c"
+                                                              class="group flex items-center justify-between transition-all duration-300 hover:text-primary py-1">
+                                <span class="font-medium text-sm">Muži C</span>
+                                                                    <i class="fa-light fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                                                            </a>
+                        </li>
+                                                                    <li class="">
+                            <a href="/tymy/muzi-e"
+                                                              class="group flex items-center justify-between transition-all duration-300 hover:text-primary py-1">
+                                <span class="font-medium text-sm">Muži E</span>
+                                                                    <i class="fa-light fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                                                            </a>
+                        </li>
+                                                                    <li class="pb-1">
+                            <a href="https://new.kbelstisokoli.cz/nabor"
+                                target="_blank" rel="noopener"                                class="group flex items-center justify-between transition-all duration-300 bg-white/5 border border-white/10 py-2 px-4 rounded-xl hover:bg-primary/10 hover:border-primary/20 hover:text-white">
+                                <span class="font-bold text-[11px] tracking-tight leading-tight">Nábor - Kbelští sokoli</span>
+                                                                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0 ml-2">
+                                        <i class="fa-light fa-arrow-up-right text-[8px]"></i>
+                                    </span>
+                                                            </a>
+                        </li>
+                                                                    <li class="pb-1">
+                            <a href="https://www.basketkbely.cz/druzstva"
+                                target="_blank" rel="noopener"                                class="group flex items-center justify-between transition-all duration-300 bg-white/5 border border-white/10 py-2 px-4 rounded-xl hover:bg-primary/10 hover:border-primary/20 hover:text-white">
+                                <span class="font-bold text-[11px] tracking-tight leading-tight">Ostatní kbelské týmy</span>
+                                                                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0 ml-2">
+                                        <i class="fa-light fa-arrow-up-right text-[8px]"></i>
+                                    </span>
+                                                            </a>
+                        </li>
+                                                                    <li class="pb-1">
+                            <a href="https://www.basketkbely.cz/zacnihrat"
+                                target="_blank" rel="noopener"                                class="group flex items-center justify-between transition-all duration-300 bg-white/5 border border-white/10 py-2 px-4 rounded-xl hover:bg-primary/10 hover:border-primary/20 hover:text-white">
+                                <span class="font-bold text-[11px] tracking-tight leading-tight">Nábor - Mládež &amp; Elita</span>
+                                                                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0 ml-2">
+                                        <i class="fa-light fa-arrow-up-right text-[8px]"></i>
+                                    </span>
+                                                            </a>
+                        </li>
+                                                                    <li class="pb-1">
+                            <a href="https://www.basketkbely.cz/"
+                                target="_blank" rel="noopener"                                class="group flex items-center justify-between transition-all duration-300 bg-white/5 border border-white/10 py-2 px-4 rounded-xl hover:bg-primary/10 hover:border-primary/20 hover:text-white">
+                                <span class="font-bold text-[11px] tracking-tight leading-tight">Hlavní web oddílu</span>
+                                                                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0 ml-2">
+                                        <i class="fa-light fa-arrow-up-right text-[8px]"></i>
+                                    </span>
+                                                            </a>
+                        </li>
+                                    </ul>
+                <div class="mt-8 p-4 bg-white/5 rounded-xl border border-white/5">
+                    <p class="text-xs leading-relaxed text-slate-400">
+                        Hledáte basket pro děti nebo mládež ve Kbelích? Pokračujte na hlavní stránky kbelského basketu.
+                    </p>
+                </div>
+            </div>
+
+            
+            <div class="sm:col-span-2 lg:col-span-3">
+                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
+                    <span class="w-8 h-px bg-primary mr-3"></span>
+                    Kontakt a spojení
+                </h3>
+
+                <div class="space-y-6">
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-y-4 gap-x-8 text-sm">
+                                                    <li class="flex items-center gap-4 group">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
+                                    <i class="fa-light fa-basketball-hoop"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white leading-tight">RumcajsArena</div>
+                                    <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">
+                                        Letňany • Pátek 19:30 hod.
+                                    </div>
+                                </div>
+                            </li>
+                        
+                                                    <li class="flex items-center gap-4 group">
+                                <a href="https://new.kbelstisokoli.cz/napiste-nam?to=c3BhbmlseUBrZWVwNjkuY3o%3D"
+   data-protected-email="c3BhbmlseUBrZWVwNjkuY3o="
+   class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+    <i class="fa-light fa-envelope"></i>
+</a>
+                                <div class="min-w-0">
+                                    <a href="https://new.kbelstisokoli.cz/napiste-nam?to=c3BhbmlseUBrZWVwNjkuY3o%3D"
+   data-protected-email="c3BhbmlseUBrZWVwNjkuY3o="
+   class="hover:text-primary transition-colors font-bold break-all py-1 inline-block">
+    [email]
+</a>
+                                </div>
+                            </li>
+                        
+                                                    <li class="flex items-center gap-4 group">
+                                <a href="tel:+420602285447" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                    <i class="fa-light fa-phone"></i>
+                                </a>
+                                <a href="tel:+420602285447" class="hover:text-primary transition-colors font-bold py-1 inline-block">+420 602 285 447</a>
+                            </li>
+                        
+                                            </ul>
+
+                    <div class="flex flex-wrap gap-3 sm:gap-4 pt-4 border-t border-white/5">
+                        <a href="https://new.kbelstisokoli.cz/kontakt" class="btn btn-primary btn-sm px-4 sm:px-6 grow sm:grow-0 justify-center">
+                            <span>Kontaktovat týmy</span>
+                        </a>
+                        <a href="https://www.basketkbely.cz/"
+                           target="_blank"
+                           rel="noopener"
+                           class="btn btn-outline-white btn-sm px-4 sm:px-6 group grow sm:grow-0 justify-center text-center"
+                           data-track-click="external_link"
+                           data-track-label="Footer: Main Club Website"
+                           data-track-category="external">
+                            <span class="truncate">Hlavní klubový kontakt</span>
+                            <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70 shrink-0"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="bg-black/40 border-t border-white/5 text-slate-500 text-xs md:text-sm">
+        <div class="container py-10 md:py-8 flex flex-col md:flex-row items-center justify-between gap-10 md:gap-8">
+            <div class="text-center md:text-left w-full md:w-auto">
+                <div class="font-bold text-slate-300 mb-2 uppercase tracking-tight text-balance leading-tight">
+                    © 2026 Basketbalový klub Kbelští sokoli. Všechna práva vyhrazena.
+                </div>
+                <div class="flex items-center justify-center md:justify-start gap-4">
+                    <div class="w-10 h-px bg-primary/30 hidden xs:block"></div>
+                    <span class="uppercase tracking-widest-responsive sm:tracking-[0.2em] text-[10px] font-black text-slate-500 leading-tight">
+                        Součást TJ Sokol Kbely Basketbal
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-4 sm:gap-x-8 sm:gap-y-6 md:gap-x-6 md:gap-y-4 w-full md:w-auto">
+                <a href="https://new.kbelstisokoli.cz/kontakt" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
+                    <span class="w-1.5 h-1.5 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
+                    Kontakt
+                </a>
+
+                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+
+                <a href="https://new.kbelstisokoli.cz/login" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    Členská&nbsp;sekce
+                </a>
+
+                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+
+                <a href="https://new.kbelstisokoli.cz/gdpr" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    Ochrana soukromí
+                </a>
+
+                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+
+                <a href="https://www.basketkbely.cz/" target="_blank" rel="noopener" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black flex items-center group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:bg-primary/10 hover:border-primary/20 min-w-full sm:min-w-0 justify-center">
+                    Hlavní oddíl
+                    <i class="fa-light fa-arrow-up-right ml-2 text-[8px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 text-primary"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </body>
+</html>

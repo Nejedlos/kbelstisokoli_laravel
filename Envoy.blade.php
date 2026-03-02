@@ -616,7 +616,7 @@
                 $targets[] = "{{ $public_path }}/index.php";
             }
             $base = "{{ $path }}";
-            $public = "{{ $public_path ?? $path . '/public' }}";
+            $public = "{{ $public_path ?? $path . "/public" }}";
 
             foreach (array_unique($targets) as $target) {
                 if (!file_exists($target)) continue;

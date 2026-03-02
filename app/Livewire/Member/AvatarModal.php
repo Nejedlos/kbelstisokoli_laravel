@@ -20,6 +20,8 @@ class AvatarModal extends Component
 
     public $avatarFile;
 
+    public $previewUrl;
+
     public $cropData;
     // public $galleryAssets = []; // Odstraněno - nyní se načítá dynamicky v render() pro snížení zátěže Livewire stavu
 
@@ -44,29 +46,29 @@ class AvatarModal extends Component
             return collect();
         }
 
-        // 1. Pokus o načtení z databáze (systémové avatary)
-        $query = MediaAsset::query()
-            ->where(function ($query) {
-                // Pouze ty, co mají v názvu "Avatar", abychom odfiltrovali např. fotky z importu photo poolů
-                $query->where('title', 'like', '%Avatar%')
-                    ->orWhere('title', 'like', 'Default%');
-            })
-            ->whereNull('uploaded_by_id')
-            ->where('is_public', true);
+        // 1. Preferovat načtení přímo ze složky (robustní bez závislosti na DB)
+        $assets = $this->loadGalleryFromDisk();
 
-        $assets = $query
-            ->latest('id')
-            ->limit(100) // Stačí 100, ne tisíce
-            ->get();
-
-        // 2. Fallback: Pokud je DB prázdná, prohledáme přímo disk (pro případ, že jsou soubory synchronizovány bez DB)
+        // 2. Fallback: Pokud složka neobsahuje žádné položky, zkusíme DB (systémové avatary)
         if ($assets->isEmpty()) {
-            $assets = $this->loadGalleryFromDisk();
+            $query = MediaAsset::query()
+                ->where(function ($query) {
+                    // Pouze ty, co mají v názvu "Avatar", abychom odfiltrovali např. fotky z importu photo poolů
+                    $query->where('title', 'like', '%Avatar%')
+                        ->orWhere('title', 'like', 'Default%');
+                })
+                ->whereNull('uploaded_by_id')
+                ->where('is_public', true);
+
+            $assets = $query
+                ->latest('id')
+                ->limit(100) // Stačí 100, ne tisíce
+                ->get();
         }
 
         // 3. Logování, pokud je galerie stále prázdná
         if ($assets->isEmpty()) {
-            \Illuminate\Support\Facades\Log::warning('AvatarModal: Galerie je prázdná i po pokusu o načtení z disku.');
+            \Illuminate\Support\Facades\Log::warning('AvatarModal: Galerie je prázdná i po pokusu o načtení z disku i DB.');
         }
 
         return $assets;
@@ -92,25 +94,57 @@ class AvatarModal extends Component
                 continue;
             }
 
-            $files = File::files($dir);
-            if (empty($files)) {
+            // Hledáme soubory rekurzivně, abychom našli i ty v conversions, pokud chybí v rootu
+            $allFiles = File::allFiles($dir);
+            if (empty($allFiles)) {
                 continue;
             }
 
-            // Najdeme hlavní soubor (první obrázek v rootu složky ID)
+            // Najdeme hlavní soubor (preferujeme root, pak conversions)
             $mainFile = null;
-            foreach ($files as $file) {
+
+            // 1. Zkusíme soubory přímo v adresáři
+            $rootFiles = File::files($dir);
+            foreach ($rootFiles as $file) {
                 if (in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'])) {
                     $mainFile = $file;
                     break;
                 }
             }
+
+            // 2. Fallback na conversions (hledáme originál nebo aspoň něco)
+            if (! $mainFile) {
+                foreach ($allFiles as $file) {
+                    $fName = $file->getFilename();
+                    if (str_contains($fName, 'original') || str_contains($fName, 'optimized')) {
+                        $mainFile = $file;
+                        break;
+                    }
+                }
+            }
+
+            // 3. Poslední pokus - jakýkoliv obrázek kdekoli v adresáři
+            if (! $mainFile) {
+                foreach ($allFiles as $file) {
+                    if (in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'])) {
+                        $mainFile = $file;
+                        break;
+                    }
+                }
+            }
+
             if (! $mainFile) {
                 continue;
             }
 
             $fileName = $mainFile->getFilename();
-            $mainUrl = asset('uploads/defaults/'.$mediaId.'/'.$fileName);
+            // Pokud je soubor v podadresáři (např. conversions), musíme to zohlednit v URL
+            $relativeDir = str_replace($path . '/' . $mediaId . '/', '', $mainFile->getPath() . '/');
+            if ($relativeDir === $mainFile->getPath() . '/') { // Fallback pokud str_replace selže
+                 $relativeDir = str_contains($mainFile->getPathname(), 'conversions') ? 'conversions/' : '';
+            }
+
+            $mainUrl = asset('uploads/defaults/'.$mediaId.'/'.$relativeDir.$fileName);
 
             // Náhled (zkusíme najít v podadresáři conversions)
             $thumbUrl = $mainUrl; // Fallback na originál
@@ -118,7 +152,6 @@ class AvatarModal extends Component
             if (is_dir($conversionsPath)) {
                 $thumbFiles = File::files($conversionsPath);
                 foreach ($thumbFiles as $thumb) {
-                    // Spatie obvykle přidává suffix -thumb nebo -optimized
                     $tName = $thumb->getFilename();
                     if (str_contains($tName, 'thumb') || str_contains($tName, 'optimized') || str_contains($tName, 'preview')) {
                         $thumbUrl = asset('uploads/defaults/'.$mediaId.'/conversions/'.$tName);
@@ -127,7 +160,7 @@ class AvatarModal extends Component
                 }
             }
 
-            // Vytvoříme regulérní objekt simulující MediaAsset model (aby šel serializovat Livewirem)
+            // Vytvoříme regulérní objekt simulující MediaAsset model
             $assets->push(new VirtualAvatarAsset($mediaId, $mainUrl, $thumbUrl));
         }
 
@@ -144,7 +177,7 @@ class AvatarModal extends Component
         $this->activeTab = 'gallery';
         $this->confirmingDelete = false;
         // $this->loadGallery(); // Odstraněno, načítá se v render()
-        $this->reset('avatarFile', 'cropData');
+        $this->reset('avatarFile', 'cropData', 'previewUrl');
     }
 
     public function close()
@@ -165,6 +198,9 @@ class AvatarModal extends Component
     public function deleteAvatar()
     {
         $user = \App\Models\User::find($this->userId) ?: auth()->user();
+        if ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin()) {
+            abort(403);
+        }
         $user->clearMediaCollection('avatar');
         $user->refresh();
 
@@ -194,6 +230,11 @@ class AvatarModal extends Component
             return;
         }
 
+        $user = \App\Models\User::find($this->userId) ?: auth()->user();
+        if ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin()) {
+            abort(403);
+        }
+
         // Base64 to file
         $imageData = explode(',', $croppedImageBase64);
         if (count($imageData) < 2) {
@@ -205,7 +246,6 @@ class AvatarModal extends Component
         Storage::disk('local')->put($tempPath, $decodedImage);
         $fullPath = storage_path('app/private/'.$tempPath);
 
-        $user = \App\Models\User::find($this->userId) ?: auth()->user();
         $user->addMedia($fullPath)
             ->usingFileName('avatar-'.time().'.webp')
             ->toMediaCollection('avatar');

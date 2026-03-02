@@ -42,10 +42,10 @@ class MemberMigrationSeeder extends Seeder
 
         // Načtení nových týmů
         $teamC = Team::where('slug', 'muzi-c')->first();
-        $teamD = Team::where('slug', 'muzi-d')->first();
+        $teamE = Team::where('slug', 'muzi-e')->first();
 
-        if (! $teamC || ! $teamD) {
-            $this->command->error('Nové týmy (muzi-c, muzi-d) nebyly nalezeny v DB. Spusťte nejdříve TeamSeeder.');
+        if (! $teamC || ! $teamE) {
+            $this->command->error('Nové týmy (muzi-c, muzi-e) nebyly nalezeny v DB. Spusťte nejdříve TeamSeeder.');
 
             return;
         }
@@ -172,11 +172,11 @@ class MemberMigrationSeeder extends Seeder
             if ($reg->team == 1) { // CÉČKO
                 $userTeams = [$teamC->id];
                 $primaryTeamId = $teamC->id;
-            } elseif ($reg->team == 2) { // DÉČKO
-                $userTeams = [$teamD->id];
-                $primaryTeamId = $teamD->id;
-            } elseif ($reg->team == 3) { // VŠICHNI (C+D)
-                $userTeams = [$teamC->id, $teamD->id];
+            } elseif ($reg->team == 2) { // ÉČKO
+                $userTeams = [$teamE->id];
+                $primaryTeamId = $teamE->id;
+            } elseif ($reg->team == 3) { // VŠICHNI (C+E)
+                $userTeams = [$teamC->id, $teamE->id];
                 $primaryTeamId = $teamC->id; // Výchozí jako primární
             }
 

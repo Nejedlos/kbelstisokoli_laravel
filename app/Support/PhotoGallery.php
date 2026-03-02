@@ -29,7 +29,8 @@ class PhotoGallery
             $query->where('photo_pools.team_id', $teamId);
         }
 
-        return $query->inRandomOrder()
+        return $query->with('media')
+            ->inRandomOrder()
             ->limit($limit)
             ->get();
     }

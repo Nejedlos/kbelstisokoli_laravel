@@ -43,6 +43,7 @@ class PerformanceProfilingMiddleware
         }
 
         $startTime = microtime(true);
+        $bootstrapDuration = defined('LARAVEL_START') ? ($startTime - LARAVEL_START) * 1000 : 0;
 
         // Zapnutí query logu
         DB::enableQueryLog();
@@ -63,6 +64,7 @@ class PerformanceProfilingMiddleware
             'method' => $request->method(),
             'status' => $response->getStatusCode(),
             'duration_ms' => round($duration, 2),
+            'bootstrap_ms' => round($bootstrapDuration, 2),
             'query_count' => $queryCount,
             'query_time_ms' => round($queryTime, 2),
             'memory_mb' => round($memoryPeak, 2),
@@ -70,7 +72,7 @@ class PerformanceProfilingMiddleware
         ];
 
         // Pokud je to pomalý request (např. > 500ms) nebo hodně queries (např. > 50), logujeme to výrazněji
-        if ($duration > 500 || $queryCount > 50) {
+        if ($duration + $bootstrapDuration > 500 || $queryCount > 50) {
             $duplicatedQueries = $this->getDuplicatedQueries($queries);
             $logData['duplicated_queries'] = $duplicatedQueries;
             Log::warning('Slow request detected', $logData);
@@ -80,6 +82,7 @@ class PerformanceProfilingMiddleware
 
         // Přidání headers pro snadnou diagnostiku v DevTools (pouze pro autorizované uživatele, v local prostředí nebo při performance testu)
         if (app()->environment('local') || $this->isAuthorized($request) || $request->header('X-Performance-Test-Key') === config('app.key')) {
+            $response->headers->set('X-Perf-Bootstrap-MS', round($bootstrapDuration, 2));
             $response->headers->set('X-Perf-Duration-MS', round($duration, 2));
             $response->headers->set('X-Perf-Query-Count', $queryCount);
             $response->headers->set('X-Perf-Query-Time-MS', round($queryTime, 2));
@@ -117,7 +120,7 @@ class PerformanceProfilingMiddleware
         // Kontrola, zda je uživatel admin (používáme Spatie Permission nebo jinou logiku)
         // V tomto projektu se zdá, že existuje oprávnění 'access_admin'
         // Pokud je impersonován, považujeme ho za autorizovaného, pokud původní admin byl
-        if ($request->session()->has('impersonated_by')) {
+        if ($request->hasSession() && $request->session()->has('impersonated_by')) {
             return true;
         }
 

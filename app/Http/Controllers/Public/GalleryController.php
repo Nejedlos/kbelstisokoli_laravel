@@ -10,7 +10,7 @@ class GalleryController extends Controller
 {
     public function index(): View
     {
-        $galleries = Gallery::with('coverAsset')
+        $galleries = Gallery::with('coverAsset.media')
             ->where('is_public', true)
             ->where('is_visible', true)
             ->where(function ($query) {
@@ -21,7 +21,8 @@ class GalleryController extends Controller
             ->get();
 
         $pools = \App\Models\PhotoPool::with(['mediaAssets' => function ($query) {
-            $query->where('media_assets.is_public', true)
+            $query->with('media')
+                ->where('media_assets.is_public', true)
                 ->where('photo_pool_media_asset.is_visible', true)
                 ->orderBy('photo_pool_media_asset.sort_order');
         }])
@@ -39,7 +40,7 @@ class GalleryController extends Controller
     public function show(string $slug): View
     {
         // Nejdřív zkusíme starou galerii
-        $gallery = Gallery::with(['mediaAssets', 'coverAsset', 'seo'])
+        $gallery = Gallery::with(['mediaAssets.media', 'coverAsset.media', 'seo'])
             ->where('slug', $slug)
             ->where('is_public', true)
             ->first();
@@ -50,7 +51,8 @@ class GalleryController extends Controller
 
         // Pak zkusíme Photo Pool (sbírku)
         $pool = \App\Models\PhotoPool::with(['mediaAssets' => function ($query) {
-            $query->where('media_assets.is_public', true)
+            $query->with('media')
+                ->where('media_assets.is_public', true)
                 ->where('photo_pool_media_asset.is_visible', true)
                 ->orderBy('photo_pool_media_asset.sort_order');
         }, 'seo'])
