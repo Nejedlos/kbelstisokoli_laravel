@@ -419,6 +419,6 @@ class AttendanceController extends Controller
 
         event(new \App\Events\RsvpChanged($attendance));
 
-        return back()->with('status', 'Vaše odpověď byla uložena.');
+        return back()->with('status', __('member.attendance.save_success'));
     }
 }

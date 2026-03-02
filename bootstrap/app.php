@@ -10,6 +10,35 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
 $app = Application::configure(basePath: dirname(__DIR__))
+    ->booting(function () {
+        // Fix pro Webglobe a jiné hostingy se specifickým nastavením temp složek
+        // Automatické vytvoření storage podadresářů pro zamezení chyb při kompilaci Blade (tempnam fallback)
+        $storagePaths = [
+            storage_path('framework/cache'),
+            storage_path('framework/cache/data'),
+            storage_path('framework/sessions'),
+            storage_path('framework/views'),
+            storage_path('logs'),
+        ];
+
+        foreach ($storagePaths as $path) {
+            if (!is_dir($path)) {
+                @mkdir($path, 0775, true);
+            }
+        }
+
+        // Potlačení notice o tempnam fallbacku, která shazuje aplikaci na produkci
+        // (E_NOTICE je v Laravelu standardně převáděna na ErrorException)
+        $previousHandler = set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$previousHandler) {
+            if ($errno === E_NOTICE && str_contains($errstr, 'tempnam(): file created in the system\'s temporary directory')) {
+                return true; // Ignorovat tuto konkrétní notice
+            }
+            if ($previousHandler) {
+                return $previousHandler($errno, $errstr, $errfile, $errline);
+            }
+            return false;
+        });
+    })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -86,8 +115,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\FullPageCacheMiddleware::class,
             \App\Http\Middleware\PerformanceProfilingMiddleware::class,
+            \App\Http\Middleware\FullPageCacheMiddleware::class,
             \App\Http\Middleware\SetLocaleMiddleware::class,
             \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);

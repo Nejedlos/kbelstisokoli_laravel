@@ -101,6 +101,7 @@ return [
             'other' => 'Jiné',
         ],
         'save_response' => 'Uložit odpověď',
+        'save_success' => 'Vaše odpověď byla úspěšně uložena.',
         'who_comes_title' => 'Kdo přijde?',
         'who_not_comes_title' => 'Kdo se omluvil?',
         'who_pending_title' => 'Zatím neví (otazník)',
@@ -168,6 +169,10 @@ return [
             'confirm_button' => 'Potvrdit',
         ],
         'save_changes' => 'Uložit změny',
+        'update_success' => 'Váš profil byl úspěšně aktualizován.',
+        'avatar_updated' => 'Avatar byl úspěšně aktualizován.',
+        'avatar_from_gallery' => 'Avatar byl úspěšně nastaven z galerie.',
+        'avatar_error' => 'Vybraný obrázek nemá připojené médium.',
         'player_card' => [
             'position_player' => 'Hráč',
             'my_teams' => 'Moje týmy',

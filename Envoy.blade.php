@@ -251,6 +251,12 @@
         fi
     fi
 
+    echo "Ensuring storage and cache directories exist and are writable..."
+    mkdir -p storage/framework/{sessions,views,cache}
+    mkdir -p storage/framework/cache/data
+    mkdir -p storage/logs
+    chmod -R 775 storage bootstrap/cache || true
+
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
@@ -299,6 +305,12 @@
         rm .git/gc.log
     fi
     git prune
+
+    echo "Ensuring storage and cache directories exist and are writable..."
+    mkdir -p storage/framework/{sessions,views,cache}
+    mkdir -p storage/framework/cache/data
+    mkdir -p storage/logs
+    chmod -R 775 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
@@ -567,6 +579,12 @@
         echo "Generating APP_KEY..."
         {{ $php }} artisan key:generate --no-interaction
     fi
+
+    echo "Ensuring storage and cache directories exist and are writable..."
+    mkdir -p storage/framework/{sessions,views,cache}
+    mkdir -p storage/framework/cache/data
+    mkdir -p storage/logs
+    chmod -R 775 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php

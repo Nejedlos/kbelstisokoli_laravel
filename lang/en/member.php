@@ -101,6 +101,7 @@ return [
             'other' => 'Other',
         ],
         'save_response' => 'Save Response',
+        'save_success' => 'Your response has been successfully saved.',
         'who_comes_title' => 'Who is Coming?',
         'who_not_comes_title' => 'Excused',
         'who_pending_title' => 'Not responded yet',
@@ -168,6 +169,10 @@ return [
             'confirm_button' => 'Confirm',
         ],
         'save_changes' => 'Save Changes',
+        'update_success' => 'Your profile has been successfully updated.',
+        'avatar_updated' => 'Avatar has been successfully updated.',
+        'avatar_from_gallery' => 'Avatar has been successfully set from the gallery.',
+        'avatar_error' => 'The selected image does not have an attached media.',
         'player_card' => [
             'position_player' => 'Player',
             'my_teams' => 'My Teams',

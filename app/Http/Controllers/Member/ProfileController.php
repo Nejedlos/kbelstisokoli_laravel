@@ -67,7 +67,7 @@ class ProfileController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Váš profil byl úspěšně aktualizován.');
+        return back()->with('status', __('member.profile.update_success'));
     }
 
     /**
@@ -91,7 +91,7 @@ class ProfileController extends Controller
                 ->toMediaCollection('avatar');
         }
 
-        return back()->with('status', 'Avatar byl aktualizován.');
+        return back()->with('status', __('member.profile.avatar_updated'));
     }
 
     /**
@@ -109,7 +109,7 @@ class ProfileController extends Controller
         $media = $asset->getFirstMedia('default');
 
         if (! $media) {
-            return back()->with('error', 'Vybraný obrázek nemá připojené médium.');
+            return back()->with('error', __('member.profile.avatar_error'));
         }
 
         $user = auth()->user();
@@ -120,6 +120,6 @@ class ProfileController extends Controller
             ->usingFileName('avatar-from-asset-'.time().'.'.$media->extension)
             ->toMediaCollection('avatar');
 
-        return back()->with('status', 'Avatar byl nastaven z galerie.');
+        return back()->with('status', __('member.profile.avatar_from_gallery'));
     }
 }

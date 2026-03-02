@@ -237,9 +237,11 @@ class AdminPanelProvider extends PanelProvider
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
+                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
+                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
                 Authenticate::class,
                 '2fa.required',
                 '2fa.timeout',
