@@ -87,13 +87,23 @@ class BrandingService
                 'role' => $dbSettings['contact_role'] ?? null,
                 'street' => $dbSettings['contact_street'] ?? null,
                 'city' => $dbSettings['contact_city'] ?? null,
-                'phone' => $dbSettings['contact_phone'] ?? null, // Use the one already in dbSettings
+                'phone' => $dbSettings['contact_phone'] ?? null,
                 'fax' => $dbSettings['contact_fax'] ?? null,
-                'email' => $dbSettings['contact_email'] ?? null, // Use the one already in dbSettings
+                'email' => $dbSettings['contact_email'] ?? null,
             ],
             'maintenance_mode' => filter_var($dbSettings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'maintenance_title' => $dbSettings['maintenance_title'] ?? __('Trenér právě kreslí vítěznou taktiku pro náš nový web.'),
             'maintenance_text' => $dbSettings['maintenance_text'] ?? __('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),
+            'admin_contact' => [
+                'email' => $dbSettings['admin_contact_email'] ?? null,
+                'name' => $dbSettings['admin_contact_name'] ?? null,
+                'phone' => $dbSettings['admin_contact_phone'] ?? null,
+                'photo_path' => $dbSettings['admin_contact_photo_path'] ?? null,
+            ],
+            'economy' => [
+                'bank_account' => $dbSettings['bank_account'] ?? null,
+                'bank_name' => $dbSettings['bank_name'] ?? null,
+            ],
         ];
 
         return $this->settings;
@@ -201,9 +211,11 @@ class BrandingService
                     ->orWhere('key', 'like', 'maintenance_%')
                     ->orWhere('key', 'like', 'venue_%')
                     ->orWhere('key', 'like', 'club_%')
+                    ->orWhere('key', 'like', 'admin_contact_%')
                     ->orWhereIn('key', [
                         'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
-                        'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset'
+                        'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset',
+                        'bank_account', 'bank_name'
                     ])
                     ->get(['key', 'value']);
 

@@ -1,6 +1,6 @@
 @props(['branding'])
 
-@cacheFragment('footer_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 86400)
+@cacheFragment('footer_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl().serialize($branding)), 86400)
 @php
     $footerNav = $footerMenu ?? [];
     $clubNav = $footerClubMenu ?? [];
@@ -149,35 +149,79 @@
                                     <i class="fa-light fa-basketball-hoop"></i>
                                 </div>
                                 <div>
-                                    <div class="font-bold text-white leading-tight">{{ $branding['venue']['name'] }}</div>
+                                    <div class="font-bold text-white leading-tight">
+                                        @if($branding['venue']['map_url'] ?? null)
+                                            <a href="{{ $branding['venue']['map_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-colors italic">
+                                                {{ $branding['venue']['name'] }}
+                                            </a>
+                                        @else
+                                            {{ $branding['venue']['name'] }}
+                                        @endif
+                                    </div>
                                     <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">
-                                        {{ $branding['venue']['city'] ?? '' }}@if(($branding['venue']['city'] ?? null) && ($branding['match_day'] ?? null)) • @endif{{ $branding['match_day'] ?? '' }}
+                                        @if($branding['venue']['street'] ?? null)
+                                            {{ $branding['venue']['street'] }},
+                                        @endif
+                                        {{ $branding['venue']['city'] ?? '' }}
+                                        @if($branding['match_day'] ?? null)
+                                            • {{ $branding['match_day'] }}
+                                        @endif
                                     </div>
                                 </div>
                             </li>
                         @endif
 
-                        @if(data_get($branding, 'contact.email'))
+                        @if(data_get($branding, 'public_contact.person'))
                             <li class="flex items-center gap-4 group">
-                                <x-mailto :email="$branding['contact']['email']" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
-                                    <i class="fa-light fa-envelope"></i>
-                                </x-mailto>
-                                <div class="min-w-0">
-                                    <x-mailto :email="$branding['contact']['email']" class="hover:text-primary transition-colors font-bold break-all py-1 inline-block" />
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
+                                    <i class="fa-light fa-user"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white leading-tight">{{ $branding['public_contact']['person'] }}</div>
+                                    @if(data_get($branding, 'public_contact.role'))
+                                        <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">
+                                            {{ $branding['public_contact']['role'] }}
+                                        </div>
+                                    @endif
                                 </div>
                             </li>
                         @endif
 
-                        @if(data_get($branding, 'contact.phone'))
+                        @if(data_get($branding, 'public_contact.street'))
                             <li class="flex items-center gap-4 group">
-                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
-                                    <i class="fa-light fa-phone"></i>
-                                </a>
-                                <a href="tel:{{ str_replace(' ', '', $branding['contact']['phone']) }}" class="hover:text-primary transition-colors font-bold py-1 inline-block">{{ $branding['contact']['phone'] }}</a>
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
+                                    <i class="fa-light fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white leading-tight">{{ $branding['public_contact']['street'] }}</div>
+                                    <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">
+                                        {{ $branding['public_contact']['city'] ?? '' }}
+                                    </div>
+                                </div>
                             </li>
                         @endif
 
-                        @if(!data_get($branding, 'contact.email') && !data_get($branding, 'contact.phone'))
+                        @if(data_get($branding, 'public_contact.email'))
+                            <li class="flex items-center gap-4 group">
+                                <x-mailto :email="$branding['public_contact']['email']" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                    <i class="fa-light fa-envelope"></i>
+                                </x-mailto>
+                                <div class="min-w-0">
+                                    <x-mailto :email="$branding['public_contact']['email']" class="hover:text-primary transition-colors font-bold break-all py-1 inline-block" />
+                                </div>
+                            </li>
+                        @endif
+
+                        @if(data_get($branding, 'public_contact.phone'))
+                            <li class="flex items-center gap-4 group">
+                                <a href="tel:{{ str_replace(' ', '', $branding['public_contact']['phone']) }}" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                    <i class="fa-light fa-phone"></i>
+                                </a>
+                                <a href="tel:{{ str_replace(' ', '', $branding['public_contact']['phone']) }}" class="hover:text-primary transition-colors font-bold py-1 inline-block">{{ $branding['public_contact']['phone'] }}</a>
+                            </li>
+                        @endif
+
+                        @if(!data_get($branding, 'public_contact.email') && !data_get($branding, 'public_contact.phone'))
                             <li class="text-slate-400 italic text-xs flex items-start gap-3 sm:col-span-2 lg:col-span-1">
                                 <i class="fa-light fa-circle-info mt-0.5 text-primary"></i>
                                 {{ __('footer.contact_placeholder_text') }}

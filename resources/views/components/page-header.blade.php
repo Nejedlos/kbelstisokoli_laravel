@@ -12,7 +12,7 @@
             <x-picture
                 :src="$image"
                 class="w-full h-full object-cover"
-                alt=""
+                alt="{{ $title }}"
                 loading="eager"
                 fetchpriority="high"
             />

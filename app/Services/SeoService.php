@@ -73,7 +73,31 @@ class SeoService
 
     protected function resolveTitle(?SeoMetadata $seo, ?Model $model, string $siteName, string $titleSuffix): string
     {
-        $title = $seo->title ?? $model->title ?? $siteName;
+        $title = $seo->title ?? $model->title ?? null;
+
+        if (! $title) {
+            // Speciální případy pro stránky bez modelu v DB (fallbacky)
+            $path = Request::path();
+            if (Str::contains($path, 'novinky') || Str::contains($path, 'news')) {
+                $title = __('nav.news');
+            } elseif (Str::contains($path, 'tymy') || Str::contains($path, 'teams')) {
+                $title = __('nav.teams');
+            } elseif (Str::contains($path, 'galerie') || Str::contains($path, 'gallery')) {
+                $title = __('nav.gallery');
+            } elseif (Str::contains($path, 'zapasy') || Str::contains($path, 'matches')) {
+                $title = __('nav.matches');
+            } elseif (Str::contains($path, 'treninky') || Str::contains($path, 'trainings')) {
+                $title = __('nav.trainings');
+            } elseif (Str::contains($path, 'kontakt') || Str::contains($path, 'contact')) {
+                $title = __('nav.contact');
+            } elseif (Str::contains($path, 'vysledky-hledani') || Str::contains($path, 'search')) {
+                $title = __('nav.search_results') !== 'nav.search_results' ? __('nav.search_results') : 'Výsledky hledání';
+            } elseif (Str::contains($path, 'mapa-webu') || Str::contains($path, 'sitemap')) {
+                $title = app()->getLocale() === 'cs' ? 'Mapa webu' : 'Sitemap';
+            } else {
+                $title = $siteName;
+            }
+        }
 
         if ($title === $siteName) {
             return $title;
@@ -97,22 +121,41 @@ class SeoService
             return Str::limit(strip_tags($model->excerpt), 160);
         }
 
+        if ($model && isset($model->description) && $model->description) {
+            return Str::limit(strip_tags($model->description), 160);
+        }
+
         if ($model && isset($model->content)) {
             $content = is_array($model->content) ? json_encode($model->content) : $model->content;
 
             return Str::limit(strip_tags($content), 160);
         }
 
-        return $settings['seo_description'] ?? '';
+        return $settings['seo_description'] ?? 'Basketbalový klub Sokol Kbely - tréninky, zápasy a nábor nových členů v Praze 9.';
     }
 
     protected function resolveKeywords(?SeoMetadata $seo, array $settings): string
     {
+        $keywords = [];
+
         if ($seo && $seo->keywords) {
-            return $seo->keywords;
+            $keywords[] = $seo->keywords;
         }
 
-        return $settings['seo_keywords'] ?? '';
+        if (isset($settings['seo_keywords']) && $settings['seo_keywords']) {
+            $keywords[] = $settings['seo_keywords'];
+        }
+
+        if (empty($keywords)) {
+            // Defaultní klíčová slova optimalizovaná pro funnel, pokud nic není nastaveno
+            return 'basketbal Kbely, basketbalový klub Praha, nábor dětí basketbal, Sokol Kbely, basketbalová akademie';
+        }
+
+        // Spojíme unikátní klíčová slova
+        $allKeywords = implode(', ', $keywords);
+        $parts = array_map('trim', explode(',', $allKeywords));
+
+        return implode(', ', array_unique(array_filter($parts)));
     }
 
     protected function resolveOgImage(?SeoMetadata $seo, ?Model $model, array $settings): ?string

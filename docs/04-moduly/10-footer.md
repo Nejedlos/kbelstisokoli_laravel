@@ -20,9 +20,10 @@ Patička webu byla kompletně přepracována do moderního sportovního stylu, k
 
 ### 3. Technická implementace a editovatelnost
 - **Dynamická menu:** Patička nyní načítá menu `footer` a `footer_club` přímo z databáze, což umožňuje správcům snadno měnit odkazy bez zásahu do kódu.
-- **Branding Integration:** Veškeré texty a URL (včetně externích odkazů na hlavní klub) jsou napojeny na globální nastavení (`BrandingService`).
+- **Branding Integration:** Veškeré texty a URL (včetně externích odkazů na hlavní klub) jsou napojeny na globální nastavení (`BrandingService`). Kontaktní údaje jsou sjednoceny se stránkou kontaktu a jsou plně dynamické dle nastavení v administraci (včetně adresy domácí haly).
 - **Lokalizace (CZ/EN):** Celá patička je plně bilingvní. Texty jsou spravovány přes překladové soubory `lang/*.json`.
-- **Fallbacky:** Implementovány bezpečné fallbacky pro případ chybějících kontaktů nebo menu, aby layout zůstal stabilní.
+- **Fragment Caching:** Implementováno cachování patičky s automatickou invalidací při změně brandingu pro maximální výkon.
+- **Fallbacky:** Implementovány bezpečné fallbacky pro případ chybějících kontaktů nebo menu, aby layout s zůstal stabilní.
 
 ### 4. Bottom Bar (Spodní lišta)
 - Zjednodušený copyright s informací o členství v širším oddílu.
