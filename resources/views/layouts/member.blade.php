@@ -446,16 +446,34 @@
             <div class="py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-10">
                 <div class="max-w-7xl mx-auto">
                     @if (session('status'))
-                        <div class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-2xl flex items-center gap-4 animate-fade-in">
+                        <div x-data="{ show: true }"
+                             x-show="show"
+                             x-init="setTimeout(() => show = false, 8000)"
+                             x-transition:leave="transition ease-in duration-500"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-2xl flex items-center gap-4 animate-fade-in">
                             <i class="fa-light fa-circle-check text-emerald-500 text-lg"></i>
                             <span class="font-bold text-sm">{{ session('status') }}</span>
+                            <button @click="show = false" class="ml-auto text-emerald-500/50 hover:text-emerald-500 transition-colors">
+                                <i class="fa-light fa-xmark"></i>
+                            </button>
                         </div>
                     @endif
 
                     @if (session('error'))
-                        <div class="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-700 rounded-2xl flex items-center gap-4">
+                        <div x-data="{ show: true }"
+                             x-show="show"
+                             x-init="setTimeout(() => show = false, 12000)"
+                             x-transition:leave="transition ease-in duration-500"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-700 rounded-2xl flex items-center gap-4 animate-fade-in">
                             <i class="fa-light fa-circle-exclamation text-rose-500 text-lg"></i>
                             <span class="font-bold text-sm">{{ session('error') }}</span>
+                            <button @click="show = false" class="ml-auto text-rose-500/50 hover:text-rose-500 transition-colors">
+                                <i class="fa-light fa-xmark"></i>
+                            </button>
                         </div>
                     @endif
 

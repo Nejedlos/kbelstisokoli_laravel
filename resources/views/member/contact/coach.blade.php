@@ -5,11 +5,6 @@
 
 @section('content')
     <div class="max-w-4xl mx-auto">
-        @if (session('status'))
-            <div class="mb-6 p-4 rounded-club bg-success-50 text-success-700 border border-success-200 text-sm animate-fade-in">
-                <i class="fa-light fa-circle-check mr-1.5"></i> {{ session('status') }}
-            </div>
-        @endif
 
         <div class="card sport-card-accent p-6 md:p-10">
             <form action="{{ route('member.contact.coach.send') }}" method="POST" enctype="multipart/form-data" x-data="{ loading: false }" @submit="loading = true" class="space-y-8">
