@@ -70,20 +70,20 @@ class TeamsTable
                 ActionGroup::make([
                     Action::make('view_public')
                         ->label(__('admin.navigation.resources.team.actions.view_public'))
-                        ->icon(IconHelper::get(IconHelper::GLOBE))
+                        ->icon(IconHelper::render(IconHelper::GLOBE))
                         ->url(fn ($record) => route('public.teams.show', $record->slug))
                         ->openUrlInNewTab()
                         ->color('gray'),
                     EditAction::make()
                         ->label(__('user.actions.edit'))
-                        ->icon(IconHelper::get(IconHelper::EDIT)),
+                        ->icon(IconHelper::render(IconHelper::EDIT)),
                     ReplicateAction::make()
                         ->label(__('user.actions.replicate'))
-                        ->icon(IconHelper::get(IconHelper::COPY))
+                        ->icon(IconHelper::render(IconHelper::COPY))
                         ->color('warning'),
                     DeleteAction::make()
                         ->label(__('user.actions.delete'))
-                        ->icon(IconHelper::get(IconHelper::TRASH)),
+                        ->icon(IconHelper::render(IconHelper::TRASH)),
                 ]),
             ])
             ->toolbarActions([

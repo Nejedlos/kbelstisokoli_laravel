@@ -84,6 +84,9 @@ return [
             'player_profile' => [
                 'label' => 'Hráčský profil',
                 'plural_label' => 'Hráčské profily',
+                'fields' => [
+                    'jersey_number' => 'Číslo dresu',
+                ],
             ],
             'post' => [
                 'label' => 'Novinka',
@@ -198,8 +201,8 @@ return [
                 ],
                 'actions' => [
                     'view_public' => 'Web',
-                    'attach_coach' => '+ Trenér',
-                    'attach_player' => '+ Hráč',
+                    'attach_coach' => 'Trenér',
+                    'attach_player' => 'Hráč',
                     'edit_coach_contact' => 'Upravit kontaktní údaje',
                     'detach' => 'Odebrat',
                     'detach_selected' => 'Odebrat vybrané',

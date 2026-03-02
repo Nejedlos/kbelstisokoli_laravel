@@ -84,6 +84,9 @@ return [
             'player_profile' => [
                 'label' => 'Player Profile',
                 'plural_label' => 'Player Profiles',
+                'fields' => [
+                    'jersey_number' => 'Jersey Number',
+                ],
             ],
             'post' => [
                 'label' => 'News Post',
@@ -198,8 +201,8 @@ return [
                 ],
                 'actions' => [
                     'view_public' => 'Web',
-                    'attach_coach' => '+ Coach',
-                    'attach_player' => '+ Player',
+                    'attach_coach' => 'Coach',
+                    'attach_player' => 'Player',
                     'edit_coach_contact' => 'Edit contact info',
                     'detach' => 'Detach',
                     'detach_selected' => 'Detach selected',

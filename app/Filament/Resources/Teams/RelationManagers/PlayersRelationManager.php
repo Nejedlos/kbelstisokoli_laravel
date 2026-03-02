@@ -24,9 +24,12 @@ class PlayersRelationManager extends RelationManager
 
     protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
+        $playerTable = $query->getModel()->getTable();
+        $userTable = (new \App\Models\User())->getTable();
+
         return $query->with(['user'])
-            ->where('player_profiles.is_active', true)
-            ->whereHas('user', fn ($q) => $q->where('users.is_active', true));
+            ->where("{$playerTable}.is_active", true)
+            ->whereHas('user', fn ($q) => $q->where("{$userTable}.is_active", true));
     }
 
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
@@ -44,11 +47,15 @@ class PlayersRelationManager extends RelationManager
                     ->columnSpanFull(),
                 TextInput::make('role_in_team')
                     ->label(__('admin.navigation.resources.team.fields.role_in_team'))
+                    ->default('player')
+                    ->required()
                     ->maxLength(255),
                 Checkbox::make('is_primary_team')
-                    ->label(__('admin.navigation.resources.team.fields.is_primary_team')),
+                    ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
+                    ->default(false),
                 Checkbox::make('is_on_roster')
-                    ->label(__('Hráč je na soupisce')),
+                    ->label(__('Hráč je na soupisce'))
+                    ->default(false),
             ]);
     }
 
@@ -83,32 +90,56 @@ class PlayersRelationManager extends RelationManager
             ->headerActions([
                 AttachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.attach_player'))
-                    ->icon(IconHelper::get(IconHelper::PLUS))
+                    ->icon(IconHelper::render(IconHelper::PLUS))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
+                    ->recordSelectOptionsQuery(function (\Illuminate\Database\Eloquent\Builder $query) {
+                        $userTable = (new \App\Models\User())->getTable();
+                        $playerTable = $query->getModel()->getTable();
+
+                        return $query
+                            ->join($userTable, "{$playerTable}.user_id", '=', "{$userTable}.id")
+                            ->select("{$playerTable}.*", "{$userTable}.name as user_name_title")
+                            ->orderBy("{$userTable}.name");
+                    })
+                    ->recordTitleAttribute('user_name_title')
+                    ->recordSelectSearchColumns([(new \App\Models\User())->getTable().'.name'])
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
                         TextInput::make('role_in_team')
-                            ->label(__('admin.navigation.resources.team.fields.role_in_team')),
+                            ->label(__('admin.navigation.resources.team.fields.role_in_team'))
+                            ->default('player')
+                            ->required(),
                         Checkbox::make('is_primary_team')
-                            ->label(__('admin.navigation.resources.team.fields.is_primary_team')),
+                            ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
+                            ->default(false),
                         Checkbox::make('is_on_roster')
-                            ->label(__('Hráč je na soupisce')),
+                            ->label(__('Hráč je na soupisce'))
+                            ->default(false),
                     ]),
             ])
             ->recordActions([
                 Action::make('edit_user')
                     ->label(__('user.actions.edit_user'))
-                    ->icon(IconHelper::get(IconHelper::USER))
+                    ->icon(IconHelper::render(IconHelper::USER))
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id]))
                     ->openUrlInNewTab(),
                 EditAction::make()
                     ->label(__('admin.navigation.resources.team.fields.role_in_team'))
-                    ->icon(IconHelper::get(IconHelper::EDIT))
-                    ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
+                    ->icon(IconHelper::render(IconHelper::EDIT))
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
+                    ->form([
+                        TextInput::make('role_in_team')
+                            ->label(__('admin.navigation.resources.team.fields.role_in_team'))
+                            ->required(),
+                        Checkbox::make('is_primary_team')
+                            ->label(__('admin.navigation.resources.team.fields.is_primary_team')),
+                        Checkbox::make('is_on_roster')
+                            ->label(__('Hráč je na soupisce')),
+                    ]),
                 DetachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.detach'))
-                    ->icon(IconHelper::get(IconHelper::TRASH))
+                    ->icon(IconHelper::render(IconHelper::TRASH))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ])
             ->toolbarActions([

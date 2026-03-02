@@ -133,41 +133,19 @@
 
     echo "Patching entry points for absolute paths..."
     {{ $php }} -r '
-        $targets = ["{{ $path }}/public/index.php", "'$DEST'"];
+        $targets = array_unique(["{{ $path }}/public/index.php", "'\"$DEST\"'"]);
         $base = "{{ $path }}";
         $public = "{{ $public_path ?? $path . "/public" }}";
 
-        foreach (array_unique($targets) as $target) {
+        foreach ($targets as $target) {
             if (!file_exists($target)) continue;
             $content = file_get_contents($target);
-
-            // 1. Fix $APP_BASE if exists
-            $content = preg_replace("/\\\$APP_BASE\\s*=\\s*['\"].*?['\"];/", "\$APP_BASE = \"$base\";", $content);
-
-            // 2. Fix autoload.php reference
-            $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
-                "require \"$base/vendor/autoload.php\";",
-                $content
-            );
-
-            // 3. Fix bootstrap/app.php reference and ensure LARAVEL_PUBLIC_PATH is defined
+            $content = preg_replace("/\\\$APP_BASE\s*=\\s*[\"'].*?[\"'];/", "\$APP_BASE = \"$base\";", $content);
+            $content = preg_replace("/require\s+.*?vendor\/autoload\.php[\"'].*?;/", "require \"$base/vendor/autoload.php\";", $content);
             $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
-            $content = preg_replace("/define\('LARAVEL_PUBLIC_PATH'.*?\);\\s*/", "", $content);
-
-            $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
-                "define(\"LARAVEL_PUBLIC_PATH\", \"$public\");\n            \$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(\"$public\");",
-                $content
-            );
-
-            // 4. Fix maintenance mode path
-            $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
-                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
-                $content
-            );
-
+            $content = preg_replace("/define\([\"']LARAVEL_PUBLIC_PATH[\"'].*?\);\\s*/", "", $content);
+            $content = preg_replace("/(\\\$app\s*=\s*)?require_once\s+.*?bootstrap\/app\.php[\"'].*?;/", "define(\"LARAVEL_PUBLIC_PATH\", \"$public\");\n            \$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(\"$public\");", $content);
+            $content = preg_replace("/file_exists\(\s*\\\$maintenance\s*=\s*.*?storage\/framework\/maintenance\.php[\"']\s*\)/", "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")", $content);
             file_put_contents($target, $content);
         }
     '
@@ -385,41 +363,19 @@
 
     echo "Patching entry points for absolute paths..."
     {{ $php }} -r '
-        $targets = ["{{ $path }}/public/index.php", "'$DEST'"];
+        $targets = array_unique(["{{ $path }}/public/index.php", "'\"$DEST\"'"]);
         $base = "{{ $path }}";
         $public = "{{ $public_path ?? $path . "/public" }}";
 
-        foreach (array_unique($targets) as $target) {
+        foreach ($targets as $target) {
             if (!file_exists($target)) continue;
             $content = file_get_contents($target);
-
-            // 1. Fix $APP_BASE if exists
-            $content = preg_replace("/\\\$APP_BASE\\s*=\\s*['\"].*?['\"];/", "\$APP_BASE = \"$base\";", $content);
-
-            // 2. Fix autoload.php reference
-            $content = preg_replace(
-                "/require\s+[^;]+vendor\/autoload\.php[\x22\x27]\s*;/",
-                "require \"$base/vendor/autoload.php\";",
-                $content
-            );
-
-            // 3. Fix bootstrap/app.php reference and ensure LARAVEL_PUBLIC_PATH is defined
+            $content = preg_replace("/\\\$APP_BASE\s*=\\s*[\"'].*?[\"'];/", "\$APP_BASE = \"$base\";", $content);
+            $content = preg_replace("/require\s+.*?vendor\/autoload\.php[\"'].*?;/", "require \"$base/vendor/autoload.php\";", $content);
             $content = preg_replace("/\\\$app->usePublicPath\(.*?\);\\s*/", "", $content);
-            $content = preg_replace("/define\('LARAVEL_PUBLIC_PATH'.*?\);\\s*/", "", $content);
-
-            $content = preg_replace(
-                "/(\\\$app\s*=\s*)?require_once\s+[^;]+bootstrap\/app\.php[\x22\x27]\s*;/",
-                "define(\"LARAVEL_PUBLIC_PATH\", \"$public\");\n            \$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(\"$public\");",
-                $content
-            );
-
-            // 4. Fix maintenance mode path
-            $content = preg_replace(
-                "/file_exists\(\s*\\\$maintenance\s*=\s*[^;]+storage\/framework\/maintenance\.php[\x22\x27]\s*\)/",
-                "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")",
-                $content
-            );
-
+            $content = preg_replace("/define\([\"']LARAVEL_PUBLIC_PATH[\"'].*?\);\\s*/", "", $content);
+            $content = preg_replace("/(\\\$app\s*=\s*)?require_once\s+.*?bootstrap\/app\.php[\"'].*?;/", "define(\"LARAVEL_PUBLIC_PATH\", \"$public\");\n            \$app = require_once \"$base/bootstrap/app.php\";\n            \$app->usePublicPath(\"$public\");", $content);
+            $content = preg_replace("/file_exists\(\s*\\\$maintenance\s*=\s*.*?storage\/framework\/maintenance\.php[\"']\s*\)/", "file_exists(\$maintenance = \"$base/storage/framework/maintenance.php\")", $content);
             file_put_contents($target, $content);
         }
     '

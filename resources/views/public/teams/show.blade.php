@@ -7,7 +7,6 @@
             'muzi-a' => 'Vlajková loď klubu (2. liga skupina A)',
             'muzi-b' => 'Zkušený tým (Pražský přebor A)',
             'muzi-c' => 'Soutěžní tým s ambicemi (Pražský přebor B)',
-            'muzi-d' => 'Soutěžní basket (1. třída)',
             'muzi-e' => 'Tým se skvělou partou (3. třída B)',
             default => $team->name
         }"
@@ -80,7 +79,6 @@
                                             'muzi-a' => '2. liga (skupina A)',
                                             'muzi-b' => 'Pražský přebor A',
                                             'muzi-c' => 'Pražský přebor B',
-                                            'muzi-d' => '1. třída',
                                             'muzi-e' => '3. třída B',
                                             default => ''
                                         } }}

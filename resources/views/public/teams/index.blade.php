@@ -33,7 +33,6 @@
                                                     'muzi-a' => '2. liga A',
                                                     'muzi-b' => 'Přebor A',
                                                     'muzi-c' => 'Přebor B',
-                                                    'muzi-d' => '1. třída',
                                                     'muzi-e' => '3. třída B',
                                                     default => ''
                                                 } }}
@@ -56,7 +55,6 @@
                                                             'muzi-a' => '2. liga (skupina A)',
                                                             'muzi-b' => 'Pražský přebor',
                                                             'muzi-c' => 'Pražský přebor B',
-                                                            'muzi-d' => '1. třída',
                                                             'muzi-e' => '3. třída B',
                                                             default => ''
                                                         } }}
@@ -121,7 +119,6 @@
                                                     'muzi-a' => '2. liga A',
                                                     'muzi-b' => 'Přebor A',
                                                     'muzi-c' => 'Přebor B',
-                                                    'muzi-d' => '1. třída',
                                                     'muzi-e' => '3. třída B',
                                                     default => ''
                                                 } }}

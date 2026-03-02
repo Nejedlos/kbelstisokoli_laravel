@@ -551,9 +551,7 @@ class AppSyncCommand extends Command
                 if (str_starts_with($key, 'PROD_') || in_array($key, ['APP_KEY', 'FONTAWESOME_TOKEN', 'OPENAI_API_KEY', 'ERROR_REPORT_EMAIL', 'ERROR_REPORT_SENDER'])) {
                     if (! empty($value) || $key === 'PROD_DB_PASSWORD') {
                         $toTransfer[$key] = $value;
-                        if (str_starts_with($key, 'PROD_DB_')) {
-                            $toTransfer[str_replace('PROD_', '', $key)] = $value;
-                        }
+                        // Odstraněno automatické mapování PROD_DB_* na DB_* pro zachování lokální konfigurace
                     }
                 }
             }
