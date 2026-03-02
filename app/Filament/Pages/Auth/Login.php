@@ -43,18 +43,23 @@ class Login extends BaseLogin
 
     protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
     {
-        return Notification::make()
-            ->title(__('Too many login attempts. Please try again in :seconds seconds.', [
+        return null; // Don't send notification, handle via exception
+    }
+
+    protected function getRateLimitedException(TooManyRequestsException $exception): never
+    {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'data.email' => __('auth.throttle', [
                 'seconds' => $exception->secondsUntilAvailable,
-                'minutes' => $exception->minutesUntilAvailable,
-            ]))
-            ->danger();
+                'minutes' => ceil($exception->secondsUntilAvailable / 60),
+            ]),
+        ]);
     }
 
     protected function throwFailureValidationException(): never
     {
-        throw ValidationException::withMessages([
-            'data.email' => __('These credentials do not match our records.'),
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'data.email' => __('auth.failed'),
         ]);
     }
 

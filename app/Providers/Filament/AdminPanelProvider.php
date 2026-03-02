@@ -47,8 +47,19 @@ class AdminPanelProvider extends PanelProvider
                     return '';
                 }
 
+                $cropper = '';
+                if (auth()->check()) {
+                    $cropper = "
+                        <link rel='stylesheet' href='/assets/vendor/cropper.min.css' />
+                        <script src='/assets/vendor/cropper.min.js'></script>
+                    ";
+                }
+
                 return Blade::render(
-                    "<style>
+                    "
+                    <link rel='preconnect' href='https://fonts.googleapis.com'>
+                    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+                    <style>
                         {!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}
                         /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
                         .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
@@ -62,10 +73,7 @@ class AdminPanelProvider extends PanelProvider
                         }
                      </style>
                      @vite(['resources/css/filament-admin.css'])
-                     @if(auth()->check())
-                        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css' integrity='sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==' crossorigin='anonymous' referrerpolicy='no-referrer' />
-                        <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js' integrity='sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
-                     @endif"
+                     {$cropper}"
                 );
             })
             ->renderHook('panels::body.start', function (): string {

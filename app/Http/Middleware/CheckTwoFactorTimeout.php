@@ -36,17 +36,6 @@ class CheckTwoFactorTimeout
         $confirmedAt = $request->session()->get('auth.2fa_confirmed_at');
         $timeout = config('auth.2fa_timeout', 86400); // Výchozí 24 hodin
 
-        \Illuminate\Support\Facades\Log::info('CheckTwoFactorTimeout.check', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'confirmed_at' => $confirmedAt,
-            'timeout' => $timeout,
-            'now' => now()->timestamp,
-            'diff' => $confirmedAt ? (now()->timestamp - $confirmedAt) : null,
-            'session_id' => \Illuminate\Support\Facades\Session::getId(),
-            'impersonated_by' => $request->session()->get('impersonated_by'),
-        ]);
-
         if ($confirmedAt && (now()->timestamp - $confirmedAt) < $timeout) {
             return $next($request);
         }
@@ -58,7 +47,6 @@ class CheckTwoFactorTimeout
                 $data = decrypt($rememberCookie);
                 if (isset($data['user_id']) && $data['user_id'] === $user->id) {
                     // Zařízení je zapamatováno, prodloužíme platnost potvrzení v session
-                    \Illuminate\Support\Facades\Log::info('CheckTwoFactorTimeout.remember_cookie_found', ['user_id' => $user->id]);
                     $request->session()->put('auth.2fa_confirmed_at', now()->timestamp);
 
                     return $next($request);
@@ -84,12 +72,6 @@ class CheckTwoFactorTimeout
         // DŮLEŽITÉ: Fortify challenge potřebuje 'login.id' v session pro identifikaci uživatele,
         // jinak přesměruje zpět na login (což vytvoří redirect loop u přihlášeného uživatele).
         session()->put('login.id', $user->id);
-
-        \Illuminate\Support\Facades\Log::info('CheckTwoFactorTimeout.redirect_to_challenge', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'intended' => $request->fullUrl(),
-        ]);
 
         return redirect()->route('two-factor.login');
     }

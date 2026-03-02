@@ -168,27 +168,45 @@ class BrandingService
         }
 
         try {
-            // Pokud jsme v konzoli a běží příkaz, který by neměl sahat do DB (např. package:discover)
-            // nebo pokud soubor s SQLite databází neexistuje, vrátíme prázdné pole.
+            // Rychlá kontrola existence DB v konzoli (např. při package:discover)
             if (app()->runningInConsole()) {
                 $dbConnection = config('database.default');
                 $dbConfig = config("database.connections.{$dbConnection}");
 
                 if (($dbConfig['driver'] ?? '') === 'sqlite') {
                     $database = $dbConfig['database'] ?? '';
-                    // V CI prostředí nemusí absolutní cesta k DB existovat při buildu/lintu
                     if ($database !== ':memory:' && ! empty($database) && ! file_exists($database)) {
                         return $this->dbSettings = [];
                     }
                 }
             }
 
-            return $this->dbSettings = Cache::remember('global_branding_settings_'.app()->getLocale(), 3600, function () {
-                if (! Schema::hasTable('settings')) {
+            $locale = app()->getLocale();
+            return $this->dbSettings = Cache::remember("global_branding_settings_{$locale}", 3600, function () {
+                // Optimalizované zjištění existence tabulky přes cache (Schema::hasTable je drahé v každém requestu)
+                $tableExists = Cache::rememberForever('schema_has_settings_table', function () {
+                    return Schema::hasTable('settings');
+                });
+
+                if (! $tableExists) {
                     return [];
                 }
 
-                $settings = Setting::all();
+                // Načteme jen klíče, které BrandingService reálně používá
+                $settings = Setting::where('key', 'like', 'branding_%')
+                    ->orWhere('key', 'like', 'social_%')
+                    ->orWhere('key', 'like', 'contact_%')
+                    ->orWhere('key', 'like', 'cta_%')
+                    ->orWhere('key', 'like', 'seo_%')
+                    ->orWhere('key', 'like', 'maintenance_%')
+                    ->orWhere('key', 'like', 'venue_%')
+                    ->orWhere('key', 'like', 'club_%')
+                    ->orWhereIn('key', [
+                        'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
+                        'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset'
+                    ])
+                    ->get(['key', 'value']);
+
                 $mapped = [];
                 foreach ($settings as $setting) {
                     $mapped[$setting->key] = $setting->value;
@@ -197,7 +215,7 @@ class BrandingService
                 return $mapped;
             });
         } catch (\Throwable $e) {
-            // Bezpečný fallback v případě jakékoliv chyby (např. chybějící tabulka cache nebo settings)
+            // Bezpečný fallback v případě jakékoliv chyby
             return $this->dbSettings = [];
         }
     }

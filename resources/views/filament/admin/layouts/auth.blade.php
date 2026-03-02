@@ -24,6 +24,8 @@
 @endphp
 
 <x-filament-panels::layout.base :livewire="$livewire">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <div class="ks-auth-page auth-gradient w-full min-h-dvh flex items-center justify-center py-6 px-4 md:px-6 lg:px-8 relative overflow-x-hidden"
          style="
             background-color: #0f172a !important;

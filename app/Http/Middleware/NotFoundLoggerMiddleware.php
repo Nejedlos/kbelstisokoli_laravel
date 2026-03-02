@@ -34,6 +34,11 @@ class NotFoundLoggerMiddleware
         try {
             $path = '/'.ltrim($request->getPathInfo(), '/');
 
+            // Ignorujeme statické soubory, které často generují 404 (ikony, mapy atd.)
+            if (preg_match('/\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|map)$/i', $path)) {
+                return;
+            }
+
             // Ignorujeme některé zbytečné cesty (pokud je potřeba)
             // Např. telemetry, health checky atd.
             if ($path === '/up' || $path === '/health') {

@@ -22,20 +22,6 @@ class EnsureTwoFactorEnabled
 
         $isAdmin = $user && $user->canAccessAdmin();
 
-        \Illuminate\Support\Facades\Log::info('EnsureTwoFactorEnabled.handle', [
-            'path' => $request->path(),
-            'route' => optional($request->route())->getName(),
-            'is_admin_route' => $isAdminRoute,
-            'user_id' => $user?->id,
-            'email' => $user?->email,
-            'can_access_admin' => $user?->canAccessAdmin(),
-            'has_secret' => (bool) ($user?->two_factor_secret),
-            'confirmed' => (bool) ($user?->two_factor_confirmed_at),
-            'needs_confirmation' => \Laravel\Fortify\Fortify::confirmsTwoFactorAuthentication(),
-            'session_id' => \Illuminate\Support\Facades\Session::getId(),
-            'impersonated_by' => $request->session()->get('impersonated_by'),
-        ]);
-
         // Pokud je impersonace aktivní, přeskakujeme kontrolu 2FA
         if ($request->session()->has('impersonated_by')) {
             return $next($request);
@@ -51,11 +37,6 @@ class EnsureTwoFactorEnabled
 
                 // Pokud už není na stránce nastavení 2FA, přesměrujeme ho tam
                 if (! $request->routeIs('auth.two-factor-setup')) {
-                    \Illuminate\Support\Facades\Log::info('EnsureTwoFactorEnabled.redirect_to_setup', [
-                        'user_id' => $user?->id,
-                        'email' => $user?->email,
-                    ]);
-
                     return redirect()->route('auth.two-factor-setup');
                 }
             }

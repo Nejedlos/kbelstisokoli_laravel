@@ -11,7 +11,7 @@ return [
     | 'ultra'      - Adds Full Page caching and Livewire navigation (SPA feel)
     |
     */
-    'scenario' => env('PERF_SCENARIO', 'standard'),
+    'scenario' => env('PERF_SCENARIO', 'ultra'),
 
     'features' => [
         'full_page_cache' => env('PERF_FULL_PAGE_CACHE', false),
