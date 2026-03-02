@@ -355,7 +355,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
             ->height(800)
             ->format('webp')
             ->sharpen(10)
-            ->performOnCollections('player_photos');
+            ->performOnCollections('avatar', 'player_photos');
 
         // Portrétní varianta pro soupisku
         $this->addMediaConversion('roster')

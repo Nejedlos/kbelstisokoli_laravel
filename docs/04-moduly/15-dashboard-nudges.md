@@ -9,6 +9,7 @@ Systém funguje na principu "nudges" (postrčení), která jsou generována na s
 ### Generování nudges
 Nudges jsou definovány v `DashboardController` (metoda `index`). Aktuálně systém kontroluje:
 - **Chybějící avatar:** Pokud uživatel nemá nahranou žádnou vlastní fotografii v Media Library (kolekce `avatar`), zobrazí se mu výzva k nahrání.
+- **Aktualizace:** Výpočet nudges a URL k avataru probíhá mimo hlavní cache dashboardu. To zajišťuje okamžitou odezvu (nudge zmizí) po nahrání fotografie, i když ostatní data (program, výsledky) zůstávají v cache (TTL 5 minut). Pro zobrazení na dashboardu se používá originální ořezaný obrázek (nikoliv thumbnail), aby byla zajištěna maximální ostrost i na velkých displejích.
 
 ### UI a rotace
 - Pokud je k dispozici více nudges, systém vybere při každém načtení stránky jeden náhodně. Tím se předejde zahlcení uživatele, ale zároveň se rotují důležité úkoly.

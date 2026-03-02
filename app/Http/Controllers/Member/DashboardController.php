@@ -26,14 +26,13 @@ class DashboardController extends Controller
         $locale = app()->getLocale();
         $activeTeamId = app(MemberContext::class)->getActiveTeamId();
 
-        $cacheKey = "member_dashboard_{$user->id}_{$locale}_{$activeTeamId}";
-        $data = Cache::remember($cacheKey, 600, function () use ($user, $now, $activeTeamId) {
+        $cacheKey = "member_dashboard_{$user->id}_{$locale}_{$activeTeamId}_v2";
+        $data = Cache::remember($cacheKey, 300, function () use ($user, $now, $activeTeamId) {
             $user->loadMissing(['playerProfile.teams']);
 
             // Doplňková data pro moderní nástěnku
             $economySummary = app(FinanceService::class)->getMemberSummary($user);
             $notifications = $user->notifications()->latest()->limit(5)->get();
-            $avatarUrl = method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl('thumb') : null;
 
             $currentSeasonId = Season::where('is_active', true)->first()?->id;
 
@@ -171,34 +170,37 @@ class DashboardController extends Controller
             // 3. Týmy uživatele
             $myTeams = $user->playerProfile?->teams()->get() ?? collect();
 
-            // 4. Nudges (doporučení pro uživatele)
-            $nudges = [];
-            if ($user->getMedia('avatar')->isEmpty()) {
-                $nudges[] = [
-                    'id' => 'avatar',
-                    'title' => __('dashboard.nudges.avatar.title'),
-                    'message' => __('dashboard.nudges.avatar.message'),
-                    'cta' => __('dashboard.nudges.avatar.cta'),
-                    'url' => route('member.profile.edit'),
-                    'icon' => 'camera-retro',
-                    'color' => 'primary',
-                    'instruction' => __('dashboard.nudges.avatar.instruction'),
-                ];
-            }
-
             return [
                 'upcoming' => $upcoming,
                 'pendingCount' => $pendingCount,
                 'myTeams' => $myTeams,
                 'economySummary' => $economySummary,
                 'notifications' => $notifications,
-                'avatarUrl' => $avatarUrl,
-                'nudges' => $nudges,
             ];
         });
 
+        // Vždy čerstvá profilová data (mimo hlavní cache dashboardu pro okamžitou odezvu po změně)
+        $avatarUrl = method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null;
+
+        // 4. Nudges (doporučení pro uživatele) - počítáme pokaždé čerstvé
+        $nudges = [];
+        if (!$user->hasMedia('avatar')) {
+            $nudges[] = [
+                'id' => 'avatar',
+                'title' => __('dashboard.nudges.avatar.title'),
+                'message' => __('dashboard.nudges.avatar.message'),
+                'cta' => __('dashboard.nudges.avatar.cta'),
+                'url' => route('member.profile.edit'),
+                'icon' => 'camera-retro',
+                'color' => 'primary',
+                'instruction' => __('dashboard.nudges.avatar.instruction'),
+            ];
+        }
+
         return view('member.dashboard', array_merge($data, [
             'user' => $user,
+            'avatarUrl' => $avatarUrl,
+            'nudges' => $nudges,
         ]));
     }
 }
