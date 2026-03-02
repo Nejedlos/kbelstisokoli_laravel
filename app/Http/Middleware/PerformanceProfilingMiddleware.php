@@ -58,8 +58,8 @@ class PerformanceProfilingMiddleware
             Log::info('Performance profile', $logData);
         }
 
-        // Přidání headers pro snadnou diagnostiku v DevTools (pouze pro autorizované uživatele nebo v local prostředí)
-        if (app()->environment('local') || $this->isAuthorized($request)) {
+        // Přidání headers pro snadnou diagnostiku v DevTools (pouze pro autorizované uživatele, v local prostředí nebo při performance testu)
+        if (app()->environment('local') || $this->isAuthorized($request) || $request->header('X-Performance-Test-Key') === config('app.key')) {
             $response->headers->set('X-Perf-Duration-MS', round($duration, 2));
             $response->headers->set('X-Perf-Query-Count', $queryCount);
             $response->headers->set('X-Perf-Query-Time-MS', round($queryTime, 2));

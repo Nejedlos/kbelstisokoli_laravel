@@ -295,9 +295,9 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     width: 100vw !important;
     height: 100dvh !important;
     z-index: 99999 !important; /* Maximální z-index pro garantované překrytí */
-    background: radial-gradient(circle at center, rgba(var(--color-brand-navy-rgb), 0.75) 0%, rgba(var(--color-brand-navy-rgb), 0.95) 100%) !important;
-    backdrop-filter: blur(12px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    background: radial-gradient(circle at center, rgba(var(--color-brand-navy-rgb), 0.4) 0%, rgba(var(--color-brand-navy-rgb), 0.7) 100%) !important;
+    backdrop-filter: blur(8px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(140%) !important;
     pointer-events: none !important;
     display: none !important;
 }

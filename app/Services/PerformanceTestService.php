@@ -68,7 +68,11 @@ class PerformanceTestService
                     'opcache_enabled' => $opcache,
                 ]);
             } else {
-                Log::error("Performance test failed: no duration header in response for $fullUrl. Status: ".$response->status());
+                Log::error("Performance test failed: no duration header in response for $fullUrl.", [
+                    'status' => $response->status(),
+                    'headers' => $response->headers(),
+                    'body_preview' => substr($response->body(), 0, 500),
+                ]);
             }
         } catch (\Throwable $e) {
             Log::error("Performance test failed for $fullUrl: ".$e->getMessage());
