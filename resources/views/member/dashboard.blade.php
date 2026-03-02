@@ -21,36 +21,50 @@
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 -translate-y-4"
                  x-transition:enter-end="opacity-100 translate-y-0"
-                 class="relative overflow-hidden group shadow-sm hover:shadow-md transition-shadow duration-300"
+                 class="relative rounded-[2.5rem] overflow-hidden group shadow-xl shadow-{{ $nudge['color'] }}/10 hover:shadow-{{ $nudge['color'] }}/20 transition-all duration-500"
             >
-                <div class="absolute inset-0 bg-gradient-to-br from-{{ $nudge['color'] }}/15 via-white to-{{ $nudge['color'] }}/5 rounded-[2rem] border border-{{ $nudge['color'] }}/30 border-l-4 border-l-{{ $nudge['color'] }}"></div>
+                <!-- Decorative Gradient Blobs (Clipped) -->
+                <div class="absolute inset-0 overflow-hidden pointer-events-none rounded-[2.5rem]">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-{{ $nudge['color'] }}/20 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-{{ $nudge['color'] }}/30 transition-colors duration-700 animate-pulse"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary/10 rounded-full blur-3xl -ml-10 -mb-10 opacity-50"></div>
+                </div>
 
-                <div class="relative p-7 flex flex-col md:flex-row items-center gap-6">
-                    <div class="w-16 h-16 rounded-2xl bg-{{ $nudge['color'] }} text-white flex items-center justify-center shrink-0 shadow-xl shadow-{{ $nudge['color'] }}/30 group-hover:scale-110 transition-transform duration-500">
-                        <i class="fa-light fa-{{ $nudge['icon'] }} text-3xl"></i>
+                <!-- Background Layer (Glassmorphism) -->
+                <div class="absolute inset-0 bg-white/40 backdrop-blur-2xl border border-{{ $nudge['color'] }}/20 rounded-[2.5rem]"></div>
+
+                <div class="relative p-7 md:p-9 flex flex-col md:flex-row items-center gap-7 sm:gap-10">
+                    <!-- Icon Section -->
+                    <div class="relative shrink-0">
+                        <div class="absolute -inset-4 bg-{{ $nudge['color'] }}/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <div class="relative w-20 h-20 rounded-[1.75rem] bg-gradient-to-tr from-{{ $nudge['color'] }} to-{{ $nudge['color'] }}/80 text-white flex items-center justify-center shadow-2xl shadow-{{ $nudge['color'] }}/40 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
+                            <i class="fa-light fa-{{ $nudge['icon'] }} text-4xl"></i>
+                        </div>
                     </div>
 
-                    <div class="flex-1 text-center md:text-left space-y-1.5">
-                        <h4 class="text-xl font-black uppercase tracking-tight text-secondary">
+                    <div class="flex-1 text-center md:text-left space-y-2">
+                        <h4 class="text-2xl font-black uppercase tracking-tight text-secondary leading-none">
                             {{ $nudge['title'] }}
                         </h4>
-                        <p class="text-base text-slate-700 font-semibold leading-snug">
+                        <p class="text-lg text-slate-700 font-bold leading-tight">
                             {{ $nudge['message'] }}
                         </p>
                         @if(!empty($nudge['instruction']))
-                            <div class="pt-2 flex items-center gap-2 text-sm text-{{ $nudge['color'] }} font-bold bg-{{ $nudge['color'] }}/5 px-3 py-1.5 rounded-lg w-fit">
-                                <i class="fa-light fa-circle-info"></i>
-                                <span>{{ $nudge['instruction'] }}</span>
+                            <div class="pt-3 flex items-center justify-center md:justify-start gap-2.5">
+                                <div class="flex items-center gap-2 text-[10px] text-{{ $nudge['color'] }} font-black uppercase tracking-widest bg-{{ $nudge['color'] }}/10 px-4 py-2 rounded-full border border-{{ $nudge['color'] }}/10 shadow-sm">
+                                    <i class="fa-light fa-circle-info text-sm"></i>
+                                    <span>{{ $nudge['instruction'] }}</span>
+                                </div>
                             </div>
                         @endif
                     </div>
 
-                    <div class="flex items-center gap-4 shrink-0">
-                        <a href="{{ $nudge['url'] }}" class="btn btn-{{ $nudge['color'] }} px-8 py-3 text-sm font-black shadow-lg shadow-{{ $nudge['color'] }}/20">
+                    <div class="flex items-center gap-5 shrink-0">
+                        <a href="{{ $nudge['url'] }}" class="btn btn-{{ $nudge['color'] }} px-10 py-4 text-sm font-black shadow-2xl shadow-{{ $nudge['color'] }}/30 hover:shadow-{{ $nudge['color'] }}/50 hover:-translate-y-1 transition-all uppercase tracking-widest">
                             {{ $nudge['cta'] }}
+                            <i class="fa-light fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                         </a>
-                        <button @click="hideNudge()" class="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all" title="{{ __('common.close') }}">
-                            <i class="fa-light fa-xmark text-xl"></i>
+                        <button @click="hideNudge()" class="p-4 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all" title="{{ __('common.close') }}">
+                            <i class="fa-light fa-xmark text-2xl"></i>
                         </button>
                     </div>
                 </div>
