@@ -350,7 +350,7 @@ class AvatarModal extends Component
     {
         // 1. Nejprve vytvoříme dočasný WebP soubor pro výpočet MD5 a kontrolu duplicity
         $tempFile = tempnam(sys_get_temp_dir(), 'avatar_') . '.webp';
-        $this->resizeToWebp($sourcePath, $tempFile, 400, 400);
+        $this->resizeToWebp($sourcePath, $tempFile, 1000, 1000); // Zvětšeno pro kvalitní hlavní avatar
 
         if (! file_exists($tempFile)) {
             return;
@@ -393,7 +393,7 @@ class AvatarModal extends Component
 
         // 4. Přesuneme dočasný soubor na finální místo a vytvoříme thumb
         File::move($tempFile, $newPath . '/' . $fileName);
-        $this->resizeToWebp($sourcePath, $conversionsPath . '/' . $thumbName, 100, 100);
+        $this->resizeToWebp($sourcePath, $conversionsPath . '/' . $thumbName, 200, 200); // Thumb ve 200x200
     }
 
     protected function resizeToWebp($sourcePath, $targetPath, $width, $height)
@@ -465,7 +465,7 @@ class AvatarModal extends Component
             }
         }
 
-        // 2. Generujeme ID (složku) - najdeme nejvyšší stávající a přičteme 1
+        // 2. Generujeme ID (složku)
         $directories = File::directories($path);
         $maxId = 0;
         foreach ($directories as $dir) {
@@ -483,10 +483,16 @@ class AvatarModal extends Component
         $fileName = 'avatar-' . time() . '.webp';
         $thumbName = 'avatar-' . time() . '-thumb.webp';
 
-        // Uložíme hlavní obrázek (ořezaný už je ve 400x400 z frontendu, ale pro jistotu nebo budoucí změny...)
-        // V zadání je "rozumná velikost", frontend posílá 400x400 což je pro avatary super.
-        File::put($newPath . '/' . $fileName, $decodedImage);
-        File::put($conversionsPath . '/' . $thumbName, $decodedImage); // Pro teď stejný, frontend ořez je dost malý
+        // 3. Uložíme hlavní obrázek (ořezaný originál z frontendu - cca 1200x1200px)
+        // Omezíme jej v PHP na max 1000x1000 pro úsporu místa a dostatečnou kvalitu
+        $tempCroppedFile = tempnam(sys_get_temp_dir(), 'cropped_') . '.webp';
+        File::put($tempCroppedFile, $decodedImage);
+
+        // Uložíme jako hlavní (1000x1000) a jako thumb (200x200)
+        $this->resizeToWebp($tempCroppedFile, $newPath . '/' . $fileName, 1000, 1000);
+        $this->resizeToWebp($tempCroppedFile, $conversionsPath . '/' . $thumbName, 200, 200);
+
+        @unlink($tempCroppedFile);
 
         $this->uploadAsSystem = false;
         $this->previewUrl = null;

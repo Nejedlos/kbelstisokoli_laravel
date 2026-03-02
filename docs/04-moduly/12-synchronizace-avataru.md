@@ -46,7 +46,7 @@ Pokud se synchronizace "zasekne" (často kolem 55 % při velkém množství soub
 Od března 2026 mohou administrátoři spravovat klubovou galerii avatarů přímo v uživatelském rozhraní prostřednictvím `AvatarModal` (v profilu člena nebo v administraci uživatelů).
 
 ### Funkce pro administrátory:
-- **Hromadný import:** Administrátoři mohou nahrát více souborů najednou do klubové galerie. Při výběru více souborů se automaticky přeskočí krok s manuálním ořezem a všechny obrázky jsou centrálně oříznuty na čtverec, změněna velikost na 400x400 px a převedeny na `.webp`.
-- **Automatická optimalizace:** Systém automaticky převede nahraný avatar na formát `.webp` a uloží jej do `public/uploads/defaults` s rozměry 400x400 px. Pro hromadný import se používá serverové zpracování pomocí GD knihovny.
+- **Hromadný import:** Administrátoři mohou nahrát více souborů najednou do klubové galerie. Při výběru více souborů se automaticky přeskočí krok s manuálním ořezem a všechny obrázky jsou centrálně oříznuty na čtverec, změněna velikost na 1000x1000 px a převedeny na `.webp`.
+- **Automatická optimalizace:** Systém automaticky převede nahraný avatar na formát `.webp` a uloží jej do `public/uploads/defaults` s rozměry 1000x1000 px. Pro hromadný import se používá serverové zpracování pomocí GD knihovny.
 - **Mazání z galerie:** V záložce "Klubová galerie" se administrátorům u každého obrázku zobrazuje ikona koše. Po potvrzení v modálu dojde k trvalému smazání souborů i složky daného avataru z disku.
 - **Bezpečnost:** Akce jsou povoleny pouze uživatelům s oprávněním přístupu do administrace (`canAccessAdmin`).

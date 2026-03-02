@@ -48,20 +48,13 @@
             checkCrossOrigin: true,
             background: false,
             modal: true,
-            autoCropArea: 0.8,
+            autoCropArea: 1,
             zoomable: true,
             scalable: true,
             ready: () => {
                 console.log('Cropper is ready and active');
                 if (this.cropper) {
                     this.cropper.crop();
-                    // Zkusíme ještě vynutit zobrazení ořezového boxu
-                    this.cropper.setCropBoxData({
-                        left: 0,
-                        top: 0,
-                        width: 400,
-                        height: 400
-                    });
                 }
             }
         });
@@ -72,8 +65,8 @@
             return;
         }
         const canvas = this.cropper.getCroppedCanvas({
-            width: 400,
-            height: 400,
+            width: 1200,
+            height: 1200,
             imageSmoothingEnabled: true,
             imageSmoothingQuality: 'high',
         });
