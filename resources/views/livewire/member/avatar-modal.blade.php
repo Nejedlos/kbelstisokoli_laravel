@@ -1,7 +1,9 @@
 <div x-data="{
     isOpen: @entangle('isOpen'),
     confirmingDelete: @entangle('confirmingDelete'),
+    confirmingSystemDelete: @entangle('confirmingSystemDelete'),
     activeTab: @entangle('activeTab'),
+    uploadAsSystem: @entangle('uploadAsSystem'),
     cropper: null,
     previewUrl: @entangle('previewUrl'),
     initCropper() {
@@ -130,7 +132,7 @@ class="fixed inset-0 z-50 overflow-y-auto"
         <div class="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 border border-slate-200/60" @click.stop>
 
             <!-- Header -->
-            <div x-show="!confirmingDelete" class="p-5 sm:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+            <div x-show="!confirmingDelete && !confirmingSystemDelete" class="p-5 sm:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
                 <div>
                     <h3 class="text-xl sm:text-2xl font-black uppercase tracking-tight text-secondary leading-none">{{ __('member.profile.avatar.modal_title') }}</h3>
                     <p class="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-2">{{ __('member.profile.avatar.modal_subtitle') }}</p>
@@ -140,15 +142,29 @@ class="fixed inset-0 z-50 overflow-y-auto"
                 </button>
             </div>
 
-            <div x-show="!confirmingDelete" class="flex flex-col">
+            <div x-show="!confirmingDelete && !confirmingSystemDelete" class="flex flex-col">
                 <!-- 1. SECTION: EDITOR (Top) -->
                 <div id="avatar-editor-section" class="p-5 sm:p-8 bg-slate-50/50 border-b border-slate-100 min-h-[300px] sm:min-h-[350px] flex flex-col items-center justify-center relative">
                     <div x-show="!previewUrl" class="text-center py-10 sm:py-16">
-                        <div class="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-slate-200 shadow-xl shadow-slate-200/50 transform rotate-3 group-hover:rotate-0 transition-transform">
-                            <i class="fa-light fa-image-slash text-3xl sm:text-4xl text-slate-300"></i>
-                        </div>
-                        <p class="text-xs sm:text-sm font-black text-secondary uppercase tracking-[0.2em]">{{ __('member.profile.avatar.no_image_selected') }}</p>
-                        <p class="text-[9px] sm:text-[10px] text-slate-400 mt-2 font-bold italic">{{ __('member.profile.avatar.no_image_hint') }}</p>
+                        @if($uploadAsSystem && count($avatarFile) > 1)
+                            <div class="relative inline-block mb-8 sm:mb-12">
+                                <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse"></div>
+                                <div class="relative w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-[2rem] sm:rounded-[2.5rem] flex items-center justify-center border border-slate-100 shadow-2xl transform rotate-3">
+                                    <i class="fa-light fa-images text-5xl sm:text-7xl text-primary"></i>
+                                    <div class="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-14 sm:h-14 bg-rose-500 text-white rounded-xl sm:rounded-2xl flex items-center justify-center border-4 border-white shadow-xl transform rotate-12 z-10">
+                                        <span class="text-lg sm:text-2xl font-black">{{ count($avatarFile) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h3 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-secondary mb-3 leading-none">{{ __('member.profile.avatar.bulk_ready_title') }}</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto font-bold italic opacity-80 uppercase tracking-widest">{{ __('member.profile.avatar.bulk_ready_subtitle') }}</p>
+                        @else
+                            <div class="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-slate-200 shadow-xl shadow-slate-200/50 transform rotate-3 group-hover:rotate-0 transition-transform">
+                                <i class="fa-light fa-image-slash text-3xl sm:text-4xl text-slate-300"></i>
+                            </div>
+                            <p class="text-xs sm:text-sm font-black text-secondary uppercase tracking-[0.2em]">{{ __('member.profile.avatar.no_image_selected') }}</p>
+                            <p class="text-[9px] sm:text-[10px] text-slate-400 mt-2 font-bold italic">{{ __('member.profile.avatar.no_image_hint') }}</p>
+                        @endif
                     </div>
 
                     <div x-show="previewUrl" class="w-full space-y-4 sm:space-y-6 animate-in fade-in duration-500">
@@ -165,15 +181,24 @@ class="fixed inset-0 z-50 overflow-y-auto"
                             </button>
 
                             <div class="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
-                                <button type="button" @click="initCropper()" class="btn btn-outline py-2.5 px-5 text-[9px] sm:text-[10px] uppercase tracking-widest w-full sm:w-auto bg-white border-slate-200">
-                                    <i class="fa-light fa-crop-simple mr-2 text-primary"></i> {{ __('member.profile.avatar.reset_crop') }}
-                                </button>
-                                <button type="button" @click="saveCrop()" wire:loading.attr="disabled" wire:target="saveAvatar"
-                                        class="btn btn-primary py-3 px-6 sm:px-10 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
-                                    <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
-                                    <i class="fa-light fa-check-double mr-2" wire:loading.remove wire:target="saveAvatar"></i>
-                                    {{ __('member.profile.avatar.save_and_set') }}
-                                </button>
+                                @if($previewUrl)
+                                    <button type="button" @click="initCropper()" class="btn btn-outline py-2.5 px-5 text-[9px] sm:text-[10px] uppercase tracking-widest w-full sm:w-auto bg-white border-slate-200">
+                                        <i class="fa-light fa-crop-simple mr-2 text-primary"></i> {{ __('member.profile.avatar.reset_crop') }}
+                                    </button>
+                                    <button type="button" @click="saveCrop()" wire:loading.attr="disabled" wire:target="saveAvatar"
+                                            class="btn btn-primary py-3 px-6 sm:px-10 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
+                                        <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
+                                        <i class="fa-light fa-check-double mr-2" wire:loading.remove wire:target="saveAvatar"></i>
+                                        {{ __('member.profile.avatar.save_and_set') }}
+                                    </button>
+                                @elseif($uploadAsSystem && count($avatarFile) > 1)
+                                    <button type="button" wire:click="saveAvatar" wire:loading.attr="disabled" wire:target="saveAvatar"
+                                            class="btn btn-primary py-3 px-6 sm:px-12 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
+                                        <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
+                                        <i class="fa-light fa-upload mr-2" wire:loading.remove wire:target="saveAvatar"></i>
+                                        {{ __('member.profile.avatar.admin.bulk_import_btn') }}
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -211,6 +236,13 @@ class="fixed inset-0 z-50 overflow-y-auto"
                                          :class="previewUrl === @js($asset->getUrl()) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
                                         <i class="fa-light fa-check text-white text-xl"></i>
                                     </div>
+
+                                    @if(auth()->user()?->canAccessAdmin())
+                                        <button type="button" wire:click.stop="confirmSystemDelete('{{ $asset->id }}')"
+                                                class="absolute top-1 right-1 w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 shadow-lg">
+                                            <i class="fa-light fa-trash-can text-[10px]"></i>
+                                        </button>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -225,6 +257,23 @@ class="fixed inset-0 z-50 overflow-y-auto"
 
                     <!-- Upload Area -->
                     <div x-show="activeTab === 'upload'" class="space-y-4">
+                        @if(auth()->user()?->canAccessAdmin())
+                            <div class="flex items-center justify-center mb-4">
+                                <label class="flex items-center cursor-pointer group">
+                                    <div class="relative" @click="uploadAsSystem = !uploadAsSystem">
+                                        <div class="block w-10 h-6 rounded-full border border-slate-300 transition-all duration-300 shadow-inner"
+                                             :class="uploadAsSystem ? 'bg-primary border-primary' : 'bg-slate-200'"></div>
+                                        <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all duration-300 transform shadow-md"
+                                             :class="uploadAsSystem ? 'translate-x-4 scale-110' : 'translate-x-0'"></div>
+                                    </div>
+                                    <div class="ml-3 text-secondary font-black uppercase tracking-widest text-[10px]">
+                                        {{ __('member.profile.avatar.admin.upload_as_system') }}
+                                        <span class="block text-[8px] text-slate-400 font-bold lowercase normal-case tracking-normal">{{ __('member.profile.avatar.admin.upload_as_system_hint') }}</span>
+                                    </div>
+                                </label>
+                            </div>
+                        @endif
+
                         <div class="border-2 border-dashed border-slate-200 rounded-[2rem] p-12 text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer group relative overflow-hidden"
                              onclick="document.getElementById('avatar-upload-input').click()">
                             <div class="relative z-10">
@@ -234,15 +283,18 @@ class="fixed inset-0 z-50 overflow-y-auto"
                                 <h4 class="text-sm font-black text-secondary mb-2 uppercase tracking-widest">{{ __('member.profile.avatar.upload_click') }}</h4>
                                 <p class="text-[10px] text-slate-400 font-bold italic">{{ __('member.profile.avatar.formats') }}</p>
                             </div>
-                            <input type="file" id="avatar-upload-input" class="hidden" accept="image/*" @change="
-                                const file = $event.target.files[0];
-                                if (file) {
+                            <input type="file" id="avatar-upload-input" class="hidden" accept="image/*" multiple wire:model="avatarFile" @change="
+                                const files = $event.target.files;
+                                if (files.length === 1) {
                                     const reader = new FileReader();
                                     reader.onload = (e) => {
                                         this.previewUrl = e.target.result;
                                         this.scrollToEditor();
                                     };
-                                    reader.readAsDataURL(file);
+                                    reader.readAsDataURL(files[0]);
+                                } else if (files.length > 1) {
+                                    this.previewUrl = null;
+                                    this.scrollToEditor();
                                 }
                             ">
                         </div>
@@ -279,8 +331,34 @@ class="fixed inset-0 z-50 overflow-y-auto"
                 </div>
             </div>
 
+            <!-- Confirmation System Delete -->
+            <div x-show="confirmingSystemDelete" x-cloak class="p-6 sm:p-10 text-center animate-in fade-in slide-in-from-bottom-8 duration-500">
+                <div class="relative inline-block mb-8 sm:mb-12">
+                    <div class="absolute inset-0 bg-rose-500/20 blur-3xl rounded-full animate-pulse"></div>
+                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-[2rem] sm:rounded-[2.5rem] flex items-center justify-center border border-slate-100 shadow-2xl transform rotate-3">
+                        <i class="fa-light fa-trash-xmark text-5xl sm:text-7xl text-rose-500"></i>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-secondary mb-3 sm:mb-4 leading-none">{{ __('member.profile.avatar.admin.delete_title') }}</h3>
+                <p class="text-xs sm:text-sm text-slate-500 mb-8 sm:mb-10 max-w-sm mx-auto font-bold italic leading-relaxed opacity-80">
+                    {{ __('member.profile.avatar.admin.delete_text') }}
+                </p>
+
+                <div class="flex flex-col xs:flex-row items-center justify-center gap-3 sm:gap-4">
+                    <button type="button" @click="confirmingSystemDelete = null" class="w-full xs:w-auto px-8 sm:px-10 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-slate-100 hover:bg-slate-200 text-secondary text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] transition-all">
+                        {{ __('member.profile.avatar.keep_in_game') }}
+                    </button>
+                    <button type="button" wire:click="deleteSystemAvatar" wire:loading.attr="disabled"
+                            class="w-full xs:w-auto px-10 sm:px-12 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-rose-500/30 disabled:opacity-50 flex items-center justify-center">
+                        <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="deleteSystemAvatar"></i>
+                        {{ __('member.profile.avatar.admin.delete_confirm') }}
+                    </button>
+                </div>
+            </div>
+
             <!-- Footer info -->
-            <div x-show="!confirmingDelete" class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center gap-3">
+            <div x-show="!confirmingDelete && !confirmingSystemDelete" class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center gap-3">
                 <i class="fa-light fa-circle-info text-primary"></i>
                 <p class="text-[10px] text-slate-500 font-medium leading-tight">
                     {{ __('member.profile.avatar.info_footer') }}

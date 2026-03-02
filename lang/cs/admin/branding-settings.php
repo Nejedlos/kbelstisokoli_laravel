@@ -7,6 +7,7 @@ return [
         'identity' => 'Základní identita',
         'identity_desc' => 'Zde nastavte názvy klubu. V textu můžete používat zástupné symboly ###TEAM_NAME### nebo ###TEAM_SHORT###, které budou automaticky nahrazeny těmito hodnotami.',
         'contact' => 'Kontaktní údaje (Patička)',
+        'admin_contact' => 'Administrátorský kontakt (Členská sekce)',
         'social' => 'Sociální sítě',
         'cta' => 'Výzva k akci (Globální CTA)',
         'legal' => 'Právní informace',

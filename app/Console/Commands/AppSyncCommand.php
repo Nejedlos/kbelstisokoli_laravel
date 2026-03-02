@@ -278,6 +278,20 @@ class AppSyncCommand extends Command
             'database/migrations/',
             'database/seeders/',
             'database/factories/',
+            'artisan',
+            'composer.json',
+            'composer.lock',
+            'package.json',
+            'vite.config.js',
+            'tailwind.config.js',
+            'postcss.config.js',
+            'bootstrap/app.php',
+            'bootstrap/cache/',
+            'routes/',
+            'config/',
+            'app/',
+            'lang/',
+            'resources/views/',
         ];
 
         // Seznam souborů v kořeni public (bez index.php)
@@ -321,8 +335,9 @@ class AppSyncCommand extends Command
                 }
 
                 foreach ($remoteDirs as $remoteDir) {
-                    // Zajistíme, že cílový adresář na serveru existuje
-                    Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p " . escapeshellarg($remoteDir) . "'");
+                    // Zajistíme, že cílový adresář na serveru existuje (pro soubory vytvoříme rodičovský adresář)
+                    $remoteParentDir = is_dir($localDir) ? $remoteDir : dirname($remoteDir);
+                    Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p " . escapeshellarg($remoteParentDir) . "'");
 
                     // 1. Rsync
                     $checkRsync = Process::run('rsync --version');
@@ -340,6 +355,13 @@ class AppSyncCommand extends Command
 
                     // 2. FTP Fallback
                     if (! $synced && $ftpHost && $ftpUser) {
+                        // Pokud rsync selhal nebo není k dispozici, vyčistíme cílový adresář ručně přes SSH,
+                        // abychom předešli hromadění starých souborů (náhrada za rsync --delete).
+                        if (is_dir($localDir)) {
+                            $this->line("  Cleaning remote directory before FTP sync: $remoteDir");
+                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf " . escapeshellarg($remoteDir) . "/*'");
+                        }
+
                         $this->line("  Trying FTP fallback for $remoteDir...");
                         if ($this->syncViaFtp($localDir, $remoteDir, $ftpHost, $ftpUser, $ftpPass, $ftpPort)) {
                             $synced = true;
@@ -348,8 +370,15 @@ class AppSyncCommand extends Command
 
                     // 3. SCP Fallback
                     if (! $synced) {
+                        // Obdobně pro SCP fallback vyčistíme cílový adresář
+                        if (is_dir($localDir)) {
+                            $this->line("  Cleaning remote directory before SCP sync: $remoteDir");
+                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf " . escapeshellarg($remoteDir) . "/*'");
+                        }
+
                         $this->line('  Falling back to SCP...');
-                        $scpCmd = "scp -P {$port} -r " . escapeshellarg($localDir . '.') . " {$user}@{$host}:" . escapeshellarg($remoteDir);
+                        $sourcePath = is_dir($localDir) ? $localDir . '/.' : $localDir;
+                        $scpCmd = "scp -P {$port} -r " . escapeshellarg($sourcePath) . " {$user}@{$host}:" . escapeshellarg($remoteDir);
                         Process::forever()->run($scpCmd);
                     }
                 }
@@ -454,7 +483,9 @@ class AppSyncCommand extends Command
             ftp_pasv($conn, true);
 
             // Zabezpečení cílové cesty (vytvoření pouze jednou)
-            $parts = explode('/', trim($remoteDir, '/'));
+            // Pro soubory vytváříme pouze rodičovský adresář
+            $targetDir = is_dir($localDir) ? $remoteDir : dirname($remoteDir);
+            $parts = explode('/', trim($targetDir, '/'));
             $path = '';
             foreach ($parts as $part) {
                 $path .= '/' . $part;
@@ -463,7 +494,11 @@ class AppSyncCommand extends Command
                 }
             }
 
-            $this->uploadRecursive($conn, $localDir, $remoteDir);
+            if (is_dir($localDir)) {
+                $this->uploadRecursive($conn, $localDir, $remoteDir);
+            } else {
+                @ftp_put($conn, $remoteDir, $localDir, FTP_BINARY);
+            }
             ftp_close($conn);
 
             return true;

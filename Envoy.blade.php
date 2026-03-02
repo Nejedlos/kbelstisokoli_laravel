@@ -1,11 +1,11 @@
 @servers(['web' => $user . '@' . $host . ($port ? ' -p ' . $port : '') . ' -o StrictHostKeyChecking=no'])
 
 @setup
-    $repository = isset($repository) ? $repository : 'https://' . $token . '@github.com/Nejedlos/kbelstisokoli_laravel.git';
-    $path = isset($path) ? $path : '/www/kbelstisokoli';
-    $php = isset($php) ? $php : 'php';
-    $node = isset($node) ? $node : 'node';
-    $npm = isset($npm) ? $npm : 'npm';
+    if (isset($repository)) { $v_repository = $repository; } else { $v_repository = 'https://' . $token . '@github.com/Nejedlos/kbelstisokoli_laravel.git'; }
+    if (isset($path)) { $v_path = $path; } else { $v_path = '/www/kbelstisokoli'; }
+    if (isset($php)) { $v_php = $php; } else { $v_php = 'php'; }
+    if (isset($node)) { $v_node = $node; } else { $v_node = 'node'; }
+    if (isset($npm)) { $v_npm = $npm; } else { $v_npm = 'npm'; }
 
     if (isset($db_connection)) { $v_conn = $db_connection; } else { $v_conn = 'mysql'; }
     $db_connection_b64 = base64_encode($v_conn);
@@ -23,11 +23,12 @@
     $db_prefix_b64 = base64_encode($v_pref);
     if (isset($public_path)) { $v_pub = $public_path; } else { $v_pub = ''; }
     $public_path_b64 = base64_encode($v_pub);
-    $freshseed = isset($freshseed) ? $freshseed : false;
-    $usersync = isset($usersync) ? $usersync : false;
-    $noai = isset($noai) ? $noai : false;
-    $fontawesome_token = isset($fontawesome_token) ? $fontawesome_token : '';
-    if (isset($public_path)) { $target_public = $public_path; } else { $target_public = $path . '/public'; }
+
+    if (isset($freshseed) && $freshseed) { $v_freshseed_opt = '--fresh'; } else { $v_freshseed_opt = ''; }
+    if (isset($usersync) && $usersync == "1") { $v_usersync_opt = '--users'; } else { $v_usersync_opt = ''; }
+    if (isset($noai)) { $v_noai = $noai; } else { $v_noai = false; }
+    if (isset($fontawesome_token)) { $v_fontawesome_token = $fontawesome_token; } else { $v_fontawesome_token = ''; }
+    if (isset($public_path)) { $target_public = $public_path; } else { $target_public = $v_path . '/public'; }
 @endsetup
 
 @task('setup', ['on' => 'web'])
@@ -141,25 +142,7 @@
     fi
 
     echo "Patching entry points for absolute paths..."
-    cat << 'EOF' > patch_entrypoints.php
-<?php
-$base = $argv[1];
-$public = $argv[2];
-$dest = ""; if (isset($argv[3])) { $dest = $argv[3]; }
-$files = array_unique(array_filter([$base . "/public/index.php", $dest]));
-foreach ($files as $f) {
-    if (!file_exists($f)) continue;
-    $c = file_get_contents($f);
-    $c = preg_replace("/\\\$APP_BASE\\s*=\\s*.*?;/", "\$APP_BASE = \"" . $base . "\";", $c);
-    $c = preg_replace("/require\\s+.*?vendor\/autoload\\.php.*?;/", "require \"" . $base . "/vendor/autoload.php\";", $c);
-    $c = preg_replace("/\\\$app->usePublicPath\\(.*?\\);\\s*/", "", $c);
-    $c = preg_replace("/define\\([\"']LARAVEL_PUBLIC_PATH[\"'].*?\\);\\s*/", "", $c);
-    $replacement = "define(\"LARAVEL_PUBLIC_PATH\", \"" . $public . "\");\n            \$app = require_once \"" . $base . "/bootstrap/app.php\";\n            \$app->usePublicPath(\"" . $public . "\");";
-    $c = preg_replace("/require_once\\s+.*?bootstrap\/app\\.php.*?[\"'];/", $replacement, $c);
-    $c = preg_replace("/file_exists\\(\\s*\\\$maintenance\\s*=\\s*.*?storage\/framework\/maintenance\\.php.*?\\)/", "file_exists(\$maintenance = \"" . $base . "/storage/framework/maintenance.php\")", $c);
-    file_put_contents($f, $c);
-}
-EOF
+    echo "PD9waHAKJGJhc2UgPSAkYXJndlsxXTsKJHB1YmxpYyA9ICRhcmd2WzJdOwokZGVzdCA9ICIiOyBpZiAoaXNzZXQoJGFyZ3ZbM10pKSB7ICRkZXN0ID0gJGFyZ3ZbM107IH0KJGZpbGVzID0gYXJyYXlfdW5pcXVlKGFycmF5X2ZpbHRlcihbJGJhc2UgLiAiL3B1YmxpYy9pbmRleC5waHAiLCAkZGVzdF0pKTsKZm9yZWFjaCAoJGZpbGVzIGFzICRmKSB7CiAgICBpZiAoIWZpbGVfZXhpc3RzKCRmKSkgY29udGludWU7CiAgICAkYyA9IGZpbGVfZ2V0X2NvbnRlbnRzKCRmKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJEFQUF9CQVNFXFxzKj1cXHMqLio/Oy8iLCAiXCRBUFBfQkFTRSA9IFwiIiAuICRiYXNlIC4gIlwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvcmVxdWlyZVxccysuKj92ZW5kb3JcL2F1dG9sb2FkXFwucGhwLio/Oy8iLCAicmVxdWlyZSBcIiIgLiAkYmFzZSAuICIvdmVuZG9yL2F1dG9sb2FkLnBocFwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJGFwcC0+dXNlUHVibGljUGF0aFxcKC4qP1xcKTtcXHMqLyIsICIiLCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2RlZmluZVxcKFtcIiddTEFSQVZFTF9QVUJMSUNfUEFUSFtcIiddLio/XFwpO1xccyovIiwgIiIsICRjKTsKICAgICRyZXBsYWNlbWVudCA9ICJkZWZpbmUoXCJMQVJBVkVMX1BVQkxJQ19QQVRIXCIsIFwiIiAuICRwdWJsaWMgLiAiXCIpO1xuICAgICAgICAgICAgXCRhcHAgPSByZXF1aXJlX29uY2UgXCIiIC4gJGJhc2UgLiAiL2Jvb3RzdHJhcC9hcHAucGhwXCI7XG4gICAgICAgICAgICBcJGFwcC0+dXNlUHVibGljUGF0aChcIiIgLiAkcHVibGljIC4gIlwiKTsiOwogICAgJGMgPSBwcmVnX3JlcGxhY2UoIi9yZXF1aXJlX29uY2VcXHMrLio/Ym9vdHN0cmFwXC9hcHBcXC5waHAuKj8oW1wiJ118OykvIiwgJHJlcGxhY2VtZW50LCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2ZpbGVfZXhpc3RzXFwoXFxzKlxcXCRtYWludGVuYW5jZVxccyo9XFxzKi4qP3N0b3JhZ2VcL2ZyYW1ld29ya1wvbWFpbnRlbmFuY2VcXC5waHAuKj9cXCkvIiwgImZpbGVfZXhpc3RzKFwkbWFpbnRlbmFuY2UgPSBcIiIgLiAkYmFzZSAuICIvc3RvcmFnZS9mcmFtZXdvcmsvbWFpbnRlbmFuY2UucGhwXCIpIiwgJGMpOwogICAgZmlsZV9wdXRfY29udGVudHMoJGYsICRjKTsKfQo=" | base64 -d > patch_entrypoints.php
     {{ $php }} patch_entrypoints.php "{{ $path }}" "{{ $target_public }}" "$DEST"
     rm patch_entrypoints.php
     echo "✅ Entry points patched."
@@ -255,7 +238,7 @@ EOF
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
+    {{ $php }} artisan app:seed --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }}
 
     if [ "{{ $usersync }}" = "1" ]; then
         echo "Syncing users (avatars) skipped (using FTP sync instead)..."
@@ -313,7 +296,7 @@ EOF
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
+    {{ $php }} artisan app:seed --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }}
 
     echo "Updating .env configuration..."
     {{ $php }} -r '
@@ -375,25 +358,7 @@ EOF
     fi
 
     echo "Patching entry points for absolute paths..."
-    cat << 'EOF' > patch_entrypoints.php
-<?php
-$base = $argv[1];
-$public = $argv[2];
-$dest = ""; if (isset($argv[3])) { $dest = $argv[3]; }
-$files = array_unique(array_filter([$base . "/public/index.php", $dest]));
-foreach ($files as $f) {
-    if (!file_exists($f)) continue;
-    $c = file_get_contents($f);
-    $c = preg_replace("/\\\$APP_BASE\\s*=\\s*.*?;/", "\$APP_BASE = \"" . $base . "\";", $c);
-    $c = preg_replace("/require\\s+.*?vendor\/autoload\\.php.*?;/", "require \"" . $base . "/vendor/autoload.php\";", $c);
-    $c = preg_replace("/\\\$app->usePublicPath\\(.*?\\);\\s*/", "", $c);
-    $c = preg_replace("/define\\([\"']LARAVEL_PUBLIC_PATH[\"'].*?\\);\\s*/", "", $c);
-    $replacement = "define(\"LARAVEL_PUBLIC_PATH\", \"" . $public . "\");\n            \$app = require_once \"" . $base . "/bootstrap/app.php\";\n            \$app->usePublicPath(\"" . $public . "\");";
-    $c = preg_replace("/require_once\\s+.*?bootstrap\/app\\.php.*?[\"'];/", $replacement, $c);
-    $c = preg_replace("/file_exists\\(\\s*\\\$maintenance\\s*=\\s*.*?storage\/framework\/maintenance\\.php.*?\\)/", "file_exists(\$maintenance = \"" . $base . "/storage/framework/maintenance.php\")", $c);
-    file_put_contents($f, $c);
-}
-EOF
+    echo "PD9waHAKJGJhc2UgPSAkYXJndlsxXTsKJHB1YmxpYyA9ICRhcmd2WzJdOwokZGVzdCA9ICIiOyBpZiAoaXNzZXQoJGFyZ3ZbM10pKSB7ICRkZXN0ID0gJGFyZ3ZbM107IH0KJGZpbGVzID0gYXJyYXlfdW5pcXVlKGFycmF5X2ZpbHRlcihbJGJhc2UgLiAiL3B1YmxpYy9pbmRleC5waHAiLCAkZGVzdF0pKTsKZm9yZWFjaCAoJGZpbGVzIGFzICRmKSB7CiAgICBpZiAoIWZpbGVfZXhpc3RzKCRmKSkgY29udGludWU7CiAgICAkYyA9IGZpbGVfZ2V0X2NvbnRlbnRzKCRmKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJEFQUF9CQVNFXFxzKj1cXHMqLio/Oy8iLCAiXCRBUFBfQkFTRSA9IFwiIiAuICRiYXNlIC4gIlwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvcmVxdWlyZVxccysuKj92ZW5kb3JcL2F1dG9sb2FkXFwucGhwLio/Oy8iLCAicmVxdWlyZSBcIiIgLiAkYmFzZSAuICIvdmVuZG9yL2F1dG9sb2FkLnBocFwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJGFwcC0+dXNlUHVibGljUGF0aFxcKC4qP1xcKTtcXHMqLyIsICIiLCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2RlZmluZVxcKFtcIiddTEFSQVZFTF9QVUJMSUNfUEFUSFtcIiddLio/XFwpO1xccyovIiwgIiIsICRjKTsKICAgICRyZXBsYWNlbWVudCA9ICJkZWZpbmUoXCJMQVJBVkVMX1BVQkxJQ19QQVRIXCIsIFwiIiAuICRwdWJsaWMgLiAiXCIpO1xuICAgICAgICAgICAgXCRhcHAgPSByZXF1aXJlX29uY2UgXCIiIC4gJGJhc2UgLiAiL2Jvb3RzdHJhcC9hcHAucGhwXCI7XG4gICAgICAgICAgICBcJGFwcC0+dXNlUHVibGljUGF0aChcIiIgLiAkcHVibGljIC4gIlwiKTsiOwogICAgJGMgPSBwcmVnX3JlcGxhY2UoIi9yZXF1aXJlX29uY2VcXHMrLio/Ym9vdHN0cmFwXC9hcHBcXC5waHAuKj8oW1wiJ118OykvIiwgJHJlcGxhY2VtZW50LCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2ZpbGVfZXhpc3RzXFwoXFxzKlxcXCRtYWludGVuYW5jZVxccyo9XFxzKi4qP3N0b3JhZ2VcL2ZyYW1ld29ya1wvbWFpbnRlbmFuY2VcXC5waHAuKj9cXCkvIiwgImZpbGVfZXhpc3RzKFwkbWFpbnRlbmFuY2UgPSBcIiIgLiAkYmFzZSAuICIvc3RvcmFnZS9mcmFtZXdvcmsvbWFpbnRlbmFuY2UucGhwXCIpIiwgJGMpOwogICAgZmlsZV9wdXRfY29udGVudHMoJGYsICRjKTsKfQo=" | base64 -d > patch_entrypoints.php
     {{ $php }} patch_entrypoints.php "{{ $path }}" "{{ $target_public }}" "$DEST"
     rm patch_entrypoints.php
     echo "✅ Entry points patched."
@@ -583,35 +548,22 @@ EOF
         fi
 
         echo "Patching entry points for absolute paths..."
-        cat << 'EOF' > patch_entrypoints.php
-<?php
-$base = $argv[1];
-$public = $argv[2];
-$dest = ""; if (isset($argv[3])) { $dest = $argv[3]; }
-$files = array_unique(array_filter([$base . "/public/index.php", $dest]));
-foreach ($files as $f) {
-    if (!file_exists($f)) continue;
-    $c = file_get_contents($f);
-    $c = preg_replace("/\\\$APP_BASE\\s*=\\s*.*?;/", "\$APP_BASE = \"" . $base . "\";", $c);
-    $c = preg_replace("/require\\s+.*?vendor\/autoload\\.php.*?;/", "require \"" . $base . "/vendor/autoload.php\";", $c);
-    $c = preg_replace("/\\\$app->usePublicPath\\(.*?\\);\\s*/", "", $c);
-    $c = preg_replace("/define\\([\"']LARAVEL_PUBLIC_PATH[\"'].*?\\);\\s*/", "", $c);
-    $replacement = "define(\"LARAVEL_PUBLIC_PATH\", \"" . $public . "\");\n            \$app = require_once \"" . $base . "/bootstrap/app.php\";\n            \$app->usePublicPath(\"" . $public . "\");";
-    $c = preg_replace("/require_once\\s+.*?bootstrap\/app\\.php.*?[\"'];/", $replacement, $c);
-    $c = preg_replace("/file_exists\\(\\s*\\\$maintenance\\s*=\\s*.*?storage\/framework\/maintenance\\.php.*?\\)/", "file_exists(\$maintenance = \"" . $base . "/storage/framework/maintenance.php\")", $c);
-    file_put_contents($f, $c);
-}
-EOF
+        echo "PD9waHAKJGJhc2UgPSAkYXJndlsxXTsKJHB1YmxpYyA9ICRhcmd2WzJdOwokZGVzdCA9ICIiOyBpZiAoaXNzZXQoJGFyZ3ZbM10pKSB7ICRkZXN0ID0gJGFyZ3ZbM107IH0KJGZpbGVzID0gYXJyYXlfdW5pcXVlKGFycmF5X2ZpbHRlcihbJGJhc2UgLiAiL3B1YmxpYy9pbmRleC5waHAiLCAkZGVzdF0pKTsKZm9yZWFjaCAoJGZpbGVzIGFzICRmKSB7CiAgICBpZiAoIWZpbGVfZXhpc3RzKCRmKSkgY29udGludWU7CiAgICAkYyA9IGZpbGVfZ2V0X2NvbnRlbnRzKCRmKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJEFQUF9CQVNFXFxzKj1cXHMqLio/Oy8iLCAiXCRBUFBfQkFTRSA9IFwiIiAuICRiYXNlIC4gIlwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvcmVxdWlyZVxccysuKj92ZW5kb3JcL2F1dG9sb2FkXFwucGhwLio/Oy8iLCAicmVxdWlyZSBcIiIgLiAkYmFzZSAuICIvdmVuZG9yL2F1dG9sb2FkLnBocFwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJGFwcC0+dXNlUHVibGljUGF0aFxcKC4qP1xcKTtcXHMqLyIsICIiLCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2RlZmluZVxcKFtcIiddTEFSQVZFTF9QVUJMSUNfUEFUSFtcIiddLio/XFwpO1xccyovIiwgIiIsICRjKTsKICAgICRyZXBsYWNlbWVudCA9ICJkZWZpbmUoXCJMQVJBVkVMX1BVQkxJQ19QQVRIXCIsIFwiIiAuICRwdWJsaWMgLiAiXCIpO1xuICAgICAgICAgICAgXCRhcHAgPSByZXF1aXJlX29uY2UgXCIiIC4gJGJhc2UgLiAiL2Jvb3RzdHJhcC9hcHAucGhwXCI7XG4gICAgICAgICAgICBcJGFwcC0+dXNlUHVibGljUGF0aChcIiIgLiAkcHVibGljIC4gIlwiKTsiOwogICAgJGMgPSBwcmVnX3JlcGxhY2UoIi9yZXF1aXJlX29uY2VcXHMrLio/Ym9vdHN0cmFwXC9hcHBcXC5waHAuKj8oW1wiJ118OykvIiwgJHJlcGxhY2VtZW50LCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2ZpbGVfZXhpc3RzXFwoXFxzKlxcXCRtYWludGVuYW5jZVxccyo9XFxzKi4qP3N0b3JhZ2VcL2ZyYW1ld29ya1wvbWFpbnRlbmFuY2VcXC5waHAuKj9cXCkvIiwgImZpbGVfZXhpc3RzKFwkbWFpbnRlbmFuY2UgPSBcIiIgLiAkYmFzZSAuICIvc3RvcmFnZS9mcmFtZXdvcmsvbWFpbnRlbmFuY2UucGhwXCIpIiwgJGMpOwogICAgZmlsZV9wdXRfY29udGVudHMoJGYsICRjKTsKfQo=" | base64 -d > patch_entrypoints.php
         {{ $php }} patch_entrypoints.php "{{ $path }}" "{{ $target_public }}" "{{ $target_public }}/index.php"
         rm patch_entrypoints.php
         echo "✅ Entry points patched."
+
+        cd {{ $path }}
+        echo "Current directory after patching: $(pwd)"
+        ls -la artisan || echo "artisan not found!"
     fi
 
     echo "Running idempotent database migrations..."
+    cd {{ $path }}
     {{ $php }} artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
+    {{ $php }} artisan app:seed --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }}
 
     if [ "{{ $usersync }}" = "1" ]; then
         echo "Syncing users (avatars) skipped (using FTP sync instead)..."

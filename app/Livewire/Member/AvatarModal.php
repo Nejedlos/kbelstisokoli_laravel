@@ -18,7 +18,7 @@ class AvatarModal extends Component
 
     public $activeTab = 'gallery'; // 'upload' | 'gallery'
 
-    public $avatarFile;
+    public $avatarFile = []; // Nyní pole pro podporu hromadného importu
 
     public $previewUrl;
 
@@ -26,6 +26,10 @@ class AvatarModal extends Component
     // public $galleryAssets = []; // Odstraněno - nyní se načítá dynamicky v render() pro snížení zátěže Livewire stavu
 
     public $confirmingDelete = false;
+
+    public $confirmingSystemDelete = null; // ID of system avatar to delete
+
+    public $uploadAsSystem = false;
 
     public $userId;
 
@@ -168,6 +172,23 @@ class AvatarModal extends Component
         return $assets->sortByDesc('id')->values();
     }
 
+    public function updatedAvatarFile()
+    {
+        if (empty($this->avatarFile)) {
+            return;
+        }
+
+        // Pokud je nahráváno jako systémový avatar a je vybráno více souborů, neřešíme ořez (automatický resize)
+        if ($this->uploadAsSystem && is_array($this->avatarFile) && count($this->avatarFile) > 1) {
+            $this->previewUrl = null; // Náhled u hromadného importu neřešíme (nebo jen indikaci)
+            return;
+        }
+
+        // Jinak (jeden soubor) funguje standardní ořez
+        $file = is_array($this->avatarFile) ? end($this->avatarFile) : $this->avatarFile;
+        $this->previewUrl = $file->temporaryUrl();
+    }
+
     public function open($userId = null)
     {
         if ($userId) {
@@ -176,6 +197,8 @@ class AvatarModal extends Component
         $this->isOpen = true;
         $this->activeTab = 'gallery';
         $this->confirmingDelete = false;
+        $this->confirmingSystemDelete = null;
+        $this->uploadAsSystem = false;
         // $this->loadGallery(); // Odstraněno, načítá se v render()
         $this->reset('avatarFile', 'cropData', 'previewUrl');
     }
@@ -184,6 +207,30 @@ class AvatarModal extends Component
     {
         $this->isOpen = false;
         $this->confirmingDelete = false;
+        $this->confirmingSystemDelete = null;
+    }
+
+    public function confirmSystemDelete($id)
+    {
+        if (! auth()->user()?->canAccessAdmin()) {
+            return;
+        }
+        $this->confirmingSystemDelete = $id;
+    }
+
+    public function deleteSystemAvatar()
+    {
+        if (! auth()->user()?->canAccessAdmin() || ! $this->confirmingSystemDelete) {
+            return;
+        }
+
+        $path = public_path('uploads/defaults/' . $this->confirmingSystemDelete);
+        if (is_dir($path)) {
+            File::deleteDirectory($path);
+        }
+
+        $this->confirmingSystemDelete = null;
+        session()->flash('status', __('member.profile.avatar.admin.flash.system_deleted'));
     }
 
     public function confirmDelete($userId = null)
@@ -224,9 +271,21 @@ class AvatarModal extends Component
         return mb_strtoupper(mb_substr($name, 0, 2));
     }
 
-    public function saveAvatar($croppedImageBase64)
+    public function saveAvatar($croppedImageBase64 = null)
     {
+        // 1. Hromadný import jako systémový avatar (pokud jsou vybrány soubory a skip ořezu)
+        if ($this->uploadAsSystem && is_array($this->avatarFile) && count($this->avatarFile) > 1) {
+            $this->saveSystemAvatarsBulk();
+            return;
+        }
+
+        // 2. Standardní cesta s ořezem (jednotlivé nahrávání)
         if (! $croppedImageBase64) {
+            return;
+        }
+
+        if ($this->uploadAsSystem) {
+            $this->saveSystemAvatar($croppedImageBase64);
             return;
         }
 
@@ -267,6 +326,135 @@ class AvatarModal extends Component
 
         $this->close();
         session()->flash('status', __('member.profile.avatar.flash.saved'));
+    }
+
+    protected function saveSystemAvatarsBulk()
+    {
+        if (! auth()->user()?->canAccessAdmin() || empty($this->avatarFile)) {
+            return;
+        }
+
+        $count = 0;
+        foreach ($this->avatarFile as $file) {
+            $this->processAndSaveSystemAvatar($file->getRealPath());
+            $count++;
+        }
+
+        $this->reset(['avatarFile', 'uploadAsSystem', 'previewUrl']);
+        $this->activeTab = 'gallery';
+
+        session()->flash('status', __('member.profile.avatar.admin.flash.system_saved_bulk', ['count' => $count]));
+    }
+
+    protected function processAndSaveSystemAvatar($sourcePath)
+    {
+        // Generujeme ID (složku)
+        $path = public_path('uploads/defaults');
+        $directories = File::directories($path);
+        $maxId = 0;
+        foreach ($directories as $dir) {
+            $id = basename($dir);
+            if (is_numeric($id) && $id > $maxId) {
+                $maxId = $id;
+            }
+        }
+        $newId = $maxId + 1;
+        $newPath = $path . '/' . $newId;
+        $conversionsPath = $newPath . '/conversions';
+
+        File::makeDirectory($conversionsPath, 0755, true);
+
+        $fileName = 'avatar-' . time() . '-' . uniqid() . '.webp';
+        $thumbName = str_replace('.webp', '-thumb.webp', $fileName);
+
+        // Resize and convert using GD
+        $this->resizeToWebp($sourcePath, $newPath . '/' . $fileName, 400, 400);
+        $this->resizeToWebp($sourcePath, $conversionsPath . '/' . $thumbName, 100, 100);
+    }
+
+    protected function resizeToWebp($sourcePath, $targetPath, $width, $height)
+    {
+        $info = getimagesize($sourcePath);
+        if (! $info) return;
+
+        $mime = $info['mime'];
+        $src = match($mime) {
+            'image/jpeg' => imagecreatefromjpeg($sourcePath),
+            'image/png' => imagecreatefrompng($sourcePath),
+            'image/webp' => imagecreatefromwebp($sourcePath),
+            'image/gif' => imagecreatefromgif($sourcePath),
+            default => null,
+        };
+
+        if (! $src) return;
+
+        $srcW = imagesx($src);
+        $srcH = imagesy($src);
+
+        // Square crop (center)
+        $minSize = min($srcW, $srcH);
+        $srcX = ($srcW - $minSize) / 2;
+        $srcY = ($srcH - $minSize) / 2;
+
+        $dst = imagecreatetruecolor($width, $height);
+
+        // Preserve transparency for PNGs if needed, though we output WebP
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
+        imagefilledrectangle($dst, 0, 0, $width, $height, $transparent);
+
+        imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $width, $height, $minSize, $minSize);
+
+        imagewebp($dst, $targetPath, 85);
+
+        imagedestroy($src);
+        imagedestroy($dst);
+    }
+
+    protected function saveSystemAvatar($croppedImageBase64)
+    {
+        if (! auth()->user()?->canAccessAdmin()) {
+            abort(403);
+        }
+
+        // Base64 to file
+        $imageData = explode(',', $croppedImageBase64);
+        if (count($imageData) < 2) {
+            return;
+        }
+
+        $decodedImage = base64_decode($imageData[1]);
+
+        // Generujeme ID (složku) - najdeme nejvyšší stávající a přičteme 1
+        $path = public_path('uploads/defaults');
+        $directories = File::directories($path);
+        $maxId = 0;
+        foreach ($directories as $dir) {
+            $id = basename($dir);
+            if (is_numeric($id) && $id > $maxId) {
+                $maxId = $id;
+            }
+        }
+        $newId = $maxId + 1;
+        $newPath = $path . '/' . $newId;
+        $conversionsPath = $newPath . '/conversions';
+
+        File::makeDirectory($conversionsPath, 0755, true);
+
+        $fileName = 'avatar-' . time() . '.webp';
+        $thumbName = 'avatar-' . time() . '-thumb.webp';
+
+        // Uložíme hlavní obrázek (ořezaný už je ve 400x400 z frontendu, ale pro jistotu nebo budoucí změny...)
+        // V zadání je "rozumná velikost", frontend posílá 400x400 což je pro avatary super.
+        File::put($newPath . '/' . $fileName, $decodedImage);
+        File::put($conversionsPath . '/' . $thumbName, $decodedImage); // Pro teď stejný, frontend ořez je dost malý
+
+        $this->uploadAsSystem = false;
+        $this->previewUrl = null;
+        $this->activeTab = 'gallery';
+
+        session()->flash('status', __('member.profile.avatar.admin.flash.system_saved'));
     }
 
     public function render()

@@ -7,6 +7,7 @@ return [
         'identity' => 'Basic Identity',
         'identity_desc' => 'Set the club names here. You can use placeholders ###TEAM_NAME### or ###TEAM_SHORT### in the text, which will be automatically replaced with these values.',
         'contact' => 'Contact Details (Footer)',
+        'admin_contact' => 'Administrator Contact (Member Section)',
         'social' => 'Social Networks',
         'cta' => 'Call to Action (Global CTA)',
         'legal' => 'Legal Information',

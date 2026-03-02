@@ -149,6 +149,13 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.phone')),
                                 TextInput::make('contact_address')
                                     ->label(__('admin/branding-settings.fields.address')),
+                            ]),
+                    ]),
+
+                Section::make(__('admin/branding-settings.sections.admin_contact'))
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
                                 TextInput::make('admin_contact_email')
                                     ->label(__('admin/branding-settings.fields.admin_contact_email'))
                                     ->helperText(__('admin/branding-settings.fields.admin_contact_email_help'))

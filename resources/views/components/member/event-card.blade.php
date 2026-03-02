@@ -41,8 +41,9 @@
 @endphp
 
 <div class="relative group">
-    <div class="absolute inset-0 bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/20 group-hover:shadow-xl group-hover:shadow-primary/5 group-hover:border-primary/20 transition-all duration-500"></div>
-    <div class="absolute top-0 left-0 w-1 h-full bg-{{ $status === 'confirmed' ? 'emerald-500' : ($status === 'declined' ? 'rose-500' : 'slate-200') }} rounded-l-3xl"></div>
+    <div class="absolute inset-0 bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/20 group-hover:shadow-xl group-hover:shadow-primary/5 group-hover:border-primary/20 transition-all duration-500 overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-{{ $status === 'confirmed' ? 'emerald-500' : ($status === 'declined' ? 'rose-500' : 'slate-200') }}"></div>
+    </div>
 
     <div class="relative p-5 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="flex items-center gap-4 sm:gap-5 flex-1 w-full min-w-0">

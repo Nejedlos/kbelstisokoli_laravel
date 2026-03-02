@@ -40,3 +40,13 @@ Pokud se synchronizace "zasekne" (často kolem 55 % při velkém množství soub
 1. Spusťte příkaz s `--limit=100` a sledujte logy, abyste identifikovali, u kterého souboru k problému dochází.
 2. Pokud jde o timeout, pokračujte s nastavením `--offset` pro dokončení zbývajících souborů.
 3. Pokud jde o poškozený soubor, opravte jej nebo odstraňte ze `storage` a spusťte znovu.
+
+## 5. Správa administrátory (UI)
+
+Od března 2026 mohou administrátoři spravovat klubovou galerii avatarů přímo v uživatelském rozhraní prostřednictvím `AvatarModal` (v profilu člena nebo v administraci uživatelů).
+
+### Funkce pro administrátory:
+- **Hromadný import:** Administrátoři mohou nahrát více souborů najednou do klubové galerie. Při výběru více souborů se automaticky přeskočí krok s manuálním ořezem a všechny obrázky jsou centrálně oříznuty na čtverec, změněna velikost na 400x400 px a převedeny na `.webp`.
+- **Automatická optimalizace:** Systém automaticky převede nahraný avatar na formát `.webp` a uloží jej do `public/uploads/defaults` s rozměry 400x400 px. Pro hromadný import se používá serverové zpracování pomocí GD knihovny.
+- **Mazání z galerie:** V záložce "Klubová galerie" se administrátorům u každého obrázku zobrazuje ikona koše. Po potvrzení v modálu dojde k trvalému smazání souborů i složky daného avataru z disku.
+- **Bezpečnost:** Akce jsou povoleny pouze uživatelům s oprávněním přístupu do administrace (`canAccessAdmin`).
