@@ -67,6 +67,12 @@ class GlobalSeeder extends Seeder
         'menus',
         'menu_items',
         'seo_metadatas',
+        'media_assets',
+        'media',
+        'photo_pools',
+        'photo_pool_media_asset',
+        'trophies',
+        'announcements',
     ];
 
     /**
@@ -94,5 +100,9 @@ class GlobalSeeder extends Seeder
         }
 
         $this->call($seeders);
+
+        // Synchronizace výchozích avatarů (nyní ukládá přímo do public/uploads/defaults)
+        $this->command->info('Synchronizuji výchozí avatary...');
+        \Illuminate\Support\Facades\Artisan::call('sync:default-avatars', [], $this->command->getOutput());
     }
 }

@@ -2,27 +2,40 @@
 
 namespace App\Console\Commands;
 
-use App\Models\MediaAsset;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class DefaultAvatarsSyncCommand extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $signature = 'sync:default-avatars
                             {--force : Přepíše existující avatary, pokud již existují (vynutí update)}
                             {--limit=0 : Počet souborů ke zpracování v této dávce (0 = vše)}
                             {--offset=0 : Od kterého souboru začít (pro postupné zpracování)}
                             {--stop-on-error : Zastaví zpracování při první chybě}';
 
-    protected $description = 'Jednorázový manuální import výchozích avatarů z lokálního úložiště do MediaAsset galerie.';
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Import výchozích avatarů ze storage do složky public/uploads/defaults pro galerii.';
 
+    /**
+     * Execute the console command.
+     */
     public function handle()
     {
         ini_set('memory_limit', '2G');
         set_time_limit(0);
 
         $sourceDir = storage_path('app/defaults/avatars');
+        $targetPath = public_path('uploads/defaults');
 
         if (! is_dir($sourceDir)) {
             $msg = "Zdrojový adresář neexistuje: {$sourceDir}. Ujistěte se, že jste nahráli avatary do storage/app/defaults/avatars/";
@@ -32,8 +45,11 @@ class DefaultAvatarsSyncCommand extends Command
             return Command::FAILURE;
         }
 
+        if (! is_dir($targetPath)) {
+            File::makeDirectory($targetPath, 0755, true);
+        }
+
         $allFiles = File::allFiles($sourceDir);
-        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: Nalezeno celkem '.count($allFiles).' souborů ve zdrojové složce: '.$sourceDir);
 
         // Filtrování relevantních souborů (bez thumbs a jen obrázky)
         $filteredFiles = [];
@@ -51,118 +67,145 @@ class DefaultAvatarsSyncCommand extends Command
         $limit = (int) $this->option('limit');
         $offset = (int) $this->option('offset');
 
-        if ($offset >= $totalFound && $totalFound > 0) {
-            $this->info("Všechny soubory ({$totalFound}) již byly zpracovány. Končím.");
-
-            return Command::SUCCESS;
-        }
-
         if ($limit > 0 || $offset > 0) {
             $filteredFiles = array_slice($filteredFiles, $offset, $limit ?: null);
         }
 
         $totalToProcess = count($filteredFiles);
         $this->info("Nalezeno celkem {$totalFound} relevantních souborů.");
-        $this->info("Zpracovávám dávku {$totalToProcess} souborů (offset: {$offset}, limit: ".($limit ?: 'vše').').');
+        $this->info("Zpracovávám dávku {$totalToProcess} souborů.");
 
         $bar = $this->output->createProgressBar($totalToProcess);
         $bar->start();
 
+        // Načtení stávajících MD5 hashů pro rychlou kontrolu duplicit
+        $existingHashes = [];
+        if (File::exists($targetPath)) {
+            $existingFiles = File::allFiles($targetPath);
+            foreach ($existingFiles as $file) {
+                // Kontrolujeme jen hlavní avatary, ne konverze/thumb
+                if (! str_contains($file->getRelativePathname(), 'conversions') && $file->getExtension() === 'webp') {
+                    $existingHashes[md5_file($file->getRealPath())] = true;
+                }
+            }
+        }
+
         $countImported = 0;
         $countSkipped = 0;
         $countErrors = 0;
-        $disk = config('media-library.disk_name', 'public_path');
 
-        // Optimalizace: Načtení všech existujících názvů souborů do paměti najednou
-        $existingMedia = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('model_type', MediaAsset::class)
-            ->pluck('file_name', 'model_id')
-            ->toArray();
-        $existingFileNames = array_flip($existingMedia);
-
-        foreach ($filteredFiles as $index => $file) {
-            $fileName = $file->getFilename();
-            $currentPos = $offset + $index + 1;
-
-            // Logování aktuálního souboru (před zpracováním)
-            // Použijeme line přepisování pro přehlednost, nebo info pro debug
-            $this->info("\n[{$currentPos}/{$totalFound}] Zpracovávám: ".$file->getRelativePathname());
-
-            // Rychlá kontrola v poli v paměti místo DB query
-            $existingId = $existingFileNames[$fileName] ?? null;
-
-            if ($existingId && ! $this->option('force')) {
-                $countSkipped++;
-                $bar->advance();
-
-                continue;
-            }
-
+        foreach ($filteredFiles as $file) {
             try {
-                if ($existingId) {
-                    $asset = MediaAsset::find($existingId);
-                    if ($asset) {
-                        // Zajistit, aby existující asset byl veřejný a měl správná metadata
-                        $asset->update([
-                            'is_public' => true,
-                            'access_level' => 'public',
-                            'type' => 'image',
-                        ]);
-                        $asset->clearMediaCollection('default');
-                    } else {
-                        // Pokud existuje záznam v media, ale ne model (sirotek), vytvoříme nový
-                        $asset = MediaAsset::create([
-                            'title' => 'Default Avatar '.Str::random(6),
-                            'is_public' => true,
-                            'access_level' => 'public',
-                            'type' => 'image',
-                        ]);
+                // Pro každý soubor vytvoříme dočasný WebP pro MD5 kontrolu (stejně jako v AvatarModal)
+                $tempFile = tempnam(sys_get_temp_dir(), 'avatar_sync_') . '.webp';
+                $this->resizeToWebp($file->getRealPath(), $tempFile, 400, 400);
+
+                if (! file_exists($tempFile)) {
+                    $countErrors++;
+                    $bar->advance();
+                    continue;
+                }
+
+                $newMd5 = md5_file($tempFile);
+
+                if (isset($existingHashes[$newMd5]) && ! $this->option('force')) {
+                    @unlink($tempFile);
+                    $countSkipped++;
+                    $bar->advance();
+                    continue;
+                }
+
+                // Generujeme nové ID (složku) - najdeme nejvyšší stávající a přičteme 1
+                $directories = File::directories($targetPath);
+                $maxId = 0;
+                foreach ($directories as $dir) {
+                    $id = basename($dir);
+                    if (is_numeric($id) && (int)$id > $maxId) {
+                        $maxId = (int)$id;
                     }
-                } else {
-                    $asset = MediaAsset::create([
-                        'title' => 'Default Avatar '.Str::random(6),
-                        'is_public' => true,
-                        'access_level' => 'public',
-                        'type' => 'image',
-                    ]);
+                }
+                $newId = $maxId + 1;
+                $newDirPath = $targetPath . '/' . $newId;
+                $conversionsPath = $newDirPath . '/conversions';
+
+                if (! File::exists($conversionsPath)) {
+                    File::makeDirectory($conversionsPath, 0755, true);
                 }
 
-                // Přidání média
-                $asset->addMedia($file->getPathname())
-                    ->preservingOriginal()
-                    ->toMediaCollection('default', $disk);
+                $fileName = 'avatar-' . time() . '-' . Str::random(5) . '.webp';
+                $thumbName = str_replace('.webp', '-thumb.webp', $fileName);
 
+                // Přesuneme dočasný soubor na finální místo
+                File::move($tempFile, $newDirPath . '/' . $fileName);
+
+                // Vytvoříme thumb
+                $this->resizeToWebp($file->getRealPath(), $conversionsPath . '/' . $thumbName, 100, 100);
+
+                $existingHashes[$newMd5] = true;
                 $countImported++;
-                if ($countImported % 50 === 0) {
-                    \Illuminate\Support\Facades\Log::info("DefaultAvatarsSyncCommand: Průběh: {$countImported} importováno...");
-                }
             } catch (\Exception $e) {
                 $countErrors++;
-                $this->error("\nCHYBA u souboru ".$file->getRelativePathname().': '.$e->getMessage());
-
                 if ($this->option('stop-on-error')) {
-                    $this->error('Zastavuji zpracování kvůli chybě (--stop-on-error).');
+                    $this->error("\nCHYBA u souboru " . $file->getRelativePathname() . ': ' . $e->getMessage());
                     break;
                 }
             }
 
             $bar->advance();
 
-            // Uvolnění paměti po každém 10. souboru
             if ($countImported % 10 === 0) {
                 gc_collect_cycles();
             }
         }
 
         $bar->finish();
-        $summary = "Synchronizace dávky dokončena. Importováno: {$countImported}, Přeskočeno: {$countSkipped}, Chyby: {$countErrors}.";
-        $this->info("\n\n".$summary);
-        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: '.$summary);
-
-        if ($totalToProcess + $offset < $totalFound) {
-            $nextOffset = $offset + $totalToProcess;
-            $this->warn('Zbývá ještě '.($totalFound - $nextOffset)." souborů. Spusťte znovu s --offset={$nextOffset}");
-        }
+        $summary = "Synchronizace dokončena. Importováno: {$countImported}, Přeskočeno: {$countSkipped}, Chyby: {$countErrors}.";
+        $this->info("\n\n" . $summary);
+        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: ' . $summary);
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Zmenší obrázek a převede ho na WebP.
+     */
+    protected function resizeToWebp($sourcePath, $targetPath, $width, $height)
+    {
+        $info = @getimagesize($sourcePath);
+        if (! $info) return;
+
+        $mime = $info['mime'];
+        $src = match($mime) {
+            'image/jpeg' => @imagecreatefromjpeg($sourcePath),
+            'image/png' => @imagecreatefrompng($sourcePath),
+            'image/webp' => @imagecreatefromwebp($sourcePath),
+            'image/gif' => @imagecreatefromgif($sourcePath),
+            default => null,
+        };
+
+        if (! $src) return;
+
+        $srcW = imagesx($src);
+        $srcH = imagesy($src);
+
+        // Square crop (center)
+        $minSize = min($srcW, $srcH);
+        $srcX = ($srcW - $minSize) / 2;
+        $srcY = ($srcH - $minSize) / 2;
+
+        $dst = imagecreatetruecolor($width, $height);
+
+        // Preserve transparency
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
+        imagefilledrectangle($dst, 0, 0, $width, $height, $transparent);
+
+        imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $width, $height, $minSize, $minSize);
+
+        imagewebp($dst, $targetPath, 85);
+
+        imagedestroy($src);
+        imagedestroy($dst);
     }
 }

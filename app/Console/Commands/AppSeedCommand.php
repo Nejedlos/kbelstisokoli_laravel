@@ -159,23 +159,23 @@ class AppSeedCommand extends Command
     {
         $this->info('Čistím tabulky definované v GlobalSeeder...');
 
-        Schema::disableForeignKeyConstraints();
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
 
-        foreach (GlobalSeeder::TABLES_TO_WIPE as $table) {
-            if (Schema::hasTable($table)) {
+        foreach (\Database\Seeders\GlobalSeeder::TABLES_TO_WIPE as $table) {
+            if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
                 $this->line("- Čištění tabulky: <comment>{$table}</comment>");
 
                 // Používáme DB::table()->delete() pro maximální kompatibilitu napříč DB drivery
                 // (zejména SQLite na hostingu může mít s TRUNCATE problémy u cizích klíčů)
-                DB::table($table)->delete();
+                \Illuminate\Support\Facades\DB::table($table)->delete();
 
                 // Resetování auto-incrementu
                 try {
-                    $prefix = DB::getTablePrefix();
+                    $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
                     if (config('database.default') === 'mysql') {
-                        DB::statement("ALTER TABLE `{$prefix}{$table}` AUTO_INCREMENT = 1");
+                        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `{$prefix}{$table}` AUTO_INCREMENT = 1");
                     } elseif (config('database.default') === 'sqlite') {
-                        DB::statement("DELETE FROM sqlite_sequence WHERE name='{$prefix}{$table}'");
+                        \Illuminate\Support\Facades\DB::statement("DELETE FROM sqlite_sequence WHERE name='{$prefix}{$table}'");
                     }
                 } catch (\Throwable $e) {
                     $this->warn("  - Nepodařilo se resetovat auto-increment pro: {$table}");
@@ -183,7 +183,16 @@ class AppSeedCommand extends Command
             }
         }
 
-        Schema::enableForeignKeyConstraints();
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+
+        // Čištění lokálních adresářů s avatary (pro ošetření duplicit na localhostu)
+        $this->info('Čistím lokální složky s avatary (defaults)...');
+        $defaultsPath = public_path('uploads/defaults');
+        if (\Illuminate\Support\Facades\File::exists($defaultsPath)) {
+            \Illuminate\Support\Facades\File::cleanDirectory($defaultsPath);
+            $this->line("- Složka vyčištěna: <comment>{$defaultsPath}</comment>");
+        }
+
         $this->info('Čištění dokončeno.');
     }
 }

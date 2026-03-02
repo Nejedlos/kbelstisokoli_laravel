@@ -144,28 +144,37 @@ class="fixed inset-0 z-50 overflow-y-auto"
 
             <div x-show="!confirmingDelete && !confirmingSystemDelete" class="flex flex-col">
                 <!-- 1. SECTION: EDITOR (Top) -->
-                <div id="avatar-editor-section" class="p-5 sm:p-8 bg-slate-50/50 border-b border-slate-100 min-h-[300px] sm:min-h-[350px] flex flex-col items-center justify-center relative">
-                    <div x-show="!previewUrl" class="text-center py-10 sm:py-16">
-                        @if($uploadAsSystem && count($avatarFile) > 1)
-                            <div class="relative inline-block mb-8 sm:mb-12">
-                                <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse"></div>
-                                <div class="relative w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-[2rem] sm:rounded-[2.5rem] flex items-center justify-center border border-slate-100 shadow-2xl transform rotate-3">
-                                    <i class="fa-light fa-images text-5xl sm:text-7xl text-primary"></i>
-                                    <div class="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-14 sm:h-14 bg-rose-500 text-white rounded-xl sm:rounded-2xl flex items-center justify-center border-4 border-white shadow-xl transform rotate-12 z-10">
-                                        <span class="text-lg sm:text-2xl font-black">{{ count($avatarFile) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <h3 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-secondary mb-3 leading-none">{{ __('member.profile.avatar.bulk_ready_title') }}</h3>
-                            <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto font-bold italic opacity-80 uppercase tracking-widest">{{ __('member.profile.avatar.bulk_ready_subtitle') }}</p>
-                        @else
+                    <div class="p-5 sm:p-8 bg-slate-50/50 border-b border-slate-100 min-h-[300px] sm:min-h-[350px] flex flex-col items-center justify-center relative">
+                        <div x-show="!previewUrl && !(uploadAsSystem && avatarFile && avatarFile.length > 1)" class="text-center py-10 sm:py-16">
                             <div class="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-slate-200 shadow-xl shadow-slate-200/50 transform rotate-3 group-hover:rotate-0 transition-transform">
                                 <i class="fa-light fa-image-slash text-3xl sm:text-4xl text-slate-300"></i>
                             </div>
                             <p class="text-xs sm:text-sm font-black text-secondary uppercase tracking-[0.2em]">{{ __('member.profile.avatar.no_image_selected') }}</p>
                             <p class="text-[9px] sm:text-[10px] text-slate-400 mt-2 font-bold italic">{{ __('member.profile.avatar.no_image_hint') }}</p>
-                        @endif
-                    </div>
+                        </div>
+
+                        <div x-show="!previewUrl && uploadAsSystem && avatarFile && avatarFile.length > 1" class="text-center py-10 sm:py-16">
+                            <div class="relative inline-block mb-8 sm:mb-12">
+                                <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse"></div>
+                                <div class="relative w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-[2rem] sm:rounded-[2.5rem] flex items-center justify-center border border-slate-100 shadow-2xl transform rotate-3">
+                                    <i class="fa-light fa-images text-5xl sm:text-7xl text-primary"></i>
+                                    <div class="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-14 sm:h-14 bg-rose-500 text-white rounded-xl sm:rounded-2xl flex items-center justify-center border-4 border-white shadow-xl transform rotate-12 z-10">
+                                        <span class="text-lg sm:text-2xl font-black" x-text="avatarFile.length"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h3 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-secondary mb-3 leading-none">{{ __('member.profile.avatar.bulk_ready_title') }}</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto font-bold italic opacity-80 uppercase tracking-widest">{{ __('member.profile.avatar.bulk_ready_subtitle') }}</p>
+
+                            <div class="mt-8">
+                                <button type="button" wire:click="saveAvatar" wire:loading.attr="disabled" wire:target="saveAvatar"
+                                        class="btn btn-primary py-3 px-6 sm:px-12 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
+                                    <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
+                                    <i class="fa-light fa-upload mr-2" wire:loading.remove wire:target="saveAvatar"></i>
+                                    {{ __('member.profile.avatar.admin.bulk_import_btn') }}
+                                </button>
+                            </div>
+                        </div>
 
                     <div x-show="previewUrl" class="w-full space-y-4 sm:space-y-6 animate-in fade-in duration-500">
                         <div wire:ignore class="relative w-full rounded-[1.5rem] sm:rounded-[2rem] bg-slate-200 shadow-inner border border-slate-200 flex items-center justify-center p-2 overflow-hidden" style="min-height: 300px; max-height: 70vh;">
@@ -181,24 +190,15 @@ class="fixed inset-0 z-50 overflow-y-auto"
                             </button>
 
                             <div class="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
-                                @if($previewUrl)
-                                    <button type="button" @click="initCropper()" class="btn btn-outline py-2.5 px-5 text-[9px] sm:text-[10px] uppercase tracking-widest w-full sm:w-auto bg-white border-slate-200">
-                                        <i class="fa-light fa-crop-simple mr-2 text-primary"></i> {{ __('member.profile.avatar.reset_crop') }}
-                                    </button>
-                                    <button type="button" @click="saveCrop()" wire:loading.attr="disabled" wire:target="saveAvatar"
-                                            class="btn btn-primary py-3 px-6 sm:px-10 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
-                                        <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
-                                        <i class="fa-light fa-check-double mr-2" wire:loading.remove wire:target="saveAvatar"></i>
-                                        {{ __('member.profile.avatar.save_and_set') }}
-                                    </button>
-                                @elseif($uploadAsSystem && count($avatarFile) > 1)
-                                    <button type="button" wire:click="saveAvatar" wire:loading.attr="disabled" wire:target="saveAvatar"
-                                            class="btn btn-primary py-3 px-6 sm:px-12 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
-                                        <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
-                                        <i class="fa-light fa-upload mr-2" wire:loading.remove wire:target="saveAvatar"></i>
-                                        {{ __('member.profile.avatar.admin.bulk_import_btn') }}
-                                    </button>
-                                @endif
+                                <button type="button" @click="initCropper()" class="btn btn-outline py-2.5 px-5 text-[9px] sm:text-[10px] uppercase tracking-widest w-full sm:w-auto bg-white border-slate-200">
+                                    <i class="fa-light fa-crop-simple mr-2 text-primary"></i> {{ __('member.profile.avatar.reset_crop') }}
+                                </button>
+                                <button type="button" @click="saveCrop()" wire:loading.attr="disabled" wire:target="saveAvatar"
+                                        class="btn btn-primary py-3 px-6 sm:px-10 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
+                                    <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
+                                    <i class="fa-light fa-check-double mr-2" wire:loading.remove wire:target="saveAvatar"></i>
+                                    {{ __('member.profile.avatar.save_and_set') }}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -258,20 +258,29 @@ class="fixed inset-0 z-50 overflow-y-auto"
                     <!-- Upload Area -->
                     <div x-show="activeTab === 'upload'" class="space-y-4">
                         @if(auth()->user()?->canAccessAdmin())
-                            <div class="flex items-center justify-center mb-4">
-                                <label class="flex items-center cursor-pointer group">
-                                    <div class="relative" @click="uploadAsSystem = !uploadAsSystem">
-                                        <div class="block w-10 h-6 rounded-full border border-slate-300 transition-all duration-300 shadow-inner"
-                                             :class="uploadAsSystem ? 'bg-primary border-primary' : 'bg-slate-200'"></div>
-                                        <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all duration-300 transform shadow-md"
-                                             :class="uploadAsSystem ? 'translate-x-4 scale-110' : 'translate-x-0'"></div>
+                                    <div class="flex items-center justify-center mb-4">
+                                        <label class="flex items-center gap-4 bg-slate-100 p-2 rounded-2xl border border-slate-200 shadow-inner overflow-visible min-w-[220px] justify-center cursor-pointer group">
+                                            <!-- Hidden actual input for Livewire/Alpine binding -->
+                                            <input type="checkbox" x-model="uploadAsSystem" class="sr-only">
+
+                                            <!-- Visual Switch (Track) -->
+                                            <div class="relative w-12 h-6 flex-shrink-0 rounded-full transition-colors duration-300 shadow-inner border border-slate-200"
+                                                 :class="uploadAsSystem ? 'bg-primary border-primary' : 'bg-slate-300 border-slate-300'">
+                                                <!-- The Dot (Knob) -->
+                                                <div class="absolute left-1 top-1 h-4 w-4 rounded-full !bg-white shadow-lg transition-transform duration-300 transform z-[50] pointer-events-none"
+                                                     :class="uploadAsSystem ? 'translate-x-6' : 'translate-x-0'"></div>
+                                            </div>
+
+                                            <div class="flex flex-col select-none">
+                                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-700 leading-none group-hover:text-primary transition-colors">
+                                                    {{ __('member.profile.avatar.admin.upload_as_system') }}
+                                                </span>
+                                                <span class="text-[8px] text-slate-400 font-bold tracking-tight lowercase mt-1">
+                                                    {{ __('member.profile.avatar.admin.upload_as_system_hint') }}
+                                                </span>
+                                            </div>
+                                        </label>
                                     </div>
-                                    <div class="ml-3 text-secondary font-black uppercase tracking-widest text-[10px]">
-                                        {{ __('member.profile.avatar.admin.upload_as_system') }}
-                                        <span class="block text-[8px] text-slate-400 font-bold lowercase normal-case tracking-normal">{{ __('member.profile.avatar.admin.upload_as_system_hint') }}</span>
-                                    </div>
-                                </label>
-                            </div>
                         @endif
 
                         <div class="border-2 border-dashed border-slate-200 rounded-[2rem] p-12 text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer group relative overflow-hidden"

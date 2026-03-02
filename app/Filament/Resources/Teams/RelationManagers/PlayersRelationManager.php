@@ -124,12 +124,20 @@ class PlayersRelationManager extends RelationManager
                     ])
                     ->after(function (\App\Models\PlayerProfile $record, array $data, RelationManager $livewire) {
                         if ($data['is_primary_team'] ?? false) {
-                            // Zrušíme příznak primárního týmu u ostatních týmů v pivotu
-                            $record->teams()->where('team_id', '!=', $livewire->getOwnerRecord()->id)
-                                ->updateExistingPivot($record->teams()->pluck('team_id'), ['is_primary_team' => false]);
+                            $currentTeamId = $livewire->getOwnerRecord()->id;
+
+                            // Zrušíme příznak primárního týmu u ostatních týmů v pivotu (správně cíleně podle ID)
+                            $allTeamIds = $record->teams()->pluck('teams.id')->all();
+                            $otherTeamIds = array_values(array_filter($allTeamIds, fn ($id) => (int) $id !== (int) $currentTeamId));
+                            if (! empty($otherTeamIds)) {
+                                $record->teams()->updateExistingPivot($otherTeamIds, ['is_primary_team' => false]);
+                            }
+
+                            // Ujistíme se, že aktuální tým má v pivotu nastavený příznak primárního týmu
+                            $record->teams()->updateExistingPivot($currentTeamId, ['is_primary_team' => true]);
 
                             // Aktualizujeme primary_team_id v profilu
-                            $record->update(['primary_team_id' => $livewire->getOwnerRecord()->id]);
+                            $record->update(['primary_team_id' => $currentTeamId]);
                         }
                     }),
             ])
@@ -156,16 +164,27 @@ class PlayersRelationManager extends RelationManager
                             ->label(__('Hráč je na soupisce')),
                     ])
                     ->after(function (\App\Models\PlayerProfile $record, array $data, RelationManager $livewire) {
+                        $currentTeamId = $livewire->getOwnerRecord()->id;
+
                         if ($data['is_primary_team'] ?? false) {
-                            // Zrušíme příznak u ostatních týmů
-                            $record->teams()->where('team_id', '!=', $livewire->getOwnerRecord()->id)
-                                ->updateExistingPivot($record->teams()->pluck('team_id'), ['is_primary_team' => false]);
+                            // Zrušíme příznak u ostatních týmů (správně cíleně podle ID)
+                            $allTeamIds = $record->teams()->pluck('teams.id')->all();
+                            $otherTeamIds = array_values(array_filter($allTeamIds, fn ($id) => (int) $id !== (int) $currentTeamId));
+                            if (! empty($otherTeamIds)) {
+                                $record->teams()->updateExistingPivot($otherTeamIds, ['is_primary_team' => false]);
+                            }
+
+                            // Ujistíme se, že aktuální tým má v pivotu nastavený příznak primárního týmu
+                            $record->teams()->updateExistingPivot($currentTeamId, ['is_primary_team' => true]);
 
                             // Aktualizujeme profil
-                            $record->update(['primary_team_id' => $livewire->getOwnerRecord()->id]);
-                        } elseif ($record->primary_team_id === $livewire->getOwnerRecord()->id) {
+                            $record->update(['primary_team_id' => $currentTeamId]);
+                        } elseif ($record->primary_team_id === $currentTeamId) {
                             // Pokud to byl primární tým a uživatel jej odškrtl, nastavíme primary_team_id na null
                             $record->update(['primary_team_id' => null]);
+
+                            // A v pivotu zrušíme příznak pro tento tým
+                            $record->teams()->updateExistingPivot($currentTeamId, ['is_primary_team' => false]);
                         }
                     }),
                 DetachAction::make()

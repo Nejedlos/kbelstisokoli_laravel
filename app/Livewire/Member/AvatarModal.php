@@ -348,8 +348,32 @@ class AvatarModal extends Component
 
     protected function processAndSaveSystemAvatar($sourcePath)
     {
-        // Generujeme ID (složku)
+        // 1. Nejprve vytvoříme dočasný WebP soubor pro výpočet MD5 a kontrolu duplicity
+        $tempFile = tempnam(sys_get_temp_dir(), 'avatar_') . '.webp';
+        $this->resizeToWebp($sourcePath, $tempFile, 400, 400);
+
+        if (! file_exists($tempFile)) {
+            return;
+        }
+
+        $newMd5 = md5_file($tempFile);
         $path = public_path('uploads/defaults');
+
+        // 2. Kontrola duplicity proti existujícím souborům v galerii
+        if (File::exists($path)) {
+            $existingFiles = File::allFiles($path);
+            foreach ($existingFiles as $file) {
+                // Kontrolujeme jen hlavní avatary, ne konverze/thumb
+                if (! str_contains($file->getRelativePathname(), 'conversions') && $file->getExtension() === 'webp') {
+                    if (md5_file($file->getRealPath()) === $newMd5) {
+                        @unlink($tempFile);
+                        return; // Duplikát nalezen, přeskakujeme
+                    }
+                }
+            }
+        }
+
+        // 3. Generujeme ID (složku)
         $directories = File::directories($path);
         $maxId = 0;
         foreach ($directories as $dir) {
@@ -367,8 +391,8 @@ class AvatarModal extends Component
         $fileName = 'avatar-' . time() . '-' . uniqid() . '.webp';
         $thumbName = str_replace('.webp', '-thumb.webp', $fileName);
 
-        // Resize and convert using GD
-        $this->resizeToWebp($sourcePath, $newPath . '/' . $fileName, 400, 400);
+        // 4. Přesuneme dočasný soubor na finální místo a vytvoříme thumb
+        File::move($tempFile, $newPath . '/' . $fileName);
         $this->resizeToWebp($sourcePath, $conversionsPath . '/' . $thumbName, 100, 100);
     }
 
@@ -426,8 +450,22 @@ class AvatarModal extends Component
 
         $decodedImage = base64_decode($imageData[1]);
 
-        // Generujeme ID (složku) - najdeme nejvyšší stávající a přičteme 1
+        // 1. Kontrola duplicity (MD5) proti existujícím souborům v galerii
+        $newMd5 = md5($decodedImage);
         $path = public_path('uploads/defaults');
+        if (File::exists($path)) {
+            $existingFiles = File::allFiles($path);
+            foreach ($existingFiles as $file) {
+                // Kontrolujeme jen hlavní avatary, ne konverze/thumb
+                if (! str_contains($file->getRelativePathname(), 'conversions') && $file->getExtension() === 'webp') {
+                    if (md5_file($file->getRealPath()) === $newMd5) {
+                        return; // Duplikát nalezen, přeskakujeme
+                    }
+                }
+            }
+        }
+
+        // 2. Generujeme ID (složku) - najdeme nejvyšší stávající a přičteme 1
         $directories = File::directories($path);
         $maxId = 0;
         foreach ($directories as $dir) {

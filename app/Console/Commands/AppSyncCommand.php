@@ -313,10 +313,9 @@ class AppSyncCommand extends Command
             }
         }
 
-        // Pokud synchronizujeme uživatele, nahrajeme i jejich lokálně stažená média
+        // Pokud synchronizujeme uživatele, nahrajeme i jejich lokálně stažená média (hráčské fotky apod.)
         if ($usersync) {
             $syncDirs[] = 'public/uploads/media/';
-            $syncDirs[] = 'public/uploads/avatars/';
         }
 
         foreach ($syncDirs as $dir) {
