@@ -42,16 +42,69 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
             ->renderHook('panels::head.end', function (): string {
-                if (request()->routeIs('filament.admin.auth.*')) {
-                    // Na auth stránkách barvy vkládá auth layout (resources/views/filament/admin/layouts/auth.blade.php) sám
-                    return '';
-                }
+                // Podle toho, zda jsme na auth stránkách nebo v adminu, zvolíme správný CSS entrypoint
+                $isAuth = request()->routeIs('filament.admin.auth.*');
+                $entrypoints = $isAuth
+                    ? ['resources/css/filament-auth.css']
+                    : ['resources/css/filament-admin.css'];
 
                 $cropper = '';
-                if (auth()->check()) {
+                if (auth()->check() && ! $isAuth) {
                     $cropper = "
                         <link rel='stylesheet' href='/assets/vendor/cropper.min.css' />
                         <script src='/assets/vendor/cropper.min.js'></script>
+                    ";
+                }
+
+                // Branding service vrací --color-brand-* tokens
+                $brandingService = app(\App\Services\BrandingService::class);
+                $brandingVariables = $brandingService->getCssVariables();
+
+                // Pokud jsme na auth stránce, přidáme aliasy --brand-* (pro filament-auth.css)
+                $authAliases = '';
+                if ($isAuth) {
+                    $settings = $brandingService->getSettings();
+                    $colors = $settings['colors'];
+                    $hexToRgb = function($hex) {
+                        $hex = str_replace('#', '', (string) $hex);
+                        return \App\Support\ColorHelper::hexToRgb($hex); // Použijeme helper pokud existuje, nebo inline
+                    };
+                    // Rychlý inline hexToRgb pro spolehlivost v provideru
+                    $inlineHexToRgb = function($hex) {
+                        $hex = str_replace('#', '', (string) $hex);
+                        if (strlen($hex) === 3) {
+                            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+                            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+                            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+                        } else {
+                            $r = hexdec(substr($hex, 0, 2));
+                            $g = hexdec(substr($hex, 2, 2));
+                            $b = hexdec(substr($hex, 4, 2));
+                        }
+                        return "{$r}, {$g}, {$b}";
+                    };
+
+                    $authAliases = "
+                        :root {
+                            --brand-navy: " . ($colors['navy'] ?? '#0b1f3a') . ";
+                            --brand-navy-rgb: " . $inlineHexToRgb($colors['navy'] ?? '#0b1f3a') . ";
+                            --brand-blue: " . ($colors['blue'] ?? '#2563eb') . ";
+                            --brand-blue-rgb: " . $inlineHexToRgb($colors['blue'] ?? '#2563eb') . ";
+                            --brand-red: " . ($colors['red'] ?? '#e11d48') . ";
+                            --brand-red-rgb: " . $inlineHexToRgb($colors['red'] ?? '#e11d48') . ";
+                            --brand-red-hover: " . ($colors['red_hover'] ?? '#be123c') . ";
+                            --brand-white: #ffffff;
+
+                            /* UI tokens pro auth */
+                            --ui-text: rgba(255, 255, 255, 0.92);
+                            --ui-text-muted: rgba(255, 255, 255, 0.65);
+                            --ui-border: rgba(255, 255, 255, 0.18);
+                            --ui-surface: rgba(255, 255, 255, 0.80);
+                            --ui-surface-elevated: rgba(255, 255, 255, 0.90);
+                            --ui-success: #22c55e;
+                            --ui-danger: #ef4444;
+                            --ui-warning: #f59e0b;
+                        }
                     ";
                 }
 
@@ -59,8 +112,10 @@ class AdminPanelProvider extends PanelProvider
                     "
                     <link rel='preconnect' href='https://fonts.googleapis.com'>
                     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+                    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap'>
                     <style>
-                        {!! app(\\App\\Services\\BrandingService::class)->getCssVariables() !!}
+                        {!! \$brandingVariables !!}
+                        {!! \$authAliases !!}
                         /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
                         .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
                             display: inline-block;
@@ -72,8 +127,12 @@ class AdminPanelProvider extends PanelProvider
                             opacity: 0;
                         }
                      </style>
-                     @vite(['resources/css/filament-admin.css'])
-                     {$cropper}"
+                     @vite(\$entrypoints)
+                     @if (\$isAuth)
+                        @vite(['resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
+                     @endif
+                     {!! \$cropper !!}",
+                    ['entrypoints' => $entrypoints, 'authAliases' => $authAliases, 'brandingVariables' => $brandingVariables, 'cropper' => $cropper, 'isAuth' => $isAuth]
                 );
             })
             ->renderHook('panels::body.start', function (): string {

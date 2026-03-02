@@ -61,8 +61,8 @@
                                     <option value="all" {{ $filters['attendance'] == 'all' ? 'selected' : '' }}>{{ __('member.attendance.filter.all') }}</option>
                                     <option value="confirmed" {{ $filters['attendance'] == 'confirmed' ? 'selected' : '' }}>{{ __('member.attendance.filter.confirmed') }}</option>
                                     <option value="declined" {{ $filters['attendance'] == 'declined' ? 'selected' : '' }}>{{ __('member.attendance.filter.declined') }}</option>
-                                    <option value="none" {{ $filters['attendance'] == 'none' ? 'selected' : '' }}>{{ __('member.attendance.filter.none') }}</option>
                                     <option value="maybe" {{ $filters['attendance'] == 'maybe' ? 'selected' : '' }}>{{ __('member.attendance.filter.maybe') }}</option>
+                                    <option value="none" {{ $filters['attendance'] == 'none' ? 'selected' : '' }}>{{ __('member.attendance.filter.none') }}</option>
                                 </select>
                                 <div class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                     <i class="fa-light fa-chevron-down text-[10px]"></i>

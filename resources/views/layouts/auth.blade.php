@@ -27,7 +27,22 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <meta name="theme-color" content="{{ $colors['red'] ?? '#e11d48' }}">
-    <style>{!! app(\App\Services\BrandingService::class)->getCssVariables() !!}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap">
+    <style>
+        {!! app(\App\Services\BrandingService::class)->getCssVariables() !!}
+        /* Stabilizace ikon pro zamezení FOUC */
+        .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+            display: inline-block;
+            width: 1.25em;
+            height: 1em;
+            line-height: 1;
+            vertical-align: -0.125em;
+            overflow: hidden;
+            opacity: 0;
+        }
+    </style>
     @vite(['resources/css/filament-auth.css', 'resources/js/app.js', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
 
     @stack('head')

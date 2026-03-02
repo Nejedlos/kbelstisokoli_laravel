@@ -33,10 +33,10 @@
     ];
 
     $statusLabels = [
-        'pending' => 'Čeká',
-        'confirmed' => 'Přijdu',
-        'declined' => 'Omluven',
-        'maybe' => 'Možná',
+        'pending' => __('member.attendance.status.pending'),
+        'confirmed' => __('member.attendance.status.confirmed'),
+        'declined' => __('member.attendance.status.declined'),
+        'maybe' => __('member.attendance.status.maybe'),
     ];
 @endphp
 
@@ -103,14 +103,14 @@
                     <form action="{{ route('member.attendance.store', ['type' => $type, 'id' => $data->id]) }}" method="POST">
                         @csrf
                         <input type="hidden" name="status" value="confirmed">
-                        <button type="submit" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 group/btn" title="Přijdu">
+                        <button type="submit" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 group/btn" title="{{ __('member.attendance.status.confirmed') }}">
                             <i class="fa-light fa-check text-xl"></i>
                         </button>
                     </form>
                     <form action="{{ route('member.attendance.store', ['type' => $type, 'id' => $data->id]) }}" method="POST">
                         @csrf
                         <input type="hidden" name="status" value="declined">
-                        <button type="submit" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-rose-500/20 active:scale-95 group/btn" title="Nepřijdu">
+                        <button type="submit" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-rose-500/20 active:scale-95 group/btn" title="{{ __('member.attendance.status.declined') }}">
                             <i class="fa-light fa-xmark text-xl"></i>
                         </button>
                     </form>

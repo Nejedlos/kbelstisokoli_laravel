@@ -40,9 +40,9 @@ return [
             'month' => 'Month',
             'attendance' => 'My Attendance',
             'all' => 'All',
-            'confirmed' => 'Confirmed',
-            'declined' => 'Declined',
-            'none' => 'Not Responded',
+            'confirmed' => 'Attending',
+            'declined' => 'Excused',
+            'none' => 'Not specified',
             'maybe' => 'Maybe',
             'types' => [
                 'all' => 'All Events',
@@ -75,7 +75,7 @@ return [
             'responded' => 'Responded',
         ],
         'status' => [
-            'pending' => 'Pending',
+            'pending' => 'Not specified',
             'confirmed' => 'Attending',
             'declined' => 'Excused',
             'maybe' => 'Maybe',

@@ -25,21 +25,16 @@
         <form method="POST" action="{{ route('login') }}" class="space-y-8" novalidate>
             @csrf
 
-            <div class="space-y-3 fi-fo-field">
+            <div class="space-y-3 fi-fo-field {{ $errors->has('email') ? 'ks-invalid' : '' }}">
                 <label for="email" class="fi-fo-field-label ml-1">{{ __('E‑mailová adresa') }}</label>
                 <div class="fi-input-wrp">
                     <input id="email" type="email" name="email" value="{{ old('email') }}" autofocus
                            placeholder="jmeno@klub.cz"
                            class="fi-input">
                 </div>
-                @error('email')
-                    <div class="fi-error-message" style="display: block !important;">
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
             </div>
 
-            <div class="space-y-3 fi-fo-field">
+            <div class="space-y-3 fi-fo-field {{ $errors->has('password') ? 'ks-invalid' : '' }}">
                 <div class="flex justify-between items-center px-1">
                     <label for="password" class="fi-fo-field-label">{{ __('Heslo') }}</label>
                     <a href="{{ route('password.request') }}" class="fi-link text-[10px]">{{ __('Zapomněli jste?') }}</a>
@@ -56,11 +51,6 @@
                         </button>
                     </div>
                 </div>
-                @error('password')
-                    <div class="fi-error-message" style="display: block !important;">
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
             </div>
 
             <div class="flex items-center px-1">

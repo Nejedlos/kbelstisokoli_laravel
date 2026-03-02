@@ -40,9 +40,9 @@ return [
             'month' => 'Měsíc',
             'attendance' => 'Moje docházka',
             'all' => 'Vše',
-            'confirmed' => 'Potvrzeno',
-            'declined' => 'Odmítnuto',
-            'none' => 'Nevyjádřeno',
+            'confirmed' => 'Účast',
+            'declined' => 'Omluva',
+            'none' => 'Nezadáno',
             'maybe' => 'Možná',
             'types' => [
                 'all' => 'Všechny akce',
@@ -75,9 +75,9 @@ return [
             'responded' => 'Odpovězeno',
         ],
         'status' => [
-            'pending' => 'Čeká',
-            'confirmed' => 'Přijdu',
-            'declined' => 'Omluven',
+            'pending' => 'Nezadáno',
+            'confirmed' => 'Účast',
+            'declined' => 'Omluva',
             'maybe' => 'Možná',
         ],
         'event_types' => [

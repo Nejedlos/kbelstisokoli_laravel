@@ -3,24 +3,81 @@
 namespace App\Filament\Pages\Auth;
 
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
+use Filament\Facades\Filament;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ResetPassword extends BaseResetPassword
 {
-    protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
+    public function resetPassword(): ?PasswordResetResponse
     {
-        return null; // Don't send notification, handle via exception
+        try {
+            $this->rateLimit(2);
+        } catch (TooManyRequestsException $exception) {
+            throw ValidationException::withMessages([
+                'data.password' => __('auth.throttle', [
+                    'seconds' => $exception->secondsUntilAvailable,
+                    'minutes' => ceil($exception->secondsUntilAvailable / 60),
+                ]),
+            ]);
+        }
+
+        $data = $this->form->getState();
+
+        $data['email'] = $this->email;
+        $data['token'] = $this->token;
+
+        $hasPanelAccess = true;
+
+        $status = Password::broker(Filament::getAuthPasswordBroker())->reset(
+            $this->getCredentialsFromFormData($data),
+            function (CanResetPassword|Model|Authenticatable $user) use ($data, &$hasPanelAccess): void {
+                if (
+                    ($user instanceof FilamentUser) &&
+                    (! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
+                ) {
+                    $hasPanelAccess = false;
+
+                    return;
+                }
+
+                $user->forceFill([
+                    $user->getAuthPasswordName() => Hash::make($data['password']),
+                    $user->getRememberTokenName() => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($hasPanelAccess === false) {
+            $status = Password::INVALID_USER;
+        }
+
+        if ($status === Password::PASSWORD_RESET) {
+            session()->flash('status', __($status));
+
+            return app(PasswordResetResponse::class);
+        }
+
+        throw ValidationException::withMessages([
+            'data.password' => [__($status)],
+        ]);
     }
 
-    protected function getRateLimitedException(TooManyRequestsException $exception): never
+    protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
     {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'data.email' => __('auth.throttle', [
-                'seconds' => $exception->secondsUntilAvailable,
-                'minutes' => ceil($exception->secondsUntilAvailable / 60),
-            ]),
-        ]);
+        return null;
     }
 
     // Use our custom auth layout for full control over the page shell

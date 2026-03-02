@@ -72,6 +72,23 @@
             icon="fa-shield-plus"
         />
 
+        @if (session('status'))
+            <x-auth-alert type="success" :message="session('status')" />
+        @endif
+
+        @if ($errors->any())
+            @php
+                $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
+            @endphp
+            @if (!empty($filteredErrors))
+                <x-auth-alert type="error">
+                    @foreach ($filteredErrors as $error)
+                        <div>{{ $error }}</div>
+                    @endforeach
+                </x-auth-alert>
+            @endif
+        @endif
+
         <div class="glass-card relative overflow-hidden group">
             <!-- Decorative corner accent -->
             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-700"></div>
@@ -164,16 +181,13 @@
 
                     <form method="POST" action="{{ route('two-factor.confirm') }}" class="space-y-6">
                         @csrf
-                        <div class="space-y-3">
+                        <div class="space-y-3 fi-fo-field {{ $errors->has('code') ? 'ks-invalid' : '' }}">
                             <label for="code" class="fi-fo-field-label text-center block">{{ __('Zadejte 6místný kód z aplikace') }}</label>
                             <div class="relative group/input">
                                 <input id="code" type="text" name="code" inputmode="numeric" autofocus required autocomplete="one-time-code"
                                        placeholder="000 000"
-                                       class="fi-input-wrp w-full bg-white border {{ $errors->has('code') ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10' }} rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.4em] text-center text-3xl py-6">
+                                       class="fi-input-wrp w-full bg-white border border-white/10 rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.4em] text-center text-3xl py-6">
                             </div>
-                            @if($errors->has('code'))
-                                <p class="fi-error-message block text-center" style="display: block !important;">{{ $errors->first('code') }}</p>
-                            @endif
                         </div>
 
                         <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">

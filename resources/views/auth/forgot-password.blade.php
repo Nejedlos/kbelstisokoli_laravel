@@ -25,18 +25,13 @@
         <form method="POST" action="{{ route('password.email') }}" class="space-y-8" novalidate>
         @csrf
 
-        <div class="space-y-3">
+        <div class="space-y-3 fi-fo-field {{ $errors->has('email') ? 'ks-invalid' : '' }}">
             <label for="email" class="fi-fo-field-label ml-1">{{ __('Vaše e‑mailová adresa') }}</label>
             <div class="fi-input-wrp">
                 <input id="email" type="email" name="email" value="{{ old('email') }}" autofocus
                        placeholder="jmeno@klub.cz"
                        class="fi-input">
             </div>
-            @error('email')
-                <div class="fi-error-message" style="display: block !important;">
-                    <span>{{ $message }}</span>
-                </div>
-            @enderror
         </div>
 
         <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">

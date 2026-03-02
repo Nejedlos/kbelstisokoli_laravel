@@ -9,33 +9,44 @@
         icon="fa-shield-check"
     />
 
+    @if (session('status'))
+        <x-auth-alert type="success" :message="session('status')" />
+    @endif
+
+    @if ($errors->any())
+        @php
+            $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
+        @endphp
+        @if (!empty($filteredErrors))
+            <x-auth-alert type="error">
+                @foreach ($filteredErrors as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </x-auth-alert>
+        @endif
+    @endif
+
     <div class="glass-card">
         <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-8" novalidate>
             @csrf
 
-            <div class="space-y-4" x-show="!recovery">
+            <div class="space-y-4 fi-fo-field {{ $errors->has('code') ? 'ks-invalid' : '' }}" x-show="!recovery">
                 <label for="code" class="fi-fo-field-label block text-center">{{ __('6místný ověřovací kód') }}</label>
                 <div class="relative group/input">
                     <input id="code" type="text" name="code" inputmode="numeric" autofocus autocomplete="one-time-code"
                            placeholder="000 000"
-                           class="fi-input-wrp w-full bg-white border {{ $errors->has('code') ? 'border-rose-500' : 'border-slate-200' }} rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.5em] text-center text-3xl py-6">
+                           class="fi-input-wrp w-full bg-white border border-slate-200 rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.5em] text-center text-3xl py-6">
                 </div>
-                @if ($errors->has('code'))
-                    <p class="fi-error-message block text-center" style="display: block !important;">{{ $errors->first('code') }}</p>
-                @endif
                 <p class="text-[10px] text-white/40 font-medium text-center italic">{{ __('Otevřete Google Authenticator nebo podobnou aplikaci.') }}</p>
             </div>
 
-            <div class="space-y-4" x-show="recovery" x-cloak>
+            <div class="space-y-4 fi-fo-field {{ $errors->has('recovery_code') ? 'ks-invalid' : '' }}" x-show="recovery" x-cloak>
                 <label for="recovery_code" class="fi-fo-field-label block text-center">{{ __('Záchranný kód') }}</label>
                 <div class="relative group/input">
                     <input id="recovery_code" type="text" name="recovery_code" autocomplete="one-time-code"
                            placeholder="abcde-fghij"
-                           class="fi-input-wrp w-full bg-white border {{ $errors->has('recovery_code') ? 'border-rose-500' : 'border-slate-200' }} rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-mono font-bold text-slate-900 placeholder-slate-300 outline-none text-center text-xl py-6 uppercase">
+                           class="fi-input-wrp w-full bg-white border border-slate-200 rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-mono font-bold text-slate-900 placeholder-slate-300 outline-none text-center text-xl py-6 uppercase">
                 </div>
-                @if ($errors->has('recovery_code'))
-                    <p class="fi-error-message block text-center" style="display: block !important;">{{ $errors->first('recovery_code') }}</p>
-                @endif
             </div>
 
             <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">

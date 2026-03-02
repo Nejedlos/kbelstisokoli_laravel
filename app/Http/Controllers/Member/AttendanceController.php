@@ -340,7 +340,11 @@ class AttendanceController extends Controller
 
         // Aplikace filtrů na stav docházky
         if ($filterAttendance !== 'all') {
-            $attendancesQuery->where('planned_status', $filterAttendance);
+            if ($filterAttendance === 'none') {
+                $attendancesQuery->where(fn($q) => $q->whereNull('planned_status')->orWhere('planned_status', 'pending'));
+            } else {
+                $attendancesQuery->where('planned_status', $filterAttendance);
+            }
         }
 
         // Aplikace filtrů na datum (přes attendable událost)

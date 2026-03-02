@@ -26,20 +26,15 @@
         @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <div class="space-y-3 fi-fo-field">
+        <div class="space-y-3 fi-fo-field {{ $errors->has('email') ? 'ks-invalid' : '' }}">
             <label for="email" class="fi-fo-field-label ml-1">{{ __('Potvrďte e‑mail') }}</label>
             <div class="fi-input-wrp">
                 <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" autofocus
                        class="fi-input">
             </div>
-            @error('email')
-                <div class="fi-error-message" style="display: block !important;">
-                    <span>{{ $message }}</span>
-                </div>
-            @enderror
         </div>
 
-        <div class="space-y-3 fi-fo-field">
+        <div class="space-y-3 fi-fo-field {{ $errors->has('password') ? 'ks-invalid' : '' }}">
             <label for="password" class="fi-fo-field-label ml-1">{{ __('Nové heslo') }}</label>
             <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
                 <div class="fi-input-wrp-content-ctn">
@@ -53,11 +48,6 @@
                     </button>
                 </div>
             </div>
-            @error('password')
-                <div class="fi-error-message" style="display: block !important;">
-                    <span>{{ $message }}</span>
-                </div>
-            @enderror
         </div>
 
         <div class="space-y-3 fi-fo-field">

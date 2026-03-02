@@ -24,8 +24,6 @@
 @endphp
 
 <x-filament-panels::layout.base :livewire="$livewire">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <div class="ks-auth-page auth-gradient w-full min-h-dvh flex items-center justify-center py-6 px-4 md:px-6 lg:px-8 relative overflow-x-hidden"
          style="
             background-color: #0f172a !important;
@@ -38,7 +36,6 @@
             background-size: cover !important;
         "
     >
-        @vite(['resources/css/filament-auth.css', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
         {{-- Background Elements (Tactical & Atmospheric) --}}
         <div class="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
             {{-- Noise Texture --}}
@@ -64,40 +61,6 @@
                 <div class="floating-ball w-[50rem] h-[50rem] bottom-[-15%] right-[-15%] opacity-15" style="background: radial-gradient(circle, rgba({{ $hexToRgb($colors['blue'] ?? '#2563eb') }}, 0.3) 0%, transparent 70%);"></div>
             </div>
         </div>
-        <style>
-            :root {
-                /* Brand tokens */
-                --brand-navy: {{ $colors['navy'] ?? '#0b1f3a' }};
-                --brand-navy-rgb: {{ $hexToRgb($colors['navy'] ?? '#0b1f3a') }};
-                --brand-blue: {{ $colors['blue'] ?? '#2563eb' }};
-                --brand-blue-rgb: {{ $hexToRgb($colors['blue'] ?? '#2563eb') }};
-                --brand-red: {{ $colors['red'] ?? '#e11d48' }};
-                --brand-red-rgb: {{ $hexToRgb($colors['red'] ?? '#e11d48') }};
-                --brand-red-hover: {{ $colors['red_hover'] ?? '#be123c' }};
-                --brand-white: #ffffff;
-
-                /* UI tokens */
-                --ui-text: rgba(255, 255, 255, 0.92);
-                --ui-text-muted: rgba(255, 255, 255, 0.65);
-                --ui-border: rgba(255, 255, 255, 0.18);
-                --ui-surface: rgba(255, 255, 255, 0.80);
-                --ui-surface-elevated: rgba(255, 255, 255, 0.90);
-                --ui-success: #22c55e;
-                --ui-danger: #ef4444;
-                --ui-warning: #f59e0b;
-            }
-
-            /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
-            .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
-                display: inline-block;
-                width: 1.25em;
-                height: 1em;
-                line-height: 1;
-                vertical-align: -0.125em;
-                overflow: hidden;
-                opacity: 0;
-            }
-        </style>
 
 
         <div class="ks-auth-container w-full max-w-[22rem] sm:max-w-[28rem] md:max-w-[32rem] relative z-10 py-10">
@@ -119,23 +82,6 @@
             <!-- Form Surface -->
             <div class="glass-card animate-fade-in-down" style="animation-delay: 0.1s">
                 <div class="relative">
-                    @if (session('status'))
-                        <x-auth-alert type="success" :message="session('status')" />
-                    @endif
-
-                    @if ($errors->any())
-                        @php
-                            $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
-                        @endphp
-                        @if (!empty($filteredErrors))
-                            <x-auth-alert type="error">
-                                @foreach ($filteredErrors as $error)
-                                    <div>{{ $error }}</div>
-                                @endforeach
-                            </x-auth-alert>
-                        @endif
-                    @endif
-
                     {{ $slot }}
                 </div>
 
