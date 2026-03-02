@@ -65,10 +65,10 @@
             return;
         }
         const canvas = this.cropper.getCroppedCanvas({
-            width: 1200,
-            height: 1200,
+            width: 800,
+            height: 800,
             imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high',
+            imageSmoothingQuality: 'medium',
         });
 
         if (!canvas) {
@@ -77,7 +77,7 @@
         }
 
         try {
-            const base64 = canvas.toDataURL('image/webp', 0.9);
+            const base64 = canvas.toDataURL('image/webp', 0.75);
             $wire.saveAvatar(base64);
         } catch (e) {
             console.error('Failed to get data URL from canvas:', e);
@@ -121,29 +121,29 @@ class="fixed inset-0 z-50 overflow-y-auto"
     <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="isOpen = false"></div>
 
             <!-- Modal Content -->
-    <div class="relative min-h-screen flex items-center justify-center p-2 sm:p-4">
+    <div class="relative min-h-screen flex items-start sm:items-center justify-center p-4">
         <div class="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 border border-slate-200/60" @click.stop>
 
             <!-- Header -->
-            <div x-show="!confirmingDelete && !confirmingSystemDelete" class="p-5 sm:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+            <div x-show="!confirmingDelete && !confirmingSystemDelete" id="avatar-editor-section" class="p-4 sm:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
                 <div>
-                    <h3 class="text-xl sm:text-2xl font-black uppercase tracking-tight text-secondary leading-none">{{ __('member.profile.avatar.modal_title') }}</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-2">{{ __('member.profile.avatar.modal_subtitle') }}</p>
+                    <h3 class="text-lg sm:text-2xl font-black uppercase tracking-tight text-secondary leading-none">{{ __('member.profile.avatar.modal_title') }}</h3>
+                    <p class="text-[9px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1.5 sm:mt-2">{{ __('member.profile.avatar.modal_subtitle') }}</p>
                 </div>
-                <button @click="isOpen = false" type="button" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all flex items-center justify-center shadow-sm shrink-0 ml-4">
-                    <i class="fa-light fa-xmark text-xl"></i>
+                <button @click="isOpen = false" type="button" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all flex items-center justify-center shadow-sm shrink-0 ml-4">
+                    <i class="fa-light fa-xmark text-lg sm:text-xl"></i>
                 </button>
             </div>
 
             <div x-show="!confirmingDelete && !confirmingSystemDelete" class="flex flex-col">
                 <!-- 1. SECTION: EDITOR (Top) -->
-                    <div class="p-5 sm:p-8 bg-slate-50/50 border-b border-slate-100 min-h-[300px] sm:min-h-[350px] flex flex-col items-center justify-center relative">
-                        <div x-show="!previewUrl && !(uploadAsSystem && avatarFile && avatarFile.length > 1)" class="text-center py-10 sm:py-16">
-                            <div class="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-slate-200 shadow-xl shadow-slate-200/50 transform rotate-3 group-hover:rotate-0 transition-transform">
-                                <i class="fa-light fa-image-slash text-3xl sm:text-4xl text-slate-300"></i>
+                    <div class="p-4 sm:p-8 bg-slate-50/50 border-b border-slate-100 min-h-[250px] sm:min-h-[350px] flex flex-col items-center justify-center relative">
+                        <div x-show="!previewUrl && !(uploadAsSystem && avatarFile && avatarFile.length > 1)" class="text-center py-8 sm:py-16">
+                            <div class="w-16 h-16 sm:w-28 sm:h-28 bg-white rounded-[1.25rem] sm:rounded-[2rem] flex items-center justify-center mx-auto mb-4 sm:mb-6 border border-slate-200 shadow-xl shadow-slate-200/50 transform rotate-3 group-hover:rotate-0 transition-transform">
+                                <i class="fa-light fa-image-slash text-2xl sm:text-4xl text-slate-300"></i>
                             </div>
-                            <p class="text-xs sm:text-sm font-black text-secondary uppercase tracking-[0.2em]">{{ __('member.profile.avatar.no_image_selected') }}</p>
-                            <p class="text-[9px] sm:text-[10px] text-slate-400 mt-2 font-bold italic">{{ __('member.profile.avatar.no_image_hint') }}</p>
+                            <p class="text-[10px] sm:text-sm font-black text-secondary uppercase tracking-[0.2em]">{{ __('member.profile.avatar.no_image_selected') }}</p>
+                            <p class="text-[8px] sm:text-[10px] text-slate-400 mt-2 font-bold italic">{{ __('member.profile.avatar.no_image_hint') }}</p>
                         </div>
 
                         <div x-show="!previewUrl && uploadAsSystem && avatarFile && avatarFile.length > 1" class="text-center py-10 sm:py-16">
@@ -170,24 +170,24 @@ class="fixed inset-0 z-50 overflow-y-auto"
                         </div>
 
                     <div x-show="previewUrl" class="w-full space-y-4 sm:space-y-6 animate-in fade-in duration-500">
-                        <div wire:ignore class="relative w-full rounded-[1.5rem] sm:rounded-[2rem] bg-slate-200 shadow-inner border border-slate-200 flex items-center justify-center p-2 overflow-hidden" style="min-height: 300px; max-height: 70vh;">
-                            <div class="w-full max-h-[400px] sm:max-h-[500px] overflow-hidden flex items-center justify-center">
+                        <div wire:ignore class="relative w-full rounded-[1.5rem] sm:rounded-[2rem] bg-slate-200 shadow-inner border border-slate-200 flex items-center justify-center p-2 overflow-hidden" style="min-height: 250px; max-height: 60vh;">
+                            <div class="w-full max-h-[350px] sm:max-h-[500px] overflow-hidden flex items-center justify-center">
                                 <img :src="previewUrl" id="cropper-image" class="max-w-full block" crossorigin="anonymous" @load="initCropper()">
                             </div>
                         </div>
 
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
                             <button type="button" @click="previewUrl = null; if(cropper) cropper.destroy(); cropper = null;"
-                                    class="flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
+                                    class="flex items-center justify-center sm:justify-start gap-2 px-5 py-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
                                 <i class="fa-light fa-trash-can"></i> {{ __('member.profile.avatar.cancel_selection') }}
                             </button>
 
-                            <div class="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
-                                <button type="button" @click="initCropper()" class="btn btn-outline py-2.5 px-5 text-[9px] sm:text-[10px] uppercase tracking-widest w-full sm:w-auto bg-white border-slate-200">
+                            <div class="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+                                <button type="button" @click="initCropper()" class="btn btn-outline py-2 px-5 text-[9px] sm:text-[10px] uppercase tracking-widest w-full sm:w-auto bg-white border-slate-200">
                                     <i class="fa-light fa-crop-simple mr-2 text-primary"></i> {{ __('member.profile.avatar.reset_crop') }}
                                 </button>
                                 <button type="button" @click="saveCrop()" wire:loading.attr="disabled" wire:target="saveAvatar"
-                                        class="btn btn-primary py-3 px-6 sm:px-10 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
+                                        class="btn btn-primary py-2.5 sm:py-3 px-6 sm:px-10 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] disabled:opacity-50 shadow-xl shadow-primary/30 w-full sm:w-auto">
                                     <i class="fa-light fa-spinner-third animate-spin mr-2" wire:loading wire:target="saveAvatar"></i>
                                     <i class="fa-light fa-check-double mr-2" wire:loading.remove wire:target="saveAvatar"></i>
                                     {{ __('member.profile.avatar.save_and_set') }}
@@ -214,20 +214,22 @@ class="fixed inset-0 z-50 overflow-y-auto"
                 </div>
 
                 <!-- 3. SECTION: SELECTION (Bottom) -->
-                <div class="p-6 bg-white overflow-hidden">
+                <div class="p-4 sm:p-6 bg-white overflow-hidden">
                     <!-- Gallery Selection -->
                     <div x-show="activeTab === 'gallery'" class="space-y-4">
-                        <div class="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 max-h-none sm:max-h-[450px] overflow-y-visible sm:overflow-y-auto pr-0 sm:pr-2 custom-scrollbar">
                             @foreach($galleryAssets as $asset)
                                 <button type="button" wire:key="asset-{{ $asset->id }}" @click="selectFromGallery(@js($asset->getUrl()))"
                                         class="group relative aspect-square rounded-xl overflow-hidden border-2 transition-all"
                                         :class="previewUrl === @js($asset->getUrl()) ? 'border-primary ring-2 ring-primary/20' : 'border-slate-100 hover:border-primary/50'">
                                     <img src="{{ $asset->getUrl('thumb') }}"
+                                         srcset="{{ $asset->getUrl('thumb') }} 200w, {{ $asset->getUrl() }} 1000w"
+                                         sizes="(max-width: 640px) 33vw, 150px"
                                          onerror="this.src='{{ $asset->getUrl() }}'; this.onerror=null;"
                                          alt="" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                     <div class="absolute inset-0 bg-secondary/40 flex items-center justify-center transition-opacity"
                                          :class="previewUrl === @js($asset->getUrl()) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
-                                        <i class="fa-light fa-check text-white text-xl"></i>
+                                        <i class="fa-light fa-check text-white text-lg sm:text-xl"></i>
                                     </div>
 
                                     @if(auth()->user()?->canAccessAdmin())
