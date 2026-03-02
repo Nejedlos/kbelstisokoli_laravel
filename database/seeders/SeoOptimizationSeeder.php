@@ -22,8 +22,8 @@ class SeoOptimizationSeeder extends Seeder
         $pages = [
             'home' => [
                 'title' => [
-                    'cs' => 'Basketbal Letňany – Týmy Tým C a E',
-                    'en' => 'Basketball Letnany – Teams Team C and E',
+                    'cs' => 'Sokol Kbely C & E – Basketbal v Letňanech',
+                    'en' => 'Sokol Kbely C & E – Basketball in Letnany',
                 ],
                 'description' => [
                     'cs' => 'Oficiální web basketbalových týmů TJ Sokol Kbely C a E. Hrajeme v Letňanech (RumcajsArena). Přidejte se k naší basketbalové komunitě v Praze 9.',
@@ -36,12 +36,12 @@ class SeoOptimizationSeeder extends Seeder
             ],
             'o-klubu' => [
                 'title' => [
-                    'cs' => 'O nás – Basketbal v Letňanech',
-                    'en' => 'About Us – Basketball in Letnany',
+                    'cs' => 'O nás – TJ Sokol Kbely Basketball',
+                    'en' => 'About Us – TJ Sokol Kbely Basketball',
                 ],
                 'description' => [
-                    'cs' => 'Poznejte historii a vizi našich mužských týmů. C a E jsou srdcem kbelstského basketbalu se základnou v Letňanech.',
-                    'en' => 'Discover the history and vision of our men\'s teams. C and E are the heart of Kbely basketball based in Letňany.',
+                    'cs' => 'Poznejte historii a vizi našich mužských týmů. Sokol Kbely C a E jsou srdcem kbelstského basketbalu se základnou v Letňanech.',
+                    'en' => 'Discover the history and vision of our men\'s teams. Sokol Kbely C and E are the heart of Kbely basketball based in Letňany.',
                 ],
                 'keywords' => [
                     'cs' => 'historie Sokol Kbely, basketbalový klub Praha, TJ Sokol Kbely, basketbal Letňany, mužský basketbal',
@@ -50,8 +50,8 @@ class SeoOptimizationSeeder extends Seeder
             ],
             'nabor' => [
                 'title' => [
-                    'cs' => 'Nábor hráčů – Přidej se k Sokolům C nebo E',
-                    'en' => 'Join the Kbely Falcons – Recruitment C or E',
+                    'cs' => 'Nábor hráčů – Přidej se k Sokolům Kbely C nebo E',
+                    'en' => 'Join the Kbely Falcons – Recruitment Sokol Kbely C or E',
                 ],
                 'description' => [
                     'cs' => 'Hledáme nové posily do našich týmů! Pokud hraješ basket a hledáš dobrou partu v Praze 9, přijď na trénink do RumcajsAreny.',
@@ -68,8 +68,8 @@ class SeoOptimizationSeeder extends Seeder
                     'en' => 'Practices at RumcajsArena Letnany',
                 ],
                 'description' => [
-                    'cs' => 'Kdy a kde trénujeme? Kompletní rozpis tréninkových hodin pro týmy C a E v naší hale v Letňanech (Třinecká 650).',
-                    'en' => 'When and where do we practice? Complete schedule for teams C and E at our gym in Letňany (Třinecká 650).',
+                    'cs' => 'Kdy a kde trénujeme? Kompletní rozpis tréninkových hodin pro Muže C a E v naší hale v Letňanech (Třinecká 650).',
+                    'en' => 'When and where do we practice? Complete schedule for Men C and E at our gym in Letňany (Třinecká 650).',
                 ],
                 'keywords' => [
                     'cs' => 'tréninky basketbalu Praha, RumcajsArena rozpis, basketbal Letňany trénink, Třinecká 650 basketbal',
@@ -82,8 +82,8 @@ class SeoOptimizationSeeder extends Seeder
                     'en' => 'Matches and Results – Watch Us in Action',
                 ],
                 'description' => [
-                    'cs' => 'Výsledky, tabulky a nadcházející zápasy týmů Sokol Kbely C v Pražském přeboru a týmu E ve 3. třídě.',
-                    'en' => 'Results, standings, and upcoming matches for Sokol Kbely C in the Prague Championship and team E in the 3rd class.',
+                    'cs' => 'Výsledky, tabulky a nadcházející zápasy Sokol Kbely C v Pražském přeboru a Sokol Kbely E ve 3. třídě.',
+                    'en' => 'Results, standings, and upcoming matches for Sokol Kbely C in the Prague Championship and Sokol Kbely E in the 3rd class.',
                 ],
                 'keywords' => [
                     'cs' => 'výsledky basketbalu Praha, Pražský přebor basketbal tabulka, zápasy Sokol Kbely, basketbalové utkání Praha',
@@ -92,12 +92,12 @@ class SeoOptimizationSeeder extends Seeder
             ],
             'tymy' => [
                 'title' => [
-                    'cs' => 'Naše týmy – Tým C a Tým E',
-                    'en' => 'Our Teams – Team C and Team E',
+                    'cs' => 'Naše týmy – Sokol Kbely C a E',
+                    'en' => 'Our Teams – Sokol Kbely C and E',
                 ],
                 'description' => [
                     'cs' => 'Soupisky, profily hráčů a trenérů našich hlavních týmů. Poznejte sestavu Mužů C a Mužů E.',
-                    'en' => 'Rosters, player and coach profiles of our main teams. Meet the Team C and Team E squads.',
+                    'en' => 'Rosters, player and coach profiles of our main teams. Meet the Sokol Kbely C and Sokol Kbely E squads.',
                 ],
                 'keywords' => [
                     'cs' => 'soupiska basketbal, basketbalový tým muži, Sokol Kbely soupiska, basketbalisti Praha 9',
@@ -106,8 +106,8 @@ class SeoOptimizationSeeder extends Seeder
             ],
             'kontakt' => [
                 'title' => [
-                    'cs' => 'Kontakt na vedení týmů C a E',
-                    'en' => 'Contact Team Leaders C and E',
+                    'cs' => 'Kontakt na vedení Sokol Kbely C a E',
+                    'en' => 'Contact Team Leaders Sokol Kbely C and E',
                 ],
                 'description' => [
                     'cs' => 'Máte dotaz k náboru nebo přátelskému utkání? Kontaktujte vedení našich letňanských týmů přímo přes web.',
@@ -124,8 +124,8 @@ class SeoOptimizationSeeder extends Seeder
                     'en' => 'History – Our Journey Since 2004',
                 ],
                 'description' => [
-                    'cs' => 'Jak vznikly týmy C a E? Projděte si milníky naší basketbalové party a naše úspěchy v pražských soutěžích.',
-                    'en' => 'How did teams C and E start? Explore the milestones of our basketball group and our successes in Prague competitions.',
+                    'cs' => 'Jak vznikly týmy Sokol Kbely C a E? Projděte si milníky naší basketbalové party a naše úspěchy v pražských soutěžích.',
+                    'en' => 'How did teams Sokol Kbely C and E start? Explore the milestones of our basketball group and our successes in Prague competitions.',
                 ],
                 'keywords' => [
                     'cs' => 'historie basketbalu Kbely, basketbalová historie Praha, milníky Sokol Kbely',
@@ -152,8 +152,8 @@ class SeoOptimizationSeeder extends Seeder
                     'en' => 'Search | Kbely Falcons',
                 ],
                 'description' => [
-                    'cs' => 'Najděte informace o zápasech, hráčích nebo novinkách z našich basketbalových týmů C a E.',
-                    'en' => 'Find information about matches, players, or news from our basketball teams C and E.',
+                    'cs' => 'Najděte informace o zápasech, hráčích nebo novinkách z našich basketbalových týmů Sokol Kbely C a E.',
+                    'en' => 'Find information about matches, players, or news from our basketball teams Sokol Kbely C and E.',
                 ],
                 'keywords' => [
                     'cs' => 'hledat basketbal, vyhledávání Sokol Kbely',
@@ -162,12 +162,12 @@ class SeoOptimizationSeeder extends Seeder
             ],
             'join' => [
                 'title' => [
-                    'cs' => 'Chci hrát! – Přihláška do týmu Sokol Kbely',
-                    'en' => 'Join Us! – Team Application Form',
+                    'cs' => 'Chci hrát! – Přihláška do TJ Sokol Kbely Basketball',
+                    'en' => 'Join Us! – TJ Sokol Kbely Basketball Application',
                 ],
                 'description' => [
-                    'cs' => 'Vyplň krátký dotazník a my se ti ozveme. Nábor do týmů C a E probíhá celoročně v Letňanech.',
-                    'en' => 'Fill out a short questionnaire and we\'ll get back to you. Recruitment for teams C and E is open year-round in Letňany.',
+                    'cs' => 'Vyplň krátký dotazník a my se ti ozveme. Nábor do Sokol Kbely C a E probíhá celoročně v Letňanech.',
+                    'en' => 'Fill out a short questionnaire and we\'ll get back to you. Recruitment for Sokol Kbely C and E is open year-round in Letňany.',
                 ],
                 'keywords' => [
                     'cs' => 'přihláška basketbal, náborový formulář basketbal, registrace hráče Praha',
@@ -192,12 +192,12 @@ class SeoOptimizationSeeder extends Seeder
         $teams = [
             'muzi-c' => [
                 'title' => [
-                    'cs' => 'Tým C – Pražský přebor B Letňany',
-                    'en' => 'Team C – Prague Championship B Letnany',
+                    'cs' => 'Sokol Kbely C – Pražský přebor B Letňany',
+                    'en' => 'Sokol Kbely C – Prague Championship B Letnany',
                 ],
                 'description' => [
-                    'cs' => 'Tým C hraje Pražský přebor B. Domácí zápasy v Letňanech. Sledujte soupisku, tabulku a rozpis zápasů "céčka".',
-                    'en' => 'The Team C team competes in the Prague Championship B. Home games in Letňany. Follow the "C" roster, standings, and schedule.',
+                    'cs' => 'Muži C hrají Pražský přebor B. Domácí zápasy v Letňanech. Sledujte soupisku, tabulku a rozpis zápasů "céčka".',
+                    'en' => 'Sokol Kbely C competes in the Prague Championship B. Home games in Letňany. Follow the "C" roster, standings, and schedule.',
                 ],
                 'keywords' => [
                     'cs' => 'muži C basketbal, Sokol Kbely C, Pražský přebor B, basketbal Letňany muži',
@@ -206,12 +206,12 @@ class SeoOptimizationSeeder extends Seeder
             ],
             'muzi-e' => [
                 'title' => [
-                    'cs' => 'Tým E – 3. třída B Letňany',
-                    'en' => 'Team E – 3rd Class B Letnany',
+                    'cs' => 'Sokol Kbely E – 3. třída B Letňany',
+                    'en' => 'Sokol Kbely E – 3rd Class B Letnany',
                 ],
                 'description' => [
-                    'cs' => 'Tým E hraje 3. třídu B v RumcajsAreně. Naše "éčko" je skvělá parta pro ty, co milují soutěžní basketbal.',
-                    'en' => 'The Team E team plays in the 3rd Class B at RumcajsArena. Our "E" team is a great group for those who love competitive basketball.',
+                    'cs' => 'Muži E hrají 3. třídu B v RumcajsAreně. Naše "éčko" je skvělá parta pro ty, co milují soutěžní basketbal.',
+                    'en' => 'Sokol Kbely E plays in the 3rd Class B at RumcajsArena. Our "E" team is a great group for those who love competitive basketball.',
                 ],
                 'keywords' => [
                     'cs' => 'muži E basketbal, Sokol Kbely E, 3. třída B basketbal, RumcajsArena basketbal',

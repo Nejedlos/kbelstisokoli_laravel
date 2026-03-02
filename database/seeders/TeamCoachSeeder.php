@@ -17,19 +17,19 @@ class TeamCoachSeeder extends Seeder
         // 1. Definice týmů
         $teams = [
             'muzi-c' => [
-                'name' => ['cs' => 'Tým C', 'en' => 'Team C'],
+                'name' => ['cs' => 'Sokol Kbely C', 'en' => 'Sokol Kbely C'],
                 'category' => 'senior',
                 'description' => [
-                    'cs' => 'Tým C hraje Pražský přebor B. Jsme jádro naší basketbalové komunity v Letňanech (Třinecká 650). Zakládáme si na týmovém duchu a chceme se v sezóně 2025/2026 posunout v tabulce výše.',
-                    'en' => 'The Team C competes in the Prague Championship B. We are the core of our basketball community in Letňany (Třinecká 650). We focus on team spirit and aim to move up the table in the 2025/2026 season.',
+                    'cs' => 'Náš elitní tým hrající Pražský přebor B. Jsme hrdou součástí TJ Sokol Kbely Basketball a srdcem naší komunity v Letňanech. Zakládáme si na týmové chemii a ambicích posouvat se v tabulce neustále výše.',
+                    'en' => 'Our elite team competing in the Prague Championship B. We are a proud part of TJ Sokol Kbely Basketball and the heart of our community in Letňany. We pride ourselves on team chemistry and ambitions to constantly move up the table.',
                 ],
             ],
             'muzi-e' => [
-                'name' => ['cs' => 'Tým E', 'en' => 'Team E'],
+                'name' => ['cs' => 'Sokol Kbely E', 'en' => 'Sokol Kbely E'],
                 'category' => 'senior',
                 'description' => [
-                    'cs' => 'Tým E hraje 3. třídu B v naší RumcajsAreně v Letňanech. Ideální místo pro ty, co milují basketbal, dobrou partu a chtějí hrát pro radost i v soutěžním tempu.',
-                    'en' => 'The Team E plays the 3rd Class B in our RumcajsArena in Letňany. Perfect place for those who love basketball, a great community, and want to play for joy even at a competitive pace.',
+                    'cs' => 'Zkušený tým hrající 3. třídu B v naší RumcajsAreně. Jsme součástí oddílu TJ Sokol Kbely Basketball. Ideální volba pro ty, co milují basketbal, skvělou partu a chtějí hrát s radostí i v soutěžním tempu.',
+                    'en' => 'Experienced team playing the 3rd Class B in our RumcajsArena. We are part of the TJ Sokol Kbely Basketball club. Perfect choice for those who love basketball, a great group, and want to play with joy even at a competitive pace.',
                 ],
             ],
         ];

@@ -40,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->darkMode(false)
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
             ->renderHook('panels::head.end', function (): string {
                 // Podle toho, zda jsme na auth stránkách nebo v adminu, zvolíme správný CSS entrypoint

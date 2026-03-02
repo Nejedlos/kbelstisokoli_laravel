@@ -91,5 +91,5 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Generické stránky (vždy na konci skupiny)
     Route::get('/{slug}', [PageController::class, 'show'])
         ->name('pages.show')
-        ->where('slug', '^(?!admin|clenska-sekce|login|logout|two-factor|auth|user|api|up|system).*$');
+        ->where('slug', '^(?!admin|clenska-sekce|login|logout|logout-success|two-factor|auth|user|api|up|system).*$');
 });

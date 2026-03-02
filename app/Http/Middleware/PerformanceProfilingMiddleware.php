@@ -120,11 +120,19 @@ class PerformanceProfilingMiddleware
         // Kontrola, zda je uživatel admin (používáme Spatie Permission nebo jinou logiku)
         // V tomto projektu se zdá, že existuje oprávnění 'access_admin'
         // Pokud je impersonován, považujeme ho za autorizovaného, pokud původní admin byl
-        if ($request->hasSession() && $request->session()->has('impersonated_by')) {
-            return true;
+        try {
+            if ($request->hasSession() && $request->session()->has('impersonated_by')) {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            // Tichý fail pro případy, kdy session není k dispozici (např. v middlewaru běžícím příliš brzy)
         }
 
-        return Auth::check() && $request->user()->can('access_admin');
+        try {
+            return Auth::check() && $request->user()?->can('access_admin');
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     protected function getDuplicatedQueries(array $queries): array

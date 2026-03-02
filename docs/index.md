@@ -9,6 +9,7 @@ Základní informace o projektu, jeho architektuře a konfiguraci.
 3. [Struktura projektu](./01-zakladni-koncepty/03-struktura-projektu.md)
 4. [Konfigurace prostředí](./01-zakladni-koncepty/04-konfigurace.md)
 5. [Lokalizace a překlady](./01-zakladni-koncepty/05-lokalizace.md)
+6. [Názvosloví týmů](./01-zakladni-koncepty/06-nazvoslovi-tymu.md)
 
 ### 02. [Vývoj a standardy](./02-vyvoj-a-standardy)
 Technické standardy, správa assetů a vizuálních prvků.

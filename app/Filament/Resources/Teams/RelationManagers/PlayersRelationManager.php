@@ -105,8 +105,8 @@ class PlayersRelationManager extends RelationManager
                             ->select("{$playerTable}.*", "{$userTable}.name as user_name_title")
                             ->orderBy("{$userTable}.name");
                     })
-                    ->recordTitleAttribute('user_name_title')
-                    ->recordSelectSearchColumns([(new \App\Models\User())->getTable().'.name'])
+                    ->recordTitleAttribute('user.name')
+                    ->recordSelectSearchColumns(['user.name'])
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Select::make('role_in_team')

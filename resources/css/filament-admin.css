@@ -4,6 +4,7 @@
 @import "../vendor/fontawesome/css/all.min.css";
 
 @theme {
+    --dark-mode: selector;
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     /* Mapování Filament barev na Tailwind v4 utility */

@@ -25,6 +25,7 @@
 }
 
 @theme {
+    --dark-mode: selector;
     /* Breakpoints */
     --breakpoint-xs: 480px;
 
@@ -133,7 +134,7 @@
     }
 
     h1, h2, h3, h4, h5, h6 {
-        @apply font-display font-black tracking-tight leading-tight;
+        @apply font-display font-black tracking-tighter leading-tight uppercase;
     }
 }
 
@@ -210,15 +211,21 @@
     }
 
     .section-title {
-        @apply text-3xl md:text-4xl lg:text-5xl mb-8 relative inline-block;
+        @apply text-3xl md:text-4xl lg:text-5xl mb-16 relative inline-block italic;
     }
 
     .section-title::after {
         content: '';
-        @apply absolute bottom-0 left-0 w-12 h-1 bg-primary;
+        @apply absolute -bottom-6 left-0 w-20 h-1.5 bg-gradient-to-r from-primary to-primary-hover skew-x-[-15deg] rounded-full;
     }
 
-    .section-title-center::after {
+    .section-title::before {
+        content: '';
+        @apply absolute -bottom-6 left-0 w-40 h-0.5 bg-primary/20 skew-x-[-15deg] rounded-full;
+    }
+
+    .section-title-center::after,
+    .section-title-center::before {
         @apply left-1/2 -translate-x-1/2;
     }
 

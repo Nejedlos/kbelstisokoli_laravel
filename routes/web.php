@@ -33,6 +33,14 @@ Route::match(['get', 'post'], '/admin/logout', [AuthenticatedSessionController::
     ->middleware('web')
     ->name('admin.logout');
 
+// Stránka po úspěšném odhlášení
+Route::get('/logout-success', function (\App\Services\BrandingService $brandingService) {
+    return view('auth.logged-out', [
+        'branding' => $brandingService->getSettings(),
+        'branding_css' => $brandingService->getCssVariables(),
+    ]);
+})->name('logout.success');
+
 // Webový trigger pro cron/scheduler
 Route::get('/system/cron/run', [\App\Http\Controllers\System\CronController::class, 'run'])->name('system.cron.run');
 

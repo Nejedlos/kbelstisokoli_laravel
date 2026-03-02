@@ -21,7 +21,7 @@ class LogoutResponse implements FilamentLogoutResponseContract, LogoutResponseCo
         // Vymažeme 2FA remember cookie
         $cookie = Cookie::forget('2fa_remember');
 
-        return redirect()->to('/')
+        return redirect()->route('logout.success')
             ->withCookie($cookie);
     }
 }
