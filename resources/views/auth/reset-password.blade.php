@@ -4,6 +4,23 @@
 <div class="animate-fade-in-down">
     <x-auth-header title="Nové heslo" subtitle="Nastavte si bezpečný přístup" icon="fa-lock-keyhole" />
 
+    @if (session('status'))
+        <x-auth-alert type="success" :message="session('status')" />
+    @endif
+
+    @if ($errors->any())
+        @php
+            $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
+        @endphp
+        @if (!empty($filteredErrors))
+            <x-auth-alert type="error">
+                @foreach ($filteredErrors as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </x-auth-alert>
+        @endif
+    @endif
+
     <div class="glass-card">
     <form method="POST" action="{{ route('password.update') }}" class="space-y-8" novalidate>
         @csrf

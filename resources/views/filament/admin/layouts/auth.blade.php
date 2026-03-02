@@ -117,6 +117,23 @@
             <!-- Form Surface -->
             <div class="glass-card animate-fade-in-down" style="animation-delay: 0.1s">
                 <div class="relative">
+                    @if (session('status'))
+                        <x-auth-alert type="success" :message="session('status')" />
+                    @endif
+
+                    @if ($errors->any())
+                        @php
+                            $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
+                        @endphp
+                        @if (!empty($filteredErrors))
+                            <x-auth-alert type="error">
+                                @foreach ($filteredErrors as $error)
+                                    <div>{{ $error }}</div>
+                                @endforeach
+                            </x-auth-alert>
+                        @endif
+                    @endif
+
                     {{ $slot }}
                 </div>
 

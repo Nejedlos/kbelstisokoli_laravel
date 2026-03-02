@@ -5,25 +5,21 @@
     <x-auth-header title="Vítejte zpět" subtitle="Vstupte na palubovku vaší arény" />
 
     @if (session('status'))
-            <div x-data="{ show: true }"
-                 x-show="show"
-                 x-init="setTimeout(() => show = false, 8000)"
-                 x-transition:leave="transition ease-in duration-500"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95"
-                 class="glass-card !bg-emerald-500/10 border-emerald-500/30 text-emerald-200 p-6 mb-8 rounded-3xl flex items-center gap-4 animate-fade-in shadow-lg shadow-emerald-500/5">
-                <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                    <i class="fa-light fa-circle-check text-xl"></i>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-[10px] uppercase tracking-widest font-black opacity-50 mb-0.5">Skvělá zpráva</span>
-                    <span class="font-bold text-sm leading-tight text-white/90">{{ session('status') }}</span>
-                </div>
-                <button @click="show = false" class="ml-auto text-emerald-500/50 hover:text-emerald-500 transition-colors">
-                    <i class="fa-light fa-xmark"></i>
-                </button>
-            </div>
+        <x-auth-alert type="success" :message="session('status')" />
+    @endif
+
+    @if ($errors->any())
+        @php
+            $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
+        @endphp
+        @if (!empty($filteredErrors))
+            <x-auth-alert type="error">
+                @foreach ($filteredErrors as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </x-auth-alert>
         @endif
+    @endif
 
         <div class="glass-card">
         <form method="POST" action="{{ route('login') }}" class="space-y-8" novalidate>

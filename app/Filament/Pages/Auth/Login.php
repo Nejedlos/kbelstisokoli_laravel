@@ -53,13 +53,8 @@ class Login extends BaseLogin
 
     protected function throwFailureValidationException(): never
     {
-        Notification::make()
-            ->title(__('These credentials do not match our records.'))
-            ->danger()
-            ->send();
-
         throw ValidationException::withMessages([
-            'data.email' => ' ',
+            'data.email' => __('These credentials do not match our records.'),
         ]);
     }
 
