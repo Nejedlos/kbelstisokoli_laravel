@@ -171,6 +171,21 @@ class DashboardController extends Controller
             // 3. Týmy uživatele
             $myTeams = $user->playerProfile?->teams()->get() ?? collect();
 
+            // 4. Nudges (doporučení pro uživatele)
+            $nudges = [];
+            if ($user->getMedia('avatar')->isEmpty()) {
+                $nudges[] = [
+                    'id' => 'avatar',
+                    'title' => __('dashboard.nudges.avatar.title'),
+                    'message' => __('dashboard.nudges.avatar.message'),
+                    'cta' => __('dashboard.nudges.avatar.cta'),
+                    'url' => route('member.profile.edit'),
+                    'icon' => 'camera-retro',
+                    'color' => 'primary',
+                    'instruction' => __('dashboard.nudges.avatar.instruction'),
+                ];
+            }
+
             return [
                 'upcoming' => $upcoming,
                 'pendingCount' => $pendingCount,
@@ -178,6 +193,7 @@ class DashboardController extends Controller
                 'economySummary' => $economySummary,
                 'notifications' => $notifications,
                 'avatarUrl' => $avatarUrl,
+                'nudges' => $nudges,
             ];
         });
 

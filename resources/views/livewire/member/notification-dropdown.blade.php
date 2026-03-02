@@ -30,7 +30,8 @@
         <div class="max-h-[60vh] sm:max-h-[480px] overflow-y-auto custom-scrollbar" wire:poll.30s.keep-alive>
             @forelse($latestNotifications as $notification)
                 <a href="{{ route('member.notifications.redirect', $notification->id) }}"
-                   class="block p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/80 transition-all {{ $notification->unread() ? 'bg-primary/5' : '' }}">
+                   class="block p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/80 transition-all {{ $notification->unread() ? 'bg-primary/5' : '' }}"
+                   aria-label="{{ !empty($notification->data['title']) ? __($notification->data['title']) : __('member.notifications.default_title') }}">
                     <div class="flex gap-3">
                         <div class="shrink-0 mt-0.5">
                             @if(!empty($notification->data['user_avatar']))

@@ -5,6 +5,58 @@
 
 @section('content')
     <div class="space-y-10">
+        @if(!empty($nudges) && count($nudges) > 0)
+            @php
+                // Pokud je jich více, vybereme jeden náhodně pro střídání (při každém načtení)
+                $nudge = $nudges[array_rand($nudges)];
+            @endphp
+            <div x-data="{
+                    showNudge: !localStorage.getItem('nudge_hidden_{{ $nudge['id'] }}_{{ $user->id }}'),
+                    hideNudge() {
+                        localStorage.setItem('nudge_hidden_{{ $nudge['id'] }}_{{ $user->id }}', 'true');
+                        this.showNudge = false;
+                    }
+                 }"
+                 x-show="showNudge"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 -translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="relative overflow-hidden group shadow-sm hover:shadow-md transition-shadow duration-300"
+            >
+                <div class="absolute inset-0 bg-gradient-to-br from-{{ $nudge['color'] }}/15 via-white to-{{ $nudge['color'] }}/5 rounded-[2rem] border border-{{ $nudge['color'] }}/30 border-l-4 border-l-{{ $nudge['color'] }}"></div>
+
+                <div class="relative p-7 flex flex-col md:flex-row items-center gap-6">
+                    <div class="w-16 h-16 rounded-2xl bg-{{ $nudge['color'] }} text-white flex items-center justify-center shrink-0 shadow-xl shadow-{{ $nudge['color'] }}/30 group-hover:scale-110 transition-transform duration-500">
+                        <i class="fa-light fa-{{ $nudge['icon'] }} text-3xl"></i>
+                    </div>
+
+                    <div class="flex-1 text-center md:text-left space-y-1.5">
+                        <h4 class="text-xl font-black uppercase tracking-tight text-secondary">
+                            {{ $nudge['title'] }}
+                        </h4>
+                        <p class="text-base text-slate-700 font-semibold leading-snug">
+                            {{ $nudge['message'] }}
+                        </p>
+                        @if(!empty($nudge['instruction']))
+                            <div class="pt-2 flex items-center gap-2 text-sm text-{{ $nudge['color'] }} font-bold bg-{{ $nudge['color'] }}/5 px-3 py-1.5 rounded-lg w-fit">
+                                <i class="fa-light fa-circle-info"></i>
+                                <span>{{ $nudge['instruction'] }}</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="flex items-center gap-4 shrink-0">
+                        <a href="{{ $nudge['url'] }}" class="btn btn-{{ $nudge['color'] }} px-8 py-3 text-sm font-black shadow-lg shadow-{{ $nudge['color'] }}/20">
+                            {{ $nudge['cta'] }}
+                        </a>
+                        <button @click="hideNudge()" class="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all" title="{{ __('common.close') }}">
+                            <i class="fa-light fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Profile Summary -->
         <section class="relative group rounded-[2.5rem]">
             <!-- Background Layer -->
@@ -151,9 +203,11 @@
                     @else
                         <div class="space-y-2">
                             @foreach($notifications as $n)
-                                <a href="{{ data_get($n->data, 'action_url', route('member.notifications.index')) }}" class="card p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
+                                <a href="{{ data_get($n->data, 'action_url', route('member.notifications.index')) }}"
+                                   class="card p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group"
+                                   aria-label="{{ !empty(data_get($n->data, 'title')) ? __(data_get($n->data, 'title')) : __('member.notifications.default_title') }}">
                                     <div>
-                                        <div class="font-bold text-secondary">{{ data_get($n->data, 'title', __('member.notifications.default_title')) }}</div>
+                                        <div class="font-bold text-secondary">{{ !empty(data_get($n->data, 'title')) ? __(data_get($n->data, 'title')) : __('member.notifications.default_title') }}</div>
                                         <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $n->created_at->diffForHumans() }}</div>
                                     </div>
                                     <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">

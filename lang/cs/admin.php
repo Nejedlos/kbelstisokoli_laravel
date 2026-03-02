@@ -195,6 +195,12 @@ return [
                     'coach_phone_help' => 'Pokud je vyplněn, zobrazí se na webu místo hlavního telefonu trenéra.',
                     'role_in_team' => 'Role v týmu',
                     'is_primary_team' => 'Primární tým',
+                    'roles' => [
+                        'player' => 'Hráč',
+                        'captain' => 'Kapitán',
+                        'assistant_captain' => 'Asistent kapitána',
+                        'guest' => 'Hostující hráč',
+                    ],
                 ],
                 'tabs' => [
                     'general' => 'Základní informace',

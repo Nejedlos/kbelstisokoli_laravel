@@ -1,6 +1,75 @@
-@servers(['web' => $user . '@' . $host . ($port ? ' -p ' . $port : '') . ' -o StrictHostKeyChecking=no'])
+<?php $dir_name = isset($dir_name) ? $dir_name : null; ?>
+<?php $dir = isset($dir) ? $dir : null; ?>
+<?php $NODE_VERSION = isset($NODE_VERSION) ? $NODE_VERSION : null; ?>
+<?php $PATH = isset($PATH) ? $PATH : null; ?>
+<?php $NPM_BIN_PATH = isset($NPM_BIN_PATH) ? $NPM_BIN_PATH : null; ?>
+<?php $N_VER = isset($N_VER) ? $N_VER : null; ?>
+<?php $NODE_BIN_PATH = isset($NODE_BIN_PATH) ? $NODE_BIN_PATH : null; ?>
+<?php $VER = isset($VER) ? $VER : null; ?>
+<?php $n = isset($n) ? $n : null; ?>
+<?php $maintenance = isset($maintenance) ? $maintenance : null; ?>
+<?php $replacement = isset($replacement) ? $replacement : null; ?>
+<?php $app = isset($app) ? $app : null; ?>
+<?php $APP_BASE = isset($APP_BASE) ? $APP_BASE : null; ?>
+<?php $c = isset($c) ? $c : null; ?>
+<?php $f = isset($f) ? $f : null; ?>
+<?php $files = isset($files) ? $files : null; ?>
+<?php $dest = isset($dest) ? $dest : null; ?>
+<?php $public = isset($public) ? $public : null; ?>
+<?php $argv = isset($argv) ? $argv : null; ?>
+<?php $base = isset($base) ? $base : null; ?>
+<?php $DEST = isset($DEST) ? $DEST : null; ?>
+<?php $COMPOSER_BIN = isset($COMPOSER_BIN) ? $COMPOSER_BIN : null; ?>
+<?php $line = isset($line) ? $line : null; ?>
+<?php $safeValue = isset($safeValue) ? $safeValue : null; ?>
+<?php $found = isset($found) ? $found : null; ?>
+<?php $value = isset($value) ? $value : null; ?>
+<?php $key = isset($key) ? $key : null; ?>
+<?php $vars = isset($vars) ? $vars : null; ?>
+<?php $lines = isset($lines) ? $lines : null; ?>
+<?php $envFile = isset($envFile) ? $envFile : null; ?>
+<?php $PHP_VERSION = isset($PHP_VERSION) ? $PHP_VERSION : null; ?>
+<?php $target_public = isset($target_public) ? $target_public : null; ?>
+<?php $fontawesome_token = isset($fontawesome_token) ? $fontawesome_token : null; ?>
+<?php $noai = isset($noai) ? $noai : null; ?>
+<?php $usersync = isset($usersync) ? $usersync : null; ?>
+<?php $freshseed = isset($freshseed) ? $freshseed : null; ?>
+<?php $public_path_b64 = isset($public_path_b64) ? $public_path_b64 : null; ?>
+<?php $v_pub = isset($v_pub) ? $v_pub : null; ?>
+<?php $public_path = isset($public_path) ? $public_path : null; ?>
+<?php $db_prefix_b64 = isset($db_prefix_b64) ? $db_prefix_b64 : null; ?>
+<?php $v_pref = isset($v_pref) ? $v_pref : null; ?>
+<?php $db_prefix = isset($db_prefix) ? $db_prefix : null; ?>
+<?php $db_password_b64 = isset($db_password_b64) ? $db_password_b64 : null; ?>
+<?php $v_pass = isset($v_pass) ? $v_pass : null; ?>
+<?php $db_password = isset($db_password) ? $db_password : null; ?>
+<?php $db_username_b64 = isset($db_username_b64) ? $db_username_b64 : null; ?>
+<?php $v_user = isset($v_user) ? $v_user : null; ?>
+<?php $db_username = isset($db_username) ? $db_username : null; ?>
+<?php $db_database_b64 = isset($db_database_b64) ? $db_database_b64 : null; ?>
+<?php $v_db = isset($v_db) ? $v_db : null; ?>
+<?php $db_database = isset($db_database) ? $db_database : null; ?>
+<?php $db_port_b64 = isset($db_port_b64) ? $db_port_b64 : null; ?>
+<?php $v_port = isset($v_port) ? $v_port : null; ?>
+<?php $db_port = isset($db_port) ? $db_port : null; ?>
+<?php $db_host_b64 = isset($db_host_b64) ? $db_host_b64 : null; ?>
+<?php $v_host = isset($v_host) ? $v_host : null; ?>
+<?php $db_host = isset($db_host) ? $db_host : null; ?>
+<?php $db_connection_b64 = isset($db_connection_b64) ? $db_connection_b64 : null; ?>
+<?php $v_conn = isset($v_conn) ? $v_conn : null; ?>
+<?php $db_connection = isset($db_connection) ? $db_connection : null; ?>
+<?php $npm = isset($npm) ? $npm : null; ?>
+<?php $node = isset($node) ? $node : null; ?>
+<?php $php = isset($php) ? $php : null; ?>
+<?php $path = isset($path) ? $path : null; ?>
+<?php $token = isset($token) ? $token : null; ?>
+<?php $repository = isset($repository) ? $repository : null; ?>
+<?php $port = isset($port) ? $port : null; ?>
+<?php $host = isset($host) ? $host : null; ?>
+<?php $user = isset($user) ? $user : null; ?>
+<?php $__container->servers(['web' => $user . '@' . $host . ($port ? ' -p ' . $port : '') . ' -o StrictHostKeyChecking=no']); ?>
 
-@setup
+<?php
     $repository = isset($repository) ? $repository : 'https://' . $token . '@github.com/Nejedlos/kbelstisokoli_laravel.git';
     $path = isset($path) ? $path : '/www/kbelstisokoli';
     $php = isset($php) ? $php : 'php';
@@ -28,30 +97,32 @@
     $noai = isset($noai) ? $noai : false;
     $fontawesome_token = isset($fontawesome_token) ? $fontawesome_token : '';
     if (isset($public_path)) { $target_public = $public_path; } else { $target_public = $path . '/public'; }
-@endsetup
+?>
 
-@task('setup', ['on' => 'web'])
-    echo "🚀 Starting setup on {{ $host }}..."
+<?php $__container->startTask('setup', ['on' => 'web']); ?>
+    echo "🚀 Starting setup on <?php echo $host; ?>..."
 
-    PHP_VERSION=$({{ $php }} -r 'echo PHP_VERSION;')
+    PHP_VERSION=$(<?php echo $php; ?> -r 'echo PHP_VERSION;')
     if [ "$(printf '%s\n' "8.4.0" "$PHP_VERSION" | sort -V | head -n1)" != "8.4.0" ]; then
-        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using {{ $php }})"
+        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using <?php echo $php; ?>)"
         exit 1
     fi
 
-    if [ ! -d "{{ $path }}" ]; then
-        echo "Creating directory {{ $path }}..."
-        mkdir -p "{{ $path }}"
+    if [ ! -d "<?php echo $path; ?>" ]; then
+        echo "Creating directory <?php echo $path; ?>..."
+        mkdir -p "<?php echo $path; ?>"
     fi
 
-    cd {{ $path }}
+    cd <?php echo $path; ?>
+
 
     if [ ! -d ".git" ]; then
         echo "Cloning repository..."
-        git clone {{ $repository }} .
+        git clone <?php echo $repository; ?> .
     else
         echo "Repository already exists, updating URL with token..."
-        git remote set-url origin {{ $repository }}
+        git remote set-url origin <?php echo $repository; ?>
+
         if [ -f ".git/gc.log" ]; then
             echo "Removing .git/gc.log..."
             rm .git/gc.log
@@ -69,7 +140,7 @@
     fi
 
     echo "Updating .env configuration..."
-    {{ $php }} -r '
+    <?php echo $php; ?> -r '
         $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
@@ -77,19 +148,19 @@
             "APP_ENV" => "production",
             "APP_DEBUG" => "false",
         ];
-        if ("{{ $db_database_b64 }}") {
-            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
-            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
-            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
-            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
-            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
-            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
-            if ("{{ $db_prefix_b64 }}") {
-                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
+        if ("<?php echo $db_database_b64; ?>") {
+            $vars["DB_CONNECTION"] = base64_decode("<?php echo $db_connection_b64; ?>");
+            $vars["DB_HOST"] = base64_decode("<?php echo $db_host_b64; ?>");
+            $vars["DB_PORT"] = base64_decode("<?php echo $db_port_b64; ?>");
+            $vars["DB_DATABASE"] = base64_decode("<?php echo $db_database_b64; ?>");
+            $vars["DB_USERNAME"] = base64_decode("<?php echo $db_username_b64; ?>");
+            $vars["DB_PASSWORD"] = base64_decode("<?php echo $db_password_b64; ?>");
+            if ("<?php echo $db_prefix_b64; ?>") {
+                $vars["DB_PREFIX"] = base64_decode("<?php echo $db_prefix_b64; ?>");
             }
         }
-        if ("{{ $public_path_b64 }}") {
-            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
+        if ("<?php echo $public_path_b64; ?>") {
+            $vars["APP_PUBLIC_PATH"] = base64_decode("<?php echo $public_path_b64; ?>");
         }
         foreach ($vars as $key => $value) {
             $found = false;
@@ -111,33 +182,33 @@
 
     if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
-        {{ $php }} artisan key:generate --no-interaction
+        <?php echo $php; ?> artisan key:generate --no-interaction
     fi
 
     echo "Running composer install..."
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
-    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+    <?php echo $php; ?> $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path is configured: {{ $public_path }}"
-        if [ ! -L "{{ $public_path }}" ] && [ ! -d "{{ $public_path }}" ]; then
-            ln -sf "{{ $path }}/public" "{{ $public_path }}"
-            echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
+    if [ ! -z "<?php echo isset($public_path) ? $public_path : ''; ?>" ] && [ "<?php echo isset($public_path) ? $public_path : ''; ?>" != "<?php echo $path; ?>/public" ]; then
+        echo "Ensuring custom public path is configured: <?php echo $public_path; ?>"
+        if [ ! -L "<?php echo $public_path; ?>" ] && [ ! -d "<?php echo $public_path; ?>" ]; then
+            ln -sf "<?php echo $path; ?>/public" "<?php echo $public_path; ?>"
+            echo "✅ Created symlink from <?php echo $path; ?>/public to <?php echo $public_path; ?>"
         fi
     fi
 
     # Determine and patch entry point
     if [ -f "public/index.production.php" ]; then
-        if [ -z "{{ isset($public_path) ? $public_path : '' }}" ] || [ "{{ isset($public_path) ? $public_path : '' }}" = "{{ $path }}/public" ]; then
-            DEST="{{ $path }}/public/index.php"
+        if [ -z "<?php echo isset($public_path) ? $public_path : ''; ?>" ] || [ "<?php echo isset($public_path) ? $public_path : ''; ?>" = "<?php echo $path; ?>/public" ]; then
+            DEST="<?php echo $path; ?>/public/index.php"
         else
-            DEST="{{ $public_path }}/index.php"
+            DEST="<?php echo $public_path; ?>/index.php"
         fi
         cp public/index.production.php "$DEST"
         echo "✅ index.php replaced by index.production.php"
     else
-        DEST="{{ $path }}/public/index.php"
+        DEST="<?php echo $path; ?>/public/index.php"
     fi
 
     echo "Patching entry points for absolute paths..."
@@ -160,7 +231,7 @@ foreach ($files as $f) {
     file_put_contents($f, $c);
 }
 EOF
-    {{ $php }} patch_entrypoints.php "{{ $path }}" "{{ $target_public }}" "$DEST"
+    <?php echo $php; ?> patch_entrypoints.php "<?php echo $path; ?>" "<?php echo $target_public; ?>" "$DEST"
     rm patch_entrypoints.php
     echo "✅ Entry points patched."
 
@@ -168,12 +239,12 @@ EOF
     mkdir -p .node_bin
 
     # Symlink node (using absolute path to avoid circularity)
-    if [[ "{{ $node }}" == /* ]]; then
-        NODE_BIN_PATH="{{ $node }}"
+    if [[ "<?php echo $node; ?>" == /* ]]; then
+        NODE_BIN_PATH="<?php echo $node; ?>"
     else
         # Prefer v18+ versions if found
         NODE_BIN_PATH=""
-        for n in $(which -a node22 node20 node18 "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
+        for n in $(which -a node22 node20 node18 "<?php echo $node; ?>" | grep -v "<?php echo $path; ?>/.node_bin"); do
             VER=$($n -v 2>/dev/null | sed "s/v//")
             if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
                 NODE_BIN_PATH=$n
@@ -181,32 +252,32 @@ EOF
             fi
         done
         if [ -z "$NODE_BIN_PATH" ]; then
-            NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+            NODE_BIN_PATH=$(which -a "<?php echo $node; ?>" | grep -v "<?php echo $path; ?>/.node_bin" | head -n1)
         fi
     fi
     ln -sf "$NODE_BIN_PATH" .node_bin/node
 
     # Symlink npm (using absolute path to avoid circularity)
-    if [[ "{{ $npm }}" == /* ]]; then
-        NPM_BIN_PATH="{{ $npm }}"
+    if [[ "<?php echo $npm; ?>" == /* ]]; then
+        NPM_BIN_PATH="<?php echo $npm; ?>"
     else
         NPM_BIN_PATH=""
         # Try to find a matching npm if we have a specific node version (e.g. node20 -> npm20)
         N_VER=$(echo "$NODE_BIN_PATH" | sed -E 's/.*node([0-9]+).*/\1/' | grep -E '^[0-9]+$')
         if [ ! -z "$N_VER" ]; then
-            NPM_BIN_PATH=$(which -a "npm$N_VER" 2>/dev/null | grep -v "{{ $path }}/.node_bin" | head -n1)
+            NPM_BIN_PATH=$(which -a "npm$N_VER" 2>/dev/null | grep -v "<?php echo $path; ?>/.node_bin" | head -n1)
         fi
 
         if [ -z "$NPM_BIN_PATH" ]; then
-            NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+            NPM_BIN_PATH=$(which -a "<?php echo $npm; ?>" | grep -v "<?php echo $path; ?>/.node_bin" | head -n1)
         fi
     fi
     ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
-    export PATH="{{ $path }}/.node_bin:$PATH"
+    export PATH="<?php echo $path; ?>/.node_bin:$PATH"
 
-    if [ ! -z "{{ $fontawesome_token }}" ]; then
-        export FONTAWESOME_TOKEN="{{ $fontawesome_token }}"
+    if [ ! -z "<?php echo $fontawesome_token; ?>" ]; then
+        export FONTAWESOME_TOKEN="<?php echo $fontawesome_token; ?>"
     fi
 
     # Node.js version check
@@ -225,20 +296,20 @@ EOF
         npm run build
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ ! -z "<?php echo isset($public_path) ? $public_path : ''; ?>" ] && [ "<?php echo isset($public_path) ? $public_path : ''; ?>" != "<?php echo $path; ?>/public" ]; then
         # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
-        if [ ! -L "{{ $public_path }}" ]; then
-            cd {{ $path }}/public
+        if [ ! -L "<?php echo $public_path; ?>" ]; then
+            cd <?php echo $path; ?>/public
             find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
                 dir_name=$(basename "$dir")
-                echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
-                rm -rf "{{ $public_path }}/$dir_name"
-                mkdir -p "{{ $public_path }}/$dir_name"
-                cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
+                echo "Syncing $dir_name to custom public path: <?php echo $public_path; ?>/$dir_name"
+                rm -rf "<?php echo $public_path; ?>/$dir_name"
+                mkdir -p "<?php echo $public_path; ?>/$dir_name"
+                cp -rf "$dir_name"/. "<?php echo $public_path; ?>/$dir_name/"
             done
 
             echo "Syncing root files to custom public path..."
-            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
+            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "<?php echo $public_path; ?>/" \;
         fi
     fi
 
@@ -252,42 +323,44 @@ EOF
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
     echo "Running idempotent database migrations..."
-    {{ $php }} artisan migrate --force
+    <?php echo $php; ?> artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
+    <?php echo $php; ?> artisan app:seed --force --no-interaction <?php echo $freshseed ? '--fresh' : ''; ?> <?php echo $usersync == "1" ? '--users' : ''; ?>
 
-    if [ "{{ $usersync }}" = "1" ]; then
+
+    if [ "<?php echo $usersync; ?>" = "1" ]; then
         echo "Syncing users (avatars) skipped (using FTP sync instead)..."
     fi
 
     echo "Syncing icons..."
-    {{ $php }} artisan app:icons:sync
-    {{ $php }} artisan filament:clear-cached-components
-    {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
+    <?php echo $php; ?> artisan app:icons:sync
+    <?php echo $php; ?> artisan filament:clear-cached-components
+    <?php echo $php; ?> artisan cache:clear
+    <?php echo $php; ?> artisan view:clear
 
     echo "Optimizing application..."
-    {{ $php }} artisan optimize
+    <?php echo $php; ?> artisan optimize
 
-    if [ "{{ $noai }}" != "1" ]; then
+    if [ "<?php echo $noai; ?>" != "1" ]; then
         echo "Reindexing AI..."
-        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+        <?php echo $php; ?> artisan ai:index --locale=all --enrich --no-interaction
     fi
 
     echo "✅ Setup finished successfully!"
-@endtask
+<?php $__container->endTask(); ?>
 
-@task('deploy', ['on' => 'web'])
-    echo "🚀 Deploying to {{ $host }}..."
+<?php $__container->startTask('deploy', ['on' => 'web']); ?>
+    echo "🚀 Deploying to <?php echo $host; ?>..."
 
-    PHP_VERSION=$({{ $php }} -r 'echo PHP_VERSION;')
+    PHP_VERSION=$(<?php echo $php; ?> -r 'echo PHP_VERSION;')
     if [ "$(printf '%s\n' "8.4.0" "$PHP_VERSION" | sort -V | head -n1)" != "8.4.0" ]; then
-        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using {{ $php }})"
+        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using <?php echo $php; ?>)"
         exit 1
     fi
 
-    cd {{ $path }}
+    cd <?php echo $path; ?>
+
 
     git fetch origin main
     git reset --hard origin/main
@@ -307,33 +380,34 @@ EOF
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
-    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+    <?php echo $php; ?> $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
     echo "Running idempotent database migrations..."
-    {{ $php }} artisan migrate --force
+    <?php echo $php; ?> artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
+    <?php echo $php; ?> artisan app:seed --force --no-interaction <?php echo $freshseed ? '--fresh' : ''; ?> <?php echo $usersync == "1" ? '--users' : ''; ?>
+
 
     echo "Updating .env configuration..."
-    {{ $php }} -r '
+    <?php echo $php; ?> -r '
         $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
         $vars = [];
-        if ("{{ $db_database_b64 }}") {
-            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
-            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
-            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
-            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
-            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
-            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
-            if ("{{ $db_prefix_b64 }}") {
-                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
+        if ("<?php echo $db_database_b64; ?>") {
+            $vars["DB_CONNECTION"] = base64_decode("<?php echo $db_connection_b64; ?>");
+            $vars["DB_HOST"] = base64_decode("<?php echo $db_host_b64; ?>");
+            $vars["DB_PORT"] = base64_decode("<?php echo $db_port_b64; ?>");
+            $vars["DB_DATABASE"] = base64_decode("<?php echo $db_database_b64; ?>");
+            $vars["DB_USERNAME"] = base64_decode("<?php echo $db_username_b64; ?>");
+            $vars["DB_PASSWORD"] = base64_decode("<?php echo $db_password_b64; ?>");
+            if ("<?php echo $db_prefix_b64; ?>") {
+                $vars["DB_PREFIX"] = base64_decode("<?php echo $db_prefix_b64; ?>");
             }
         }
-        if ("{{ $public_path_b64 }}") {
-            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
+        if ("<?php echo $public_path_b64; ?>") {
+            $vars["APP_PUBLIC_PATH"] = base64_decode("<?php echo $public_path_b64; ?>");
         }
         foreach ($vars as $key => $value) {
             $found = false;
@@ -353,25 +427,25 @@ EOF
     '
     echo "✅ .env updated."
 
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
-        echo "Ensuring custom public path is configured: {{ $public_path }}"
-        if [ ! -L "{{ $public_path }}" ] && [ ! -d "{{ $public_path }}" ]; then
-            ln -sf "{{ $path }}/public" "{{ $public_path }}"
-            echo "✅ Created symlink from {{ $path }}/public to {{ $public_path }}"
+    if [ ! -z "<?php echo isset($public_path) ? $public_path : ''; ?>" ] && [ "<?php echo isset($public_path) ? $public_path : ''; ?>" != "<?php echo $path; ?>/public" ]; then
+        echo "Ensuring custom public path is configured: <?php echo $public_path; ?>"
+        if [ ! -L "<?php echo $public_path; ?>" ] && [ ! -d "<?php echo $public_path; ?>" ]; then
+            ln -sf "<?php echo $path; ?>/public" "<?php echo $public_path; ?>"
+            echo "✅ Created symlink from <?php echo $path; ?>/public to <?php echo $public_path; ?>"
         fi
     fi
 
     # Determine and patch entry point
     if [ -f "public/index.production.php" ]; then
-        if [ -z "{{ isset($public_path) ? $public_path : '' }}" ] || [ "{{ isset($public_path) ? $public_path : '' }}" = "{{ $path }}/public" ]; then
-            DEST="{{ $path }}/public/index.php"
+        if [ -z "<?php echo isset($public_path) ? $public_path : ''; ?>" ] || [ "<?php echo isset($public_path) ? $public_path : ''; ?>" = "<?php echo $path; ?>/public" ]; then
+            DEST="<?php echo $path; ?>/public/index.php"
         else
-            DEST="{{ $public_path }}/index.php"
+            DEST="<?php echo $public_path; ?>/index.php"
         fi
         cp public/index.production.php "$DEST"
         echo "✅ index.php replaced by index.production.php"
     else
-        DEST="{{ $path }}/public/index.php"
+        DEST="<?php echo $path; ?>/public/index.php"
     fi
 
     echo "Patching entry points for absolute paths..."
@@ -394,7 +468,7 @@ foreach ($files as $f) {
     file_put_contents($f, $c);
 }
 EOF
-    {{ $php }} patch_entrypoints.php "{{ $path }}" "{{ $target_public }}" "$DEST"
+    <?php echo $php; ?> patch_entrypoints.php "<?php echo $path; ?>" "<?php echo $target_public; ?>" "$DEST"
     rm patch_entrypoints.php
     echo "✅ Entry points patched."
 
@@ -402,12 +476,12 @@ EOF
     mkdir -p .node_bin
 
     # Symlink node (using absolute path to avoid circularity)
-    if [[ "{{ $node }}" == /* ]]; then
-        NODE_BIN_PATH="{{ $node }}"
+    if [[ "<?php echo $node; ?>" == /* ]]; then
+        NODE_BIN_PATH="<?php echo $node; ?>"
     else
         # Prefer v18+ versions if found
         NODE_BIN_PATH=""
-        for n in $(which -a node22 node20 node18 "{{ $node }}" | grep -v "{{ $path }}/.node_bin"); do
+        for n in $(which -a node22 node20 node18 "<?php echo $node; ?>" | grep -v "<?php echo $path; ?>/.node_bin"); do
             VER=$($n -v 2>/dev/null | sed "s/v//")
             if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
                 NODE_BIN_PATH=$n
@@ -415,32 +489,32 @@ EOF
             fi
         done
         if [ -z "$NODE_BIN_PATH" ]; then
-            NODE_BIN_PATH=$(which -a "{{ $node }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+            NODE_BIN_PATH=$(which -a "<?php echo $node; ?>" | grep -v "<?php echo $path; ?>/.node_bin" | head -n1)
         fi
     fi
     ln -sf "$NODE_BIN_PATH" .node_bin/node
 
     # Symlink npm (using absolute path to avoid circularity)
-    if [[ "{{ $npm }}" == /* ]]; then
-        NPM_BIN_PATH="{{ $npm }}"
+    if [[ "<?php echo $npm; ?>" == /* ]]; then
+        NPM_BIN_PATH="<?php echo $npm; ?>"
     else
         NPM_BIN_PATH=""
         # Try to find a matching npm if we have a specific node version (e.g. node20 -> npm20)
         N_VER=$(echo "$NODE_BIN_PATH" | sed -E 's/.*node([0-9]+).*/\1/' | grep -E '^[0-9]+$')
         if [ ! -z "$N_VER" ]; then
-            NPM_BIN_PATH=$(which -a "npm$N_VER" 2>/dev/null | grep -v "{{ $path }}/.node_bin" | head -n1)
+            NPM_BIN_PATH=$(which -a "npm$N_VER" 2>/dev/null | grep -v "<?php echo $path; ?>/.node_bin" | head -n1)
         fi
 
         if [ -z "$NPM_BIN_PATH" ]; then
-            NPM_BIN_PATH=$(which -a "{{ $npm }}" | grep -v "{{ $path }}/.node_bin" | head -n1)
+            NPM_BIN_PATH=$(which -a "<?php echo $npm; ?>" | grep -v "<?php echo $path; ?>/.node_bin" | head -n1)
         fi
     fi
     ln -sf "$NPM_BIN_PATH" .node_bin/npm
 
-    export PATH="{{ $path }}/.node_bin:$PATH"
+    export PATH="<?php echo $path; ?>/.node_bin:$PATH"
 
-    if [ ! -z "{{ $fontawesome_token }}" ]; then
-        export FONTAWESOME_TOKEN="{{ $fontawesome_token }}"
+    if [ ! -z "<?php echo $fontawesome_token; ?>" ]; then
+        export FONTAWESOME_TOKEN="<?php echo $fontawesome_token; ?>"
     fi
 
     # Node.js version check
@@ -459,47 +533,48 @@ EOF
     npm run build
 
     # Zajištění, aby build a assety byly v subdoméně
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ ! -z "<?php echo isset($public_path) ? $public_path : ''; ?>" ] && [ "<?php echo isset($public_path) ? $public_path : ''; ?>" != "<?php echo $path; ?>/public" ]; then
         # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
-        if [ ! -L "{{ $public_path }}" ]; then
-            cd {{ $path }}/public
+        if [ ! -L "<?php echo $public_path; ?>" ]; then
+            cd <?php echo $path; ?>/public
             find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
                 dir_name=$(basename "$dir")
-                echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
-                rm -rf "{{ $public_path }}/$dir_name"
-                mkdir -p "{{ $public_path }}/$dir_name"
-                cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
+                echo "Syncing $dir_name to custom public path: <?php echo $public_path; ?>/$dir_name"
+                rm -rf "<?php echo $public_path; ?>/$dir_name"
+                mkdir -p "<?php echo $public_path; ?>/$dir_name"
+                cp -rf "$dir_name"/. "<?php echo $public_path; ?>/$dir_name/"
             done
 
             echo "Syncing root files to custom public path..."
-            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
+            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "<?php echo $public_path; ?>/" \;
         fi
     fi
 
-    {{ $php }} artisan app:icons:sync
-    {{ $php }} artisan filament:clear-cached-components
-    {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
-    {{ $php }} artisan optimize
+    <?php echo $php; ?> artisan app:icons:sync
+    <?php echo $php; ?> artisan filament:clear-cached-components
+    <?php echo $php; ?> artisan cache:clear
+    <?php echo $php; ?> artisan view:clear
+    <?php echo $php; ?> artisan optimize
 
-    if [ "{{ $noai }}" != "1" ]; then
+    if [ "<?php echo $noai; ?>" != "1" ]; then
         echo "Reindexing AI..."
-        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+        <?php echo $php; ?> artisan ai:index --locale=all --enrich --no-interaction
     fi
 
     echo "✅ Deployment finished successfully!"
-@endtask
+<?php $__container->endTask(); ?>
 
-@task('sync', ['on' => 'web'])
-    echo "🚀 Syncing configuration and running migrations on {{ $host }}..."
+<?php $__container->startTask('sync', ['on' => 'web']); ?>
+    echo "🚀 Syncing configuration and running migrations on <?php echo $host; ?>..."
 
-    PHP_VERSION=$({{ $php }} -r 'echo PHP_VERSION;')
+    PHP_VERSION=$(<?php echo $php; ?> -r 'echo PHP_VERSION;')
     if [ "$(printf '%s\n' "8.4.0" "$PHP_VERSION" | sort -V | head -n1)" != "8.4.0" ]; then
-        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using {{ $php }})"
+        echo "❌ Error: PHP version 8.4.0 or higher is required. Found: $PHP_VERSION (using <?php echo $php; ?>)"
         exit 1
     fi
 
-    cd {{ $path }}
+    cd <?php echo $path; ?>
+
 
     echo "Preparing .env file..."
     if [ ! -f ".env" ]; then
@@ -508,7 +583,7 @@ EOF
     fi
 
     echo "Updating .env configuration..."
-    {{ $php }} -r '
+    <?php echo $php; ?> -r '
         $envFile = ".env";
         if (!file_exists($envFile)) { exit(0); }
         $lines = explode("\n", trim(file_get_contents($envFile)));
@@ -516,19 +591,19 @@ EOF
             "APP_ENV" => "production",
             "APP_DEBUG" => "false",
         ];
-        if ("{{ $db_database_b64 }}") {
-            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
-            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
-            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
-            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
-            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
-            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
-            if ("{{ $db_prefix_b64 }}") {
-                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
+        if ("<?php echo $db_database_b64; ?>") {
+            $vars["DB_CONNECTION"] = base64_decode("<?php echo $db_connection_b64; ?>");
+            $vars["DB_HOST"] = base64_decode("<?php echo $db_host_b64; ?>");
+            $vars["DB_PORT"] = base64_decode("<?php echo $db_port_b64; ?>");
+            $vars["DB_DATABASE"] = base64_decode("<?php echo $db_database_b64; ?>");
+            $vars["DB_USERNAME"] = base64_decode("<?php echo $db_username_b64; ?>");
+            $vars["DB_PASSWORD"] = base64_decode("<?php echo $db_password_b64; ?>");
+            if ("<?php echo $db_prefix_b64; ?>") {
+                $vars["DB_PREFIX"] = base64_decode("<?php echo $db_prefix_b64; ?>");
             }
         }
-        if ("{{ $public_path_b64 }}") {
-            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
+        if ("<?php echo $public_path_b64; ?>") {
+            $vars["APP_PUBLIC_PATH"] = base64_decode("<?php echo $public_path_b64; ?>");
         }
         foreach ($vars as $key => $value) {
             $found = false;
@@ -550,7 +625,7 @@ EOF
 
     if ! grep -q "APP_KEY=base64" .env; then
         echo "Generating APP_KEY..."
-        {{ $php }} artisan key:generate --no-interaction
+        <?php echo $php; ?> artisan key:generate --no-interaction
     fi
 
     echo "Ensuring storage and cache directories exist and are writable..."
@@ -563,23 +638,23 @@ EOF
     rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
 
     # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
-        if [ ! -L "{{ $public_path }}" ]; then
-            cd {{ $path }}/public
+    if [ ! -z "<?php echo isset($public_path) ? $public_path : ''; ?>" ] && [ "<?php echo isset($public_path) ? $public_path : ''; ?>" != "<?php echo $path; ?>/public" ]; then
+        if [ ! -L "<?php echo $public_path; ?>" ]; then
+            cd <?php echo $path; ?>/public
             # Najdeme všechny skutečné adresáře v public/
             find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
                 dir_name=$(basename "$dir")
-                echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
-                rm -rf "{{ $public_path }}/$dir_name"
-                mkdir -p "{{ $public_path }}/$dir_name"
+                echo "Syncing $dir_name to custom public path: <?php echo $public_path; ?>/$dir_name"
+                rm -rf "<?php echo $public_path; ?>/$dir_name"
+                mkdir -p "<?php echo $public_path; ?>/$dir_name"
                 # Kopírování obsahu včetně skrytých souborů
-                cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
+                cp -rf "$dir_name"/. "<?php echo $public_path; ?>/$dir_name/"
             done
 
             # Také zkopírovat jednotlivé soubory v public/ (všechny, ne jen vybrané přípony)
             # Vynecháme index.php a index.production.php, které jsou řešeny patchováním/nahrazením
             echo "Syncing root files to custom public path..."
-            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
+            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "<?php echo $public_path; ?>/" \;
         fi
 
         echo "Patching entry points for absolute paths..."
@@ -602,40 +677,42 @@ foreach ($files as $f) {
     file_put_contents($f, $c);
 }
 EOF
-        {{ $php }} patch_entrypoints.php "{{ $path }}" "{{ $target_public }}" "{{ $target_public }}/index.php"
+        <?php echo $php; ?> patch_entrypoints.php "<?php echo $path; ?>" "<?php echo $target_public; ?>" "<?php echo $target_public; ?>/index.php"
         rm patch_entrypoints.php
         echo "✅ Entry points patched."
     fi
 
     echo "Running idempotent database migrations..."
-    {{ $php }} artisan migrate --force
+    <?php echo $php; ?> artisan migrate --force
 
     echo "Running database seeding..."
-    {{ $php }} artisan app:seed --force --no-interaction {{ $freshseed ? '--fresh' : '' }} {{ $usersync == "1" ? '--users' : '' }}
+    <?php echo $php; ?> artisan app:seed --force --no-interaction <?php echo $freshseed ? '--fresh' : ''; ?> <?php echo $usersync == "1" ? '--users' : ''; ?>
 
-    if [ "{{ $usersync }}" = "1" ]; then
+
+    if [ "<?php echo $usersync; ?>" = "1" ]; then
         echo "Syncing users (avatars) skipped (using FTP sync instead)..."
     fi
 
     echo "Syncing icons..."
-    {{ $php }} artisan app:icons:sync
-    {{ $php }} artisan filament:clear-cached-components
-    {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
+    <?php echo $php; ?> artisan app:icons:sync
+    <?php echo $php; ?> artisan filament:clear-cached-components
+    <?php echo $php; ?> artisan cache:clear
+    <?php echo $php; ?> artisan view:clear
 
     echo "Optimizing application..."
-    {{ $php }} artisan optimize
+    <?php echo $php; ?> artisan optimize
 
-    if [ "{{ $noai }}" != "1" ]; then
+    if [ "<?php echo $noai; ?>" != "1" ]; then
         echo "Reindexing AI..."
-        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+        <?php echo $php; ?> artisan ai:index --locale=all --enrich --no-interaction
     fi
 
     echo "✅ Sync finished successfully!"
-@endtask
+<?php $__container->endTask(); ?>
 
-@task('status', ['on' => 'web'])
-    cd {{ $path }}
-    {{ $php }} artisan --version
+<?php $__container->startTask('status', ['on' => 'web']); ?>
+    cd <?php echo $path; ?>
+
+    <?php echo $php; ?> artisan --version
     git log -1
-@endtask
+<?php $__container->endTask(); ?>

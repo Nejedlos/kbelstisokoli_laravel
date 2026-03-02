@@ -32,6 +32,8 @@ return [
         'security_2fa' => 'Two-Factor Authentication (2FA)',
         'consents' => 'Club Consents',
         'consents_desc' => 'Management of granted consents (GDPR, photos, etc.).',
+        'player_photos' => 'Player Photos',
+        'player_photos_desc' => 'Portrait and action photos of the player for the website and rosters.',
     ],
     'fields' => [
         'first_name' => 'First Name',

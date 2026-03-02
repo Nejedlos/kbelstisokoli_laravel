@@ -32,6 +32,8 @@ return [
         'security_2fa' => 'Dvoufázové ověření (2FA)',
         'consents' => 'Klubové souhlasy',
         'consents_desc' => 'Správa udělených souhlasů (GDPR, fotografie, atd.).',
+        'player_photos' => 'Hráčské fotografie',
+        'player_photos_desc' => 'Portrétní a akční fotografie hráče pro web a soupisky.',
     ],
     'fields' => [
         'first_name' => 'Jméno',

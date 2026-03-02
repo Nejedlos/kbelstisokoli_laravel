@@ -195,6 +195,12 @@ return [
                     'coach_phone_help' => 'If filled, it will be displayed on the web instead of the coach\'s main phone.',
                     'role_in_team' => 'Role in team',
                     'is_primary_team' => 'Primary team',
+                    'roles' => [
+                        'player' => 'Player',
+                        'captain' => 'Captain',
+                        'assistant_captain' => 'Assistant Captain',
+                        'guest' => 'Guest Player',
+                    ],
                 ],
                 'tabs' => [
                     'general' => 'General Information',

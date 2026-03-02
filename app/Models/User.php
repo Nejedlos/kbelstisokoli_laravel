@@ -69,6 +69,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
         'notification_preferences',
         'onboarding_completed_at',
         'metadata',
+        'member_view_all_by_default',
+        'member_default_team_id',
     ];
 
     /**
@@ -96,6 +98,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
             'notification_preferences' => 'array',
             'onboarding_completed_at' => 'datetime',
             'metadata' => 'array',
+            'member_view_all_by_default' => 'boolean',
+            'member_default_team_id' => 'integer',
             'two_factor_confirmed_at' => 'datetime',
             'date_of_birth' => 'date',
             'membership_started_at' => 'date',

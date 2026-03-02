@@ -27,7 +27,7 @@
                 <div class="relative group border-b border-slate-50 last:border-0 transition-all duration-300 {{ $isUnread ? 'bg-primary/5 hover:bg-primary/[0.08]' : 'hover:bg-slate-50/80' }}">
                     <div class="flex items-center gap-4 p-5 sm:p-6">
                         @if($actionUrl)
-                            <a href="{{ $actionUrl }}" class="absolute inset-0 z-20" aria-label="{{ $notification->data['title'] ?? '' }}"></a>
+                            <a href="{{ $actionUrl }}" class="absolute inset-0 z-20" aria-label="{{ !empty($notification->data['title']) ? __($notification->data['title']) : __('member.notifications.default_title') }}"></a>
                         @endif
 
                         <div class="shrink-0">

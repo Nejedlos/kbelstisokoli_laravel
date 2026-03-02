@@ -531,20 +531,6 @@ class AppSyncCommand extends Command
         }
 
         $toTransfer = [];
-        if (file_exists($exampleEnvPath)) {
-            $exampleVars = \Dotenv\Dotenv::parse(file_get_contents($exampleEnvPath));
-            foreach (['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_PREFIX'] as $key) {
-                if (isset($exampleVars[$key])) {
-                    $toTransfer[$key] = $exampleVars[$key];
-                }
-            }
-            foreach ($exampleVars as $key => $value) {
-                if (str_starts_with($key, 'PROD_')) {
-                    $toTransfer[$key] = $value;
-                }
-            }
-        }
-
         if (file_exists($rootEnvPath)) {
             $rootVars = \Dotenv\Dotenv::parse(file_get_contents($rootEnvPath));
             foreach ($rootVars as $key => $value) {

@@ -34,13 +34,18 @@ class MemberContext
             return null;
         }
 
-        // 3. Zkusíme defaultní tým z profilu
+        // 3. Zkusíme primární tým z aktivního hráčského profilu
+        $primaryTeamId = $user->activePlayerProfile?->primary_team_id;
+        if ($primaryTeamId) {
+            return $primaryTeamId;
+        }
+
+        // 4. Zkusíme defaultní tým z profilu (v modelu User)
         if ($user->member_default_team_id) {
             return $user->member_default_team_id;
         }
 
-        // 4. Zkusíme první tým uživatele (hráčský profil -> týmy)
-        // User model má teams() relaci přímo
+        // 5. Zkusíme první tým uživatele (hráčský profil -> týmy)
         $firstTeamId = $user->teams()->first()?->id;
 
         return $firstTeamId;

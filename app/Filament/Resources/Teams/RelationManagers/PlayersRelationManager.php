@@ -11,6 +11,7 @@ use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -45,11 +46,12 @@ class PlayersRelationManager extends RelationManager
                     ->label(__('user.fields.full_name'))
                     ->disabled()
                     ->columnSpanFull(),
-                TextInput::make('role_in_team')
+                Select::make('role_in_team')
                     ->label(__('admin.navigation.resources.team.fields.role_in_team'))
+                    ->options(__('admin.navigation.resources.team.fields.roles'))
                     ->default('player')
                     ->required()
-                    ->maxLength(255),
+                    ->native(false),
                 Checkbox::make('is_primary_team')
                     ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
                     ->default(false),
@@ -74,6 +76,7 @@ class PlayersRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('pivot.role_in_team')
                     ->label(__('admin.navigation.resources.team.fields.role_in_team'))
+                    ->formatStateUsing(fn (string $state): string => __("admin.navigation.resources.team.fields.roles.{$state}") ?? $state)
                     ->searchable(),
                 IconColumn::make('pivot.is_primary_team')
                     ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
@@ -106,17 +109,29 @@ class PlayersRelationManager extends RelationManager
                     ->recordSelectSearchColumns([(new \App\Models\User())->getTable().'.name'])
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
-                        TextInput::make('role_in_team')
+                        Select::make('role_in_team')
                             ->label(__('admin.navigation.resources.team.fields.role_in_team'))
+                            ->options(__('admin.navigation.resources.team.fields.roles'))
                             ->default('player')
-                            ->required(),
+                            ->required()
+                            ->native(false),
                         Checkbox::make('is_primary_team')
                             ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
-                            ->default(false),
+                            ->default(true),
                         Checkbox::make('is_on_roster')
                             ->label(__('Hráč je na soupisce'))
                             ->default(false),
-                    ]),
+                    ])
+                    ->after(function (\App\Models\PlayerProfile $record, array $data, RelationManager $livewire) {
+                        if ($data['is_primary_team'] ?? false) {
+                            // Zrušíme příznak primárního týmu u ostatních týmů v pivotu
+                            $record->teams()->where('team_id', '!=', $livewire->getOwnerRecord()->id)
+                                ->updateExistingPivot($record->teams()->pluck('team_id'), ['is_primary_team' => false]);
+
+                            // Aktualizujeme primary_team_id v profilu
+                            $record->update(['primary_team_id' => $livewire->getOwnerRecord()->id]);
+                        }
+                    }),
             ])
             ->recordActions([
                 Action::make('edit_user')
@@ -129,23 +144,52 @@ class PlayersRelationManager extends RelationManager
                     ->icon(IconHelper::render(IconHelper::EDIT))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->form([
-                        TextInput::make('role_in_team')
+                        Select::make('role_in_team')
                             ->label(__('admin.navigation.resources.team.fields.role_in_team'))
-                            ->required(),
+                            ->options(__('admin.navigation.resources.team.fields.roles'))
+                            ->default('player')
+                            ->required()
+                            ->native(false),
                         Checkbox::make('is_primary_team')
                             ->label(__('admin.navigation.resources.team.fields.is_primary_team')),
                         Checkbox::make('is_on_roster')
                             ->label(__('Hráč je na soupisce')),
-                    ]),
+                    ])
+                    ->after(function (\App\Models\PlayerProfile $record, array $data, RelationManager $livewire) {
+                        if ($data['is_primary_team'] ?? false) {
+                            // Zrušíme příznak u ostatních týmů
+                            $record->teams()->where('team_id', '!=', $livewire->getOwnerRecord()->id)
+                                ->updateExistingPivot($record->teams()->pluck('team_id'), ['is_primary_team' => false]);
+
+                            // Aktualizujeme profil
+                            $record->update(['primary_team_id' => $livewire->getOwnerRecord()->id]);
+                        } elseif ($record->primary_team_id === $livewire->getOwnerRecord()->id) {
+                            // Pokud to byl primární tým a uživatel jej odškrtl, nastavíme primary_team_id na null
+                            $record->update(['primary_team_id' => null]);
+                        }
+                    }),
                 DetachAction::make()
                     ->label(__('admin.navigation.resources.team.actions.detach'))
                     ->icon(IconHelper::render(IconHelper::TRASH))
-                    ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
+                    ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
+                    ->after(function (\App\Models\PlayerProfile $record, RelationManager $livewire) {
+                        if ($record->primary_team_id === $livewire->getOwnerRecord()->id) {
+                            $record->update(['primary_team_id' => null]);
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
-                        ->label(__('admin.navigation.resources.team.actions.detach_selected')),
+                        ->label(__('admin.navigation.resources.team.actions.detach_selected'))
+                        ->after(function (\Illuminate\Support\Collection $records, RelationManager $livewire) {
+                            $teamId = $livewire->getOwnerRecord()->id;
+                            foreach ($records as $record) {
+                                if ($record->primary_team_id === $teamId) {
+                                    $record->update(['primary_team_id' => null]);
+                                }
+                            }
+                        }),
                 ])->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ]);
     }
