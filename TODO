@@ -1,0 +1,16 @@
+ kontrolovat soupisku jestli souhlasí a synchronizovat (HOTOVO)
+ pokud hráč není v systému tak bezpečně zadat ghost uživatele (HOTOVO)
+ KROK 6: Implementace synchronizace zápasů (seznam a detaily) (HOTOVO)
+ KROK 7: Orchestrace a automatizace synchronizace (HOTOVO)
+ KROK 8: Plánování úloh (Scheduler) (HOTOVO)
+ v adminu mít nástroje pro správu synchronizace, dry-run a párování hráčů (HOTOVO)
+ import starých statistik podle zadání
+ v systémové konsoli mít příkaz na spuštění synchronizace statistik ručně
+ Co se synchronizuje (HOTOVO):
+ - zápasy
+ - hráči na soupisce
+ - statistiky týmu
+ - statistiky hráčů
+
+Zparacovat na outputu aby to bylo pro uživatele zajímavé a poučné
+

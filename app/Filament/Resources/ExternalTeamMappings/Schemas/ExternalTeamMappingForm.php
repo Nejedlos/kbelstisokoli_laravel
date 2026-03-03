@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Filament\Resources\ExternalTeamMappings\Schemas;
+
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Schema;
+
+class ExternalTeamMappingForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Základní informace')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('source_key')
+                            ->label('Zdroj')
+                            ->default('czbasketball')
+                            ->required()
+                            ->readOnly(),
+                        Select::make('team_id')
+                            ->label('Interní tým')
+                            ->relationship('team', 'name')
+                            ->required(),
+                        TextInput::make('external_team_id')
+                            ->label('Externí ID týmu')
+                            ->required()
+                            ->helperText('Např. 7738 pro Muži E'),
+                        TextInput::make('base_team_url')
+                            ->label('URL týmu')
+                            ->url()
+                            ->required()
+                            ->helperText('https://cz.basketball/tym/7738'),
+                    ]),
+            ]);
+    }
+}
