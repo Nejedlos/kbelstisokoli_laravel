@@ -64,6 +64,7 @@ Popis jednotlivých funkčních modulů aplikace.
 22. [Administrace synchronizace](./04-moduly/27-external-admin-tools.md)
 23. [Vizualizace externích statistik](./04-moduly/28-external-stats-visuals.md)
 24. [Robustnost a monitoring importů](./04-moduly/29-external-robustness.md)
+25. [Import historických statistik (Legacy)](./04-moduly/30-legacy-stats-import.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)
 Implementace umělé inteligence pro vyhledávání a správu dokumentů.

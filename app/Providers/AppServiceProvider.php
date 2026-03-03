@@ -49,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\Stats\Sync\OpponentSyncService::class);
         $this->app->singleton(\App\Services\Stats\Sync\MatchSyncService::class);
         $this->app->singleton(\App\Services\Stats\Sync\StatisticSyncService::class);
+        $this->app->singleton(\App\Services\Stats\Legacy\LegacyFileClassifier::class);
+        $this->app->singleton(\App\Services\Stats\Legacy\LegacyImportService::class);
 
         // Robustní fix pro Vite manifest na Webglobe hostingu (subdomény vs. root)
         $this->app->singleton(Vite::class, function ($app) {
