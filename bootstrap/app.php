@@ -80,6 +80,15 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         /*
         |--------------------------------------------------------------------------
+        | Scheduler Heartbeat pro Debug Panel
+        |--------------------------------------------------------------------------
+        */
+        $schedule->call(function () {
+            \Illuminate\Support\Facades\Cache::put('scheduler_heartbeat', now());
+        })->everyMinute();
+
+        /*
+        |--------------------------------------------------------------------------
         | Synchronizace externích statistik (cz.basketball)
         |--------------------------------------------------------------------------
         */
