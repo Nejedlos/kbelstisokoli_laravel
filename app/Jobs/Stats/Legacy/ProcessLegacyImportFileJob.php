@@ -57,6 +57,26 @@ class ProcessLegacyImportFileJob implements ShouldQueue
         try {
             $content = Storage::disk('public')->get($file->stored_path);
 
+            if ($content === null) {
+                // Zkusíme disk 'local' pokud v 'public' není, protože batch_creator dává 'legacystats/...'
+                // A storage_path('app/legacystats') odpovídá 'local' disku v Laravelu obvykle.
+                $content = Storage::disk('local')->get($file->stored_path);
+            }
+
+            // Pokud to není v Laravel storage disku, zkusíme přímou cestu (pro CLI/Local)
+            if ($content === null) {
+                // Skutečná cesta v tomto prostředí je storage/app/legacystats/...
+                // Ale stored_path může být "legacystats/file.html"
+                $absolutePath = base_path('storage/app/' . $file->stored_path);
+                if (file_exists($absolutePath)) {
+                    $content = file_get_contents($absolutePath);
+                }
+            }
+
+            if ($content === null) {
+                throw new \Exception("Soubor {$file->stored_path} nebyl nalezen v úložišti.");
+            }
+
             // Idempotence check (pokud už existuje stejný hash v úspěšném runu)
             $existingFile = LegacyImportFile::where('content_hash', $file->content_hash)
                 ->where('status', 'success')
@@ -71,7 +91,8 @@ class ProcessLegacyImportFileJob implements ShouldQueue
             }
 
             // 2. Parse
-            $tableDto = $extractor->extract($content, $file->file_type);
+            $classification = (new \App\Services\Stats\Legacy\LegacyFileClassifier())->classify($file->original_filename, $content);
+            $extractedTables = $extractor->extract($content, $file->file_type, $classification['encoding']);
 
             // 3. Season & Team
             $season = $this->ensureSeason($file->detected_season_label);
@@ -81,73 +102,56 @@ class ProcessLegacyImportFileJob implements ShouldQueue
                 throw new \Exception("Sezónu '{$file->detected_season_label}' se nepodařilo vytvořit/najít.");
             }
 
-            // 4. Statistic Set
-            $setName = match ($file->file_type) {
-                'players_stats' => "Legacy: Statistiky hráčů {$season->name}" . ($team ? " ({$team->name})" : ""),
-                'team_stats' => "Legacy: Týmové statistiky {$season->name}" . ($team ? " ({$team->name})" : ""),
-                'league_table' => "Legacy: Konečná tabulka {$season->name}",
-                default => "Legacy Import: {$file->original_filename}",
-            };
+            // 4. Persist Tables
+            $totalImportedCount = 0;
+            $warnings = [];
 
-            $setSlug = Str::slug("legacy-{$file->file_type}-{$season->name}" . ($team ? "-{$team->slug}" : ""));
+            foreach ($extractedTables as $tableDto) {
+                $statSet = $this->ensureStatSet($tableDto, $season, $team, $file);
 
-            $statSet = StatisticSet::updateOrCreate(
-                ['slug' => $setSlug],
-                [
-                    'name' => ['cs' => $setName, 'en' => $setName],
-                    'type' => match ($file->file_type) {
-                        'players_stats' => 'player',
-                        'team_stats' => 'team',
-                        'league_table' => 'team',
-                        default => 'player',
-                    },
-                    'column_config' => $tableDto->columns,
-                    'source_type' => 'legacy',
-                    'scope' => 'season',
-                ]
-            );
+                DB::transaction(function () use ($tableDto, $statSet, $season, $team, $file, &$totalImportedCount) {
+                    // Smazat staré řádky pro stejný set, sezónu a soubor
+                    StatisticRow::where('statistic_set_id', $statSet->id)
+                        ->where('season_id', $season->id)
+                        ->whereJsonContains('source_metadata->original_filename', $file->original_filename)
+                        ->whereJsonContains('source_metadata->table_type', $tableDto->type)
+                        ->delete();
 
-            // 5. Persist Rows
-            $importedCount = 0;
-            DB::transaction(function () use ($tableDto, $statSet, $season, $team, $file, &$importedCount) {
-                // Smazat staré řádky pro stejný set a sezónu v rámci této dávky (pokud re-run)
-                // Ale raději budeme čistit jen pokud force? Tady zatím prostě mažeme staré z tohoto souboru.
-                StatisticRow::where('statistic_set_id', $statSet->id)
-                    ->where('season_id', $season->id)
-                    ->whereJsonContains('source_metadata->original_filename', $file->original_filename)
-                    ->delete();
+                    foreach ($tableDto->rows as $row) {
+                        StatisticRow::create([
+                            'statistic_set_id' => $statSet->id,
+                            'season_id' => $season->id,
+                            'team_id' => $team?->id,
+                            'row_label' => $row->rowLabel,
+                            'values' => $row->values,
+                            'source_metadata' => [
+                                'source_type' => 'legacy',
+                                'table_type' => $tableDto->type,
+                                'original_filename' => $file->original_filename,
+                                'content_hash' => hash('sha256', serialize($row->values)),
+                                'imported_at' => now()->toDateTimeString(),
+                            ],
+                        ]);
+                        $totalImportedCount++;
+                    }
+                });
 
-                foreach ($tableDto->rows as $row) {
-                    StatisticRow::create([
-                        'statistic_set_id' => $statSet->id,
-                        'season_id' => $season->id,
-                        'team_id' => $team?->id,
-                        'row_label' => $row->rowLabel,
-                        'values' => $row->values,
-                        'source_metadata' => [
-                            'source_type' => 'legacy',
-                            'original_filename' => $file->original_filename,
-                            'content_hash' => $file->content_hash,
-                            'imported_at' => now()->toDateTimeString(),
-                        ],
-                    ]);
-                    $importedCount++;
-                }
-            });
+                $warnings = array_merge($warnings, $tableDto->warnings);
+            }
 
             // 6. Update status
             $file->update([
                 'status' => 'success',
-                'imported_rows_count' => $importedCount,
-                'warnings_count' => count($tableDto->warnings),
+                'imported_rows_count' => $totalImportedCount,
+                'warnings_count' => count($warnings),
             ]);
 
             $run->update([
                 'status' => 'success',
-                'extracted_count' => count($tableDto->rows),
-                'imported_count' => $importedCount,
+                'extracted_count' => $totalImportedCount,
+                'imported_count' => $totalImportedCount,
                 'finished_at' => now(),
-                'metadata' => array_merge($run->metadata, ['warnings' => $tableDto->warnings]),
+                'metadata' => array_merge($run->metadata, ['warnings' => $warnings]),
             ]);
 
         } catch (\Exception $e) {
@@ -194,5 +198,30 @@ class ProcessLegacyImportFileJob implements ShouldQueue
                 : 'running',
             'finished_at' => ($stats->processed == $stats->total) ? now() : null,
         ]);
+    }
+
+    protected function ensureStatSet($tableDto, $season, $team, $file): StatisticSet
+    {
+        $setName = match ($tableDto->type) {
+            'players_shooting' => "Legacy: Střelba hráčů {$season->name}" . ($team ? " ({$team->name})" : ""),
+            'players_summary' => "Legacy: Souhrn hráčů {$season->name}" . ($team ? " ({$team->name})" : ""),
+            'team_matches_shooting' => "Legacy: Zápasy střelba {$season->name}" . ($team ? " ({$team->name})" : ""),
+            'team_matches_fouls' => "Legacy: Zápasy fauly/val {$season->name}" . ($team ? " ({$team->name})" : ""),
+            'league_table' => "Legacy: Konečná tabulka {$season->name}",
+            default => "Legacy Import: {$tableDto->type} {$season->name}",
+        };
+
+        $setSlug = Str::slug("legacy-{$tableDto->type}-{$season->name}" . ($team ? "-{$team->slug}" : ""));
+
+        return StatisticSet::updateOrCreate(
+            ['slug' => $setSlug],
+            [
+                'name' => ['cs' => $setName, 'en' => $setName],
+                'type' => Str::contains($tableDto->type, 'players') ? 'player' : 'team',
+                'column_config' => $tableDto->columns,
+                'source_type' => 'legacy',
+                'scope' => 'season',
+            ]
+        );
     }
 }

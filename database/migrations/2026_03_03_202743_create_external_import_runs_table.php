@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('external_import_runs', function (Blueprint $table) {
             $table->id();
             $table->string('source_key'); // "czbasketball"
-            $table->foreignId('season_id')->constrained()->onDelete('cascade');
+            $table->foreignId('season_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('team_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('run_type'); // team_page, matches_list, match_detail, player_detail
             $table->string('target_external_id')->nullable();

@@ -65,10 +65,11 @@ Popis jednotlivých funkčních modulů aplikace.
 23. [Vizualizace externích statistik](./04-moduly/28-external-stats-visuals.md)
 24. [Robustnost a monitoring importů](./04-moduly/29-external-robustness.md)
 25. [Import historických statistik (Legacy)](./04-moduly/30-legacy-stats-import.md)
-26. [Debug & Operations Panel](./04-moduly/31-debug-panel.md)
-27. [CLI Příkazy (Artisan)](./04-moduly/32-cli-prikazy.md)
-28. [Statistiky: UX a Vizualizace](./04-moduly/33-statistiky-ux-a-vizualizace.md)
-29. [Season Discover & Backfill](./04-moduly/34-season-discover-backfill.md)
+26. [Poznámky k Legacy Importu](./04-moduly/30-legacy-import-notes.md)
+27. [Debug & Operations Panel](./04-moduly/31-debug-panel.md)
+28. [CLI Příkazy (Artisan)](./04-moduly/32-cli-prikazy.md)
+29. [Statistiky: UX a Vizualizace](./04-moduly/33-statistiky-ux-a-vizualizace.md)
+30. [Season Discover & Backfill](./04-moduly/34-season-discover-backfill.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)
 Implementace umělé inteligence pro vyhledávání a správu dokumentů.

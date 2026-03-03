@@ -11,7 +11,7 @@ class NormalizedTableDTO
         public string $name,
         public array $columns, // Definice klíčů a popisků
         public array $rows,
-        public array $metadata = []
+        public array $warnings = []
     ) {}
 
     public function toArray(): array

@@ -123,9 +123,11 @@ class QARun extends Command
 
             $content = File::get($file->getPathname());
             $classification = $classifier->classify($file->getFilename(), $content);
-            $dto = $extractor->extract($content, $classification['file_type']);
+            $extractedTables = $extractor->extract($content, $classification['file_type'], $classification['encoding']);
 
-            $this->line("✅ Vyextrahováno " . count($dto->rows) . " řádků.");
+            foreach ($extractedTables as $dto) {
+                $this->line("✅ Vyextrahováno " . count($dto->rows) . " řádků (Typ: {$dto->name}).");
+            }
         }
     }
 

@@ -8,6 +8,13 @@ class LegacyFileClassifier
 {
     public function classify(string $filename, string $content): array
     {
+        $encoding = $this->detectEncoding($filename, $content);
+
+        // Pokud je to Windows-1250, musíme content překódovat pro další analýzu
+        if ($encoding === 'Windows-1250') {
+            $content = iconv('Windows-1250', 'UTF-8//IGNORE', $content);
+        }
+
         $detectedSeason = $this->detectSeason($filename, $content);
         $detectedTeam = $this->detectTeam($filename, $content);
         $fileType = $this->detectFileType($filename, $content);
@@ -16,7 +23,22 @@ class LegacyFileClassifier
             'season' => $detectedSeason,
             'team' => $detectedTeam,
             'file_type' => $fileType,
+            'encoding' => $encoding,
         ];
+    }
+
+    protected function detectEncoding(string $filename, string $content): string
+    {
+        // Specifické soubory, o kterých víme, že jsou ve Windows-1250
+        if (Str::contains($filename, 'sokoli_statistiky_')) {
+            return 'Windows-1250';
+        }
+
+        if (preg_match('/charset=windows-1250/i', $content)) {
+            return 'Windows-1250';
+        }
+
+        return 'UTF-8';
     }
 
     protected function detectSeason(string $filename, string $content): ?string
@@ -31,6 +53,11 @@ class LegacyFileClassifier
             }
 
             return "{$year1}/{$year2}";
+        }
+
+        // Hledání v obsahu (např. v nadpisu "ročník 2019/20")
+        if (preg_match('/ročník\s+(20\d{2})[-\/](\d{2})/i', $content, $matches)) {
+            return "{$matches[1]}/20{$matches[2]}";
         }
 
         // Hledání v obsahu (např. v nadpisu)
@@ -77,12 +104,29 @@ class LegacyFileClassifier
     {
         $search = Str::lower($filename . ' ' . strip_tags($content));
 
-        if (Str::contains($search, ['hráči', 'hraci', 'soupiska', 'roster', 'hráčské statistiky'])) {
+        if (Str::contains($filename, 'sokoli_statistiky_')) {
+            return 'mixed';
+        }
+
+        if (Str::contains($filename, 'konecna_tabulka_')) {
+            return 'league_table';
+        }
+
+        if (Str::contains($filename, '_hraci')) {
             return 'players_stats';
         }
 
+        if (Str::contains($filename, '_druzstvo')) {
+            return 'team_stats';
+        }
+
+        // Fallback na obsah
         if (Str::contains($search, ['tabulka', 'konečná tabulka', 'league table', 'pořadí'])) {
             return 'league_table';
+        }
+
+        if (Str::contains($search, ['hráči', 'hraci', 'soupiska', 'roster', 'hráčské statistiky'])) {
+            return 'players_stats';
         }
 
         if (Str::contains($search, ['statistiky týmu', 'týmové statistiky', 'team statistics'])) {
