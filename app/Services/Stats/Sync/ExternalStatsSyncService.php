@@ -75,15 +75,35 @@ class ExternalStatsSyncService
         try {
             $html = $this->fetcher->fetch($config->team_season_url, $run);
             $extractor = app(TeamRosterExtractor::class);
-            $data = $extractor->extract($html);
-            $hash = hash('sha256', $data->fragmentHtml);
+
+            $usedAiFallback = false;
+            try {
+                $data = $extractor->extract($html);
+            } catch (\Exception $e) {
+                Log::warning("DOM extractor selhal pro soupisku týmu {$team->slug}, zkouším AI fallback. Chyba: " . $e->getMessage());
+                $data = $this->normalizer->normalize($html, ['type' => 'roster']);
+                $usedAiFallback = true;
+            }
+
+            $hash = hash('sha256', $data->fragmentHtml ?? $html);
 
             if ($run->isIdenticalToLast($hash)) {
                 $run->skip();
                 return;
             }
 
-            $run->update(['content_hash' => $hash]);
+            $run->update([
+                'content_hash' => $hash,
+                'metadata' => array_merge($run->metadata ?? [], [
+                    'used_dom_extractor' => !$usedAiFallback,
+                    'used_ai_fallback' => $usedAiFallback,
+                ])
+            ]);
+
+            if ($usedAiFallback) {
+                $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
+            }
+
             $this->rosterSyncService->sync($team, $season, $data);
 
             $run->finish([
@@ -106,13 +126,33 @@ class ExternalStatsSyncService
         try {
             $html = $this->fetcher->fetch($config->matches_list_url, $run);
             $extractor = app(MatchesListExtractor::class);
-            $data = $extractor->extract($html);
-            $hash = hash('sha256', $data->fragmentHtml);
+
+            $usedAiFallback = false;
+            try {
+                $data = $extractor->extract($html);
+            } catch (\Exception $e) {
+                Log::warning("DOM extractor selhal pro seznam zápasů týmu {$team->slug}, zkouším AI fallback. Chyba: " . $e->getMessage());
+                $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
+                $usedAiFallback = true;
+            }
+
+            $hash = hash('sha256', $data->fragmentHtml ?? $html);
 
             if ($run->isIdenticalToLast($hash)) {
                 $run->skip();
             } else {
-                $run->update(['content_hash' => $hash]);
+                $run->update([
+                    'content_hash' => $hash,
+                    'metadata' => array_merge($run->metadata ?? [], [
+                        'used_dom_extractor' => !$usedAiFallback,
+                        'used_ai_fallback' => $usedAiFallback,
+                    ])
+                ]);
+
+                if ($usedAiFallback) {
+                    $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
+                }
+
                 foreach ($data->rows as $row) {
                     $this->matchSyncService->sync($team, $season, $row->values);
                 }
@@ -212,6 +252,10 @@ class ExternalStatsSyncService
                     'used_ai_fallback' => $usedAiFallback,
                 ])
             ]);
+
+            if ($usedAiFallback) {
+                $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
+            }
 
             $this->statisticSyncService->syncMatchBoxscore($match, $data);
 

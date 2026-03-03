@@ -35,4 +35,18 @@ class ExternalTeamSeasonConfig extends Model
     {
         return $this->belongsTo(Season::class);
     }
+
+    /**
+     * Zjistí počet selhání v řadě pro tuto konfiguraci.
+     */
+    public function getFailCountInARow(): int
+    {
+        return ExternalImportRun::where('team_id', $this->team_id)
+            ->where('season_id', $this->season_id)
+            ->where('source_key', $this->source_key)
+            ->orderByDesc('started_at')
+            ->get()
+            ->takeWhile(fn ($run) => in_array($run->status, ['failed', 'partial_failed']))
+            ->count();
+    }
 }

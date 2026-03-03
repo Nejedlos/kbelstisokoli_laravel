@@ -63,6 +63,7 @@ Popis jednotlivých funkčních modulů aplikace.
 21. [Plánování úloh (Scheduler)](./04-moduly/26-external-scheduler.md)
 22. [Administrace synchronizace](./04-moduly/27-external-admin-tools.md)
 23. [Vizualizace externích statistik](./04-moduly/28-external-stats-visuals.md)
+24. [Robustnost a monitoring importů](./04-moduly/29-external-robustness.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)
 Implementace umělé inteligence pro vyhledávání a správu dokumentů.

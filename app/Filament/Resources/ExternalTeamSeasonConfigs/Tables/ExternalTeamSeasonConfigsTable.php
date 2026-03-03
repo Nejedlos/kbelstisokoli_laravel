@@ -40,6 +40,16 @@ class ExternalTeamSeasonConfigsTable
                     ->label('Poslední sync')
                     ->dateTime()
                     ->sortable(),
+                TextColumn::make('health')
+                    ->label('Zdraví')
+                    ->getStateUsing(fn ($record) => $record->getFailCountInARow())
+                    ->badge()
+                    ->color(fn ($state) => match (true) {
+                        $state === 0 => 'success',
+                        $state < 3 => 'warning',
+                        default => 'danger',
+                    })
+                    ->formatStateUsing(fn ($state) => $state === 0 ? 'OK' : "$state chyby v řadě"),
             ])
             ->filters([
                 //

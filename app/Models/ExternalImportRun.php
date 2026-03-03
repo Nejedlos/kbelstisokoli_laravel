@@ -123,6 +123,33 @@ class ExternalImportRun extends Model
     }
 
     /**
+     * Označí běh jako částečně selhaný (např. selhal DOM, ale AI prošla).
+     */
+    public function partialFail(\Throwable $e): void
+    {
+        $this->update([
+            'status' => 'partial_failed',
+            'finished_at' => now(),
+            'error_summary' => $e->getMessage(),
+        ]);
+    }
+
+    /**
+     * Zjistí počet selhání v řadě pro stejné parametry.
+     */
+    public function getFailCountInARow(): int
+    {
+        return self::where('source_key', $this->source_key)
+            ->where('run_type', $this->run_type)
+            ->where('target_external_id', $this->target_external_id)
+            ->where('id', '<', $this->id)
+            ->orderByDesc('started_at')
+            ->get()
+            ->takeWhile(fn ($run) => in_array($run->status, ['failed', 'partial_failed']))
+            ->count();
+    }
+
+    /**
      * Aktualizuje metadata běhu.
      */
     public function updateMetadata(array $data): void
