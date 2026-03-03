@@ -12,6 +12,52 @@ class StatisticSetService
     public const TEAM_SEASON_SUMMARY_SET = 'team-season-summary-external';
 
     /**
+     * Zajistí existenci konkrétní statistické sady.
+     */
+    public function ensureSet(string $slug, string $name, string $type, string $sourceType = 'external'): \App\Models\StatisticSet
+    {
+        return \App\Models\StatisticSet::firstOrCreate(
+            ['slug' => $slug],
+            [
+                'name' => $name,
+                'type' => $type,
+                'source_type' => $sourceType,
+                'scope' => [$type === 'match' ? 'match' : 'season'],
+                'column_config' => $this->getDefaultColumnConfig($type),
+                'is_visible' => true,
+                'status' => 'active',
+            ]
+        );
+    }
+
+    protected function getDefaultColumnConfig(string $type): array
+    {
+        if ($type === 'match') {
+            return [
+                ['key' => 'pts', 'label' => 'Body', 'type' => 'number'],
+                ['key' => 'minutes', 'label' => 'Minuty', 'type' => 'number'],
+                ['key' => 'fg2_made', 'label' => '2B (P)', 'type' => 'number'],
+                ['key' => 'fg2_att', 'label' => '2B (V)', 'type' => 'number'],
+                ['key' => 'fg3_made', 'label' => '3B (P)', 'type' => 'number'],
+                ['key' => 'fg3_att', 'label' => '3B (V)', 'type' => 'number'],
+                ['key' => 'ft_made', 'label' => 'TH (P)', 'type' => 'number'],
+                ['key' => 'ft_att', 'label' => 'TH (V)', 'type' => 'number'],
+                ['key' => 'fouls', 'label' => 'Fauly', 'type' => 'number'],
+            ];
+        }
+
+        if ($type === 'player') {
+            return [
+                ['key' => 'gp', 'label' => 'Zápasy', 'type' => 'number'],
+                ['key' => 'pts_total', 'label' => 'Body celkem', 'type' => 'number'],
+                ['key' => 'ppg', 'label' => 'B/Z', 'type' => 'number'],
+            ];
+        }
+
+        return [];
+    }
+
+    /**
      * Zajistí existenci základních statistických sad.
      */
     public function ensureBaseSets(): void

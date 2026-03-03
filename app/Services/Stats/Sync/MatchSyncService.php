@@ -96,6 +96,7 @@ class MatchSyncService
         if ($match) {
             $match->update($data);
         } else {
+            \Log::info("Creating match for {$team->slug} vs {$opponentName}");
             $match = BasketballMatch::create($data);
         }
 
@@ -107,7 +108,7 @@ class MatchSyncService
         // Velmi jednoduchá heuristika: pokud obsahuje "Kbely" a náš tým taky
         // Lepší by bylo mít mapování názvů v external_team_mappings.metadata
         $scrapedNormalized = mb_strtolower($scrapedName);
-        $myTeamNormalized = mb_strtolower($team->name); // Pozor, name je translatable!
+        $myTeamNormalized = mb_strtolower($team->getTranslation('name', 'cs'));
 
         if (str_contains($scrapedNormalized, 'kbely')) {
             return true;

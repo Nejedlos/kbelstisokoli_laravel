@@ -17,6 +17,37 @@ class StatisticSyncService
     ) {}
 
     /**
+     * Uloží jeden řádek statistiky (vhodné pro legacy import nebo manuální vklad).
+     */
+    public function saveRow(StatisticSet $set, \App\Services\Stats\DTO\NormalizedRowDTO $row, array $context = []): StatisticRow
+    {
+        $playerId = $context['player_id'] ?? null;
+        $matchId = $context['basketball_match_id'] ?? null;
+        $teamId = $context['team_id'] ?? null;
+        $seasonId = $context['season_id'] ?? null;
+
+        return StatisticRow::updateOrCreate(
+            [
+                'statistic_set_id' => $set->id,
+                'basketball_match_id' => $matchId,
+                'player_id' => $playerId,
+                'row_label' => $playerId ? null : $row->rowLabel,
+                'season_id' => $seasonId,
+                'team_id' => $teamId,
+                // Pro legacy import přidáme hash do klíče, aby byla zajištěna idempotence na úrovni řádku
+                'source_metadata->content_hash' => $context['source_metadata']['content_hash'] ?? null,
+            ],
+            [
+                'values' => $row->values,
+                'source_metadata' => array_merge(
+                    $row->metadata ?? [],
+                    $context['source_metadata'] ?? []
+                )
+            ]
+        );
+    }
+
+    /**
      * Synchronizuje statistiky z boxscoru zápasu.
      */
     public function syncMatchBoxscore(BasketballMatch $match, NormalizedTableDTO $data): void

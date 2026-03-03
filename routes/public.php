@@ -20,6 +20,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Cron / Plánovač (HTTP spuštění)
+Route::get('/system/schedule/{token}', function (string $token) {
+    if (empty(config('app.schedule_token')) || $token !== config('app.schedule_token')) {
+        abort(403, 'Neplatný token.');
+    }
+
+    \Illuminate\Support\Facades\Artisan::call('schedule:run');
+
+    return response('Plánované úlohy byly spuštěny.' . PHP_EOL . \Illuminate\Support\Facades\Artisan::output());
+})->name('system.schedule');
+
 Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(function (): void {
     // Úvod
     Route::get('/', HomeController::class)->name('home');
@@ -84,16 +95,6 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Vyhledávání
     Route::get('/hledat', [\App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');
 
-    // Cron / Plánovač (HTTP spuštění)
-    Route::get('/system/schedule/{token}', function (string $token) {
-        if (empty(config('app.schedule_token')) || $token !== config('app.schedule_token')) {
-            abort(403, 'Neplatný token.');
-        }
-
-        \Illuminate\Support\Facades\Artisan::call('schedule:run');
-
-        return response('Plánované úlohy byly spuštěny.' . PHP_EOL . \Illuminate\Support\Facades\Artisan::output());
-    })->name('system.schedule');
 
     // Robots.txt & Sitemap & LLMs
     Route::get('/robots.txt', function () {

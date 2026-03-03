@@ -103,6 +103,7 @@ class MatchesListExtractor implements StatExtractorInterface
                     'away_team' => $awayTeam,
                     'score' => $score,
                     'status' => $status,
+                    'external_match_id' => $matchId,
                 ],
                 metadata: [
                     'external_match_id' => $matchId,

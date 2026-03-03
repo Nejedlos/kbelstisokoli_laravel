@@ -35,6 +35,7 @@ class ExternalStatsSyncService
      */
     public function syncTeamSeason(int $teamId, int $seasonId, array $options = []): void
     {
+        \Log::info("START: syncTeamSeason for team $teamId, season $seasonId");
         $config = ExternalTeamSeasonConfig::where('team_id', $teamId)
             ->where('season_id', $seasonId)
             ->where('is_enabled', true)
@@ -78,14 +79,17 @@ class ExternalStatsSyncService
 
             $usedAiFallback = false;
             try {
-                $data = $extractor->extract($html);
+                $result = $extractor->extract($html);
+                $data = $result['data'];
+                $fragmentHtml = $result['fragment_html'];
             } catch (\Exception $e) {
                 Log::warning("DOM extractor selhal pro soupisku týmu {$team->slug}, zkouším AI fallback. Chyba: " . $e->getMessage());
                 $data = $this->normalizer->normalize($html, ['type' => 'roster']);
+                $fragmentHtml = $html;
                 $usedAiFallback = true;
             }
 
-            $hash = hash('sha256', $data->fragmentHtml ?? $html);
+            $hash = hash('sha256', $fragmentHtml);
 
             if ($run->isIdenticalToLast($hash)) {
                 $run->skip();
@@ -104,7 +108,7 @@ class ExternalStatsSyncService
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
             }
 
-            $this->rosterSyncService->sync($team, $season, $data);
+            $this->rosterSyncService->syncWithData($config, $data);
 
             $run->finish([
                 'extracted_count' => count($data->rows),
@@ -121,6 +125,7 @@ class ExternalStatsSyncService
      */
     protected function syncMatchesList(Team $team, Season $season, ExternalTeamSeasonConfig $config, array $options): void
     {
+        \Log::info("START: syncMatchesList for team {$team->slug}");
         $run = ExternalImportRun::start('czbasketball', $season->id, $team->id, 'matches_list', $config->external_team_id);
 
         try {
@@ -129,14 +134,18 @@ class ExternalStatsSyncService
 
             $usedAiFallback = false;
             try {
-                $data = $extractor->extract($html);
+                \Log::info("Extracting matches for {$team->slug}");
+                $result = $extractor->extract($html);
+                $data = $result['data'];
+                $fragmentHtml = $result['fragment_html'];
+                \Log::info("Extracted " . count($data->rows) . " matches for {$team->slug}");
             } catch (\Exception $e) {
-                Log::warning("DOM extractor selhal pro seznam zápasů týmu {$team->slug}, zkouším AI fallback. Chyba: " . $e->getMessage());
                 $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
+                $fragmentHtml = $html;
                 $usedAiFallback = true;
             }
 
-            $hash = hash('sha256', $data->fragmentHtml ?? $html);
+            $hash = hash('sha256', $fragmentHtml);
 
             if ($run->isIdenticalToLast($hash)) {
                 $run->skip();
@@ -153,6 +162,7 @@ class ExternalStatsSyncService
                     $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
                 }
 
+                \Log::info("Syncing matches for {$team->slug}, count: " . count($data->rows));
                 foreach ($data->rows as $row) {
                     $this->matchSyncService->sync($team, $season, $row->values);
                 }
@@ -232,14 +242,17 @@ class ExternalStatsSyncService
 
             $usedAiFallback = false;
             try {
-                $data = $extractor->extract($html);
+                $result = $extractor->extract($html);
+                $data = $result['data'];
+                $fragmentHtml = $result['fragment_html'];
             } catch (\Exception $e) {
                 Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: " . $e->getMessage());
                 $data = $this->normalizer->normalize($html, ['type' => 'match_boxscore']);
+                $fragmentHtml = $html;
                 $usedAiFallback = true;
             }
 
-            $hash = hash('sha256', $data->fragmentHtml ?? $html);
+            $hash = hash('sha256', $fragmentHtml);
             if ($run->isIdenticalToLast($hash)) {
                 $run->skip();
                 return;
@@ -289,11 +302,13 @@ class ExternalStatsSyncService
         try {
             // Roster preview
             $rosterHtml = $this->fetcher->fetch($config->team_season_url, $run);
-            $rosterData = app(TeamRosterExtractor::class)->extract($rosterHtml);
+            $rosterResult = app(TeamRosterExtractor::class)->extract($rosterHtml);
+            $rosterData = $rosterResult['data'];
 
             // Matches preview
             $matchesHtml = $this->fetcher->fetch($config->matches_list_url, $run);
-            $matchesData = app(MatchesListExtractor::class)->extract($matchesHtml);
+            $matchesResult = app(MatchesListExtractor::class)->extract($matchesHtml);
+            $matchesData = $matchesResult['data'];
 
             $run->finish([
                 'extracted_count' => count($rosterData->rows) + count($matchesData->rows),
