@@ -80,4 +80,12 @@ class Team extends Model
         return $this->activePlayers()
             ->wherePivot('is_on_roster', true);
     }
+
+    /**
+     * Externí mapování týmu (cz.basketball atd.)
+     */
+    public function externalMappings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ExternalTeamMapping::class, 'team_id');
+    }
 }

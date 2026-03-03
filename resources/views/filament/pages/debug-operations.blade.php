@@ -21,7 +21,7 @@
         @endforeach
     </div>
 
-    <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- Externí Sync --}}
         <div class="space-y-4">
             <h2 class="text-xl font-bold">Externí Statistiky (Aktivní sezóna)</h2>
@@ -77,7 +77,7 @@
 
         {{-- Legacy Import --}}
         <div class="space-y-4">
-            <h2 class="text-xl font-bold">Legacy Import (Poslední dávka)</h2>
+            <h2 class="text-xl font-bold">Legacy Import</h2>
             @if($legacyImport)
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <h3 class="text-lg font-bold mb-2">{{ $legacyImport['title'] }}</h3>
@@ -101,7 +101,7 @@
                             <div class="text-xs text-gray-500">Celkem</div>
                         </div>
                     </div>
-                    <div class="mt-4 flex space-x-4">
+                    <div class="mt-4">
                         <a href="{{ \App\Filament\Resources\LegacyImportBatches\LegacyImportBatchResource::getUrl('view', ['record' => $legacyImport['id']]) }}" class="text-sm text-primary-600 hover:underline font-medium">
                             Detail dávky →
                         </a>
@@ -112,16 +112,44 @@
                     Nenalezena žádná dávka legacy importu.
                 </div>
             @endif
+        </div>
 
-            <div class="pt-4 space-y-2">
-                <h3 class="font-medium">Rychlé odkazy</h3>
-                <div class="grid grid-cols-2 gap-2">
-                    <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl() }}" icon="heroicon-m-list-bullet">
-                        Historie běhů
+        {{-- Season Discovery --}}
+        <div class="space-y-4">
+            <h2 class="text-xl font-bold">Season Backfill</h2>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">Prázdné sezóny</h3>
+                    <span @class([
+                        'px-2 py-1 rounded-full text-xs font-bold',
+                        'bg-warning-100 text-warning-700' => $discoveryStats['empty_count'] > 0,
+                        'bg-success-100 text-success-700' => $discoveryStats['empty_count'] === 0,
+                    ])>
+                        {{ $discoveryStats['empty_count'] }} k prověření
+                    </span>
+                </div>
+
+                <p class="text-xs text-gray-500 mb-4 leading-relaxed">
+                    Identifikováno {{ $discoveryStats['empty_count'] }} sezón, které nemají konfiguraci nebo data. Discovery zkusí najít 'y' parametr na cz.basketball.
+                </p>
+
+                <div class="pt-2 space-y-2">
+                    <x-filament::button color="info" size="sm" icon="heroicon-m-magnifying-glass" class="w-full" wire:click="mountAction('discoverSeasons')">
+                        Spustit Discovery
                     </x-filament::button>
-                    <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalEntityMappings\ExternalEntityMappingResource::getUrl() }}" icon="heroicon-m-users">
-                        Unmatched hráči
-                    </x-filament::button>
+
+                    <div class="grid grid-cols-2 gap-2 mt-4">
+                        <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl() }}" icon="heroicon-m-list-bullet">
+                            Historie
+                        </x-filament::button>
+                        <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalEntityMappings\ExternalEntityMappingResource::getUrl() }}" icon="heroicon-m-users">
+                            Párování
+                        </x-filament::button>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-[10px] text-gray-400">
+                    Poslední discovery: {{ $discoveryStats['last_discover'] ? \Carbon\Carbon::parse($discoveryStats['last_discover'])->diffForHumans() : 'Nikdy' }}
                 </div>
             </div>
         </div>

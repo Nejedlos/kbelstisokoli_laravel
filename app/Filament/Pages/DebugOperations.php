@@ -56,6 +56,7 @@ class DebugOperations extends Page
             'externalSync' => $this->getExternalSyncStats(),
             'legacyImport' => $this->getLegacyImportStats(),
             'auditLogs' => $this->getAuditLogs(),
+            'discoveryStats' => $this->getDiscoveryStats(),
         ];
     }
 
@@ -83,6 +84,24 @@ class DebugOperations extends Page
                     }
 
                     Notification::make()->title('Sync jobs dispatched')->success()->send();
+                }),
+
+            Action::make('discoverSeasons')
+                ->label('Discover Missing Seasons')
+                ->icon('heroicon-m-magnifying-glass')
+                ->color('info')
+                ->requiresConfirmation()
+                ->action(function () {
+                    $discoveryService = app(\App\Services\Stats\Sync\SeasonDiscoveryService::class);
+                    $results = $discoveryService->discover();
+
+                    $found = count(array_filter($results, fn($r) => $r['status'] !== 'not found'));
+
+                    Notification::make()
+                        ->title("Discovery finished")
+                        ->body("Found and created {$found} new season configurations.")
+                        ->success()
+                        ->send();
                 }),
 
             Action::make('recomputeAll')
@@ -248,6 +267,27 @@ class DebugOperations extends Page
             ->latest()
             ->limit(20)
             ->get();
+    }
+
+    protected function getDiscoveryStats(): array
+    {
+        $emptyCount = 0;
+        $teams = Team::whereHas('externalMappings')->get();
+        $seasons = Season::all();
+        $statusService = app(\App\Services\Stats\Sync\SeasonDataStatusService::class);
+
+        foreach ($teams as $team) {
+            foreach ($seasons as $season) {
+                if ($statusService->isEmpty($team->id, $season->id)) {
+                    $emptyCount++;
+                }
+            }
+        }
+
+        return [
+            'empty_count' => $emptyCount,
+            'last_discover' => ExternalImportRun::where('run_type', 'season_discover')->latest()->first()?->created_at,
+        ];
     }
 
     // --- Action Handlers ---
