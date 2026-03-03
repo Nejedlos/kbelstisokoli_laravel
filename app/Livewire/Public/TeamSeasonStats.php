@@ -14,10 +14,12 @@ class TeamSeasonStats extends Component
 
     public $summary = [];
     public $topScorers = [];
+    public $pointsSeries = [];
+    public $recentForm = [];
 
-    public function mount($teamId = null)
+    public function mount($teamId = null, $seasonId = null)
     {
-        $this->seasonId = Season::where('is_active', true)->first()?->id ?? Season::latest()->first()?->id;
+        $this->seasonId = $seasonId ?? Season::where('is_active', true)->first()?->id ?? Season::latest()->first()?->id;
         $this->teamId = $teamId ?? Team::first()?->id;
 
         $this->loadStats();
@@ -37,6 +39,10 @@ class TeamSeasonStats extends Component
         $service = app(TeamStatsService::class);
         $this->summary = $service->getSeasonSummary($this->teamId, $this->seasonId);
         $this->topScorers = $service->getTopScorers($this->teamId, $this->seasonId)->toArray();
+        $this->pointsSeries = $service->getPointsSeries($this->teamId, $this->seasonId)->toArray();
+        $this->recentForm = $service->getRecentForm($this->teamId, $this->seasonId)->toArray();
+
+        $this->dispatch('statsLoaded');
     }
 
     public function render()

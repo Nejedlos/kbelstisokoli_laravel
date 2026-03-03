@@ -67,6 +67,7 @@ Popis jednotlivých funkčních modulů aplikace.
 25. [Import historických statistik (Legacy)](./04-moduly/30-legacy-stats-import.md)
 26. [Debug & Operations Panel](./04-moduly/31-debug-panel.md)
 27. [CLI Příkazy (Artisan)](./04-moduly/32-cli-prikazy.md)
+28. [Statistiky: UX a Vizualizace](./04-moduly/33-statistiky-ux-a-vizualizace.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)
 Implementace umělé inteligence pro vyhledávání a správu dokumentů.

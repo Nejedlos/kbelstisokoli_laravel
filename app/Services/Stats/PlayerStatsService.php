@@ -40,7 +40,7 @@ class PlayerStatsService
      */
     public function getPerGameSeries(int $userId, int $seasonId, ?int $teamId = null): Collection
     {
-        $query = StatisticRow::with('basketballMatch')
+        $query = StatisticRow::with(['basketballMatch', 'basketballMatch.opponent'])
             ->where('player_id', $userId)
             ->where('season_id', $seasonId)
             ->whereHas('statisticSet', function ($q) {
@@ -59,9 +59,120 @@ class PlayerStatsService
                 'match_id' => $row->basketball_match_id,
                 'date' => $row->basketballMatch?->scheduled_at,
                 'opponent' => $row->basketballMatch?->opponent?->name ?? 'Neznámý soupeř',
+                'is_home' => $row->basketballMatch?->is_home,
+                'score_home' => $row->basketballMatch?->score_home,
+                'score_away' => $row->basketballMatch?->score_away,
                 'values' => $row->values,
             ];
         });
+    }
+
+    /**
+     * Získá ranking hráče v týmu pro danou sezónu.
+     */
+    public function getRankings(int $userId, int $seasonId, int $teamId): array
+    {
+        $allSummaries = StatisticRow::where('team_id', $teamId)
+            ->where('season_id', $seasonId)
+            ->whereNotNull('player_id')
+            ->whereNull('basketball_match_id')
+            ->whereHas('statisticSet', function ($q) {
+                $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
+            })
+            ->get();
+
+        if ($allSummaries->isEmpty()) {
+            return [];
+        }
+
+        $metrics = ['pts_total', 'ppg', 'gp', 'minutes_avg'];
+        $rankings = [];
+
+        foreach ($metrics as $metric) {
+            $sorted = $allSummaries->sortByDesc(function ($row) use ($metric) {
+                return $row->values[$metric] ?? 0;
+            })->values();
+
+            $index = $sorted->search(function ($row) use ($userId) {
+                return $row->player_id === $userId;
+            });
+
+            if ($index !== false) {
+                $rankings[$metric] = [
+                    'rank' => $index + 1,
+                    'total' => $allSummaries->count(),
+                    'value' => $sorted[$index]->values[$metric] ?? 0,
+                ];
+            }
+        }
+
+        return $rankings;
+    }
+
+    /**
+     * Získá insighty (poučné zajímavosti) o výkonu hráče.
+     */
+    public function getInsights(int $userId, int $seasonId, int $teamId): array
+    {
+        $series = $this->getPerGameSeries($userId, $seasonId, $teamId);
+
+        if ($series->count() < 1) {
+            return [];
+        }
+
+        $insights = [];
+
+        // Nejlepší zápas (podle bodů)
+        $bestMatch = $series->sortByDesc('values.pts')->first();
+        if ($bestMatch && ($bestMatch['values']['pts'] ?? 0) > 0) {
+            $insights[] = [
+                'type' => 'best_match',
+                'label' => 'Nejlepší zápas sezóny',
+                'value' => "{$bestMatch['values']['pts']} bodů proti {$bestMatch['opponent']}",
+                'date' => $bestMatch['date']?->format('d.m.Y'),
+            ];
+        }
+
+        // Stabilita (průměr posledních 5)
+        if ($series->count() >= 3) {
+            $last5 = $series->take(-5);
+            $avgLast5 = round($last5->avg('values.pts'), 1);
+            $insights[] = [
+                'type' => 'stability',
+                'label' => 'Aktuální forma',
+                'value' => "{$avgLast5} PPG v posledních {$last5->count()} zápasech",
+            ];
+        }
+
+        // Trend (posledních 3 vs celkový průměr)
+        if ($series->count() >= 4) {
+            $summary = $this->getSeasonSummary($userId, $seasonId, $teamId);
+            $overallAvg = $summary['ppg'] ?? 0;
+            $last3Avg = round($series->take(-3)->avg('values.pts'), 1);
+
+            if ($last3Avg > $overallAvg + 2) {
+                $insights[] = [
+                    'type' => 'trend_up',
+                    'label' => 'Stoupající tendence',
+                    'value' => "Hraješ lépe než je tvůj sezónní průměr ({$last3Avg} vs {$overallAvg} PPG)",
+                ];
+            }
+        }
+
+        return $insights;
+    }
+
+    /**
+     * Získá průměry týmu pro srovnání.
+     */
+    public function getTeamAverages(int $seasonId, int $teamId): array
+    {
+        $teamSummary = (new TeamStatsService())->getSeasonSummary($teamId, $seasonId);
+
+        return [
+            'pts_avg' => $teamSummary['pts_avg'] ?? 0,
+            'gp' => $teamSummary['gp'] ?? 0,
+        ];
     }
 
     /**

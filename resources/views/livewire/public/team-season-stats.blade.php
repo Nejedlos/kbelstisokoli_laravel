@@ -34,7 +34,12 @@
                     <span class="text-gray-300 mx-1">-</span>
                     <span class="text-red-500">{{ $summary['losses'] ?? 0 }}</span>
                 </div>
-                <div class="mt-4 text-xs text-gray-400">Celkem {{ $summary['gp'] ?? 0 }} odehraných zápasů</div>
+                <div class="mt-4 text-xs text-gray-400 font-bold uppercase tracking-tighter">
+                    Forma:
+                    @foreach($recentForm as $f)
+                        <span @class(['text-green-500' => $f['result'] === 'W', 'text-red-500' => $f['result'] === 'L'])>{{ $f['result'] }}</span>
+                    @endforeach
+                </div>
             </div>
         </div>
 
@@ -57,11 +62,10 @@
                 <i class="fa-light fa-basketball-hoop text-9xl"></i>
              </div>
              <h3 class="text-sm font-bold text-primary-200 uppercase tracking-widest mb-2">Aktuální stav</h3>
-             <div class="text-2xl font-bold mb-4">Sezóna v plném proudu</div>
-             <div class="bg-white/20 h-2 w-full rounded-full overflow-hidden">
-                <div class="bg-white h-full" style="width: 75%"></div>
+             <div class="text-2xl font-bold mb-4">Sezóna {{ $seasons->where('id', $seasonId)->first()?->name }}</div>
+             <div class="text-xs text-primary-100 leading-relaxed italic opacity-80">
+                Data jsou pravidelně synchronizována z oficiálního zdroje cz.basketball.
              </div>
-             <div class="mt-2 text-xs text-primary-100">Synchronizováno před okamžikem</div>
         </div>
     </div>
 
@@ -106,29 +110,50 @@
         </div>
 
         {{-- Team Performance Chart --}}
-        <div class="space-y-6">
+        <div class="space-y-6" wire:ignore>
             <h2 class="text-2xl font-black text-gray-900 dark:text-white flex items-center">
-                <i class="fa-light fa-chart-line mr-3 text-blue-500"></i> Výkon týmu
+                <i class="fa-light fa-chart-line mr-3 text-blue-500"></i> Bodová ofenzíva vs defenzíva
             </h2>
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-8 h-[400px] flex flex-col items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 opacity-5 pointer-events-none">
-                    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <path d="M0 80 Q 25 20, 50 50 T 100 30" fill="none" stroke="currentColor" stroke-width="1" />
-                    </svg>
-                </div>
-                <div class="text-center space-y-4">
-                    <i class="fa-light fa-chart-mixed text-6xl text-gray-200"></i>
-                    <p class="text-gray-400 font-medium">Graf vývoje bodů týmu (ApexCharts)</p>
-                    <div class="flex space-x-2 justify-center">
-                        <div class="w-2 h-12 bg-primary-400 rounded-full animate-pulse"></div>
-                        <div class="w-2 h-24 bg-primary-500 rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
-                        <div class="w-2 h-16 bg-primary-300 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
-                        <div class="w-2 h-20 bg-primary-600 rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
-                    </div>
-                </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-8 h-[400px]">
+                <div id="public-team-chart" class="w-full h-full"></div>
             </div>
         </div>
     </div>
+
+    @script
+    <script>
+        const initChart = () => {
+            const seriesData = @json($pointsSeries);
+            if (!seriesData || seriesData.length === 0) return;
+
+            const dates = seriesData.map(m => new Date(m.date).toLocaleDateString('cs-CZ'));
+            const ptsFor = seriesData.map(m => m.pts_for || 0);
+            const ptsAgainst = seriesData.map(m => m.pts_against || 0);
+
+            new ApexCharts(document.querySelector("#public-team-chart"), {
+                series: [
+                    { name: 'My', data: ptsFor },
+                    { name: 'Soupeř', data: ptsAgainst }
+                ],
+                chart: { type: 'area', height: '100%', toolbar: { show: false } },
+                colors: ['#e63946', '#2196f3'],
+                fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } },
+                stroke: { curve: 'smooth', width: 2 },
+                xaxis: { categories: dates, labels: { show: false } },
+                dataLabels: { enabled: false }
+            }).render();
+        };
+
+        initChart();
+
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('statsLoaded', () => {
+                document.querySelector("#public-team-chart").innerHTML = '';
+                initChart();
+            });
+        });
+    </script>
+    @endscript
     @else
     <div class="bg-white dark:bg-gray-800 p-24 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 text-center space-y-6">
         <div class="inline-flex items-center justify-center w-24 h-24 bg-gray-50 dark:bg-gray-900 rounded-full">

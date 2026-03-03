@@ -122,6 +122,36 @@ class TeamStatsService
     }
 
     /**
+     * Získá časovou řadu bodů týmu v sezóně.
+     */
+    public function getPointsSeries(int $teamId, int $seasonId): Collection
+    {
+        return BasketballMatch::where('team_id', $teamId)
+            ->where('season_id', $seasonId)
+            ->where('status', 'completed')
+            ->orderBy('scheduled_at', 'asc')
+            ->get()
+            ->map(function ($match) {
+                $isHome = $match->is_home;
+                return [
+                    'date' => $match->scheduled_at,
+                    'opponent' => $match->opponent?->name ?? 'Neznámý soupeř',
+                    'pts_for' => $isHome ? $match->score_home : $match->score_away,
+                    'pts_against' => $isHome ? $match->score_away : $match->score_home,
+                    'result' => ($isHome ? $match->score_home > $match->score_away : $match->score_away > $match->score_home) ? 'W' : 'L',
+                ];
+            });
+    }
+
+    /**
+     * Získá formu týmu (posledních 5 zápasů).
+     */
+    public function getRecentForm(int $teamId, int $seasonId, int $limit = 5): Collection
+    {
+        return $this->getPointsSeries($teamId, $seasonId)->take(-$limit);
+    }
+
+    /**
      * Výpočet souhrnu on-the-fly (fallback).
      */
     protected function calculateSummaryFromMatches(int $teamId, int $seasonId): array
