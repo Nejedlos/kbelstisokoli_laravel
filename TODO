@@ -5,7 +5,7 @@
  KROK 8: Plánování úloh (Scheduler) (HOTOVO)
  v adminu mít nástroje pro správu synchronizace, dry-run a párování hráčů (HOTOVO)
  import starých statistik podle zadání
- v systémové konsoli mít příkaz na spuštění synchronizace statistik ručně
+ v systémové konsoli mít příkaz na spuštění synchronizace statistik ručně (HOTOVO)
  Co se synchronizuje (HOTOVO):
  - zápasy
  - hráči na soupisce

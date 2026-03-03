@@ -97,11 +97,9 @@ class DebugOperations extends Page
                     foreach ($teams as $teamSlug) {
                         $team = Team::where('slug', $teamSlug)->first();
                         if ($team && $activeSeason) {
-                            // Dispatch background job or run service if quick
-                            // For safety, let's use the service directly if it's not too heavy,
-                            // but better a job if we have many players.
-                            // Here we just notify for now or run for active season.
-                            app(\App\Services\Stats\Sync\StatisticSyncService::class)->recomputeTeamSeasonAggregates($team->id, $activeSeason->id);
+                            $statService = app(\App\Services\Stats\Sync\StatisticSyncService::class);
+                            $statService->recomputePlayerSummaries($activeSeason->id);
+                            $statService->recomputeTeamSummary($activeSeason->id, $team->id);
                         }
                     }
 

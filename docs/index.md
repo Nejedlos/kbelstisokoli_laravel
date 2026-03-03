@@ -66,6 +66,7 @@ Popis jednotlivých funkčních modulů aplikace.
 24. [Robustnost a monitoring importů](./04-moduly/29-external-robustness.md)
 25. [Import historických statistik (Legacy)](./04-moduly/30-legacy-stats-import.md)
 26. [Debug & Operations Panel](./04-moduly/31-debug-panel.md)
+27. [CLI Příkazy (Artisan)](./04-moduly/32-cli-prikazy.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)
 Implementace umělé inteligence pro vyhledávání a správu dokumentů.
