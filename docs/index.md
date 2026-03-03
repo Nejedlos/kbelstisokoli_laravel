@@ -70,6 +70,7 @@ Popis jednotlivých funkčních modulů aplikace.
 28. [CLI Příkazy (Artisan)](./04-moduly/32-cli-prikazy.md)
 29. [Statistiky: UX a Vizualizace](./04-moduly/33-statistiky-ux-a-vizualizace.md)
 30. [Season Discover & Backfill](./04-moduly/34-season-discover-backfill.md)
+31. [QA Report - Statistiky a importy](./qa-report.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)
 Implementace umělé inteligence pro vyhledávání a správu dokumentů.

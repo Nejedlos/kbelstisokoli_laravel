@@ -60,22 +60,34 @@ class StatisticSyncService
         }
 
         DB::transaction(function () use ($match, $data, $set) {
+            $isOurTeam = true;
+            $currentTeamId = $match->team_id;
+
+            // Zkusíme detekovat, zda je to tabulka našeho týmu nebo soupeře
+            $ourTeamName = $this->normalizeForComparison($match->team->getTranslation('name', 'cs') ?? $match->team->name);
+            $tableTeamName = $this->normalizeForComparison($data->name);
+
+            if (!str_contains($tableTeamName, $ourTeamName) && !str_contains($ourTeamName, $tableTeamName)) {
+                $isOurTeam = false;
+                $currentTeamId = null;
+            }
+
             foreach ($data->rows as $row) {
                 $externalPlayerId = $row->metadata['external_player_id'] ?? null;
                 $playerName = $row->rowLabel;
 
-                // Párování hráče
-                $playerId = $this->findInternalPlayerId($externalPlayerId, $match->season_id, 'czbasketball');
+                // Párování hráče (jen pro náš tým má smysl hledat internal_id)
+                $playerId = $isOurTeam ? $this->findInternalPlayerId($externalPlayerId, $match->season_id, 'czbasketball') : null;
 
                 StatisticRow::updateOrCreate(
                     [
                         'statistic_set_id' => $set->id,
                         'basketball_match_id' => $match->id,
+                        'team_id' => $currentTeamId,
                         'player_id' => $playerId,
                         'row_label' => $playerId ? null : $playerName,
                     ],
                     [
-                        'team_id' => $match->team_id,
                         'season_id' => $match->season_id,
                         'values' => $row->values,
                         'source_metadata' => [
@@ -83,6 +95,7 @@ class StatisticSyncService
                             'match_external_id' => $match->metadata['external_id'] ?? null,
                             'player_external_id' => $externalPlayerId,
                             'scraped_at' => now()->toDateTimeString(),
+                            'is_opponent' => !$isOurTeam,
                         ]
                     ]
                 );
@@ -279,5 +292,26 @@ class StatisticSyncService
         if ($mapping->season_id) {
             $this->recomputePlayerSummaries($mapping->season_id);
         }
+    }
+
+    /**
+     * Normalizuje text pro porovnání (odstraní whitespace, diakritiku, převede na malé).
+     */
+    protected function normalizeForComparison(string $text): string
+    {
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $text = mb_strtolower($text);
+
+        // Odstranění diakritiky (robustnější verze)
+        $text = strtr(
+            utf8_decode($text),
+            utf8_decode('áäčďéěíĺľňóôőöŕšťúůűüýž'),
+            'aacdeeiilnoooorstuuuuyz'
+        );
+        $text = utf8_encode($text);
+
+        $text = preg_replace('/\s+/', '', $text);
+
+        return $text;
     }
 }

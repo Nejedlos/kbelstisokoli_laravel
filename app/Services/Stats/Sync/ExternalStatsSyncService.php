@@ -224,7 +224,7 @@ class ExternalStatsSyncService
     /**
      * Synchronizuje detaily konkrétního zápasu (boxscore).
      */
-    public function syncMatchDetail(int $matchId): void
+    public function syncMatchDetail(int $matchId, array $options = []): void
     {
         $match = BasketballMatch::with(['team', 'season'])->findOrFail($matchId);
         $externalMatchId = $match->metadata['external_id'] ?? null;
@@ -253,7 +253,7 @@ class ExternalStatsSyncService
             }
 
             $hash = hash('sha256', $fragmentHtml);
-            if ($run->isIdenticalToLast($hash)) {
+            if ($run->isIdenticalToLast($hash) && !($options['force'] ?? false)) {
                 $run->skip();
                 return;
             }
@@ -270,7 +270,10 @@ class ExternalStatsSyncService
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
             }
 
-            $this->statisticSyncService->syncMatchBoxscore($match, $data);
+            $tables = $result['tables'] ?? [$data];
+            foreach ($tables as $tableData) {
+                $this->statisticSyncService->syncMatchBoxscore($match, $tableData);
+            }
 
             $run->finish([
                 'extracted_count' => count($data->rows),

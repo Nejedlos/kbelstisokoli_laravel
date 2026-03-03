@@ -4,9 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Translatable\HasTranslations;
 
 class StatisticSet extends Model
 {
+    use HasTranslations;
+
+    public $translatable = ['name', 'description'];
+
     protected $fillable = [
         'name',
         'slug',

@@ -34,11 +34,47 @@ class QARun extends Command
 
             $this->info("Seedování základních dat...");
             Artisan::call('db:seed', ['--class' => 'RoleSeeder', '--force' => true]);
+            Artisan::call('db:seed', ['--class' => 'UserSeeder', '--force' => true]);
             Artisan::call('db:seed', ['--class' => 'SportSeeder', '--force' => true]);
         }
 
         $this->section("1. Externí Sync (z Fixtures)");
         $this->runExternalSyncSmoke();
+
+        // Namapujeme admina na jednoho z hráčů, aby viděl data v členské sekci
+        $admins = User::whereIn('email', ['nejedlymi@gmail.com', 'admin@basketkbely.cz'])->get();
+        foreach ($admins as $admin) {
+            $season = Season::where('is_active', true)->first();
+            $this->info("Mapuji uživatele {$admin->email} na testovacího hráče (ID 11246)...");
+
+            // Smažeme případného ghost uživatele, který si toto ID zabral
+            $ghostMapping = \App\Models\ExternalEntityMapping::where([
+                'source_key' => 'czbasketball',
+                'entity_type' => 'player',
+                'external_id' => '11246',
+            ])->first();
+
+            if ($ghostMapping && $ghostMapping->internal_id != $admin->id) {
+                $ghostUser = User::find($ghostMapping->internal_id);
+                if ($ghostUser && str_contains($ghostUser->email, 'ghost')) {
+                    $ghostUser->delete();
+                }
+            }
+
+            app(\App\Services\Stats\Sync\StatisticSyncService::class)->linkPlayerAndRecompute(
+                \App\Models\ExternalEntityMapping::updateOrCreate([
+                    'source_key' => 'czbasketball',
+                    'entity_type' => 'player',
+                    'external_id' => '11246',
+                ], [
+                    'internal_id' => $admin->id,
+                    'internal_type' => User::class,
+                    'season_id' => $season->id,
+                ]),
+                $admin->id
+            );
+        }
+        $this->line("✅ Admini namapováni.");
 
         $this->section("2. Legacy Import (reálné soubory)");
         $this->runLegacyImportSmoke();
@@ -57,44 +93,71 @@ class QARun extends Command
 
     private function runExternalSyncSmoke(): void
     {
-        $season = Season::first() ?: Season::create(['name' => '2025/2026', 'is_active' => true]);
-        $team = Team::where('slug', 'muzi-e')->first() ?: Team::create(['name' => ['cs' => 'Muzi E'], 'slug' => 'muzi-e']);
+        $season = Season::where('is_active', true)->first() ?: Season::create(['name' => '2025/2026', 'is_active' => true]);
 
-        $config = ExternalTeamSeasonConfig::updateOrCreate([
-            'team_id' => $team->id,
-            'season_id' => $season->id,
-        ], [
-            'source_key' => 'czbasketball',
-            'external_team_id' => '7738',
-            'external_season_year' => 2025,
-            'team_season_url' => 'https://cz.basketball/tym/7738?y=2025',
-            'matches_list_url' => 'https://smo.cz.basketball/zapasy?c=7738&y=2025',
-            'is_enabled' => true,
-        ]);
+        $teams = [
+            'muzi-e' => '7738',
+            'muzi-c' => '7761',
+        ];
 
         // Mock fetcheru
+        $currentSyncTeamName = 'Sokol Kbely E'; // Default
         $mockFetcher = Mockery::mock(StatFetcherInterface::class);
-        $mockFetcher->shouldReceive('fetch')->andReturnUsing(function($url) {
+        $mockFetcher->shouldReceive('fetch')->andReturnUsing(function($url) use (&$currentSyncTeamName) {
             if (str_contains($url, 'tym/')) return File::get(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html'));
             if (str_contains($url, 'zapasy')) return File::get(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html'));
-            if (str_contains($url, 'zapas/')) return File::get(base_path('tests/Fixtures/Stats/CzBasketball/match_detail.html'));
+            if (str_contains($url, 'zapas/')) {
+                $html = File::get(base_path('tests/Fixtures/Stats/CzBasketball/match_detail.html'));
+                // V fixture je "Sokol Kbely E". Nahradíme ho jen pokud synchronizujeme něco jiného.
+                if ($currentSyncTeamName !== 'Sokol Kbely E') {
+                    $html = str_replace('Sokol Kbely E', $currentSyncTeamName, $html);
+                }
+                return $html;
+            }
             return '';
         });
         app()->instance(StatFetcherInterface::class, $mockFetcher);
 
         $syncService = app(ExternalStatsSyncService::class);
-        $this->info("Synchronizuji sezónu týmu {$team->slug}...");
-        $syncService->syncTeamSeason($team->id, $season->id);
 
-        $matchCount = BasketballMatch::where('team_id', $team->id)->count();
-        $this->line("✅ Importováno zápasů: $matchCount");
+        foreach ($teams as $slug => $extId) {
+            $team = Team::where('slug', $slug)->first() ?: Team::create([
+                'name' => ['cs' => ($slug === 'muzi-c' ? 'Sokol Kbely C' : 'Sokol Kbely E')],
+                'slug' => $slug
+            ]);
 
-        $match = BasketballMatch::first();
-        if ($match) {
-            $this->info("Synchronizuji detail zápasu {$match->id}...");
-            $syncService->syncMatchDetail($match->id);
-            $statRows = StatisticRow::where('basketball_match_id', $match->id)->count();
-            $this->line("✅ Importováno řádků statistik: $statRows");
+            $currentSyncTeamName = $team->getTranslation('name', 'cs');
+
+            ExternalTeamSeasonConfig::updateOrCreate([
+                'team_id' => $team->id,
+                'season_id' => $season->id,
+            ], [
+                'source_key' => 'czbasketball',
+                'external_team_id' => $extId,
+                'external_season_year' => 2025,
+                'team_season_url' => "https://cz.basketball/tym/{$extId}?y=2025",
+                'matches_list_url' => "https://smo.cz.basketball/zapasy?c={$extId}&y=2025",
+                'is_enabled' => true,
+            ]);
+
+            $this->info("Synchronizuji sezónu týmu {$team->slug}...");
+            $syncService->syncTeamSeason($team->id, $season->id);
+
+            $matchCount = BasketballMatch::where('team_id', $team->id)->count();
+            $this->line("✅ Importováno zápasů pro {$slug}: $matchCount");
+
+            // Synchronizujeme detaily všech zápasů
+            $matches = BasketballMatch::where('team_id', $team->id)->get();
+            $this->info("Synchronizuji detaily " . $matches->count() . " zápasů pro {$slug}...");
+            foreach ($matches as $match) {
+                $syncService->syncMatchDetail($match->id, ['force' => true]);
+            }
+
+            $statRows = StatisticRow::where('team_id', $team->id)
+                ->where('season_id', $season->id)
+                ->whereNotNull('basketball_match_id')
+                ->count();
+            $this->line("✅ Importováno celkem řádků statistik pro {$slug}: $statRows");
         }
     }
 
@@ -106,29 +169,54 @@ class QARun extends Command
             return;
         }
 
-        $this->info("Spouštím detekci souborů v {$path}...");
-        // Zde jen simulujeme spuštění jobu pro první soubor pro smoke test účely
+        $this->info("Spouštím reálný legacy import z {$path}...");
+
+        // Vytvoříme batch
+        $batch = \App\Models\LegacyImportBatch::create([
+            'title' => 'QA Smoke Run Legacy Import',
+            'status' => 'queued',
+            'total_files' => 0,
+            'created_by_user_id' => User::first()?->id,
+        ]);
+
         $files = File::files($path);
-        $htmlFiles = array_filter($files, fn($f) => in_array($f->getExtension(), ['html', 'htm']));
+        $count = 0;
+        $classifier = app(\App\Services\Stats\Legacy\LegacyFileClassifier::class);
 
-        $this->line("✅ Nalezeno " . count($htmlFiles) . " souborů.");
+        foreach ($files as $file) {
+            if (in_array($file->getExtension(), ['html', 'htm'])) {
+                $content = File::get($file->getPathname());
+                $classification = $classifier->classify($file->getFilename(), $content);
 
-        if (count($htmlFiles) > 0) {
-            $file = reset($htmlFiles);
-            $this->info("Zpracovávám ukázkový soubor: " . $file->getFilename());
+                if (empty($classification['season'])) {
+                    $this->warn("U souboru {$file->getFilename()} nebyla detekována sezóna!");
+                }
 
-            // Použijeme QAMasterTest logiku pro smoke v commandu
-            $classifier = app(\App\Services\Stats\Legacy\LegacyFileClassifier::class);
-            $extractor = app(\App\Services\Stats\Legacy\Extractors\LegacyStatExtractor::class);
-
-            $content = File::get($file->getPathname());
-            $classification = $classifier->classify($file->getFilename(), $content);
-            $extractedTables = $extractor->extract($content, $classification['file_type'], $classification['encoding']);
-
-            foreach ($extractedTables as $dto) {
-                $this->line("✅ Vyextrahováno " . count($dto->rows) . " řádků (Typ: {$dto->name}).");
+                \App\Models\LegacyImportFile::create([
+                    'legacy_import_batch_id' => $batch->id,
+                    'original_filename' => $file->getFilename(),
+                    'stored_path' => 'legacystats/' . $file->getFilename(),
+                    'detected_season_label' => $classification['season'],
+                    'detected_team_slug' => $classification['team'],
+                    'file_type' => $classification['file_type'],
+                    'status' => 'queued',
+                    'content_hash' => hash('sha256', $content),
+                ]);
+                $count++;
             }
         }
+
+        $batch->update(['total_files' => $count]);
+        $this->info("Vytvořen batch {$batch->id} s {$count} soubory.");
+
+        // Spustíme synchronně
+        Artisan::call('legacy:import-batch', ['batchId' => $batch->id, '--sync' => true]);
+
+        $batch->refresh();
+        $this->line("✅ Legacy import dokončen. Stav: {$batch->status}, Úspěšně: {$batch->success_files}, Chyba: {$batch->failed_files}");
+
+        $statRows = StatisticRow::whereJsonContains('source_metadata->source_type', 'legacy')->count();
+        $this->line("✅ Celkem naimportováno legacy statistik: $statRows");
     }
 
     private function checkInvariants(): void

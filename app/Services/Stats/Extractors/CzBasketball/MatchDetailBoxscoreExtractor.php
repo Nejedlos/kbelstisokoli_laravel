@@ -61,10 +61,12 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $teamNameNode = $table->previousAll()->filter('h3, h4, .title')->first();
             if ($teamNameNode->count() > 0) {
                 $tableName = trim($teamNameNode->text());
+                $allFragmentHtml .= "<h3>" . $tableName . "</h3>\n";
             }
 
             $allFragmentHtml .= $table->outerHtml() . "\n";
-            $allTablesData[] = $this->processBoxscoreTable($table, $tableName, $warnings);
+            $tableName = $this->processBoxscoreTable($table, $tableName, $warnings);
+            $allTablesData[] = $tableName;
         });
 
         // Pro zjednodušení vracíme první tabulku jako hlavní data, ale v metadatech máme vše
@@ -77,6 +79,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         ]);
 
         return [
+            'tables' => $allTablesData,
             'data' => $mainTable,
             'fragment_html' => $allFragmentHtml,
         ];
@@ -124,12 +127,36 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
     protected function processBoxscoreTable(Crawler $table, string $tableName, array &$warnings): NormalizedTableDTO
     {
+        // Pokud má tabulka v hlavičce th s colspan, obsahuje název týmu
+        $headerTh = $table->filter('thead th[colspan]');
+        if ($headerTh->count() > 0) {
+            $tableName = trim($headerTh->first()->text());
+        } elseif ($table->filter('thead th')->count() > 0 && str_contains($table->filter('thead th')->first()->attr('class') ?? '', 'title')) {
+            $tableName = trim($table->filter('thead th')->first()->text());
+        } else {
+            // Zkusíme najít h4 nad tabulkou (v některých verzích HTML)
+            try {
+                $container = $table->closest('div.overflow-auto');
+                if ($container && $container->count() > 0) {
+                    $h4 = $container->previousAll()->filter('h4')->first();
+                    if ($h4 && $h4->count() > 0) {
+                        $tableName = trim($h4->text());
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore DOM traversal errors
+            }
+        }
+
         $columns = [];
         $rows = [];
 
         // Hlavička tabulky pro mapování sloupců
-        $table->filter('thead th')->each(function (Crawler $th, $i) use (&$columns) {
+        $table->filter('thead tr')->last()->filter('th')->each(function (Crawler $th, $i) use (&$columns, $table) {
             $label = trim($th->text());
+            if ($th->attr('colspan') > 1 && $table->filter('thead tr')->count() > 1) {
+                return; // Přeskočíme hlavičku s colspan (název týmu)
+            }
             $normalizedLabel = mb_strtoupper(str_replace(' ', '', $label));
 
             $key = $this->columnMapping[$normalizedLabel] ?? 'col_' . $i;
