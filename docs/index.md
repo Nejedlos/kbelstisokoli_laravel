@@ -50,6 +50,18 @@ Popis jednotlivých funkčních modulů aplikace.
 8. [Homepage](./04-moduly/08-homepage.md)
 9. [Vylepšení homepage](./04-moduly/09-vylepseni-homepage.md)
 10. [Footer](./04-moduly/10-footer.md)
+11. [Externí statistiky a importy](./04-moduly/16-externi-statistiky-a-importy.md)
+12. [Audit cz.basketball](./04-moduly/17-external-czbasketball-audit.md)
+13. [Season-Aware Mapping](./04-moduly/18-external-mapping-season-aware.md)
+14. [Audit a Idempotence importů](./04-moduly/19-external-import-runs.md)
+15. [Robustní Fetcher (cz.basketball)](./04-moduly/20-external-fetcher-czbasketball.md)
+16. [DOM Extraktory (cz.basketball)](./04-moduly/21-external-extractors-czbasketball.md)
+17. [Synchronizace soupisky](./04-moduly/22-roster-synchronization.md)
+18. [AI Fallback a Normalizace](./04-moduly/23-external-ai-fallback.md)
+19. [Perzistence a Agregace](./04-moduly/24-external-persistence-and-aggregations.md)
+20. [Orchestrace synchronizace](./04-moduly/25-external-sync-orchestration.md)
+21. [Plánování úloh (Scheduler)](./04-moduly/26-external-scheduler.md)
+22. [Administrace synchronizace](./04-moduly/27-external-admin-tools.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)
 Implementace umělé inteligence pro vyhledávání a správu dokumentů.
@@ -71,7 +83,8 @@ Návody pro nasazení na produkci a řešení provozních problémů.
 1. [Nasazení na produkci](./07-provoz-a-nasazeni/01-nasazeni.md)
 2. [Řešení problémů](./07-provoz-a-nasazeni/02-reseni-problemu.md)
 3. [Hlášení chyb](./07-provoz-a-nasazeni/03-hlaseni-chyb.md)
-4. [Oprava relativních odkazů](./07-provoz-a-nasazeni/fixes/relative-links-in-user-menu.md)
+4. [Plánované úlohy (Cron)](./07-provoz-a-nasazeni/04-planovane-ulohy.md)
+5. [Oprava relativních odkazů](./07-provoz-a-nasazeni/fixes/relative-links-in-user-menu.md)
 - [Fixes (Konkrétní řešení chyb)](./07-provoz-a-nasazeni/fixes)
 
 ### 08. [Manuály a ostatní](./08-manualy-a-ostatni)

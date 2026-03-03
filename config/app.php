@@ -126,6 +126,8 @@ return [
     'prod_db_password' => env('PROD_DB_PASSWORD'),
     'prod_db_prefix' => env('PROD_DB_PREFIX', 'new_'),
 
+    'schedule_token' => env('SCHEDULE_TOKEN'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

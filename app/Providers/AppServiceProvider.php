@@ -34,6 +34,22 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(\App\Services\Member\MemberContext::class);
 
+        $this->app->bind(
+            \App\Services\Stats\Contracts\StatFetcherInterface::class,
+            \App\Services\Stats\Fetchers\CzBasketballFetcher::class
+        );
+
+        $this->app->bind(
+            \App\Services\Stats\Contracts\StatNormalizerInterface::class,
+            \App\Services\Stats\Normalizers\OpenAiNormalizer::class
+        );
+
+        $this->app->singleton(\App\Services\Stats\Sync\RosterSyncService::class);
+        $this->app->singleton(\App\Services\Stats\Sync\StatisticSetService::class);
+        $this->app->singleton(\App\Services\Stats\Sync\OpponentSyncService::class);
+        $this->app->singleton(\App\Services\Stats\Sync\MatchSyncService::class);
+        $this->app->singleton(\App\Services\Stats\Sync\StatisticSyncService::class);
+
         // Robustní fix pro Vite manifest na Webglobe hostingu (subdomény vs. root)
         $this->app->singleton(Vite::class, function ($app) {
             return new class extends Vite {

@@ -10,6 +10,11 @@ class Opponent extends Model
         'name',
         'city',
         'logo',
+        'metadata',
+    ];
+
+    protected $casts = [
+        'metadata' => 'array',
     ];
 
     public function games(): \Illuminate\Database\Eloquent\Relations\HasMany

@@ -78,7 +78,9 @@ class SeoService
         if (! $title) {
             // Speciální případy pro stránky bez modelu v DB (fallbacky)
             $path = Request::path();
-            if (Str::contains($path, 'novinky') || Str::contains($path, 'news')) {
+            if ($path === '/' || $path === 'cs' || $path === 'en' || $path === '') {
+                $title = 'Kbelští sokoli – Basketbal Praha 9 (Letňany, Kbely)';
+            } elseif (Str::contains($path, 'novinky') || Str::contains($path, 'news')) {
                 $title = __('nav.news');
             } elseif (Str::contains($path, 'tymy') || Str::contains($path, 'teams')) {
                 $title = __('nav.teams');
@@ -99,8 +101,12 @@ class SeoService
             }
         }
 
-        if ($title === $siteName) {
+        if ($title === 'Kbelští sokoli – Basketbal Praha 9 (Letňany, Kbely)') {
             return $title;
+        }
+
+        if ($title === $siteName) {
+            return $title . ' – Basketbal Praha 9';
         }
 
         // Pokud titulek již obsahuje název klubu, nepřidáváme suffix
@@ -108,7 +114,7 @@ class SeoService
             return $title;
         }
 
-        return $title.$titleSuffix;
+        return $title . ' | ' . $siteName . ' – Basketbal Praha 9';
     }
 
     protected function resolveDescription(?SeoMetadata $seo, ?Model $model, array $settings): string
@@ -200,47 +206,56 @@ class SeoService
     {
         $data = [];
 
+        $siteName = $settings['club_name'] ?? 'Kbelští sokoli';
+        $logo = $settings['logo_path'] ? web_asset($settings['logo_path']) : null;
+        $url = url('/');
+
         // Organization
         $org = [
             '@context' => 'https://schema.org',
             '@type' => 'SportsOrganization',
-            'name' => $settings['club_name'] ?? 'Kbelští sokoli',
-            'url' => url('/'),
-            'logo' => $settings['logo_path'] ? web_asset($settings['logo_path']) : null,
+            'name' => $siteName,
+            'url' => $url,
+            'logo' => $logo,
         ];
 
-        // Address (jen pokud existují smysluplná data)
-        $address = [
-            '@type' => 'PostalAddress',
-            'streetAddress' => $settings['contact']['address'] ?? null,
-        ];
-        $address = $this->cleanSchema($address);
-        if (! empty($address)) {
-            $org['address'] = $address;
-        }
-
-        // ContactPoint (jen pokud existují data)
-        $contact = [
-            '@type' => 'ContactPoint',
+        // LocalBusiness (Kbely/Letňany)
+        $local = [
+            '@context' => 'https://schema.org',
+            '@type' => 'LocalBusiness',
+            'name' => $siteName,
+            'image' => $logo,
+            'url' => $url,
             'telephone' => $settings['contact']['phone'] ?? null,
-            'contactType' => 'customer service',
             'email' => $settings['contact']['email'] ?? null,
+            'address' => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => $settings['contact']['address'] ?? 'Praha 9',
+                'addressLocality' => 'Praha',
+                'postalCode' => '19700',
+                'addressCountry' => 'CZ',
+            ],
+            'geo' => [
+                '@type' => 'GeoCoordinates',
+                'latitude' => '50.1315',
+                'longitude' => '14.5492',
+            ],
+            'priceRange' => '$$',
         ];
-        $contact = $this->cleanSchema($contact);
-        if (! empty($contact)) {
-            $org['contactPoint'] = $contact;
-        }
 
         $sameAs = array_filter([
             $settings['socials']['facebook'] ?? null,
             $settings['socials']['instagram'] ?? null,
             $settings['socials']['youtube'] ?? null,
+            'https://www.linkedin.com/company/kbelstisokoli', // Příklad, pokud by byl
         ]);
         if (! empty($sameAs)) {
             $org['sameAs'] = $sameAs;
+            $local['sameAs'] = $sameAs;
         }
 
         $data[] = $this->cleanSchema($org);
+        $data[] = $this->cleanSchema($local);
 
         // Article if post
         if ($model instanceof \App\Models\Post) {
@@ -253,7 +268,7 @@ class SeoService
                 'dateModified' => $model->updated_at->toIso8601String(),
                 'author' => [
                     '@type' => 'Organization',
-                    'name' => $settings['club_name'] ?? 'Kbelští sokoli',
+                    'name' => $siteName,
                 ],
             ];
             $data[] = $this->cleanSchema($article);

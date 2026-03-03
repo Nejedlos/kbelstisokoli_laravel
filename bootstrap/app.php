@@ -75,7 +75,31 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 });
             }
         } catch (\Throwable $e) {
-            // Tichý fail, pokud DB není připravena (např. při první migraci nebo chybějícím .env)
+            // Tichý fail, pokud DB není připravena
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Synchronizace externích statistik (cz.basketball)
+        |--------------------------------------------------------------------------
+        */
+        $czbConfig = config('external_sources.czbasketball');
+        if (config('external_sources.enabled') && $czbConfig['enabled']) {
+            // Baseline sync: 1x denně v noci (plná soupiska + seznam zápasů)
+            $schedule->job(new \App\Jobs\Stats\ExternalStatsSchedulerJob(recentOnly: false))
+                ->dailyAt($czbConfig['schedule']['baseline_time'] ?? '03:30')
+                ->name('czbasketball:baseline-sync')
+                ->withoutOverlapping();
+
+            // Match-day & Post-match sync: Častější refresh pro aktuální boxscore
+            $schedule->job(new \App\Jobs\Stats\ExternalStatsSchedulerJob(recentOnly: true))
+                ->everyTwoHours()
+                ->between(
+                    $czbConfig['schedule']['match_day_window'][0] ?? '10:00',
+                    $czbConfig['schedule']['match_day_window'][1] ?? '23:00'
+                )
+                ->name('czbasketball:matchday-sync')
+                ->withoutOverlapping();
         }
     })
     ->withMiddleware(function (Middleware $middleware): void {

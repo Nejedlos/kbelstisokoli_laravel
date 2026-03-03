@@ -84,12 +84,37 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Vyhledávání
     Route::get('/hledat', [\App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');
 
-    // Sitemap & Robots
-    Route::get('/sitemap.xml', [\App\Http\Controllers\Public\SitemapController::class, 'index'])->name('sitemap');
-    Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class, 'robots'])->name('robots');
+    // Cron / Plánovač (HTTP spuštění)
+    Route::get('/system/schedule/{token}', function (string $token) {
+        if (empty(config('app.schedule_token')) || $token !== config('app.schedule_token')) {
+            abort(403, 'Neplatný token.');
+        }
 
-    // Generické stránky (vždy na konci skupiny)
+        \Illuminate\Support\Facades\Artisan::call('schedule:run');
+
+        return response('Plánované úlohy byly spuštěny.' . PHP_EOL . \Illuminate\Support\Facades\Artisan::output());
+    })->name('system.schedule');
+
+    // Robots.txt & Sitemap & LLMs
+    Route::get('/robots.txt', function () {
+        return response(file_get_contents(public_path('robots.txt')), 200, ['Content-Type' => 'text/plain']);
+    });
+    Route::get('/llms.txt', function () {
+        return response(file_get_contents(public_path('llms.txt')), 200, ['Content-Type' => 'text/plain']);
+    });
+    Route::get('/sitemap.xml', function () {
+        if (file_exists(public_path('sitemap.xml'))) {
+            return response()->file(public_path('sitemap.xml'), ['Content-Type' => 'text/xml']);
+        }
+        return response()->view('public.sitemap', [
+            'pages' => \App\Models\Page::where('status', 'published')->where('is_visible', true)->get(),
+            'posts' => \App\Models\Post::where('status', 'published')->where('is_visible', true)->get(),
+            'galleries' => \App\Models\Gallery::where('is_public', true)->where('is_visible', true)->get(),
+        ], 200)->header('Content-Type', 'text/xml');
+    })->name('sitemap');
+
+    // Generic pages (always at the end of the group)
     Route::get('/{slug}', [PageController::class, 'show'])
         ->name('pages.show')
-        ->where('slug', '^(?!admin|clenska-sekce|login|logout|logout-success|two-factor|auth|user|api|up|system).*$');
+        ->where('slug', '^(?!admin|clenska-sekce|login|logout|logout-success|two-factor|auth|user|api|up|system|robots\.txt|sitemap\.xml|llms\.txt).*$');
 });

@@ -10,6 +10,7 @@ class StatisticRow extends Model
     protected $fillable = [
         'statistic_set_id',
         'player_id',
+        'team_id',
         'basketball_match_id',
         'season_id',
         'row_label',
