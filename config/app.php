@@ -127,6 +127,7 @@ return [
     'prod_db_prefix' => env('PROD_DB_PREFIX', 'new_'),
 
     'schedule_token' => env('SCHEDULE_TOKEN'),
+    'seed_users' => env('APP_SEED_USERS', false),
 
     'previous_keys' => [
         ...array_filter(
