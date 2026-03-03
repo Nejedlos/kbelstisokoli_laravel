@@ -43,8 +43,6 @@ class QAMasterTest extends TestCase
      */
     public function test_auth_and_permissions()
     {
-        $this->withoutMiddleware(['2fa.required', '2fa.timeout']);
-
         // 1. Guest Access
         $this->get('/admin')->assertRedirect();
         $this->get('/clenska-sekce/dashboard')->assertRedirect();
@@ -58,10 +56,16 @@ class QAMasterTest extends TestCase
         $this->get('/admin')->assertStatus(403);
 
         // 3. Admin Access
-        $admin = User::factory()->create(['is_active' => true]);
+        $admin = User::factory()->create([
+            'is_active' => true,
+            'two_factor_secret' => 'secret',
+            'two_factor_confirmed_at' => now(),
+        ]);
         $admin->assignRole('admin');
 
         $this->actingAs($admin, 'web');
+        session(['impersonated_by' => 1]);
+
         $this->get('/admin')->assertStatus(200);
         $this->get('/clenska-sekce/dashboard')->assertStatus(200);
     }
@@ -136,9 +140,7 @@ class QAMasterTest extends TestCase
         $match = BasketballMatch::first();
         $this->assertNotNull($match, "No match found in database after sync.");
 
-        $externalMatchId = $match->metadata['external']['season_external_match_id'] ?? '519196'; // Fixture ID
-
-        $syncService->syncMatchDetail($externalMatchId, $team->id, $season->id);
+        $syncService->syncMatchDetail($match->id);
 
         // Ověření statistik
         $this->assertDatabaseHas('statistic_rows', [
@@ -227,11 +229,14 @@ class QAMasterTest extends TestCase
      */
     public function test_ui_rendering()
     {
-        $this->withoutMiddleware(['2fa.required', '2fa.timeout']);
-
-        $admin = User::factory()->create(['is_active' => true]);
+        $admin = User::factory()->create([
+            'is_active' => true,
+            'two_factor_secret' => 'secret',
+            'two_factor_confirmed_at' => now(),
+        ]);
         $admin->assignRole('admin');
         $this->actingAs($admin, 'web');
+        session(['impersonated_by' => 1]);
 
         // Admin pages
         $this->get('/admin/debug-operations')->assertStatus(200);

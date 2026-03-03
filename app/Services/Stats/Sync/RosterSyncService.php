@@ -23,106 +23,71 @@ class RosterSyncService
     ) {}
 
     /**
-     * Synchronizuje soupisku pro daný tým a sezónu.
+     * Synchronizuje soupisku pro daný tým a sezónu (stáhne data z webu).
      */
     public function sync(ExternalTeamSeasonConfig $config, ?int $userId = null): ExternalImportRun
     {
-        $run = ExternalImportRun::create([
-            'source_key' => $config->source_key,
-            'season_id' => $config->season_id,
-            'team_id' => $config->team_id,
-            'run_type' => 'team_page',
-            'target_external_id' => $config->external_team_id,
-            'status' => 'running',
-            'started_at' => now(),
-            'created_by_user_id' => $userId,
-            'metadata' => [
-                'url' => $config->team_season_url,
-            ],
-        ]);
+        $run = ExternalImportRun::start($config->source_key, $config->season_id, $config->team_id, 'team_page', $config->external_team_id);
+        $run->updateMetadata(['url' => $config->team_season_url]);
 
         try {
-            $html = $this->fetcher->fetch($config->team_season_url);
-            $run->updateMetadata(['snapshot_path' => $this->getLastSnapshotPath($run)]);
-
+            $html = $this->fetcher->fetch($config->team_season_url, $run);
             $extractedData = $this->extractor->extract($html);
             $tableDto = $extractedData['data'];
-            $fragmentHtml = $extractedData['fragment_html'];
 
-            $contentHash = hash('sha256', $fragmentHtml);
+            $this->syncWithData($config, $tableDto);
 
-            // Check for idempotency
-            if ($run->getLastHash() === $contentHash) {
-                $run->update([
-                    'status' => 'skipped',
-                    'content_hash' => $contentHash,
-                    'finished_at' => now(),
-                ]);
-                return $run;
-            }
-
-            $run->update(['content_hash' => $contentHash]);
-
-            $importedCount = 0;
-            $skippedCount = 0;
-            $warnings = [];
-
-            DB::transaction(function () use ($tableDto, $config, &$importedCount, &$skippedCount, &$warnings) {
-                $externalPlayerIdsOnRoster = [];
-
-                foreach ($tableDto->rows as $row) {
-                    $externalPlayerId = $row->playerId;
-                    $playerName = $row->values['player_name'] ?? $row->rowLabel;
-
-                    if (!$externalPlayerId) {
-                        $warnings[] = "Player '{$playerName}' has no external ID, skipping.";
-                        $skippedCount++;
-                        continue;
-                    }
-
-                    $externalPlayerIdsOnRoster[] = $externalPlayerId;
-
-                    // 1. Najít nebo vytvořit mapping a uživatele
-                    $user = $this->findOrCreateUserForExternalPlayer($externalPlayerId, $playerName, $config);
-
-                    // 2. Zajistit existenci PlayerProfile
-                    $profile = $user->playerProfile ?: $this->createPlayerProfile($user, $row->values);
-
-                    // 3. Aktualizovat pivot tabulku (is_on_roster = true)
-                    $this->updateRosterStatus($profile, $config->team_id, true);
-
-                    $importedCount++;
-                }
-
-                // 4. Volitelně: Hráči, kteří už nejsou na soupisce, nastavit is_on_roster = false
-                // Zde musíme být opatrní, abychom nedeaktivovali hráče, kteří tam jsou ručně.
-                // Ale zadání říká "jen kdo je v současnosti na soupisce".
-                $this->deactivateOldRosterMembers($config->team_id, $externalPlayerIdsOnRoster, $config->source_key);
-            });
-
-            $run->update([
-                'status' => 'success',
+            $run->finish([
                 'extracted_count' => count($tableDto->rows),
-                'imported_count' => $importedCount,
-                'skipped_count' => $skippedCount,
-                'finished_at' => now(),
-                'metadata' => array_merge($run->metadata ?? [], [
-                    'warnings' => $warnings,
-                ]),
+                'imported_count' => count($tableDto->rows),
             ]);
-
         } catch (\Exception $e) {
-            $run->update([
-                'status' => 'failed',
-                'finished_at' => now(),
-                'error_summary' => $e->getMessage(),
-                'metadata' => array_merge($run->metadata ?? [], [
-                    'exception_trace' => $e->getTraceAsString(),
-                ]),
-            ]);
+            $run->fail($e);
+            throw $e;
         }
 
         return $run;
+    }
+
+    /**
+     * Synchronizuje soupisku s již vyparsovanými daty.
+     */
+    public function syncWithData(ExternalTeamSeasonConfig $config, \App\Services\Stats\DTO\NormalizedTableDTO $tableDto): void
+    {
+        $importedCount = 0;
+        $skippedCount = 0;
+        $warnings = [];
+
+        DB::transaction(function () use ($tableDto, $config, &$importedCount, &$skippedCount, &$warnings) {
+            $externalPlayerIdsOnRoster = [];
+
+            foreach ($tableDto->rows as $row) {
+                $externalPlayerId = $row->playerId;
+                $playerName = $row->values['player_name'] ?? $row->rowLabel;
+
+                if (!$externalPlayerId) {
+                    $warnings[] = "Player '{$playerName}' has no external ID, skipping.";
+                    $skippedCount++;
+                    continue;
+                }
+
+                $externalPlayerIdsOnRoster[] = $externalPlayerId;
+
+                // 1. Najít nebo vytvořit mapping a uživatele
+                $user = $this->findOrCreateUserForExternalPlayer($externalPlayerId, $playerName, $config);
+
+                // 2. Zajistit existenci PlayerProfile
+                $profile = $user->playerProfile ?: $this->createPlayerProfile($user, $row->values);
+
+                // 3. Aktualizovat pivot tabulku (is_on_roster = true)
+                $this->updateRosterStatus($profile, $config->team_id, true);
+
+                $importedCount++;
+            }
+
+            // 4. Hráči, kteří už nejsou na soupisce, nastavit is_on_roster = false
+            $this->deactivateOldRosterMembers($config->team_id, $externalPlayerIdsOnRoster, $config->source_key);
+        });
     }
 
     protected function findOrCreateUserForExternalPlayer(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
