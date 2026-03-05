@@ -39,10 +39,13 @@ class CzBasketballMatchesListClipper implements ClipperInterface
         $links = [];
         $matchesTable->filter('a[href*="/zapas/"]')->each(function (Crawler $a) use (&$links) {
             $href = $a->attr('href');
+            if (str_starts_with($href, '/')) {
+                $href = 'https://cz.basketball' . $href;
+            }
             $links[] = [
-                'href' => $href,
-                'text' => trim($a->text()),
-                'id' => preg_match('/\/zapas\/(\d+)/', $href, $m) ? $m[1] : null
+                'id' => preg_match('/\/zapas\/(\d+)/', $href, $m) ? $m[1] : null,
+                'url' => $href,
+                'name' => trim($a->text()),
             ];
         });
 

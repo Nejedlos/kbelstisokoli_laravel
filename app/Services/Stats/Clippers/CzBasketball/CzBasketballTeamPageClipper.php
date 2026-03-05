@@ -354,16 +354,44 @@ class CzBasketballTeamPageClipper implements ClipperInterface
         ];
 
         foreach ($clips as $clip) {
-            foreach ($clip->links as $link) {
-                $url = $link['url'];
-                if (str_contains($url, '/hrac/')) $result['players'][] = $link;
-                elseif (str_contains($url, '/zapas/')) $result['matches'][] = $link;
-                elseif (str_contains($url, '/tym/')) $result['opponent_teams'][] = $link;
-                elseif (str_contains($url, '/soutez/')) $result['competitions'][] = $link;
+            $links = $clip->links ?? [];
+            foreach ($links as $link) {
+                $url = $link['url'] ?? ($link['href'] ?? null);
+                if (! is_string($url) || $url === '') {
+                    continue; // ochrana proti nekompletním záznamům
+                }
+                // Absolutizace relativních URL pro konzistenci
+                if (str_starts_with($url, '/')) {
+                    $url = 'https://cz.basketball' . $url;
+                }
+
+                $entry = [
+                    'id' => $link['id'] ?? null,
+                    'url' => $url,
+                    'name' => $link['name'] ?? ($link['text'] ?? null),
+                ];
+
+                if (isset($link['number']) && ! isset($entry['number'])) {
+                    $entry['number'] = $link['number'];
+                }
+                if (isset($link['label']) && ! isset($entry['label'])) {
+                    $entry['label'] = $link['label'];
+                }
+
+                if (str_contains($url, '/hrac/')) {
+                    $result['players'][] = $entry;
+                } elseif (str_contains($url, '/zapas/')) {
+                    $result['matches'][] = $entry;
+                } elseif (str_contains($url, '/tym/')) {
+                    $result['opponent_teams'][] = $entry;
+                } elseif (str_contains($url, '/soutez/')) {
+                    $result['competitions'][] = $entry;
+                }
             }
         }
 
         foreach ($result as $key => $val) {
+            // Odstraníme duplicitní záznamy podle URL
             $result[$key] = array_values(collect($val)->unique('url')->toArray());
         }
 
