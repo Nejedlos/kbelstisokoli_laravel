@@ -13,6 +13,17 @@ Při použití standardní Laravel syntaxe pro dotazování do JSONu (`->where('
 3. **Konvence pro `LIKE`:** 
     - Pro řetězce: `->where('metadata', 'LIKE', '%"key":"value"%')`
     - Buďte opatrní při vyhledávání čísel, která mohou být uložena bez uvozovek. Pokud je to možné, vynucujte v PHP ukládání jako string.
+4. **Filament a translatable pole:** 
+    - Standardní `searchable()` na translatable polích (Spatie Translatable) generuje SQL s `json_unquote`.
+    - **Povinnost:** Vždy definujte vlastní query pro vyhledávání v translatable polích:
+      ```php
+      TextColumn::make('title')
+          ->searchable(query: function ($query, string $search): Builder {
+              return $query->where('title', 'LIKE', "%{$search}%");
+          })
+      ```
+    - **Řazení:** Translatable pole nesmí být `sortable()`, protože MariaDB na hostingu neumí řadit podle JSON hodnot bez nativních funkcí.
+    - **Relace:** Pokud vyhledáváte v relaci přes translatable pole (např. `team.name`), použijte `whereHas` s `LIKE`.
 
 ## Příklad bezpečné úpravy
 **Špatně (způsobí pád):**

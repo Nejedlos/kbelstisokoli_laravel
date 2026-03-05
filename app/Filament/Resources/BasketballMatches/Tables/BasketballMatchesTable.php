@@ -27,7 +27,11 @@ class BasketballMatchesTable
                 TextColumn::make('team.name')
                     ->label('Tým')
                     ->badge()
-                    ->searchable(),
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->whereHas('team', function ($q) use ($search) {
+                            $q->where('name', 'LIKE', "%{$search}%");
+                        });
+                    }),
                 TextColumn::make('opponent.name')
                     ->label('Soupeř')
                     ->searchable()

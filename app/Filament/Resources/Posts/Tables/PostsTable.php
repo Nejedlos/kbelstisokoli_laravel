@@ -24,14 +24,18 @@ class PostsTable
 
                 TextColumn::make('title')
                     ->label('Titulek')
-                    ->searchable()
-                    ->sortable()
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('title', 'LIKE', "%{$search}%");
+                    })
                     ->description(fn ($record) => $record->slug),
 
                 TextColumn::make('category.name')
                     ->label('Kategorie')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->whereHas('category', function ($q) use ($search) {
+                            $q->where('name', 'LIKE', "%{$search}%");
+                        });
+                    }),
 
                 TextColumn::make('status')
                     ->label('Stav')

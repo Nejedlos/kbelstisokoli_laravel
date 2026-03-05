@@ -26,11 +26,15 @@ class AnnouncementsTable
                         'success' => 'success',
                         default => 'info',
                     })
-                    ->searchable(),
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('title', 'LIKE', "%{$search}%");
+                    }),
                 TextColumn::make('message')
                     ->label('Zpráva')
                     ->limit(50)
-                    ->searchable(),
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('message', 'LIKE', "%{$search}%");
+                    }),
                 TextColumn::make('audience')
                     ->label('Publikum')
                     ->badge()

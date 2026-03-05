@@ -23,11 +23,11 @@ class MatchSyncService
     public function sync(Team $team, Season $season, array $matchData, ?ExternalImportRun $run = null): BasketballMatch
     {
         $externalMatchId = $matchData['external_match_id'] ?? null;
-        $scheduledAtStr = $matchData['scheduled_at'];
+        $scheduledAtStr = $matchData['scheduled_at'] ?? null;
         $scheduledAt = $scheduledAtStr ? Carbon::parse($scheduledAtStr) : null;
 
-        $homeTeamName = $matchData['home_team'];
-        $awayTeamName = $matchData['away_team'];
+        $homeTeamName = $matchData['home_team'] ?? 'Unknown';
+        $awayTeamName = $matchData['away_team'] ?? 'Unknown';
 
         // Detekce, zda jsme domácí a kdo je soupeř
         $isHome = $this->isMyTeam($homeTeamName, $team);
@@ -64,7 +64,7 @@ class MatchSyncService
         if ($externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'LIKE', '%"external_id":"' . $externalMatchId . '"%')
+                ->where('metadata', 'LIKE', '%"external_id":"'.$externalMatchId.'"%')
                 ->first();
         }
 
@@ -72,7 +72,7 @@ class MatchSyncService
         if (! $match) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'LIKE', '%"match_identity_key":"' . $matchIdentityKey . '"%')
+                ->where('metadata', 'LIKE', '%"match_identity_key":"'.$matchIdentityKey.'"%')
                 ->first();
         }
 

@@ -40,7 +40,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
 
         try {
             $response = Http::withToken($this->apiKey)
-                ->timeout(config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 90)))
+                ->timeout(config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 180)))
                 ->post($this->baseUrl.'/chat/completions', [
                     'model' => $this->model,
                     'messages' => [

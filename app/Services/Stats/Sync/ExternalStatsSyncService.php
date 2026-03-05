@@ -14,6 +14,7 @@ use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use App\Services\Support\ConsoleService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -236,7 +237,17 @@ class ExternalStatsSyncService
 
                 \Log::info("Syncing matches for {$team->slug}, count: ".count($data->rows));
                 foreach ($data->rows as $row) {
-                    $this->matchSyncService->sync($team, $season, $row->values, $run);
+                    $rowValues = $row->values;
+
+                    // Zajištění povinných klíčů pro MatchSyncService
+                    $rowValues['scheduled_at'] ??= null;
+                    $rowValues['home_team'] ??= 'Unknown';
+                    $rowValues['away_team'] ??= 'Unknown';
+                    $rowValues['score'] ??= null;
+                    $rowValues['status'] ??= 'planned';
+                    $rowValues['external_match_id'] ??= $rowValues['id'] ?? null;
+
+                    $this->matchSyncService->sync($team, $season, $rowValues, $run);
                 }
                 $run->finish([
                     'extracted_count' => count($data->rows),

@@ -11,6 +11,8 @@ class GlobalSeeder extends Seeder
      * Sem přidávejte další seedery v pořadí, v jakém mají být spuštěny.
      */
     public const SEEDERS = [
+        ExternalStatSourceSeeder::class,
+        ExternalTeamMappingSeeder::class,
         RoleSeeder::class,
         SportSeeder::class,
         UserSeeder::class,
@@ -73,6 +75,9 @@ class GlobalSeeder extends Seeder
         'photo_pool_media_asset',
         'trophies',
         'announcements',
+        'external_team_mappings',
+        'external_team_season_configs',
+        'external_stat_sources',
     ];
 
     /**
