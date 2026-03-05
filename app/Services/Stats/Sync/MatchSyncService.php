@@ -29,14 +29,26 @@ class MatchSyncService
         $homeTeamName = $matchData['home_team'];
         $awayTeamName = $matchData['away_team'];
 
-        // Detekce soupeře a zda jsme doma
-        // Poznámka: v realitě cz.basketball může být název týmu mírně odlišný od našeho interního jména,
-        // ale pro potřeby identity key a hledání soupeře musíme být konzistentní.
-        // Předpokládáme, že pokud tým v datech NENÍ náš tým, je to soupeř.
-        // Pro lepší robustnost můžeme použít config['my_team_names']
-
+        // Detekce, zda jsme domácí a kdo je soupeř
         $isHome = $this->isMyTeam($homeTeamName, $team);
+
+        // Pokud to nevypadá, že jsme domácí, zkusíme jestli nejsme hosté
+        if (! $isHome) {
+            $isAway = $this->isMyTeam($awayTeamName, $team);
+            if (! $isAway) {
+                // Pokud nejsme ani jedno, tak jsme asi v koncích s automatickou detekcí podle jména,
+                // ale budeme předpokládat, že jsme hosté, pokud homeTeam neobsahuje 'Kbely'
+                $isHome = str_contains(mb_strtolower($homeTeamName), 'kbely') && ! str_contains(mb_strtolower($awayTeamName), 'kbely');
+            } else {
+                $isHome = false;
+            }
+        }
+
         $opponentName = $isHome ? $awayTeamName : $homeTeamName;
+        $opponentExternalId = $isHome ? ($matchData['away_team_external_id'] ?? null) : ($matchData['home_team_external_id'] ?? null);
+
+        // Upsert soupeře (včetně externích ID pokud budou k dispozici)
+        $opponent = $this->opponentSyncService->sync($opponentName, null, $opponentExternalId);
 
         $matchIdentityKey = MatchIdentityKey::make(
             $season->id,
@@ -46,20 +58,31 @@ class MatchSyncService
             $opponentName
         );
 
-        $match = BasketballMatch::where('season_id', $season->id)
-            ->where('team_id', $team->id)
-            ->where('metadata', 'LIKE', '%"match_identity_key":"' . $matchIdentityKey . '"%')
-            ->first();
+        $match = null;
 
-        // Pokud jsme nenašli podle identity key, zkusíme podle external_id (pokud ho máme)
-        if (! $match && $externalMatchId) {
+        // 1. Přednost má external_id
+        if ($externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
-                ->where('metadata', 'LIKE', '%"external_id":"' . $externalMatchId . '"%')
+                ->where('team_id', $team->id)
+                ->where('metadata->external_id', (string) $externalMatchId)
                 ->first();
         }
 
-        // Upsert soupeře
-        $opponent = $this->opponentSyncService->sync($opponentName);
+        // 2. Fallback na identity key
+        if (! $match) {
+            $match = BasketballMatch::where('season_id', $season->id)
+                ->where('team_id', $team->id)
+                ->where('metadata->match_identity_key', $matchIdentityKey)
+                ->first();
+        }
+
+        // 3. Poslední záchrana - LIKE (pro zpětnou kompatibilitu, pokud metadata nejsou indexovaná/přístupná přes ->)
+        if (! $match) {
+            $match = BasketballMatch::where('season_id', $season->id)
+                ->where('team_id', $team->id)
+                ->where('metadata', 'LIKE', '%"match_identity_key":"' . $matchIdentityKey . '"%')
+                ->first();
+        }
 
         // Zpracování skóre
         $scoreHome = null;
@@ -112,15 +135,31 @@ class MatchSyncService
 
     protected function isMyTeam(string $scrapedName, Team $team): bool
     {
-        // Velmi jednoduchá heuristika: pokud obsahuje "Kbely" a náš tým taky
-        // Lepší by bylo mít mapování názvů v external_team_mappings.metadata
-        $scrapedNormalized = mb_strtolower($scrapedName);
-        $myTeamNormalized = mb_strtolower($team->getTranslation('name', 'cs'));
+        $scrapedNormalized = mb_strtolower(trim($scrapedName));
+        $myTeamCs = mb_strtolower(trim($team->getTranslation('name', 'cs')));
+        $myTeamEn = mb_strtolower(trim($team->getTranslation('name', 'en')));
 
-        if (str_contains($scrapedNormalized, 'kbely')) {
+        // 1. Přesná shoda
+        if ($scrapedNormalized === $myTeamCs || $scrapedNormalized === $myTeamEn) {
             return true;
         }
 
-        return $scrapedNormalized === $myTeamNormalized;
+        // 2. Pokud obsahuje "Kbely", musíme rozlišit písmeno týmu (C, E, ...)
+        if (str_contains($scrapedNormalized, 'kbely')) {
+            // Pokud synchronizujeme Sokol Kbely C, tak hledáme "C" v názvu z webu
+            // Většinou je to "Sokol Kbely C" nebo "Kbely C"
+            preg_match('/\b([a-gA-G])\b/', $scrapedNormalized, $mScraped);
+            preg_match('/\b([a-gA-G])\b/', $myTeamCs, $mMy);
+
+            $suffixScraped = isset($mScraped[1]) ? mb_strtolower($mScraped[1]) : null;
+            $suffixMy = isset($mMy[1]) ? mb_strtolower($mMy[1]) : null;
+
+            if ($suffixScraped === $suffixMy) {
+                return true;
+            }
+        }
+
+        // Fallback na starý způsob, pokud vše ostatní selže
+        return $scrapedNormalized === $myTeamCs;
     }
 }

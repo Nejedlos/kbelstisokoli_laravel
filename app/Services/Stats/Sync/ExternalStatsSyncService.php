@@ -65,12 +65,12 @@ class ExternalStatsSyncService
             Log::error('Chyba při synchronizaci soupisky: '.$e->getMessage());
         }
 
-        // 2. Synchronizace seznamu zápasů
-        try {
-            ConsoleService::log("- Synchronizace seznamu zápasů...");
-            $this->syncMatchesList($team, $season, $config, $options);
-            ConsoleService::log("  Seznam zápasů OK.", 'success');
-        } catch (\Exception $e) {
+            // 2. Synchronizace seznamu zápasů
+            try {
+                ConsoleService::log("- Synchronizace seznamu zápasů...");
+                $count = $this->syncMatchesList($team, $season, $config, $options);
+                ConsoleService::log("  Seznam zápasů OK (zpracováno $count zápasů).", 'success');
+            } catch (\Exception $e) {
             $errors[] = 'Zápasy: '.$e->getMessage();
             ConsoleService::log("  Chyba při synchronizaci seznamu zápasů: ".$e->getMessage(), 'error');
             Log::error('Chyba při synchronizaci seznamu zápasů: '.$e->getMessage());
@@ -317,6 +317,25 @@ class ExternalStatsSyncService
 
             if ($usedAiFallback) {
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
+            }
+
+            // Aktualizace skóre a stavu z detailu zápasu (pokud tam jsou)
+            $header = $data->metadata['header'] ?? [];
+            if (isset($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $m)) {
+                $scoreHome = (int) $m[1];
+                $scoreAway = (int) $m[2];
+
+                if ($match->score_home !== $scoreHome || $match->score_away !== $scoreAway || $match->status !== 'completed') {
+                    $oldValues = $match->only(['score_home', 'score_away', 'status']);
+                    $match->update([
+                        'score_home' => $scoreHome,
+                        'score_away' => $scoreAway,
+                        'status' => 'completed',
+                    ]);
+                    if ($run) {
+                        $run->addLog('match_updated_from_detail', $match, $oldValues, $match->only(['score_home', 'score_away', 'status']));
+                    }
+                }
             }
 
             // Fresh mode: smazání starých statistik zápasu před importem nových

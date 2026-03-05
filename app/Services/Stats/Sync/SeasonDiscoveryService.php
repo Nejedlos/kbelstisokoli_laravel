@@ -183,7 +183,7 @@ class SeasonDiscoveryService
                 'external_team_id' => $externalTeamId,
                 'external_season_year' => $y,
                 'team_season_url' => "https://cz.basketball/tym/{$externalTeamId}?y={$y}",
-                'matches_list_url' => $matchesUrl,
+                'matches_list_url' => "https://cz.basketball/tym/{$externalTeamId}?y={$y}",
                 'is_enabled' => true,
                 'metadata' => [
                     'discovered_by' => 'season_discover',

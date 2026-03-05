@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ExternalTeamSeasonConfigs\Tables;
 use App\Services\Stats\Sync\ExternalStatsSyncService;
 use App\Support\IconHelper;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 class ExternalTeamSeasonConfigsTable
@@ -90,11 +92,52 @@ class ExternalTeamSeasonConfigsTable
                 EditAction::make()
                     ->icon(new HtmlString('<i class="fa-light fa-pen-to-square"></i>')),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
+                    BulkAction::make('syncSelected')
+                        ->label('Sync vybrané')
+                        ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                        ->color('success')
+                        ->action(fn (Collection $records, ExternalStatsSyncService $service) => self::runBulkSync($records, $service)),
+                    BulkAction::make('forceSyncSelected')
+                        ->label('Force Sync vybrané')
+                        ->icon(new HtmlString('<i class="fa-light fa-bolt"></i>'))
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records, ExternalStatsSyncService $service) => self::runBulkSync($records, $service, ['force' => true])),
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    protected static function runBulkSync(Collection $records, ExternalStatsSyncService $service, array $options = []): void
+    {
+        $successCount = 0;
+        $errorCount = 0;
+        $errors = [];
+
+        foreach ($records as $record) {
+            try {
+                $service->syncTeamSeason($record->team_id, $record->season_id, $options);
+                $successCount++;
+            } catch (\Exception $e) {
+                $errorCount++;
+                $errors[] = ($record->team?->name ?? 'Neznámý tým') . ': ' . $e->getMessage();
+            }
+        }
+
+        if ($errorCount === 0) {
+            Notification::make()
+                ->title("Hromadná synchronizace {$successCount} záznamů dokončena")
+                ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title("Hromadná synchronizace dokončena s chybami")
+                ->body("Úspěšně: $successCount, Chyby: $errorCount. " . implode('; ', array_slice($errors, 0, 3)) . (count($errors) > 3 ? '...' : ''))
+                ->warning()
+                ->send();
+        }
     }
 
     protected static function runSync($record, ExternalStatsSyncService $service, array $options = []): void

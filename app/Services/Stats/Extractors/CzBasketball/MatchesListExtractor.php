@@ -18,12 +18,35 @@ class MatchesListExtractor implements StatExtractorInterface
         $crawler = new Crawler($content);
         $warnings = [];
 
-        // Hledáme tabulku se zápasy - obvykle table.table-striped
-        $table = $crawler->filter('table.table-striped')->first();
+        // Hledáme tabulku se zápasy - hledáme tu, která má v hlavičce "domácí / hosté" a "datum a čas"
+        $table = $crawler->filter('table')->reduce(function (Crawler $node) {
+            $thead = $node->filter('thead');
+            if ($thead->count() === 0) {
+                return false;
+            }
+            $headerText = mb_strtolower($thead->text());
+
+            // Kontrolujeme, zda obsahuje aspoň "hosté" a "datum" a "skore" (to je v obou variantách)
+            return (str_contains($headerText, 'hosté') || str_contains($headerText, 'domácí'))
+                && (str_contains($headerText, 'datum'))
+                && (str_contains($headerText, 'skore') || str_contains($headerText, 'skóre'));
+        });
+
+        // Pokud jich je víc, chceme tu, která má "kolo" (to je ta z tabu #3 nebo ze stránky zápasů)
+        if ($table->count() > 1) {
+            $tableWithKolo = $table->reduce(function (Crawler $node) {
+                return str_contains(mb_strtolower($node->filter('thead')->text()), 'kolo');
+            });
+            if ($tableWithKolo->count() > 0) {
+                $table = $tableWithKolo;
+            }
+        }
+
+        $table = $table->first();
 
         if ($table->count() === 0) {
-            // Fallback na jakoukoli tabulku obsahující /zapas/
-            $table = $crawler->filter('table')->reduce(function (Crawler $node) {
+            // Fallback na table.table-striped, která obsahuje /zapas/
+            $table = $crawler->filter('table.table-striped')->reduce(function (Crawler $node) {
                 return str_contains($node->html(), '/zapas/');
             })->first();
         }
@@ -71,8 +94,10 @@ class MatchesListExtractor implements StatExtractorInterface
                     $scheduledAt = Carbon::createFromFormat('j. n. Y H:i', $cleanDateStr);
                 } catch (\Exception $e) {
                     try {
-                        // Zkusíme bez času
-                        $scheduledAt = Carbon::createFromFormat('j. n. Y', explode(' ', $cleanDateStr)[0].' '.explode(' ', $cleanDateStr)[1].' '.explode(' ', $cleanDateStr)[2]);
+                        // Zkusíme bez času - rozdělíme podle mezer a vezmeme první 3 části (např. 6., 3., 2026)
+                        $parts = array_filter(explode(' ', $cleanDateStr));
+                        $dateOnly = implode(' ', array_slice($parts, 0, 3));
+                        $scheduledAt = Carbon::createFromFormat('j. n. Y', $dateOnly);
                     } catch (\Exception $e2) {
                         $warnings[] = "Could not parse date: $dateStr";
                     }
@@ -81,14 +106,36 @@ class MatchesListExtractor implements StatExtractorInterface
 
             // Týmy (třetí buňka)
             $teamNodes = $cells->eq(2)->filter('.text-nowrap');
+            $homeTeamId = null;
+            $awayTeamId = null;
+
             if ($teamNodes->count() >= 2) {
                 $homeTeam = trim($teamNodes->eq(0)->text());
                 $awayTeam = trim($teamNodes->eq(1)->text());
+
+                // Zkusíme najít external_id týmu (v odkazu)
+                $homeLink = $teamNodes->eq(0)->filter('a[href*="/tym/"]')->first();
+                if ($homeLink->count() > 0 && preg_match('/\/tym\/(\d+)/', $homeLink->attr('href'), $m)) {
+                    $homeTeamId = $m[1];
+                }
+                $awayLink = $teamNodes->eq(1)->filter('a[href*="/tym/"]')->first();
+                if ($awayLink->count() > 0 && preg_match('/\/tym\/(\d+)/', $awayLink->attr('href'), $m)) {
+                    $awayTeamId = $m[1];
+                }
             } else {
                 // Fallback na text rozdělený novým řádkem nebo něčím
                 $teams = explode("\n", trim($cells->eq(2)->text()));
                 $homeTeam = trim($teams[0] ?? 'Unknown');
                 $awayTeam = trim($teams[1] ?? 'Unknown');
+
+                // Zkusíme aspoň odkaz kdekoli v buňce (pokud jsou tam dva, tak první=home, druhý=away)
+                $links = $cells->eq(2)->filter('a[href*="/tym/"]');
+                if ($links->count() >= 1 && preg_match('/\/tym\/(\d+)/', $links->eq(0)->attr('href'), $m)) {
+                    $homeTeamId = $m[1];
+                }
+                if ($links->count() >= 2 && preg_match('/\/tym\/(\d+)/', $links->eq(1)->attr('href'), $m)) {
+                    $awayTeamId = $m[1];
+                }
             }
 
             // Skóre (čtvrtá buňka)
@@ -118,9 +165,13 @@ class MatchesListExtractor implements StatExtractorInterface
                     'score' => $score,
                     'status' => $status,
                     'external_match_id' => $matchId,
+                    'home_team_external_id' => $homeTeamId,
+                    'away_team_external_id' => $awayTeamId,
                 ],
                 metadata: [
                     'external_match_id' => $matchId,
+                    'home_team_external_id' => $homeTeamId,
+                    'away_team_external_id' => $awayTeamId,
                     'source' => 'czbasketball',
                 ]
             );

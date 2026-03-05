@@ -9,26 +9,37 @@ class OpponentSyncService
     /**
      * Synchronizuje soupeře v databázi.
      */
-    public function sync(string $name, ?string $city = null): Opponent
+    public function sync(string $name, ?string $city = null, ?string $externalId = null): Opponent
     {
         $name = trim($name);
         $city = $city ? trim($city) : null;
 
-        // Pro hledání použijeme case-insensitive porovnání (v MySQL default, v Postgres ne nutně)
-        // Ale pro jistotu a přehlednost budeme hledat přes Eloquent.
-        $query = Opponent::where('name', $name);
+        $opponent = null;
 
-        if ($city) {
-            $query->where('city', $city);
-        } else {
-            $query->whereNull('city');
+        // 1. Zkusíme hledat podle external_id v metadatech
+        if ($externalId) {
+            $opponent = Opponent::where('metadata->external_id', (string) $externalId)->first();
+
+            if (! $opponent) {
+                // Zkusíme LIKE pro případ, že metadata nejsou jako JSON sloupec
+                $opponent = Opponent::where('metadata', 'LIKE', '%"external_id":"' . $externalId . '"%')->first();
+            }
         }
 
-        $opponent = $query->first();
+        // 2. Pokud nemáme external_id nebo jsme nenašli, hledáme podle jména
+        if (! $opponent) {
+            $query = Opponent::where('name', $name);
+
+            if ($city) {
+                $query->where('city', $city);
+            } else {
+                $query->whereNull('city');
+            }
+
+            $opponent = $query->first();
+        }
 
         if (! $opponent) {
-            // Zkusíme najít aspoň podle jména, pokud město nesouhlasí?
-            // Raději budeme striktní podle zadání "name + city pokud existuje".
             $opponent = Opponent::create([
                 'name' => $name,
                 'city' => $city,
@@ -36,12 +47,16 @@ class OpponentSyncService
                     'source_key' => 'czbasketball',
                     'last_seen_at' => now()->toDateTimeString(),
                     'external_name_variants' => [$name],
+                    'external_id' => $externalId,
                 ],
             ]);
         } else {
             $metadata = $opponent->metadata ?? [];
             $metadata['source_key'] = 'czbasketball';
             $metadata['last_seen_at'] = now()->toDateTimeString();
+            if ($externalId) {
+                $metadata['external_id'] = $externalId;
+            }
 
             $variants = $metadata['external_name_variants'] ?? [];
             if (! in_array($name, $variants)) {
