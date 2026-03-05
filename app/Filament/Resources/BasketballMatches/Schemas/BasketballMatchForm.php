@@ -26,7 +26,6 @@ class BasketballMatchForm
                                     ->options([
                                         'mistrovske' => 'Mistrovské utkání',
                                         'poharove' => 'Pohárové utkání',
-                                        'turnaj' => 'Turnaj',
                                         'pratelske' => 'Přátelské utkání',
                                     ])
                                     ->required()

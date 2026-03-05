@@ -32,6 +32,8 @@ class ClubEventForm
                                         'meeting' => 'Schůzka / Porada',
                                         'camp' => 'Soustředění / Kemp',
                                         'volunteer' => 'Dobrovolnická akce / Brigáda',
+                                        'tournament' => 'Turnaj',
+                                        'all' => 'Klubová akce / Pro všechny',
                                         'other' => 'Ostatní',
                                     ])
                                     ->default('other')

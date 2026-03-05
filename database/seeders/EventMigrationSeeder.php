@@ -96,15 +96,15 @@ class EventMigrationSeeder extends Seeder
                     }
                     $scheduledAt = \Carbon\Carbon::parse($old->datum.' '.$time);
 
-                    $matchTypes = ['MI', 'PO', 'PRATEL', 'TUR'];
+                    $matchTypes = ['MI', 'PO', 'PRATEL'];
                     if (in_array($old->druh, $matchTypes)) {
                         // Migrace zápasu
                         $this->migrateMatch($old, $targetTeamIds, $season?->id, $scheduledAt, $existingMatches->get($old->id));
                     } elseif ($old->druh === 'TR') {
                         // Migrace tréninku
                         $this->migrateTraining($old, $targetTeamIds, $scheduledAt, $existingTrainings->get($old->id));
-                    } elseif ($old->druh === 'ALL') {
-                        // Migrace klubové akce
+                    } elseif (in_array($old->druh, ['ALL', 'TUR'])) {
+                        // Migrace klubové akce (včetně turnajů)
                         $this->migrateClubEvent($old, $targetTeamIds, $scheduledAt, $existingClubEvents->get($old->id));
                     } else {
                         // Fallback pro ostatní typy (např. TR, pokud tam bylo dříve něco jiného)
@@ -169,7 +169,12 @@ class EventMigrationSeeder extends Seeder
             'season_id' => $seasonId,
             'opponent_id' => $opponentId,
             'scheduled_at' => $scheduledAt,
-            'match_type' => $old->druh, // MI, PO, TUR, PRATEL
+            'match_type' => match ($old->druh) {
+                'MI' => 'mistrovske',
+                'PO' => 'poharove',
+                'PRATEL' => 'pratelske',
+                default => 'mistrovske',
+            },
             'location' => $old->adresa ?: ($old->kde === 'doma' ? 'Kbely' : null),
             'is_home' => $old->kde === 'doma',
             'status' => $status,
@@ -225,7 +230,11 @@ class EventMigrationSeeder extends Seeder
             'cs' => $old->souper ?: 'Klubová akce',
             'en' => $old->souper ?: 'Club Event',
         ];
-        $event->event_type = 'other';
+        $event->event_type = match ($old->druh) {
+            'TUR' => 'tournament',
+            'ALL' => 'all',
+            default => 'other',
+        };
         $event->location = $old->adresa ?: 'Kbely';
         $event->starts_at = $scheduledAt;
         $event->ends_at = $scheduledAt->copy()->addMinutes(120);
