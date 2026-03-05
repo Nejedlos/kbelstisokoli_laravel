@@ -12,16 +12,16 @@ class OpponentMergeSuggestionForm
         return $schema
             ->components([
                 TextInput::make('sourceOpponent.name')
-                    ->label(__('admin.resources.opponent_merge_suggestion.fields.source_opponent'))
+                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.source_opponent'))
                     ->disabled(),
                 TextInput::make('targetOpponent.name')
-                    ->label(__('admin.resources.opponent_merge_suggestion.fields.target_opponent'))
+                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.target_opponent'))
                     ->disabled(),
                 TextInput::make('similarity')
-                    ->label(__('admin.resources.opponent_merge_suggestion.fields.similarity'))
+                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.similarity'))
                     ->disabled(),
                 TextInput::make('status')
-                    ->label(__('admin.resources.opponent_merge_suggestion.fields.status'))
+                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.status'))
                     ->disabled(),
             ]);
     }

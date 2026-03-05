@@ -30,17 +30,17 @@ class OpponentMergeSuggestionResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.resources.opponent_merge_suggestion.plural_label');
+        return __('admin.navigation.resources.opponent_merge_suggestion.plural_label');
     }
 
     public static function getPluralLabel(): string
     {
-        return __('admin.resources.opponent_merge_suggestion.plural_label');
+        return __('admin.navigation.resources.opponent_merge_suggestion.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('admin.resources.opponent_merge_suggestion.label');
+        return __('admin.navigation.resources.opponent_merge_suggestion.label');
     }
 
     public static function getNavigationSort(): ?int

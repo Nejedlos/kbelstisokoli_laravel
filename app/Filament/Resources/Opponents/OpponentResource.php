@@ -8,6 +8,7 @@ use App\Filament\Resources\Opponents\Pages\ListOpponents;
 use App\Filament\Resources\Opponents\Schemas\OpponentForm;
 use App\Filament\Resources\Opponents\Tables\OpponentsTable;
 use App\Models\Opponent;
+use App\Filament\Resources\Opponents\Widgets\OpponentMergeSuggestionsWidget;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -55,6 +56,13 @@ class OpponentResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            OpponentMergeSuggestionsWidget::class,
         ];
     }
 

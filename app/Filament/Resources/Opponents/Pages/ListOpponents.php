@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Opponents\Pages;
 
 use App\Filament\Resources\Opponents\OpponentResource;
 use App\Filament\Resources\OpponentMergeSuggestions\OpponentMergeSuggestionResource;
+use App\Filament\Resources\Opponents\Widgets\OpponentMergeSuggestionsWidget;
 use App\Services\Stats\OpponentMergeService;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -18,20 +19,18 @@ class ListOpponents extends ListRecords
     {
         return [
             Action::make('scan_duplicates')
-                ->label(__('admin.resources.opponent_merge_suggestion.actions.scan'))
+                ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.scan'))
                 ->icon('heroicon-o-magnifying-glass')
                 ->action(function (OpponentMergeService $service) {
                     $count = $service->scan(false);
 
                     Notification::make()
-                        ->title(__('admin.resources.opponent_merge_suggestion.notifications.scan_finished', ['count' => $count]))
+                        ->title(__('admin.navigation.resources.opponent_merge_suggestion.notifications.scan_finished', ['count' => $count]))
                         ->success()
                         ->send();
-
-                    return redirect(OpponentMergeSuggestionResource::getUrl());
                 }),
             Action::make('hard_scan_duplicates')
-                ->label(__('admin.resources.opponent_merge_suggestion.actions.hard_scan'))
+                ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.hard_scan'))
                 ->icon('heroicon-o-magnifying-glass-plus')
                 ->color('warning')
                 ->requiresConfirmation()
@@ -39,13 +38,18 @@ class ListOpponents extends ListRecords
                     $count = $service->scan(true);
 
                     Notification::make()
-                        ->title(__('admin.resources.opponent_merge_suggestion.notifications.hard_scan_finished', ['count' => $count]))
+                        ->title(__('admin.navigation.resources.opponent_merge_suggestion.notifications.hard_scan_finished', ['count' => $count]))
                         ->success()
                         ->send();
-
-                    return redirect(OpponentMergeSuggestionResource::getUrl());
                 }),
             CreateAction::make(),
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            OpponentMergeSuggestionsWidget::class,
         ];
     }
 }
