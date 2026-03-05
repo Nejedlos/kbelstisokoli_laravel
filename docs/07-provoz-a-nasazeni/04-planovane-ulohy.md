@@ -37,13 +37,31 @@ Pokud máte přístup k SSH a standardnímu Cronu, použijte klasický příkaz:
 
 ## 3. Definice úloh
 
-Plánované úlohy jsou definovány v souboru `routes/console.php`.
+V tomto projektu jsou plánované úlohy spravovány dvěma způsoby:
 
-Aktuálně nastavené úlohy:
-- `seo:generate-sitemap` – Spouští se denně v 03:00.
+### 3.1 Dynamické úlohy (Administrace / Batch příkazy)
+
+Většina úloh je definována v databázi v tabulce `cron_tasks`. Tyto úlohy lze spravovat přímo v administraci v sekci **Systém -> Cron Úlohy**.
+
+U každé úlohy lze nastavit:
+- **Aktivitu**: Zda se má úloha spouštět.
+- **Cron výraz**: Kdy se má úloha spouštět (např. `0 3 * * *`).
+- **Příkaz**: Artisan příkaz, který se má provést.
+
+Mezi tyto úlohy patří:
+- **Synchronizace statistik**: Globální i pro konkrétní týmy.
+- **RSVP Upomínky**: Rozesílání notifikací členům.
+- **Finance**: Kontrola splatnosti předpisů.
+- **Systémový úklid**: Promazávání starých logů a cache.
+
+### 3.2 Statické úlohy (Kód)
+
+Některé kritické systémové úlohy jsou definovány přímo v kódu v `bootstrap/app.php` nebo `routes/console.php`:
+- **Scheduler Heartbeat**: Každou minutu (pro monitoring běhu plánovače a debug panelu).
 
 ## 4. Monitoring a Logování
 
-Výstup z HTTP endpointu zobrazuje výsledek posledního běhu plánovače. Pokud nebyla naplánována žádná úloha pro daný čas, výstup bude prázdný (nebo s potvrzením o spuštění).
-
-V případě chyb hledejte záznamy v `storage/logs/laravel.log`.
+Každý běh úlohy z administrace (Dynamické úlohy) je logován do tabulky `cron_logs`. V administraci je u každé úlohy vidět:
+- **Poslední běh**: Čas a výsledek (Success/Failed).
+- **Výstup (Output)**: Kompletní výstup z konzole pro diagnostiku.
+- **Doba trvání**: Jak dlouho úloha běžela.

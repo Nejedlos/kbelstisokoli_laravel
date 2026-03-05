@@ -11,22 +11,29 @@ class StatsImportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'stats:import';
+    protected $signature = 'stats:import {--recent : Synchronizuje pouze nedávné zápasy pro všechny týmy}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Spustí import externích statistik.';
+    protected $description = 'Spustí hromadnou synchronizaci externích statistik pro všechny povolené týmy.';
 
     /**
      * Execute the console command.
      */
     public function handle(): void
     {
-        $this->info('Dispatching stats import job...');
-        \App\Jobs\StatsImportJob::dispatch();
-        $this->info('Job dispatched successfully.');
+        $recent = (bool) $this->option('recent');
+
+        $this->info($recent
+            ? 'Spouštím prioritní synchronizaci nedávných zápasů (Recent)...'
+            : 'Spouštím celkovou synchronizaci sezóny pro všechny týmy (Baseline)...'
+        );
+
+        \App\Jobs\Stats\ExternalStatsSchedulerJob::dispatch($recent);
+
+        $this->info('Úloha byla zařazena do fronty k hromadnému zpracování.');
     }
 }

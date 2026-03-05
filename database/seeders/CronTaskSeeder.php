@@ -27,6 +27,20 @@ class CronTaskSeeder extends Seeder
                 'priority' => 5,
             ],
             [
+                'name' => 'Synchronizace statistik (Celková - vše)',
+                'command' => 'stats:import',
+                'expression' => '30 3 * * *', // Denně ve 3:30 (baseline)
+                'description' => 'Spustí celkovou synchronizaci sezóny (soupisky + všechny zápasy) pro všechny povolené týmy.',
+                'priority' => 20,
+            ],
+            [
+                'name' => 'Synchronizace statistik (Průběžná - prioritní)',
+                'command' => 'stats:import --recent',
+                'expression' => '15 */2 * * *', // Každé 2 hodiny
+                'description' => 'Prioritní synchronizace nedávných a právě probíhajících zápasů pro všechny týmy.',
+                'priority' => 25,
+            ],
+            [
                 'name' => 'Synchronizace statistik (Muži C)',
                 'command' => 'stats:sync-team-season muzi-c active --recent-days=3',
                 'expression' => '0 */2 * * *', // Každé 2 hodiny
