@@ -193,11 +193,8 @@ class ExternalStatsSyncService
 
             if ($usedAi) {
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed or AI-only used, used AI.']);
-                if (isset($data->metadata['sanitized_length'])) {
-                    $run->updateMetadata([
-                        'sanitized_length' => $data->metadata['sanitized_length'],
-                        'prompt_length' => $data->metadata['prompt_length'] ?? null,
-                    ]);
+                if ($data->metadata) {
+                    $run->updateMetadata($data->metadata);
                 }
             }
 
@@ -267,6 +264,9 @@ class ExternalStatsSyncService
                         'type' => 'matches_list',
                         'strict_schema' => $this->getMatchesListSchema(),
                     ]);
+                    if ($data->metadata) {
+                        $run->updateMetadata($data->metadata);
+                    }
                     $allRows = array_merge($allRows, $data->rows);
                     $fragmentHtml .= $clip->htmlFragment;
                 }
@@ -298,6 +298,9 @@ class ExternalStatsSyncService
                             'type' => 'matches_list',
                             'strict_schema' => $this->getMatchesListSchema(),
                         ]);
+                        if ($data->metadata) {
+                            $run->updateMetadata($data->metadata);
+                        }
                         $allRows = array_merge($allRows, $data->rows);
                         $fragmentHtml .= $clip->htmlFragment;
                     }

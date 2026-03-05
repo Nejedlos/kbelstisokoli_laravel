@@ -77,9 +77,9 @@ class ExternalImportRunForm
                             ->readOnly()
                             ->rows(15)
                             ->extraAttributes([
-                                'style' => 'font-family: "JetBrains Mono", "Courier New", monospace; font-size: 0.8rem; line-height: 1.2; background-color: #f9fafb;',
+                                'style' => 'font-family: "JetBrains Mono", "Courier New", monospace; font-size: 0.8rem; line-height: 1.2; background-color: #fef2f2;',
                             ])
-                            ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? "Původní HTML: " . number_format($record->metadata['html_size'] / 1024, 1) . " KB | Sanitizováno: " . (isset($record->metadata['sanitized_length']) ? number_format($record->metadata['sanitized_length'] / 1024, 1) . " KB" : "N/A") . " | Timeout: " . (config('services.openai.timeout') ?? 60) . "s" : null)
+                            ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? "Původní HTML: " . number_format($record->metadata['html_size'] / 1024, 1) . " KB | Sanitizováno: " . (isset($record->metadata['sanitized_length']) ? number_format($record->metadata['sanitized_length'] / 1024, 1) . " KB" : "N/A") . " | Timeout: " . (config('services.openai.timeout') ?? 60) . "s | Connect: 10s" : null)
                             ->hintAction(
                                 \Filament\Actions\ActionGroup::make([
                                     Action::make('copyError')
@@ -112,6 +112,21 @@ class ExternalImportRunForm
                                 ])->dropdown(false)
                             )
                             ->hidden(fn ($get) => ! $get('error_summary')),
+                        Textarea::make('metadata.debug_logs')
+                            ->label('Debug logy (OpenAI)')
+                            ->columnSpanFull()
+                            ->readOnly()
+                            ->rows(10)
+                            ->extraAttributes([
+                                'style' => 'font-family: "JetBrains Mono", "Courier New", monospace; font-size: 0.75rem; line-height: 1.1; background-color: #f0fdf4;',
+                            ])
+                            ->formatStateUsing(function ($state) {
+                                if (is_array($state)) {
+                                    return implode("\n", $state);
+                                }
+                                return $state;
+                            })
+                            ->hidden(fn ($record) => ! $record || ! isset($record->metadata['debug_logs'])),
                     ]),
                 Section::make('Metadata a doplňky')
                     ->schema([

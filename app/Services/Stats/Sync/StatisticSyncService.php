@@ -113,13 +113,36 @@ class StatisticSyncService
             if (is_array($teamNameValue)) {
                 $teamNameValue = $teamNameValue['cs'] ?? ($teamNameValue['en'] ?? (reset($teamNameValue) ?: ''));
             }
-            $ourTeamName = $this->normalizeForComparison($teamNameValue);
-            $tableTeamName = $this->normalizeForComparison($data->name);
-            \Log::info("Comparing teams: '{$data->name}' (normalized: {$tableTeamName}) vs '{$teamNameValue}' (normalized: {$ourTeamName})");
 
-            if (! str_contains($tableTeamName, $ourTeamName) && ! str_contains($ourTeamName, $tableTeamName)) {
-                $isOurTeam = false;
-                $currentTeamId = null;
+            $possibleOurNames = [
+                $this->normalizeForComparison($teamNameValue),
+            ];
+
+            // Přidáme název z externí konfigurace, pokud existuje
+            $externalName = \App\Models\ExternalTeamSeasonConfig::where('team_id', $match->team_id)
+                ->where('season_id', $match->season_id)
+                ->value('team_name_in_source');
+
+            if ($externalName) {
+                $possibleOurNames[] = $this->normalizeForComparison($externalName);
+            }
+
+            $tableTeamName = $this->normalizeForComparison($data->name);
+            $matched = false;
+            foreach ($possibleOurNames as $ourName) {
+                if (str_contains($tableTeamName, $ourName) || str_contains($ourName, $tableTeamName)) {
+                    $matched = true;
+                    break;
+                }
+            }
+
+            if (! $matched) {
+                // Poslední šance: pokud je v tabulce jméno našeho týmu jako podřetězec bez normalizace
+                if (! str_contains(mb_strtolower($data->name), mb_strtolower($teamNameValue)) &&
+                    (! $externalName || ! str_contains(mb_strtolower($data->name), mb_strtolower($externalName)))) {
+                    $isOurTeam = false;
+                    $currentTeamId = null;
+                }
             }
 
             foreach ($data->rows as $row) {

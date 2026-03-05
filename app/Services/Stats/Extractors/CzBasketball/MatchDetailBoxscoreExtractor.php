@@ -57,13 +57,17 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
             $tableName = $i === 0 ? ($matchHeader['home_team'] ?? 'Home Team Boxscore') : ($matchHeader['away_team'] ?? 'Away Team Boxscore');
 
-            // Zkusíme najít název týmu nad tabulkou (např. v h3 nebo h4)
-            // Nejprve zkusíme přímo nad tabulkou, pak nad jejím rodičem
+            // Zkusíme najít název týmu nad tabulkou.
+            // Často je to v h4 nad div.overflow-auto, nebo přímo nad tabulkou.
             $teamNameNode = $table->previousAll()->filter('h3, h4, .title')->last();
             if ($teamNameNode->count() === 0) {
                 $container = $table->closest('div');
-                if ($container->count() > 0) {
+                while ($container->count() > 0 && $teamNameNode->count() === 0) {
                     $teamNameNode = $container->previousAll()->filter('h3, h4, .title')->last();
+                    if ($teamNameNode->count() > 0) {
+                        break;
+                    }
+                    $container = $container->parent();
                 }
             }
 
@@ -97,23 +101,21 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
     {
         $header = [];
 
-        // Týmy (alfa / beta nebo team-name)
-        $homeNode = $crawler->filter('.alfa')->first();
+        // Týmy (zkusíme .alfa/.beta, .score-home-team/.score-away-team, .team-name, nebo h4.text-center)
+        $homeNode = $crawler->filter('.alfa, .score-home-team, .team-name, .match-teams h1, .match-teams h2, h4.text-center')->first();
         if ($homeNode->count() > 0) {
             $header['home_team'] = trim($homeNode->text());
         }
 
-        $awayNode = $crawler->filter('.beta')->first();
-        if ($awayNode->count() > 0) {
-            $header['away_team'] = trim($awayNode->text());
-        }
-
-        if (! isset($header['home_team'])) {
-            $teams = $crawler->filter('.team-name, .match-teams h1, .match-teams h2');
-            if ($teams->count() >= 2) {
-                $header['home_team'] = trim($teams->eq(0)->text());
-                $header['away_team'] = trim($teams->eq(1)->text());
-            }
+        $awayNodes = $crawler->filter('.beta, .score-away-team, .team-name, .match-teams h1, .match-teams h2, h4.text-center');
+        if ($awayNodes->count() >= 2) {
+            $header['away_team'] = trim($awayNodes->eq(1)->text());
+        } elseif ($awayNodes->count() === 1) {
+             // Fallback pokud máme jen jeden match na tyhle selektory, zkusíme .beta samostatně
+             $beta = $crawler->filter('.beta')->first();
+             if ($beta->count() > 0) {
+                 $header['away_team'] = trim($beta->text());
+             }
         }
 
         // Skóre
@@ -135,30 +137,6 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
     protected function processBoxscoreTable(Crawler $table, string $tableName, array &$warnings): NormalizedTableDTO
     {
-        // Pokud má tabulka v hlavičce th s colspan, obsahuje název týmu
-        $headerTh = $table->filter('thead th[colspan]');
-        if ($headerTh->count() > 0) {
-            $tableName = trim($headerTh->first()->text());
-        } elseif ($table->filter('thead th')->count() > 0 && str_contains($table->filter('thead th')->first()->attr('class') ?? '', 'title')) {
-            $tableName = trim($table->filter('thead th')->first()->text());
-        } else {
-            // Zkusíme najít h4 nad tabulkou (v některých verzích HTML)
-            try {
-                $container = $table->closest('div.overflow-auto');
-                if ($container && $container->count() > 0) {
-                    $h4 = $container->previousAll()->filter('h4')->last();
-                    if ($h4 && $h4->count() > 0) {
-                        $tableName = trim($h4->text());
-                    }
-                }
-            } catch (\Exception $e) {
-                // Ignore DOM traversal errors
-            }
-        }
-
-        $columns = [];
-        $rows = [];
-
         // Hlavička tabulky pro mapování sloupců
         $table->filter('thead tr')->last()->filter('th')->each(function (Crawler $th, $i) use (&$columns, $table) {
             $label = trim($th->text());

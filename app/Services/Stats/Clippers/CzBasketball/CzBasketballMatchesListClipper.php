@@ -27,7 +27,7 @@ class CzBasketballMatchesListClipper implements ClipperInterface
 
         $fragmentHtml = $matchesTable->outerHtml();
         $prev = $matchesTable->previousAll()->first();
-        if ($prev && in_array($prev->nodeName(), ['h1', 'h2', 'h3'])) {
+        if ($prev->count() > 0 && in_array($prev->nodeName(), ['h1', 'h2', 'h3'])) {
             $fragmentHtml = $prev->outerHtml() . $fragmentHtml;
         }
 
@@ -76,7 +76,7 @@ class CzBasketballMatchesListClipper implements ClipperInterface
             $rows = $table->filter('tr');
         }
 
-        $chunkSize = 40;
+        $chunkSize = 25;
         $totalRows = $rows->count();
 
         for ($i = 0; $i < $totalRows; $i += $chunkSize) {

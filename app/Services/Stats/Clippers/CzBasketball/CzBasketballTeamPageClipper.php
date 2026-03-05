@@ -83,7 +83,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
         // Zkusíme vzít i nadpis nad tabulkou
         $fragmentHtml = $rosterTable->outerHtml();
         $prev = $rosterTable->previousAll()->first();
-        if ($prev && in_array($prev->nodeName(), ['h2', 'h3', 'h4', 'caption'])) {
+        if ($prev->count() > 0 && in_array($prev->nodeName(), ['h2', 'h3', 'h4', 'caption'])) {
             $fragmentHtml = $prev->outerHtml() . $fragmentHtml;
         }
 
@@ -123,7 +123,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
 
         $fragmentHtml = $matchesTable->outerHtml();
         $prev = $matchesTable->previousAll()->first();
-        if ($prev && in_array($prev->nodeName(), ['h2', 'h3', 'h4'])) {
+        if ($prev->count() > 0 && in_array($prev->nodeName(), ['h2', 'h3', 'h4'])) {
             $fragmentHtml = $prev->outerHtml() . $fragmentHtml;
         }
 

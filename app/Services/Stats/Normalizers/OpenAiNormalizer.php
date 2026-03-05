@@ -40,25 +40,22 @@ class OpenAiNormalizer implements StatNormalizerInterface
         $sanitizedContent = $this->sanitizeHtml($content);
         $sanitizedLength = strlen($sanitizedContent);
 
-        Log::info("OpenAI: Starting normalization for type '{$type}'", [
-            'original_length' => strlen($content),
-            'sanitized_length' => $sanitizedLength,
-            'model' => $this->model,
-            'preview' => substr($sanitizedContent, 0, 150) . '...',
-        ]);
+        $debugLogs = [];
+        $debugLogs[] = "[" . date('H:i:s') . "] Normalization started. Original length: " . strlen($content);
+        $debugLogs[] = "[" . date('H:i:s') . "] Sanitized length: " . $sanitizedLength;
 
         $prompt = $this->buildPrompt($sanitizedContent, $type, $canonicalKeys, $strictSchema);
+        $promptLength = strlen($prompt);
         $startTime = microtime(true);
 
         try {
             $timeout = config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60));
-            $promptLength = strlen($prompt);
-            Log::info("OpenAI: Sending request to API", [
-                'prompt_length' => $promptLength,
-                'timeout' => $timeout,
-            ]);
+            $connectTimeout = 10; // 10s na navázání spojení
+
+            $debugLogs[] = "[" . date('H:i:s') . "] Sending request to OpenAI API (Model: {$this->model}, Timeout: {$timeout}s)";
 
             $response = Http::withToken($this->apiKey)
+                ->connectTimeout($connectTimeout)
                 ->timeout($timeout)
                 ->post($this->baseUrl.'/chat/completions', [
                     'model' => $this->model,
@@ -76,45 +73,43 @@ class OpenAiNormalizer implements StatNormalizerInterface
                     'temperature' => 0.1,
                 ]);
 
+            $duration = round(microtime(true) - $startTime, 2);
+            $debugLogs[] = "[" . date('H:i:s') . "] Response received after {$duration}s. Status: " . $response->status();
+
             if ($response->failed()) {
-                $duration = round(microtime(true) - $startTime, 2);
                 $errorMsg = $response->reason();
                 if ($response->status() === 408 || str_contains($errorMsg, 'timed out')) {
-                    $errorMsg = "OpenAI API Timeout after {$duration}s (configured: {$timeout}s). Prompt length: {$promptLength} chars.";
+                    $errorMsg = "OpenAI API Timeout after {$duration}s (Limit: {$timeout}s). Prompt: {$promptLength} chars.";
                 }
+
+                $debugLogs[] = "[" . date('H:i:s') . "] API Error: " . $errorMsg;
 
                 Log::error('OpenAI Normalizer API Error', [
                     'status' => $response->status(),
                     'reason' => $response->reason(),
                     'duration' => $duration.'s',
-                    'body' => $response->body(),
+                    'debug_logs' => $debugLogs,
                 ]);
-                throw new Exception("OpenAI API request failed: ".$errorMsg);
+
+                throw new Exception("OpenAI API request failed: " . $errorMsg . "\nLogs:\n" . implode("\n", $debugLogs));
             }
 
-            $duration = round(microtime(true) - $startTime, 2);
             $result = $response->json();
             $contentResponse = $result['choices'][0]['message']['content'] ?? '';
 
-            Log::info("OpenAI: Received response", [
-                'duration' => $duration.'s',
-                'response_length' => strlen($contentResponse),
-                'finish_reason' => $result['choices'][0]['finish_reason'] ?? 'unknown',
-            ]);
+            $debugLogs[] = "[" . date('H:i:s') . "] JSON received (" . strlen($contentResponse) . " chars). Parsing...";
 
             $parsedData = json_decode($contentResponse, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
-                Log::error("OpenAI: JSON decode failed", [
-                    'error' => json_last_error_msg(),
-                    'raw_content' => substr($contentResponse, 0, 1000),
-                ]);
-                throw new Exception('Failed to parse JSON response from OpenAI.');
+                $debugLogs[] = "[" . date('H:i:s') . "] JSON Parse Error: " . json_last_error_msg();
+                throw new Exception('Failed to parse JSON response from OpenAI. Logs: ' . implode("\n", $debugLogs));
             }
 
             return $this->mapToDTO($parsedData, $type, [
                 'prompt_length' => $promptLength,
                 'sanitized_length' => $sanitizedLength,
+                'debug_logs' => $debugLogs,
             ]);
 
         } catch (Exception $e) {
@@ -122,19 +117,20 @@ class OpenAiNormalizer implements StatNormalizerInterface
             $timeoutConfig = config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60));
             $msg = $e->getMessage();
 
+            $debugLogs[] = "[" . date('H:i:s') . "] Exception caught: " . $msg;
+
             if (str_contains($msg, 'timed out') || str_contains($msg, 'cURL error 28')) {
                 $msg = "Timeout Error: OpenAI request took {$duration}s (Limit: {$timeoutConfig}s). Content size: " . strlen($content) . " chars. Type: {$type}";
-                throw new Exception($msg);
             }
 
             Log::error('OpenAI Normalizer Exception', [
                 'message' => $e->getMessage(),
                 'type' => $type,
                 'duration' => $duration.'s',
-                'content_length' => strlen($content),
-                'timeout_config' => $timeoutConfig,
+                'debug_logs' => $debugLogs,
             ]);
-            throw $e;
+
+            throw new Exception($msg . "\n\nDebug Logs:\n" . implode("\n", $debugLogs));
         }
     }
 
@@ -224,12 +220,31 @@ PROMPT;
         // Odebrat nav, footer, header, head (pokud tam zbyly)
         $html = preg_replace('/<(nav|footer|header|head)\b[^>]*>(.*?)<\/\1>/is', '', $html);
 
-        // Odebrat nepotřebné atributy (ponecháme href pro player_id a taky colspan/rowspan pro tabulky)
-        // Ponecháme: href, colspan, rowspan
-        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z0-9]+)="[^"]*"/i', '', $html);
-        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z0-9]+)=\'[^\']*\'/i', '', $html);
+        // Agresivní odstranění VŠECH atributů kromě povolených (href, colspan, rowspan)
+        // Použijeme regex callback pro maximální spolehlivost
+        $html = preg_replace_callback('/<([a-z0-9]+)(\s+[^>]*)?>/i', function($matches) {
+            $tag = strtolower($matches[1]);
+            $attrs = $matches[2] ?? '';
 
-        // Agresivní odstranění všech tagů kromě strukturálních a odkazů
+            if (empty(trim($attrs))) {
+                return "<{$tag}>";
+            }
+
+            $allowedAttrs = ['href', 'colspan', 'rowspan'];
+            $cleanAttrs = '';
+
+            foreach ($allowedAttrs as $attr) {
+                // Najdeme atribut a jeho hodnotu (v uvozovkách i bez)
+                if (preg_match('/' . $attr . '=(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i', $attrs, $attrMatch)) {
+                    $val = $attrMatch[1] ?: ($attrMatch[2] ?: $attrMatch[3]);
+                    $cleanAttrs .= " {$attr}=\"{$val}\"";
+                }
+            }
+
+            return "<{$tag}{$cleanAttrs}>";
+        }, $html);
+
+        // Odstranění všech tagů kromě strukturálních a odkazů
         // Ponecháme: table, thead, tbody, tfoot, tr, td, th, a, h1, h2, h3, h4, span, div, b, strong
         $html = strip_tags($html, '<table><thead><tbody><tfoot><tr><td><th><a><h1><h2><h3><h4><span><div><b><strong>');
 

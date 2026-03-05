@@ -68,7 +68,7 @@ class QAMasterTest extends TestCase
     {
         // Příprava dat
         $season = Season::create(['name' => '2025/2026', 'is_active' => true]);
-        $team = Team::create(['name' => ['cs' => 'Muzi E'], 'slug' => 'muzi-e']);
+        $team = Team::create(['name' => ['cs' => 'Sokol Kbely E'], 'slug' => 'sokol-kbely-e']);
 
         $config = ExternalTeamSeasonConfig::create([
             'source_key' => 'czbasketball',
@@ -78,6 +78,7 @@ class QAMasterTest extends TestCase
             'external_season_year' => 2025,
             'team_season_url' => 'https://cz.basketball/tym/7738?y=2025',
             'matches_list_url' => 'https://smo.cz.basketball/zapasy?c=7738&y=2025',
+            'team_name_in_source' => 'Sokol Kbely E',
             'is_enabled' => true,
         ]);
 
@@ -132,8 +133,6 @@ class QAMasterTest extends TestCase
         $this->assertNotNull($match, 'No match found in database after sync.');
 
         $syncService->syncMatchDetail($match->id);
-
-        dd(\App\Models\StatisticRow::all()->map(fn($r) => $r->only(['basketball_match_id', 'team_id', 'row_label']))->toArray());
 
         // Ověření statistik
         $this->assertDatabaseHas('statistic_rows', [
