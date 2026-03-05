@@ -47,13 +47,13 @@ class MatchSyncService
 
         $match = BasketballMatch::where('season_id', $season->id)
             ->where('team_id', $team->id)
-            ->where('metadata->match_identity_key', $matchIdentityKey)
+            ->where('metadata', 'LIKE', '%"match_identity_key":"' . $matchIdentityKey . '"%')
             ->first();
 
         // Pokud jsme nenašli podle identity key, zkusíme podle external_id (pokud ho máme)
         if (! $match && $externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
-                ->where('metadata->external_id', $externalMatchId)
+                ->where('metadata', 'LIKE', '%"external_id":"' . $externalMatchId . '"%')
                 ->first();
         }
 

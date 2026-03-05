@@ -193,7 +193,7 @@ class ExternalStatsSyncService
         $query = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
             ->where('status', 'completed')
-            ->whereNotNull('metadata->external_id');
+            ->where('metadata', 'LIKE', '%"external_id":%');
 
         if ($recentOnly) {
             $days = config('external_sources.czbasketball.limits.recent_match_days', 3);
@@ -210,14 +210,28 @@ class ExternalStatsSyncService
                         ->from('statistic_rows')
                         ->whereColumn('statistic_rows.basketball_match_id', 'matches.id')
                         ->where('statistic_rows.statistic_set_id', $boxscoreSetId);
-                })->orWhere('metadata->last_synced_at', '<', now()->subDay()->toDateTimeString());
+                })->orWhereNotNull('metadata'); // Dočasně vybereme s metadaty, profiltrujeme v PHP
             });
         }
 
-        $matches = $query->limit($limit)->get();
+        // Načteme dostatečný počet zápasů pro filtraci v PHP (abychom se vyhnuli JSON query v SQL)
+        $matches = $query->limit(100)->get();
 
+        $dispatchedCount = 0;
         foreach ($matches as $match) {
+            if ($dispatchedCount >= $limit) {
+                break;
+            }
+
+            if (! $force) {
+                $lastSynced = $match->metadata['last_synced_at'] ?? null;
+                if ($lastSynced && \Illuminate\Support\Carbon::parse($lastSynced)->gt(now()->subDay())) {
+                    continue;
+                }
+            }
+
             SyncMatchDetailJob::dispatch($match->id, $options);
+            $dispatchedCount++;
         }
     }
 

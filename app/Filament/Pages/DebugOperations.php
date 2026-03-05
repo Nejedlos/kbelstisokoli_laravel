@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Jobs\Stats\SyncTeamSeasonJob;
+use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\LegacyImportBatch;
@@ -130,8 +131,9 @@ class DebugOperations extends Page
 
         // DB
         try {
-            DB::connection()->getPdo();
-            $status['db'] = ['label' => 'Database', 'ok' => true, 'msg' => 'Connected'];
+            $pdo = DB::connection()->getPdo();
+            $version = $pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
+            $status['db'] = ['label' => 'Database', 'ok' => true, 'msg' => "Connected ({$version})"];
         } catch (\Exception $e) {
             $status['db'] = ['label' => 'Database', 'ok' => false, 'msg' => $e->getMessage()];
         }
@@ -204,10 +206,10 @@ class DebugOperations extends Page
                 ->latest('finished_at')
                 ->first();
 
-            $matchCount = DB::table('matches')
+            $matchCount = BasketballMatch::query()
                 ->where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)
-                ->whereNotNull('metadata->external->season_external_match_id')
+                ->where('metadata', 'LIKE', '%"season_external_match_id":%')
                 ->count();
 
             $boxscoreSet = StatisticSet::where('slug', 'match-boxscore')->first();

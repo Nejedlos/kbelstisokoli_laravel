@@ -59,7 +59,7 @@ class SyncMatchCommand extends Command
         // Najdeme interní zápas pokud existuje pro lepší výpis
         $match = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
-            ->where('metadata->external->season_external_match_id', $matchExternalId)
+            ->where('metadata', 'LIKE', '%"season_external_match_id":"' . $matchExternalId . '"%')
             ->first();
 
         $this->info('Synchronizuji zápas: '.($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));

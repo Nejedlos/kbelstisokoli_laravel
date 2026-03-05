@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
 use App\Models\Season;
 use App\Models\StatisticRow;
@@ -145,10 +146,10 @@ class StatsHealthCommand extends Command
                 ->latest('finished_at')
                 ->first();
 
-            $matchCount = DB::table('matches')
+            $matchCount = BasketballMatch::query()
                 ->where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)
-                ->whereNotNull('metadata->external->season_external_match_id')
+                ->where('metadata', 'LIKE', '%"season_external_match_id":%')
                 ->count();
 
             $boxscoreSet = StatisticSet::where('slug', 'match-boxscore')->first();

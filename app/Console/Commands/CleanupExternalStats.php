@@ -52,7 +52,7 @@ class CleanupExternalStats extends Command
             if ($lastModified->lt($cutoffDate)) {
                 // Je to staré, ale je to poslední fail?
                 $isImportant = ExternalImportRun::whereIn('status', ['failed', 'partial_failed'])
-                    ->where('metadata->snapshot_path', $file)
+                    ->where('metadata', 'LIKE', '%"snapshot_path":"' . $file . '"%')
                     ->exists();
 
                 if (! $isImportant) {
