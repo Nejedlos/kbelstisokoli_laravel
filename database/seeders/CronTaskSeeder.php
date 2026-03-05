@@ -27,11 +27,25 @@ class CronTaskSeeder extends Seeder
                 'priority' => 5,
             ],
             [
-                'name' => 'Import statistik',
-                'command' => 'stats:import',
+                'name' => 'Synchronizace statistik (Muži C)',
+                'command' => 'stats:sync-team-season muzi-c active --recent-days=3',
                 'expression' => '0 */2 * * *', // Každé 2 hodiny
-                'description' => 'Spustí pipeline pro import externích sportovních statistik.',
+                'description' => 'Synchronizuje soupisku a nové zápasy pro Muže C z cz.basketball.',
                 'priority' => 0,
+            ],
+            [
+                'name' => 'Synchronizace statistik (Muži E)',
+                'command' => 'stats:sync-team-season muzi-e active --recent-days=3',
+                'expression' => '10 */2 * * *', // Každé 2 hodiny (s 10min odstupem)
+                'description' => 'Synchronizuje soupisku a nové zápasy pro Muže E z cz.basketball.',
+                'priority' => 0,
+            ],
+            [
+                'name' => 'Úklid statistik',
+                'command' => 'external-stats:cleanup --days=30',
+                'expression' => '0 4 * * *', // Každý den ve 4:00 ráno
+                'description' => 'Promaže staré HTML snapshoty a historii běhů externích importů.',
+                'priority' => -5,
             ],
             [
                 'name' => 'Systémový úklid',
