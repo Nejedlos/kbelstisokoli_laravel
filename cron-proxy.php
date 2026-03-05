@@ -113,6 +113,7 @@ curl_setopt_array($ch, array(
     CURLOPT_HEADER         => true,
     CURLOPT_SSL_VERIFYPEER => false,
     CURLOPT_SSL_VERIFYHOST => 0,
+    CURLOPT_HTTPHEADER     => array('Accept: application/json'),
 ));
 
 $response = curl_exec($ch);
@@ -140,6 +141,11 @@ if ($response === false) {
 
 $headers = $response ? substr($response, 0, $headerSize) : '';
 $body    = $response ? substr($response, $headerSize) : '';
+
+$json = NULL;
+if ($body && strpos($headers, 'application/json') !== false) {
+    $json = json_decode($body, true);
+}
 
 // Diagnostika DNS
 $host = parse_url(TARGET_URL, PHP_URL_HOST);
@@ -222,6 +228,34 @@ if (PHP_SAPI === 'cli') {
         </div>
         <?php endif; ?>
 
+        <?php if ($json && isset($json['heartbeat'])): ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="glass p-4 rounded-xl shadow-lg">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-800 mb-1">Laravel Heartbeat</p>
+                <div class="flex items-center">
+                    <?php if (isset($json['heartbeat']['success']) && $json['heartbeat']['success']): ?>
+                        <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span class="text-lg font-bold text-slate-900">Zapsáno do cache</span>
+                    <?php else: ?>
+                        <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <span class="text-lg font-bold text-slate-900">CHYBA ZÁPISU</span>
+                    <?php endif; ?>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">Čas: <?php echo isset($json['heartbeat']['time']) ? $json['heartbeat']['time'] : 'N/A'; ?></p>
+                <?php if (isset($json['heartbeat']['error']) && $json['heartbeat']['error']): ?>
+                    <p class="text-xs text-red-600 mt-1 font-mono"><?php echo htmlspecialchars($json['heartbeat']['error']); ?></p>
+                <?php endif; ?>
+            </div>
+            <div class="glass p-4 rounded-xl shadow-lg text-slate-900">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-800 mb-1">Laravel Environment</p>
+                <div class="text-sm font-bold">Driver: <span class="font-mono"><?php echo isset($json['heartbeat']['cache_driver']) ? $json['heartbeat']['cache_driver'] : 'N/A'; ?></span></div>
+                <div class="text-[10px] text-slate-500 mt-1 truncate" title="<?php echo isset($json['heartbeat']['storage_path']) ? $json['heartbeat']['storage_path'] : ''; ?>">
+                    Path: <?php echo isset($json['heartbeat']['storage_path']) ? $json['heartbeat']['storage_path'] : 'N/A'; ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <div class="space-y-6">
             <section>
                 <h3 class="text-lg font-semibold mb-2 flex items-center">
@@ -248,7 +282,7 @@ if (PHP_SAPI === 'cli') {
             </details>
 
             <div class="pt-8 border-t border-blue-800 flex flex-wrap gap-x-8 gap-y-2 text-xs text-blue-400">
-                <div><strong>Remote ADDR:</strong> <?php echo $_SERVER['REMOTE_ADDR'] ?? 'N/A'; ?></div>
+                <div><strong>Remote ADDR:</strong> <?php echo isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A'; ?></div>
                 <div><strong>Server SAPI:</strong> <?php echo PHP_SAPI; ?></div>
                 <div><strong>Log File:</strong> <?php echo LOG_FILE; ?> (<?php echo file_exists(LOG_FILE) ? round(filesize(LOG_FILE)/1024, 1) . ' KB' : 'neexistuje'; ?>)</div>
                 <div><strong>Memory Peak:</strong> <?php echo round(memory_get_peak_usage()/1024/1024, 2); ?> MB</div>

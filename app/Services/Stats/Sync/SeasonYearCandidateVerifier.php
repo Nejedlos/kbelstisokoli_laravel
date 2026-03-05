@@ -34,10 +34,10 @@ class SeasonYearCandidateVerifier
 
             if (count($rosterDto->rows) >= 3) {
                 $confidence += 40;
-                $evidence[] = 'Found '.count($rosterDto->rows).' players in roster.';
+                $evidence[] = 'Soupiska nalezena: '.count($rosterDto->rows).' hráčů.';
             } elseif (count($rosterDto->rows) >= 1) {
                 $confidence += 20;
-                $evidence[] = 'Found '.count($rosterDto->rows).' player(s) in roster.';
+                $evidence[] = 'Soupiska nalezena (malá): '.count($rosterDto->rows).' hráč(ů).';
             }
         } catch (\Exception $e) {
             $evidence[] = 'Roster fetch error: '.$e->getMessage();
@@ -60,7 +60,7 @@ class SeasonYearCandidateVerifier
 
                 if (count($matchesDto->rows) > 0) {
                     $confidence += 60;
-                    $evidence[] = 'Found '.count($matchesDto->rows)." matches at {$matchesUrl}.";
+                    $evidence[] = 'Zápasy nalezeny: '.count($matchesDto->rows)." na URL {$matchesUrl}.";
                     break; // Našli jsme validní URL
                 }
             } catch (\Exception $e) {

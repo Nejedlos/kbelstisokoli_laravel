@@ -44,7 +44,24 @@ class SeasonDiscoveryService
             }
 
             foreach ($seasons as $season) {
-                // Kontrola, zda je sezóna "prázdná" nebo zda vynucujeme re-discovery
+                $config = ExternalTeamSeasonConfig::where('team_id', $team->id)
+                    ->where('season_id', $season->id)
+                    ->first();
+
+                // Pokud už konfiguraci máme a nemáme vynuceno force, přeskočíme discovery
+                if (! $force && $config) {
+                    // Pokud je sezóna "plná", rozhodně ji neřešíme
+                    if (! $this->statusService->isEmpty($team->id, $season->id)) {
+                        continue;
+                    }
+
+                    // Pokud je sezóna "prázdná", ale konfiguraci máme, taky ji standardně neřešíme (není "missing")
+                    // Ale pokud uživatel chce zkusit, jestli neexistuje lepší 'y', tak by musel dát force.
+                    ConsoleService::log("Sezóna {$season->name} pro tým {$team->slug} již má konfiguraci (y={$config->external_season_year}), přeskakuji discovery.", 'debug');
+                    continue;
+                }
+
+                // Pokud je sezóna "plná" (má data), tak ji rozhodně neřešíme bez force
                 if (! $force && ! $this->statusService->isEmpty($team->id, $season->id)) {
                     continue;
                 }
@@ -70,8 +87,17 @@ class SeasonDiscoveryService
 
                 if ($winner) {
                     if (! $dryRun) {
+                        $isNew = ! $config;
                         $this->saveConfig($team, $season, $winner);
+
+                        if ($isNew) {
+                            ConsoleService::log("  Vytvořena nová konfigurace pro sezónu {$season->name} (y={$winner['y']}).", 'success');
+                        } else {
+                            ConsoleService::log("  Aktualizována konfigurace pro sezónu {$season->name} (y={$winner['y']}).", 'success');
+                        }
+
                         if ($syncAfter) {
+                            ConsoleService::log("  Spouštím synchronizaci dat...", 'info');
                             SyncTeamSeasonJob::dispatch($team->id, $season->id);
                         }
                     }

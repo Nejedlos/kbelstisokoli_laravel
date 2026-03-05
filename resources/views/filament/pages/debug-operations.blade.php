@@ -185,7 +185,7 @@
                                 @foreach($auditLogs as $log)
                                     <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors">
                                         <td class="px-4 py-3">
-                                            <a href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl('view', ['record' => $log->id]) }}" class="font-bold text-primary-600 hover:underline">
+                                            <a href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl('edit', ['record' => $log->id]) }}" class="font-bold text-primary-600 hover:underline">
                                                 #{{ $log->id }}
                                             </a>
                                         </td>

@@ -52,20 +52,46 @@ Route::get('/system/schedule/{token}', function (string $token) {
         \Illuminate\Support\Facades\Log::warning('Schedule:run DID NOT trigger heartbeat from HTTP matching known strings. Output: ' . $output);
     }
 
+    $writeSuccess = false;
+    $writeTime = null;
+    $errorMessage = null;
+
     // Vždy se pokusíme o zápis heartbeatu přímo zde, abychom měli jistotu
     try {
-        \Illuminate\Support\Facades\Cache::put('scheduler_heartbeat', now());
+        $now = now();
+        \Illuminate\Support\Facades\Cache::put('scheduler_heartbeat', $now);
+        \Illuminate\Support\Facades\Cache::store('file')->put('scheduler_heartbeat', $now); // Explicitní zápis i do file storu
+
         $verify = \Illuminate\Support\Facades\Cache::get('scheduler_heartbeat');
+        $writeSuccess = ($verify !== null);
+        $writeTime = $verify ? (is_string($verify) ? $verify : $verify->toDateTimeString()) : null;
+
         \Illuminate\Support\Facades\Log::info('Schedule:run explicit heartbeat write check', [
-            'success' => $verify ? true : false,
-            'time' => $verify ? $verify->toDateTimeString() : null,
+            'success' => $writeSuccess,
+            'time' => $writeTime,
         ]);
     } catch (\Exception $e) {
-        \Illuminate\Support\Facades\Log::error('Schedule:run heartbeat write FAILED: ' . $e->getMessage());
+        $errorMessage = $e->getMessage();
+        \Illuminate\Support\Facades\Log::error('Schedule:run heartbeat write FAILED: ' . $errorMessage);
+    }
+
+    if (request()->wantsJson() || request()->header('X-Requested-With') === 'XMLHttpRequest' || request()->has('json')) {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Plánované úlohy byly spuštěny.',
+            'heartbeat' => [
+                'success' => $writeSuccess,
+                'time' => $writeTime,
+                'error' => $errorMessage,
+                'cache_driver' => $cacheDriver,
+                'storage_path' => $storagePath,
+            ],
+            'output' => $output,
+        ]);
     }
 
     return response('Plánované úlohy byly spuštěny.'.PHP_EOL.$output);
-})->name('system.schedule');
+});
 
 Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(function (): void {
     // Úvod

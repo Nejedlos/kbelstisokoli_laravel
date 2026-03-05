@@ -130,13 +130,39 @@ class DebugOperations extends Page
                 ->label('Discover Missing Seasons')
                 ->icon('heroicon-m-magnifying-glass')
                 ->color('info')
+                ->form([
+                    \Filament\Forms\Components\Select::make('mode')
+                        ->label('Spouštěcí mód')
+                        ->options([
+                            'sync' => 'Synchronně (v prohlížeči - hrozí timeout)',
+                            'job' => 'Na pozadí (Job - doporučeno)',
+                        ])
+                        ->default('job')
+                        ->required(),
+                    \Filament\Forms\Components\Toggle::make('force')
+                        ->label('Force mode')
+                        ->helperText('Zkusí re-discovery i u sezón, které už konfiguraci mají.'),
+                ])
                 ->requiresConfirmation()
-                ->action(function () {
+                ->action(function (array $data) {
+                    $options = [
+                        'force' => $data['force'] ?? false,
+                    ];
+
+                    if ($data['mode'] === 'job') {
+                        \App\Jobs\Stats\DiscoverSeasonsJob::dispatch(null, null, $options);
+                        ConsoleService::log('Discovery proces naplánován jako job na pozadí.', 'info');
+                        Notification::make()->title('Discovery job dispatched')->success()->send();
+
+                        return;
+                    }
+
+                    // Synchronní běh (původní)
                     ConsoleService::log('Zahajuji proces vyhledávání chybějících sezón (Discovery)...', 'info');
                     $discoveryService = app(\App\Services\Stats\Sync\SeasonDiscoveryService::class);
-                    $results = $discoveryService->discover();
+                    $results = $discoveryService->discover(null, null, $options);
 
-                    $found = count(array_filter($results, fn ($r) => $r['status'] !== 'not found'));
+                    $found = count(array_filter($results, fn ($r) => ! in_array($r['status'], ['not found', 'error'])));
 
                     ConsoleService::log("Discovery dokončeno. Nalezeno a vytvořeno: {$found} nových konfigurací.", 'success');
 
@@ -198,11 +224,23 @@ class DebugOperations extends Page
 
         // Scheduler
         $lastHeartbeat = Cache::get('scheduler_heartbeat');
-        $isOk = $lastHeartbeat && $lastHeartbeat->diffInMinutes(now()) < 5;
+        if (!$lastHeartbeat) {
+            $lastHeartbeat = Cache::store('file')->get('scheduler_heartbeat');
+        }
+
+        if (is_string($lastHeartbeat)) {
+            try {
+                $lastHeartbeat = \Illuminate\Support\Carbon::parse($lastHeartbeat);
+            } catch (\Exception $e) {
+                $lastHeartbeat = null;
+            }
+        }
+
+        $isOk = $lastHeartbeat && $lastHeartbeat instanceof \Illuminate\Support\Carbon && $lastHeartbeat->diffInMinutes(now()) < 5;
         $status['scheduler'] = [
             'label' => 'Scheduler',
             'ok' => $isOk,
-            'msg' => $lastHeartbeat ? 'Last run: '.$lastHeartbeat->diffForHumans() : 'No heartbeat detected',
+            'msg' => ($lastHeartbeat instanceof \Illuminate\Support\Carbon) ? 'Last run: '.$lastHeartbeat->diffForHumans() : 'No heartbeat detected',
         ];
 
         // Storage
