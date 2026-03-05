@@ -84,8 +84,17 @@ class DebugOperations extends Page
                 ->label('Sync All Active')
                 ->icon('heroicon-m-arrow-path')
                 ->color('primary')
+                ->form([
+                    \Filament\Forms\Components\Toggle::make('force')
+                        ->label('Force mode')
+                        ->helperText('Ignoruje hash obsahu.'),
+                    \Filament\Forms\Components\Toggle::make('fresh')
+                        ->label('Fresh mode')
+                        ->helperText('Smaže stávající statistiky a znovu je importuje (nebezpečné!).')
+                        ->hidden(fn ($get) => ! $get('force')),
+                ])
                 ->requiresConfirmation()
-                ->action(function () {
+                ->action(function (array $data) {
                     $activeSeason = Season::where('is_active', true)->first();
                     if (! $activeSeason) {
                         Notification::make()->title('No active season found')->danger()->send();
@@ -93,18 +102,28 @@ class DebugOperations extends Page
                         return;
                     }
 
-                    ConsoleService::log("Spouštím synchronizaci všech aktivních týmů pro sezónu: {$activeSeason->name}");
+                    $mode = '';
+                    if ($data['fresh'] ?? false) {
+                        $mode = ' (FRESH)';
+                    } elseif ($data['force'] ?? false) {
+                        $mode = ' (FORCE)';
+                    }
+
+                    ConsoleService::log("Spouštím synchronizaci všech aktivních týmů{$mode} pro sezónu: {$activeSeason->name}");
 
                     $teams = config('external_sources.czbasketball.teams', []);
                     foreach ($teams as $teamSlug) {
                         $team = Team::where('slug', $teamSlug)->first();
                         if ($team) {
                             ConsoleService::log("- Naplánováno pro tým: {$team->name}", 'info');
-                            SyncTeamSeasonJob::dispatch($team->id, $activeSeason->id);
+                            SyncTeamSeasonJob::dispatch($team->id, $activeSeason->id, [
+                                'force' => $data['force'] ?? false,
+                                'fresh' => $data['fresh'] ?? false,
+                            ]);
                         }
                     }
 
-                    Notification::make()->title('Sync jobs dispatched')->success()->send();
+                    Notification::make()->title('Sync jobs dispatched'.($mode ?: ''))->success()->send();
                 }),
 
             Action::make('discoverSeasons')
