@@ -20,6 +20,15 @@ class ExternalStatSourcesTable
                     ->searchable()
                     ->sortable()
                     ->description(fn ($record) => $record->source_url),
+                TextColumn::make('slug')
+                    ->label('Slug')
+                    ->badge()
+                    ->color('gray'),
+                TextColumn::make('teamMappings.team.name')
+                    ->label('Přiřazené týmy')
+                    ->badge()
+                    ->color('success')
+                    ->separator(','),
                 TextColumn::make('source_type')
                     ->label('Typ')
                     ->badge()

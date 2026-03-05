@@ -8,6 +8,7 @@ class ExternalStatSource extends Model
 {
     protected $fillable = [
         'name',
+        'slug',
         'source_url',
         'source_type',
         'extractor_config',
@@ -24,4 +25,9 @@ class ExternalStatSource extends Model
         'is_active' => 'boolean',
         'last_run_at' => 'datetime',
     ];
+
+    public function teamMappings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ExternalTeamMapping::class, 'source_key', 'slug');
+    }
 }

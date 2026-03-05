@@ -11,6 +11,9 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
+use Filament\Forms\Set;
+use Illuminate\Support\Str;
+
 class ExternalStatSourceForm
 {
     public static function configure(Schema $schema): Schema
@@ -19,11 +22,18 @@ class ExternalStatSourceForm
             ->components([
                 Section::make('Zdroj statistik')
                     ->schema([
-                        Grid::make(2)
+                        Grid::make(3)
                             ->schema([
                                 TextInput::make('name')
                                     ->label('Název zdroje')
-                                    ->required(),
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', (string) Str::slug($state))),
+                                TextInput::make('slug')
+                                    ->label('Identifikátor (Slug)')
+                                    ->required()
+                                    ->unique(ignoreRecord: true)
+                                    ->helperText('Unikátní klíč zdroje (např. czbasketball)'),
                                 Select::make('source_type')
                                     ->label('Typ zdroje')
                                     ->options([

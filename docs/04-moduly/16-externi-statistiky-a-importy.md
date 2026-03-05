@@ -82,6 +82,28 @@ Tento dokument slouží jako detailní technická specifikace pro implementaci s
 - **`values`**: JSON (payload dat: `{"pts": 12, "reb": 5}`).
 - `source_metadata`: JSON (historie importu).
 
+#### Tabulka: `external_stat_sources` (Model: `App\Models\ExternalStatSource`)
+*Konfigurace a stav externích zdrojů dat.*
+- `id`: Primary Key.
+- `name`: String (název zdroje).
+- `slug`: String (unikátní identifikátor zdroje, např. `czbasketball`).
+- `source_url`: String (hlavní URL zdroje).
+- `source_type`: String (`html_table`, `page_extract`, `api`).
+- `extractor_config`: JSON (pravidla pro extrakci - např. CSS selektory).
+- `mapping_config`: JSON (mapování na interní pole).
+- `is_active`: Boolean.
+- `last_run_at`: DateTime (poslední pokus o import).
+- `last_status`: String (`success`, `error`).
+
+#### Tabulka: `external_team_mappings` (Model: `App\Models\ExternalTeamMapping`)
+*Propojení interních týmů s externími identitami ve zdrojích.*
+- `id`: Primary Key.
+- `source_key`: String (odpovídá `slug` v `external_stat_sources`).
+- `team_id`: Foreign Key (`teams`).
+- `external_team_id`: String (např. ID týmu v systému ČBF).
+- `base_team_url`: String (URL profilu týmu na externím webu).
+- `metadata`: JSON.
+
 ---
 
 ## 2. Architektura Importní Pipeline (AI Ingest)

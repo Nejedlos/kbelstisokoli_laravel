@@ -22,4 +22,9 @@ class ExternalTeamMapping extends Model
     {
         return $this->belongsTo(Team::class);
     }
+
+    public function source(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(ExternalStatSource::class, 'source_key', 'slug');
+    }
 }

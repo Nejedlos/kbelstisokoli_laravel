@@ -7,6 +7,7 @@ use App\Filament\Resources\Teams\Pages\EditTeam;
 use App\Filament\Resources\Teams\Pages\ListTeams;
 use App\Filament\Resources\Teams\RelationManagers\CoachesRelationManager;
 use App\Filament\Resources\Teams\RelationManagers\PlayersRelationManager;
+use App\Filament\Resources\Teams\RelationManagers\ExternalMappingsRelationManager;
 use App\Filament\Resources\Teams\Schemas\TeamForm;
 use App\Filament\Resources\Teams\Tables\TeamsTable;
 use App\Models\Team;
@@ -58,6 +59,7 @@ class TeamResource extends Resource
         return [
             CoachesRelationManager::class,
             PlayersRelationManager::class,
+            ExternalMappingsRelationManager::class,
         ];
     }
 

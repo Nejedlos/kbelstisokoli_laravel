@@ -7,6 +7,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
+use App\Models\ExternalStatSource;
+
 class ExternalTeamMappingForm
 {
     public static function configure(Schema $schema): Schema
@@ -16,11 +18,12 @@ class ExternalTeamMappingForm
                 Section::make('Základní informace')
                     ->columns(2)
                     ->schema([
-                        TextInput::make('source_key')
+                        Select::make('source_key')
                             ->label('Zdroj')
+                            ->options(ExternalStatSource::all()->pluck('name', 'slug'))
                             ->default('czbasketball')
-                            ->required()
-                            ->readOnly(),
+                            ->searchable()
+                            ->required(),
                         Select::make('team_id')
                             ->label('Interní tým')
                             ->relationship('team', 'name')
