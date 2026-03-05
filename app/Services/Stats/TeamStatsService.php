@@ -68,7 +68,7 @@ class TeamStatsService
             ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::MATCH_BOXSCORE_SET);
             })
-            ->select('player_id', DB::raw('SUM(JSON_EXTRACT(values, "$.pts")) as pts_total'), DB::raw('COUNT(*) as gp'))
+            ->select('player_id', DB::raw('SUM(JSON_EXTRACT(`values`, "$.pts")) as pts_total'), DB::raw('COUNT(*) as gp'))
             ->groupBy('player_id')
             ->get()
             ->map(function ($row) {

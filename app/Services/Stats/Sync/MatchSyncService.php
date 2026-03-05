@@ -3,6 +3,7 @@
 namespace App\Services\Stats\Sync;
 
 use App\Models\BasketballMatch;
+use App\Models\ExternalImportRun;
 use App\Models\Season;
 use App\Models\Team;
 use App\Support\MatchIdentityKey;
@@ -19,7 +20,7 @@ class MatchSyncService
      *
      * @param  array  $matchData  [scheduled_at, home_team, away_team, score, status, external_match_id]
      */
-    public function sync(Team $team, Season $season, array $matchData): BasketballMatch
+    public function sync(Team $team, Season $season, array $matchData, ?ExternalImportRun $run = null): BasketballMatch
     {
         $externalMatchId = $matchData['external_match_id'] ?? null;
         $scheduledAtStr = $matchData['scheduled_at'];
@@ -91,10 +92,19 @@ class MatchSyncService
         $data['metadata'] = $metadata;
 
         if ($match) {
+            $oldValues = $match->only(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id']);
             $match->update($data);
+            $newValues = $match->only(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id']);
+
+            if ($run && $match->wasChanged(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id'])) {
+                $run->addLog('updated', $match, $oldValues, $newValues);
+            }
         } else {
             \Log::info("Creating match for {$team->slug} vs {$opponentName}");
             $match = BasketballMatch::create($data);
+            if ($run) {
+                $run->addLog('created', $match, null, $match->only(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id']));
+            }
         }
 
         return $match;

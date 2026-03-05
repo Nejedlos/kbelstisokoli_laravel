@@ -4,6 +4,7 @@ namespace App\Services\Stats\Sync;
 
 use App\Models\BasketballMatch;
 use App\Models\ExternalEntityMapping;
+use App\Models\ExternalImportRun;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\User;
@@ -19,38 +20,75 @@ class StatisticSyncService
     /**
      * Uloží jeden řádek statistiky (vhodné pro legacy import nebo manuální vklad).
      */
-    public function saveRow(StatisticSet $set, \App\Services\Stats\DTO\NormalizedRowDTO $row, array $context = []): StatisticRow
+    public function saveRow(StatisticSet $set, \App\Services\Stats\DTO\NormalizedRowDTO $row, array $context = [], ?ExternalImportRun $run = null): StatisticRow
     {
         $playerId = $context['player_id'] ?? null;
         $matchId = $context['basketball_match_id'] ?? null;
         $teamId = $context['team_id'] ?? null;
         $seasonId = $context['season_id'] ?? null;
 
-        return StatisticRow::updateOrCreate(
-            [
-                'statistic_set_id' => $set->id,
-                'basketball_match_id' => $matchId,
-                'player_id' => $playerId,
-                'row_label' => $playerId ? null : $row->rowLabel,
-                'season_id' => $seasonId,
-                'team_id' => $teamId,
-                // Pro legacy import přidáme hash do klíče, aby byla zajištěna idempotence na úrovni řádku
-                'source_metadata->content_hash' => $context['source_metadata']['content_hash'] ?? null,
-            ],
-            [
-                'values' => $row->values,
-                'source_metadata' => array_merge(
-                    $row->metadata ?? [],
-                    $context['source_metadata'] ?? []
-                ),
-            ]
-        );
+        $attributes = [
+            'statistic_set_id' => $set->id,
+            'basketball_match_id' => $matchId,
+            'player_id' => $playerId,
+            'row_label' => $playerId ? null : $row->rowLabel,
+            'season_id' => $seasonId,
+            'team_id' => $teamId,
+            // Pro legacy import přidáme hash do klíče, aby byla zajištěna idempotence na úrovni řádku
+            'source_metadata->content_hash' => $context['source_metadata']['content_hash'] ?? null,
+        ];
+
+        $values = [
+            'values' => $row->values,
+            'source_metadata' => array_merge(
+                $row->metadata ?? [],
+                $context['source_metadata'] ?? []
+            ),
+        ];
+
+        $statRow = StatisticRow::where($attributes)->first();
+
+        if ($statRow) {
+            $oldValues = $statRow->only(['values']);
+            $statRow->update($values);
+            if ($run && $statRow->wasChanged('values')) {
+                $run->addLog('updated', $statRow, $oldValues, $statRow->only(['values']), "Updated stats for " . ($playerId ? "player ID $playerId" : $row->rowLabel));
+            }
+        } else {
+            $statRow = StatisticRow::create(array_merge($attributes, $values));
+            if ($run) {
+                $run->addLog('created', $statRow, null, $statRow->only(['values']), "Created stats for " . ($playerId ? "player ID $playerId" : $row->rowLabel));
+            }
+        }
+
+        return $statRow;
+    }
+
+    /**
+     * Smaže boxscore statistik pro konkrétní zápas.
+     */
+    public function clearMatchBoxscore(BasketballMatch $match, ?ExternalImportRun $run = null): void
+    {
+        $this->statisticSetService->ensureBaseSets();
+        $set = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->first();
+
+        if (! $set) {
+            return;
+        }
+
+        $count = StatisticRow::where('statistic_set_id', $set->id)
+            ->where('basketball_match_id', $match->id)
+            ->delete();
+
+        if ($run && $count > 0) {
+            $run->addLog('deleted', null, null, null, "FRESH mode: Smazáno $count existujících řádků statistik pro zápas.");
+        }
     }
 
     /**
      * Synchronizuje statistiky z boxscoru zápasu.
      */
-    public function syncMatchBoxscore(BasketballMatch $match, NormalizedTableDTO $data): void
+    public function syncMatchBoxscore(BasketballMatch $match, NormalizedTableDTO $data, ?ExternalImportRun $run = null): void
     {
         $this->statisticSetService->ensureBaseSets();
         $set = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->first();
@@ -59,7 +97,7 @@ class StatisticSyncService
             throw new \Exception('Statistic set for boxscore not found.');
         }
 
-        DB::transaction(function () use ($match, $data, $set) {
+        DB::transaction(function () use ($match, $data, $set, $run) {
             $isOurTeam = true;
             $currentTeamId = $match->team_id;
 
@@ -79,26 +117,39 @@ class StatisticSyncService
                 // Párování hráče (jen pro náš tým má smysl hledat internal_id)
                 $playerId = $isOurTeam ? $this->findInternalPlayerId($externalPlayerId, $match->season_id, 'czbasketball') : null;
 
-                StatisticRow::updateOrCreate(
-                    [
-                        'statistic_set_id' => $set->id,
-                        'basketball_match_id' => $match->id,
-                        'team_id' => $currentTeamId,
-                        'player_id' => $playerId,
-                        'row_label' => $playerId ? null : $playerName,
+                $attributes = [
+                    'statistic_set_id' => $set->id,
+                    'basketball_match_id' => $match->id,
+                    'team_id' => $currentTeamId,
+                    'player_id' => $playerId,
+                    'row_label' => $playerId ? null : $playerName,
+                ];
+
+                $values = [
+                    'season_id' => $match->season_id,
+                    'values' => $row->values,
+                    'source_metadata' => [
+                        'source' => 'czbasketball',
+                        'match_external_id' => $match->metadata['external_id'] ?? null,
+                        'player_external_id' => $externalPlayerId,
+                        'scraped_at' => now()->toDateTimeString(),
+                        'is_opponent' => ! $isOurTeam,
                     ],
-                    [
-                        'season_id' => $match->season_id,
-                        'values' => $row->values,
-                        'source_metadata' => [
-                            'source' => 'czbasketball',
-                            'match_external_id' => $match->metadata['external_id'] ?? null,
-                            'player_external_id' => $externalPlayerId,
-                            'scraped_at' => now()->toDateTimeString(),
-                            'is_opponent' => ! $isOurTeam,
-                        ],
-                    ]
-                );
+                ];
+
+                $statRow = StatisticRow::where($attributes)->first();
+                if ($statRow) {
+                    $oldValues = $statRow->only(['values']);
+                    $statRow->update($values);
+                    if ($run && $statRow->wasChanged('values')) {
+                        $run->addLog('updated', $statRow, $oldValues, $statRow->only(['values']), "Boxscore update: " . ($playerId ? "Player ID $playerId" : $playerName));
+                    }
+                } else {
+                    $statRow = StatisticRow::create(array_merge($attributes, $values));
+                    if ($run) {
+                        $run->addLog('created', $statRow, null, $statRow->only(['values']), "Boxscore create: " . ($playerId ? "Player ID $playerId" : $playerName));
+                    }
+                }
             }
         });
 

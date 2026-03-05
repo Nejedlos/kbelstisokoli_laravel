@@ -30,22 +30,38 @@ Route::get('/system/schedule/{token}', function (string $token) {
     $output = \Illuminate\Support\Facades\Artisan::output();
 
     // Heartbeat logování pro diagnostiku
-    $isHeartbeat = str_contains($output, 'Running scheduled command: (callable)') || str_contains($output, 'No scheduled commands are ready to run');
+    $isHeartbeat = str_contains($output, 'Running scheduled command: (callable)')
+        || str_contains($output, 'Running [Callback]')
+        || str_contains($output, 'No scheduled commands are ready to run');
+
+    $cacheDriver = config('cache.default');
+    $storagePath = storage_path();
 
     \Illuminate\Support\Facades\Log::info('Schedule:run endpoint hit', [
         'ip' => request()->ip(),
         'ua' => request()->userAgent(),
         'is_heartbeat' => $isHeartbeat,
         'output_len' => strlen($output),
+        'cache_driver' => $cacheDriver,
+        'storage_path' => $storagePath,
     ]);
 
     if ($isHeartbeat) {
         \Illuminate\Support\Facades\Log::info('Schedule:run triggered heartbeat from HTTP (or no commands ready).');
     } else {
-        \Illuminate\Support\Facades\Log::warning('Schedule:run DID NOT trigger heartbeat from HTTP. Output: ' . $output);
-        // Zkusíme vynutit heartbeat, pokud neběží automaticky
+        \Illuminate\Support\Facades\Log::warning('Schedule:run DID NOT trigger heartbeat from HTTP matching known strings. Output: ' . $output);
+    }
+
+    // Vždy se pokusíme o zápis heartbeatu přímo zde, abychom měli jistotu
+    try {
         \Illuminate\Support\Facades\Cache::put('scheduler_heartbeat', now());
-        \Illuminate\Support\Facades\Log::info('Schedule:run forced heartbeat from HTTP.');
+        $verify = \Illuminate\Support\Facades\Cache::get('scheduler_heartbeat');
+        \Illuminate\Support\Facades\Log::info('Schedule:run explicit heartbeat write check', [
+            'success' => $verify ? true : false,
+            'time' => $verify ? $verify->toDateTimeString() : null,
+        ]);
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error('Schedule:run heartbeat write FAILED: ' . $e->getMessage());
     }
 
     return response('Plánované úlohy byly spuštěny.'.PHP_EOL.$output);

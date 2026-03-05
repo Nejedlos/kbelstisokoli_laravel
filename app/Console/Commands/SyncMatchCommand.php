@@ -21,6 +21,7 @@ class SyncMatchCommand extends Command
                             {seasonNameOrId : Název sezóny (2024/2025) nebo její ID}
                             {teamSlug : Slug týmu (např. muzi-c)}
                             {--force : Ignoruje hash a vynutí synchronizaci}
+                            {--fresh : Smaže stávající data před novým importem}
                             {--sync : Spustí synchronizaci synchronně (v tomto procesu)}';
 
     /**
@@ -66,6 +67,7 @@ class SyncMatchCommand extends Command
 
         $options = [
             'force' => $this->option('force'),
+            'fresh' => $this->option('fresh'),
         ];
 
         if ($this->option('sync')) {

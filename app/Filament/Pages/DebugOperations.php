@@ -299,6 +299,7 @@ class DebugOperations extends Page
     protected function getAuditLogs(): \Illuminate\Support\Collection
     {
         return ExternalImportRun::with(['team', 'season'])
+            ->withCount('logs')
             ->latest()
             ->limit(20)
             ->get();
@@ -329,16 +330,40 @@ class DebugOperations extends Page
 
     public function runTeamSync(int $teamId): void
     {
+        $this->executeTeamSync($teamId);
+    }
+
+    public function runTeamSyncForce(int $teamId): void
+    {
+        $this->executeTeamSync($teamId, ['force' => true]);
+    }
+
+    public function runTeamSyncFresh(int $teamId): void
+    {
+        $this->executeTeamSync($teamId, ['force' => true, 'fresh' => true]);
+    }
+
+    protected function executeTeamSync(int $teamId, array $options = []): void
+    {
         $activeSeason = Season::where('is_active', true)->first();
         if (! $activeSeason) {
+            Notification::make()->title('No active season found')->danger()->send();
+
             return;
         }
 
         $team = Team::find($teamId);
-        ConsoleService::log("Ruční spuštění synchronizace pro tým: ".($team?->name ?? $teamId), 'info');
+        $mode = '';
+        if ($options['fresh'] ?? false) {
+            $mode = ' (FRESH)';
+        } elseif ($options['force'] ?? false) {
+            $mode = ' (FORCE)';
+        }
 
-        SyncTeamSeasonJob::dispatch($teamId, $activeSeason->id);
-        Notification::make()->title('Sync started for team')->success()->send();
+        ConsoleService::log("Ruční spuštění synchronizace{$mode} pro tým: ".($team?->name ?? $teamId), 'info');
+
+        SyncTeamSeasonJob::dispatch($teamId, $activeSeason->id, $options);
+        Notification::make()->title('Sync started for team'.($mode ?: ''))->success()->send();
     }
 
     public function forceMatchSync(string $externalMatchId): void

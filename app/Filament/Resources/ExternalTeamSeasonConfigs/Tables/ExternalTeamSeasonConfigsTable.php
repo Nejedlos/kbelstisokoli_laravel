@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ExternalTeamSeasonConfigs\Tables;
 
 use App\Services\Stats\Sync\ExternalStatsSyncService;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -14,6 +15,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class ExternalTeamSeasonConfigsTable
 {
@@ -57,12 +59,12 @@ class ExternalTeamSeasonConfigsTable
             ->recordActions([
                 Action::make('sync')
                     ->label('Sync')
-                    ->icon('fas-arrows-rotate')
+                    ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                     ->color('success')
                     ->action(fn ($record, ExternalStatsSyncService $service) => self::runSync($record, $service)),
                 Action::make('dryRun')
                     ->label('Dry-run')
-                    ->icon('fas-eye')
+                    ->icon(new HtmlString('<i class="fa-light fa-eye"></i>'))
                     ->color('info')
                     ->modalHeading('Náhled synchronizace (Dry-run)')
                     ->modalSubmitAction(false)
@@ -71,11 +73,22 @@ class ExternalTeamSeasonConfigsTable
                     ->infolist(fn ($record, ExternalStatsSyncService $service) => self::getDryRunInfolist($record, $service)),
                 Action::make('forceSync')
                     ->label('Force Sync')
-                    ->icon('fas-bolt')
+                    ->icon(new HtmlString('<i class="fa-light fa-bolt"></i>'))
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->tooltip('Ignoruje hash obsahu a vynutí stažení dat.')
+                    ->action(fn ($record, ExternalStatsSyncService $service) => self::runSync($record, $service, ['force' => true])),
+                Action::make('freshSync')
+                    ->label('Fresh Sync')
+                    ->icon(new HtmlString('<i class="fa-light fa-trash-can-arrow-up"></i>'))
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn ($record, ExternalStatsSyncService $service) => self::runSync($record, $service, ['force' => true])),
-                EditAction::make(),
+                    ->modalHeading('Vynucená synchronizace (FRESH)')
+                    ->modalDescription('Tato akce smaže existující statistiky zápasů a znovu je importuje z externího zdroje. Chcete pokračovat?')
+                    ->tooltip('Smaže stávající statistiky a znovu je importuje.')
+                    ->action(fn ($record, ExternalStatsSyncService $service) => self::runSync($record, $service, ['force' => true, 'fresh' => true])),
+                EditAction::make()
+                    ->icon(new HtmlString('<i class="fa-light fa-pen-to-square"></i>')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

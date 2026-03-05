@@ -20,6 +20,7 @@ class SyncTeamSeasonCommand extends Command
                             {seasonNameOrId : Název sezóny (2024/2025) nebo její ID}
                             {--dry-run : Spustí pouze náhled bez zápisu do DB}
                             {--force : Ignoruje hash a vynutí synchronizaci}
+                            {--fresh : Smaže stávající data před novým importem}
                             {--max-matches=20 : Maximální počet detailů zápasů ke stažení}
                             {--recent-days=3 : Počet dní zpět pro prioritní synchronizaci}
                             {--sync : Spustí synchronizaci synchronně (v tomto procesu)}';
@@ -59,6 +60,7 @@ class SyncTeamSeasonCommand extends Command
         $options = [
             'dryRun' => $this->option('dry-run'),
             'force' => $this->option('force'),
+            'fresh' => $this->option('fresh'),
             'maxMatchDetails' => (int) $this->option('max-matches'),
             'recentOnly' => (bool) $this->option('recent-days'),
             'recentDays' => (int) $this->option('recent-days'),

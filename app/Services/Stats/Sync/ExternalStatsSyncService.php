@@ -30,7 +30,7 @@ class ExternalStatsSyncService
     /**
      * Synchronizuje celou sezónu pro daný tým.
      *
-     * @param  array  $options  [limit, force]
+     * @param  array  $options  [limit, force, fresh]
      */
     public function syncTeamSeason(int $teamId, int $seasonId, array $options = []): void
     {
@@ -49,13 +49,13 @@ class ExternalStatsSyncService
         $team = Team::findOrFail($teamId);
         $season = Season::findOrFail($seasonId);
 
-        ConsoleService::log("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}", 'info');
-        Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}");
+        ConsoleService::log("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : ''), 'info');
+        Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : ''));
 
         // 1. Synchronizace soupisky
         try {
             ConsoleService::log("- Synchronizace soupisky...");
-            $this->syncRoster($team, $season, $config);
+            $this->syncRoster($team, $season, $config, $options);
             ConsoleService::log("  Soupiska OK.", 'success');
         } catch (\Exception $e) {
             ConsoleService::log("  Chyba při synchronizaci soupisky: ".$e->getMessage(), 'error');
@@ -76,9 +76,15 @@ class ExternalStatsSyncService
     /**
      * Synchronizuje soupisku týmu.
      */
-    protected function syncRoster(Team $team, Season $season, ExternalTeamSeasonConfig $config): void
+    protected function syncRoster(Team $team, Season $season, ExternalTeamSeasonConfig $config, array $options = []): void
     {
         $run = ExternalImportRun::start('czbasketball', $season->id, $team->id, 'team_page', $config->external_team_id);
+        if ($options['force'] ?? false) {
+            $run->updateMetadata(['force' => true]);
+        }
+        if ($options['fresh'] ?? false) {
+            $run->updateMetadata(['fresh' => true]);
+        }
 
         try {
             $html = $this->fetcher->fetch($config->team_season_url, $run);
@@ -98,7 +104,7 @@ class ExternalStatsSyncService
 
             $hash = hash('sha256', $fragmentHtml);
 
-            if ($run->isIdenticalToLast($hash)) {
+            if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
                 $run->skip();
 
                 return;
@@ -156,7 +162,7 @@ class ExternalStatsSyncService
 
             $hash = hash('sha256', $fragmentHtml);
 
-            if ($run->isIdenticalToLast($hash)) {
+            if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
                 $run->skip();
             } else {
                 $run->update([
@@ -164,6 +170,8 @@ class ExternalStatsSyncService
                     'metadata' => array_merge($run->metadata ?? [], [
                         'used_dom_extractor' => ! $usedAiFallback,
                         'used_ai_fallback' => $usedAiFallback,
+                        'force' => $options['force'] ?? false,
+                        'fresh' => $options['fresh'] ?? false,
                     ]),
                 ]);
 
@@ -173,7 +181,7 @@ class ExternalStatsSyncService
 
                 \Log::info("Syncing matches for {$team->slug}, count: ".count($data->rows));
                 foreach ($data->rows as $row) {
-                    $this->matchSyncService->sync($team, $season, $row->values);
+                    $this->matchSyncService->sync($team, $season, $row->values, $run);
                 }
                 $run->finish([
                     'extracted_count' => count($data->rows),
@@ -259,6 +267,12 @@ class ExternalStatsSyncService
 
         $url = 'https://cz.basketball/zapas/'.$externalMatchId;
         $run = ExternalImportRun::start('czbasketball', $match->season_id, $match->team_id, 'match_detail', $externalMatchId);
+        if ($options['force'] ?? false) {
+            $run->updateMetadata(['force' => true]);
+        }
+        if ($options['fresh'] ?? false) {
+            $run->updateMetadata(['fresh' => true]);
+        }
 
         try {
             $html = $this->fetcher->fetch($url, $run);
@@ -277,7 +291,7 @@ class ExternalStatsSyncService
             }
 
             $hash = hash('sha256', $fragmentHtml);
-            if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false)) {
+            if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
                 $run->skip();
 
                 return;
@@ -295,9 +309,14 @@ class ExternalStatsSyncService
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
             }
 
+            // Fresh mode: smazání starých statistik zápasu před importem nových
+            if ($options['fresh'] ?? false) {
+                $this->statisticSyncService->clearMatchBoxscore($match, $run);
+            }
+
             $tables = $result['tables'] ?? [$data];
             foreach ($tables as $tableData) {
-                $this->statisticSyncService->syncMatchBoxscore($match, $tableData);
+                $this->statisticSyncService->syncMatchBoxscore($match, $tableData, $run);
             }
 
             $run->finish([

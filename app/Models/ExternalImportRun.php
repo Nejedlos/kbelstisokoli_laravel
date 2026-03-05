@@ -45,6 +45,11 @@ class ExternalImportRun extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    public function logs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ExternalImportLog::class);
+    }
+
     /**
      * Zahájí nový běh importu.
      */
@@ -156,6 +161,21 @@ class ExternalImportRun extends Model
     {
         $this->update([
             'metadata' => array_merge($this->metadata ?? [], $data),
+        ]);
+    }
+
+    /**
+     * Přidá detailní log k běhu.
+     */
+    public function addLog(string $action, ?Model $model = null, ?array $oldValues = null, ?array $newValues = null, ?string $message = null): ExternalImportLog
+    {
+        return $this->logs()->create([
+            'model_type' => $model ? get_class($model) : null,
+            'model_id' => $model ? $model->id : null,
+            'action' => $action,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'message' => $message,
         ]);
     }
 }

@@ -30,6 +30,6 @@ class SyncMatchDetailJob implements ShouldQueue
 
     public function handle(ExternalStatsSyncService $service): void
     {
-        $service->syncMatchDetail($this->matchId);
+        $service->syncMatchDetail($this->matchId, $this->options);
     }
 }
