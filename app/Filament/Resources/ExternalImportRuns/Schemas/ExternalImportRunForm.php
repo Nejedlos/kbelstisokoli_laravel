@@ -81,10 +81,19 @@ class ExternalImportRunForm
                             ])
                             ->hintAction(
                                 Action::make('copyError')
-                                    ->label('Kopírovat chybu')
-                                    ->icon(FilamentIcon::get(AppIcon::COPY))
+                                    ->label(new \Illuminate\Support\HtmlString('
+                                        <span x-show="!copied">Kopírovat chybu</span>
+                                        <span x-show="copied" x-cloak>Zkopírováno!</span>
+                                    '))
+                                    ->icon(new \Illuminate\Support\HtmlString('
+                                        <span x-show="!copied">' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::COPY) . '</span>
+                                        <span x-show="copied" class="text-success-500" x-cloak>' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::ACTIVATE) . '</span>
+                                    '))
+                                    ->extraAttributes([
+                                        'x-data' => '{ copied: false }',
+                                    ])
                                     ->url('#')
-                                    ->alpineClickHandler('window.navigator.clipboard.writeText($el.closest(".fi-fo-field").querySelector("textarea").value); $tooltip("Zkopírováno", { timeout: 2000 })')
+                                    ->alpineClickHandler("window.navigator.clipboard.writeText(\$el.closest('.fi-fo-field').querySelector('textarea').value); copied = true; setTimeout(() => copied = false, 2000); \$tooltip('Zkopírováno', { timeout: 2000 })")
                             )
                             ->hidden(fn ($get) => ! $get('error_summary')),
                     ]),
