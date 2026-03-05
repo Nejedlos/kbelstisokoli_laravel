@@ -106,6 +106,8 @@ class ExternalStatsSyncService
             $html = $this->fetcher->fetch($config->team_season_url, $run);
             $extractor = app(TeamRosterExtractor::class);
 
+            $run->updateMetadata(['html_size' => strlen($html)]);
+
             $usedAiFallback = false;
             if ($options['ai'] ?? false) {
                 $data = $this->normalizer->normalize($html, ['type' => 'roster']);
@@ -153,6 +155,10 @@ class ExternalStatsSyncService
                 'imported_count' => count($data->rows),
             ]);
         } catch (\Exception $e) {
+            if (isset($html)) {
+                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $html);
+                $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
+            }
             $run->fail($e);
             throw $e;
         }
@@ -170,6 +176,8 @@ class ExternalStatsSyncService
             $run->updateMetadata(['url' => $config->matches_list_url]);
             $html = $this->fetcher->fetch($config->matches_list_url, $run);
             $extractor = app(MatchesListExtractor::class);
+
+            $run->updateMetadata(['html_size' => strlen($html)]);
 
             $usedAiFallback = false;
             if ($options['ai'] ?? false) {
@@ -264,6 +272,10 @@ class ExternalStatsSyncService
             }
 
         } catch (\Exception $e) {
+            if (isset($html)) {
+                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $html);
+                $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
+            }
             $run->fail($e);
             throw $e;
         }
@@ -351,6 +363,8 @@ class ExternalStatsSyncService
         try {
             $html = $this->fetcher->fetch($url, $run);
             $extractor = app(MatchDetailBoxscoreExtractor::class);
+
+            $run->updateMetadata(['html_size' => strlen($html)]);
 
             $usedAiFallback = false;
             if ($options['ai'] ?? false) {
@@ -465,6 +479,10 @@ class ExternalStatsSyncService
             ]);
 
         } catch (\Exception $e) {
+            if (isset($html)) {
+                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $html);
+                $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
+            }
             $run->fail($e);
             throw $e;
         }

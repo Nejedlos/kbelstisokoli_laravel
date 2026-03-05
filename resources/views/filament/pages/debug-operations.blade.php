@@ -86,8 +86,17 @@
                                             <span class="font-bold">URL:</span> {{ $team['last_error_metadata']['url'] }}
                                         </div>
                                     @endif
-                                    <div class="max-h-[150px] overflow-y-auto whitespace-pre-wrap font-mono leading-tight">
-                                        {{ $team['last_error'] }}
+                                    <div class="relative group">
+                                        <div class="max-h-[150px] overflow-y-auto whitespace-pre-wrap font-mono leading-tight pr-8">
+                                            {{ $team['last_error'] }}
+                                        </div>
+                                        <button
+                                            x-on:click="window.navigator.clipboard.writeText($el.parentElement.querySelector('div').innerText.trim()); $tooltip('Zkopírováno', { timeout: 2000 })"
+                                            class="absolute top-0 right-0 p-1 text-gray-400 hover:text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 dark:bg-gray-800/80 rounded"
+                                            title="Kopírovat chybu"
+                                        >
+                                            <i class="fa-light fa-copy"></i>
+                                        </button>
                                     </div>
                                 </div>
                             @endif

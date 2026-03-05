@@ -41,13 +41,14 @@ class OpenAiNormalizer implements StatNormalizerInterface
             'model' => $this->model,
         ]);
 
-        $prompt = $this->buildPrompt($content, $type, $canonicalKeys);
+        $prompt = $this->buildPrompt($this->sanitizeHtml($content), $type, $canonicalKeys);
         $startTime = microtime(true);
 
         try {
             $timeout = config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60));
+            $promptLength = strlen($prompt);
             Log::info("OpenAI: Sending request to API", [
-                'prompt_length' => strlen($prompt),
+                'prompt_length' => $promptLength,
                 'timeout' => $timeout,
             ]);
 
@@ -71,13 +72,18 @@ class OpenAiNormalizer implements StatNormalizerInterface
 
             if ($response->failed()) {
                 $duration = round(microtime(true) - $startTime, 2);
+                $errorMsg = $response->reason();
+                if ($response->status() === 408 || str_contains($errorMsg, 'timed out')) {
+                    $errorMsg = "OpenAI API Timeout after {$duration}s (configured: {$timeout}s). Prompt length: {$promptLength} chars.";
+                }
+
                 Log::error('OpenAI Normalizer API Error', [
                     'status' => $response->status(),
                     'reason' => $response->reason(),
                     'duration' => $duration.'s',
                     'body' => $response->body(),
                 ]);
-                throw new Exception("OpenAI API request failed after {$duration}s: ".$response->reason());
+                throw new Exception("OpenAI API request failed: ".$errorMsg);
             }
 
             $duration = round(microtime(true) - $startTime, 2);
@@ -104,12 +110,20 @@ class OpenAiNormalizer implements StatNormalizerInterface
 
         } catch (Exception $e) {
             $duration = round(microtime(true) - $startTime, 2);
+            $timeoutConfig = config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60));
+            $msg = $e->getMessage();
+
+            if (str_contains($msg, 'timed out') || str_contains($msg, 'cURL error 28')) {
+                $msg = "Timeout Error: OpenAI request took {$duration}s (Limit: {$timeoutConfig}s). Content size: " . strlen($content) . " chars. Type: {$type}";
+                throw new Exception($msg);
+            }
+
             Log::error('OpenAI Normalizer Exception', [
                 'message' => $e->getMessage(),
                 'type' => $type,
                 'duration' => $duration.'s',
                 'content_length' => strlen($content),
-                'timeout_config' => config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60)),
+                'timeout_config' => $timeoutConfig,
             ]);
             throw $e;
         }
@@ -176,6 +190,27 @@ $structure
 HTML Fragment:
 $html
 PROMPT;
+    }
+
+    protected function sanitizeHtml(string $html): string
+    {
+        // Odebrat komentáře
+        $html = preg_replace('/<!--(.|\s)*?-->/', '', $html);
+        // Odebrat skripty a styly
+        $html = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $html);
+        $html = preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $html);
+        // Odebrat SVG (pokud jsou v tabulce, obvykle nejsou potřeba pro data)
+        $html = preg_replace('/<svg\b[^>]*>(.*?)<\/svg>/is', '', $html);
+
+        // Odebrat nepotřebné atributy (ponecháme href pro player_id a taky colspan/rowspan pro tabulky)
+        // Ponecháme: href, colspan, rowspan
+        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z]+)="[^"]*"/i', '', $html);
+        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z]+)=\'[^\']*\'/i', '', $html);
+
+        // Odebrat přebytečné mezery a konce řádků
+        $html = preg_replace('/\s+/', ' ', $html);
+
+        return trim($html);
     }
 
     protected function mapToDTO(array $data, string $type): NormalizedTableDTO

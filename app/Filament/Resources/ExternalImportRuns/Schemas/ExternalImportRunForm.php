@@ -75,25 +75,39 @@ class ExternalImportRunForm
                             ->label('Chyba')
                             ->columnSpanFull()
                             ->readOnly()
-                            ->rows(10)
+                            ->rows(15)
                             ->extraAttributes([
-                                'style' => 'font-family: monospace; font-size: 0.75rem; line-height: 1rem;',
+                                'style' => 'font-family: "JetBrains Mono", "Courier New", monospace; font-size: 0.8rem; line-height: 1.2; background-color: #f9fafb;',
                             ])
+                            ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? "Velikost zdrojového HTML: " . number_format($record->metadata['html_size'] / 1024, 1) . " KB | Timeout: " . (config('services.openai.timeout') ?? 60) . "s" : null)
                             ->hintAction(
-                                Action::make('copyError')
-                                    ->label(new \Illuminate\Support\HtmlString('
-                                        <span x-show="!copied">Kopírovat chybu</span>
-                                        <span x-show="copied" x-cloak>Zkopírováno!</span>
-                                    '))
-                                    ->icon(new \Illuminate\Support\HtmlString('
-                                        <span x-show="!copied">' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::COPY) . '</span>
-                                        <span x-show="copied" class="text-success-500" x-cloak>' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::ACTIVATE) . '</span>
-                                    '))
-                                    ->extraAttributes([
-                                        'x-data' => '{ copied: false }',
-                                    ])
-                                    ->url('#')
-                                    ->alpineClickHandler("window.navigator.clipboard.writeText(\$el.closest('.fi-fo-field').querySelector('textarea').value); copied = true; setTimeout(() => copied = false, 2000); \$tooltip('Zkopírováno', { timeout: 2000 })")
+                                \Filament\Actions\ActionGroup::make([
+                                    Action::make('copyError')
+                                        ->label(new \Illuminate\Support\HtmlString('
+                                            <span x-show="!copied">Kopírovat kompletní chybu</span>
+                                            <span x-show="copied" x-cloak>Zkopírováno!</span>
+                                        '))
+                                        ->icon(new \Illuminate\Support\HtmlString('
+                                            <span x-show="!copied">' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::COPY) . '</span>
+                                            <span x-show="copied" class="text-success-500" x-cloak>' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::ACTIVATE) . '</span>
+                                        '))
+                                        ->extraAttributes([
+                                            'x-data' => '{ copied: false }',
+                                        ])
+                                        ->url('#')
+                                        ->alpineClickHandler("event.preventDefault(); window.navigator.clipboard.writeText(\$el.closest('.fi-fo-field').querySelector('textarea').value); copied = true; setTimeout(() => copied = false, 2000); \$tooltip('Zkopírováno do schránky', { timeout: 2000 })"),
+
+                                    Action::make('downloadDebugHtml')
+                                        ->label('Stáhnout zdrojové HTML')
+                                        ->icon(new \Illuminate\Support\HtmlString(\App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::AUDIT_LOGS)))
+                                        ->color('gray')
+                                        ->action(function ($record) {
+                                            if (isset($record->metadata['debug_html_file']) && \Illuminate\Support\Facades\Storage::disk('local')->exists($record->metadata['debug_html_file'])) {
+                                                return \Illuminate\Support\Facades\Storage::disk('local')->download($record->metadata['debug_html_file'], "import_run_{$record->id}.html");
+                                            }
+                                        })
+                                        ->hidden(fn ($record) => ! $record || ! isset($record->metadata['debug_html_file'])),
+                                ])->dropdown(false)
                             )
                             ->hidden(fn ($get) => ! $get('error_summary')),
                     ]),
