@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Opponents\Pages;
 
+use App\Filament\Resources\Opponents\OpponentResource;
 use App\Filament\Resources\OpponentMergeSuggestions\OpponentMergeSuggestionResource;
 use App\Services\Stats\OpponentMergeService;
 use Filament\Actions\Action;
