@@ -2,32 +2,39 @@
 
 namespace App\Filament\Resources\Teams\RelationManagers;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use App\Models\ExternalStatSource;
 use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
+use App\Filament\Resources\ExternalStatSources\ExternalStatSourceResource;
 
 class ExternalMappingsRelationManager extends RelationManager
 {
     protected static string $relationship = 'externalMappings';
 
+    protected static ?string $title = 'Externí zdroje statistik';
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('source_key')
+                Select::make('source_key')
                     ->label('Zdroj')
-                    ->default('czbasketball')
-                    ->required()
-                    ->maxLength(255),
+                    ->options(ExternalStatSource::all()->pluck('name', 'slug'))
+                    ->searchable()
+                    ->required(),
                 TextInput::make('external_team_id')
                     ->label('Externí ID týmu')
                     ->required()
@@ -47,7 +54,7 @@ class ExternalMappingsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('external_team_id')
             ->columns([
-                TextColumn::make('source_key')
+                TextColumn::make('externalStatSource.name')
                     ->label('Zdroj')
                     ->badge(),
                 TextColumn::make('external_team_id')
@@ -66,6 +73,13 @@ class ExternalMappingsRelationManager extends RelationManager
                     ->icon(new HtmlString(IconHelper::render(IconHelper::CREATE))),
             ])
             ->recordActions([
+                Action::make('go_to_source')
+                    ->label('Upravit ve zdroji')
+                    ->icon(new HtmlString(IconHelper::render(AppIcon::GLOBE)))
+                    ->url(fn ($record) => $record->externalStatSource
+                        ? ExternalStatSourceResource::getUrl('edit', ['record' => $record->externalStatSource->id]) . '?activeRelation=0'
+                        : null)
+                    ->openUrlInNewTab(),
                 EditAction::make()
                     ->icon(new HtmlString(IconHelper::render(IconHelper::EDIT))),
                 DeleteAction::make()

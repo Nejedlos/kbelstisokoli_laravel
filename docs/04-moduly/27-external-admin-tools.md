@@ -2,13 +2,21 @@
 
 Tento modul poskytuje administrativní rozhraní pro správu mapování týmů, konfiguraci sezón, auditování importů a manuální párování hráčů. Všechny nástroje jsou dostupné v sekci **Externí statistiky**.
 
-## 1. Mapování týmů (External Team Mappings)
+## 1. Externí zdroje statistik (External Stat Sources)
+Centrální správa zdrojů dat (např. `cz.basketball`).
+- **Přiřazené týmy:** Zobrazuje seznam všech týmů, které jsou k tomuto zdroji namapovány, s rychlým odkazem na editaci týmu.
+- **Správa mapování:** V detailu zdroje lze přímo přidávat nebo odebírat přiřazené týmy (Relation Manager).
+- **Akce Synchronizovat vše:** Spustí hromadnou synchronizaci všech připojených týmů.
+
+## 2. Mapování týmů (External Team Mappings)
 Slouží k definici základní identity týmu napříč sezónami.
+- **V detailu týmu:** Mapování lze spravovat přímo v administraci týmu (sekce *Externí synchronizace*).
 - **Interní tým:** Výběr týmu z našeho systému.
-- **Externí ID:** Unikátní identifikátor týmu na webu `cz.basketball` (např. `7738`).
+- **Zdroj:** Výběr z dostupných externích zdrojů (např. `cz.basketball`).
+- **Externí ID:** Unikátní identifikátor týmu na webu (např. `7738`).
 - **Základní URL:** Odkaz na domovskou stránku týmu.
 
-## 2. Konfigurace sezón (External Team Season Configs)
+## 3. Konfigurace sezón (External Team Season Configs)
 Sezónně specifické nastavení pro synchronizaci.
 - **Externí rok sezóny:** Parametr `y`, který určuje sezónu (např. `2025` pro 2025/26).
 - **URL soupisky a zápasů:** Konkrétní adresy, ze kterých se čerpají data.

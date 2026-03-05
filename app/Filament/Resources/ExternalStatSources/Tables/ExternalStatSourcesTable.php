@@ -28,7 +28,8 @@ class ExternalStatSourcesTable
                     ->label('Přiřazené týmy')
                     ->badge()
                     ->color('success')
-                    ->separator(','),
+                    ->separator(', ')
+                    ->url(fn ($record) => $record->teamMappings->count() === 1 ? \App\Filament\Resources\Teams\TeamResource::getUrl('edit', ['record' => $record->teamMappings->first()->team_id]) : null),
                 TextColumn::make('source_type')
                     ->label('Typ')
                     ->badge()

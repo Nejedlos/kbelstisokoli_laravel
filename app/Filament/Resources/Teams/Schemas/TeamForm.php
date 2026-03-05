@@ -62,11 +62,12 @@ class TeamForm
                         Repeater::make('externalMappings')
                             ->relationship('externalMappings')
                             ->schema([
-                                TextInput::make('source_key')
+                                Select::make('source_key')
                                     ->label('Zdroj')
+                                    ->options(\App\Models\ExternalStatSource::all()->pluck('name', 'slug'))
                                     ->default('czbasketball')
                                     ->required()
-                                    ->readOnly(),
+                                    ->searchable(),
                                 TextInput::make('external_team_id')
                                     ->label('Externí ID týmu')
                                     ->required()
