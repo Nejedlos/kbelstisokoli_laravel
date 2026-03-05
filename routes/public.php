@@ -27,8 +27,28 @@ Route::get('/system/schedule/{token}', function (string $token) {
     }
 
     \Illuminate\Support\Facades\Artisan::call('schedule:run');
+    $output = \Illuminate\Support\Facades\Artisan::output();
 
-    return response('Plánované úlohy byly spuštěny.'.PHP_EOL.\Illuminate\Support\Facades\Artisan::output());
+    // Heartbeat logování pro diagnostiku
+    $isHeartbeat = str_contains($output, 'Running scheduled command: (callable)') || str_contains($output, 'No scheduled commands are ready to run');
+
+    \Illuminate\Support\Facades\Log::info('Schedule:run endpoint hit', [
+        'ip' => request()->ip(),
+        'ua' => request()->userAgent(),
+        'is_heartbeat' => $isHeartbeat,
+        'output_len' => strlen($output),
+    ]);
+
+    if ($isHeartbeat) {
+        \Illuminate\Support\Facades\Log::info('Schedule:run triggered heartbeat from HTTP (or no commands ready).');
+    } else {
+        \Illuminate\Support\Facades\Log::warning('Schedule:run DID NOT trigger heartbeat from HTTP. Output: ' . $output);
+        // Zkusíme vynutit heartbeat, pokud neběží automaticky
+        \Illuminate\Support\Facades\Cache::put('scheduler_heartbeat', now());
+        \Illuminate\Support\Facades\Log::info('Schedule:run forced heartbeat from HTTP.');
+    }
+
+    return response('Plánované úlohy byly spuštěny.'.PHP_EOL.$output);
 })->name('system.schedule');
 
 Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(function (): void {

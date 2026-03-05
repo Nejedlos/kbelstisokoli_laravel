@@ -18,6 +18,11 @@ const TARGET_URL = 'https://new.kbelstisokoli.cz/system/schedule/6f72f0cdf9f8ce4
 const DEFAULT_TIMEOUT_SECONDS = 60;
 const LOG_FILE = '/tmp/cron-proxy-kbelstisokoli.log';
 
+// Podpora pro CLI argumenty (pokud se volá jako php cron-proxy.php TOKEN)
+if (PHP_SAPI === 'cli' && isset($argv[1])) {
+    $_GET['token'] = $argv[1];
+}
+
 // Token pro ochranu: nastav env CRON_PROXY_TOKEN
 $expectedToken = getenv('CRON_PROXY_TOKEN') ?: '';
 $providedToken = (string)(isset($_GET['token']) ? $_GET['token'] : '');
@@ -77,14 +82,20 @@ $timeout = (int)(isset($_GET['timeout']) ? $_GET['timeout'] : DEFAULT_TIMEOUT_SE
 if ($timeout < 5) $timeout = 5;
 if ($timeout > 180) $timeout = 180;
 
-logLine("START proxy -> " . TARGET_URL);
-
 $ch = curl_init(TARGET_URL);
 if ($ch === false) {
     http_response_code(500);
     echo "Failed to init cURL\n";
     logLine("ERROR: curl_init failed");
     exit;
+}
+
+logLine("START proxy -> " . TARGET_URL . " from " . ($_SERVER['REMOTE_ADDR'] ?? 'CLI') . " (SAPI: " . PHP_SAPI . ")");
+
+if (isset($_GET['debug']) || PHP_SAPI === 'cli') {
+    curl_setopt($ch, CURLOPT_VERBOSE, true);
+    $verbose = fopen('php://temp', 'w+');
+    curl_setopt($ch, CURLOPT_STDERR, $verbose);
 }
 
 curl_setopt_array($ch, array(
@@ -95,8 +106,8 @@ curl_setopt_array($ch, array(
     CURLOPT_TIMEOUT        => $timeout,
     CURLOPT_USERAGENT      => 'webglobe-cron-proxy/1.0',
     CURLOPT_HEADER         => true,   // chceme oddělit hlavičky + tělo kvůli debug
-    CURLOPT_SSL_VERIFYPEER => true,
-    CURLOPT_SSL_VERIFYHOST => 2,
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_SSL_VERIFYHOST => 0,
 ));
 
 $response = curl_exec($ch);
@@ -108,13 +119,33 @@ curl_close($ch);
 
 if ($response === false) {
     http_response_code(502);
-    echo "Proxy error: cURL failed ($errno): $error\n";
-    logLine("ERROR: cURL failed errno=$errno error=$error");
+    $msg = "Proxy error: cURL failed ($errno): $error";
+    echo $msg . "\n";
+    logLine("ERROR: " . $msg);
+    if (isset($verbose)) {
+        rewind($verbose);
+        $vLog = stream_get_contents($verbose);
+        logLine("DEBUG: " . $vLog);
+        echo "\n--- CURL DEBUG ---\n" . $vLog . "\n";
+    }
+
+    // Zkusíme DNS check pro diagnostiku
+    $host = parse_url(TARGET_URL, PHP_URL_HOST);
+    $ip = gethostbyname($host);
+    logLine("DIAGNOSTIC: DNS resolve $host -> $ip");
+    echo "DNS resolve $host -> $ip\n";
+
     exit;
 }
 
 $headers = substr($response, 0, $headerSize);
 $body    = substr($response, $headerSize);
+
+if (isset($verbose)) {
+    rewind($verbose);
+    $vLog = stream_get_contents($verbose);
+    logLine("DEBUG: DONE httpCode=$httpCode bodyLen=" . strlen($body));
+}
 
 logLine("DONE httpCode=$httpCode bodyLen=" . strlen($body));
 
