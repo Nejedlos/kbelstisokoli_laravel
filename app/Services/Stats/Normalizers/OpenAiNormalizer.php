@@ -35,6 +35,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
 
         $type = $mappingConfig['type'] ?? 'unknown_table';
         $canonicalKeys = $mappingConfig['canonical_keys'] ?? [];
+        $strictSchema = $mappingConfig['strict_schema'] ?? null;
 
         $sanitizedContent = $this->sanitizeHtml($content);
         $sanitizedLength = strlen($sanitizedContent);
@@ -46,7 +47,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
             'preview' => substr($sanitizedContent, 0, 150) . '...',
         ]);
 
-        $prompt = $this->buildPrompt($sanitizedContent, $type, $canonicalKeys);
+        $prompt = $this->buildPrompt($sanitizedContent, $type, $canonicalKeys, $strictSchema);
         $startTime = microtime(true);
 
         try {
@@ -137,11 +138,14 @@ class OpenAiNormalizer implements StatNormalizerInterface
         }
     }
 
-    protected function buildPrompt(string $html, string $type, array $canonicalKeys): string
+    protected function buildPrompt(string $html, string $type, array $canonicalKeys, ?string $strictSchema = null): string
     {
         $keysList = implode(', ', array_keys($canonicalKeys));
 
-        $structure = '{
+        $structure = $strictSchema;
+
+        if (!$structure) {
+            $structure = '{
      "name": "Descriptive name of the table",
      "columns": [{"key": "canonical_key", "label": "Original Label"}],
      "rows": [
@@ -155,8 +159,8 @@ class OpenAiNormalizer implements StatNormalizerInterface
      "warnings": ["List of any parsing issues or missing values"]
    }';
 
-        if ($type === 'match_boxscore') {
-            $structure = '{
+            if ($type === 'match_boxscore') {
+                $structure = '{
      "header": {
        "home_team": "Name of home team",
        "away_team": "Name of away team",
@@ -178,6 +182,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
      ],
      "warnings": ["List of any parsing issues"]
    }';
+            }
         }
 
         return <<<PROMPT
