@@ -36,6 +36,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
         $type = $mappingConfig['type'] ?? 'unknown_table';
         $canonicalKeys = $mappingConfig['canonical_keys'] ?? [];
         $strictSchema = $mappingConfig['strict_schema'] ?? null;
+        $contextLinks = $mappingConfig['context_links'] ?? null;
 
         $sanitizedContent = $this->sanitizeHtml($content);
         $sanitizedLength = strlen($sanitizedContent);
@@ -44,7 +45,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
         $debugLogs[] = "[" . date('H:i:s') . "] Normalization started. Original length: " . strlen($content);
         $debugLogs[] = "[" . date('H:i:s') . "] Sanitized length: " . $sanitizedLength;
 
-        $prompt = $this->buildPrompt($sanitizedContent, $type, $canonicalKeys, $strictSchema);
+        $prompt = $this->buildPrompt($sanitizedContent, $type, $canonicalKeys, $strictSchema, $contextLinks);
         $promptLength = strlen($prompt);
         $startTime = microtime(true);
 
@@ -134,7 +135,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
         }
     }
 
-    protected function buildPrompt(string $html, string $type, array $canonicalKeys, ?string $strictSchema = null): string
+    protected function buildPrompt(string $html, string $type, array $canonicalKeys, ?string $strictSchema = null, ?string $contextLinks = null): string
     {
         $keysList = implode(', ', array_keys($canonicalKeys));
 
@@ -185,6 +186,9 @@ class OpenAiNormalizer implements StatNormalizerInterface
 Parse the following HTML fragment into a structured JSON object.
 Table type: $type
 Target canonical keys (and their meanings): $keysList
+
+Context Links (Extracted from original page):
+$contextLinks
 
 Rules:
 1. Output MUST be a valid JSON object.

@@ -74,10 +74,17 @@
                             </div>
 
                             @if($team['last_error'])
-                                <div class="mt-4 bg-danger-50 dark:bg-danger-900/10 text-danger-700 dark:text-danger-400 text-[10px] rounded-lg border border-danger-200 dark:border-danger-900/30 overflow-hidden shadow-sm">
+                                <div
+                                    x-data="{ expanded: false }"
+                                    class="mt-4 bg-danger-50 dark:bg-danger-900/10 text-danger-700 dark:text-danger-400 text-[10px] rounded-lg border border-danger-200 dark:border-danger-900/30 overflow-hidden shadow-sm"
+                                >
                                     {{-- Error Header --}}
                                     <div class="flex flex-col sm:flex-row justify-between items-center px-3 py-2 bg-danger-100/50 dark:bg-danger-900/40 border-b border-danger-100 dark:border-danger-900/30 gap-2">
-                                        <div class="flex items-center gap-1.5 font-bold uppercase tracking-wide opacity-80">
+                                        <div
+                                            class="flex items-center gap-1.5 font-bold uppercase tracking-wide opacity-80 cursor-pointer select-none group"
+                                            x-on:click="expanded = !expanded"
+                                        >
+                                            <i class="fa-light fa-chevron-right transition-transform duration-200 text-[8px]" :class="{ 'rotate-90': expanded }"></i>
                                             <i class="fa-light fa-circle-exclamation text-danger-500"></i>
                                             Last Error (Run #{{ $team['last_error_id'] }})
                                         </div>
@@ -85,14 +92,14 @@
                                             @if(isset($team['last_error_metadata']['debug_html_file']))
                                                 <button
                                                     wire:click="downloadDebugHtml({{ $team['last_error_id'] }})"
-                                                    class="flex items-center gap-1.5 px-2 py-1 bg-info-600 dark:bg-info-500 hover:bg-info-700 dark:hover:bg-info-400 text-white rounded-md shadow-sm transition-all font-bold uppercase tracking-wider text-[9px] active:scale-95"
+                                                    class="flex items-center gap-1.5 px-2 py-1 bg-sky-700 dark:bg-sky-600 hover:bg-sky-800 dark:hover:bg-sky-500 text-white rounded-md shadow-sm transition-all font-bold uppercase tracking-wider text-[9px] active:scale-95 border border-sky-800/20 dark:border-sky-400/20"
                                                     title="Stáhnout sanitizovaný HTML fragment, který AI zpracovávala"
                                                 >
                                                     <i class="fa-light fa-file-code"></i> HTML
                                                 </button>
                                             @endif
                                             <button
-                                                x-on:click="window.navigator.clipboard.writeText($el.closest('.mt-4').querySelector('.font-mono').innerText.trim()); $tooltip('Zkopírováno do schránky', { timeout: 2000 })"
+                                                x-on:click="window.navigator.clipboard.writeText($el.closest('.mt-4').querySelector('.font-mono-full').innerText.trim()); $tooltip('Zkopírováno do schránky', { timeout: 2000 })"
                                                 class="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-600 dark:bg-primary-500 hover:bg-primary-700 dark:hover:bg-primary-400 text-white rounded-md shadow-md transition-all font-bold uppercase tracking-wider text-[9px] active:scale-95 shadow-primary-500/20"
                                                 title="Zkopírovat kompletní chybovou hlášku"
                                             >
@@ -107,16 +114,33 @@
                                     {{-- Error Content --}}
                                     <div class="p-3">
                                         @if(isset($team['last_error_metadata']['url']))
-                                            <div class="mb-3 p-1.5 bg-white/50 dark:bg-black/20 rounded border border-danger-100/50 dark:border-danger-900/20 break-all flex items-start gap-2">
+                                            <div class="mb-2 p-1.5 bg-white/50 dark:bg-black/20 rounded border border-danger-100/50 dark:border-danger-900/20 break-all flex items-start gap-2">
                                                 <span class="font-bold shrink-0 uppercase tracking-tighter opacity-60">URL:</span>
-                                                <span class="truncate-2-lines">{{ $team['last_error_metadata']['url'] }}</span>
+                                                <span class="truncate">{{ $team['last_error_metadata']['url'] }}</span>
                                             </div>
                                         @endif
-                                        <div class="relative">
-                                            <div class="max-h-[120px] overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed pr-2 scrollbar-thin scrollbar-thumb-danger-200 dark:scrollbar-thumb-danger-900 selection:bg-danger-500/20 selection:text-danger-900 dark:selection:text-danger-100">
+
+                                        {{-- Excerpt (shown when collapsed) --}}
+                                        <div x-show="!expanded" x-on:click="expanded = true" class="cursor-pointer opacity-70 hover:opacity-100 transition-opacity flex items-center gap-2 group">
+                                            <div class="truncate font-mono flex-1">
                                                 {{ $team['last_error'] }}
                                             </div>
-                                            <div class="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tl from-danger-50 dark:from-gray-900/10 pointer-events-none"></div>
+                                            <span class="text-[8px] uppercase font-bold text-danger-400 dark:text-danger-600 group-hover:underline decoration-1 underline-offset-2 shrink-0">Zobrazit více <i class="fa-light fa-caret-down"></i></span>
+                                        </div>
+
+                                        {{-- Full content (shown when expanded) --}}
+                                        <div x-show="expanded" x-cloak x-collapse>
+                                            <div class="relative">
+                                                <div class="max-h-[300px] overflow-y-auto whitespace-pre-wrap font-mono font-mono-full leading-relaxed pr-2 scrollbar-thin scrollbar-thumb-danger-200 dark:scrollbar-thumb-danger-900 selection:bg-danger-500/20 selection:text-danger-900 dark:selection:text-danger-100">
+                                                    {{ $team['last_error'] }}
+                                                </div>
+                                                <div class="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tl from-danger-50 dark:from-gray-900/10 pointer-events-none"></div>
+                                            </div>
+                                            <div class="mt-2 text-center border-t border-danger-100/30 dark:border-danger-900/30 pt-2">
+                                                <button x-on:click="expanded = false" class="text-[8px] uppercase font-bold text-danger-400 dark:text-danger-600 hover:underline">
+                                                    <i class="fa-light fa-caret-up"></i> Zabalit
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

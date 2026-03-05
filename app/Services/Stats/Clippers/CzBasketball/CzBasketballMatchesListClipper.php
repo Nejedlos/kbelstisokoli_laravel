@@ -15,13 +15,18 @@ class CzBasketballMatchesListClipper implements ClipperInterface
     {
         $crawler = new Crawler($html);
 
+        $tables = $crawler->filter('table');
+        \Log::debug("Clipper: Found {$tables->count()} tables on page.");
+
         // Heuristika: <table> kde >= 5 řádků obsahuje /zapas/
-        $matchesTable = $crawler->filter('table')->reduce(function (Crawler $node) {
+        $matchesTable = $tables->reduce(function (Crawler $node, $i) {
             $matchLinks = $node->filter('a[href*="/zapas/"]');
+            \Log::debug("Clipper: Table #{$i} has {$matchLinks->count()} match links.");
             return $matchLinks->count() >= 5;
         })->first();
 
         if ($matchesTable->count() === 0) {
+            \Log::warning("Clipper: No matches list table found using primary heuristic (>= 5 match links).");
             return [];
         }
 

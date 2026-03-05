@@ -113,13 +113,27 @@ class ExternalStatsSyncService
             $clipper = app(CzBasketballTeamPageClipper::class);
             $clips = $clipper->clip($html, $config->team_season_url);
 
+            // CNH a JSON Linky
+            $cnh = $clipper->buildCnh($clips);
+            $linksJson = $clipper->buildExtractedLinksJson($clips);
+
+            // Uložit CNH a JSON pro debug/AI
+            $year = $season->year ?? 'unknown';
+            $basePath = "external/czbasketball/clips/{$config->external_team_id}/y{$year}";
+            \Illuminate\Support\Facades\Storage::disk('local')->makeDirectory($basePath);
+            \Illuminate\Support\Facades\Storage::disk('local')->put("{$basePath}/team_page_cnh.html", $cnh);
+            \Illuminate\Support\Facades\Storage::disk('local')->put("{$basePath}/extracted_links.json", $linksJson);
+
             $rosterClip = collect($clips)->firstWhere('id', 'roster_table');
             $headerClip = collect($clips)->firstWhere('id', 'team_header');
 
             $run->updateMetadata([
                 'html_size' => strlen($html),
+                'cnh_size' => strlen($cnh),
                 'clips_found' => count($clips),
                 'clip_ids' => collect($clips)->pluck('id')->toArray(),
+                'cnh_file' => "{$basePath}/team_page_cnh.html",
+                'links_json_file' => "{$basePath}/extracted_links.json",
             ]);
 
             $usedAi = false;
@@ -134,6 +148,7 @@ class ExternalStatsSyncService
                 $data = $this->normalizer->normalize($rosterClip->htmlFragment, [
                     'type' => 'roster',
                     'strict_schema' => $this->getRosterSchema(),
+                    'context_links' => $linksJson,
                 ]);
                 $fragmentHtml = $rosterClip->htmlFragment;
                 $usedAi = true;
@@ -153,6 +168,7 @@ class ExternalStatsSyncService
                     $data = $this->normalizer->normalize($rosterClip->htmlFragment, [
                         'type' => 'roster',
                         'strict_schema' => $this->getRosterSchema(),
+                        'context_links' => $linksJson,
                     ]);
                     $fragmentHtml = $rosterClip->htmlFragment;
                     $usedAi = true;
@@ -244,11 +260,22 @@ class ExternalStatsSyncService
             $clipper = app(CzBasketballMatchesListClipper::class);
             $clips = $clipper->clip($html, $config->matches_list_url);
 
+            // JSON Linky pro kontext
+            $teamPageClipper = app(CzBasketballTeamPageClipper::class);
+            $linksJson = $teamPageClipper->buildExtractedLinksJson($clips);
+
             $run->updateMetadata([
                 'html_size' => strlen($html),
                 'clips_found' => count($clips),
                 'clip_ids' => collect($clips)->pluck('id')->toArray(),
+                'links_json_file' => "external/czbasketball/clips/{$config->external_team_id}/y" . ($season->year ?? 'unknown') . "/matches_list_links.json",
             ]);
+
+            // Uložit linky
+            $year = $season->year ?? 'unknown';
+            $basePath = "external/czbasketball/clips/{$config->external_team_id}/y{$year}";
+            \Illuminate\Support\Facades\Storage::disk('local')->makeDirectory($basePath);
+            \Illuminate\Support\Facades\Storage::disk('local')->put("{$basePath}/matches_list_links.json", $linksJson);
 
             $usedAi = false;
             $allRows = [];
@@ -263,6 +290,7 @@ class ExternalStatsSyncService
                     $data = $this->normalizer->normalize($clip->htmlFragment, [
                         'type' => 'matches_list',
                         'strict_schema' => $this->getMatchesListSchema(),
+                        'context_links' => $linksJson,
                     ]);
                     if ($data->metadata) {
                         $run->updateMetadata($data->metadata);
@@ -297,6 +325,7 @@ class ExternalStatsSyncService
                         $data = $this->normalizer->normalize($clip->htmlFragment, [
                             'type' => 'matches_list',
                             'strict_schema' => $this->getMatchesListSchema(),
+                            'context_links' => $linksJson,
                         ]);
                         if ($data->metadata) {
                             $run->updateMetadata($data->metadata);
