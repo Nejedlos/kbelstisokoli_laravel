@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('team_id')->constrained()->onDelete('cascade');
             $table->string('external_team_id');
             $table->string('base_team_url');
-            $table->json('metadata')->nullable();
+            $table->longText('metadata')->nullable();
             $table->timestamps();
 
             $table->unique(['source_key', 'team_id']);

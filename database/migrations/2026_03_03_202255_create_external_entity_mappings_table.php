@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('internal_id')->nullable();
             $table->string('identity_key');
             $table->float('confidence')->nullable();
-            $table->json('metadata')->nullable();
+            $table->longText('metadata')->nullable();
             $table->timestamp('first_seen_at')->nullable();
             $table->timestamp('last_seen_at')->nullable();
             $table->timestamps();

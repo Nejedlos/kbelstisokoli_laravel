@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('competition_label')->nullable();
             $table->boolean('is_enabled')->default(true);
             $table->timestamp('last_synced_at')->nullable();
-            $table->json('metadata')->nullable();
+            $table->longText('metadata')->nullable();
             $table->timestamps();
 
             $table->unique(['source_key', 'season_id', 'team_id'], 'ext_team_season_unique');

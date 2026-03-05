@@ -26,7 +26,7 @@ return new class extends Migration
             $table->integer('skipped_count')->nullable();
             $table->string('content_hash', 64)->nullable(); // sha256
             $table->text('error_summary')->nullable();
-            $table->json('metadata')->nullable();
+            $table->longText('metadata')->nullable();
             $table->foreignId('created_by_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
 

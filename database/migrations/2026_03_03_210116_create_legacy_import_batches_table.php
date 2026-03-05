@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('failed_files')->default(0);
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
-            $table->json('metadata')->nullable();
+            $table->longText('metadata')->nullable();
             $table->timestamps();
         });
     }

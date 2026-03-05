@@ -1,4 +1,5 @@
-### Production Rollout Report
+### Known Issues & Fixes
+- **SQL Error (json column):** Opravena nekompatibilita s MySQL serverem Webglobe (typ `json` nahrazen za `longText` s Eloquent castem).
 
 ```text
 QA Rollout Report - 2026-03-03 23:13:15
