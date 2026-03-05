@@ -97,7 +97,7 @@ class DebugOperations extends Page
                         ->label('AI mode')
                         ->helperText('Použije AI (OpenAI) pro synchronizaci místo DOM extraktoru.')
                         ->hidden(fn ($get) => ! $get('fresh')),
-                    \Filament\Forms\Components\Section::make('Rozsah synchronizace')
+                    \Filament\Schemas\Components\Section::make('Rozsah synchronizace')
                         ->schema([
                             \Filament\Forms\Components\Toggle::make('sync_roster')
                                 ->label('Synchronizovat soupisku')
