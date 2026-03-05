@@ -24,7 +24,7 @@ class MenuResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.content');
+        return __('admin.navigation.groups.content_and_media');
     }
 
     public static function getModelLabel(): string
@@ -39,7 +39,7 @@ class MenuResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 4;
+        return 60;
     }
 
     public static function form(Schema $schema): Schema

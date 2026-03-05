@@ -18,7 +18,7 @@ class PostResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.content');
+        return __('admin.navigation.groups.content_and_media');
     }
 
     public static function getNavigationIcon(): ?string
@@ -38,7 +38,7 @@ class PostResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 10;
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder

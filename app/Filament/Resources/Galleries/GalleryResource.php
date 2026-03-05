@@ -16,7 +16,7 @@ class GalleryResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.media');
+        return __('admin.navigation.groups.content_and_media');
     }
 
     public static function getModelLabel(): string
@@ -36,7 +36,7 @@ class GalleryResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 30;
     }
 
     public static function form(Schema $schema): Schema

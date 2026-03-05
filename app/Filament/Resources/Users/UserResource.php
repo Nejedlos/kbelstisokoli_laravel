@@ -25,7 +25,7 @@ class UserResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.user_management');
+        return __('admin.navigation.groups.users_and_people');
     }
 
     public static function getModelLabel(): string
@@ -40,7 +40,7 @@ class UserResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 10;
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder

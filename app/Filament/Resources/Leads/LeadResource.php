@@ -24,7 +24,12 @@ class LeadResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.communication');
+        return __('admin.navigation.groups.users_and_people');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 50;
     }
 
     public static function getModelLabel(): string

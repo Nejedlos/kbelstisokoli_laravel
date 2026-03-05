@@ -19,7 +19,7 @@ class PermissionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.user_management');
+        return __('admin.navigation.groups.users_and_people');
     }
 
     public static function getModelLabel(): string
@@ -34,7 +34,7 @@ class PermissionResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 4;
+        return 30;
     }
 
     public static function table(Table $table): Table

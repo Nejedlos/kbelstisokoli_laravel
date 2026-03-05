@@ -111,8 +111,12 @@ class SeasonDiscoveryService
         }
 
         $candidates = [];
-        // Hledání roku v názvu (např. 2024/2025 -> 2024)
-        if (preg_match('/(\d{4})/', $season->name, $matches)) {
+
+        // 1. Normalizujeme název sezóny pro spolehlivější parsování
+        $normalized = Season::normalizeName($season->name);
+
+        // 2. Hledání roku v názvu (např. 2024/2025 -> 2024)
+        if (preg_match('/(\d{4})/', $normalized, $matches)) {
             $year = (int) $matches[1];
             $candidates[] = $year;
 

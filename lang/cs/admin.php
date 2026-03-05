@@ -3,12 +3,11 @@
 return [
     'navigation' => [
         'groups' => [
-            'content' => 'Obsah',
-            'media' => 'Média',
+            'content_and_media' => 'Obsah a média',
             'sports_agenda' => 'Sportovní agenda',
-            'statistics' => 'Statistiky',
-            'communication' => 'Komunikace',
-            'user_management' => 'Správa uživatelů',
+            'statistics_and_data' => 'Statistiky a data',
+            'external_data' => 'Externí statistiky',
+            'users_and_people' => 'Lidé a uživatelé',
             'finance' => 'Finance',
             'admin_tools' => 'Admin nástroje',
         ],

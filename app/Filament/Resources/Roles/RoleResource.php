@@ -19,7 +19,7 @@ class RoleResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.user_management');
+        return __('admin.navigation.groups.users_and_people');
     }
 
     public static function getModelLabel(): string
@@ -34,7 +34,7 @@ class RoleResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 3;
+        return 20;
     }
 
     public static function table(Table $table): Table

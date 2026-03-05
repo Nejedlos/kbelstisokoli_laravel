@@ -3,12 +3,11 @@
 return [
     'navigation' => [
         'groups' => [
-            'content' => 'Content',
-            'media' => 'Media',
+            'content_and_media' => 'Content & Media',
             'sports_agenda' => 'Sports Agenda',
-            'statistics' => 'Statistics',
-            'communication' => 'Communication',
-            'user_management' => 'User Management',
+            'statistics_and_data' => 'Statistics & Data',
+            'external_data' => 'External Statistics',
+            'users_and_people' => 'Users & People',
             'finance' => 'Finance',
             'admin_tools' => 'Admin Tools',
         ],
