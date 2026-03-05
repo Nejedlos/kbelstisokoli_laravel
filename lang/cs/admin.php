@@ -72,6 +72,35 @@ return [
                 'label' => 'Soupeř',
                 'plural_label' => 'Soupeři',
             ],
+            'opponent_merge_suggestion' => [
+                'label' => 'Návrh na sloučení',
+                'plural_label' => 'Návrhy na sloučení soupeřů',
+                'actions' => [
+                    'scan' => 'Hledat duplicity',
+                    'hard_scan' => 'Tvrdý sken duplicit',
+                    'accept' => 'Přijmout',
+                    'reject' => 'Odmítnout',
+                ],
+                'notifications' => [
+                    'scan_finished' => 'Nalezeno :count nových návrhů na sloučení',
+                    'hard_scan_finished' => 'Nalezeno/obnoveno :count návrhů na sloučení',
+                    'merge_success' => 'Sloučení proběhlo úspěšně',
+                    'merge_error' => 'Chyba při slučování',
+                    'rejected' => 'Návrh byl odmítnut',
+                ],
+                'fields' => [
+                    'source_opponent' => 'Zdroj (ke smazání)',
+                    'target_opponent' => 'Cíl (k ponechání)',
+                    'similarity' => 'Podobnost',
+                    'status' => 'Stav',
+                    'new_name' => 'Výsledný název',
+                ],
+                'status' => [
+                    'pending' => 'Čeká',
+                    'accepted' => 'Přijato',
+                    'rejected' => 'Odmítnuto',
+                ],
+            ],
             'page' => [
                 'label' => 'Stránka',
                 'plural_label' => 'Stránky',

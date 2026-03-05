@@ -16,14 +16,9 @@ class OpponentSyncService
 
         $opponent = null;
 
-        // 1. Zkusíme hledat podle external_id v metadatech
+        // 1. Zkusíme hledat podle external_id v metadatech (LIKE pro kompatibilitu se staršími DB bez JSON funkcí)
         if ($externalId) {
-            $opponent = Opponent::where('metadata->external_id', (string) $externalId)->first();
-
-            if (! $opponent) {
-                // Zkusíme LIKE pro případ, že metadata nejsou jako JSON sloupec
-                $opponent = Opponent::where('metadata', 'LIKE', '%"external_id":"' . $externalId . '"%')->first();
-            }
+            $opponent = Opponent::where('metadata', 'LIKE', '%"external_id":"' . $externalId . '"%')->first();
         }
 
         // 2. Pokud nemáme external_id nebo jsme nenašli, hledáme podle jména

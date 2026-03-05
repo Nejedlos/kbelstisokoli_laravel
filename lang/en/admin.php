@@ -72,6 +72,35 @@ return [
                 'label' => 'Opponent',
                 'plural_label' => 'Opponents',
             ],
+            'opponent_merge_suggestion' => [
+                'label' => 'Merge Suggestion',
+                'plural_label' => 'Opponent Merge Suggestions',
+                'actions' => [
+                    'scan' => 'Scan for Duplicates',
+                    'hard_scan' => 'Hard Scan for Duplicates',
+                    'accept' => 'Accept',
+                    'reject' => 'Reject',
+                ],
+                'notifications' => [
+                    'scan_finished' => 'Found :count new merge suggestions',
+                    'hard_scan_finished' => 'Found/restored :count merge suggestions',
+                    'merge_success' => 'Merge completed successfully',
+                    'merge_error' => 'Error during merging',
+                    'rejected' => 'Suggestion was rejected',
+                ],
+                'fields' => [
+                    'source_opponent' => 'Source (to be deleted)',
+                    'target_opponent' => 'Target (to be kept)',
+                    'similarity' => 'Similarity',
+                    'status' => 'Status',
+                    'new_name' => 'Resulting Name',
+                ],
+                'status' => [
+                    'pending' => 'Pending',
+                    'accepted' => 'Accepted',
+                    'rejected' => 'Rejected',
+                ],
+            ],
             'page' => [
                 'label' => 'Page',
                 'plural_label' => 'Pages',

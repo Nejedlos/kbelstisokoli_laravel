@@ -78,6 +78,8 @@ class ExternalTeamSeasonConfigsTable
                     ->icon(new HtmlString('<i class="fa-light fa-bolt"></i>'))
                     ->color('warning')
                     ->requiresConfirmation()
+                    ->modalHeading('Vynucená synchronizace (FORCE)')
+                    ->modalDescription('Tato akce ignoruje hash obsahu a vynutí stažení a zpracování dat, i když se zdá, že se nezměnila. Chcete pokračovat?')
                     ->tooltip('Ignoruje hash obsahu a vynutí stažení dat.')
                     ->action(fn ($record, ExternalStatsSyncService $service) => self::runSync($record, $service, ['force' => true])),
                 Action::make('freshSync')
@@ -104,7 +106,17 @@ class ExternalTeamSeasonConfigsTable
                         ->icon(new HtmlString('<i class="fa-light fa-bolt"></i>'))
                         ->color('warning')
                         ->requiresConfirmation()
+                        ->modalHeading('Hromadná vynucená synchronizace (FORCE)')
+                        ->modalDescription('Tato akce u všech vybraných záznamů ignoruje hash obsahu a vynutí stažení a zpracování dat. Chcete pokračovat?')
                         ->action(fn (Collection $records, ExternalStatsSyncService $service) => self::runBulkSync($records, $service, ['force' => true])),
+                    BulkAction::make('freshSyncSelected')
+                        ->label('Fresh Sync vybrané')
+                        ->icon(new HtmlString('<i class="fa-light fa-trash-can-arrow-up"></i>'))
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hromadná vynucená synchronizace (FRESH)')
+                        ->modalDescription('Tato akce u všech vybraných záznamů smaže existující statistiky zápasů a znovu je importuje z externího zdroje. Chcete pokračovat?')
+                        ->action(fn (Collection $records, ExternalStatsSyncService $service) => self::runBulkSync($records, $service, ['force' => true, 'fresh' => true])),
                     DeleteBulkAction::make(),
                 ]),
             ]);

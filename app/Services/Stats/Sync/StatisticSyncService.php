@@ -27,6 +27,8 @@ class StatisticSyncService
         $teamId = $context['team_id'] ?? null;
         $seasonId = $context['season_id'] ?? null;
 
+        $contentHash = $context['source_metadata']['content_hash'] ?? null;
+
         $attributes = [
             'statistic_set_id' => $set->id,
             'basketball_match_id' => $matchId,
@@ -34,8 +36,6 @@ class StatisticSyncService
             'row_label' => $playerId ? null : $row->rowLabel,
             'season_id' => $seasonId,
             'team_id' => $teamId,
-            // Pro legacy import přidáme hash do klíče, aby byla zajištěna idempotence na úrovni řádku
-            'source_metadata->content_hash' => $context['source_metadata']['content_hash'] ?? null,
         ];
 
         $values = [
@@ -46,7 +46,14 @@ class StatisticSyncService
             ),
         ];
 
-        $statRow = StatisticRow::where($attributes)->first();
+        $query = StatisticRow::where($attributes);
+
+        if ($contentHash) {
+            // LIKE pro kompatibilitu se staršími DB bez JSON funkcí
+            $query->where('source_metadata', 'LIKE', '%"content_hash":"' . $contentHash . '"%');
+        }
+
+        $statRow = $query->first();
 
         if ($statRow) {
             $oldValues = $statRow->only(['values']);
