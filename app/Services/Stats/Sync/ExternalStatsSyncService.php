@@ -146,6 +146,12 @@ class ExternalStatsSyncService
 
             if ($usedAiFallback) {
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
+                if (isset($data->metadata['sanitized_length'])) {
+                    $run->updateMetadata([
+                        'sanitized_length' => $data->metadata['sanitized_length'],
+                        'prompt_length' => $data->metadata['prompt_length'] ?? null,
+                    ]);
+                }
             }
 
             $this->rosterSyncService->syncWithData($config, $data);
@@ -156,7 +162,8 @@ class ExternalStatsSyncService
             ]);
         } catch (\Exception $e) {
             if (isset($html)) {
-                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $html);
+                $sanitized = $this->normalizer->sanitizeHtml($html);
+                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
                 $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
             }
             $run->fail($e);
@@ -244,6 +251,12 @@ class ExternalStatsSyncService
 
                 if ($usedAiFallback) {
                     $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
+                    if (isset($data->metadata['sanitized_length'])) {
+                        $run->updateMetadata([
+                            'sanitized_length' => $data->metadata['sanitized_length'],
+                            'prompt_length' => $data->metadata['prompt_length'] ?? null,
+                        ]);
+                    }
                 }
 
                 \Log::info("Syncing matches for {$team->slug}, count: ".count($data->rows));
@@ -273,7 +286,8 @@ class ExternalStatsSyncService
 
         } catch (\Exception $e) {
             if (isset($html)) {
-                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $html);
+                $sanitized = $this->normalizer->sanitizeHtml($html);
+                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
                 $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
             }
             $run->fail($e);
@@ -442,6 +456,12 @@ class ExternalStatsSyncService
 
             if ($usedAiFallback) {
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
+                if (isset($data->metadata['sanitized_length'])) {
+                    $run->updateMetadata([
+                        'sanitized_length' => $data->metadata['sanitized_length'],
+                        'prompt_length' => $data->metadata['prompt_length'] ?? null,
+                    ]);
+                }
             }
 
             // Aktualizace skóre a stavu z detailu zápasu (pokud tam jsou)
@@ -480,7 +500,8 @@ class ExternalStatsSyncService
 
         } catch (\Exception $e) {
             if (isset($html)) {
-                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $html);
+                $sanitized = $this->normalizer->sanitizeHtml($html);
+                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
                 $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
             }
             $run->fail($e);

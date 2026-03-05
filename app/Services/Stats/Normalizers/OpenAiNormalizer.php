@@ -36,12 +36,17 @@ class OpenAiNormalizer implements StatNormalizerInterface
         $type = $mappingConfig['type'] ?? 'unknown_table';
         $canonicalKeys = $mappingConfig['canonical_keys'] ?? [];
 
+        $sanitizedContent = $this->sanitizeHtml($content);
+        $sanitizedLength = strlen($sanitizedContent);
+
         Log::info("OpenAI: Starting normalization for type '{$type}'", [
-            'content_length' => strlen($content),
+            'original_length' => strlen($content),
+            'sanitized_length' => $sanitizedLength,
             'model' => $this->model,
+            'preview' => substr($sanitizedContent, 0, 150) . '...',
         ]);
 
-        $prompt = $this->buildPrompt($this->sanitizeHtml($content), $type, $canonicalKeys);
+        $prompt = $this->buildPrompt($sanitizedContent, $type, $canonicalKeys);
         $startTime = microtime(true);
 
         try {
@@ -106,7 +111,10 @@ class OpenAiNormalizer implements StatNormalizerInterface
                 throw new Exception('Failed to parse JSON response from OpenAI.');
             }
 
-            return $this->mapToDTO($parsedData, $type);
+            return $this->mapToDTO($parsedData, $type, [
+                'prompt_length' => $promptLength,
+                'sanitized_length' => $sanitizedLength,
+            ]);
 
         } catch (Exception $e) {
             $duration = round(microtime(true) - $startTime, 2);
@@ -192,20 +200,33 @@ $html
 PROMPT;
     }
 
-    protected function sanitizeHtml(string $html): string
+    public function sanitizeHtml(string $html): string
     {
+        // Ponechat pouze obsah <body> pokud existuje
+        if (preg_match('/<body\b[^>]*>(.*?)<\/body>/is', $html, $matches)) {
+            $html = $matches[1];
+        }
+
         // Odebrat komentáře
         $html = preg_replace('/<!--(.|\s)*?-->/', '', $html);
+
         // Odebrat skripty a styly
         $html = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $html);
         $html = preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $html);
-        // Odebrat SVG (pokud jsou v tabulce, obvykle nejsou potřeba pro data)
+        // Odebrat SVG
         $html = preg_replace('/<svg\b[^>]*>(.*?)<\/svg>/is', '', $html);
+
+        // Odebrat nav, footer, header, head (pokud tam zbyly)
+        $html = preg_replace('/<(nav|footer|header|head)\b[^>]*>(.*?)<\/\1>/is', '', $html);
 
         // Odebrat nepotřebné atributy (ponecháme href pro player_id a taky colspan/rowspan pro tabulky)
         // Ponecháme: href, colspan, rowspan
-        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z]+)="[^"]*"/i', '', $html);
-        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z]+)=\'[^\']*\'/i', '', $html);
+        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z0-9]+)="[^"]*"/i', '', $html);
+        $html = preg_replace('/\s+(class|id|style|target|rel|data-[a-z0-9-]+|onclick|onerror|onmouseover|title|alt|aria-[a-z0-9]+)=\'[^\']*\'/i', '', $html);
+
+        // Agresivní odstranění všech tagů kromě strukturálních a odkazů
+        // Ponecháme: table, thead, tbody, tfoot, tr, td, th, a, h1, h2, h3, h4, span, div, b, strong
+        $html = strip_tags($html, '<table><thead><tbody><tfoot><tr><td><th><a><h1><h2><h3><h4><span><div><b><strong>');
 
         // Odebrat přebytečné mezery a konce řádků
         $html = preg_replace('/\s+/', ' ', $html);
@@ -213,7 +234,7 @@ PROMPT;
         return trim($html);
     }
 
-    protected function mapToDTO(array $data, string $type): NormalizedTableDTO
+    protected function mapToDTO(array $data, string $type, array $additionalMetadata = []): NormalizedTableDTO
     {
         if ($type === 'match_boxscore' && isset($data['tables'])) {
             // Special handling for multiple tables in boxscore
@@ -246,7 +267,7 @@ PROMPT;
                 'warnings' => $data['warnings'] ?? [],
                 'source' => 'openai',
                 'model' => $this->model,
-            ]);
+            ], $additionalMetadata);
 
             return $mainTable;
         }
@@ -268,11 +289,11 @@ PROMPT;
             name: $data['name'] ?? $type,
             columns: $data['columns'] ?? [],
             rows: $rows,
-            metadata: [
+            metadata: array_merge([
                 'warnings' => $data['warnings'] ?? [],
                 'source' => 'openai',
                 'model' => $this->model,
-            ]
+            ], $additionalMetadata)
         );
     }
 }

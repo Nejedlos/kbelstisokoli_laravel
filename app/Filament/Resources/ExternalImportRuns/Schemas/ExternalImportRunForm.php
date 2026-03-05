@@ -79,20 +79,22 @@ class ExternalImportRunForm
                             ->extraAttributes([
                                 'style' => 'font-family: "JetBrains Mono", "Courier New", monospace; font-size: 0.8rem; line-height: 1.2; background-color: #f9fafb;',
                             ])
-                            ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? "Velikost zdrojového HTML: " . number_format($record->metadata['html_size'] / 1024, 1) . " KB | Timeout: " . (config('services.openai.timeout') ?? 60) . "s" : null)
+                            ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? "Původní HTML: " . number_format($record->metadata['html_size'] / 1024, 1) . " KB | Sanitizováno: " . (isset($record->metadata['sanitized_length']) ? number_format($record->metadata['sanitized_length'] / 1024, 1) . " KB" : "N/A") . " | Timeout: " . (config('services.openai.timeout') ?? 60) . "s" : null)
                             ->hintAction(
                                 \Filament\Actions\ActionGroup::make([
                                     Action::make('copyError')
                                         ->label(new \Illuminate\Support\HtmlString('
-                                            <span x-show="!copied">Kopírovat kompletní chybu</span>
+                                            <span x-show="!copied">Kopírovat chybu</span>
                                             <span x-show="copied" x-cloak>Zkopírováno!</span>
                                         '))
                                         ->icon(new \Illuminate\Support\HtmlString('
                                             <span x-show="!copied">' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::COPY) . '</span>
                                             <span x-show="copied" class="text-success-500" x-cloak>' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::ACTIVATE) . '</span>
                                         '))
+                                        ->color('primary')
                                         ->extraAttributes([
                                             'x-data' => '{ copied: false }',
+                                            'class' => 'font-bold'
                                         ])
                                         ->url('#')
                                         ->alpineClickHandler("event.preventDefault(); window.navigator.clipboard.writeText(\$el.closest('.fi-fo-field').querySelector('textarea').value); copied = true; setTimeout(() => copied = false, 2000); \$tooltip('Zkopírováno do schránky', { timeout: 2000 })"),
@@ -100,7 +102,7 @@ class ExternalImportRunForm
                                     Action::make('downloadDebugHtml')
                                         ->label('Stáhnout zdrojové HTML')
                                         ->icon(new \Illuminate\Support\HtmlString(\App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::AUDIT_LOGS)))
-                                        ->color('gray')
+                                        ->color('info')
                                         ->action(function ($record) {
                                             if (isset($record->metadata['debug_html_file']) && \Illuminate\Support\Facades\Storage::disk('local')->exists($record->metadata['debug_html_file'])) {
                                                 return \Illuminate\Support\Facades\Storage::disk('local')->download($record->metadata['debug_html_file'], "import_run_{$record->id}.html");

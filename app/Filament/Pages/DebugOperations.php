@@ -469,4 +469,18 @@ class DebugOperations extends Page
         SyncMatchDetailJob::dispatch($match->id, ['force' => true]);
         Notification::make()->title('Force match sync dispatched pro zápas #'.$match->id)->success()->send();
     }
+
+    public function downloadDebugHtml(int $runId): mixed
+    {
+        $run = \App\Models\ExternalImportRun::find($runId);
+        if ($run && isset($run->metadata['debug_html_file'])) {
+            $path = $run->metadata['debug_html_file'];
+            if (\Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
+                return \Illuminate\Support\Facades\Storage::disk('local')->download($path, "run_{$runId}_debug.html");
+            }
+        }
+
+        Notification::make()->title('Soubor nenalezen')->danger()->send();
+        return null;
+    }
 }

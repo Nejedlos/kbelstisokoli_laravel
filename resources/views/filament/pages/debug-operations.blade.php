@@ -74,29 +74,50 @@
                             </div>
 
                             @if($team['last_error'])
-                                <div class="mt-4 p-2 bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-400 text-[10px] rounded border border-danger-100 dark:border-danger-900/30">
-                                    <div class="flex justify-between items-start mb-1">
-                                        <strong>Last Error (Run #{{ $team['last_error_id'] }}):</strong>
-                                        <a href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl('edit', ['record' => $team['last_error_id']]) }}" class="underline hover:text-danger-800">
-                                            Detail →
-                                        </a>
+                                <div class="mt-4 bg-danger-50 dark:bg-danger-900/10 text-danger-700 dark:text-danger-400 text-[10px] rounded-lg border border-danger-200 dark:border-danger-900/30 overflow-hidden shadow-sm">
+                                    {{-- Error Header --}}
+                                    <div class="flex flex-col sm:flex-row justify-between items-center px-3 py-2 bg-danger-100/50 dark:bg-danger-900/40 border-b border-danger-100 dark:border-danger-900/30 gap-2">
+                                        <div class="flex items-center gap-1.5 font-bold uppercase tracking-wide opacity-80">
+                                            <i class="fa-light fa-circle-exclamation text-danger-500"></i>
+                                            Last Error (Run #{{ $team['last_error_id'] }})
+                                        </div>
+                                        <div class="flex items-center gap-3 shrink-0">
+                                            @if(isset($team['last_error_metadata']['debug_html_file']))
+                                                <button
+                                                    wire:click="downloadDebugHtml({{ $team['last_error_id'] }})"
+                                                    class="flex items-center gap-1.5 px-2 py-1 bg-info-600 dark:bg-info-500 hover:bg-info-700 dark:hover:bg-info-400 text-white rounded-md shadow-sm transition-all font-bold uppercase tracking-wider text-[9px] active:scale-95"
+                                                    title="Stáhnout sanitizovaný HTML fragment, který AI zpracovávala"
+                                                >
+                                                    <i class="fa-light fa-file-code"></i> HTML
+                                                </button>
+                                            @endif
+                                            <button
+                                                x-on:click="window.navigator.clipboard.writeText($el.closest('.mt-4').querySelector('.font-mono').innerText.trim()); $tooltip('Zkopírováno do schránky', { timeout: 2000 })"
+                                                class="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-600 dark:bg-primary-500 hover:bg-primary-700 dark:hover:bg-primary-400 text-white rounded-md shadow-md transition-all font-bold uppercase tracking-wider text-[9px] active:scale-95 shadow-primary-500/20"
+                                                title="Zkopírovat kompletní chybovou hlášku"
+                                            >
+                                                <i class="fa-light fa-copy"></i> Copy Error
+                                            </button>
+                                            <a href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl('edit', ['record' => $team['last_error_id']]) }}" class="font-bold hover:underline flex items-center gap-1 text-danger-700 dark:text-danger-400 whitespace-nowrap px-1">
+                                                Detail <i class="fa-light fa-arrow-right-long"></i>
+                                            </a>
+                                        </div>
                                     </div>
-                                    @if(isset($team['last_error_metadata']['url']))
-                                        <div class="mb-2 break-all opacity-80">
-                                            <span class="font-bold">URL:</span> {{ $team['last_error_metadata']['url'] }}
+
+                                    {{-- Error Content --}}
+                                    <div class="p-3">
+                                        @if(isset($team['last_error_metadata']['url']))
+                                            <div class="mb-3 p-1.5 bg-white/50 dark:bg-black/20 rounded border border-danger-100/50 dark:border-danger-900/20 break-all flex items-start gap-2">
+                                                <span class="font-bold shrink-0 uppercase tracking-tighter opacity-60">URL:</span>
+                                                <span class="truncate-2-lines">{{ $team['last_error_metadata']['url'] }}</span>
+                                            </div>
+                                        @endif
+                                        <div class="relative">
+                                            <div class="max-h-[120px] overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed pr-2 scrollbar-thin scrollbar-thumb-danger-200 dark:scrollbar-thumb-danger-900 selection:bg-danger-500/20 selection:text-danger-900 dark:selection:text-danger-100">
+                                                {{ $team['last_error'] }}
+                                            </div>
+                                            <div class="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tl from-danger-50 dark:from-gray-900/10 pointer-events-none"></div>
                                         </div>
-                                    @endif
-                                    <div class="relative group">
-                                        <div class="max-h-[150px] overflow-y-auto whitespace-pre-wrap font-mono leading-tight pr-8">
-                                            {{ $team['last_error'] }}
-                                        </div>
-                                        <button
-                                            x-on:click="window.navigator.clipboard.writeText($el.parentElement.querySelector('div').innerText.trim()); $tooltip('Zkopírováno', { timeout: 2000 })"
-                                            class="absolute top-0 right-0 p-1 text-gray-400 hover:text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 dark:bg-gray-800/80 rounded"
-                                            title="Kopírovat chybu"
-                                        >
-                                            <i class="fa-light fa-copy"></i>
-                                        </button>
                                     </div>
                                 </div>
                             @endif
