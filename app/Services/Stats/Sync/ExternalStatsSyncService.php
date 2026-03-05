@@ -52,12 +52,15 @@ class ExternalStatsSyncService
         ConsoleService::log("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : ''), 'info');
         Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : ''));
 
+        $errors = [];
+
         // 1. Synchronizace soupisky
         try {
             ConsoleService::log("- Synchronizace soupisky...");
             $this->syncRoster($team, $season, $config, $options);
             ConsoleService::log("  Soupiska OK.", 'success');
         } catch (\Exception $e) {
+            $errors[] = 'Soupiska: '.$e->getMessage();
             ConsoleService::log("  Chyba při synchronizaci soupisky: ".$e->getMessage(), 'error');
             Log::error('Chyba při synchronizaci soupisky: '.$e->getMessage());
         }
@@ -68,8 +71,15 @@ class ExternalStatsSyncService
             $this->syncMatchesList($team, $season, $config, $options);
             ConsoleService::log("  Seznam zápasů OK.", 'success');
         } catch (\Exception $e) {
+            $errors[] = 'Zápasy: '.$e->getMessage();
             ConsoleService::log("  Chyba při synchronizaci seznamu zápasů: ".$e->getMessage(), 'error');
             Log::error('Chyba při synchronizaci seznamu zápasů: '.$e->getMessage());
+        }
+
+        $config->update(['last_synced_at' => now()]);
+
+        if (! empty($errors)) {
+            throw new \Exception('Synchronizace dokončena s chybami: '.implode('; ', $errors));
         }
     }
 

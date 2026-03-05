@@ -95,6 +95,19 @@ Tento dokument slouží jako detailní technická specifikace pro implementaci s
 - `last_run_at`: DateTime (poslední pokus o import).
 - `last_status`: String (`success`, `error`).
 
+#### Tabulka: `external_team_season_configs` (Model: `App\Models\ExternalTeamSeasonConfig`)
+*Konfigurace synchronizace konkrétního týmu pro danou sezónu.*
+- `id`: Primary Key.
+- `source_key`: Identifikátor zdroje (např. `czbasketball`).
+- `team_id`: Foreign Key (`teams`).
+- `season_id`: Foreign Key (`seasons`).
+- `external_team_id`: ID týmu v externím systému.
+- `external_season_year`: Rok sezóny pro externí systém.
+- `team_season_url`: URL profilu týmu (soupisky) na sezónu.
+- `matches_list_url`: URL seznamu zápasů na sezónu.
+- `is_enabled`: Boolean (povolení synchronizace).
+- `last_synced_at`: DateTime (poslední pokus o synchronizaci).
+
 #### Tabulka: `external_team_mappings` (Model: `App\Models\ExternalTeamMapping`)
 *Propojení interních týmů s externími identitami ve zdrojích.*
 - `id`: Primary Key.
