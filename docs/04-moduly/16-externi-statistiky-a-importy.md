@@ -160,9 +160,10 @@ Systém je navržen pro automatizované stahování a normalizaci dat pomocí AI
 2. **Párování zápasů**: Přes `metadata->external_id` v tabulce `matches`.
 3. **Párování týmů**: Přes `slug` nebo externí ID v metadatech.
 4. **AI Transformace**: StatNormalizer odesílá fragment HTML do LLM s promptem definovaným v `mapping_config` pro získání čistého JSONu.
-5. **Vynucená synchronizace (Force/Fresh)**:
+5. **Možnosti synchronizace (Force/Fresh/AI)**:
     - **Force mode**: Ignoruje kontrolu hashů obsahu a vždy provede stažení a zpracování dat. Vhodné při změně extraktoru nebo opravě chyb v normalizaci.
     - **Fresh mode**: Nejenže vynutí synchronizaci, ale před importem nových statistik (boxscoru) smaže všechna stávající data pro daný zápas v databázi. Tím se zajistí, že v DB nezůstane nic "starého", co už v externím zdroji není.
+    - **AI mode**: Prioritně používá `OpenAiNormalizer` pro extrakci dat přímo z HTML místo standardních DOM extraktorů. Toto je nejpřesnější způsob synchronizace, pokud se změní struktura webu, ale spotřebovává API tokeny. AI mode je v administraci dostupný jako volba "AI Fresh".
 
 ---
 
@@ -170,10 +171,11 @@ Systém je navržen pro automatizované stahování a normalizaci dat pomocí AI
 
 Pro ruční spouštění synchronizace jsou k dispozici tyto příkazy:
 
-- `php artisan stats:sync-team-season {teamSlug} {seasonName} [--force] [--fresh] [--sync]`: Synchronizuje celou sezónu týmu.
-- `php artisan stats:sync-match {matchExternalId} {seasonName} {teamSlug} [--force] [--fresh] [--sync]`: Synchronizuje detail konkrétního zápasu.
+- `php artisan stats:sync-team-season {teamSlug} {seasonName} [--force] [--fresh] [--ai] [--sync]`: Synchronizuje celou sezónu týmu.
+- `php artisan stats:sync-match {matchExternalId} {seasonName} {teamSlug} [--force] [--fresh] [--ai] [--sync]`: Synchronizuje detail konkrétního zápasu.
 
 Příznaky:
 - `--force`: Ignoruje hash a vynutí stažení.
 - `--fresh`: Smaže stávající data (statistiky) před importem.
+- `--ai`: Použije AI normalizér místo DOM extraktoru.
 - `--sync`: Spustí okamžitě v popředí (místo zařazení do fronty).

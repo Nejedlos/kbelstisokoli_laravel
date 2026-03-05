@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\BasketballMatches\Tables;
 
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -93,9 +95,25 @@ class BasketballMatchesTable
             ->recordActions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    BulkAction::make('ai_sync')
+                        ->label('AI Synchronizace detailů')
+                        ->icon('heroicon-m-sparkles')
+                        ->color('info')
+                        ->action(function (\Illuminate\Support\Collection $records) {
+                            $records->each(function ($record) {
+                                \App\Jobs\Stats\SyncMatchDetailJob::dispatch($record->id, [
+                                    'force' => true,
+                                    'fresh' => true,
+                                    'ai' => true,
+                                ]);
+                            });
+                            Notification::make()->title('AI synchronizace detailů zápasů byla naplánována.')->success()->send();
+                        })
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

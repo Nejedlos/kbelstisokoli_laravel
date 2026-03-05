@@ -8,12 +8,12 @@ use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
-use App\Services\Support\ConsoleService;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Contracts\StatNormalizerInterface;
 use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
+use App\Services\Support\ConsoleService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -49,31 +49,35 @@ class ExternalStatsSyncService
         $team = Team::findOrFail($teamId);
         $season = Season::findOrFail($seasonId);
 
-        ConsoleService::log("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : ''), 'info');
-        Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : ''));
+        ConsoleService::log("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : '').(($options['ai'] ?? false) ? ' (AI mode)' : ''), 'info');
+        Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}");
 
         $errors = [];
 
         // 1. Synchronizace soupisky
-        try {
-            ConsoleService::log("- Synchronizace soupisky...");
-            $this->syncRoster($team, $season, $config, $options);
-            ConsoleService::log("  Soupiska OK.", 'success');
-        } catch (\Exception $e) {
-            $errors[] = 'Soupiska: '.$e->getMessage();
-            ConsoleService::log("  Chyba při synchronizaci soupisky: ".$e->getMessage(), 'error');
-            Log::error('Chyba při synchronizaci soupisky: '.$e->getMessage());
+        if ($options['sync_roster'] ?? true) {
+            try {
+                ConsoleService::log('- Synchronizace soupisky...');
+                $this->syncRoster($team, $season, $config, $options);
+                ConsoleService::log('  Soupiska OK.', 'success');
+            } catch (\Exception $e) {
+                $errors[] = 'Soupiska: '.$e->getMessage();
+                ConsoleService::log('  Chyba při synchronizaci soupisky: '.$e->getMessage(), 'error');
+                Log::error('Chyba při synchronizaci soupisky: '.$e->getMessage());
+            }
         }
 
-            // 2. Synchronizace seznamu zápasů
+        // 2. Synchronizace seznamu zápasů
+        if ($options['sync_matches'] ?? true) {
             try {
-                ConsoleService::log("- Synchronizace seznamu zápasů...");
-                $count = $this->syncMatchesList($team, $season, $config, $options);
-                ConsoleService::log("  Seznam zápasů OK (zpracováno $count zápasů).", 'success');
+                ConsoleService::log('- Synchronizace seznamu zápasů...');
+                $this->syncMatchesList($team, $season, $config, $options);
+                ConsoleService::log('  Seznam zápasů OK.', 'success');
             } catch (\Exception $e) {
-            $errors[] = 'Zápasy: '.$e->getMessage();
-            ConsoleService::log("  Chyba při synchronizaci seznamu zápasů: ".$e->getMessage(), 'error');
-            Log::error('Chyba při synchronizaci seznamu zápasů: '.$e->getMessage());
+                $errors[] = 'Zápasy: '.$e->getMessage();
+                ConsoleService::log('  Chyba při synchronizaci seznamu zápasů: '.$e->getMessage(), 'error');
+                Log::error('Chyba při synchronizaci seznamu zápasů: '.$e->getMessage());
+            }
         }
 
         $config->update(['last_synced_at' => now()]);
@@ -101,15 +105,23 @@ class ExternalStatsSyncService
             $extractor = app(TeamRosterExtractor::class);
 
             $usedAiFallback = false;
-            try {
-                $result = $extractor->extract($html);
-                $data = $result['data'];
-                $fragmentHtml = $result['fragment_html'];
-            } catch (\Exception $e) {
-                Log::warning("DOM extractor selhal pro soupisku týmu {$team->slug}, zkouším AI fallback. Chyba: ".$e->getMessage());
+            if ($options['ai'] ?? false) {
                 $data = $this->normalizer->normalize($html, ['type' => 'roster']);
                 $fragmentHtml = $html;
                 $usedAiFallback = true;
+                $result = ['data' => $data, 'fragment_html' => $fragmentHtml];
+            } else {
+                try {
+                    $result = $extractor->extract($html);
+                    $data = $result['data'];
+                    $fragmentHtml = $result['fragment_html'];
+                } catch (\Exception $e) {
+                    Log::warning("DOM extractor selhal pro soupisku týmu {$team->slug}, zkouším AI fallback. Chyba: ".$e->getMessage());
+                    $data = $this->normalizer->normalize($html, ['type' => 'roster']);
+                    $fragmentHtml = $html;
+                    $usedAiFallback = true;
+                    $result = ['data' => $data, 'fragment_html' => $fragmentHtml];
+                }
             }
 
             $hash = hash('sha256', $fragmentHtml);
@@ -157,17 +169,25 @@ class ExternalStatsSyncService
             $extractor = app(MatchesListExtractor::class);
 
             $usedAiFallback = false;
-            try {
-                \Log::info("Extracting matches for {$team->slug}");
-                $result = $extractor->extract($html);
-                $data = $result['data'];
-                $fragmentHtml = $result['fragment_html'];
-                \Log::info('Extracted '.count($data->rows)." matches for {$team->slug}");
-                ConsoleService::log("  Extrahováno ".count($data->rows)." zápasů ze seznamu.", 'info');
-            } catch (\Exception $e) {
+            if ($options['ai'] ?? false) {
                 $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
                 $fragmentHtml = $html;
                 $usedAiFallback = true;
+                $result = ['data' => $data, 'fragment_html' => $fragmentHtml];
+            } else {
+                try {
+                    \Log::info("Extracting matches for {$team->slug}");
+                    $result = $extractor->extract($html);
+                    $data = $result['data'];
+                    $fragmentHtml = $result['fragment_html'];
+                    \Log::info('Extracted '.count($data->rows)." matches for {$team->slug}");
+                    ConsoleService::log('  Extrahováno '.count($data->rows).' zápasů ze seznamu.', 'info');
+                } catch (\Exception $e) {
+                    $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
+                    $fragmentHtml = $html;
+                    $usedAiFallback = true;
+                    $result = ['data' => $data, 'fragment_html' => $fragmentHtml];
+                }
             }
 
             $hash = hash('sha256', $fragmentHtml);
@@ -200,7 +220,9 @@ class ExternalStatsSyncService
             }
 
             // Naplánování detailů zápasů
-            $this->dispatchMatchDetailJobs($team, $season, $options);
+            if ($options['sync_details'] ?? true) {
+                $this->dispatchMatchDetailJobs($team, $season, $options);
+            }
 
         } catch (\Exception $e) {
             $run->fail($e);
@@ -289,15 +311,49 @@ class ExternalStatsSyncService
             $extractor = app(MatchDetailBoxscoreExtractor::class);
 
             $usedAiFallback = false;
-            try {
-                $result = $extractor->extract($html);
-                $data = $result['data'];
-                $fragmentHtml = $result['fragment_html'];
-            } catch (\Exception $e) {
-                Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: ".$e->getMessage());
+            if ($options['ai'] ?? false) {
                 $data = $this->normalizer->normalize($html, ['type' => 'match_boxscore']);
                 $fragmentHtml = $html;
                 $usedAiFallback = true;
+                $result = [
+                    'data' => $data,
+                    'fragment_html' => $fragmentHtml,
+                    'tables' => $data->metadata['all_tables_dto'] ?? [$data],
+                ];
+
+                // Pokud máme v metadatech all_tables (v polích), musíme je převést zpět na DTO pro cyklus níže
+                if (isset($data->metadata['all_tables'])) {
+                    $result['tables'] = [];
+                    foreach ($data->metadata['all_tables'] as $tableData) {
+                        $rows = [];
+                        foreach ($tableData['rows'] ?? [] as $row) {
+                            $rows[] = new \App\Services\Stats\DTO\NormalizedRowDTO(
+                                values: $row['values'] ?? [],
+                                playerId: null,
+                                rowLabel: $row['rowLabel'] ?? null,
+                                metadata: $row['metadata'] ?? []
+                            );
+                        }
+                        $result['tables'][] = new \App\Services\Stats\DTO\NormalizedTableDTO(
+                            name: $tableData['name'] ?? 'Boxscore',
+                            columns: $tableData['columns'] ?? [],
+                            rows: $rows,
+                            metadata: $tableData['metadata'] ?? []
+                        );
+                    }
+                }
+            } else {
+                try {
+                    $result = $extractor->extract($html);
+                    $data = $result['data'];
+                    $fragmentHtml = $result['fragment_html'];
+                } catch (\Exception $e) {
+                    Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: ".$e->getMessage());
+                    $data = $this->normalizer->normalize($html, ['type' => 'match_boxscore']);
+                    $fragmentHtml = $html;
+                    $usedAiFallback = true;
+                    $result = ['data' => $data, 'fragment_html' => $fragmentHtml, 'tables' => [$data]];
+                }
             }
 
             $hash = hash('sha256', $fragmentHtml);

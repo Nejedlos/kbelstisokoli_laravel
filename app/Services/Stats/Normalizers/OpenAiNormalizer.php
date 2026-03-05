@@ -87,15 +87,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
     {
         $keysList = implode(', ', array_keys($canonicalKeys));
 
-        return <<<PROMPT
-Parse the following HTML fragment into a structured JSON object.
-Table type: $type
-Target canonical keys (and their meanings): $keysList
-
-Rules:
-1. Output MUST be a valid JSON object.
-2. Structure:
-   {
+        $structure = '{
      "name": "Descriptive name of the table",
      "columns": [{"key": "canonical_key", "label": "Original Label"}],
      "rows": [
@@ -107,11 +99,47 @@ Rules:
        }
      ],
      "warnings": ["List of any parsing issues or missing values"]
-   }
+   }';
+
+        if ($type === 'match_boxscore') {
+            $structure = '{
+     "header": {
+       "home_team": "Name of home team",
+       "away_team": "Name of away team",
+       "score": "Final score in format HH:AA",
+       "date": "Date and time of match"
+     },
+     "tables": [
+       {
+         "name": "Team name (e.g. Sokol Kbely)",
+         "columns": [{"key": "canonical_key", "label": "Original Label"}],
+         "rows": [
+           {
+             "player_external_id": "ID from link /hrac/{id} or null",
+             "player_name": "Full name",
+             "values": {"canonical_key": value, ...}
+           }
+         ]
+       }
+     ],
+     "warnings": ["List of any parsing issues"]
+   }';
+        }
+
+        return <<<PROMPT
+Parse the following HTML fragment into a structured JSON object.
+Table type: $type
+Target canonical keys (and their meanings): $keysList
+
+Rules:
+1. Output MUST be a valid JSON object.
+2. Structure:
+$structure
 3. Mapping: Use only the provided canonical keys for the "values" object.
 4. No Hallucinations: If a value is missing in HTML, set it to null and add a warning.
 5. Numeric values: Ensure numbers are returned as integers/floats where appropriate.
 6. Player IDs: Extract the numeric ID from any href containing "/hrac/{id}".
+7. If multiple tables are present (like Home and Away boxscores), return them in the "tables" array.
 
 HTML Fragment:
 $html
@@ -120,6 +148,42 @@ PROMPT;
 
     protected function mapToDTO(array $data, string $type): NormalizedTableDTO
     {
+        if ($type === 'match_boxscore' && isset($data['tables'])) {
+            // Special handling for multiple tables in boxscore
+            $allTables = [];
+            foreach ($data['tables'] as $table) {
+                $rows = [];
+                foreach ($table['rows'] ?? [] as $row) {
+                    $rows[] = new NormalizedRowDTO(
+                        values: $row['values'] ?? [],
+                        playerId: null,
+                        rowLabel: $row['player_name'] ?? $row['row_label'] ?? null,
+                        metadata: [
+                            'external_player_id' => $row['player_external_id'] ?? null,
+                            'ai_normalized' => true,
+                        ]
+                    );
+                }
+                $allTables[] = new NormalizedTableDTO(
+                    name: $table['name'] ?? $type,
+                    columns: $table['columns'] ?? [],
+                    rows: $rows,
+                    metadata: ['ai_normalized' => true]
+                );
+            }
+
+            $mainTable = $allTables[0] ?? new NormalizedTableDTO($type, [], [], ['warnings' => ['No tables found by AI']]);
+            $mainTable->metadata = array_merge($mainTable->metadata, [
+                'header' => $data['header'] ?? [],
+                'all_tables' => array_map(fn ($t) => $t->toArray(), $allTables),
+                'warnings' => $data['warnings'] ?? [],
+                'source' => 'openai',
+                'model' => $this->model,
+            ]);
+
+            return $mainTable;
+        }
+
         $rows = [];
         foreach ($data['rows'] ?? [] as $row) {
             $rows[] = new NormalizedRowDTO(

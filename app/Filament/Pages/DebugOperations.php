@@ -93,6 +93,23 @@ class DebugOperations extends Page
                         ->label('Fresh mode')
                         ->helperText('Smaže stávající statistiky a znovu je importuje (nebezpečné!).')
                         ->hidden(fn ($get) => ! $get('force')),
+                    \Filament\Forms\Components\Toggle::make('ai')
+                        ->label('AI mode')
+                        ->helperText('Použije AI (OpenAI) pro synchronizaci místo DOM extraktoru.')
+                        ->hidden(fn ($get) => ! $get('fresh')),
+                    \Filament\Forms\Components\Section::make('Rozsah synchronizace')
+                        ->schema([
+                            \Filament\Forms\Components\Toggle::make('sync_roster')
+                                ->label('Synchronizovat soupisku')
+                                ->default(true),
+                            \Filament\Forms\Components\Toggle::make('sync_matches')
+                                ->label('Synchronizovat zápasy (seznam)')
+                                ->default(true),
+                            \Filament\Forms\Components\Toggle::make('sync_details')
+                                ->label('Synchronizovat detaily (statistiky)')
+                                ->default(true)
+                                ->hidden(fn ($get) => ! $get('sync_matches')),
+                        ])->columns(3),
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data) {
@@ -104,7 +121,9 @@ class DebugOperations extends Page
                     }
 
                     $mode = '';
-                    if ($data['fresh'] ?? false) {
+                    if ($data['ai'] ?? false) {
+                        $mode = ' (AI FRESH)';
+                    } elseif ($data['fresh'] ?? false) {
                         $mode = ' (FRESH)';
                     } elseif ($data['force'] ?? false) {
                         $mode = ' (FORCE)';
@@ -120,6 +139,10 @@ class DebugOperations extends Page
                             SyncTeamSeasonJob::dispatch($team->id, $activeSeason->id, [
                                 'force' => $data['force'] ?? false,
                                 'fresh' => $data['fresh'] ?? false,
+                                'ai' => $data['ai'] ?? false,
+                                'sync_roster' => $data['sync_roster'] ?? true,
+                                'sync_matches' => $data['sync_matches'] ?? true,
+                                'sync_details' => $data['sync_details'] ?? true,
                             ]);
                         }
                     }
@@ -183,7 +206,7 @@ class DebugOperations extends Page
                     $activeSeason = Season::where('is_active', true)->first();
                     $teams = config('external_sources.czbasketball.teams', []);
 
-                    ConsoleService::log("Spouštím přepočet statistik pro sezónu: ".($activeSeason?->name ?? 'N/A'));
+                    ConsoleService::log('Spouštím přepočet statistik pro sezónu: '.($activeSeason?->name ?? 'N/A'));
 
                     foreach ($teams as $teamSlug) {
                         $team = Team::where('slug', $teamSlug)->first();
@@ -225,7 +248,7 @@ class DebugOperations extends Page
 
         // Scheduler
         $lastHeartbeat = Cache::get('scheduler_heartbeat');
-        if (!$lastHeartbeat) {
+        if (! $lastHeartbeat) {
             $lastHeartbeat = Cache::store('file')->get('scheduler_heartbeat');
         }
 
@@ -401,6 +424,11 @@ class DebugOperations extends Page
         $this->executeTeamSync($teamId, ['force' => true, 'fresh' => true]);
     }
 
+    public function runTeamSyncAiFresh(int $teamId): void
+    {
+        $this->executeTeamSync($teamId, ['force' => true, 'fresh' => true, 'ai' => true]);
+    }
+
     protected function executeTeamSync(int $teamId, array $options = []): void
     {
         $activeSeason = Season::where('is_active', true)->first();
@@ -412,7 +440,9 @@ class DebugOperations extends Page
 
         $team = Team::find($teamId);
         $mode = '';
-        if ($options['fresh'] ?? false) {
+        if ($options['ai'] ?? false) {
+            $mode = ' (AI FRESH)';
+        } elseif ($options['fresh'] ?? false) {
             $mode = ' (FRESH)';
         } elseif ($options['force'] ?? false) {
             $mode = ' (FORCE)';
@@ -426,14 +456,15 @@ class DebugOperations extends Page
 
     public function forceMatchSync(string $externalMatchId): void
     {
-        $activeSeason = Season::where('is_active', true)->first();
-        $team = Team::whereIn('slug', config('external_sources.czbasketball.teams'))->first(); // Fallback to first configured team
+        $match = BasketballMatch::where('metadata', 'LIKE', '%"external_id":"'.$externalMatchId.'"%')->first();
 
-        if (! $activeSeason || ! $team) {
+        if (! $match) {
+            Notification::make()->title('Zápas s externím ID '.$externalMatchId.' nebyl nalezen.')->danger()->send();
+
             return;
         }
 
-        SyncMatchDetailJob::dispatch($team->id, $activeSeason->id, $externalMatchId, ['force' => true]);
-        Notification::make()->title('Force match sync dispatched')->success()->send();
+        SyncMatchDetailJob::dispatch($match->id, ['force' => true]);
+        Notification::make()->title('Force match sync dispatched pro zápas #'.$match->id)->success()->send();
     }
 }

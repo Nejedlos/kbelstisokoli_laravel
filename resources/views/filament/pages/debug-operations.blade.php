@@ -51,6 +51,9 @@
                                     <x-filament::button size="xs" color="danger" wire:click="runTeamSyncFresh({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Fresh Sync (přepsat data!)">
                                         Fresh
                                     </x-filament::button>
+                                    <x-filament::button size="xs" color="info" wire:click="runTeamSyncAiFresh({{ $team['team_id'] }})" wire:loading.attr="disabled" title="AI Fresh Sync (přepsat data pomocí AI!)">
+                                        AI Fresh
+                                    </x-filament::button>
                                 </div>
                             </div>
 
