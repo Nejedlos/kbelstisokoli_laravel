@@ -63,6 +63,7 @@ class CzBasketballFetcher implements StatFetcherInterface
                 }, true) // true pro exponenciální backoff
                 ->withOptions([
                     'allow_redirects' => true,
+                    'verify' => false,
                 ])
                 ->get($url);
 

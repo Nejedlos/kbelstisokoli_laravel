@@ -16,6 +16,7 @@ class ClubEventsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('starts_at', 'desc')
             ->columns([
                 TextColumn::make('title')
                     ->label('Název')

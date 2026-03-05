@@ -59,7 +59,7 @@ class TeamStatsService
             })->sortByDesc('ppg')->take($limit)->values();
         }
 
-        // Pokud nemáme summaries, agregujeme z boxscoru
+        // Pokud nemáme summaries, agregujeme z boxscoru v PHP (DB JSON_EXTRACT není všude dostupný)
         return StatisticRow::with('player')
             ->where('team_id', $teamId)
             ->where('season_id', $seasonId)
@@ -68,18 +68,20 @@ class TeamStatsService
             ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::MATCH_BOXSCORE_SET);
             })
-            ->select('player_id', DB::raw('SUM(JSON_EXTRACT(`values`, "$.pts")) as pts_total'), DB::raw('COUNT(*) as gp'))
-            ->groupBy('player_id')
             ->get()
-            ->map(function ($row) {
-                $pts = (int) $row->pts_total;
-                $gp = (int) $row->gp;
+            ->groupBy('player_id')
+            ->map(function ($playerRows, $playerId) {
+                $ptsTotal = $playerRows->sum(function ($row) {
+                    return (int) ($row->values['pts'] ?? 0);
+                });
+                $gp = $playerRows->count();
+                $player = $playerRows->first()?->player;
 
                 return [
-                    'player_id' => $row->player_id,
-                    'name' => $row->player?->name ?? 'Neznámý hráč',
-                    'pts_total' => $pts,
-                    'ppg' => $gp > 0 ? round($pts / $gp, 1) : 0,
+                    'player_id' => $playerId,
+                    'name' => $player?->name ?? 'Neznámý hráč',
+                    'pts_total' => $ptsTotal,
+                    'ppg' => $gp > 0 ? round($ptsTotal / $gp, 1) : 0,
                     'gp' => $gp,
                 ];
             })->sortByDesc('ppg')->take($limit)->values();

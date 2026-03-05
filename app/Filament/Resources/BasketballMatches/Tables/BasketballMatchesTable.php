@@ -15,6 +15,7 @@ class BasketballMatchesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('scheduled_at', 'desc')
             ->striped()
             ->columns([
                 TextColumn::make('scheduled_at')

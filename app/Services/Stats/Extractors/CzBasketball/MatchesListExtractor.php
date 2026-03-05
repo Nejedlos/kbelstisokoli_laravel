@@ -92,7 +92,19 @@ class MatchesListExtractor implements StatExtractorInterface
             }
 
             // Skóre (čtvrtá buňka)
-            $score = trim($cells->eq(3)->text());
+            $scoreCell = $cells->eq(3);
+            $scoreDivs = $scoreCell->filter('div');
+
+            if ($scoreDivs->count() >= 2) {
+                $score = trim($scoreDivs->eq(0)->text()).':'.trim($scoreDivs->eq(1)->text());
+            } else {
+                $score = trim($scoreCell->text());
+                // Pokud obsahuje mezeru nebo pomlčku a neobsahuje dvojtečku, zkusíme ji nahradit
+                if (! str_contains($score, ':') && preg_match('/(\d+)\s*[\s\-]\s*(\d+)/', $score, $scoreMatches)) {
+                    $score = $scoreMatches[1].':'.$scoreMatches[2];
+                }
+            }
+
             $status = 'planned';
             if ($score && preg_match('/\d+\s*:\s*\d+/', $score)) {
                 $status = 'completed';

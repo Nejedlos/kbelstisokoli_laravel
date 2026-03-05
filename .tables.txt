@@ -1,0 +1,408 @@
+Array
+(
+    [0] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => ai_chunks
+        )
+
+    [1] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => ai_documents
+        )
+
+    [2] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => ai_request_logs
+        )
+
+    [3] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => ai_settings
+        )
+
+    [4] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => announcements
+        )
+
+    [5] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => attendances
+        )
+
+    [6] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => audit_logs
+        )
+
+    [7] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => basketball_match_team
+        )
+
+    [8] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => cache
+        )
+
+    [9] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => cache_locks
+        )
+
+    [10] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => charge_payment_allocations
+        )
+
+    [11] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => club_competition_entries
+        )
+
+    [12] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => club_competition_entry_team
+        )
+
+    [13] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => club_competitions
+        )
+
+    [14] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => club_event_team
+        )
+
+    [15] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => club_events
+        )
+
+    [16] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => coach_team
+        )
+
+    [17] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => cron_logs
+        )
+
+    [18] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => cron_tasks
+        )
+
+    [19] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => external_entity_mappings
+        )
+
+    [20] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => external_import_logs
+        )
+
+    [21] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => external_import_runs
+        )
+
+    [22] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => external_stat_sources
+        )
+
+    [23] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => external_team_mappings
+        )
+
+    [24] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => external_team_season_configs
+        )
+
+    [25] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => failed_jobs
+        )
+
+    [26] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => finance_charges
+        )
+
+    [27] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => finance_payments
+        )
+
+    [28] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => financial_tariffs
+        )
+
+    [29] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => fine_templates
+        )
+
+    [30] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => galleries
+        )
+
+    [31] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => gallery_media
+        )
+
+    [32] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => job_batches
+        )
+
+    [33] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => jobs
+        )
+
+    [34] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => leads
+        )
+
+    [35] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => legacy_import_batches
+        )
+
+    [36] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => legacy_import_files
+        )
+
+    [37] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => matches
+        )
+
+    [38] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => media
+        )
+
+    [39] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => media_assets
+        )
+
+    [40] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => menu_items
+        )
+
+    [41] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => menus
+        )
+
+    [42] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => migrations
+        )
+
+    [43] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => model_has_permissions
+        )
+
+    [44] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => model_has_roles
+        )
+
+    [45] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => not_found_logs
+        )
+
+    [46] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => notifications
+        )
+
+    [47] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => opponents
+        )
+
+    [48] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => page_blocks
+        )
+
+    [49] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => pages
+        )
+
+    [50] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => password_reset_tokens
+        )
+
+    [51] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => performance_test_results
+        )
+
+    [52] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => permissions
+        )
+
+    [53] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => personal_access_tokens
+        )
+
+    [54] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => photo_pool_media_asset
+        )
+
+    [55] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => photo_pool_team
+        )
+
+    [56] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => photo_pools
+        )
+
+    [57] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => player_profile_team
+        )
+
+    [58] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => player_profiles
+        )
+
+    [59] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => post_categories
+        )
+
+    [60] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => posts
+        )
+
+    [61] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => redirects
+        )
+
+    [62] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => role_has_permissions
+        )
+
+    [63] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => roles
+        )
+
+    [64] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => seasons
+        )
+
+    [65] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => seo_metadatas
+        )
+
+    [66] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => sessions
+        )
+
+    [67] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => settings
+        )
+
+    [68] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => statistic_row_team
+        )
+
+    [69] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => statistic_rows
+        )
+
+    [70] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => statistic_sets
+        )
+
+    [71] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => team_training
+        )
+
+    [72] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => teams
+        )
+
+    [73] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => telescope_entries
+        )
+
+    [74] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => telescope_entries_tags
+        )
+
+    [75] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => telescope_monitoring
+        )
+
+    [76] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => trainings
+        )
+
+    [77] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => user_consents
+        )
+
+    [78] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => user_relationships
+        )
+
+    [79] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => user_season_configs
+        )
+
+    [80] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => users
+        )
+
+)
