@@ -60,8 +60,11 @@ class SyncMatchCommand extends Command
         // Najdeme interní zápas pokud existuje pro lepší výpis
         $match = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
-            ->get()
-            ->first(fn($m) => ($m->metadata['external_id'] ?? $m->metadata['season_external_match_id'] ?? null) == $matchExternalId);
+            ->where(function ($q) use ($matchExternalId) {
+                $q->where('metadata', 'LIKE', '%"external_id":"' . $matchExternalId . '"%')
+                  ->orWhere('metadata', 'LIKE', '%"season_external_match_id":"' . $matchExternalId . '"%');
+            })
+            ->first();
 
         $this->info('Synchronizuji zápas: '.($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
 

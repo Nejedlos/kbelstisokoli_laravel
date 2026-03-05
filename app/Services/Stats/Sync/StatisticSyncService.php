@@ -109,8 +109,13 @@ class StatisticSyncService
             $currentTeamId = $match->team_id;
 
             // Zkusíme detekovat, zda je to tabulka našeho týmu nebo soupeře
-            $ourTeamName = $this->normalizeForComparison($match->team->getTranslation('name', 'cs') ?? $match->team->name);
+            $teamNameValue = $match->team->getTranslation('name', 'cs') ?: ($match->team->name ?: '');
+            if (is_array($teamNameValue)) {
+                $teamNameValue = $teamNameValue['cs'] ?? ($teamNameValue['en'] ?? (reset($teamNameValue) ?: ''));
+            }
+            $ourTeamName = $this->normalizeForComparison($teamNameValue);
             $tableTeamName = $this->normalizeForComparison($data->name);
+            \Log::info("Comparing teams: '{$data->name}' (normalized: {$tableTeamName}) vs '{$teamNameValue}' (normalized: {$ourTeamName})");
 
             if (! str_contains($tableTeamName, $ourTeamName) && ! str_contains($ourTeamName, $tableTeamName)) {
                 $isOurTeam = false;

@@ -24,6 +24,14 @@ Při použití standardní Laravel syntaxe pro dotazování do JSONu (`->where('
       ```
     - **Řazení:** Translatable pole nesmí být `sortable()`, protože MariaDB na hostingu neumí řadit podle JSON hodnot bez nativních funkcí.
     - **Relace:** Pokud vyhledáváte v relaci přes translatable pole (např. `team.name`), použijte `whereHas` s `LIKE`.
+5. **Globální vyhledávání (Filament):** 
+    - Filament Resource třídy by měly mít vypnuté globální vyhledávání pro translatable atributy, protože rovněž generuje `json_unquote`.
+    - V Resource třídě definujte prázdné pole:
+      ```php
+      public static function getGloballySearchableAttributes(): array {
+          return [];
+      }
+      ```
 
 ## Příklad bezpečné úpravy
 **Špatně (způsobí pád):**

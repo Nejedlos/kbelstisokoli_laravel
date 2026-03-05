@@ -146,7 +146,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             try {
                 $container = $table->closest('div.overflow-auto');
                 if ($container && $container->count() > 0) {
-                    $h4 = $container->previousAll()->filter('h4')->first();
+                    $h4 = $container->previousAll()->filter('h4')->last();
                     if ($h4 && $h4->count() > 0) {
                         $tableName = trim($h4->text());
                     }

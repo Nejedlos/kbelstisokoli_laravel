@@ -83,9 +83,8 @@ class ExternalImportRunForm
                                 Action::make('copyError')
                                     ->label('Kopírovat chybu')
                                     ->icon(FilamentIcon::get(AppIcon::COPY))
-                                    ->extraAttributes([
-                                        'x-on:click' => 'window.navigator.clipboard.writeText($state); $tooltip("Zkopírováno", { timeout: 2000 })',
-                                    ])
+                                    ->url('#')
+                                    ->alpineClickHandler('window.navigator.clipboard.writeText($el.closest(".fi-fo-field").querySelector("textarea").value); $tooltip("Zkopírováno", { timeout: 2000 })')
                             )
                             ->hidden(fn ($get) => ! $get('error_summary')),
                     ]),

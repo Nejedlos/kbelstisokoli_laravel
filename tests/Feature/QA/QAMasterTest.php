@@ -133,6 +133,8 @@ class QAMasterTest extends TestCase
 
         $syncService->syncMatchDetail($match->id);
 
+        dd(\App\Models\StatisticRow::all()->map(fn($r) => $r->only(['basketball_match_id', 'team_id', 'row_label']))->toArray());
+
         // Ověření statistik
         $this->assertDatabaseHas('statistic_rows', [
             'basketball_match_id' => $match->id,
