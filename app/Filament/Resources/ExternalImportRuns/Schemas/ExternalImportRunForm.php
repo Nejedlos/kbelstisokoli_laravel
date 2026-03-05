@@ -77,7 +77,10 @@ class ExternalImportRunForm
                     ->schema([
                         KeyValue::make('metadata')
                             ->label('Metadata')
-                            ->readOnly(),
+                            ->disableAddingRows()
+                            ->disableDeletingRows()
+                            ->disableEditingKeys()
+                            ->disableEditingValues(),
                     ]),
             ]);
     }

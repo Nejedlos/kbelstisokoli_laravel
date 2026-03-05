@@ -30,15 +30,27 @@ class LogsRelationManager extends RelationManager
             ->components([
                 Section::make()
                     ->schema([
-                        TextInput::make('action'),
-                        TextInput::make('model_type'),
-                        TextInput::make('model_id'),
+                        TextInput::make('action')
+                            ->readOnly(),
+                        TextInput::make('model_type')
+                            ->readOnly(),
+                        TextInput::make('model_id')
+                            ->readOnly(),
                         Textarea::make('message')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->readOnly(),
                         KeyValue::make('old_values')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->disableAddingRows()
+                            ->disableDeletingRows()
+                            ->disableEditingKeys()
+                            ->disableEditingValues(),
                         KeyValue::make('new_values')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->disableAddingRows()
+                            ->disableDeletingRows()
+                            ->disableEditingKeys()
+                            ->disableEditingValues(),
                     ])->columns(3),
             ]);
     }
