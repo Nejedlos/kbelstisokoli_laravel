@@ -24,13 +24,12 @@
                 @endforeach
             </div>
 
-            <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {{-- Externí Sync --}}
-                <div class="space-y-4">
-                    <h2 class="text-xl font-bold">Externí Statistiky (Aktivní sezóna)</h2>
+            <div class="mt-8 space-y-4">
+                <h2 class="text-xl font-bold">Externí Statistiky (Aktivní sezóna)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach($externalSync as $team)
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                            <div class="flex justify-between items-start mb-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                                 <div>
                                     <h3 class="text-lg font-bold">{{ is_array($team['team_name']) ? ($team['team_name']['cs'] ?? $team['team_name']['en']) : $team['team_name'] }}</h3>
                                     <span @class([
@@ -41,7 +40,7 @@
                                         {{ $team['enabled'] ? 'Synchronizace zapnuta' : 'Synchronizace vypnuta' }}
                                     </span>
                                 </div>
-                                <div class="flex space-x-1">
+                                <div class="flex flex-wrap gap-1">
                                     <x-filament::button size="xs" color="gray" wire:click="runTeamSync({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Standardní synchronizace">
                                         Sync
                                     </x-filament::button>
@@ -99,7 +98,9 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
 
+            <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {{-- Legacy Import --}}
                 <div class="space-y-4">
                     <h2 class="text-xl font-bold">Legacy Import</h2>

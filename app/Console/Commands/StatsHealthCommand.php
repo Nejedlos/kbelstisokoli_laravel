@@ -149,7 +149,8 @@ class StatsHealthCommand extends Command
             $matchCount = BasketballMatch::query()
                 ->where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)
-                ->where('metadata', 'LIKE', '%"season_external_match_id":%')
+                ->get()
+                ->filter(fn($m) => isset($m->metadata['external_id']) || isset($m->metadata['season_external_match_id']))
                 ->count();
 
             $boxscoreSet = StatisticSet::where('slug', 'match-boxscore')->first();

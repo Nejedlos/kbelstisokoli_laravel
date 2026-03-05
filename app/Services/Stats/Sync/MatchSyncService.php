@@ -65,7 +65,7 @@ class MatchSyncService
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
                 ->get()
-                ->first(fn($m) => ($m->metadata['external_id'] ?? null) == $externalMatchId);
+                ->first(fn($m) => ($m->metadata['external_id'] ?? $m->metadata['season_external_match_id'] ?? null) == $externalMatchId);
         }
 
         // 2. Fallback na identity key
@@ -102,6 +102,7 @@ class MatchSyncService
         $metadata['last_synced_at'] = now()->toDateTimeString();
         if ($externalMatchId) {
             $metadata['external_id'] = $externalMatchId;
+            $metadata['season_external_match_id'] = $externalMatchId;
         }
 
         $data['metadata'] = $metadata;

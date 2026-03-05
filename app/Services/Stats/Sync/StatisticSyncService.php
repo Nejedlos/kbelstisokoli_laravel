@@ -334,7 +334,10 @@ class StatisticSyncService
 
             // Aktualizace řádků statistik pro tento externí ID a sezónu (pokud je sezónní)
             // nebo globálně (pokud je hráč stabilní).
-            $query = StatisticRow::where('source_metadata', 'LIKE', '%"player_external_id":"' . $mapping->external_id . '"%');
+            $query = StatisticRow::where(function($q) use ($mapping) {
+                $q->where('source_metadata', 'LIKE', '%"player_external_id":"' . $mapping->external_id . '"%')
+                  ->orWhere('source_metadata', 'LIKE', '%"player_external_id":' . $mapping->external_id . '%');
+            });
 
             if ($mapping->season_id) {
                 $query->where('season_id', $mapping->season_id);
