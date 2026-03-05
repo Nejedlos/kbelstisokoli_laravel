@@ -18,6 +18,11 @@ class RecaptchaSettings extends Page implements HasForms
 {
     use InteractsWithForms;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('admin/recaptcha-settings.navigation');

@@ -31,11 +31,13 @@ class DebugOperations extends Page
 
     protected string $view = 'filament.pages.debug-operations';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     public function mount(): void
     {
-        if (! auth()->user()?->can('access_admin')) {
-            abort(403);
-        }
     }
 
     public static function getNavigationGroup(): ?string

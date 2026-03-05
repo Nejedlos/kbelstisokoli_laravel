@@ -50,6 +50,11 @@ class BrandingSettings extends Page implements HasForms
 
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     public function mount(): void
     {
         $dbData = Setting::pluck('value', 'key')->toArray();

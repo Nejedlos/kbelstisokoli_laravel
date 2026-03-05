@@ -25,6 +25,11 @@ class SystemConsole extends Page
 
     public string $output = '';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     public function mount(): void {}
 
     public static function getNavigationGroup(): ?string

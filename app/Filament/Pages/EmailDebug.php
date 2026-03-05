@@ -23,6 +23,11 @@ class EmailDebug extends Page
 
     protected string $view = 'filament.pages.email-debug';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.navigation.groups.admin_tools');
