@@ -36,6 +36,8 @@ Route::get('/system/schedule/{token}', function (string $token) {
 
     $cacheDriver = config('cache.default');
     $storagePath = storage_path();
+    $cachePath = config('cache.stores.file.path');
+    $isWritable = is_writable($cachePath);
 
     \Illuminate\Support\Facades\Log::info('Schedule:run endpoint hit', [
         'ip' => request()->ip(),
@@ -44,6 +46,8 @@ Route::get('/system/schedule/{token}', function (string $token) {
         'output_len' => strlen($output),
         'cache_driver' => $cacheDriver,
         'storage_path' => $storagePath,
+        'cache_path' => $cachePath,
+        'is_writable' => $isWritable,
     ]);
 
     if ($isHeartbeat) {
@@ -85,6 +89,8 @@ Route::get('/system/schedule/{token}', function (string $token) {
                 'error' => $errorMessage,
                 'cache_driver' => $cacheDriver,
                 'storage_path' => $storagePath,
+                'cache_path' => $cachePath,
+                'is_writable' => $isWritable,
             ],
             'output' => $output,
         ]);

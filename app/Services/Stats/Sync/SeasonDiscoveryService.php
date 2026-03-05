@@ -77,7 +77,8 @@ class SeasonDiscoveryService
 
                     if ($verifyResult['isValid']) {
                         $winner = $verifyResult;
-                        ConsoleService::log("  Found! y={$y} (confidence: {$winner['confidence']})", 'success');
+                        $evidenceStr = implode(', ', $winner['evidence']);
+                        ConsoleService::log("  Found! y={$y} (confidence: {$winner['confidence']}, evidence: {$evidenceStr})", 'success');
                         break;
                     }
 
@@ -109,12 +110,16 @@ class SeasonDiscoveryService
                         'confidence' => $winner['confidence'],
                     ];
                 } else {
+                    ConsoleService::log("  Pro sezónu {$season->name} nebyl nalezen žádný validní rok (zkoušeno: ".implode(', ', $candidates).").", 'warning');
                     $results[] = [
                         'team' => $team->slug,
                         'season' => $season->name,
                         'status' => 'not found',
                         'tried' => $candidates,
                     ];
+
+                    ConsoleService::log("  Zastavuji vyhledávání starších sezón pro tým {$team->slug}.", 'info');
+                    break;
                 }
 
                 // Delay mezi sezónami

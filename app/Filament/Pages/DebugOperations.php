@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Jobs\Stats\DiscoverSeasonsJob;
 use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Jobs\Stats\SyncTeamSeasonJob;
 use App\Models\BasketballMatch;
@@ -150,7 +151,7 @@ class DebugOperations extends Page
                     ];
 
                     if ($data['mode'] === 'job') {
-                        \App\Jobs\Stats\DiscoverSeasonsJob::dispatch(null, null, $options);
+                        DiscoverSeasonsJob::dispatch(null, null, $options);
                         ConsoleService::log('Discovery proces naplánován jako job na pozadí.', 'info');
                         Notification::make()->title('Discovery job dispatched')->success()->send();
 
