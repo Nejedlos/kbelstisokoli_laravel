@@ -41,9 +41,15 @@
                                         {{ $team['enabled'] ? 'Synchronizace zapnuta' : 'Synchronizace vypnuta' }}
                                     </span>
                                 </div>
-                                <div class="flex space-x-2">
-                                    <x-filament::button size="xs" color="gray" wire:click="runTeamSync({{ $team['team_id'] }})" wire:loading.attr="disabled">
-                                        Sync Now
+                                <div class="flex space-x-1">
+                                    <x-filament::button size="xs" color="gray" wire:click="runTeamSync({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Standardní synchronizace">
+                                        Sync
+                                    </x-filament::button>
+                                    <x-filament::button size="xs" color="warning" wire:click="runTeamSyncForce({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Force Sync (ignorovat hash)">
+                                        Force
+                                    </x-filament::button>
+                                    <x-filament::button size="xs" color="danger" wire:click="runTeamSyncFresh({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Fresh Sync (přepsat data!)">
+                                        Fresh
                                     </x-filament::button>
                                 </div>
                             </div>
@@ -137,16 +143,16 @@
                         </p>
 
                         <div class="pt-2 space-y-2">
-                            <x-filament::button color="info" size="sm" icon="heroicon-m-magnifying-glass" class="w-full" wire:click="mountAction('discoverSeasons')">
-                                Spustit Discovery
+                            <x-filament::button color="info" size="sm" class="w-full" wire:click="mountAction('discoverSeasons')">
+                                <i class="fa-light fa-magnifying-glass mr-1"></i> Spustit Discovery
                             </x-filament::button>
 
                             <div class="grid grid-cols-2 gap-2 mt-4">
-                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl() }}" icon="heroicon-m-list-bullet">
-                                    Historie
+                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl() }}">
+                                    <i class="fa-light fa-list-bullet mr-1"></i> Historie
                                 </x-filament::button>
-                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalEntityMappings\ExternalEntityMappingResource::getUrl() }}" icon="heroicon-m-users">
-                                    Párování
+                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalEntityMappings\ExternalEntityMappingResource::getUrl() }}">
+                                    <i class="fa-light fa-users mr-1"></i> Párování
                                 </x-filament::button>
                             </div>
                         </div>
@@ -178,9 +184,21 @@
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($auditLogs as $log)
                                     <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors">
-                                        <td class="px-4 py-3">#{{ $log->id }}</td>
+                                        <td class="px-4 py-3">
+                                            <a href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl('view', ['record' => $log->id]) }}" class="font-bold text-primary-600 hover:underline">
+                                                #{{ $log->id }}
+                                            </a>
+                                        </td>
                                         <td class="px-4 py-3 font-medium">{{ $log->team?->name ?? 'Klub (Global)' }}</td>
-                                        <td class="px-4 py-3 font-mono text-[10px] uppercase text-gray-500">{{ $log->run_type }}</td>
+                                        <td class="px-4 py-3 font-mono text-[10px] uppercase text-gray-500">
+                                            {{ $log->run_type }}
+                                            @if($log->metadata['force'] ?? false)
+                                                <span class="text-warning-600 font-bold">[FORCE]</span>
+                                            @endif
+                                            @if($log->metadata['fresh'] ?? false)
+                                                <span class="text-danger-600 font-bold">[FRESH]</span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 text-xs truncate max-w-[150px]" title="{{ $log->target_external_id }}">
                                             {{ $log->target_external_id ?: '-' }}
                                         </td>
@@ -198,10 +216,15 @@
                                         </td>
                                         <td class="px-4 py-3 text-[10px] text-gray-600 dark:text-gray-400">
                                             <div class="flex items-center space-x-2">
-                                                <span class="text-success-600 font-bold">✓ {{ $log->imported_count }}</span>
+                                                <span class="text-success-600 font-bold" title="Importováno">✓ {{ $log->imported_count }}</span>
                                                 @php $failed = max(0, $log->extracted_count - $log->imported_count); @endphp
                                                 @if($failed > 0)
-                                                    <span class="text-danger-600 font-bold">✗ {{ $failed }}</span>
+                                                    <span class="text-danger-600 font-bold" title="Chyby">✗ {{ $failed }}</span>
+                                                @endif
+                                                @if($log->logs_count > 0)
+                                                    <span class="text-primary-600 font-bold italic" title="Detailní logy změn">
+                                                        <i class="fa-light fa-list-check"></i> {{ $log->logs_count }}
+                                                    </span>
                                                 @endif
                                             </div>
                                         </td>
@@ -226,7 +249,7 @@
         <div class="w-full xl:w-[450px] sticky top-8 space-y-4">
             <div class="flex items-center justify-between px-2">
                 <h2 class="text-sm font-bold uppercase tracking-widest text-gray-500 flex items-center gap-2">
-                    <x-filament::icon icon="heroicon-m-command-line" class="w-4 h-4" />
+                    <i class="fa-light fa-terminal w-4 h-4"></i>
                     Live Terminal
                 </h2>
                 <button
