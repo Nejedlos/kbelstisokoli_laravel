@@ -59,7 +59,9 @@ class CzBasketballFetcher implements StatFetcherInterface
                 Log::warning("CzBasketballFetcher: Pokus o stažení selhal, zkouším znovu. Chyba: {$exception->getMessage()}");
                 return true;
             }, true) // true pro exponenciální backoff
-            ->followRedirects(true)
+            ->withOptions([
+                'allow_redirects' => true,
+            ])
             ->get($url);
 
             Log::info("CzBasketballFetcher: Staženo. Status: {$response->status()}, Final URL: {$response->effectiveUri()}");

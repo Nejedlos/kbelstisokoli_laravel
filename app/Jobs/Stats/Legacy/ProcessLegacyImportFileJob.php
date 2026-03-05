@@ -102,9 +102,21 @@ class ProcessLegacyImportFileJob implements ShouldQueue
                 throw new \Exception("Sezónu '{$file->detected_season_label}' se nepodařilo vytvořit/najít.");
             }
 
+            $warnings = [];
+
+            // Check for existing official stats
+            $hasOfficialStats = StatisticSet::where('season_id', $season->id)
+                ->where('source_type', 'external')
+                ->when($team, fn($q) => $q->whereHas('rows', fn($rq) => $rq->where('team_id', $team->id)))
+                ->exists();
+
+            if ($hasOfficialStats) {
+                $warnings[] = "K sezóně {$season->name}" . ($team ? " (tým {$team->slug})" : "") . " již existují oficiální statistiky (external sync). Legacy data byla uložena odděleně.";
+            }
+
             // 4. Persist Tables
             $totalImportedCount = 0;
-            $warnings = [];
+            // $warnings inicializováno dříve pro checkOfficialStats
 
             foreach ($extractedTables as $tableDto) {
                 $statSet = $this->ensureStatSet($tableDto, $season, $team, $file);

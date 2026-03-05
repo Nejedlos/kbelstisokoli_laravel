@@ -9,22 +9,38 @@ use Illuminate\Support\Facades\File;
 
 class QAPreflight extends Command
 {
-    protected $signature = 'qa:preflight';
+    protected $signature = 'qa:preflight {--prod : Ověří produkční nastavení}';
     protected $description = 'Ověří připravenost prostředí pro testování (DB, Storage, Queue, Classes)';
 
     public function handle()
     {
-        $this->header('QA Preflight Checker');
+        $this->header('QA Preflight Checker' . ($this->option('prod') ? ' [PROD MODE]' : ''));
+
+        if ($this->option('prod')) {
+            if (config('app.env') !== 'production') {
+                $this->error("❌ APP_ENV není nastaven na 'production'.");
+                return 1;
+            }
+            if (config('app.debug')) {
+                $this->error("❌ APP_DEBUG je zapnutý. Na produkci musí být vypnutý.");
+                return 1;
+            }
+        }
 
         $checks = [
             'Databáze' => $this->checkDatabase(),
             'Migrace' => $this->checkMigrations(),
             'Storage' => $this->checkStorage(),
             'Queue' => $this->checkQueue(),
-            'Legacy Source' => $this->checkLegacySource(),
+            'Scheduler' => $this->checkScheduler(),
             'Klíčové třídy' => $this->checkClasses(),
             'Závislosti' => $this->checkDependencies(),
+            'Týmové konfigurace' => $this->checkTeamConfigs(),
         ];
+
+        if (!$this->option('prod')) {
+            $checks['Legacy Source'] = $this->checkLegacySource();
+        }
 
         $failed = in_array(false, array_values($checks), true);
 
@@ -89,6 +105,54 @@ class QAPreflight extends Command
     {
         $driver = config('queue.default');
         $this->line("ℹ️ Queue: Driver je nastaven na '{$driver}'.");
+        return true;
+    }
+
+    private function checkScheduler(): bool
+    {
+        $lastRun = \Illuminate\Support\Facades\Cache::get('scheduler_last_heartbeat');
+        if (!$lastRun) {
+            $this->warn("⚠️ Scheduler: Heartbeat nenalezen. Ujistěte se, že cron běží.");
+            return true; // Jen varování
+        }
+
+        $diff = now()->diffInMinutes(\Illuminate\Support\Carbon::createFromTimestamp($lastRun));
+        if ($diff > 10) {
+            $this->error("❌ Scheduler: Poslední běh před {$diff} minutami (příliš dlouho).");
+            return false;
+        }
+
+        $this->line("✅ Scheduler: Aktivní (poslední běh před {$diff} min).");
+        return true;
+    }
+
+    private function checkTeamConfigs(): bool
+    {
+        $season = \App\Models\Season::where('is_active', true)->first();
+        if (!$season) {
+            $this->error("❌ Sezóny: Žádná aktivní sezóna nalezena.");
+            return false;
+        }
+
+        $this->line("ℹ️ Aktivní sezóna: {$season->name}");
+
+        $teams = \App\Models\Team::whereIn('slug', ['muzi-c', 'muzi-e'])->get();
+        if ($teams->count() < 2) {
+            $this->warn("⚠️ Týmy: Muži C nebo Muži E v DB chybí.");
+        }
+
+        foreach ($teams as $team) {
+            $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $team->id)
+                ->where('season_id', $season->id)
+                ->first();
+
+            if ($config) {
+                $this->line("✅ Config [{$team->slug}]: Nalezen (y={$config->external_season_year}).");
+            } else {
+                $this->warn("⚠️ Config [{$team->slug}]: Chybí pro sezónu {$season->name}.");
+            }
+        }
+
         return true;
     }
 
