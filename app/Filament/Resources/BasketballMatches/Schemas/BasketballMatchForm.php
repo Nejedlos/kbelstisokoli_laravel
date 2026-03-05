@@ -37,12 +37,13 @@ class BasketballMatchForm
                                     ->relationship('team', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->multiple(false),
                                 Select::make('season_id')
                                     ->label('Sezóna')
                                     ->relationship('season', 'name')
                                     ->required()
-                                    ->default(fn () => \App\Models\Season::where('is_active', true)->first()?->id),
+                                    ->default(\App\Models\Season::where('is_active', true)->first()?->id),
                                 Select::make('opponent_id')
                                     ->label('Soupeř')
                                     ->relationship('opponent', 'name')

@@ -45,7 +45,8 @@ class ClubCompetitionForm
                                 Select::make('season_id')
                                     ->label('Sezóna')
                                     ->relationship('season', 'name')
-                                    ->required(),
+                                    ->required()
+                                    ->default(\App\Models\Season::where('is_active', true)->first()?->id),
                                 Select::make('status')
                                     ->label('Stav')
                                     ->options([

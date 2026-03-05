@@ -188,7 +188,6 @@ class EventMigrationSeeder extends Seeder
 
         $match->team_id = $teamIds[0] ?? null;
         $match->save();
-        $match->teams()->syncWithoutDetaching($teamIds);
     }
 
     protected function migrateTraining($old, $teamIds, $scheduledAt, $existing = null)

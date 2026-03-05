@@ -26,7 +26,8 @@ class ExternalTeamSeasonConfigForm
                             ->label('Sezóna')
                             ->relationship('season', 'name')
                             ->required()
-                            ->searchable(),
+                            ->searchable()
+                            ->default(\App\Models\Season::where('is_active', true)->first()?->id),
                         TextInput::make('source_key')
                             ->label('Zdroj')
                             ->default('czbasketball')
