@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class PlayersRelationManager extends RelationManager
 {
@@ -28,7 +29,7 @@ class PlayersRelationManager extends RelationManager
         $playerTable = $query->getModel()->getTable();
         $userTable = (new \App\Models\User)->getTable();
 
-        return $query->with(['user'])
+        return $query->with(['user', 'user.externalMappings'])
             ->where("{$playerTable}.is_active", true)
             ->whereHas('user', fn ($q) => $q->where("{$userTable}.is_active", true));
     }
@@ -68,6 +69,11 @@ class PlayersRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('user.name')
                     ->label(__('user.fields.full_name'))
+                    ->formatStateUsing(fn ($state, $record) => new HtmlString(
+                        ($record->user?->externalMappings->isNotEmpty()
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
+                            : '') . e($state)
+                    ))
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id]))
                     ->searchable()
                     ->sortable(),

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ClubEvents\RelationManagers;
 
 use App\Enums\ExcuseReason;
+use App\Support\FilamentIcon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -12,8 +13,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class AttendancesRelationManager extends RelationManager
@@ -116,10 +119,10 @@ class AttendancesRelationManager extends RelationManager
                         default => '?',
                     })
                     ->sortable(),
-                \Filament\Tables\Columns\IconColumn::make('is_mismatch')
+                IconColumn::make('is_mismatch')
                     ->label('Mismatch')
                     ->boolean()
-                    ->trueIcon('heroicon-o-exclamation-triangle')
+                    ->trueIcon(FilamentIcon::get('triangle-exclamation'))
                     ->falseIcon(null)
                     ->color('danger')
                     ->sortable(),
@@ -153,7 +156,7 @@ class AttendancesRelationManager extends RelationManager
                         'absent' => 'Nebyl',
                         'excused' => 'Omluven',
                     ]),
-                \Filament\Tables\Filters\TernaryFilter::make('is_mismatch')
+                TernaryFilter::make('is_mismatch')
                     ->label('Pouze mismatch'),
             ])
             ->headerActions([

@@ -76,6 +76,14 @@ class PlayerProfile extends Model
     }
 
     /**
+     * Externí mapování profilu.
+     */
+    public function externalMappings(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(ExternalEntityMapping::class, 'internal');
+    }
+
+    /**
      * Scope pro profily platné k určitému datu.
      */
     public function scopeInEffect($query, $date = null)

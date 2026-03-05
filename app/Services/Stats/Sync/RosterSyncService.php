@@ -32,6 +32,17 @@ class RosterSyncService
             $html = $this->fetcher->fetch($config->team_season_url, $run);
             $extractedData = $this->extractor->extract($html);
             $tableDto = $extractedData['data'];
+            $fragmentHtml = $extractedData['fragment_html'] ?? '';
+
+            $hash = hash('sha256', $fragmentHtml);
+
+            if ($run->isIdenticalToLast($hash)) {
+                $run->skip();
+
+                return $run;
+            }
+
+            $run->update(['content_hash' => $hash]);
 
             $this->syncWithData($config, $tableDto);
 

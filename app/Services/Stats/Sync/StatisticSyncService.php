@@ -361,17 +361,9 @@ class StatisticSyncService
     protected function normalizeForComparison(string $text): string
     {
         $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-        $text = mb_strtolower($text);
-
-        // Odstranění diakritiky (robustnější verze)
-        $text = strtr(
-            utf8_decode($text),
-            utf8_decode('áäčďéěíĺľňóôőöŕšťúůűüýž'),
-            'aacdeeiilnoooorstuuuuyz'
-        );
-        $text = utf8_encode($text);
-
-        $text = preg_replace('/\s+/', '', $text);
+        $text = \Illuminate\Support\Str::ascii($text);
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9]/', '', $text);
 
         return $text;
     }

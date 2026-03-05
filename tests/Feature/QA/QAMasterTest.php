@@ -180,7 +180,9 @@ class QAMasterTest extends TestCase
         $this->assertNotNull($classification['file_type']);
 
         // 2. Parsing
-        $dto = $extractor->extract(File::get($testFile->getPathname()), $classification['file_type']);
+        $extracted = $extractor->extract(File::get($testFile->getPathname()), $classification['file_type']);
+        $this->assertNotEmpty($extracted);
+        $dto = $extracted[0];
         $this->assertNotEmpty($dto->columns);
         $this->assertNotEmpty($dto->rows);
 

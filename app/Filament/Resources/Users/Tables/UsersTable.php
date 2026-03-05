@@ -21,6 +21,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\HtmlString;
 
 class UsersTable
 {
@@ -28,6 +29,7 @@ class UsersTable
     {
         return $table
             ->striped()
+            ->modifyQueryUsing(fn ($query) => $query->with(['externalMappings']))
             ->columns([
                 SpatieMediaLibraryImageColumn::make('avatar')
                     ->label(__('user.fields.avatar'))
@@ -39,6 +41,11 @@ class UsersTable
                 TextColumn::make('name')
                     ->label(__('user.fields.first_name').' '.__('user.fields.last_name'))
                     ->description(fn ($record) => $record->email)
+                    ->formatStateUsing(fn ($state, $record) => new HtmlString(
+                        ($record->externalMappings->isNotEmpty()
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
+                            : '') . e($state)
+                    ))
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
                     ->sortable(),
                 TextColumn::make('club_member_id')

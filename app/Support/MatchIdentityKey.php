@@ -20,9 +20,14 @@ class MatchIdentityKey
         string $opponentName,
         ?string $round = null
     ): string {
-        $date = $scheduledAt instanceof \DateTimeInterface
-            ? $scheduledAt->format('Y-m-d')
-            : date('Y-m-d', strtotime($scheduledAt));
+        if ($scheduledAt instanceof \DateTimeInterface) {
+            $date = $scheduledAt->format('Y-m-d');
+        } elseif (! empty($scheduledAt)) {
+            $ts = is_numeric($scheduledAt) ? (int) $scheduledAt : strtotime($scheduledAt);
+            $date = $ts ? date('Y-m-d', $ts) : 'unknown-date';
+        } else {
+            $date = 'unknown-date';
+        }
 
         $opponentNormalized = Str::slug($opponentName);
         $homeFlag = $isHome ? 'home' : 'away';

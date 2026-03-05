@@ -24,7 +24,14 @@ class MatchSyncService
     {
         $externalMatchId = $matchData['external_match_id'] ?? null;
         $scheduledAtStr = $matchData['scheduled_at'] ?? null;
-        $scheduledAt = $scheduledAtStr ? Carbon::parse($scheduledAtStr) : null;
+        $scheduledAt = null;
+        if ($scheduledAtStr) {
+            try {
+                $scheduledAt = Carbon::parse($scheduledAtStr);
+            } catch (\Exception $e) {
+                \Log::warning("Failed to parse scheduled_at: {$scheduledAtStr} for match " . ($matchData['external_match_id'] ?? 'unknown'));
+            }
+        }
 
         $homeTeamName = $matchData['home_team'] ?? 'Unknown';
         $awayTeamName = $matchData['away_team'] ?? 'Unknown';

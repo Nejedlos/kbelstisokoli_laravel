@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ExternalImportRuns\Tables;
 
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
@@ -50,7 +52,7 @@ class ExternalImportRunsTable
                 IconColumn::make('metadata.used_ai_fallback')
                     ->label('AI')
                     ->boolean()
-                    ->trueIcon('fas-sparkles')
+                    ->trueIcon(FilamentIcon::get(AppIcon::AI))
                     ->trueColor('warning')
                     ->falseIcon('')
                     ->toggleable(),

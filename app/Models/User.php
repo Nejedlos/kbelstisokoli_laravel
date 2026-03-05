@@ -242,6 +242,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
     }
 
     /**
+     * Externí mapování uživatele.
+     */
+    public function externalMappings(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(ExternalEntityMapping::class, 'internal');
+    }
+
+    /**
      * Scope pro aktivní uživatele.
      */
     public function scopeActive($query)

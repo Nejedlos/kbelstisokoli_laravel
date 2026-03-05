@@ -55,18 +55,26 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 return;
             }
 
-            $tableName = $i === 0 ? 'Home Team Boxscore' : 'Away Team Boxscore';
+            $tableName = $i === 0 ? ($matchHeader['home_team'] ?? 'Home Team Boxscore') : ($matchHeader['away_team'] ?? 'Away Team Boxscore');
 
             // Zkusíme najít název týmu nad tabulkou (např. v h3 nebo h4)
-            $teamNameNode = $table->previousAll()->filter('h3, h4, .title')->first();
-            if ($teamNameNode->count() > 0) {
-                $tableName = trim($teamNameNode->text());
-                $allFragmentHtml .= '<h3>'.$tableName."</h3>\n";
+            // Nejprve zkusíme přímo nad tabulkou, pak nad jejím rodičem
+            $teamNameNode = $table->previousAll()->filter('h3, h4, .title')->last();
+            if ($teamNameNode->count() === 0) {
+                $container = $table->closest('div');
+                if ($container->count() > 0) {
+                    $teamNameNode = $container->previousAll()->filter('h3, h4, .title')->last();
+                }
             }
 
+            if ($teamNameNode && $teamNameNode->count() > 0) {
+                $tableName = trim($teamNameNode->text());
+            }
+
+            $allFragmentHtml .= '<h3>'.$tableName."</h3>\n";
             $allFragmentHtml .= $table->outerHtml()."\n";
-            $tableName = $this->processBoxscoreTable($table, $tableName, $warnings);
-            $allTablesData[] = $tableName;
+            $tableDto = $this->processBoxscoreTable($table, $tableName, $warnings);
+            $allTablesData[] = $tableDto;
         });
 
         // Pro zjednodušení vracíme první tabulku jako hlavní data, ale v metadatech máme vše

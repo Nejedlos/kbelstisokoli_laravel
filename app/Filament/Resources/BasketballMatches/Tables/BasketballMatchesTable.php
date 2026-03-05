@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\BasketballMatches\Tables;
 
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -11,6 +13,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class BasketballMatchesTable
 {
@@ -22,7 +25,11 @@ class BasketballMatchesTable
             ->columns([
                 TextColumn::make('scheduled_at')
                     ->label('Datum a čas')
-                    ->dateTime('d.m.Y H:i')
+                    ->formatStateUsing(fn ($state, $record) => new HtmlString(
+                        ((! empty($record->metadata['external_id']) || ! empty($record->metadata['season_external_match_id']))
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
+                            : '').$state->format('d.m.Y H:i')
+                    ))
                     ->sortable(),
                 TextColumn::make('team.name')
                     ->label('Tým')
@@ -104,7 +111,7 @@ class BasketballMatchesTable
                     DeleteBulkAction::make(),
                     BulkAction::make('ai_sync')
                         ->label('AI Synchronizace detailů')
-                        ->icon('heroicon-m-sparkles')
+                        ->icon(FilamentIcon::get(AppIcon::AI))
                         ->color('info')
                         ->action(function (\Illuminate\Support\Collection $records) {
                             $records->each(function ($record) {

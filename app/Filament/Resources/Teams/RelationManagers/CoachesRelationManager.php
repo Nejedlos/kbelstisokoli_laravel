@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class CoachesRelationManager extends RelationManager
 {
@@ -21,7 +22,7 @@ class CoachesRelationManager extends RelationManager
 
     protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where($query->getModel()->getTable().'.is_active', true);
+        return $query->with(['externalMappings'])->where($query->getModel()->getTable().'.is_active', true);
     }
 
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
@@ -36,6 +37,11 @@ class CoachesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('name')
                     ->label(__('user.fields.full_name'))
+                    ->formatStateUsing(fn ($state, $record) => new HtmlString(
+                        ($record->externalMappings->isNotEmpty()
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
+                            : '') . e($state)
+                    ))
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record]))
                     ->searchable()
                     ->sortable(),

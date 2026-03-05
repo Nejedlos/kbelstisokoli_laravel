@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\ExternalImportRuns\Schemas;
 
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
+use Filament\Actions\Action;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\Actions\Action;
-use Illuminate\Support\HtmlString;
 
 class ExternalImportRunForm
 {
@@ -81,7 +82,7 @@ class ExternalImportRunForm
                             ->hintAction(
                                 Action::make('copyError')
                                     ->label('Kopírovat chybu')
-                                    ->icon('heroicon-o-clipboard')
+                                    ->icon(FilamentIcon::get(AppIcon::COPY))
                                     ->extraAttributes([
                                         'x-on:click' => 'window.navigator.clipboard.writeText($state); $tooltip("Zkopírováno", { timeout: 2000 })',
                                     ])

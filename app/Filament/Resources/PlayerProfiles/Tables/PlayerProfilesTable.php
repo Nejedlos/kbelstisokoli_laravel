@@ -10,15 +10,22 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class PlayerProfilesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['user.externalMappings']))
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Jméno')
+                    ->formatStateUsing(fn ($state, $record) => new HtmlString(
+                        ($record->user?->externalMappings->isNotEmpty()
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
+                            : '') . e($state)
+                    ))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('jersey_number')
