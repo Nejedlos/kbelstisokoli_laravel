@@ -19,7 +19,7 @@ class TeamStatsService
             ->where('season_id', $seasonId)
             ->whereNull('player_id')
             ->whereNull('basketball_match_id')
-            ->whereHas('statisticSet', function ($q) {
+            ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::TEAM_SEASON_SUMMARY_SET);
             })
             ->first();
@@ -42,7 +42,7 @@ class TeamStatsService
             ->where('season_id', $seasonId)
             ->whereNotNull('player_id')
             ->whereNull('basketball_match_id')
-            ->whereHas('statisticSet', function ($q) {
+            ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
             })
             ->get();
@@ -65,7 +65,7 @@ class TeamStatsService
             ->where('season_id', $seasonId)
             ->whereNotNull('player_id')
             ->whereNotNull('basketball_match_id')
-            ->whereHas('statisticSet', function ($q) {
+            ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::MATCH_BOXSCORE_SET);
             })
             ->select('player_id', DB::raw('SUM(JSON_EXTRACT(values, "$.pts")) as pts_total'), DB::raw('COUNT(*) as gp'))

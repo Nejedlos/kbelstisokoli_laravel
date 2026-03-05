@@ -15,7 +15,7 @@ class PlayerStatsService
     {
         $query = StatisticRow::where('player_id', $userId)
             ->where('season_id', $seasonId)
-            ->whereHas('statisticSet', function ($q) {
+            ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
             });
 
@@ -41,7 +41,7 @@ class PlayerStatsService
         $query = StatisticRow::with(['basketballMatch', 'basketballMatch.opponent'])
             ->where('player_id', $userId)
             ->where('season_id', $seasonId)
-            ->whereHas('statisticSet', function ($q) {
+            ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::MATCH_BOXSCORE_SET);
             })
             ->join('matches', 'statistic_rows.basketball_match_id', '=', 'matches.id')
@@ -74,7 +74,7 @@ class PlayerStatsService
             ->where('season_id', $seasonId)
             ->whereNotNull('player_id')
             ->whereNull('basketball_match_id')
-            ->whereHas('statisticSet', function ($q) {
+            ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
             })
             ->get();
@@ -180,7 +180,7 @@ class PlayerStatsService
     {
         $query = StatisticRow::where('player_id', $userId)
             ->where('season_id', $seasonId)
-            ->whereHas('statisticSet', function ($q) {
+            ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::MATCH_BOXSCORE_SET);
             });
 

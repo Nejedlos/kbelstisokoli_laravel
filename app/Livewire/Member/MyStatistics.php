@@ -5,6 +5,7 @@ namespace App\Livewire\Member;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\Stats\PlayerStatsService;
+use App\Services\Stats\TeamStatsService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
