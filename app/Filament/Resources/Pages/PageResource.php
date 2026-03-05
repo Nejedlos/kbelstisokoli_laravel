@@ -41,6 +41,11 @@ class PageResource extends Resource
         return 20;
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return []; // Vypnuto kvůli translatable polím a kompatibilitě s Webglobe (json_unquote)
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PageForm::configure($schema);

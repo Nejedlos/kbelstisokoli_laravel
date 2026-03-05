@@ -42,6 +42,11 @@ class BasketballMatchResource extends Resource
         return 20;
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return []; // Vypnuto kvůli relacím na translatable pole a kompatibilitě s Webglobe (json_unquote)
+    }
+
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()

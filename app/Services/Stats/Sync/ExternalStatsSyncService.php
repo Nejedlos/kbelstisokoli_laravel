@@ -102,6 +102,7 @@ class ExternalStatsSyncService
         }
 
         try {
+            $run->updateMetadata(['url' => $config->team_season_url]);
             $html = $this->fetcher->fetch($config->team_season_url, $run);
             $extractor = app(TeamRosterExtractor::class);
 
@@ -166,6 +167,7 @@ class ExternalStatsSyncService
         $run = ExternalImportRun::start('czbasketball', $season->id, $team->id, 'matches_list', $config->external_team_id);
 
         try {
+            $run->updateMetadata(['url' => $config->matches_list_url]);
             $html = $this->fetcher->fetch($config->matches_list_url, $run);
             $extractor = app(MatchesListExtractor::class);
 

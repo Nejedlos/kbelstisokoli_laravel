@@ -64,16 +64,16 @@ class MatchSyncService
         if ($externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'LIKE', '%"external_id":"'.$externalMatchId.'"%')
-                ->first();
+                ->get()
+                ->first(fn($m) => ($m->metadata['external_id'] ?? null) == $externalMatchId);
         }
 
         // 2. Fallback na identity key
         if (! $match) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'LIKE', '%"match_identity_key":"'.$matchIdentityKey.'"%')
-                ->first();
+                ->get()
+                ->first(fn($m) => ($m->metadata['match_identity_key'] ?? null) === $matchIdentityKey);
         }
 
         // Zpracování skóre

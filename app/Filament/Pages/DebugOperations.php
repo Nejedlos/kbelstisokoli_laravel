@@ -353,6 +353,7 @@ class DebugOperations extends Page
                 'unmatched_count' => $unmatchedCount,
                 'last_error' => $lastError?->error_summary,
                 'last_error_id' => $lastError?->id,
+                'last_error_metadata' => $lastError?->metadata,
             ];
         }
 

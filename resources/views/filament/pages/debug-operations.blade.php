@@ -76,7 +76,20 @@
 
                             @if($team['last_error'])
                                 <div class="mt-4 p-2 bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-400 text-[10px] rounded border border-danger-100 dark:border-danger-900/30">
-                                    <strong>Last Error:</strong> {{ $team['last_error'] }}
+                                    <div class="flex justify-between items-start mb-1">
+                                        <strong>Last Error (Run #{{ $team['last_error_id'] }}):</strong>
+                                        <a href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl('edit', ['record' => $team['last_error_id']]) }}" class="underline hover:text-danger-800">
+                                            Detail →
+                                        </a>
+                                    </div>
+                                    @if(isset($team['last_error_metadata']['url']))
+                                        <div class="mb-2 break-all opacity-80">
+                                            <span class="font-bold">URL:</span> {{ $team['last_error_metadata']['url'] }}
+                                        </div>
+                                    @endif
+                                    <div class="max-h-[150px] overflow-y-auto whitespace-pre-wrap font-mono leading-tight">
+                                        {{ $team['last_error'] }}
+                                    </div>
                                 </div>
                             @endif
 

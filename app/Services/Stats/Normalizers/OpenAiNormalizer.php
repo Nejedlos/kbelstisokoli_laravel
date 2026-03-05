@@ -78,6 +78,8 @@ class OpenAiNormalizer implements StatNormalizerInterface
             Log::error('OpenAI Normalizer Exception', [
                 'message' => $e->getMessage(),
                 'type' => $type,
+                'content_length' => strlen($content),
+                'timeout_config' => config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 180)),
             ]);
             throw $e;
         }

@@ -39,6 +39,11 @@ class GalleryResource extends Resource
         return 30;
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return []; // Vypnuto kvůli translatable polím a kompatibilitě s Webglobe (json_unquote)
+    }
+
     public static function form(Schema $schema): Schema
     {
         return \App\Filament\Resources\Galleries\Schemas\GalleryForm::configure($schema);
