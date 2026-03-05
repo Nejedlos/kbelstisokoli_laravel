@@ -55,7 +55,7 @@ class CleanupExternalStats extends Command
                     ->where('metadata->snapshot_path', $file)
                     ->exists();
 
-                if (!$isImportant) {
+                if (! $isImportant) {
                     Storage::disk('local')->delete($file);
                     $deletedFiles++;
                 }

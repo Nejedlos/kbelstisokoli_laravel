@@ -80,8 +80,7 @@ class TrophyMigrationSeeder extends Seeder
                     $winnerName = trim($winnerName);
                     $user = $usersByName->get($winnerName);
 
-                    $entry = $entries->first(fn ($e) =>
-                        $e->club_competition_id === $competition->id &&
+                    $entry = $entries->first(fn ($e) => $e->club_competition_id === $competition->id &&
                         ($e->metadata['legacy_trophy_id'] ?? null) == $ot->id &&
                         ($e->metadata['legacy_position'] ?? null) == $position
                     );

@@ -49,7 +49,7 @@ class LegacyFileClassifier
             $year2 = $matches[2];
 
             if (strlen($year2) === 2) {
-                $year2 = substr($year1, 0, 2) . $year2;
+                $year2 = substr($year1, 0, 2).$year2;
             }
 
             return "{$year1}/{$year2}";
@@ -66,7 +66,7 @@ class LegacyFileClassifier
             $year2 = $matches[2];
 
             if (strlen($year2) === 2) {
-                $year2 = substr($year1, 0, 2) . $year2;
+                $year2 = substr($year1, 0, 2).$year2;
             }
 
             return "{$year1}/{$year2}";
@@ -75,7 +75,8 @@ class LegacyFileClassifier
         // Jen jeden rok
         if (preg_match('/(20\d{2})/', $filename, $matches)) {
             $year = $matches[1];
-            return "{$year}/" . ($year + 1);
+
+            return "{$year}/".($year + 1);
         }
 
         return null;
@@ -83,7 +84,7 @@ class LegacyFileClassifier
 
     protected function detectTeam(string $filename, string $content): ?string
     {
-        $search = Str::lower($filename . ' ' . strip_tags($content));
+        $search = Str::lower($filename.' '.strip_tags($content));
 
         if (Str::contains($search, ['muzi e', 'muži e', 'team e', 'tým e', 'kbely e'])) {
             return 'muzi-e';
@@ -102,7 +103,7 @@ class LegacyFileClassifier
 
     protected function detectFileType(string $filename, string $content): string
     {
-        $search = Str::lower($filename . ' ' . strip_tags($content));
+        $search = Str::lower($filename.' '.strip_tags($content));
 
         if (Str::contains($filename, 'sokoli_statistiky_')) {
             return 'mixed';

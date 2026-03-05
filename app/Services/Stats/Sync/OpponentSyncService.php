@@ -3,16 +3,11 @@
 namespace App\Services\Stats\Sync;
 
 use App\Models\Opponent;
-use Illuminate\Support\Str;
 
 class OpponentSyncService
 {
     /**
      * Synchronizuje soupeře v databázi.
-     *
-     * @param string $name
-     * @param string|null $city
-     * @return Opponent
      */
     public function sync(string $name, ?string $city = null): Opponent
     {
@@ -31,7 +26,7 @@ class OpponentSyncService
 
         $opponent = $query->first();
 
-        if (!$opponent) {
+        if (! $opponent) {
             // Zkusíme najít aspoň podle jména, pokud město nesouhlasí?
             // Raději budeme striktní podle zadání "name + city pokud existuje".
             $opponent = Opponent::create([
@@ -49,7 +44,7 @@ class OpponentSyncService
             $metadata['last_seen_at'] = now()->toDateTimeString();
 
             $variants = $metadata['external_name_variants'] ?? [];
-            if (!in_array($name, $variants)) {
+            if (! in_array($name, $variants)) {
                 $variants[] = $name;
             }
             $metadata['external_name_variants'] = $variants;

@@ -35,15 +35,16 @@ class DiscoverSeasons extends Command
             'force' => $this->option('force'),
         ];
 
-        $this->info("Zahajuji discovery proces...");
+        $this->info('Zahajuji discovery proces...');
         if ($options['dry_run']) {
-            $this->warn("REŽIM: DRY-RUN (žádné změny v DB)");
+            $this->warn('REŽIM: DRY-RUN (žádné změny v DB)');
         }
 
         $results = $discoveryService->discover($teamSlug, $seasonName, $options);
 
         if (empty($results)) {
-            $this->info("Nebyly nalezeny žádné sezóny k prověření.");
+            $this->info('Nebyly nalezeny žádné sezóny k prověření.');
+
             return 0;
         }
 
@@ -54,7 +55,7 @@ class DiscoverSeasons extends Command
                 $r['season'],
                 $r['y'] ?? '-',
                 $r['confidence'] ?? '-',
-                $r['status']
+                $r['status'],
             ];
         }, $results);
 

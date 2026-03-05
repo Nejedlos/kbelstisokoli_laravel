@@ -106,7 +106,7 @@ class SeoService
         }
 
         if ($title === $siteName) {
-            return $title . ' – Basketbal Praha 9';
+            return $title.' – Basketbal Praha 9';
         }
 
         // Pokud titulek již obsahuje název klubu, nepřidáváme suffix
@@ -114,7 +114,7 @@ class SeoService
             return $title;
         }
 
-        return $title . ' | ' . $siteName . ' – Basketbal Praha 9';
+        return $title.' | '.$siteName.' – Basketbal Praha 9';
     }
 
     protected function resolveDescription(?SeoMetadata $seo, ?Model $model, array $settings): string

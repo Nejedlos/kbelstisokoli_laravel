@@ -40,7 +40,9 @@ class MatchesListExtractor implements StatExtractorInterface
 
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, &$warnings) {
             $cells = $tr->filter('td');
-            if ($cells->count() < 3) return;
+            if ($cells->count() < 3) {
+                return;
+            }
 
             // Najdeme odkaz na detail zápasu
             $matchLink = $tr->filter('a[href*="/zapas/"]')->first();
@@ -70,7 +72,7 @@ class MatchesListExtractor implements StatExtractorInterface
                 } catch (\Exception $e) {
                     try {
                         // Zkusíme bez času
-                        $scheduledAt = Carbon::createFromFormat('j. n. Y', explode(' ', $cleanDateStr)[0] . ' ' . explode(' ', $cleanDateStr)[1] . ' ' . explode(' ', $cleanDateStr)[2]);
+                        $scheduledAt = Carbon::createFromFormat('j. n. Y', explode(' ', $cleanDateStr)[0].' '.explode(' ', $cleanDateStr)[1].' '.explode(' ', $cleanDateStr)[2]);
                     } catch (\Exception $e2) {
                         $warnings[] = "Could not parse date: $dateStr";
                     }

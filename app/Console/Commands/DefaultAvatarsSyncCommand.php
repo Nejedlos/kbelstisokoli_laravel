@@ -97,12 +97,13 @@ class DefaultAvatarsSyncCommand extends Command
         foreach ($filteredFiles as $file) {
             try {
                 // Pro každý soubor vytvoříme dočasný WebP pro MD5 kontrolu (stejně jako v AvatarModal)
-                $tempFile = tempnam(sys_get_temp_dir(), 'avatar_sync_') . '.webp';
+                $tempFile = tempnam(sys_get_temp_dir(), 'avatar_sync_').'.webp';
                 $this->resizeToWebp($file->getRealPath(), $tempFile, 400, 400);
 
                 if (! file_exists($tempFile)) {
                     $countErrors++;
                     $bar->advance();
+
                     continue;
                 }
 
@@ -112,6 +113,7 @@ class DefaultAvatarsSyncCommand extends Command
                     @unlink($tempFile);
                     $countSkipped++;
                     $bar->advance();
+
                     continue;
                 }
 
@@ -120,33 +122,33 @@ class DefaultAvatarsSyncCommand extends Command
                 $maxId = 0;
                 foreach ($directories as $dir) {
                     $id = basename($dir);
-                    if (is_numeric($id) && (int)$id > $maxId) {
-                        $maxId = (int)$id;
+                    if (is_numeric($id) && (int) $id > $maxId) {
+                        $maxId = (int) $id;
                     }
                 }
                 $newId = $maxId + 1;
-                $newDirPath = $targetPath . '/' . $newId;
-                $conversionsPath = $newDirPath . '/conversions';
+                $newDirPath = $targetPath.'/'.$newId;
+                $conversionsPath = $newDirPath.'/conversions';
 
                 if (! File::exists($conversionsPath)) {
                     File::makeDirectory($conversionsPath, 0755, true);
                 }
 
-                $fileName = 'avatar-' . time() . '-' . Str::random(5) . '.webp';
+                $fileName = 'avatar-'.time().'-'.Str::random(5).'.webp';
                 $thumbName = str_replace('.webp', '-thumb.webp', $fileName);
 
                 // Přesuneme dočasný soubor na finální místo
-                File::move($tempFile, $newDirPath . '/' . $fileName);
+                File::move($tempFile, $newDirPath.'/'.$fileName);
 
                 // Vytvoříme thumb
-                $this->resizeToWebp($file->getRealPath(), $conversionsPath . '/' . $thumbName, 100, 100);
+                $this->resizeToWebp($file->getRealPath(), $conversionsPath.'/'.$thumbName, 100, 100);
 
                 $existingHashes[$newMd5] = true;
                 $countImported++;
             } catch (\Exception $e) {
                 $countErrors++;
                 if ($this->option('stop-on-error')) {
-                    $this->error("\nCHYBA u souboru " . $file->getRelativePathname() . ': ' . $e->getMessage());
+                    $this->error("\nCHYBA u souboru ".$file->getRelativePathname().': '.$e->getMessage());
                     break;
                 }
             }
@@ -160,8 +162,8 @@ class DefaultAvatarsSyncCommand extends Command
 
         $bar->finish();
         $summary = "Synchronizace dokončena. Importováno: {$countImported}, Přeskočeno: {$countSkipped}, Chyby: {$countErrors}.";
-        $this->info("\n\n" . $summary);
-        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: ' . $summary);
+        $this->info("\n\n".$summary);
+        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: '.$summary);
 
         return Command::SUCCESS;
     }
@@ -172,10 +174,12 @@ class DefaultAvatarsSyncCommand extends Command
     protected function resizeToWebp($sourcePath, $targetPath, $width, $height)
     {
         $info = @getimagesize($sourcePath);
-        if (! $info) return;
+        if (! $info) {
+            return;
+        }
 
         $mime = $info['mime'];
-        $src = match($mime) {
+        $src = match ($mime) {
             'image/jpeg' => @imagecreatefromjpeg($sourcePath),
             'image/png' => @imagecreatefrompng($sourcePath),
             'image/webp' => @imagecreatefromwebp($sourcePath),
@@ -183,7 +187,9 @@ class DefaultAvatarsSyncCommand extends Command
             default => null,
         };
 
-        if (! $src) return;
+        if (! $src) {
+            return;
+        }
 
         $srcW = imagesx($src);
         $srcH = imagesy($src);

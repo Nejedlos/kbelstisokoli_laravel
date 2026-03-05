@@ -2,23 +2,23 @@
 
 namespace App\Filament\Resources\Teams\RelationManagers;
 
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\CreateAction;
+use App\Filament\Resources\ExternalStatSources\ExternalStatSourceResource;
+use App\Models\ExternalStatSource;
+use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use App\Models\ExternalStatSource;
-use App\Support\IconHelper;
-use App\Support\Icons\AppIcon;
-use App\Filament\Resources\ExternalStatSources\ExternalStatSourceResource;
 
 class ExternalMappingsRelationManager extends RelationManager
 {
@@ -77,7 +77,7 @@ class ExternalMappingsRelationManager extends RelationManager
                     ->label('Upravit ve zdroji')
                     ->icon(new HtmlString(IconHelper::render(AppIcon::GLOBE)))
                     ->url(fn ($record) => $record->externalStatSource
-                        ? ExternalStatSourceResource::getUrl('edit', ['record' => $record->externalStatSource->id]) . '?activeRelation=0'
+                        ? ExternalStatSourceResource::getUrl('edit', ['record' => $record->externalStatSource->id]).'?activeRelation=0'
                         : null)
                     ->openUrlInNewTab(),
                 EditAction::make()

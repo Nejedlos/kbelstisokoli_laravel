@@ -21,12 +21,12 @@ class ExternalStatsSchedulerJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (!Config::get('external_sources.enabled')) {
+        if (! Config::get('external_sources.enabled')) {
             return;
         }
 
         $activeSeason = Season::where('is_active', true)->first();
-        if (!$activeSeason) {
+        if (! $activeSeason) {
             return;
         }
 

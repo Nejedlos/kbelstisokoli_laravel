@@ -42,7 +42,7 @@ class StatisticSyncService
                 'source_metadata' => array_merge(
                     $row->metadata ?? [],
                     $context['source_metadata'] ?? []
-                )
+                ),
             ]
         );
     }
@@ -55,8 +55,8 @@ class StatisticSyncService
         $this->statisticSetService->ensureBaseSets();
         $set = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->first();
 
-        if (!$set) {
-            throw new \Exception("Statistic set for boxscore not found.");
+        if (! $set) {
+            throw new \Exception('Statistic set for boxscore not found.');
         }
 
         DB::transaction(function () use ($match, $data, $set) {
@@ -67,7 +67,7 @@ class StatisticSyncService
             $ourTeamName = $this->normalizeForComparison($match->team->getTranslation('name', 'cs') ?? $match->team->name);
             $tableTeamName = $this->normalizeForComparison($data->name);
 
-            if (!str_contains($tableTeamName, $ourTeamName) && !str_contains($ourTeamName, $tableTeamName)) {
+            if (! str_contains($tableTeamName, $ourTeamName) && ! str_contains($ourTeamName, $tableTeamName)) {
                 $isOurTeam = false;
                 $currentTeamId = null;
             }
@@ -95,8 +95,8 @@ class StatisticSyncService
                             'match_external_id' => $match->metadata['external_id'] ?? null,
                             'player_external_id' => $externalPlayerId,
                             'scraped_at' => now()->toDateTimeString(),
-                            'is_opponent' => !$isOurTeam,
-                        ]
+                            'is_opponent' => ! $isOurTeam,
+                        ],
                     ]
                 );
             }
@@ -111,7 +111,7 @@ class StatisticSyncService
      */
     protected function findInternalPlayerId(?string $externalId, int $seasonId, string $sourceKey): ?int
     {
-        if (!$externalId) {
+        if (! $externalId) {
             return null;
         }
 
@@ -133,7 +133,7 @@ class StatisticSyncService
         $boxscoreSet = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->first();
         $summarySet = StatisticSet::where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET)->first();
 
-        if (!$boxscoreSet || !$summarySet) {
+        if (! $boxscoreSet || ! $summarySet) {
             return;
         }
 
@@ -162,8 +162,8 @@ class StatisticSyncService
                     'values' => $summaryData,
                     'source_metadata' => [
                         'last_computed_at' => now()->toDateTimeString(),
-                        'source' => 'aggregation'
-                    ]
+                        'source' => 'aggregation',
+                    ],
                 ]
             );
         }
@@ -176,7 +176,7 @@ class StatisticSyncService
     {
         $teamSummarySet = StatisticSet::where('slug', StatisticSetService::TEAM_SEASON_SUMMARY_SET)->first();
 
-        if (!$teamSummarySet) {
+        if (! $teamSummarySet) {
             return;
         }
 
@@ -223,8 +223,8 @@ class StatisticSyncService
                 ],
                 'source_metadata' => [
                     'last_computed_at' => now()->toDateTimeString(),
-                    'source' => 'aggregation'
-                ]
+                    'source' => 'aggregation',
+                ],
             ]
         );
     }

@@ -17,7 +17,7 @@ class MemberContext
     public function getActiveTeamId(): ?int
     {
         // Pokud uživatel není přihlášen, nemá smysl pokračovat
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return null;
         }
 

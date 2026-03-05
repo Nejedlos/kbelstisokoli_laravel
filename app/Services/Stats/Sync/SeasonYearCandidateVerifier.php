@@ -5,7 +5,6 @@ namespace App\Services\Stats\Sync;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
-use Illuminate\Support\Facades\Log;
 
 class SeasonYearCandidateVerifier
 {
@@ -29,43 +28,43 @@ class SeasonYearCandidateVerifier
             $teamHtml = $this->fetcher->fetch($teamUrl);
             $rosterResult = $this->rosterExtractor->extract($teamHtml, [
                 'external_team_id' => $externalTeamId,
-                'external_season_year' => $y
+                'external_season_year' => $y,
             ]);
             $rosterDto = $rosterResult['data'];
 
             if (count($rosterDto->rows) >= 3) {
                 $confidence += 40;
-                $evidence[] = "Found " . count($rosterDto->rows) . " players in roster.";
+                $evidence[] = 'Found '.count($rosterDto->rows).' players in roster.';
             } elseif (count($rosterDto->rows) >= 1) {
                 $confidence += 20;
-                $evidence[] = "Found " . count($rosterDto->rows) . " player(s) in roster.";
+                $evidence[] = 'Found '.count($rosterDto->rows).' player(s) in roster.';
             }
         } catch (\Exception $e) {
-            $evidence[] = "Roster fetch error: " . $e->getMessage();
+            $evidence[] = 'Roster fetch error: '.$e->getMessage();
         }
 
         // 2. Zkusíme seznam zápasů (Matches List)
         // Pozor: subdoména může být smo.cz.basketball nebo cz.basketball
         $subdomains = ['smo', 'www', ''];
         foreach ($subdomains as $sub) {
-            $prefix = $sub ? "{$sub}." : "";
+            $prefix = $sub ? "{$sub}." : '';
             $matchesUrl = "https://{$prefix}cz.basketball/zapasy?c={$externalTeamId}&y={$y}";
 
             try {
                 $matchesHtml = $this->fetcher->fetch($matchesUrl);
                 $matchesResult = $this->matchesExtractor->extract($matchesHtml, [
                     'external_team_id' => $externalTeamId,
-                    'external_season_year' => $y
+                    'external_season_year' => $y,
                 ]);
                 $matchesDto = $matchesResult['data'];
 
                 if (count($matchesDto->rows) > 0) {
                     $confidence += 60;
-                    $evidence[] = "Found " . count($matchesDto->rows) . " matches at {$matchesUrl}.";
+                    $evidence[] = 'Found '.count($matchesDto->rows)." matches at {$matchesUrl}.";
                     break; // Našli jsme validní URL
                 }
             } catch (\Exception $e) {
-                $evidence[] = "Matches fetch error for {$matchesUrl}: " . $e->getMessage();
+                $evidence[] = "Matches fetch error for {$matchesUrl}: ".$e->getMessage();
             }
         }
 

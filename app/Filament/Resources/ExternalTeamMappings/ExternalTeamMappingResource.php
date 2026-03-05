@@ -8,7 +8,6 @@ use App\Filament\Resources\ExternalTeamMappings\Pages\ListExternalTeamMappings;
 use App\Filament\Resources\ExternalTeamMappings\Schemas\ExternalTeamMappingForm;
 use App\Filament\Resources\ExternalTeamMappings\Tables\ExternalTeamMappingsTable;
 use App\Models\ExternalTeamMapping;
-use BackedEnum;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;

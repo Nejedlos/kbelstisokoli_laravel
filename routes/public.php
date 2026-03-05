@@ -28,7 +28,7 @@ Route::get('/system/schedule/{token}', function (string $token) {
 
     \Illuminate\Support\Facades\Artisan::call('schedule:run');
 
-    return response('Plánované úlohy byly spuštěny.' . PHP_EOL . \Illuminate\Support\Facades\Artisan::output());
+    return response('Plánované úlohy byly spuštěny.'.PHP_EOL.\Illuminate\Support\Facades\Artisan::output());
 })->name('system.schedule');
 
 Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(function (): void {
@@ -95,7 +95,6 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Vyhledávání
     Route::get('/hledat', [\App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');
 
-
     // Robots.txt & Sitemap & LLMs
     Route::get('/robots.txt', function () {
         return response(file_get_contents(public_path('robots.txt')), 200, ['Content-Type' => 'text/plain']);
@@ -107,6 +106,7 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
         if (file_exists(public_path('sitemap.xml'))) {
             return response()->file(public_path('sitemap.xml'), ['Content-Type' => 'text/xml']);
         }
+
         return response()->view('public.sitemap', [
             'pages' => \App\Models\Page::where('status', 'published')->where('is_visible', true)->get(),
             'posts' => \App\Models\Post::where('status', 'published')->where('is_visible', true)->get(),

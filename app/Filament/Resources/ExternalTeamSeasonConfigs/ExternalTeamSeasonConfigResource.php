@@ -8,7 +8,6 @@ use App\Filament\Resources\ExternalTeamSeasonConfigs\Pages\ListExternalTeamSeaso
 use App\Filament\Resources\ExternalTeamSeasonConfigs\Schemas\ExternalTeamSeasonConfigForm;
 use App\Filament\Resources\ExternalTeamSeasonConfigs\Tables\ExternalTeamSeasonConfigsTable;
 use App\Models\ExternalTeamSeasonConfig;
-use BackedEnum;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;

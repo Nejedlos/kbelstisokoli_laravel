@@ -6,14 +6,12 @@ use App\Models\ExternalEntityMapping;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\PlayerProfile;
-use App\Models\Team;
 use App\Models\User;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class RosterSyncService
 {
@@ -65,9 +63,10 @@ class RosterSyncService
                 $externalPlayerId = $row->playerId;
                 $playerName = $row->values['player_name'] ?? $row->rowLabel;
 
-                if (!$externalPlayerId) {
+                if (! $externalPlayerId) {
                     $warnings[] = "Player '{$playerName}' has no external ID, skipping.";
                     $skippedCount++;
+
                     continue;
                 }
 
@@ -110,6 +109,7 @@ class RosterSyncService
         if ($profile) {
             $user = $profile->user;
             $this->createMapping($user, $externalId, $config);
+
             return $user;
         }
 
@@ -180,7 +180,7 @@ class RosterSyncService
             $teamId => [
                 'is_on_roster' => $isOnRoster,
                 'active_from' => $isOnRoster ? now() : null,
-            ]
+            ],
         ]);
 
         $profile->load('teams');
@@ -200,7 +200,7 @@ class RosterSyncService
         // Hráči, kteří mají is_on_roster = true, ale nejsou v aktuálním seznamu
         $profilesToDeactivate = PlayerProfile::whereHas('teams', function ($query) use ($teamId) {
             $query->where('team_id', $teamId)
-                  ->where('is_on_roster', true);
+                ->where('is_on_roster', true);
         })->whereNotIn('user_id', $internalIdsOnRoster)->get();
 
         foreach ($profilesToDeactivate as $profile) {

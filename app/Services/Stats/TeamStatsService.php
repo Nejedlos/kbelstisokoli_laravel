@@ -2,9 +2,8 @@
 
 namespace App\Services\Stats;
 
-use App\Models\StatisticRow;
-use App\Models\StatisticSet;
 use App\Models\BasketballMatch;
+use App\Models\StatisticRow;
 use App\Services\Stats\Sync\StatisticSetService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -75,6 +74,7 @@ class TeamStatsService
             ->map(function ($row) {
                 $pts = (int) $row->pts_total;
                 $gp = (int) $row->gp;
+
                 return [
                     'player_id' => $row->player_id,
                     'name' => $row->player?->name ?? 'Neznámý hráč',
@@ -103,14 +103,22 @@ class TeamStatsService
             $scoreHome = $match->score_home;
             $scoreAway = $match->score_away;
 
-            if ($scoreHome === null || $scoreAway === null) continue;
+            if ($scoreHome === null || $scoreAway === null) {
+                continue;
+            }
 
             if ($isHome) {
-                if ($scoreHome > $scoreAway) $wins++;
-                elseif ($scoreHome < $scoreAway) $losses++;
+                if ($scoreHome > $scoreAway) {
+                    $wins++;
+                } elseif ($scoreHome < $scoreAway) {
+                    $losses++;
+                }
             } else {
-                if ($scoreAway > $scoreHome) $wins++;
-                elseif ($scoreAway < $scoreHome) $losses++;
+                if ($scoreAway > $scoreHome) {
+                    $wins++;
+                } elseif ($scoreAway < $scoreHome) {
+                    $losses++;
+                }
             }
         }
 
@@ -133,6 +141,7 @@ class TeamStatsService
             ->get()
             ->map(function ($match) {
                 $isHome = $match->is_home;
+
                 return [
                     'date' => $match->scheduled_at,
                     'opponent' => $match->opponent?->name ?? 'Neznámý soupeř',

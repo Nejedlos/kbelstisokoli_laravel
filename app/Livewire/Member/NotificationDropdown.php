@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Member;
 
-use Livewire\Attributes\On;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class NotificationDropdown extends Component
 {

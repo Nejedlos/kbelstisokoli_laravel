@@ -6,7 +6,7 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum ExcuseReason: string implements HasLabel, HasColor, HasIcon
+enum ExcuseReason: string implements HasColor, HasIcon, HasLabel
 {
     case Illness = 'illness';
     case Injury = 'injury';
@@ -17,7 +17,7 @@ enum ExcuseReason: string implements HasLabel, HasColor, HasIcon
 
     public function getLabel(): ?string
     {
-        return __('member.attendance.excuse_reasons.' . $this->value);
+        return __('member.attendance.excuse_reasons.'.$this->value);
     }
 
     public function getColor(): string|array|null

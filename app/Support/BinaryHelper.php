@@ -18,7 +18,7 @@ class BinaryHelper
             return self::$cache['php'];
         }
 
-        $finder = new PhpExecutableFinder();
+        $finder = new PhpExecutableFinder;
         $defaultPhp = $finder->find(false) ?: PHP_BINARY;
 
         if (config('app.env') === 'production') {

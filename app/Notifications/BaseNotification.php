@@ -47,16 +47,16 @@ abstract class BaseNotification extends Notification implements ShouldQueue
         $clubName = $branding['club_name'];
         $data = $this->getNotificationData();
 
-        $subject = !empty($data['title'])
-            ? (__($data['title']) . ' | ' . $clubName)
+        $subject = ! empty($data['title'])
+            ? (__($data['title']).' | '.$clubName)
             : __('member.notifications.mail.subject_default', ['club' => $clubName]);
 
         $mail = (new MailMessage)
             ->subject($subject)
             ->greeting(__('member.notifications.mail.greeting', ['name' => $notifiable->name]))
-            ->line(!empty($data['message']) ? $data['message'] : '')
+            ->line(! empty($data['message']) ? $data['message'] : '')
             ->action(
-                !empty($data['action_label']) ? __($data['action_label']) : __('member.notifications.mail.view_portal'),
+                ! empty($data['action_label']) ? __($data['action_label']) : __('member.notifications.mail.view_portal'),
                 $data['action_url'] ?? route('member.dashboard')
             )
             ->line(__('member.notifications.mail.footer'))

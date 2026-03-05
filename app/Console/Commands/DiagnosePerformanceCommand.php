@@ -3,10 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Cache;
-use App\Models\Setting;
 
 class DiagnosePerformanceCommand extends Command
 {
@@ -32,12 +31,12 @@ class DiagnosePerformanceCommand extends Command
         $this->header('KBELŠTÍ SOKOLI - PERFORMANCE DIAGNOSIS');
 
         // 1. DB Query speed
-        $this->measure('DB Latency (SELECT 1)', function() {
+        $this->measure('DB Latency (SELECT 1)', function () {
             DB::select('SELECT 1');
         });
 
         // 2. Storage Latency
-        $this->measure('Storage Write/Read Latency', function() {
+        $this->measure('Storage Write/Read Latency', function () {
             Storage::put('perf-test.tmp', 'test');
             Storage::get('perf-test.tmp');
             Storage::delete('perf-test.tmp');
@@ -47,7 +46,7 @@ class DiagnosePerformanceCommand extends Command
         $this->info("\n[FRAMEWORK STATUS]");
         $this->check('Config Cache', config()->has('app.name')); // Vždy true, ale config:cache zrychluje načítání
         $this->check('Route Cache', app()->routesAreCached());
-        $this->check('View Cache', !empty(glob(storage_path('framework/views/*.php'))));
+        $this->check('View Cache', ! empty(glob(storage_path('framework/views/*.php'))));
 
         // 4. Cache Status
         $this->info("\n[CACHE STATUS]");
@@ -63,12 +62,13 @@ class DiagnosePerformanceCommand extends Command
 
         // 6. Branding / Settings Check
         $this->info("\n[BRANDING & SETTINGS]");
-        $this->measure('Branding Settings Load', function() {
+        $this->measure('Branding Settings Load', function () {
             app(\App\Services\BrandingService::class)->clearCache();
             app(\App\Services\BrandingService::class)->getSettings();
         });
 
         $this->line("\n[DONE] Diagnostika dokončena.");
+
         return 0;
     }
 
@@ -95,6 +95,6 @@ class DiagnosePerformanceCommand extends Command
     protected function check($label, $condition)
     {
         $status = $condition ? '<info>ACTIVE</info>' : '<error>INACTIVE</error>';
-        $this->line(sprintf("%-40s: %s", $label, $status));
+        $this->line(sprintf('%-40s: %s', $label, $status));
     }
 }

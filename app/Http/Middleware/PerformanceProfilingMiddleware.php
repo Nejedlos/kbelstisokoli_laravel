@@ -27,7 +27,7 @@ class PerformanceProfilingMiddleware
             // To zabrání deadlocku session (u file driveru) a umožní profilování chráněných stránek
             try {
                 if (Schema::hasTable('users')) {
-                    $user = User::whereHas('roles', fn($q) => $q->whereIn('name', ['super_admin', 'admin']))
+                    $user = User::whereHas('roles', fn ($q) => $q->whereIn('name', ['super_admin', 'admin']))
                         ->first() ?: User::first();
                     if ($user) {
                         Auth::onceUsingId($user->id);

@@ -8,7 +8,6 @@ use App\Filament\Resources\ExternalEntityMappings\Pages\ListExternalEntityMappin
 use App\Filament\Resources\ExternalEntityMappings\Schemas\ExternalEntityMappingForm;
 use App\Filament\Resources\ExternalEntityMappings\Tables\ExternalEntityMappingsTable;
 use App\Models\ExternalEntityMapping;
-use BackedEnum;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;

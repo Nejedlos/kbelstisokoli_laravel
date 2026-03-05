@@ -4,8 +4,8 @@ namespace App\Services\Stats\Legacy\Extractors;
 
 use App\Services\Stats\DTO\NormalizedRowDTO;
 use App\Services\Stats\DTO\NormalizedTableDTO;
-use Symfony\Component\DomCrawler\Crawler;
 use Illuminate\Support\Str;
+use Symfony\Component\DomCrawler\Crawler;
 
 class LegacyStatExtractor
 {
@@ -80,11 +80,12 @@ class LegacyStatExtractor
         $headers = [];
         $headerRow = $table->filter('tr')->first();
 
-            // ČBF soubory často nemají <thead>, ale první <tr> obsahuje popisky
+        // ČBF soubory často nemají <thead>, ale první <tr> obsahuje popisky
         $headerRow->filter('th, td')->each(function (Crawler $cell) use (&$headers) {
             $label = trim($cell->text());
             if ($label === '') {
-                $headers[] = ['key' => 'col_' . count($headers), 'label' => ''];
+                $headers[] = ['key' => 'col_'.count($headers), 'label' => ''];
+
                 return;
             }
 
@@ -93,9 +94,9 @@ class LegacyStatExtractor
 
         // Kontrola, zda první řádek je skutečně hlavička (např. obsahuje "Jméno", "Body", "TH")
         $headerLabels = collect($headers)->pluck('label')->implode(' ');
-        if (!preg_match('/jméno|hráč|tým|body|pts|th|2b|3b|skóre|z/i', $headerLabels)) {
-             // Pokud to nevypadá jako hlavička, možná je to jen prázdná tabulka nebo divný formát
-             return [];
+        if (! preg_match('/jméno|hráč|tým|body|pts|th|2b|3b|skóre|z/i', $headerLabels)) {
+            // Pokud to nevypadá jako hlavička, možná je to jen prázdná tabulka nebo divný formát
+            return [];
         }
 
         return $headers;
@@ -153,7 +154,7 @@ class LegacyStatExtractor
             return 'players_summary';
         }
 
-        if (in_array('efficiency', $keys) && !in_array('player_name', $keys)) {
+        if (in_array('efficiency', $keys) && ! in_array('player_name', $keys)) {
             return 'team_matches_fouls';
         }
 
@@ -171,7 +172,9 @@ class LegacyStatExtractor
             $rowLabel = null;
 
             $tr->filter('td')->each(function (Crawler $td, $index) use (&$values, &$playerName, &$rowLabel, $headers) {
-                if (!isset($headers[$index])) return;
+                if (! isset($headers[$index])) {
+                    return;
+                }
 
                 $key = $headers[$index]['key'];
                 $value = trim($td->text());
@@ -196,7 +199,7 @@ class LegacyStatExtractor
                 $playerName = null;
             }
 
-            if (!empty($values)) {
+            if (! empty($values)) {
                 $rows[] = new NormalizedRowDTO($values, null, null, $rowLabel);
             }
         });

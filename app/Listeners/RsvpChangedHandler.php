@@ -40,8 +40,8 @@ class RsvpChangedHandler implements ShouldQueue
         };
 
         $eventTitle = match (get_class($eventModel)) {
-            \App\Models\Training::class => ($eventModel->location ? "Trénink ($eventModel->location)" : "Trénink"),
-            \App\Models\BasketballMatch::class => ($eventModel->team?->name ?? 'Sokoli') . ' vs. ' . ($eventModel->opponent?->name ?? 'soupeř'),
+            \App\Models\Training::class => ($eventModel->location ? "Trénink ($eventModel->location)" : 'Trénink'),
+            \App\Models\BasketballMatch::class => ($eventModel->team?->name ?? 'Sokoli').' vs. '.($eventModel->opponent?->name ?? 'soupeř'),
             \App\Models\ClubEvent::class => $eventModel->title,
             default => $eventModel->title ?? $eventModel->name ?? 'událost',
         };
@@ -61,7 +61,7 @@ class RsvpChangedHandler implements ShouldQueue
 
         $actionUrl = route('member.attendance.show', [
             'type' => $type,
-            'id' => $eventModel->id
+            'id' => $eventModel->id,
         ]);
 
         // --- Příjemci a de-duplikace ---
@@ -70,16 +70,16 @@ class RsvpChangedHandler implements ShouldQueue
         // 1. Samotný uživatel (pokud je, dostane verzi "Tvoje účast...")
         $notifiables->put($user->id, [
             'notifiable' => $user,
-            'is_self' => true
+            'is_self' => true,
         ]);
 
         // 2. Rodiče (dostanou verzi "Změna účasti [Jméno]...", pokud už nejsou self)
         if ($user->relationLoaded('parents') || $user->parents()->exists()) {
             foreach ($user->parents as $parent) {
-                if (!$notifiables->has($parent->id)) {
+                if (! $notifiables->has($parent->id)) {
                     $notifiables->put($parent->id, [
                         'notifiable' => $parent,
-                        'is_self' => false
+                        'is_self' => false,
                     ]);
                 }
             }
@@ -96,10 +96,10 @@ class RsvpChangedHandler implements ShouldQueue
         foreach ($teams as $team) {
             if ($team) {
                 foreach ($team->activeCoaches()->get() as $coach) {
-                    if (!$notifiables->has($coach->id)) {
+                    if (! $notifiables->has($coach->id)) {
                         $notifiables->put($coach->id, [
                             'notifiable' => $coach,
-                            'is_self' => false
+                            'is_self' => false,
                         ]);
                     }
                 }

@@ -66,34 +66,36 @@ class AdminPanelProvider extends PanelProvider
                 if ($isAuth) {
                     $settings = $brandingService->getSettings();
                     $colors = $settings['colors'];
-                    $hexToRgb = function($hex) {
+                    $hexToRgb = function ($hex) {
                         $hex = str_replace('#', '', (string) $hex);
+
                         return \App\Support\ColorHelper::hexToRgb($hex); // Použijeme helper pokud existuje, nebo inline
                     };
                     // Rychlý inline hexToRgb pro spolehlivost v provideru
-                    $inlineHexToRgb = function($hex) {
+                    $inlineHexToRgb = function ($hex) {
                         $hex = str_replace('#', '', (string) $hex);
                         if (strlen($hex) === 3) {
-                            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
-                            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
-                            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+                            $r = hexdec(substr($hex, 0, 1).substr($hex, 0, 1));
+                            $g = hexdec(substr($hex, 1, 1).substr($hex, 1, 1));
+                            $b = hexdec(substr($hex, 2, 1).substr($hex, 2, 1));
                         } else {
                             $r = hexdec(substr($hex, 0, 2));
                             $g = hexdec(substr($hex, 2, 2));
                             $b = hexdec(substr($hex, 4, 2));
                         }
+
                         return "{$r}, {$g}, {$b}";
                     };
 
-                    $authAliases = "
+                    $authAliases = '
                         :root {
-                            --brand-navy: " . ($colors['navy'] ?? '#0b1f3a') . ";
-                            --brand-navy-rgb: " . $inlineHexToRgb($colors['navy'] ?? '#0b1f3a') . ";
-                            --brand-blue: " . ($colors['blue'] ?? '#2563eb') . ";
-                            --brand-blue-rgb: " . $inlineHexToRgb($colors['blue'] ?? '#2563eb') . ";
-                            --brand-red: " . ($colors['red'] ?? '#e11d48') . ";
-                            --brand-red-rgb: " . $inlineHexToRgb($colors['red'] ?? '#e11d48') . ";
-                            --brand-red-hover: " . ($colors['red_hover'] ?? '#be123c') . ";
+                            --brand-navy: '.($colors['navy'] ?? '#0b1f3a').';
+                            --brand-navy-rgb: '.$inlineHexToRgb($colors['navy'] ?? '#0b1f3a').';
+                            --brand-blue: '.($colors['blue'] ?? '#2563eb').';
+                            --brand-blue-rgb: '.$inlineHexToRgb($colors['blue'] ?? '#2563eb').';
+                            --brand-red: '.($colors['red'] ?? '#e11d48').';
+                            --brand-red-rgb: '.$inlineHexToRgb($colors['red'] ?? '#e11d48').';
+                            --brand-red-hover: '.($colors['red_hover'] ?? '#be123c').';
                             --brand-white: #ffffff;
 
                             /* UI tokens pro auth */
@@ -106,7 +108,7 @@ class AdminPanelProvider extends PanelProvider
                             --ui-danger: #ef4444;
                             --ui-warning: #f59e0b;
                         }
-                    ";
+                    ';
                 }
 
                 return Blade::render(

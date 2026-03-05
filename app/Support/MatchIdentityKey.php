@@ -9,13 +9,8 @@ class MatchIdentityKey
     /**
      * Generuje stabilní identifikační klíč pro zápas.
      *
-     * @param int|string $seasonId
-     * @param string $teamSlug
-     * @param mixed $scheduledAt
-     * @param bool $isHome
-     * @param string $opponentName
-     * @param string|null $round
-     * @return string
+     * @param  int|string  $seasonId
+     * @param  mixed  $scheduledAt
      */
     public static function make(
         $seasonId,

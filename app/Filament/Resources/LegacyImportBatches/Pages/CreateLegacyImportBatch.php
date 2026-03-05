@@ -24,7 +24,7 @@ class CreateLegacyImportBatch extends CreateRecord
         $data = $this->form->getRawState();
         $files = $data['uploaded_files'] ?? [];
 
-        if (!empty($files)) {
+        if (! empty($files)) {
             $service = app(LegacyImportService::class);
             $service->processUploads($this->record, $files);
         }

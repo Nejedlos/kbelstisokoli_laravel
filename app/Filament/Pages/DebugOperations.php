@@ -2,9 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Enums\MembershipStatus;
-use App\Enums\StatisticScope;
-use App\Enums\StatisticType;
 use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Jobs\Stats\SyncTeamSeasonJob;
 use App\Models\ExternalImportRun;
@@ -14,9 +11,6 @@ use App\Models\Season;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\Team;
-use App\Models\User;
-use App\Services\Stats\Fetchers\CzBasketballFetcher;
-use App\Services\Stats\Sync\ExternalStatsSyncService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -70,8 +64,9 @@ class DebugOperations extends Page
                 ->requiresConfirmation()
                 ->action(function () {
                     $activeSeason = Season::where('is_active', true)->first();
-                    if (!$activeSeason) {
+                    if (! $activeSeason) {
                         Notification::make()->title('No active season found')->danger()->send();
+
                         return;
                     }
 
@@ -95,10 +90,10 @@ class DebugOperations extends Page
                     $discoveryService = app(\App\Services\Stats\Sync\SeasonDiscoveryService::class);
                     $results = $discoveryService->discover();
 
-                    $found = count(array_filter($results, fn($r) => $r['status'] !== 'not found'));
+                    $found = count(array_filter($results, fn ($r) => $r['status'] !== 'not found'));
 
                     Notification::make()
-                        ->title("Discovery finished")
+                        ->title('Discovery finished')
                         ->body("Found and created {$found} new season configurations.")
                         ->success()
                         ->send();
@@ -145,7 +140,7 @@ class DebugOperations extends Page
             'label' => 'Queue (Jobs)',
             'ok' => true,
             'msg' => "{$jobCount} pending jobs",
-            'warning' => $jobCount > 100
+            'warning' => $jobCount > 100,
         ];
 
         // Scheduler
@@ -154,7 +149,7 @@ class DebugOperations extends Page
         $status['scheduler'] = [
             'label' => 'Scheduler',
             'ok' => $isOk,
-            'msg' => $lastHeartbeat ? 'Last run: ' . $lastHeartbeat->diffForHumans() : 'No heartbeat detected'
+            'msg' => $lastHeartbeat ? 'Last run: '.$lastHeartbeat->diffForHumans() : 'No heartbeat detected',
         ];
 
         // Storage
@@ -172,7 +167,7 @@ class DebugOperations extends Page
             $status['fetcher'] = [
                 'label' => 'External Fetcher',
                 'ok' => $response->successful(),
-                'msg' => $response->successful() ? 'cz.basketball reachable' : 'HTTP Status: ' . $response->status()
+                'msg' => $response->successful() ? 'cz.basketball reachable' : 'HTTP Status: '.$response->status(),
             ];
         } catch (\Exception $e) {
             $status['fetcher'] = ['label' => 'External Fetcher', 'ok' => false, 'msg' => 'Connection failed'];
@@ -184,14 +179,18 @@ class DebugOperations extends Page
     protected function getExternalSyncStats(): array
     {
         $activeSeason = Season::where('is_active', true)->first();
-        if (!$activeSeason) return [];
+        if (! $activeSeason) {
+            return [];
+        }
 
         $teamSlugs = config('external_sources.czbasketball.teams', []);
         $stats = [];
 
         foreach ($teamSlugs as $slug) {
             $team = Team::where('slug', $slug)->first();
-            if (!$team) continue;
+            if (! $team) {
+                continue;
+            }
 
             $config = ExternalTeamSeasonConfig::where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)
@@ -248,7 +247,9 @@ class DebugOperations extends Page
     protected function getLegacyImportStats(): ?array
     {
         $lastBatch = LegacyImportBatch::latest()->first();
-        if (!$lastBatch) return null;
+        if (! $lastBatch) {
+            return null;
+        }
 
         return [
             'id' => $lastBatch->id,
@@ -295,7 +296,9 @@ class DebugOperations extends Page
     public function runTeamSync(int $teamId): void
     {
         $activeSeason = Season::where('is_active', true)->first();
-        if (!$activeSeason) return;
+        if (! $activeSeason) {
+            return;
+        }
 
         SyncTeamSeasonJob::dispatch($teamId, $activeSeason->id);
         Notification::make()->title('Sync started for team')->success()->send();
@@ -306,7 +309,9 @@ class DebugOperations extends Page
         $activeSeason = Season::where('is_active', true)->first();
         $team = Team::whereIn('slug', config('external_sources.czbasketball.teams'))->first(); // Fallback to first configured team
 
-        if (!$activeSeason || !$team) return;
+        if (! $activeSeason || ! $team) {
+            return;
+        }
 
         SyncMatchDetailJob::dispatch($team->id, $activeSeason->id, $externalMatchId, ['force' => true]);
         Notification::make()->title('Force match sync dispatched')->success()->send();

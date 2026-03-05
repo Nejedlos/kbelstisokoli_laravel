@@ -5,7 +5,6 @@ namespace App\Filament\Resources\ExternalStatSources;
 use App\Filament\Resources\ExternalStatSources\Pages\CreateExternalStatSource;
 use App\Filament\Resources\ExternalStatSources\Pages\EditExternalStatSource;
 use App\Filament\Resources\ExternalStatSources\Pages\ListExternalStatSources;
-use App\Filament\Resources\ExternalStatSources\RelationManagers;
 use App\Filament\Resources\ExternalStatSources\Schemas\ExternalStatSourceForm;
 use App\Filament\Resources\ExternalStatSources\Tables\ExternalStatSourcesTable;
 use App\Models\ExternalStatSource;

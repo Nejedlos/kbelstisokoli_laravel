@@ -2,12 +2,11 @@
 
 namespace App\Services\Stats\Sync;
 
+use App\Jobs\Stats\SyncTeamSeasonJob;
 use App\Models\ExternalTeamMapping;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
-use App\Jobs\Stats\SyncTeamSeasonJob;
-use Illuminate\Support\Facades\Log;
 
 class SeasonDiscoveryService
 {
@@ -39,11 +38,13 @@ class SeasonDiscoveryService
                 ->where('source_key', 'czbasketball')
                 ->first();
 
-            if (!$mapping) continue;
+            if (! $mapping) {
+                continue;
+            }
 
             foreach ($seasons as $season) {
                 // Kontrola, zda je sezóna "prázdná" nebo zda vynucujeme re-discovery
-                if (!$force && !$this->statusService->isEmpty($team->id, $season->id)) {
+                if (! $force && ! $this->statusService->isEmpty($team->id, $season->id)) {
                     continue;
                 }
 
@@ -63,7 +64,7 @@ class SeasonDiscoveryService
                 }
 
                 if ($winner) {
-                    if (!$dryRun) {
+                    if (! $dryRun) {
                         $this->saveConfig($team, $season, $winner);
                         if ($syncAfter) {
                             SyncTeamSeasonJob::dispatch($team->id, $season->id);
@@ -102,15 +103,17 @@ class SeasonDiscoveryService
             // range formát "2010..2025"
             if (str_contains($options['years'], '..')) {
                 [$start, $end] = explode('..', $options['years']);
-                return range((int)$start, (int)$end);
+
+                return range((int) $start, (int) $end);
             }
+
             return array_map('intval', explode(',', $options['years']));
         }
 
         $candidates = [];
         // Hledání roku v názvu (např. 2024/2025 -> 2024)
         if (preg_match('/(\d{4})/', $season->name, $matches)) {
-            $year = (int)$matches[1];
+            $year = (int) $matches[1];
             $candidates[] = $year;
 
             // Přidáme okolní roky jako fallback
@@ -147,7 +150,7 @@ class SeasonDiscoveryService
                     'discovered_at' => now()->toIso8601String(),
                     'confidence' => $data['confidence'],
                     'evidence' => $data['evidence'],
-                ]
+                ],
             ]
         );
     }

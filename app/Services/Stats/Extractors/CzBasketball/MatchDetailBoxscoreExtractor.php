@@ -47,7 +47,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $tables = $crawler->filter('table.table-condensed');
 
         $allTablesData = [];
-        $allFragmentHtml = "";
+        $allFragmentHtml = '';
 
         $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
@@ -61,10 +61,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $teamNameNode = $table->previousAll()->filter('h3, h4, .title')->first();
             if ($teamNameNode->count() > 0) {
                 $tableName = trim($teamNameNode->text());
-                $allFragmentHtml .= "<h3>" . $tableName . "</h3>\n";
+                $allFragmentHtml .= '<h3>'.$tableName."</h3>\n";
             }
 
-            $allFragmentHtml .= $table->outerHtml() . "\n";
+            $allFragmentHtml .= $table->outerHtml()."\n";
             $tableName = $this->processBoxscoreTable($table, $tableName, $warnings);
             $allTablesData[] = $tableName;
         });
@@ -74,7 +74,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
         $mainTable->metadata = array_merge($mainTable->metadata, [
             'header' => $matchHeader,
-            'all_tables' => array_map(fn($t) => $t->toArray(), $allTablesData),
+            'all_tables' => array_map(fn ($t) => $t->toArray(), $allTablesData),
             'warnings' => $warnings,
         ]);
 
@@ -100,7 +100,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $header['away_team'] = trim($awayNode->text());
         }
 
-        if (!isset($header['home_team'])) {
+        if (! isset($header['home_team'])) {
             $teams = $crawler->filter('.team-name, .match-teams h1, .match-teams h2');
             if ($teams->count() >= 2) {
                 $header['home_team'] = trim($teams->eq(0)->text());
@@ -112,7 +112,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $scoreNodes = $crawler->filter('.delta, .match-score, .score, .final-score');
         if ($scoreNodes->count() >= 2) {
             // Skóre rozdělené do dvou částí
-            $header['score'] = trim($scoreNodes->eq(0)->text()) . ':' . trim($scoreNodes->eq(1)->text());
+            $header['score'] = trim($scoreNodes->eq(0)->text()).':'.trim($scoreNodes->eq(1)->text());
         } elseif ($scoreNodes->count() > 0) {
             $header['score'] = trim($scoreNodes->first()->text());
         }
@@ -159,14 +159,16 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             }
             $normalizedLabel = mb_strtoupper(str_replace(' ', '', $label));
 
-            $key = $this->columnMapping[$normalizedLabel] ?? 'col_' . $i;
+            $key = $this->columnMapping[$normalizedLabel] ?? 'col_'.$i;
             $columns[$key] = $label;
         });
 
         // Řádky hráčů
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $columns, &$warnings) {
             $cells = $tr->filter('td');
-            if ($cells->count() < 2) return;
+            if ($cells->count() < 2) {
+                return;
+            }
 
             $values = [];
             $playerId = null;
@@ -188,7 +190,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     $val = trim($cells->eq($i)->text());
 
                     // Pokud jsme jméno nenašli přes odkaz, zkusíme první buňky
-                    if (!$playerName && ($key === 'col_0' || $key === 'col_1')) {
+                    if (! $playerName && ($key === 'col_0' || $key === 'col_1')) {
                         if (preg_match('/[a-zA-Z]/', $val)) {
                             $playerName = $val;
                         }

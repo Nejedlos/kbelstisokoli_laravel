@@ -22,7 +22,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ];
 
         foreach ($storagePaths as $path) {
-            if (!is_dir($path)) {
+            if (! is_dir($path)) {
                 @mkdir($path, 0775, true);
             }
         }
@@ -36,6 +36,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             if ($previousHandler) {
                 return $previousHandler($errno, $errstr, $errfile, $errline);
             }
+
             return false;
         });
     })
@@ -352,12 +353,12 @@ if ($publicPathMode === 'external') {
 }
 
 // Fallback na detekci z aktuálního skriptu (index.php) pokud běží přes web
-if (!$finalPublicPath && isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
+if (! $finalPublicPath && isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
     $finalPublicPath = dirname($_SERVER['SCRIPT_FILENAME']);
 }
 
 // Pokud nic nebylo nalezeno a máme APP_PUBLIC_PATH (starý pattern), použijeme ho jako fallback
-if (!$finalPublicPath) {
+if (! $finalPublicPath) {
     $finalPublicPath = env('APP_PUBLIC_PATH');
 }
 

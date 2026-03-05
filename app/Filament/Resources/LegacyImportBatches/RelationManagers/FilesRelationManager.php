@@ -7,11 +7,11 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Actions\Action;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
@@ -114,7 +114,7 @@ class FilesRelationManager extends RelationManager
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Zavřít')
                     ->modalContent(fn ($record, LegacyStatExtractor $extractor) => View::make('filament.admin.legacy-import.preview', [
-                        'data' => $extractor->extract(Storage::disk('public')->get($record->stored_path), $record->file_type)
+                        'data' => $extractor->extract(Storage::disk('public')->get($record->stored_path), $record->file_type),
                     ])),
                 ViewAction::make(),
                 DeleteAction::make(),

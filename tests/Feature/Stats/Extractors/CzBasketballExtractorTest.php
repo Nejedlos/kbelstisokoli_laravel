@@ -12,7 +12,7 @@ class CzBasketballExtractorTest extends TestCase
     public function test_team_roster_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html'));
-        $extractor = new TeamRosterExtractor();
+        $extractor = new TeamRosterExtractor;
 
         $result = $extractor->extract($html);
 
@@ -38,7 +38,7 @@ class CzBasketballExtractorTest extends TestCase
     public function test_matches_list_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html'));
-        $extractor = new MatchesListExtractor();
+        $extractor = new MatchesListExtractor;
 
         $result = $extractor->extract($html);
 
@@ -53,7 +53,7 @@ class CzBasketballExtractorTest extends TestCase
     public function test_match_detail_boxscore_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/match_detail.html'));
-        $extractor = new MatchDetailBoxscoreExtractor();
+        $extractor = new MatchDetailBoxscoreExtractor;
 
         $result = $extractor->extract($html);
 

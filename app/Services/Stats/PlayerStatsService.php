@@ -3,10 +3,8 @@
 namespace App\Services\Stats;
 
 use App\Models\StatisticRow;
-use App\Models\StatisticSet;
 use App\Services\Stats\Sync\StatisticSetService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class PlayerStatsService
 {
@@ -167,7 +165,7 @@ class PlayerStatsService
      */
     public function getTeamAverages(int $seasonId, int $teamId): array
     {
-        $teamSummary = (new TeamStatsService())->getSeasonSummary($teamId, $seasonId);
+        $teamSummary = (new TeamStatsService)->getSeasonSummary($teamId, $seasonId);
 
         return [
             'pts_avg' => $teamSummary['pts_avg'] ?? 0,

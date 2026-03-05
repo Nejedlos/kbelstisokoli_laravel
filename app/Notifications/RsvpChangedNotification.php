@@ -4,9 +4,6 @@ namespace App\Notifications;
 
 class RsvpChangedNotification extends BaseNotification
 {
-    /**
-     * @var string
-     */
     protected string $notificationType = 'attendance';
 
     public function __construct(

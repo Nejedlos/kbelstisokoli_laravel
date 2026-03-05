@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\ExternalTeamMappings\Schemas;
 
+use App\Models\ExternalStatSource;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
-
-use App\Models\ExternalStatSource;
 
 class ExternalTeamMappingForm
 {

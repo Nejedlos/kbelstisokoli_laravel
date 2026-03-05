@@ -81,7 +81,7 @@ class ExternalImportRun extends Model
         $this->update([
             'status' => 'failed',
             'finished_at' => now(),
-            'error_summary' => $e->getMessage() . "\n" . $e->getTraceAsString(),
+            'error_summary' => $e->getMessage()."\n".$e->getTraceAsString(),
         ]);
     }
 
@@ -101,7 +101,7 @@ class ExternalImportRun extends Model
      */
     public function isIdenticalToLast(?string $newHash): bool
     {
-        if (!$newHash) {
+        if (! $newHash) {
             return false;
         }
 

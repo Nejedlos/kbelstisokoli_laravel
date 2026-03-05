@@ -11,20 +11,28 @@ use Livewire\Component;
 class MyStatistics extends Component
 {
     public $seasonId;
+
     public $teamId;
 
     public $view = 'personal'; // 'personal' or 'team'
 
     public $summary = [];
+
     public $perGameSeries = [];
+
     public $rankings = [];
+
     public $insights = [];
+
     public $teamAverages = [];
 
     // Pro týmový pohled (pokud přepnuto na tým)
     public $teamSummary = [];
+
     public $topScorers = [];
+
     public $pointsSeries = [];
+
     public $recentForm = [];
 
     public function mount()
@@ -34,7 +42,7 @@ class MyStatistics extends Component
         // Zkusíme najít první tým uživatele v dané sezóně
         $user = Auth::user();
 
-        if (!$this->teamId) {
+        if (! $this->teamId) {
             $this->teamId = $user->playerProfile?->teams()
                 ->wherePivot('is_on_roster', true)
                 ->first()?->id ?? Team::first()?->id;
@@ -52,7 +60,9 @@ class MyStatistics extends Component
 
     public function loadStats()
     {
-        if (!$this->seasonId || !$this->teamId) return;
+        if (! $this->seasonId || ! $this->teamId) {
+            return;
+        }
 
         if ($this->view === 'personal') {
             $service = app(PlayerStatsService::class);

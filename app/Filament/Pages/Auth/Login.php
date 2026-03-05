@@ -7,7 +7,6 @@ use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {

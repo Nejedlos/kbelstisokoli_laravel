@@ -4,9 +4,7 @@ namespace Tests\Feature\Stats\Sync;
 
 use App\Models\ExternalEntityMapping;
 use App\Models\ExternalImportRun;
-use App\Models\ExternalTeamMapping;
 use App\Models\ExternalTeamSeasonConfig;
-use App\Models\PlayerProfile;
 use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
@@ -49,7 +47,7 @@ class RosterSyncTest extends TestCase
         $run = $service->sync($config);
 
         if ($run->status === 'failed') {
-            $this->fail("Sync failed: " . $run->error_summary . "\n" . ($run->metadata['exception_trace'] ?? ''));
+            $this->fail('Sync failed: '.$run->error_summary."\n".($run->metadata['exception_trace'] ?? ''));
         }
 
         $this->assertEquals('success', $run->status);
@@ -70,8 +68,8 @@ class RosterSyncTest extends TestCase
         $profile = $user->playerProfile->fresh();
         $this->assertNotNull($profile);
         $teamOnRoster = $profile->teams()->where('team_id', $team->id)->first();
-        $this->assertNotNull($teamOnRoster, "Team not found in profile teams");
-        $this->assertTrue((bool)$teamOnRoster->pivot->is_on_roster);
+        $this->assertNotNull($teamOnRoster, 'Team not found in profile teams');
+        $this->assertTrue((bool) $teamOnRoster->pivot->is_on_roster);
     }
 
     public function test_it_skips_sync_if_hash_matches()
@@ -91,7 +89,7 @@ class RosterSyncTest extends TestCase
         ]);
 
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html'));
-        $contentHash = hash('sha256', (new \App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor())->extract($html)['fragment_html']);
+        $contentHash = hash('sha256', (new \App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor)->extract($html)['fragment_html']);
 
         ExternalImportRun::create([
             'source_key' => 'czbasketball',
@@ -113,7 +111,7 @@ class RosterSyncTest extends TestCase
         $run = $service->sync($config);
 
         if ($run->status === 'failed') {
-            $this->fail("Sync failed: " . $run->error_summary . "\n" . ($run->metadata['exception_trace'] ?? ''));
+            $this->fail('Sync failed: '.$run->error_summary."\n".($run->metadata['exception_trace'] ?? ''));
         }
 
         $this->assertEquals('skipped', $run->status);

@@ -308,8 +308,8 @@ class AppSyncCommand extends Command
         ];
 
         foreach ($rootPublicFiles as $file) {
-            if (file_exists(base_path('public/' . $file))) {
-                $syncDirs[] = 'public/' . $file;
+            if (file_exists(base_path('public/'.$file))) {
+                $syncDirs[] = 'public/'.$file;
             }
         }
 
@@ -325,26 +325,26 @@ class AppSyncCommand extends Command
                 $synced = false;
 
                 // Určení cílového adresáře na serveru
-                $remoteDirs = [$path . '/' . $dir];
+                $remoteDirs = [$path.'/'.$dir];
 
                 // Pokud adresář začíná na 'public/', zkusíme synchronizovat i do alternativní public_path
-                if (str_starts_with($dir, 'public/') && $publicPath && $publicPath !== rtrim($path, '/') . '/public') {
+                if (str_starts_with($dir, 'public/') && $publicPath && $publicPath !== rtrim($path, '/').'/public') {
                     $dirNameOnly = substr($dir, 7); // Odstraníme 'public/' prefix
-                    $remoteDirs[] = rtrim($publicPath, '/') . '/' . $dirNameOnly;
+                    $remoteDirs[] = rtrim($publicPath, '/').'/'.$dirNameOnly;
                 }
 
                 foreach ($remoteDirs as $remoteDir) {
                     // Zajistíme, že cílový adresář na serveru existuje (pro soubory vytvoříme rodičovský adresář)
                     $remoteParentDir = is_dir($localDir) ? $remoteDir : dirname($remoteDir);
-                    Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p " . escapeshellarg($remoteParentDir) . "'");
+                    Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p ".escapeshellarg($remoteParentDir)."'");
 
                     // 1. Rsync
                     $checkRsync = Process::run('rsync --version');
                     if ($checkRsync->successful()) {
-                        $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' " . escapeshellarg($localDir) . " {$user}@{$host}:" . escapeshellarg($remoteDir);
+                        $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($remoteDir);
                         $result = Process::forever()->run($rsyncCmd, function (string $type, string $output) {
                             if ($type === 'out' && strlen(trim($output)) > 0) {
-                                $this->line('  ' . trim($output));
+                                $this->line('  '.trim($output));
                             }
                         });
                         if ($result->successful()) {
@@ -358,7 +358,7 @@ class AppSyncCommand extends Command
                         // abychom předešli hromadění starých souborů (náhrada za rsync --delete).
                         if (is_dir($localDir)) {
                             $this->line("  Cleaning remote directory before FTP sync: $remoteDir");
-                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf " . escapeshellarg($remoteDir) . "/*'");
+                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
                         }
 
                         $this->line("  Trying FTP fallback for $remoteDir...");
@@ -372,12 +372,12 @@ class AppSyncCommand extends Command
                         // Obdobně pro SCP fallback vyčistíme cílový adresář
                         if (is_dir($localDir)) {
                             $this->line("  Cleaning remote directory before SCP sync: $remoteDir");
-                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf " . escapeshellarg($remoteDir) . "/*'");
+                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
                         }
 
                         $this->line('  Falling back to SCP...');
-                        $sourcePath = is_dir($localDir) ? $localDir . '/.' : $localDir;
-                        $scpCmd = "scp -P {$port} -r " . escapeshellarg($sourcePath) . " {$user}@{$host}:" . escapeshellarg($remoteDir);
+                        $sourcePath = is_dir($localDir) ? $localDir.'/.' : $localDir;
+                        $scpCmd = "scp -P {$port} -r ".escapeshellarg($sourcePath)." {$user}@{$host}:".escapeshellarg($remoteDir);
                         Process::forever()->run($scpCmd);
                     }
                 }
@@ -487,7 +487,7 @@ class AppSyncCommand extends Command
             $parts = explode('/', trim($targetDir, '/'));
             $path = '';
             foreach ($parts as $part) {
-                $path .= '/' . $part;
+                $path .= '/'.$part;
                 if (! @ftp_chdir($conn, $path)) {
                     @ftp_mkdir($conn, $path);
                 }
@@ -513,8 +513,8 @@ class AppSyncCommand extends Command
             if ($item === '.' || $item === '..') {
                 continue;
             }
-            $localPath = $localDir . '/' . $item;
-            $remotePath = $remoteDir . '/' . $item;
+            $localPath = $localDir.'/'.$item;
+            $remotePath = $remoteDir.'/'.$item;
             if (is_dir($localPath)) {
                 if (! @ftp_chdir($conn, $remotePath)) {
                     @ftp_mkdir($conn, $remotePath);

@@ -2,24 +2,25 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 use App\Models\BasketballMatch;
-use App\Models\StatisticRow;
 use App\Models\ExternalImportRun;
 use App\Models\Season;
+use App\Models\StatisticRow;
 use App\Models\Team;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class QASmoke extends Command
 {
     protected $signature = 'qa:smoke {--prod : Ověří produkční stav}';
+
     protected $description = 'Provede rychlý "smoke test" (web, auth, data presence)';
 
     public function handle()
     {
-        $this->info("========================================");
-        $this->info("  QA Smoke Test" . ($this->option('prod') ? ' [PROD]' : ''));
-        $this->info("========================================");
+        $this->info('========================================');
+        $this->info('  QA Smoke Test'.($this->option('prod') ? ' [PROD]' : ''));
+        $this->info('========================================');
 
         $results = [
             'Web Availability' => $this->checkWeb(),
@@ -29,10 +30,12 @@ class QASmoke extends Command
 
         if (in_array(false, array_values($results), true)) {
             $this->error("\n❌ Smoke test selhal!");
+
             return 1;
         }
 
         $this->info("\n✅ Smoke test úspěšný.");
+
         return 0;
     }
 
@@ -43,12 +46,15 @@ class QASmoke extends Command
             $response = Http::get($url);
             if ($response->successful()) {
                 $this->line("✅ Web [{$url}]: Dostupný (200).");
+
                 return true;
             }
             $this->error("❌ Web [{$url}]: Vrátil kód {$response->status()}.");
+
             return false;
         } catch (\Exception $e) {
-            $this->error("❌ Web [{$url}]: Chyba spojení - " . $e->getMessage());
+            $this->error("❌ Web [{$url}]: Chyba spojení - ".$e->getMessage());
+
             return false;
         }
     }
@@ -56,8 +62,9 @@ class QASmoke extends Command
     private function checkData(): bool
     {
         $season = Season::where('is_active', true)->first();
-        if (!$season) {
-            $this->error("❌ Data: Žádná aktivní sezóna.");
+        if (! $season) {
+            $this->error('❌ Data: Žádná aktivní sezóna.');
+
             return false;
         }
 
@@ -65,7 +72,7 @@ class QASmoke extends Command
         $this->line("ℹ️ Data: Aktivní sezóna {$season->name} má {$matchCount} zápasů.");
 
         if ($matchCount === 0) {
-            $this->warn("⚠️ Data: V aktivní sezóně nejsou žádné zápasy.");
+            $this->warn('⚠️ Data: V aktivní sezóně nejsou žádné zápasy.');
         }
 
         $teams = Team::whereIn('slug', ['muzi-c', 'muzi-e'])->get();
@@ -89,7 +96,8 @@ class QASmoke extends Command
     {
         $lastRuns = ExternalImportRun::latest()->limit(5)->get();
         if ($lastRuns->isEmpty()) {
-            $this->warn("⚠️ Import: Žádná historie importů.");
+            $this->warn('⚠️ Import: Žádná historie importů.');
+
             return true;
         }
 
@@ -99,10 +107,12 @@ class QASmoke extends Command
             foreach ($lastRuns->where('status', 'failed') as $run) {
                 $this->line("   - Run #{$run->id} [{$run->run_type}]: {$run->error_summary}");
             }
+
             return false;
         }
 
-        $this->line("✅ Import: Poslední běhy jsou v pořádku (success/skipped/partial_failed).");
+        $this->line('✅ Import: Poslední běhy jsou v pořádku (success/skipped/partial_failed).');
+
         return true;
     }
 }

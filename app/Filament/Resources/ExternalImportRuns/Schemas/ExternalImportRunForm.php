@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ExternalImportRuns\Schemas;
 
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -72,7 +71,7 @@ class ExternalImportRunForm
                             ->label('Chyba')
                             ->columnSpanFull()
                             ->readOnly()
-                            ->hidden(fn ($get) => !$get('error_summary')),
+                            ->hidden(fn ($get) => ! $get('error_summary')),
                     ]),
                 Section::make('Metadata a doplňky')
                     ->schema([

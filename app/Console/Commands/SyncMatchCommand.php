@@ -40,8 +40,9 @@ class SyncMatchCommand extends Command
         $teamSlug = $this->argument('teamSlug');
 
         $team = Team::where('slug', $teamSlug)->first();
-        if (!$team) {
+        if (! $team) {
             $this->error("Tým se slugem '{$teamSlug}' nebyl nalezen.");
+
             return self::FAILURE;
         }
 
@@ -49,8 +50,9 @@ class SyncMatchCommand extends Command
             ? Season::find($seasonInput)
             : Season::where('name', $seasonInput)->first();
 
-        if (!$season) {
+        if (! $season) {
             $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
+
             return self::FAILURE;
         }
 
@@ -60,14 +62,14 @@ class SyncMatchCommand extends Command
             ->where('metadata->external->season_external_match_id', $matchExternalId)
             ->first();
 
-        $this->info("Synchronizuji zápas: " . ($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
+        $this->info('Synchronizuji zápas: '.($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
 
         $options = [
             'force' => $this->option('force'),
         ];
 
         if ($this->option('sync')) {
-            $this->info("Spouštím synchronizaci synchronně...");
+            $this->info('Spouštím synchronizaci synchronně...');
             // syncMatchDetail očekává interní matchId, ale my ho možná ještě nemáme v DB
             // nebo chceme jen synchronizovat podle externího ID.
             // Služba syncMatchDetail v ExternalStatsSyncService bere matchId.
@@ -76,21 +78,23 @@ class SyncMatchCommand extends Command
             // Pokud match neexistuje, musíme ho nejdřív najít v seznamu zápasů.
             // Ale z CLI obvykle synchronizujeme už existující nebo známý zápas.
 
-            if (!$match) {
+            if (! $match) {
                 $this->warn("Zápas s externím ID {$matchExternalId} nebyl nalezen v interní DB. Zkuste nejdříve sync-team-season.");
+
                 return self::FAILURE;
             }
 
             $syncService->syncMatchDetail($match->id);
-            $this->info("Synchronizace zápasu dokončena.");
+            $this->info('Synchronizace zápasu dokončena.');
         } else {
-            $this->info("Zařazuji synchronizaci do fronty (SyncMatchDetailJob)...");
-            if (!$match) {
-                 $this->error("Zápas nebyl nalezen v DB. SyncMatchDetailJob vyžaduje existující ID.");
-                 return self::FAILURE;
+            $this->info('Zařazuji synchronizaci do fronty (SyncMatchDetailJob)...');
+            if (! $match) {
+                $this->error('Zápas nebyl nalezen v DB. SyncMatchDetailJob vyžaduje existující ID.');
+
+                return self::FAILURE;
             }
             SyncMatchDetailJob::dispatch($match->id, $team->id, $season->id, $matchExternalId, $options);
-            $this->info("Úloha byla zařazena.");
+            $this->info('Úloha byla zařazena.');
         }
 
         return self::SUCCESS;

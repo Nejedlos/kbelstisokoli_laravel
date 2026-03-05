@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
+
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
@@ -41,6 +42,7 @@ class LocalAssetsDeployCommand extends Command
         if (! $buildResult->successful()) {
             error('❌ Build selhal:');
             note($buildResult->errorOutput());
+
             return self::FAILURE;
         }
 
@@ -59,6 +61,7 @@ class LocalAssetsDeployCommand extends Command
 
         if (! $ftpHost || ! $ftpUser || ! $ftpPass || ! $prodPath) {
             error('❌ Chybí FTP konfigurace v .env (PROD_FTP_HOST, PROD_FTP_USER, PROD_FTP_PASSWORD, PROD_PATH).');
+
             return self::FAILURE;
         }
 
@@ -76,18 +79,19 @@ class LocalAssetsDeployCommand extends Command
             // Pokud máme PROD_PUBLIC_PATH, nahráváme přímo do ní (např. /subdomains/new/build)
             // Pokud nemáme, nahráváme do relativní cesty v rámci PROD_PATH (např. /secret/public/build)
             if ($remotePublicPath) {
-                $remoteDir = rtrim($remotePublicPath, '/') . '/' . $dirNameOnly;
+                $remoteDir = rtrim($remotePublicPath, '/').'/'.$dirNameOnly;
             } else {
-                $remoteDir = rtrim($prodPath, '/') . '/' . $dir;
+                $remoteDir = rtrim($prodPath, '/').'/'.$dir;
             }
 
             if (! is_dir($localDir)) {
                 $this->warn("⚠️ Složka {$localDir} neexistuje, přeskakuji.");
+
                 continue;
             }
 
             info("📤 Nahrávám {$dir} do {$remoteDir}...");
-            note("Tento proces může trvat několik minut v závislosti na rychlosti připojení.");
+            note('Tento proces může trvat několik minut v závislosti na rychlosti připojení.');
 
             $success = spin(
                 fn () => $this->syncViaFtp($localDir, $remoteDir, $ftpHost, $ftpUser, $ftpPass, $ftpPort),
@@ -96,6 +100,7 @@ class LocalAssetsDeployCommand extends Command
 
             if (! $success) {
                 error("❌ FTP transfer složky {$dir} selhal.");
+
                 return self::FAILURE;
             }
         }
@@ -122,14 +127,14 @@ class LocalAssetsDeployCommand extends Command
             $parts = explode('/', trim($remoteDir, '/'));
             $path = '';
             foreach ($parts as $part) {
-                $path .= '/' . $part;
+                $path .= '/'.$part;
                 if (! @ftp_chdir($conn, $path)) {
                     @ftp_mkdir($conn, $path);
                 }
             }
 
             // 2. Před nahráváním se pokusíme promazat starý manifest, aby nedošlo k mismatchi
-            $manifestPath = $remoteDir . '/manifest.json';
+            $manifestPath = $remoteDir.'/manifest.json';
             @ftp_delete($conn, $manifestPath);
 
             // 3. Samotné nahrávání (již bez opětovného mkdir/chdir v rekurzi)
@@ -154,8 +159,8 @@ class LocalAssetsDeployCommand extends Command
                 continue;
             }
 
-            $localPath = $localDir . '/' . $item;
-            $remotePath = $remoteDir . '/' . $item;
+            $localPath = $localDir.'/'.$item;
+            $remotePath = $remoteDir.'/'.$item;
 
             if (is_dir($localPath)) {
                 // Pro podložky vytvoříme adresář a pokračujeme rekurzivně

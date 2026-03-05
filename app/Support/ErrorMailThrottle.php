@@ -11,21 +11,19 @@ class ErrorMailThrottle
     /**
      * Check if the error mail should be throttled based on fingerprint.
      *
-     * @param Throwable $e
-     * @param string|null $url
      * @return bool True if should be throttled (suppressed), false if should be sent.
      */
     public static function shouldThrottle(Throwable $e, ?string $url = null): bool
     {
         // 1. Check if deduplication is enabled globally
-        if (!config('mail.error_reporting.dedup_enabled', true)) {
+        if (! config('mail.error_reporting.dedup_enabled', true)) {
             return false;
         }
 
         // 2. Check if current environment should be deduped
         $dedupEnvs = config('mail.error_reporting.dedup_environments', ['production', 'staging']);
         $currentEnv = config('app.env');
-        if (!in_array($currentEnv, $dedupEnvs)) {
+        if (! in_array($currentEnv, $dedupEnvs)) {
             // Local development override: force always send if configured
             if ($currentEnv === 'local' && config('mail.error_reporting.always_send', false)) {
                 return false;
@@ -44,11 +42,12 @@ class ErrorMailThrottle
             return false;
         }
 
-        $key = "error_mail_throttle:" . $fingerprint;
+        $key = 'error_mail_throttle:'.$fingerprint;
 
         // 4. Check if we already sent this error within the TTL window
         if (Cache::has($key)) {
             self::logSuppression($fingerprint, $e);
+
             return true;
         }
 
@@ -80,7 +79,7 @@ class ErrorMailThrottle
             $normalizedMessage,
             $file,
             $line,
-            $url
+            $url,
         ];
 
         return hash('sha256', implode('|', $data));
@@ -93,13 +92,13 @@ class ErrorMailThrottle
     {
         // We use a separate cache key to rate-limit the suppression logs themselves
         // so we don't flood the main log file with thousands of "suppressed" entries.
-        $logKey = "error_mail_suppressed_log:" . $fingerprint;
+        $logKey = 'error_mail_suppressed_log:'.$fingerprint;
 
-        if (!Cache::has($logKey)) {
-            Log::info("Error mail suppressed (deduped)", [
+        if (! Cache::has($logKey)) {
+            Log::info('Error mail suppressed (deduped)', [
                 'fingerprint' => $fingerprint,
                 'exception' => get_class($e),
-                'file' => $e->getFile() . ':' . $e->getLine(),
+                'file' => $e->getFile().':'.$e->getLine(),
                 'ttl' => config('mail.error_reporting.dedup_ttl', 900),
             ]);
 

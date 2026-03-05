@@ -14,9 +14,7 @@ class SyncTeamSeasonJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @param int $teamId
-     * @param int $seasonId
-     * @param array $options [limit, force]
+     * @param  array  $options  [limit, force]
      */
     public function __construct(
         protected int $teamId,

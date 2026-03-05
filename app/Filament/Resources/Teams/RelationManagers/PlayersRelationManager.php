@@ -26,7 +26,7 @@ class PlayersRelationManager extends RelationManager
     protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
         $playerTable = $query->getModel()->getTable();
-        $userTable = (new \App\Models\User())->getTable();
+        $userTable = (new \App\Models\User)->getTable();
 
         return $query->with(['user'])
             ->where("{$playerTable}.is_active", true)
@@ -97,7 +97,7 @@ class PlayersRelationManager extends RelationManager
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
                     ->recordSelectOptionsQuery(function (\Illuminate\Database\Eloquent\Builder $query) {
-                        $userTable = (new \App\Models\User())->getTable();
+                        $userTable = (new \App\Models\User)->getTable();
                         $playerTable = $query->getModel()->getTable();
 
                         return $query

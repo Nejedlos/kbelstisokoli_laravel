@@ -192,6 +192,7 @@ class BrandingService
             }
 
             $locale = app()->getLocale();
+
             return $this->dbSettings = Cache::remember("global_branding_settings_{$locale}", 3600, function () {
                 // Optimalizované zjištění existence tabulky přes cache (Schema::hasTable je drahé v každém requestu)
                 $tableExists = Cache::rememberForever('schema_has_settings_table', function () {
@@ -215,7 +216,7 @@ class BrandingService
                     ->orWhereIn('key', [
                         'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
                         'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset',
-                        'bank_account', 'bank_name'
+                        'bank_account', 'bank_name',
                     ])
                     ->get(['key', 'value']);
 

@@ -17,10 +17,7 @@ class MatchSyncService
     /**
      * Synchronizuje zápas.
      *
-     * @param Team $team
-     * @param Season $season
-     * @param array $matchData [scheduled_at, home_team, away_team, score, status, external_match_id]
-     * @return BasketballMatch
+     * @param  array  $matchData  [scheduled_at, home_team, away_team, score, status, external_match_id]
      */
     public function sync(Team $team, Season $season, array $matchData): BasketballMatch
     {
@@ -54,7 +51,7 @@ class MatchSyncService
             ->first();
 
         // Pokud jsme nenašli podle identity key, zkusíme podle external_id (pokud ho máme)
-        if (!$match && $externalMatchId) {
+        if (! $match && $externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('metadata->external_id', $externalMatchId)
                 ->first();

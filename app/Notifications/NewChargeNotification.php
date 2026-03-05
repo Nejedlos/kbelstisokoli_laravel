@@ -7,9 +7,6 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 class NewChargeNotification extends BaseNotification
 {
-    /**
-     * @var string
-     */
     protected string $notificationType = 'finance';
 
     /**
@@ -35,7 +32,7 @@ class NewChargeNotification extends BaseNotification
             ->line(__('member.notifications.mail.charge_item', ['title' => $this->charge->title]))
             ->line(__('member.notifications.mail.charge_amount', ['amount' => number_format($this->charge->amount_total, 0, ',', ' ')]))
             ->line(__('member.notifications.mail.charge_due_date', [
-                'date' => $this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : __('member.notifications.mail.charge_due_date_unknown')
+                'date' => $this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : __('member.notifications.mail.charge_due_date_unknown'),
             ]))
             ->action(__('member.notifications.view_payments'), route('member.economy.index'))
             ->line(__('member.notifications.mail.charge_please_pay'))

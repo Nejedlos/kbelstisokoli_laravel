@@ -54,7 +54,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Robustní fix pro Vite manifest na Webglobe hostingu (subdomény vs. root)
         $this->app->singleton(Vite::class, function ($app) {
-            return new class extends Vite {
+            return new class extends Vite
+            {
                 protected function manifestPath($buildDirectory): string
                 {
                     $path = parent::manifestPath($buildDirectory);
@@ -65,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
 
                     // Fallback: Pokud manifest není v public_path (subdoména),
                     // zkusíme ho najít v base_path('public/build/manifest.json') - root aplikace.
-                    $fallback = base_path('public/' . $buildDirectory . '/manifest.json');
+                    $fallback = base_path('public/'.$buildDirectory.'/manifest.json');
                     if (file_exists($fallback)) {
                         return $fallback;
                     }

@@ -7,13 +7,13 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 
 class ExternalTeamSeasonConfigsTable
 {
@@ -110,7 +110,7 @@ class ExternalTeamSeasonConfigsTable
             ->schema([
                 RepeatableEntry::make('roster')
                     ->label('Extrahovaná soupiska')
-                    ->getStateUsing(fn () => array_map(fn($row) => [
+                    ->getStateUsing(fn () => array_map(fn ($row) => [
                         'name' => $row->values['player_name'] ?? $row->rowLabel,
                         'ext_id' => $row->playerId,
                         'birth' => $row->values['birth_year'] ?? '-',
@@ -123,7 +123,7 @@ class ExternalTeamSeasonConfigsTable
                     ->columns(3),
                 RepeatableEntry::make('matches')
                     ->label('Extrahované zápasy')
-                    ->getStateUsing(fn () => array_map(fn($row) => [
+                    ->getStateUsing(fn () => array_map(fn ($row) => [
                         'date' => $row->values['scheduled_at'] ?? '-',
                         'opponent' => $row->values['opponent'] ?? '-',
                         'score' => $row->values['score'] ?? '-',

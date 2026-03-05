@@ -143,9 +143,9 @@ class AvatarModal extends Component
 
             $fileName = $mainFile->getFilename();
             // Pokud je soubor v podadresáři (např. conversions), musíme to zohlednit v URL
-            $relativeDir = str_replace($path . '/' . $mediaId . '/', '', $mainFile->getPath() . '/');
-            if ($relativeDir === $mainFile->getPath() . '/') { // Fallback pokud str_replace selže
-                 $relativeDir = str_contains($mainFile->getPathname(), 'conversions') ? 'conversions/' : '';
+            $relativeDir = str_replace($path.'/'.$mediaId.'/', '', $mainFile->getPath().'/');
+            if ($relativeDir === $mainFile->getPath().'/') { // Fallback pokud str_replace selže
+                $relativeDir = str_contains($mainFile->getPathname(), 'conversions') ? 'conversions/' : '';
             }
 
             $mainUrl = asset('uploads/defaults/'.$mediaId.'/'.$relativeDir.$fileName);
@@ -181,6 +181,7 @@ class AvatarModal extends Component
         // Pokud je nahráváno jako systémový avatar a je vybráno více souborů, neřešíme ořez (automatický resize)
         if ($this->uploadAsSystem && is_array($this->avatarFile) && count($this->avatarFile) > 1) {
             $this->previewUrl = null; // Náhled u hromadného importu neřešíme (nebo jen indikaci)
+
             return;
         }
 
@@ -224,7 +225,7 @@ class AvatarModal extends Component
             return;
         }
 
-        $path = public_path('uploads/defaults/' . $this->confirmingSystemDelete);
+        $path = public_path('uploads/defaults/'.$this->confirmingSystemDelete);
         if (is_dir($path)) {
             File::deleteDirectory($path);
         }
@@ -276,6 +277,7 @@ class AvatarModal extends Component
         // 1. Hromadný import jako systémový avatar (pokud jsou vybrány soubory a skip ořezu)
         if ($this->uploadAsSystem && is_array($this->avatarFile) && count($this->avatarFile) > 1) {
             $this->saveSystemAvatarsBulk();
+
             return;
         }
 
@@ -286,6 +288,7 @@ class AvatarModal extends Component
 
         if ($this->uploadAsSystem) {
             $this->saveSystemAvatar($croppedImageBase64);
+
             return;
         }
 
@@ -349,7 +352,7 @@ class AvatarModal extends Component
     protected function processAndSaveSystemAvatar($sourcePath)
     {
         // 1. Nejprve vytvoříme dočasný WebP soubor pro výpočet MD5 a kontrolu duplicity
-        $tempFile = tempnam(sys_get_temp_dir(), 'avatar_') . '.webp';
+        $tempFile = tempnam(sys_get_temp_dir(), 'avatar_').'.webp';
         $this->resizeToWebp($sourcePath, $tempFile, 1000, 1000); // Zvětšeno pro kvalitní hlavní avatar
 
         if (! file_exists($tempFile)) {
@@ -367,6 +370,7 @@ class AvatarModal extends Component
                 if (! str_contains($file->getRelativePathname(), 'conversions') && $file->getExtension() === 'webp') {
                     if (md5_file($file->getRealPath()) === $newMd5) {
                         @unlink($tempFile);
+
                         return; // Duplikát nalezen, přeskakujeme
                     }
                 }
@@ -383,26 +387,28 @@ class AvatarModal extends Component
             }
         }
         $newId = $maxId + 1;
-        $newPath = $path . '/' . $newId;
-        $conversionsPath = $newPath . '/conversions';
+        $newPath = $path.'/'.$newId;
+        $conversionsPath = $newPath.'/conversions';
 
         File::makeDirectory($conversionsPath, 0755, true);
 
-        $fileName = 'avatar-' . time() . '-' . uniqid() . '.webp';
+        $fileName = 'avatar-'.time().'-'.uniqid().'.webp';
         $thumbName = str_replace('.webp', '-thumb.webp', $fileName);
 
         // 4. Přesuneme dočasný soubor na finální místo a vytvoříme thumb
-        File::move($tempFile, $newPath . '/' . $fileName);
-        $this->resizeToWebp($sourcePath, $conversionsPath . '/' . $thumbName, 200, 200); // Thumb ve 200x200
+        File::move($tempFile, $newPath.'/'.$fileName);
+        $this->resizeToWebp($sourcePath, $conversionsPath.'/'.$thumbName, 200, 200); // Thumb ve 200x200
     }
 
     protected function resizeToWebp($sourcePath, $targetPath, $width, $height)
     {
         $info = getimagesize($sourcePath);
-        if (! $info) return;
+        if (! $info) {
+            return;
+        }
 
         $mime = $info['mime'];
-        $src = match($mime) {
+        $src = match ($mime) {
             'image/jpeg' => imagecreatefromjpeg($sourcePath),
             'image/png' => imagecreatefrompng($sourcePath),
             'image/webp' => imagecreatefromwebp($sourcePath),
@@ -410,7 +416,9 @@ class AvatarModal extends Component
             default => null,
         };
 
-        if (! $src) return;
+        if (! $src) {
+            return;
+        }
 
         $srcW = imagesx($src);
         $srcH = imagesy($src);
@@ -475,22 +483,22 @@ class AvatarModal extends Component
             }
         }
         $newId = $maxId + 1;
-        $newPath = $path . '/' . $newId;
-        $conversionsPath = $newPath . '/conversions';
+        $newPath = $path.'/'.$newId;
+        $conversionsPath = $newPath.'/conversions';
 
         File::makeDirectory($conversionsPath, 0755, true);
 
-        $fileName = 'avatar-' . time() . '.webp';
-        $thumbName = 'avatar-' . time() . '-thumb.webp';
+        $fileName = 'avatar-'.time().'.webp';
+        $thumbName = 'avatar-'.time().'-thumb.webp';
 
         // 3. Uložíme hlavní obrázek (ořezaný originál z frontendu - cca 1200x1200px)
         // Omezíme jej v PHP na max 1000x1000 pro úsporu místa a dostatečnou kvalitu
-        $tempCroppedFile = tempnam(sys_get_temp_dir(), 'cropped_') . '.webp';
+        $tempCroppedFile = tempnam(sys_get_temp_dir(), 'cropped_').'.webp';
         File::put($tempCroppedFile, $decodedImage);
 
         // Uložíme jako hlavní (1000x1000) a jako thumb (200x200)
-        $this->resizeToWebp($tempCroppedFile, $newPath . '/' . $fileName, 1000, 1000);
-        $this->resizeToWebp($tempCroppedFile, $conversionsPath . '/' . $thumbName, 200, 200);
+        $this->resizeToWebp($tempCroppedFile, $newPath.'/'.$fileName, 1000, 1000);
+        $this->resizeToWebp($tempCroppedFile, $conversionsPath.'/'.$thumbName, 200, 200);
 
         @unlink($tempCroppedFile);
 

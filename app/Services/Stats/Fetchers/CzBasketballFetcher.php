@@ -40,6 +40,7 @@ class CzBasketballFetcher implements StatFetcherInterface
     public function setCurrentRun(ExternalImportRun $run): self
     {
         $this->currentRun = $run;
+
         return $this;
     }
 
@@ -54,15 +55,16 @@ class CzBasketballFetcher implements StatFetcherInterface
             $response = Http::withHeaders([
                 'User-Agent' => $this->userAgent,
             ])
-            ->timeout($this->timeout)
-            ->retry($this->retryCount, $this->retryDelay, function (\Exception $exception, $request) {
-                Log::warning("CzBasketballFetcher: Pokus o stažení selhal, zkouším znovu. Chyba: {$exception->getMessage()}");
-                return true;
-            }, true) // true pro exponenciální backoff
-            ->withOptions([
-                'allow_redirects' => true,
-            ])
-            ->get($url);
+                ->timeout($this->timeout)
+                ->retry($this->retryCount, $this->retryDelay, function (\Exception $exception, $request) {
+                    Log::warning("CzBasketballFetcher: Pokus o stažení selhal, zkouším znovu. Chyba: {$exception->getMessage()}");
+
+                    return true;
+                }, true) // true pro exponenciální backoff
+                ->withOptions([
+                    'allow_redirects' => true,
+                ])
+                ->get($url);
 
             Log::info("CzBasketballFetcher: Staženo. Status: {$response->status()}, Final URL: {$response->effectiveUri()}");
 
@@ -111,7 +113,7 @@ class CzBasketballFetcher implements StatFetcherInterface
      */
     protected function saveSnapshot(string $html, string $url, ?Response $response = null, bool $isError = false): void
     {
-        if (!$this->currentRun) {
+        if (! $this->currentRun) {
             return;
         }
 

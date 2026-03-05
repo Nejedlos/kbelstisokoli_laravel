@@ -9,7 +9,6 @@ use App\Models\ClubEvent;
 use App\Models\Season;
 use App\Models\Training;
 use App\Models\UserSeasonConfig;
-use App\Enums\ExcuseReason;
 use App\Services\Member\MemberContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,7 +44,7 @@ class AttendanceController extends Controller
                 'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
-            ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
+            ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)))
             ->orderBy('starts_at');
 
         $matchesQuery = BasketballMatch::with([
@@ -58,7 +57,7 @@ class AttendanceController extends Controller
                 'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
-            ->when($activeTeamId, fn($q) => $q->where('team_id', $activeTeamId))
+            ->when($activeTeamId, fn ($q) => $q->where('team_id', $activeTeamId))
             ->orderBy('scheduled_at');
 
         $eventsQuery = ClubEvent::with([
@@ -71,7 +70,7 @@ class AttendanceController extends Controller
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('rsvp_enabled', true)
-            ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
+            ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)))
             ->orderBy('starts_at');
 
         // Aplikace filtrů na datum
@@ -111,9 +110,9 @@ class AttendanceController extends Controller
         if ($filterAttendance !== 'all') {
             $applyAttendanceFilter = function ($query, $status, $userId, $dateColumn) {
                 if ($status === 'none') {
-                    $query->whereDoesntHave('attendances', fn($q) => $q->where('user_id', $userId));
+                    $query->whereDoesntHave('attendances', fn ($q) => $q->where('user_id', $userId));
                 } else {
-                    $query->whereHas('attendances', fn($q) => $q->where('user_id', $userId)->where('planned_status', $status));
+                    $query->whereHas('attendances', fn ($q) => $q->where('user_id', $userId)->where('planned_status', $status));
                 }
             };
 
@@ -341,7 +340,7 @@ class AttendanceController extends Controller
         // Aplikace filtrů na stav docházky
         if ($filterAttendance !== 'all') {
             if ($filterAttendance === 'none') {
-                $attendancesQuery->where(fn($q) => $q->whereNull('planned_status')->orWhere('planned_status', 'pending'));
+                $attendancesQuery->where(fn ($q) => $q->whereNull('planned_status')->orWhere('planned_status', 'pending'));
             } else {
                 $attendancesQuery->where('planned_status', $filterAttendance);
             }

@@ -2,9 +2,7 @@
 
 namespace Tests\Feature\Stats\Sync;
 
-use App\Models\BasketballMatch;
 use App\Models\ExternalEntityMapping;
-use App\Models\Opponent;
 use App\Models\Season;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
@@ -12,8 +10,8 @@ use App\Models\Team;
 use App\Models\User;
 use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Sync\MatchSyncService;
-use App\Services\Stats\Sync\StatisticSyncService;
 use App\Services\Stats\Sync\StatisticSetService;
+use App\Services\Stats\Sync\StatisticSyncService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -54,7 +52,7 @@ class MatchAndStatSyncTest extends TestCase
         $user = User::create([
             'name' => 'Marek Novotný',
             'email' => 'marek@example.com',
-            'password' => 'pass'
+            'password' => 'pass',
         ]);
         ExternalEntityMapping::create([
             'source_key' => 'czbasketball',

@@ -57,7 +57,7 @@ class DashboardController extends Controller
                     'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
                 ])
                 ->where('starts_at', '>=', $now)
-                ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
+                ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)))
                 ->orderBy('starts_at')
                 ->limit(3)
                 ->get()
@@ -86,7 +86,7 @@ class DashboardController extends Controller
                     'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
                 ])
                 ->where('scheduled_at', '>=', $now)
-                ->when($activeTeamId, fn($q) => $q->where('team_id', $activeTeamId))
+                ->when($activeTeamId, fn ($q) => $q->where('team_id', $activeTeamId))
                 ->orderBy('scheduled_at')
                 ->limit(3)
                 ->get()
@@ -125,7 +125,7 @@ class DashboardController extends Controller
                 ])
                 ->where('starts_at', '>=', $now)
                 ->where('rsvp_enabled', true)
-                ->when($activeTeamId, fn($q) => $q->whereHas('teams', fn($sq) => $sq->where('teams.id', $activeTeamId)))
+                ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)))
                 ->orderBy('starts_at')
                 ->limit(3)
                 ->get()
@@ -184,7 +184,7 @@ class DashboardController extends Controller
 
         // 4. Nudges (doporučení pro uživatele) - počítáme pokaždé čerstvé
         $nudges = [];
-        if (!$user->hasMedia('avatar')) {
+        if (! $user->hasMedia('avatar')) {
             $nudges[] = [
                 'id' => 'avatar',
                 'title' => __('dashboard.nudges.avatar.title'),

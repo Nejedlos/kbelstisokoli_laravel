@@ -40,8 +40,9 @@ class SyncTeamSeasonCommand extends Command
         $seasonInput = $this->argument('seasonNameOrId');
 
         $team = Team::where('slug', $teamSlug)->first();
-        if (!$team) {
+        if (! $team) {
             $this->error("Tým se slugem '{$teamSlug}' nebyl nalezen.");
+
             return self::FAILURE;
         }
 
@@ -49,8 +50,9 @@ class SyncTeamSeasonCommand extends Command
             ? Season::find($seasonInput)
             : Season::where('name', $seasonInput)->first();
 
-        if (!$season) {
+        if (! $season) {
             $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
+
             return self::FAILURE;
         }
 
@@ -63,7 +65,7 @@ class SyncTeamSeasonCommand extends Command
         ];
 
         if ($this->option('dry-run')) {
-            $this->info("Spouštím DRY-RUN náhled synchronizace...");
+            $this->info('Spouštím DRY-RUN náhled synchronizace...');
             $results = $syncService->previewSync($team->id, $season->id);
 
             $this->table(['Kategorie', 'Počet / Informace'], [
@@ -77,13 +79,13 @@ class SyncTeamSeasonCommand extends Command
         }
 
         if ($this->option('sync')) {
-            $this->info("Spouštím synchronizaci synchronně...");
+            $this->info('Spouštím synchronizaci synchronně...');
             $syncService->syncTeamSeason($team->id, $season->id, $options);
-            $this->info("Synchronizace dokončena.");
+            $this->info('Synchronizace dokončena.');
         } else {
-            $this->info("Zařazuji synchronizaci do fronty (SyncTeamSeasonJob)...");
+            $this->info('Zařazuji synchronizaci do fronty (SyncTeamSeasonJob)...');
             SyncTeamSeasonJob::dispatch($team->id, $season->id, $options);
-            $this->info("Úloha byla zařazena.");
+            $this->info('Úloha byla zařazena.');
         }
 
         return self::SUCCESS;

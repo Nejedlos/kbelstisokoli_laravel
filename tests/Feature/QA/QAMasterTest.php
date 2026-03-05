@@ -2,30 +2,21 @@
 
 namespace Tests\Feature\QA;
 
-use App\Models\ExternalEntityMapping;
-use App\Models\ExternalImportRun;
-use App\Models\ExternalTeamMapping;
-use App\Models\ExternalTeamSeasonConfig;
-use App\Models\Opponent;
 use App\Models\BasketballMatch;
-use App\Models\PlayerProfile;
+use App\Models\ExternalImportRun;
+use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\StatisticSet;
-use App\Models\StatisticRow;
 use App\Services\Stats\Contracts\StatFetcherInterface;
-use App\Services\Stats\Sync\ExternalStatsSyncService;
-use App\Services\Stats\Sync\StatisticSyncService;
 use App\Services\Stats\Legacy\Extractors\LegacyStatExtractor;
 use App\Services\Stats\Legacy\LegacyFileClassifier;
+use App\Services\Stats\Sync\ExternalStatsSyncService;
 use App\Services\Stats\Sync\StatisticSetService;
-use Filament\Facades\Filament;
+use App\Services\Stats\Sync\StatisticSyncService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Mockery;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class QAMasterTest extends TestCase
@@ -93,13 +84,13 @@ class QAMasterTest extends TestCase
         // Mock Fetcher pro soupisku, zápasy i detail
         $fetcher = Mockery::mock(StatFetcherInterface::class);
         $fetcher->shouldReceive('fetch')
-            ->with(Mockery::on(fn($url) => str_contains($url, 'tym/7738')), Mockery::any())
+            ->with(Mockery::on(fn ($url) => str_contains($url, 'tym/7738')), Mockery::any())
             ->andReturn(File::get(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html')));
         $fetcher->shouldReceive('fetch')
-            ->with(Mockery::on(fn($url) => str_contains($url, 'zapasy')), Mockery::any())
+            ->with(Mockery::on(fn ($url) => str_contains($url, 'zapasy')), Mockery::any())
             ->andReturn(File::get(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html')));
         $fetcher->shouldReceive('fetch')
-            ->with(Mockery::on(fn($url) => str_contains($url, 'zapas/')), Mockery::any())
+            ->with(Mockery::on(fn ($url) => str_contains($url, 'zapas/')), Mockery::any())
             ->andReturn(File::get(base_path('tests/Fixtures/Stats/CzBasketball/match_detail.html')));
 
         $this->app->instance(StatFetcherInterface::class, $fetcher);
@@ -111,25 +102,25 @@ class QAMasterTest extends TestCase
         try {
             $syncService->syncTeamSeason($team->id, $season->id);
         } catch (\Exception $e) {
-            dump("SyncTeamSeason Exception: " . $e->getMessage());
+            dump('SyncTeamSeason Exception: '.$e->getMessage());
         }
 
-        dump("Import runs status & errors: ", ExternalImportRun::all()->mapWithKeys(fn($r) => [$r->run_type => ['status' => $r->status, 'error' => $r->error_summary]])->toArray());
+        dump('Import runs status & errors: ', ExternalImportRun::all()->mapWithKeys(fn ($r) => [$r->run_type => ['status' => $r->status, 'error' => $r->error_summary]])->toArray());
 
         if (BasketballMatch::count() === 0) {
-            dump("Matches list fixture content length: " . strlen(File::get(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html'))));
+            dump('Matches list fixture content length: '.strlen(File::get(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html'))));
             $extractor = $this->app->make(\App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor::class);
             $data = $extractor->extract(File::get(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html')));
-            dump("Extractor data rows count: " . count($data['data']->rows));
+            dump('Extractor data rows count: '.count($data['data']->rows));
 
             // Manual sync attempt to see if it fails here
-            dump("Manual sync attempt...");
+            dump('Manual sync attempt...');
             $matchSync = $this->app->make(\App\Services\Stats\Sync\MatchSyncService::class);
             try {
                 $matchSync->sync($team, $season, $data['data']->rows[0]->values);
-                dump("Manual sync success. Matches count: " . BasketballMatch::count());
+                dump('Manual sync success. Matches count: '.BasketballMatch::count());
             } catch (\Exception $e) {
-                dump("Manual sync exception: " . $e->getMessage());
+                dump('Manual sync exception: '.$e->getMessage());
             }
         }
 
@@ -138,7 +129,7 @@ class QAMasterTest extends TestCase
 
         // 2. Sync Match Detail (Boxscore)
         $match = BasketballMatch::first();
-        $this->assertNotNull($match, "No match found in database after sync.");
+        $this->assertNotNull($match, 'No match found in database after sync.');
 
         $syncService->syncMatchDetail($match->id);
 
@@ -162,7 +153,7 @@ class QAMasterTest extends TestCase
     public function test_legacy_import_pipeline()
     {
         $path = storage_path('app/legacystats');
-        if (!File::isDirectory($path) || count(File::files($path)) === 0) {
+        if (! File::isDirectory($path) || count(File::files($path)) === 0) {
             $this->markTestSkipped("Legacy source files not found in {$path}");
         }
 
@@ -175,8 +166,8 @@ class QAMasterTest extends TestCase
             }
         }
 
-        if (!$testFile) {
-            $this->markTestSkipped("No .html legacy files found.");
+        if (! $testFile) {
+            $this->markTestSkipped('No .html legacy files found.');
         }
 
         /** @var LegacyFileClassifier $classifier */
@@ -202,19 +193,19 @@ class QAMasterTest extends TestCase
         /** @var StatisticSetService $setService */
         $setService = $this->app->make(StatisticSetService::class);
 
-        $setType = match($classification['file_type']) {
+        $setType = match ($classification['file_type']) {
             'players_stats' => 'player',
             'team_stats' => 'team',
             default => 'team',
         };
 
-        $set = $setService->ensureSet("legacy_{$classification['file_type']}_{$season->id}", "Legacy Import", $setType, 'external');
+        $set = $setService->ensureSet("legacy_{$classification['file_type']}_{$season->id}", 'Legacy Import', $setType, 'external');
 
         foreach ($dto->rows as $rowDto) {
             $statService->saveRow($set, $rowDto, [
                 'season_id' => $season->id,
                 'team_id' => $team->id,
-                'source_metadata' => ['source_type' => 'legacy']
+                'source_metadata' => ['source_type' => 'legacy'],
             ]);
         }
 

@@ -23,10 +23,6 @@ class SyncMatchDetailJob implements ShouldQueue
      */
     public $timeout = 60;
 
-    /**
-     * @param int $matchId
-     * @param array $options
-     */
     public function __construct(
         protected int $matchId,
         protected array $options = []

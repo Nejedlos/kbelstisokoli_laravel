@@ -32,27 +32,28 @@ class LegacyImportBatchCommand extends Command
         $batchId = $this->argument('batchId');
         $batch = LegacyImportBatch::find($batchId);
 
-        if (!$batch) {
+        if (! $batch) {
             $this->error("Dávka s ID {$batchId} nebyla nalezena.");
+
             return self::FAILURE;
         }
 
         if ($batch->status === 'success') {
-            $this->warn("Tato dávka již byla úspěšně zpracována.");
-            if (!$this->confirm('Chcete ji přesto zkusit zpracovat znovu?')) {
+            $this->warn('Tato dávka již byla úspěšně zpracována.');
+            if (! $this->confirm('Chcete ji přesto zkusit zpracovat znovu?')) {
                 return self::SUCCESS;
             }
         }
 
         if ($this->option('sync')) {
-            $this->info("Spouštím import dávky synchronně...");
+            $this->info('Spouštím import dávky synchronně...');
             $job = new ProcessLegacyImportBatchJob($batch->id);
             $job->handle();
-            $this->info("Import dávky dokončen.");
+            $this->info('Import dávky dokončen.');
         } else {
-            $this->info("Zařazuji import dávky do fronty (ProcessLegacyImportBatchJob)...");
+            $this->info('Zařazuji import dávky do fronty (ProcessLegacyImportBatchJob)...');
             ProcessLegacyImportBatchJob::dispatch($batch->id);
-            $this->info("Úloha byla zařazena.");
+            $this->info('Úloha byla zařazena.');
         }
 
         return self::SUCCESS;

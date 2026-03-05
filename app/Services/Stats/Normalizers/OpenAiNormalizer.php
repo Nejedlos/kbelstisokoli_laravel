@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Log;
 class OpenAiNormalizer implements StatNormalizerInterface
 {
     protected string $apiKey;
+
     protected string $model;
+
     protected string $baseUrl;
 
     public function __construct()
@@ -39,7 +41,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
         try {
             $response = Http::withToken($this->apiKey)
                 ->timeout(config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 90)))
-                ->post($this->baseUrl . '/chat/completions', [
+                ->post($this->baseUrl.'/chat/completions', [
                     'model' => $this->model,
                     'messages' => [
                         [
@@ -60,7 +62,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
-                throw new Exception('OpenAI API request failed: ' . $response->reason());
+                throw new Exception('OpenAI API request failed: '.$response->reason());
             }
 
             $result = $response->json();
@@ -126,7 +128,7 @@ PROMPT;
                 rowLabel: $row['player_name'] ?? $row['row_label'] ?? null,
                 metadata: [
                     'external_player_id' => $row['player_external_id'] ?? null,
-                    'ai_normalized' => true
+                    'ai_normalized' => true,
                 ]
             );
         }
@@ -138,7 +140,7 @@ PROMPT;
             metadata: [
                 'warnings' => $data['warnings'] ?? [],
                 'source' => 'openai',
-                'model' => $this->model
+                'model' => $this->model,
             ]
         );
     }

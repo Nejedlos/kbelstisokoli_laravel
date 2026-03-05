@@ -10,11 +10,15 @@ use Livewire\Component;
 class TeamSeasonStats extends Component
 {
     public $teamId;
+
     public $seasonId;
 
     public $summary = [];
+
     public $topScorers = [];
+
     public $pointsSeries = [];
+
     public $recentForm = [];
 
     public function mount($teamId = null, $seasonId = null)
@@ -34,7 +38,9 @@ class TeamSeasonStats extends Component
 
     public function loadStats()
     {
-        if (!$this->teamId || !$this->seasonId) return;
+        if (! $this->teamId || ! $this->seasonId) {
+            return;
+        }
 
         $service = app(TeamStatsService::class);
         $this->summary = $service->getSeasonSummary($this->teamId, $this->seasonId);

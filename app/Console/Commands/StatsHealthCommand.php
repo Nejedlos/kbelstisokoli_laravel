@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Season;
-use App\Models\Team;
 use App\Models\ExternalImportRun;
-use App\Models\ExternalTeamSeasonConfig;
+use App\Models\Season;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
+use App\Models\Team;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -35,14 +34,14 @@ class StatsHealthCommand extends Command
      */
     public function handle()
     {
-        $this->info("Provádím diagnostiku systému statistik...");
+        $this->info('Provádím diagnostiku systému statistik...');
         $this->newLine();
 
         $health = $this->checkInfrastructure();
         $this->displayInfrastructure($health);
 
         $this->newLine();
-        $this->info("Přehled synchronizace aktivní sezóny:");
+        $this->info('Přehled synchronizace aktivní sezóny:');
         $this->displaySyncOverview();
 
         return self::SUCCESS;
@@ -67,7 +66,7 @@ class StatsHealthCommand extends Command
                 'label' => 'Queue (Jobs)',
                 'ok' => true,
                 'msg' => "{$jobCount} pending jobs",
-                'warning' => $jobCount > 100
+                'warning' => $jobCount > 100,
             ];
         } catch (\Exception $e) {
             $status['queue'] = ['label' => 'Queue (Jobs)', 'ok' => false, 'msg' => 'Table not found or DB error'];
@@ -79,7 +78,7 @@ class StatsHealthCommand extends Command
         $status['scheduler'] = [
             'label' => 'Scheduler',
             'ok' => $isOk,
-            'msg' => $lastHeartbeat ? 'Last run: ' . $lastHeartbeat->diffForHumans() : 'No heartbeat detected'
+            'msg' => $lastHeartbeat ? 'Last run: '.$lastHeartbeat->diffForHumans() : 'No heartbeat detected',
         ];
 
         // Storage
@@ -97,7 +96,7 @@ class StatsHealthCommand extends Command
             $status['fetcher'] = [
                 'label' => 'External Fetcher',
                 'ok' => $response->successful(),
-                'msg' => $response->successful() ? 'cz.basketball reachable' : 'HTTP Status: ' . $response->status()
+                'msg' => $response->successful() ? 'cz.basketball reachable' : 'HTTP Status: '.$response->status(),
             ];
         } catch (\Exception $e) {
             $status['fetcher'] = ['label' => 'External Fetcher', 'ok' => false, 'msg' => 'Connection failed'];
@@ -123,8 +122,9 @@ class StatsHealthCommand extends Command
     protected function displaySyncOverview(): void
     {
         $activeSeason = Season::where('is_active', true)->first();
-        if (!$activeSeason) {
-            $this->warn("Žádná aktivní sezóna nebyla nalezena.");
+        if (! $activeSeason) {
+            $this->warn('Žádná aktivní sezóna nebyla nalezena.');
+
             return;
         }
 
@@ -135,7 +135,9 @@ class StatsHealthCommand extends Command
 
         foreach ($teamSlugs as $slug) {
             $team = Team::where('slug', $slug)->first();
-            if (!$team) continue;
+            if (! $team) {
+                continue;
+            }
 
             $lastSync = ExternalImportRun::where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)
@@ -167,7 +169,7 @@ class StatsHealthCommand extends Command
                 $lastSync ? $lastSync->finished_at->diffForHumans() : 'Never',
                 $matchCount,
                 $statRowsCount,
-                $unmatchedCount > 0 ? "<comment>{$unmatchedCount}</comment>" : $unmatchedCount
+                $unmatchedCount > 0 ? "<comment>{$unmatchedCount}</comment>" : $unmatchedCount,
             ];
         }
 

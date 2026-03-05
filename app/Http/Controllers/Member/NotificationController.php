@@ -30,7 +30,7 @@ class NotificationController extends Controller
         $user = auth()->user();
         $notification = $user->notifications()->findOrFail($id);
 
-        if (!$notification->read_at) {
+        if (! $notification->read_at) {
             $user->unreadNotifications()->where('id', $id)->update(['read_at' => now()]);
         }
 

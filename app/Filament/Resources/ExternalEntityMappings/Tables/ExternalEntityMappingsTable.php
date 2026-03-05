@@ -4,10 +4,10 @@ namespace App\Filament\Resources\ExternalEntityMappings\Tables;
 
 use App\Models\User;
 use App\Services\Stats\Sync\StatisticSyncService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
@@ -76,7 +76,7 @@ class ExternalEntityMappingsTable
                             ->success()
                             ->send();
                     })
-                    ->visible(fn ($record) => !$record->internal_id),
+                    ->visible(fn ($record) => ! $record->internal_id),
                 Action::make('recompute')
                     ->label('Přepočítat')
                     ->icon('fas-arrows-rotate')
@@ -90,7 +90,7 @@ class ExternalEntityMappingsTable
                                 ->send();
                         }
                     })
-                    ->visible(fn ($record) => (bool)$record->internal_id),
+                    ->visible(fn ($record) => (bool) $record->internal_id),
                 EditAction::make(),
             ])
             ->toolbarActions([

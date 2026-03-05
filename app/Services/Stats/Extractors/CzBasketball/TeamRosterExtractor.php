@@ -40,7 +40,9 @@ class TeamRosterExtractor implements StatExtractorInterface
 
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, &$warnings) {
             $cells = $tr->filter('td');
-            if ($cells->count() < 2) return;
+            if ($cells->count() < 2) {
+                return;
+            }
 
             // Najdeme odkaz na hráče pro získání ID
             $playerLink = $tr->filter('a[href*="/hrac/"]')->first();
@@ -81,7 +83,7 @@ class TeamRosterExtractor implements StatExtractorInterface
                     ]
                 );
             } else {
-                $warnings[] = "Player ID not found for row: " . $playerName;
+                $warnings[] = 'Player ID not found for row: '.$playerName;
                 $rows[] = new NormalizedRowDTO(
                     values: [
                         'player_name' => $playerName,

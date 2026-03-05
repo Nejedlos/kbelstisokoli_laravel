@@ -3,12 +3,13 @@
 namespace App\Services\Stats\Sync;
 
 use App\Models\StatisticSet;
-use Illuminate\Support\Str;
 
 class StatisticSetService
 {
     public const MATCH_BOXSCORE_SET = 'match-boxscore-external';
+
     public const PLAYER_SEASON_SUMMARY_SET = 'player-season-summary-external';
+
     public const TEAM_SEASON_SUMMARY_SET = 'team-season-summary-external';
 
     /**

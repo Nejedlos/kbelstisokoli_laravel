@@ -45,7 +45,8 @@ class SeoGenerateSitemap extends Command
         // Zkusíme přidat nábor, pokud existuje routa
         try {
             $sitemap->add(Url::create(route('public.recruitment.index'))->setPriority(0.9)->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY));
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         // Stránky (Pages)
         Page::where('status', 'published')

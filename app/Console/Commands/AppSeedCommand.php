@@ -5,11 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Page;
 use Database\Seeders\CmsContentSeeder;
 use Database\Seeders\GdprPageSeeder;
-use Database\Seeders\GlobalSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class AppSeedCommand extends Command
 {

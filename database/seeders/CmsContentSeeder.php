@@ -121,7 +121,7 @@ class CmsContentSeeder extends Seeder
                 'is_visible' => true,
                 'seo' => [
                     'title' => ['cs' => 'Nábor basketbal Letňany – Sokol Kbely C & E', 'en' => 'Basketball Recruitment Letňany – Sokol Kbely C & E'],
-                        'description' => ['cs' => 'Přijď si zahrát basketbal do Letňan! Týmy Kbelští sokoli C & E hledají nové spoluhráče. Tréninky v RumcajsAreně.', 'en' => 'Come play basketball in Letňany! Kbely Falcons C & E teams are looking for new teammates. Trainings in RumcajsArena.'],
+                    'description' => ['cs' => 'Přijď si zahrát basketbal do Letňan! Týmy Kbelští sokoli C & E hledají nové spoluhráče. Tréninky v RumcajsAreně.', 'en' => 'Come play basketball in Letňany! Kbely Falcons C & E teams are looking for new teammates. Trainings in RumcajsArena.'],
                 ],
             ],
             [

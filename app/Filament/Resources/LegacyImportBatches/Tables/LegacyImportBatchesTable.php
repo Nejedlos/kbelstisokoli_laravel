@@ -41,7 +41,7 @@ class LegacyImportBatchesTable
                 TextColumn::make('processed_files')
                     ->label('Zpracováno')
                     ->numeric()
-                    ->description(fn ($record) => $record->success_files . ' OK / ' . $record->failed_files . ' Chyba'),
+                    ->description(fn ($record) => $record->success_files.' OK / '.$record->failed_files.' Chyba'),
 
                 TextColumn::make('created_at')
                     ->label('Vytvořeno')

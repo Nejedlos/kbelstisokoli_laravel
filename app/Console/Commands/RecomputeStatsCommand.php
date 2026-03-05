@@ -34,8 +34,9 @@ class RecomputeStatsCommand extends Command
         $seasonInput = $this->argument('seasonNameOrId');
 
         $team = Team::where('slug', $teamSlug)->first();
-        if (!$team) {
+        if (! $team) {
             $this->error("Tým se slugem '{$teamSlug}' nebyl nalezen.");
+
             return self::FAILURE;
         }
 
@@ -43,20 +44,21 @@ class RecomputeStatsCommand extends Command
             ? Season::find($seasonInput)
             : Season::where('name', $seasonInput)->first();
 
-        if (!$season) {
+        if (! $season) {
             $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
+
             return self::FAILURE;
         }
 
         $this->info("Zahajuji přepočet statistik pro tým {$team->name} a sezónu {$season->name}...");
 
-        $this->info("1/2 Přepočítávám souhrny hráčů (pro celou sezónu)...");
+        $this->info('1/2 Přepočítávám souhrny hráčů (pro celou sezónu)...');
         $statService->recomputePlayerSummaries($season->id);
 
-        $this->info("2/2 Přepočítávám souhrn týmu...");
+        $this->info('2/2 Přepočítávám souhrn týmu...');
         $statService->recomputeTeamSummary($season->id, $team->id);
 
-        $this->info("Přepočet dokončen úspěšně.");
+        $this->info('Přepočet dokončen úspěšně.');
 
         return self::SUCCESS;
     }

@@ -21,7 +21,7 @@ class CoachesRelationManager extends RelationManager
 
     protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where($query->getModel()->getTable() . '.is_active', true);
+        return $query->where($query->getModel()->getTable().'.is_active', true);
     }
 
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string

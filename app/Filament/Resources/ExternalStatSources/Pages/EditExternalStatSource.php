@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ExternalStatSources\Pages;
 
 use App\Filament\Resources\ExternalStatSources\ExternalStatSourceResource;
-use App\Models\ExternalTeamMapping;
 use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;

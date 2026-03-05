@@ -16,7 +16,7 @@ class TeamSelector extends Component
 
     public function updatedActiveTeamId($value): void
     {
-        $id = ($value === "" || $value === null) ? null : (int) $value;
+        $id = ($value === '' || $value === null) ? null : (int) $value;
 
         app(MemberContext::class)->setActiveTeamId($id);
 

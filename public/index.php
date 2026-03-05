@@ -11,7 +11,7 @@ $APP_BASE = realpath(__DIR__.'/..');
 // Nouzové hlášení chyb před bootem Laravelu (pre-boot)
 (function () use ($APP_BASE) {
     try {
-        $envPath = file_exists($APP_BASE . '/.env') ? $APP_BASE : (file_exists($APP_BASE . '/public/.env') ? $APP_BASE . '/public' : null);
+        $envPath = file_exists($APP_BASE.'/.env') ? $APP_BASE : (file_exists($APP_BASE.'/public/.env') ? $APP_BASE.'/public' : null);
         if ($envPath && class_exists(\Dotenv\Dotenv::class)) {
             \Dotenv\Dotenv::createImmutable($envPath)->safeLoad();
         }
@@ -33,9 +33,10 @@ $APP_BASE = realpath(__DIR__.'/..');
     if (! $errorRecipient || ($env !== 'production' && ! $debug)) {
         // Pokud nemáme kam posílat reporty, nebo nejsme v módu pro hlášení, končíme SMTP logiku
         if ($env === 'production' && ! $debug) {
-             // Na produkci bez debugu a bez mailu raději chyby skryjeme (pokud nebyly povoleny výše)
-             ini_set('display_errors', '0');
+            // Na produkci bez debugu a bez mailu raději chyby skryjeme (pokud nebyly povoleny výše)
+            ini_set('display_errors', '0');
         }
+
         return;
     }
 
@@ -86,8 +87,8 @@ $APP_BASE = realpath(__DIR__.'/..');
 
         // Pokud máme zobrazovat chyby, vypíšeme je i do výstupu
         if ($env !== 'production' || $debug) {
-            echo "<h1>Pre-boot Exception</h1>";
-            echo "<p><strong>".get_class($e)."</strong>: {$e->getMessage()}</p>";
+            echo '<h1>Pre-boot Exception</h1>';
+            echo '<p><strong>'.get_class($e)."</strong>: {$e->getMessage()}</p>";
             echo "<p>File: {$e->getFile()}:{$e->getLine()}</p>";
             echo "<pre>{$e->getTraceAsString()}</pre>";
         }
@@ -108,8 +109,8 @@ $APP_BASE = realpath(__DIR__.'/..');
         $error = error_get_last();
         if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
             if ($env !== 'production' || $debug) {
-                echo "<h1>Pre-boot Fatal Error</h1>";
-                echo "<pre>".print_r($error, true)."</pre>";
+                echo '<h1>Pre-boot Fatal Error</h1>';
+                echo '<pre>'.print_r($error, true).'</pre>';
             }
 
             $server = [

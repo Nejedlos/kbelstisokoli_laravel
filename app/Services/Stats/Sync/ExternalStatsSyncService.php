@@ -2,6 +2,7 @@
 
 namespace App\Services\Stats\Sync;
 
+use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
@@ -12,7 +13,6 @@ use App\Services\Stats\Contracts\StatNormalizerInterface;
 use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
-use App\Jobs\Stats\SyncMatchDetailJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -29,9 +29,7 @@ class ExternalStatsSyncService
     /**
      * Synchronizuje celou sezónu pro daný tým.
      *
-     * @param int $teamId
-     * @param int $seasonId
-     * @param array $options [limit, force]
+     * @param  array  $options  [limit, force]
      */
     public function syncTeamSeason(int $teamId, int $seasonId, array $options = []): void
     {
@@ -41,8 +39,9 @@ class ExternalStatsSyncService
             ->where('is_enabled', true)
             ->first();
 
-        if (!$config) {
+        if (! $config) {
             Log::warning("ExternalTeamSeasonConfig nebyl nalezen nebo je deaktivován pro Tým: $teamId, Sezóna: $seasonId");
+
             return;
         }
 
@@ -55,14 +54,14 @@ class ExternalStatsSyncService
         try {
             $this->syncRoster($team, $season, $config);
         } catch (\Exception $e) {
-            Log::error("Chyba při synchronizaci soupisky: " . $e->getMessage());
+            Log::error('Chyba při synchronizaci soupisky: '.$e->getMessage());
         }
 
         // 2. Synchronizace seznamu zápasů
         try {
             $this->syncMatchesList($team, $season, $config, $options);
         } catch (\Exception $e) {
-            Log::error("Chyba při synchronizaci seznamu zápasů: " . $e->getMessage());
+            Log::error('Chyba při synchronizaci seznamu zápasů: '.$e->getMessage());
         }
     }
 
@@ -83,7 +82,7 @@ class ExternalStatsSyncService
                 $data = $result['data'];
                 $fragmentHtml = $result['fragment_html'];
             } catch (\Exception $e) {
-                Log::warning("DOM extractor selhal pro soupisku týmu {$team->slug}, zkouším AI fallback. Chyba: " . $e->getMessage());
+                Log::warning("DOM extractor selhal pro soupisku týmu {$team->slug}, zkouším AI fallback. Chyba: ".$e->getMessage());
                 $data = $this->normalizer->normalize($html, ['type' => 'roster']);
                 $fragmentHtml = $html;
                 $usedAiFallback = true;
@@ -93,15 +92,16 @@ class ExternalStatsSyncService
 
             if ($run->isIdenticalToLast($hash)) {
                 $run->skip();
+
                 return;
             }
 
             $run->update([
                 'content_hash' => $hash,
                 'metadata' => array_merge($run->metadata ?? [], [
-                    'used_dom_extractor' => !$usedAiFallback,
+                    'used_dom_extractor' => ! $usedAiFallback,
                     'used_ai_fallback' => $usedAiFallback,
-                ])
+                ]),
             ]);
 
             if ($usedAiFallback) {
@@ -138,7 +138,7 @@ class ExternalStatsSyncService
                 $result = $extractor->extract($html);
                 $data = $result['data'];
                 $fragmentHtml = $result['fragment_html'];
-                \Log::info("Extracted " . count($data->rows) . " matches for {$team->slug}");
+                \Log::info('Extracted '.count($data->rows)." matches for {$team->slug}");
             } catch (\Exception $e) {
                 $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
                 $fragmentHtml = $html;
@@ -153,16 +153,16 @@ class ExternalStatsSyncService
                 $run->update([
                     'content_hash' => $hash,
                     'metadata' => array_merge($run->metadata ?? [], [
-                        'used_dom_extractor' => !$usedAiFallback,
+                        'used_dom_extractor' => ! $usedAiFallback,
                         'used_ai_fallback' => $usedAiFallback,
-                    ])
+                    ]),
                 ]);
 
                 if ($usedAiFallback) {
                     $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed, used AI fallback.']);
                 }
 
-                \Log::info("Syncing matches for {$team->slug}, count: " . count($data->rows));
+                \Log::info("Syncing matches for {$team->slug}, count: ".count($data->rows));
                 foreach ($data->rows as $row) {
                     $this->matchSyncService->sync($team, $season, $row->values);
                 }
@@ -200,7 +200,7 @@ class ExternalStatsSyncService
             $query->where('scheduled_at', '>=', now()->subDays($days)->toDateTimeString());
         }
 
-        if (!$force) {
+        if (! $force) {
             $boxscoreSetId = DB::table('statistic_sets')->where('slug', 'match-boxscore')->value('id');
 
             // Zápasy bez statistik nebo ty, které byly synchronizovány před více než 24 hodinami
@@ -229,11 +229,11 @@ class ExternalStatsSyncService
         $match = BasketballMatch::with(['team', 'season'])->findOrFail($matchId);
         $externalMatchId = $match->metadata['external_id'] ?? null;
 
-        if (!$externalMatchId) {
+        if (! $externalMatchId) {
             return;
         }
 
-        $url = "https://cz.basketball/zapas/" . $externalMatchId;
+        $url = 'https://cz.basketball/zapas/'.$externalMatchId;
         $run = ExternalImportRun::start('czbasketball', $match->season_id, $match->team_id, 'match_detail', $externalMatchId);
 
         try {
@@ -246,24 +246,25 @@ class ExternalStatsSyncService
                 $data = $result['data'];
                 $fragmentHtml = $result['fragment_html'];
             } catch (\Exception $e) {
-                Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: " . $e->getMessage());
+                Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: ".$e->getMessage());
                 $data = $this->normalizer->normalize($html, ['type' => 'match_boxscore']);
                 $fragmentHtml = $html;
                 $usedAiFallback = true;
             }
 
             $hash = hash('sha256', $fragmentHtml);
-            if ($run->isIdenticalToLast($hash) && !($options['force'] ?? false)) {
+            if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false)) {
                 $run->skip();
+
                 return;
             }
 
             $run->update([
                 'content_hash' => $hash,
                 'metadata' => array_merge($run->metadata ?? [], [
-                    'used_dom_extractor' => !$usedAiFallback,
+                    'used_dom_extractor' => ! $usedAiFallback,
                     'used_ai_fallback' => $usedAiFallback,
-                ])
+                ]),
             ]);
 
             if ($usedAiFallback) {
@@ -289,8 +290,6 @@ class ExternalStatsSyncService
     /**
      * Provede náhled synchronizace bez uložení do DB.
      *
-     * @param int $teamId
-     * @param int $seasonId
      * @return array [roster => NormalizedTableDTO, matches => NormalizedTableDTO]
      */
     public function previewSync(int $teamId, int $seasonId): array

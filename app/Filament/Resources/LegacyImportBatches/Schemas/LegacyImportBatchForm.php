@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\LegacyImportBatches\Schemas;
 
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Schema;
 
 class LegacyImportBatchForm
@@ -45,7 +45,7 @@ class LegacyImportBatchForm
 
                         Placeholder::make('files_info')
                             ->label('Soubory v této dávce')
-                            ->content(fn ($record) => $record ? $record->files()->count() . ' souborů' : '-')
+                            ->content(fn ($record) => $record ? $record->files()->count().' souborů' : '-')
                             ->visible(fn (string $operation): bool => $operation !== 'create'),
                     ]),
             ]);
