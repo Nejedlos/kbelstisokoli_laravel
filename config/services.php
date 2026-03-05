@@ -39,4 +39,11 @@ return [
         'uploads_base' => env('SYNC_NEXTAI_UPLOADS_PATH', base_path('../nextai.localhost/public/uploads')),
     ],
 
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_DEFAULT_MODEL', 'gpt-4o-mini'),
+        'timeout' => (int) env('OPENAI_TIMEOUT', 60),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+    ],
+
 ];

@@ -173,6 +173,7 @@ class ExternalStatsSyncService
 
             $usedAiFallback = false;
             if ($options['ai'] ?? false) {
+                \Log::info("ExternalStatsSync: Using AI for matches list for team {$team->slug}");
                 $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
                 $fragmentHtml = $html;
                 $usedAiFallback = true;
@@ -335,8 +336,11 @@ class ExternalStatsSyncService
             return;
         }
 
+        \Log::info("START: syncMatchDetail for match {$matchId} (ext_id: {$externalMatchId})");
         $url = 'https://cz.basketball/zapas/'.$externalMatchId;
         $run = ExternalImportRun::start('czbasketball', $match->season_id, $match->team_id, 'match_detail', $externalMatchId);
+        $run->updateMetadata(['url' => $url]);
+
         if ($options['force'] ?? false) {
             $run->updateMetadata(['force' => true]);
         }
@@ -350,6 +354,7 @@ class ExternalStatsSyncService
 
             $usedAiFallback = false;
             if ($options['ai'] ?? false) {
+                \Log::info("ExternalStatsSync: Using AI for match detail {$matchId}");
                 $data = $this->normalizer->normalize($html, ['type' => 'match_boxscore']);
                 $fragmentHtml = $html;
                 $usedAiFallback = true;

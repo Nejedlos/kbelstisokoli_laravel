@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\ExternalImportRuns\Schemas;
 
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Actions\Action;
+use Illuminate\Support\HtmlString;
 
 class ExternalImportRunForm
 {
@@ -67,10 +70,22 @@ class ExternalImportRunForm
                             ->label('Hash obsahu')
                             ->columnSpanFull()
                             ->readOnly(),
-                        TextInput::make('error_summary')
+                        Textarea::make('error_summary')
                             ->label('Chyba')
                             ->columnSpanFull()
                             ->readOnly()
+                            ->rows(10)
+                            ->extraAttributes([
+                                'style' => 'font-family: monospace; font-size: 0.75rem; line-height: 1rem;',
+                            ])
+                            ->hintAction(
+                                Action::make('copyError')
+                                    ->label('Kopírovat chybu')
+                                    ->icon('heroicon-o-clipboard')
+                                    ->extraAttributes([
+                                        'x-on:click' => 'window.navigator.clipboard.writeText($state); $tooltip("Zkopírováno", { timeout: 2000 })',
+                                    ])
+                            )
                             ->hidden(fn ($get) => ! $get('error_summary')),
                     ]),
                 Section::make('Metadata a doplňky')

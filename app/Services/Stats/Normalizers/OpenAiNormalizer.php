@@ -36,11 +36,23 @@ class OpenAiNormalizer implements StatNormalizerInterface
         $type = $mappingConfig['type'] ?? 'unknown_table';
         $canonicalKeys = $mappingConfig['canonical_keys'] ?? [];
 
+        Log::info("OpenAI: Starting normalization for type '{$type}'", [
+            'content_length' => strlen($content),
+            'model' => $this->model,
+        ]);
+
         $prompt = $this->buildPrompt($content, $type, $canonicalKeys);
+        $startTime = microtime(true);
 
         try {
+            $timeout = config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60));
+            Log::info("OpenAI: Sending request to API", [
+                'prompt_length' => strlen($prompt),
+                'timeout' => $timeout,
+            ]);
+
             $response = Http::withToken($this->apiKey)
-                ->timeout(config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 180)))
+                ->timeout($timeout)
                 ->post($this->baseUrl.'/chat/completions', [
                     'model' => $this->model,
                     'messages' => [
@@ -58,28 +70,46 @@ class OpenAiNormalizer implements StatNormalizerInterface
                 ]);
 
             if ($response->failed()) {
+                $duration = round(microtime(true) - $startTime, 2);
                 Log::error('OpenAI Normalizer API Error', [
                     'status' => $response->status(),
+                    'reason' => $response->reason(),
+                    'duration' => $duration.'s',
                     'body' => $response->body(),
                 ]);
-                throw new Exception('OpenAI API request failed: '.$response->reason());
+                throw new Exception("OpenAI API request failed after {$duration}s: ".$response->reason());
             }
 
+            $duration = round(microtime(true) - $startTime, 2);
             $result = $response->json();
-            $parsedData = json_decode($result['choices'][0]['message']['content'], true);
+            $contentResponse = $result['choices'][0]['message']['content'] ?? '';
+
+            Log::info("OpenAI: Received response", [
+                'duration' => $duration.'s',
+                'response_length' => strlen($contentResponse),
+                'finish_reason' => $result['choices'][0]['finish_reason'] ?? 'unknown',
+            ]);
+
+            $parsedData = json_decode($contentResponse, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error("OpenAI: JSON decode failed", [
+                    'error' => json_last_error_msg(),
+                    'raw_content' => substr($contentResponse, 0, 1000),
+                ]);
                 throw new Exception('Failed to parse JSON response from OpenAI.');
             }
 
             return $this->mapToDTO($parsedData, $type);
 
         } catch (Exception $e) {
+            $duration = round(microtime(true) - $startTime, 2);
             Log::error('OpenAI Normalizer Exception', [
                 'message' => $e->getMessage(),
                 'type' => $type,
+                'duration' => $duration.'s',
                 'content_length' => strlen($content),
-                'timeout_config' => config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 180)),
+                'timeout_config' => config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60)),
             ]);
             throw $e;
         }
