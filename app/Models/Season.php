@@ -65,7 +65,7 @@ class Season extends Model
         return $name;
     }
 
-    public function games(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function matches(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'season_id');
     }

@@ -32,21 +32,17 @@ class BasketballMatchForm
                                     ->required()
                                     ->default('mistrovske')
                                     ->live(),
-                                Select::make('teams')
-                                    ->label('Týmy')
-                                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
-                                    ->multiple()
+                                Select::make('team_id')
+                                    ->label('Tým')
+                                    ->relationship('team', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                                     ->searchable()
                                     ->preload()
-                                    ->required()
-                                    ->maxItems(fn ($get) => in_array($get('match_type'), ['mistrovske', 'poharove']) ? 1 : null)
-                                    ->validationMessages([
-                                        'max' => 'Pro mistrovské a pohárové zápasy lze vybrat pouze jeden tým.',
-                                    ]),
+                                    ->required(),
                                 Select::make('season_id')
                                     ->label('Sezóna')
                                     ->relationship('season', 'name')
-                                    ->required(),
+                                    ->required()
+                                    ->default(fn () => \App\Models\Season::where('is_active', true)->first()?->id),
                                 Select::make('opponent_id')
                                     ->label('Soupeř')
                                     ->relationship('opponent', 'name')

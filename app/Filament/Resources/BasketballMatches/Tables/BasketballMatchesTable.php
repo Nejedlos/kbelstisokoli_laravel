@@ -21,10 +21,9 @@ class BasketballMatchesTable
                     ->label('Datum a čas')
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
-                TextColumn::make('teams.name')
-                    ->label('Týmy')
+                TextColumn::make('team.name')
+                    ->label('Tým')
                     ->badge()
-                    ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
                     ->searchable(),
                 TextColumn::make('opponent.name')
                     ->label('Soupeř')
@@ -71,10 +70,10 @@ class BasketballMatchesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('teams')
+                SelectFilter::make('team_id')
                     ->label('Tým')
-                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
-                    ->multiple()
+                    ->relationship('team', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                    ->searchable()
                     ->preload(),
                 SelectFilter::make('season')
                     ->label('Sezóna')

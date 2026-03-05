@@ -19,7 +19,7 @@ class Team extends Model
 
     public $translatable = ['name', 'description'];
 
-    public function games(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function matches(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'team_id');
     }

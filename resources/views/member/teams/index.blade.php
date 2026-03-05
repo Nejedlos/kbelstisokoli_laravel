@@ -22,7 +22,7 @@
                             <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">{{ __('member.teams.stats.trainings') }}</span>
                         </div>
                         <div class="p-2 bg-slate-50 rounded-club border border-slate-100">
-                            <span class="block text-lg font-black text-secondary">{{ $team->games_count }}</span>
+                            <span class="block text-lg font-black text-secondary">{{ $team->matches_count }}</span>
                             <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">{{ __('member.teams.stats.matches') }}</span>
                         </div>
                     </div>

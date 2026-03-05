@@ -18,7 +18,7 @@ class TeamController extends Controller
     {
         $this->authorize('manage_teams');
 
-        $teams = Team::withCount(['players', 'trainings', 'games'])->get();
+        $teams = Team::withCount(['players', 'trainings', 'matches'])->get();
 
         return view('member.teams.index', compact('teams'));
     }

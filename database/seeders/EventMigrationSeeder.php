@@ -186,6 +186,8 @@ class EventMigrationSeeder extends Seeder
             $match = \App\Models\BasketballMatch::create($matchData);
         }
 
+        $match->team_id = $teamIds[0] ?? null;
+        $match->save();
         $match->teams()->syncWithoutDetaching($teamIds);
     }
 
