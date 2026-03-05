@@ -6,6 +6,7 @@
     uploadAsSystem: @entangle('uploadAsSystem'),
     cropper: null,
     previewUrl: @entangle('previewUrl'),
+    avatarFile: @entangle('avatarFile'),
     initCropper() {
         if (!this.previewUrl) return;
         if (this.cropper) {
@@ -289,6 +290,7 @@ class="fixed inset-0 z-50 overflow-y-auto"
                             </div>
                             <input type="file" id="avatar-upload-input" class="hidden" accept="image/*" multiple wire:model="avatarFile" @change="
                                 const files = $event.target.files;
+                                this.avatarFile = files;
                                 if (files.length === 1) {
                                     const reader = new FileReader();
                                     reader.onload = (e) => {

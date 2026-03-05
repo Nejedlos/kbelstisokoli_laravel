@@ -68,8 +68,7 @@ class Team extends Model
     public function activePlayers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->players()
-            ->where('player_profiles.is_active', true)
-            ->whereHas('user', fn ($q) => $q->where('users.is_active', true));
+            ->where('player_profiles.is_active', true);
     }
 
     /**
