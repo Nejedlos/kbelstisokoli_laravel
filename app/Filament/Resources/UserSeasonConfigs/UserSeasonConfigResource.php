@@ -36,7 +36,7 @@ class UserSeasonConfigResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 11;
+        return 40;
     }
 
     public static function form(Schema $schema): Schema

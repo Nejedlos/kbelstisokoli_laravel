@@ -36,7 +36,7 @@ class NotFoundLogResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 95;
+        return 20;
     }
 
     public static function form(Schema $schema): Schema

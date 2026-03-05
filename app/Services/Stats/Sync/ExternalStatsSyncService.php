@@ -8,6 +8,7 @@ use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Support\ConsoleService;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Contracts\StatNormalizerInterface;
 use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
@@ -33,13 +34,13 @@ class ExternalStatsSyncService
      */
     public function syncTeamSeason(int $teamId, int $seasonId, array $options = []): void
     {
-        \Log::info("START: syncTeamSeason for team $teamId, season $seasonId");
         $config = ExternalTeamSeasonConfig::where('team_id', $teamId)
             ->where('season_id', $seasonId)
             ->where('is_enabled', true)
             ->first();
 
         if (! $config) {
+            ConsoleService::log("ExternalTeamSeasonConfig nebyl nalezen nebo je deaktivován pro Tým: $teamId, Sezóna: $seasonId", 'warning');
             Log::warning("ExternalTeamSeasonConfig nebyl nalezen nebo je deaktivován pro Tým: $teamId, Sezóna: $seasonId");
 
             return;
@@ -48,19 +49,26 @@ class ExternalStatsSyncService
         $team = Team::findOrFail($teamId);
         $season = Season::findOrFail($seasonId);
 
+        ConsoleService::log("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}", 'info');
         Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}");
 
         // 1. Synchronizace soupisky
         try {
+            ConsoleService::log("- Synchronizace soupisky...");
             $this->syncRoster($team, $season, $config);
+            ConsoleService::log("  Soupiska OK.", 'success');
         } catch (\Exception $e) {
+            ConsoleService::log("  Chyba při synchronizaci soupisky: ".$e->getMessage(), 'error');
             Log::error('Chyba při synchronizaci soupisky: '.$e->getMessage());
         }
 
         // 2. Synchronizace seznamu zápasů
         try {
+            ConsoleService::log("- Synchronizace seznamu zápasů...");
             $this->syncMatchesList($team, $season, $config, $options);
+            ConsoleService::log("  Seznam zápasů OK.", 'success');
         } catch (\Exception $e) {
+            ConsoleService::log("  Chyba při synchronizaci seznamu zápasů: ".$e->getMessage(), 'error');
             Log::error('Chyba při synchronizaci seznamu zápasů: '.$e->getMessage());
         }
     }
@@ -139,6 +147,7 @@ class ExternalStatsSyncService
                 $data = $result['data'];
                 $fragmentHtml = $result['fragment_html'];
                 \Log::info('Extracted '.count($data->rows)." matches for {$team->slug}");
+                ConsoleService::log("  Extrahováno ".count($data->rows)." zápasů ze seznamu.", 'info');
             } catch (\Exception $e) {
                 $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
                 $fragmentHtml = $html;
@@ -231,6 +240,7 @@ class ExternalStatsSyncService
             }
 
             SyncMatchDetailJob::dispatch($match->id, $options);
+            ConsoleService::log("    -> Naplánován detail zápasu: ID {$match->id} ({$match->metadata['external_id']})", 'debug');
             $dispatchedCount++;
         }
     }

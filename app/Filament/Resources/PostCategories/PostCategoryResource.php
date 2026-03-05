@@ -21,7 +21,7 @@ class PostCategoryResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.content');
+        return __('admin.navigation.groups.content_and_media');
     }
 
     public static function getNavigationIcon(): ?string
@@ -41,7 +41,7 @@ class PostCategoryResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 70;
     }
 
     public static function form(Schema $schema): Schema

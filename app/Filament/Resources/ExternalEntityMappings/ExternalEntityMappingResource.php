@@ -21,7 +21,7 @@ class ExternalEntityMappingResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 4;
+        return 33;
     }
 
     public static function getNavigationLabel(): string
@@ -46,7 +46,7 @@ class ExternalEntityMappingResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Externí statistiky';
+        return __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data');
     }
 
     public static function getEloquentQuery(): Builder

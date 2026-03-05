@@ -23,7 +23,7 @@ class StatisticSetResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.statistics');
+        return __('admin.navigation.groups.statistics_and_data');
     }
 
     public static function getModelLabel(): string
@@ -38,7 +38,7 @@ class StatisticSetResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 20;
     }
 
     public static function form(Schema $schema): Schema

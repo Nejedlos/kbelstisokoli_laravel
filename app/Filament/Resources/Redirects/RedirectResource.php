@@ -38,7 +38,7 @@ class RedirectResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 90;
+        return 10;
     }
 
     public static function form(Schema $schema): Schema

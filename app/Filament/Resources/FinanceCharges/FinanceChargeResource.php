@@ -38,7 +38,7 @@ class FinanceChargeResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 20;
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder

@@ -27,7 +27,7 @@ class AuditLogResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 100;
+        return 30;
     }
 
     public static function getModelLabel(): string

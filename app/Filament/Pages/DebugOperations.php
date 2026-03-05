@@ -12,6 +12,7 @@ use App\Models\Season;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\Team;
+use App\Services\Support\ConsoleService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -32,6 +33,8 @@ class DebugOperations extends Page
 
     protected string $view = 'filament.pages.debug-operations';
 
+    public string $consoleOutput = '';
+
     public static function canAccess(): bool
     {
         return auth()->user()->can('manage_advanced_settings');
@@ -39,6 +42,23 @@ class DebugOperations extends Page
 
     public function mount(): void
     {
+        $this->consoleOutput = ConsoleService::getContent();
+    }
+
+    public function refreshConsoleLogs(): void
+    {
+        $newContent = ConsoleService::getContent();
+        if ($this->consoleOutput !== $newContent) {
+            $this->consoleOutput = $newContent;
+            $this->dispatch('console-updated');
+        }
+    }
+
+    public function clearConsoleLogs(): void
+    {
+        ConsoleService::clear();
+        $this->consoleOutput = '';
+        Notification::make()->title('Console cleared')->success()->send();
     }
 
     public static function getNavigationGroup(): ?string
@@ -73,10 +93,13 @@ class DebugOperations extends Page
                         return;
                     }
 
+                    ConsoleService::log("Spouštím synchronizaci všech aktivních týmů pro sezónu: {$activeSeason->name}");
+
                     $teams = config('external_sources.czbasketball.teams', []);
                     foreach ($teams as $teamSlug) {
                         $team = Team::where('slug', $teamSlug)->first();
                         if ($team) {
+                            ConsoleService::log("- Naplánováno pro tým: {$team->name}", 'info');
                             SyncTeamSeasonJob::dispatch($team->id, $activeSeason->id);
                         }
                     }
@@ -90,10 +113,13 @@ class DebugOperations extends Page
                 ->color('info')
                 ->requiresConfirmation()
                 ->action(function () {
+                    ConsoleService::log('Zahajuji proces vyhledávání chybějících sezón (Discovery)...', 'info');
                     $discoveryService = app(\App\Services\Stats\Sync\SeasonDiscoveryService::class);
                     $results = $discoveryService->discover();
 
                     $found = count(array_filter($results, fn ($r) => $r['status'] !== 'not found'));
+
+                    ConsoleService::log("Discovery dokončeno. Nalezeno a vytvořeno: {$found} nových konfigurací.", 'success');
 
                     Notification::make()
                         ->title('Discovery finished')
@@ -111,15 +137,19 @@ class DebugOperations extends Page
                     $activeSeason = Season::where('is_active', true)->first();
                     $teams = config('external_sources.czbasketball.teams', []);
 
+                    ConsoleService::log("Spouštím přepočet statistik pro sezónu: ".($activeSeason?->name ?? 'N/A'));
+
                     foreach ($teams as $teamSlug) {
                         $team = Team::where('slug', $teamSlug)->first();
                         if ($team && $activeSeason) {
+                            ConsoleService::log("- Přepočítávám tým: {$team->name}", 'info');
                             $statService = app(\App\Services\Stats\Sync\StatisticSyncService::class);
                             $statService->recomputePlayerSummaries($activeSeason->id);
                             $statService->recomputeTeamSummary($activeSeason->id, $team->id);
                         }
                     }
 
+                    ConsoleService::log('Přepočet statistik dokončen.', 'success');
                     Notification::make()->title('Aggregations recomputed for active season')->success()->send();
                 }),
         ];
@@ -303,6 +333,9 @@ class DebugOperations extends Page
         if (! $activeSeason) {
             return;
         }
+
+        $team = Team::find($teamId);
+        ConsoleService::log("Ruční spuštění synchronizace pro tým: ".($team?->name ?? $teamId), 'info');
 
         SyncTeamSeasonJob::dispatch($teamId, $activeSeason->id);
         Notification::make()->title('Sync started for team')->success()->send();

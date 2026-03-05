@@ -37,12 +37,12 @@ class LegacyImportBatchResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Externí statistiky';
+        return __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data');
     }
 
     public static function getNavigationSort(): ?int
     {
-        return 10;
+        return 36;
     }
 
     public static function form(Schema $schema): Schema

@@ -7,6 +7,7 @@ use App\Models\ExternalTeamMapping;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Support\ConsoleService;
 
 class SeasonDiscoveryService
 {
@@ -48,14 +49,18 @@ class SeasonDiscoveryService
                     continue;
                 }
 
+                ConsoleService::log("Zkouším discovery pro tým {$team->slug} a sezónu {$season->name}...", 'info');
+
                 $candidates = $this->suggestCandidates($season, $options);
                 $winner = null;
 
                 foreach ($candidates as $y) {
+                    ConsoleService::log("  - Prověřuji parametr y={$y}...", 'debug');
                     $verifyResult = $this->verifier->verify($mapping->external_team_id, $y);
 
                     if ($verifyResult['isValid']) {
                         $winner = $verifyResult;
+                        ConsoleService::log("  Found! y={$y} (confidence: {$winner['confidence']})", 'success');
                         break;
                     }
 

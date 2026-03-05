@@ -43,7 +43,7 @@ class CronTaskResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 80;
+        return 40;
     }
 
     public static function form(Schema $schema): Schema
