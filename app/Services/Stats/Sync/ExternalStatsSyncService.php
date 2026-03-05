@@ -180,9 +180,34 @@ class ExternalStatsSyncService
                     $result = $extractor->extract($html);
                     $data = $result['data'];
                     $fragmentHtml = $result['fragment_html'];
+
+                    // AUTO AI FALLBACK: Pokud extraktor nevrátil žádné řádky, ale HTML není prázdné
+                    if (empty($data->rows) && strlen($html) > 500) {
+                        throw new \Exception('DOM extractor returned zero matches, but HTML looks valid.');
+                    }
+
+                    // AUTO AI FALLBACK: Kontrola, zda u odehraných zápasů (starších než týden) nechybí skóre
+                    $missingScores = false;
+                    foreach ($data->rows as $row) {
+                        $scheduledAt = $row->values['scheduled_at'] ?? null;
+                        $score = $row->values['score'] ?? null;
+
+                        if ($scheduledAt && Carbon::parse($scheduledAt)->isBefore(now()->subWeek())) {
+                            if (empty($score) || ! str_contains($score, ':')) {
+                                $missingScores = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($missingScores) {
+                        throw new \Exception('DOM extractor missed scores for matches older than 1 week.');
+                    }
+
                     \Log::info('Extracted '.count($data->rows)." matches for {$team->slug}");
                     ConsoleService::log('  Extrahováno '.count($data->rows).' zápasů ze seznamu.', 'info');
                 } catch (\Exception $e) {
+                    Log::warning("DOM extractor selhal (nebo chybí data) pro seznam zápasů týmu {$team->slug}, zkouším AI fallback. Chyba: ".$e->getMessage());
                     $data = $this->normalizer->normalize($html, ['type' => 'matches_list']);
                     $fragmentHtml = $html;
                     $usedAiFallback = true;
@@ -347,8 +372,20 @@ class ExternalStatsSyncService
                     $result = $extractor->extract($html);
                     $data = $result['data'];
                     $fragmentHtml = $result['fragment_html'];
+
+                    // AUTO AI FALLBACK: Pokud je zápas starší než týden a chybí mu skóre nebo statistiky
+                    $header = $data->metadata['header'] ?? [];
+                    $score = $header['score'] ?? null;
+                    $isOldMatch = $match->scheduled_at && $match->scheduled_at->isBefore(now()->subWeek());
+
+                    $missingScore = empty($score) || ! str_contains($score, ':');
+                    $missingStats = empty($data->rows) && empty($data->metadata['all_tables'] ?? []);
+
+                    if ($isOldMatch && ($missingScore || $missingStats)) {
+                        throw new \Exception("DOM extractor missed critical data for an old match (score: $score, rows: ".count($data->rows).').');
+                    }
                 } catch (\Exception $e) {
-                    Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: ".$e->getMessage());
+                    Log::warning("DOM extractor selhal (nebo chybí data) pro zápas $externalMatchId, zkouším AI fallback. Chyba: ".$e->getMessage());
                     $data = $this->normalizer->normalize($html, ['type' => 'match_boxscore']);
                     $fragmentHtml = $html;
                     $usedAiFallback = true;

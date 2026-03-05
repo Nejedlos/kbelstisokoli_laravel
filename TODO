@@ -1,1 +1,6 @@
 co je fallback synchronizace??? podle mě by se to mělo spustit když je odehraný zapápas třeba bez score
+- vyřešeno implementací automatického AI fallbacku v ExternalStatsSyncService (syncMatchDetail i syncMatchesList)
+- AI se spustí automaticky pokud:
+    - DOM extractor vyhodí chybu
+    - Zápas je starší než týden a chybí mu skóre nebo statistiky
+    - Seznam zápasů je prázdný přestože HTML vypadá validně
