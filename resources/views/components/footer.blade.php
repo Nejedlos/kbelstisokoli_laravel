@@ -94,7 +94,7 @@
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.nav_title') }}
                 </h3>
-                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
+                <ul class="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
                     @forelse($footerNav as $item)
                         <li>
                             <a href="{{ $item->url }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->url() === $item->url ? 'text-primary' : '' }}">
@@ -139,7 +139,7 @@
                         </picture>
                     </div>
                 </div>
-                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
+                <ul class="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
                     @foreach($clubNav as $item)
                         @php $isExternal = str_starts_with($item->url, 'http') || ($item->is_external ?? false); @endphp
                         <li class="{{ $isExternal ? 'pb-1' : '' }}">
@@ -173,7 +173,7 @@
                 </h3>
 
                 <div class="space-y-6">
-                    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-y-4 gap-x-8 text-sm">
+                    <ul class="grid grid-cols-2 lg:grid-cols-1 gap-y-4 gap-x-8 text-sm">
                         @if($branding['venue']['name'] ?? null)
                             <li class="flex items-center gap-4 group">
                                 <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">

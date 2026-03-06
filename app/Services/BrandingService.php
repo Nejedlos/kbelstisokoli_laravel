@@ -42,8 +42,8 @@ class BrandingService
             'club_name' => $dbSettings['club_name'] ?? $cfg['club_name'] ?? 'Kbelští sokoli',
             'club_short_name' => $dbSettings['club_short_name'] ?? $cfg['club_short_name'] ?? 'Sokoli',
             'slogan' => $dbSettings['slogan'] ?? $cfg['slogan'] ?? null,
-            'logo_path' => $dbSettings['logo_path'] ?? $cfg['logo_path'] ?? null,
-            'alt_logo_path' => $dbSettings['alt_logo_path'] ?? $cfg['alt_logo_path'] ?? null,
+            'logo_path' => $dbSettings['team_logo_velke'] ?? $dbSettings['logo_path'] ?? $cfg['logo_path'] ?? $cfg['team_logos']['velke'] ?? null,
+            'alt_logo_path' => $dbSettings['team_logo_male'] ?? $dbSettings['alt_logo_path'] ?? $cfg['alt_logo_path'] ?? $cfg['team_logos']['male'] ?? null,
             'theme_preset' => $activeTheme,
             'colors' => $themeConfig['colors'] ?? [],
             'contact' => [
@@ -130,8 +130,13 @@ class BrandingService
                 'watermark_opacity' => (float) ($dbSettings['team_logo_watermark_opacity'] ?? 0.08),
                 'border_radius' => $dbSettings['team_logo_border_radius'] ?? 'none',
                 'shadow_enabled' => filter_var($dbSettings['team_logo_shadow_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN),
-
-                'paths' => $cfg['team_logos'] ?? [],
+                'paths' => [
+                    'velke' => $dbSettings['team_logo_velke'] ?? $cfg['team_logos']['velke'] ?? null,
+                    'male' => $dbSettings['team_logo_male'] ?? $cfg['team_logos']['male'] ?? null,
+                    'mini' => $dbSettings['team_logo_mini'] ?? $cfg['team_logos']['mini'] ?? null,
+                    'velke_webp' => $cfg['team_logos']['velke_webp'] ?? null,
+                    'mini_webp' => $cfg['team_logos']['mini_webp'] ?? null,
+                ],
             ],
             'parent_logo' => [
                 'paths' => $cfg['parent_logos'] ?? [],

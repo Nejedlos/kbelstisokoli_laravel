@@ -73,6 +73,9 @@ class BrandingSettings extends Page implements HasForms
             'partner_logo_width_mobile' => config('branding.partners.logo_width_mobile'),
             'partner_logo_max_height' => config('branding.partners.logo_max_height'),
             'partner_section_style' => config('branding.partners.section_style'),
+            'team_logo_velke' => config('branding.team_logos.velke'),
+            'team_logo_male' => config('branding.team_logos.male'),
+            'team_logo_mini' => config('branding.team_logos.mini'),
         ];
 
         $this->data = array_merge($configDefaults, $dbData);
@@ -291,15 +294,20 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.slogan'))
                                     ->columnSpanFull(),
                             ]),
-                        Grid::make(2)
+                        Grid::make(3)
                             ->schema([
-                                FileUpload::make('logo_path')
-                                    ->label(__('admin/branding-settings.fields.logo'))
+                                FileUpload::make('team_logo_velke')
+                                    ->label(__('admin/branding-settings.fields.logo_velke'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
                                     ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),
-                                FileUpload::make('alt_logo_path')
-                                    ->label(__('admin/branding-settings.fields.alt_logo'))
+                                FileUpload::make('team_logo_male')
+                                    ->label(__('admin/branding-settings.fields.logo_male'))
+                                    ->image()
+                                    ->disk(config('filesystems.uploads.disk'))
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),
+                                FileUpload::make('team_logo_mini')
+                                    ->label(__('admin/branding-settings.fields.logo_mini'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
                                     ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),

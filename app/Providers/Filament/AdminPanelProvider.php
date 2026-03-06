@@ -187,9 +187,7 @@ class AdminPanelProvider extends PanelProvider
             ->emailVerification(EmailVerificationPrompt::class)
             ->brandName($branding['club_name'])
             ->brandLogo(function() use ($branding) {
-                $logoUrl = $branding['logo_path']
-                    ? web_asset($branding['logo_path'])
-                    : asset($branding['team_logo']['paths']['velke'] ?? 'assets/img/loga/logo_kbelsti_sokoli_velke.png');
+                $logoUrl = web_asset($branding['team_logo']['paths']['velke'] ?? 'assets/img/loga/logo_kbelsti_sokoli_velke.png');
 
                 return new HtmlString('
                     <div class="flex items-center gap-2 sm:gap-3 group">
@@ -203,7 +201,7 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 ');
             })
-            ->favicon($branding['logo_path'] ? web_asset($branding['logo_path']) : '/favicon.ico')
+            ->favicon(web_asset($branding['team_logo']['paths']['mini'] ?? '/favicon.ico'))
             ->font('Instrument Sans')
             ->userMenuItems([
                 'member_section' => MenuItem::make()
