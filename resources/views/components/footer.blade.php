@@ -94,7 +94,7 @@
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     {{ __('footer.nav_title') }}
                 </h3>
-                <ul class="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
+                <ul class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
                     @forelse($footerNav as $item)
                         <li>
                             <a href="{{ $item->url }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->url() === $item->url ? 'text-primary' : '' }}">
@@ -139,7 +139,7 @@
                         </picture>
                     </div>
                 </div>
-                <ul class="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
+                <ul class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
                     @foreach($clubNav as $item)
                         @php $isExternal = str_starts_with($item->url, 'http') || ($item->is_external ?? false); @endphp
                         <li class="{{ $isExternal ? 'pb-1' : '' }}">
@@ -173,7 +173,7 @@
                 </h3>
 
                 <div class="space-y-6">
-                    <ul class="grid grid-cols-2 lg:grid-cols-1 gap-y-4 gap-x-8 text-sm">
+                    <ul class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-y-4 gap-x-8 text-sm">
                         @if($branding['venue']['name'] ?? null)
                             <li class="flex items-center gap-4 group">
                                 <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
@@ -334,27 +334,27 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-4 sm:gap-x-8 sm:gap-y-6 md:gap-x-6 md:gap-y-4 w-full md:w-auto">
-                <a href="{{ Route::has('public.contact.index') ? route('public.contact.index') : url('/kontakt') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
+            <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-4 gap-y-4 sm:gap-x-8 sm:gap-y-6 md:gap-x-6 md:gap-y-4 w-full md:w-auto">
+                <a href="{{ Route::has('public.contact.index') ? route('public.contact.index') : url('/kontakt') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 justify-center sm:justify-start">
                     <span class="w-1.5 h-1.5 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Kontakt') }}
                 </a>
 
-                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+                <span class="w-1 h-1 bg-slate-800 rounded-full"></span>
 
-                <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
-                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {!! str_replace(' ', '&nbsp;', __('Členská sekce')) !!}
                 </a>
 
-                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+                <span class="w-1 h-1 bg-slate-800 rounded-full"></span>
 
-                <a href="{{ Route::has('public.pages.show') ? route('public.pages.show', 'gdpr') : url('/gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center min-w-[40%] sm:min-w-0 justify-center sm:justify-start">
-                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                <a href="{{ Route::has('public.pages.show') ? route('public.pages.show', 'gdpr') : url('/gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Ochrana soukromí') }}
                 </a>
 
-                <span class="w-1 h-1 bg-slate-800 rounded-full hidden md:block"></span>
+                <span class="w-1 h-1 bg-slate-800 rounded-full hidden sm:block"></span>
 
                 <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black flex items-center group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:bg-primary/10 hover:border-primary/20 min-w-full sm:min-w-0 justify-center">
                     {{ __('Hlavní oddíl') }}

@@ -57,7 +57,13 @@ class BrandingSettings extends Page implements HasForms
 
     public function mount(): void
     {
-        $dbData = Setting::pluck('value', 'key')->toArray();
+        // Načteme všechna nastavení přímo jako modely, abychom využili translatable transformace
+        $settings = Setting::all();
+        $dbData = [];
+        foreach ($settings as $setting) {
+            $dbData[$setting->key] = $setting->value;
+        }
+
         $configDefaults = [
             'club_name' => config('branding.club_name'),
             'club_short_name' => config('branding.club_short_name'),
@@ -79,6 +85,16 @@ class BrandingSettings extends Page implements HasForms
         ];
 
         $this->data = array_merge($configDefaults, $dbData);
+
+        // Ošetření FileUpload polí - Filament očekává pole cest
+        $fileFields = ['team_logo_velke', 'team_logo_male', 'team_logo_mini', 'admin_contact_photo_path', 'seo_og_image_path'];
+        foreach ($fileFields as $field) {
+            if (isset($this->data[$field]) && is_string($this->data[$field]) && ! empty($this->data[$field])) {
+                $this->data[$field] = [$this->data[$field]];
+            } elseif (! isset($this->data[$field]) || empty($this->data[$field])) {
+                $this->data[$field] = [];
+            }
+        }
     }
 
     public function form(Schema $schema): Schema
@@ -534,7 +550,14 @@ class BrandingSettings extends Page implements HasForms
     public function save(): void
     {
         try {
+            $fileFields = ['team_logo_velke', 'team_logo_male', 'team_logo_mini', 'admin_contact_photo_path', 'seo_og_image_path'];
+
             foreach ($this->data as $key => $value) {
+                // Ošetření FileUpload polí před uložením - převod z pole na string
+                if (in_array($key, $fileFields) && is_array($value)) {
+                    $value = count($value) > 0 ? reset($value) : null;
+                }
+
                 Setting::updateOrCreate(
                     ['key' => $key],
                     ['value' => $value]
