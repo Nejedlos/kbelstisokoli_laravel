@@ -111,6 +111,18 @@ class BrandingSeeder extends Seeder
             'team_logo_watermark_opacity' => 0.08,
             'team_logo_border_radius' => 'none',
             'team_logo_shadow_enabled' => false,
+
+            // Nastavení partnerů
+            'partners_enabled' => true,
+            'partners_homepage_strip_enabled' => true,
+            'partners_footer_enabled' => true,
+            'partners_match_badge_enabled' => true,
+            'partners_contact_enabled' => true,
+            'partners_recruitment_enabled' => true,
+            'partner_logo_width_desktop' => 180,
+            'partner_logo_width_mobile' => 140,
+            'partner_logo_max_height' => 80,
+            'partner_section_style' => 'logo_with_label',
         ];
 
         foreach ($settings as $key => $value) {

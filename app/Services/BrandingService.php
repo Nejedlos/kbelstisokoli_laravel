@@ -35,8 +35,8 @@ class BrandingService
         $cfg = config('branding', []);
         $dbSettings = $this->getDbSettings();
 
-        $activeTheme = $dbSettings['theme_preset'] ?? $cfg['default_theme'];
-        $themeConfig = $cfg['themes'][$activeTheme] ?? $cfg['themes'][$cfg['default_theme']];
+        $activeTheme = $dbSettings['theme_preset'] ?? $cfg['default_theme'] ?? 'club-default';
+        $themeConfig = $cfg['themes'][$activeTheme] ?? $cfg['themes'][$cfg['default_theme'] ?? 'club-default'] ?? ['colors' => []];
 
         $this->settings = [
             'club_name' => $dbSettings['club_name'] ?? $cfg['club_name'] ?? 'Kbelští sokoli',
@@ -45,7 +45,7 @@ class BrandingService
             'logo_path' => $dbSettings['logo_path'] ?? $cfg['logo_path'] ?? null,
             'alt_logo_path' => $dbSettings['alt_logo_path'] ?? $cfg['alt_logo_path'] ?? null,
             'theme_preset' => $activeTheme,
-            'colors' => $themeConfig['colors'],
+            'colors' => $themeConfig['colors'] ?? [],
             'contact' => [
                 'email' => $dbSettings['contact_email'] ?? $cfg['contact']['email'] ?? null,
                 'phone' => $dbSettings['contact_phone'] ?? $cfg['contact']['phone'] ?? null,
@@ -57,7 +57,7 @@ class BrandingService
                 'youtube' => $dbSettings['social_youtube'] ?? $cfg['socials']['youtube'] ?? null,
             ],
             'default_cta' => [
-                'enabled' => filter_var($dbSettings['cta_enabled'] ?? $cfg['default_cta']['enabled'], FILTER_VALIDATE_BOOLEAN),
+                'enabled' => filter_var($dbSettings['cta_enabled'] ?? $cfg['default_cta']['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'label' => $dbSettings['cta_label'] ?? $cfg['default_cta']['label'] ?? null,
                 'url' => $dbSettings['cta_url'] ?? $cfg['default_cta']['url'] ?? null,
             ],
@@ -141,16 +141,16 @@ class BrandingService
                 ],
             ],
             'partners' => [
-                'enabled' => filter_var($dbSettings['partners_enabled'] ?? $cfg['partners']['enabled'], FILTER_VALIDATE_BOOLEAN),
-                'homepage_strip_enabled' => filter_var($dbSettings['partners_homepage_strip_enabled'] ?? $cfg['partners']['homepage_strip_enabled'], FILTER_VALIDATE_BOOLEAN),
-                'footer_enabled' => filter_var($dbSettings['partners_footer_enabled'] ?? $cfg['partners']['footer_enabled'], FILTER_VALIDATE_BOOLEAN),
-                'match_badge_enabled' => filter_var($dbSettings['partners_match_badge_enabled'] ?? $cfg['partners']['match_badge_enabled'], FILTER_VALIDATE_BOOLEAN),
-                'contact_enabled' => filter_var($dbSettings['partners_contact_enabled'] ?? $cfg['partners']['contact_enabled'], FILTER_VALIDATE_BOOLEAN),
-                'recruitment_enabled' => filter_var($dbSettings['partners_recruitment_enabled'] ?? $cfg['partners']['recruitment_enabled'], FILTER_VALIDATE_BOOLEAN),
-                'logo_width_desktop' => (int) ($dbSettings['partner_logo_width_desktop'] ?? $cfg['partners']['logo_width_desktop']),
-                'logo_width_mobile' => (int) ($dbSettings['partner_logo_width_mobile'] ?? $cfg['partners']['logo_width_mobile']),
-                'logo_max_height' => (int) ($dbSettings['partner_logo_max_height'] ?? $cfg['partners']['logo_max_height']),
-                'section_style' => $dbSettings['partner_section_style'] ?? $cfg['partners']['section_style'],
+                'enabled' => filter_var($dbSettings['partners_enabled'] ?? $cfg['partners']['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'homepage_strip_enabled' => filter_var($dbSettings['partners_homepage_strip_enabled'] ?? $cfg['partners']['homepage_strip_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'footer_enabled' => filter_var($dbSettings['partners_footer_enabled'] ?? $cfg['partners']['footer_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'match_badge_enabled' => filter_var($dbSettings['partners_match_badge_enabled'] ?? $cfg['partners']['match_badge_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'contact_enabled' => filter_var($dbSettings['partners_contact_enabled'] ?? $cfg['partners']['contact_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'recruitment_enabled' => filter_var($dbSettings['partners_recruitment_enabled'] ?? $cfg['partners']['recruitment_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'logo_width_desktop' => (int) ($dbSettings['partner_logo_width_desktop'] ?? $cfg['partners']['logo_width_desktop'] ?? 180),
+                'logo_width_mobile' => (int) ($dbSettings['partner_logo_width_mobile'] ?? $cfg['partners']['logo_width_mobile'] ?? 140),
+                'logo_max_height' => (int) ($dbSettings['partner_logo_max_height'] ?? $cfg['partners']['logo_max_height'] ?? 80),
+                'section_style' => $dbSettings['partner_section_style'] ?? $cfg['partners']['section_style'] ?? 'logo_with_label',
             ],
         ];
 

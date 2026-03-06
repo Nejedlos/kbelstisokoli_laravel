@@ -55,7 +55,22 @@ class FilamentIcon
         $finalStyle = self::resolveStyle($style);
 
         // 4. Sestavení výsledného názvu pro Blade Icons
-        return "{$finalStyle}-{$iconName}";
+        $fullIconName = "{$finalStyle}-{$iconName}";
+
+        // 5. Pokusíme se ověřit, zda ikona existuje v Blade Icons Factory,
+        // aby nedošlo k SvgNotFound Exception v postranním panelu.
+        // Pouze pokud už je kontejner nabootovaný a Factory dostupná.
+        if (app()->bound(\BladeUI\Icons\Factory::class)) {
+            try {
+                // Rychlý test existence v cache/setech
+                app(\BladeUI\Icons\Factory::class)->svg($fullIconName);
+            } catch (\Exception $e) {
+                // Pokud ikona neexistuje s naším prefixem, zkusíme heroicon-o fallback
+                return $fallback;
+            }
+        }
+
+        return $fullIconName;
     }
 
     /**
