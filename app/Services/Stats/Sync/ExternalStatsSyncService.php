@@ -219,12 +219,13 @@ class ExternalStatsSyncService
             // Link following: Hráči
             if (!empty($rosterClip->links) && ($options['follow_players'] ?? false)) {
                 $playerLinks = collect($rosterClip->links)
-                    ->filter(fn($l) => !empty($m = preg_match('/\/hrac\/(\d+)/', $l['href'], $matches)))
+                    ->filter(fn($l) => !empty($m = preg_match('/\/hrac\/(\d+)/', ($l['url'] ?? ($l['href'] ?? '')), $matches)))
                     ->take(10);
 
                 foreach ($playerLinks as $link) {
                     // Tady by šlo spustit sync pro detail hráče, pokud bychom ho měli implementovaný
-                    Log::debug("Found player link to follow: {$link['href']}");
+                    $logUrl = $link['url'] ?? ($link['href'] ?? '');
+                    Log::debug("Found player link to follow: {$logUrl}");
                 }
             }
 
@@ -373,7 +374,9 @@ class ExternalStatsSyncService
 
                 // Link following: Detaily zápasů
                 if (($options['follow_matches'] ?? true) && !empty($clips)) {
-                    $allMatchLinks = collect($clips)->flatMap(fn($c) => $c->links)->filter(fn($l) => str_contains($l['href'], '/zapas/'));
+                    $allMatchLinks = collect($clips)
+                        ->flatMap(fn($c) => $c->links)
+                        ->filter(fn($l) => str_contains($l['url'] ?? ($l['href'] ?? ''), '/zapas/'));
                     Log::debug("Found " . $allMatchLinks->count() . " match links to follow from clips.");
                 }
 
