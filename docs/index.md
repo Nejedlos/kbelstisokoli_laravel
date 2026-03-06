@@ -71,7 +71,8 @@ Popis jednotlivých funkčních modulů aplikace.
 29. [Statistiky: UX a Vizualizace](./04-moduly/33-statistiky-ux-a-vizualizace.md)
 30. [Season Discover & Backfill](./04-moduly/34-season-discover-backfill.md)
 31. [Produkční Rollout a Ověření](./04-moduly/35-prod-rollout.md)
-32. [QA Report - Statistiky a importy](./qa-report.md)
+32. [Partneři a loga](./04-moduly/36-partneri-a-loga.md)
+33. [QA Report - Statistiky a importy](./qa-report.md)
 33. [Production Rollout Report](./prod-rollout-report.md)
 
 ### 05. [AI Funkce](./05-ai-funkce)

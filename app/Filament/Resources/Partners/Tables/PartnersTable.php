@@ -20,8 +20,9 @@ class PartnersTable
             ->columns([
                 ImageColumn::make('logo_path_png')
                     ->label('Logo')
-                    ->disk('public_folder') // Předpokládám, že assety jsou v public
-                    ->height(40),
+                    ->disk('public_path')
+                    ->height(40)
+                    ->extraImgAttributes(['class' => 'partner-logo-preview rounded-lg shadow-sm border border-gray-100 dark:border-gray-800']),
 
                 TextColumn::make('name')
                     ->label('Název')

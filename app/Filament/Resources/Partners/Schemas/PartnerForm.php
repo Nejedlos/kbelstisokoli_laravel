@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Partners\Schemas;
 
 use App\Support\IconHelper;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -10,8 +11,10 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PartnerForm
 {
@@ -75,19 +78,77 @@ class PartnerForm
                             ->columnSpan(1),
                     ]),
 
-                Section::make(new HtmlString(IconHelper::render(IconHelper::IMAGE) . ' Loga (Cesty k assetům)'))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::IMAGE) . ' Logo partnera'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextInput::make('logo_path_png')
-                                    ->label('Cesta k PNG logu')
-                                    ->placeholder('assets/img/partners/logo.png')
-                                    ->helperText('Relativní cesta od public/ složky'),
+                                FileUpload::make('logo_path_png')
+                                    ->label('Logo (PNG/JPG/WebP)')
+                                    ->disk('public_path')
+                                    ->directory('assets/img/partners')
+                                    ->visibility('public')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->extraAttributes(['class' => 'partner-logo-preview'])
+                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $get): string {
+                                        $name = $get('slug') ?: Str::slug($get('name'));
+                                        return (string) str($name . '-' . time() . '.' . $file->getClientOriginalExtension());
+                                    })
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                        if (!$state) {
+                                            $set('logo_path_webp', null);
+                                            return;
+                                        }
+
+                                        $file = $state;
+                                        if (is_array($file)) {
+                                            $file = array_key_first($file);
+                                        }
+
+                                        // Cesta k nahranému souboru na disku public_path
+                                        $fullPath = public_path($file);
+
+                                        if (!file_exists($fullPath)) {
+                                            return;
+                                        }
+
+                                        $info = pathinfo($fullPath);
+                                        $webpPath = $info['dirname'] . '/' . $info['filename'] . '.webp';
+                                        $relativeWebpPath = str_replace(public_path() . '/', '', $webpPath);
+
+                                        try {
+                                            $image = null;
+                                            $extension = strtolower($info['extension']);
+
+                                            if ($extension === 'png') {
+                                                $image = imagecreatefrompng($fullPath);
+                                            } elseif ($extension === 'jpg' || $extension === 'jpeg') {
+                                                $image = imagecreatefromjpeg($fullPath);
+                                            } elseif ($extension === 'webp') {
+                                                $image = imagecreatefromwebp($fullPath);
+                                            }
+
+                                            if ($image) {
+                                                // Zachování průhlednosti pro WebP export
+                                                imagepalettetotruecolor($image);
+                                                imagealphablending($image, false);
+                                                imagesavealpha($image, true);
+
+                                                imagewebp($image, $webpPath, 85);
+                                                imagedestroy($image);
+                                                $set('logo_path_webp', $relativeWebpPath);
+                                            }
+                                        } catch (\Exception $e) {
+                                            // V případě chyby konverze tichý fallback
+                                        }
+                                    }),
 
                                 TextInput::make('logo_path_webp')
                                     ->label('Cesta k WebP logu')
-                                    ->placeholder('assets/img/partners/logo.webp')
-                                    ->helperText('Relativní cesta od public/ složky'),
+                                    ->placeholder('Generuje se automaticky...')
+                                    ->readOnly()
+                                    ->helperText('Toto pole se vyplní automaticky po nahrání hlavního loga.'),
                             ]),
                     ]),
 

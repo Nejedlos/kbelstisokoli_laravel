@@ -9,17 +9,18 @@ use App\Filament\Resources\Partners\Schemas\PartnerForm;
 use App\Filament\Resources\Partners\Tables\PartnersTable;
 use App\Models\Partner;
 use App\Support\IconHelper;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class PartnerResource extends Resource
 {
     protected static ?string $model = Partner::class;
 
-    protected static string|BackedEnum|null $navigationIcon = IconHelper::PARTNERS;
+    public static function getNavigationIcon(): ?string
+    {
+        return IconHelper::get(IconHelper::PARTNERS);
+    }
 
     public static function form(Schema $schema): Schema
     {
