@@ -32,9 +32,8 @@ return new class extends Migration
             $table->boolean('show_on_recruitment_page')->default(true);
 
             // Překlady
-            $table->json('label')->nullable();
-            $table->json('description')->nullable();
-
+            $table->longText('label')->nullable();
+            $table->longText('description')->nullable();
             $table->boolean('opened_in_new_tab')->default(true);
             $table->timestamps();
         });
