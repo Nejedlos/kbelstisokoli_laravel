@@ -93,6 +93,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // Pozn.: Skupina 'web' je již aplikována v bootstrappingu rout výše.
         // alias pro kontrolu aktivního účtu
         $middleware->alias([
+            'panel' => \Filament\Http\Middleware\SetUpPanel::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'public.maintenance' => \App\Http\Middleware\PublicMaintenanceMiddleware::class,
             '2fa.required' => \App\Http\Middleware\EnsureTwoFactorEnabled::class,

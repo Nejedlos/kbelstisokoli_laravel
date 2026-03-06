@@ -12,13 +12,13 @@
 
             @if($isTeamLogoEnabled)
                 <picture class="transition-transform duration-500 hover:rotate-3 hover:scale-110">
-                    <source srcset="{{ asset($teamLogo['paths']['mini_webp']) }}" type="image/webp">
-                    <img src="{{ asset($teamLogo['paths']['mini']) }}"
+                    <source srcset="{{ asset($teamLogo['paths']['mini_webp'] ?? '') }}" type="image/webp">
+                    <img src="{{ asset($teamLogo['paths']['mini'] ?? '') }}"
                          alt="Kbelští sokoli C & E logo"
                          class="object-contain"
-                         style="height: {{ $teamLogo['sizes']['header_mobile'] }}px; width: auto;"
-                         data-desktop-height="{{ $teamLogo['sizes']['header_desktop'] }}px"
-                         data-mobile-height="{{ $teamLogo['sizes']['header_mobile'] }}px"
+                         style="height: {{ $teamLogo['sizes']['header_mobile'] ?? 32 }}px; width: auto;"
+                         data-desktop-height="{{ $teamLogo['sizes']['header_desktop'] ?? 40 }}px"
+                         data-mobile-height="{{ $teamLogo['sizes']['header_mobile'] ?? 32 }}px"
                          id="header-team-logo"
                     >
                 </picture>

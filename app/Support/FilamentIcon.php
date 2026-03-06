@@ -59,15 +59,16 @@ class FilamentIcon
 
         // 5. Pokusíme se ověřit, zda ikona existuje v Blade Icons Factory,
         // aby nedošlo k SvgNotFound Exception v postranním panelu.
-        // Pouze pokud už je kontejner nabootovaný a Factory dostupná.
-        if (app()->bound(\BladeUI\Icons\Factory::class)) {
-            try {
+        // Pouze pokud už je aplikace nabootovaná a Factory dostupná.
+        // Vyhýbáme se volání app() během raného LoadConfiguration bootstrapu (Target class [env] not found).
+        try {
+            $app = \Illuminate\Container\Container::getInstance();
+            if ($app instanceof \Illuminate\Contracts\Foundation\Application && $app->isBooted() && $app->bound(\BladeUI\Icons\Factory::class)) {
                 // Rychlý test existence v cache/setech
                 app(\BladeUI\Icons\Factory::class)->svg($fullIconName);
-            } catch (\Exception $e) {
-                // Pokud ikona neexistuje s naším prefixem, zkusíme heroicon-o fallback
-                return $fallback;
             }
+        } catch (\Throwable $e) {
+            // Tichý fail - pokud nemůžeme ověřit existenci, vrátíme sestavený název a spolehneme se na runtime
         }
 
         return $fullIconName;

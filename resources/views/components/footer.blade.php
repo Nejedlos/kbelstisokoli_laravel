@@ -44,8 +44,8 @@
                     <a href="{{ url('/') }}" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl shadow-lg shadow-black/20">
                             <picture>
-                                <source srcset="{{ asset($teamLogo['paths']['mini_webp']) }}" type="image/webp">
-                                <img src="{{ asset($teamLogo['paths']['mini']) }}"
+                                <source srcset="{{ asset($teamLogo['paths']['mini_webp'] ?? '') }}" type="image/webp">
+                                <img src="{{ asset($teamLogo['paths']['mini'] ?? '') }}"
                                      alt="Kbelští sokoli C & E logo"
                                      class="object-contain transition-transform group-hover:scale-105"
                                      style="height: {{ $teamLogo['sizes']['footer'] ?? 56 }}px; width: auto;">
@@ -131,8 +131,8 @@
                     </h3>
                     <div class="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm border border-white/5">
                         <picture>
-                            <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp']) }}" type="image/webp">
-                            <img src="{{ asset($branding['parent_logo']['paths']['mini']) }}"
+                            <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp'] ?? '') }}" type="image/webp">
+                            <img src="{{ asset($branding['parent_logo']['paths']['mini'] ?? '') }}"
                                  alt="TJ Sokol Kbely Basketball"
                                  class="object-contain"
                                  style="height: {{ $branding['parent_logo']['sizes']['footer'] ?? 28 }}px; width: auto;">
