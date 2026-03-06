@@ -19,7 +19,12 @@ class Team extends Model
 
     public $translatable = ['name', 'description'];
 
-    public function matches(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function matches(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(BasketballMatch::class, 'basketball_match_team', 'team_id', 'basketball_match_id');
+    }
+
+    public function legacyMatches(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'team_id');
     }

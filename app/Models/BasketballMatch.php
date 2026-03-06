@@ -60,6 +60,11 @@ class BasketballMatch extends Model
         return $this->belongsTo(Team::class);
     }
 
+    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'basketball_match_team', 'basketball_match_id', 'team_id');
+    }
+
     public function season(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Season::class);

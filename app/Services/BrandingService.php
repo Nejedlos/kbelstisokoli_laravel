@@ -104,6 +104,42 @@ class BrandingService
                 'bank_account' => $dbSettings['bank_account'] ?? null,
                 'bank_name' => $dbSettings['bank_name'] ?? null,
             ],
+            'team_logo' => [
+                'enabled_header' => filter_var($dbSettings['team_logo_enabled_header'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'enabled_hero' => filter_var($dbSettings['team_logo_enabled_hero'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'enabled_hero_watermark' => filter_var($dbSettings['team_logo_enabled_hero_watermark'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'enabled_team_cards' => filter_var($dbSettings['team_logo_enabled_team_cards'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'enabled_recruitment_cards' => filter_var($dbSettings['team_logo_enabled_recruitment_cards'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'enabled_footer' => filter_var($dbSettings['team_logo_enabled_footer'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'enabled_match_cards' => filter_var($dbSettings['team_logo_enabled_match_cards'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'enabled_match_detail' => filter_var($dbSettings['team_logo_enabled_match_detail'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'enabled_page_headers' => filter_var($dbSettings['team_logo_enabled_page_headers'] ?? true, FILTER_VALIDATE_BOOLEAN),
+
+                'sizes' => [
+                    'header_desktop' => (int) ($dbSettings['team_logo_size_header_desktop'] ?? 40),
+                    'header_mobile' => (int) ($dbSettings['team_logo_size_header_mobile'] ?? 32),
+                    'hero' => (int) ($dbSettings['team_logo_size_hero'] ?? 88),
+                    'team_card' => (int) ($dbSettings['team_logo_size_team_card'] ?? 44),
+                    'recruitment_card' => (int) ($dbSettings['team_logo_size_recruitment_card'] ?? 44),
+                    'footer' => (int) ($dbSettings['team_logo_size_footer'] ?? 56),
+                    'match_card' => (int) ($dbSettings['team_logo_size_match_card'] ?? 36),
+                    'match_detail' => (int) ($dbSettings['team_logo_size_match_detail'] ?? 56),
+                    'page_header' => (int) ($dbSettings['team_logo_size_page_header'] ?? 40),
+                ],
+                'hero_opacity' => (float) ($dbSettings['team_logo_hero_opacity'] ?? 1.0),
+                'watermark_opacity' => (float) ($dbSettings['team_logo_watermark_opacity'] ?? 0.08),
+                'border_radius' => $dbSettings['team_logo_border_radius'] ?? 'none',
+                'shadow_enabled' => filter_var($dbSettings['team_logo_shadow_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN),
+
+                'paths' => $cfg['team_logos'] ?? [],
+            ],
+            'parent_logo' => [
+                'paths' => $cfg['parent_logos'] ?? [],
+                'sizes' => [
+                    'footer' => 28,
+                    'card_badge' => 44,
+                ],
+            ],
         ];
 
         return $this->settings;
@@ -212,6 +248,7 @@ class BrandingService
                     ->orWhere('key', 'like', 'maintenance_%')
                     ->orWhere('key', 'like', 'venue_%')
                     ->orWhere('key', 'like', 'club_%')
+                    ->orWhere('key', 'like', 'team_logo_%')
                     ->orWhere('key', 'like', 'admin_contact_%')
                     ->orWhereIn('key', [
                         'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',

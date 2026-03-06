@@ -35,7 +35,27 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-x-8 lg:gap-y-16">
             {{-- Column 1: Brand & Identity --}}
             <div class="space-y-6 sm:col-span-2 lg:col-span-3">
-                @if($branding['logo_path'])
+                @php
+                    $teamLogo = $branding['team_logo'] ?? null;
+                    $isTeamLogoEnabled = $teamLogo['enabled_footer'] ?? true;
+                @endphp
+
+                @if($isTeamLogoEnabled)
+                    <a href="{{ url('/') }}" class="inline-flex items-center gap-4 group">
+                        <div class="p-2 bg-white rounded-xl shadow-lg shadow-black/20">
+                            <picture>
+                                <source srcset="{{ asset($teamLogo['paths']['mini_webp']) }}" type="image/webp">
+                                <img src="{{ asset($teamLogo['paths']['mini']) }}"
+                                     alt="Kbelští sokoli C & E logo"
+                                     class="object-contain transition-transform group-hover:scale-105"
+                                     style="height: {{ $teamLogo['sizes']['footer'] ?? 56 }}px; width: auto;">
+                            </picture>
+                        </div>
+                        <span class="text-xl font-black uppercase tracking-tighter text-white group-hover:text-primary transition-colors">
+                            {{ __('footer.brand_title') }}
+                        </span>
+                    </a>
+                @elseif($branding['logo_path'])
                     <a href="{{ url('/') }}" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl">
                             <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ $branding['club_name'] }}" class="h-10 w-auto">
@@ -104,10 +124,21 @@
 
             {{-- Column 3: Teams & Club --}}
             <div class="lg:col-span-3">
-                <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
-                    <span class="w-8 h-px bg-primary mr-3"></span>
-                    {{ __('footer.club_title') }}
-                </h3>
+                <div class="flex items-center gap-3 mb-8">
+                    <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm flex items-center leading-tight">
+                        <span class="w-8 h-px bg-primary mr-3"></span>
+                        {{ __('footer.club_title') }}
+                    </h3>
+                    <div class="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm border border-white/5">
+                        <picture>
+                            <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp']) }}" type="image/webp">
+                            <img src="{{ asset($branding['parent_logo']['paths']['mini']) }}"
+                                 alt="TJ Sokol Kbely Basketball"
+                                 class="object-contain"
+                                 style="height: {{ $branding['parent_logo']['sizes']['footer'] ?? 28 }}px; width: auto;">
+                        </picture>
+                    </div>
+                </div>
                 <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
                     @foreach($clubNav as $item)
                         @php $isExternal = str_starts_with($item->url, 'http') || ($item->is_external ?? false); @endphp

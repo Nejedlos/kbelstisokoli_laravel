@@ -37,6 +37,23 @@ return [
     // Copyright text (fallback)
     'footer_text' => env('APP_BRAND_COPYRIGHT', null),
 
+    // Loga týmu Kbelští sokoli C & E
+    'team_logos' => [
+        'male' => '/assets/img/loga/logo_kbelsti_sokoli_male.png',
+        'mini' => '/assets/img/loga/logo_kbelsti_sokoli_mini.png',
+        'mini_webp' => '/assets/img/loga/logo_kbelsti_sokoli_mini.webp',
+        'velke' => '/assets/img/loga/logo_kbelsti_sokoli_velke.png',
+        'velke_webp' => '/assets/img/loga/logo_kbelsti_sokoli_velke.webp',
+    ],
+
+    // Logo hlavního oddílu TJ Sokol Kbely Basketball
+    'parent_logos' => [
+        'mini' => '/assets/img/loga/tj_sokol_kbely_basketball_logo_mini.png',
+        'mini_webp' => '/assets/img/loga/tj_sokol_kbely_basketball_logo_mini.webp',
+        'velke' => '/assets/img/loga/tj_sokol_kbely_basketball_logo_velke.png',
+        'velke_webp' => '/assets/img/loga/tj_sokol_kbely_basketball_logo_velke.webp',
+    ],
+
     // Předdefinované presety témat (Themes)
     'themes' => [
         'club-default' => [

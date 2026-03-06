@@ -27,6 +27,7 @@
         :title="$mainTeamName . ' ' . __('matches.vs') . ' ' . $match->opponent->name"
         :subtitle="$match->scheduled_at->format('d. m. Y H:i') . ' | ' . ($match->location ?? __('matches.location_not_specified'))"
         :breadcrumbs="[__('matches.breadcrumbs') => route('public.matches.index'), __('matches.view_detail') => null]"
+        image="assets/img/hero/hero-match-detail.webp"
     />
 
     <div class="section-padding bg-bg">
@@ -37,9 +38,24 @@
                     <div class="flex flex-col md:flex-row items-center justify-between gap-12">
                         <!-- Home Team -->
                         <div class="flex-1 flex flex-col items-center text-center">
-                            <div class="w-24 h-24 md:w-32 md:h-24 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20">
+                            @php
+                                $brandingResolver = app(\App\Services\TeamBrandingResolver::class);
+                                $homeBranding = $brandingResolver->getMatchLogo($match, true);
+                                $awayBranding = $brandingResolver->getMatchLogo($match, false);
+                                $teamLogoSettings = $branding['team_logo'] ?? null;
+                                $isMatchDetailLogoEnabled = $teamLogoSettings['enabled_match_detail'] ?? true;
+                            @endphp
+                            <div class="w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20 overflow-hidden p-4">
                                 @if($match->is_home)
-                                    @if($branding['logo_path'] ?? null)
+                                    @if($isMatchDetailLogoEnabled && $homeBranding)
+                                        <picture>
+                                            <source srcset="{{ $homeBranding['logo_url_large_webp'] }}" type="image/webp">
+                                            <img src="{{ $homeBranding['logo_url_large'] }}"
+                                                 class="max-w-full max-h-full object-contain drop-shadow-2xl"
+                                                 alt="{{ $homeBranding['alt'] }}"
+                                                 style="height: {{ $teamLogoSettings['sizes']['match_detail'] ?? 56 }}px; width: auto;">
+                                        </picture>
+                                    @elseif($branding['logo_path'] ?? null)
                                         <img src="{{ web_asset($branding['logo_path']) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $branding['club_name'] ?? 'Sokoli' }}">
                                     @else
                                         <i class="fa-light fa-shield-halved text-4xl opacity-20"></i>
@@ -77,9 +93,17 @@
 
                         <!-- Away Team -->
                         <div class="flex-1 flex flex-col items-center text-center">
-                            <div class="w-24 h-24 md:w-32 md:h-24 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20">
+                            <div class="w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20 overflow-hidden p-4">
                                 @if(!$match->is_home)
-                                    @if($branding['logo_path'] ?? null)
+                                    @if($isMatchDetailLogoEnabled && $awayBranding)
+                                        <picture>
+                                            <source srcset="{{ $awayBranding['logo_url_large_webp'] }}" type="image/webp">
+                                            <img src="{{ $awayBranding['logo_url_large'] }}"
+                                                 class="max-w-full max-h-full object-contain drop-shadow-2xl"
+                                                 alt="{{ $awayBranding['alt'] }}"
+                                                 style="height: {{ $teamLogoSettings['sizes']['match_detail'] ?? 56 }}px; width: auto;">
+                                        </picture>
+                                    @elseif($branding['logo_path'] ?? null)
                                         <img src="{{ web_asset($branding['logo_path']) }}" class="max-w-[80%] max-h-[80%] object-contain" alt="{{ $branding['club_name'] ?? 'Sokoli' }}">
                                     @else
                                         <i class="fa-light fa-shield-halved text-4xl opacity-20"></i>

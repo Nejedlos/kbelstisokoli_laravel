@@ -108,6 +108,21 @@
         <div class="absolute inset-0 z-0 hero-mesh opacity-20"></div>
     @endif
 
+    {{-- Branding Watermark --}}
+    @php
+        $branding = app(\App\Services\BrandingService::class)->getSettings();
+        $teamLogo = $branding['team_logo'] ?? null;
+    @endphp
+
+    @if($teamLogo['enabled_hero_watermark'] ?? false)
+        <div class="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+            <picture class="opacity-[var(--watermark-opacity)] transition-opacity duration-1000" style="--watermark-opacity: {{ $teamLogo['watermark_opacity'] ?? 0.08 }}">
+                <source srcset="{{ asset($teamLogo['paths']['velke_webp']) }}" type="image/webp">
+                <img src="{{ asset($teamLogo['paths']['velke']) }}" alt="" class="w-[120%] h-[120%] object-contain max-w-none grayscale brightness-200">
+            </picture>
+        </div>
+    @endif
+
     {{-- Decor elements for "sexy" look --}}
     @if($variant !== 'minimal')
         <div class="absolute top-0 right-0 w-1/2 h-full bg-primary/5 -skew-x-12 translate-x-1/3 pointer-events-none z-0"></div>
@@ -133,20 +148,43 @@
         ])>
             @if($data['eyebrow'] ?? null)
                 <div @class([
-                    'mb-6 inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-display font-bold uppercase tracking-[0.3em] whitespace-nowrap max-w-full overflow-hidden leading-none shadow-2xl',
-                    'bg-white/5 backdrop-blur-md text-primary-light border border-white/10 shadow-black/20' => $variant !== 'minimal',
-                    'bg-secondary/5 text-secondary border border-secondary/10 shadow-secondary/5' => $variant === 'minimal',
+                    'mb-10 inline-flex items-center px-4 py-2.5 sm:px-6 sm:py-3 rounded-full text-[11px] sm:text-[13px] font-display font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] max-w-[calc(100vw-2rem)] sm:max-w-full overflow-hidden leading-tight sm:leading-none shadow-2xl transition-all duration-300 hover:scale-[1.02] group/badge',
+                    'bg-white/95 backdrop-blur-sm text-secondary shadow-black/40' => $variant !== 'minimal',
+                    'bg-white text-secondary border border-secondary/10 shadow-secondary/10' => $variant === 'minimal',
                 ])>
-                    <span class="relative flex h-2 w-2 mr-4 shrink-0">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    @if($teamLogo['enabled_hero'] ?? true)
+                        <picture class="mr-3 sm:mr-5 shrink-0 transition-transform duration-500 group-hover/badge:rotate-3"
+                                 style="opacity: {{ $teamLogo['hero_opacity'] ?? 1.0 }};">
+                            <source srcset="{{ asset($teamLogo['paths']['mini_webp']) }}" type="image/webp">
+                            <img src="{{ asset($teamLogo['paths']['mini']) }}"
+                                 alt="Kbelští sokoli"
+                                 class="object-contain {{ $teamLogo['shadow_enabled'] ? 'drop-shadow-xl' : '' }}"
+                                 style="height: clamp(56px, 10vw, {{ $teamLogo['sizes']['hero'] }}px); width: auto; border-radius: {{ $teamLogo['border_radius'] === 'full' ? '9999px' : ($teamLogo['border_radius'] === 'lg' ? '1rem' : ($teamLogo['border_radius'] === 'md' ? '0.5rem' : ($teamLogo['border_radius'] === 'sm' ? '0.25rem' : '0'))) }};"
+                            >
+                        </picture>
+                    @else
+                        <span class="relative flex h-2 w-2 mr-4 shrink-0">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                        </span>
+                    @endif
+                    <span class="relative block text-pretty">
+                        @if(str_contains($data['eyebrow'], '•'))
+                            @php
+                                [$part1, $part2] = explode('•', $data['eyebrow'], 2);
+                            @endphp
+                            <span class="inline">{{ trim($part1) }}</span>
+                            <span class="mx-1.5 opacity-60">•</span>
+                            <span class="inline text-primary">{{ trim($part2) }}</span>
+                        @else
+                            {{ $data['eyebrow'] }}
+                        @endif
                     </span>
-                    {{ $data['eyebrow'] }}
                 </div>
             @endif
 
             @if($data['headline'] ?? null)
-                <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-display uppercase tracking-tighter text-balance">
+                <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-display uppercase tracking-tight text-balance">
                     {!! nl2br(e($data['headline'])) !!}
                 </h1>
             @endif

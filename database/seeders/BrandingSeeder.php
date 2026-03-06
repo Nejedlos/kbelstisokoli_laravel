@@ -18,9 +18,11 @@ class BrandingSeeder extends Seeder
     {
         $settings = [
             // Identita klubu
-            'club_name' => 'Kbelští sokoli',
+            'club_name' => 'TJ Sokol Kbely C & E',
             'club_short_name' => 'Sokoli',
-            'slogan' => 'Více než jen basketbal. Jsme rodina.',
+            'slogan' => 'Více než jen basketbal.',
+            'logo_path' => 'branding/logo_kbelsti_sokoli_velke.png',
+            'alt_logo_path' => 'branding/tj_sokol_kbely_basketball_logo_velke.png',
 
             // Design a UI
             'theme_preset' => 'club-default',
@@ -29,19 +31,19 @@ class BrandingSeeder extends Seeder
             'button_radius' => 'md',
 
             // Hlavní kontakty
-            'contact_email' => 'spanily@keep69.cz',
+            'contact_email' => 'spanily@pro-nemo.cz',
             'contact_phone' => '+420 602 285 447',
             'contact_address' => 'Toužimská 700, Praha 9 - Kbely',
 
             // Kontakty pro veřejnost (v patičce)
             'contact_person' => 'Tomáš Spanilý',
             'contact_role' => 'vedoucí týmu',
-            'contact_street' => 'Kovářská 17',
+            'contact_street' => '',
             'contact_city' => 'Praha 9',
-            'contact_fax' => '+420 266 315 868',
+            'contact_fax' => '',
 
             // Administrační kontakt (např. pro technické záležitosti)
-            'admin_contact_email' => 'spanily@keep69.cz',
+            'admin_contact_email' => 'spanily@pro-nemo.cz',
             'admin_contact_name' => 'Tomáš Spanilý',
             'admin_contact_phone' => '+420 602 285 447',
 
@@ -64,7 +66,7 @@ class BrandingSeeder extends Seeder
             'venue_city' => 'Letňany',
             'venue_gps' => "50°8'2.97\"N, 14°30'37.31\"E",
             'venue_map_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2557.423791906335!2d14.508026677153266!3d50.134503371533754!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470bed3fb2d307c7%3A0x80b9ba0fd7daac96!2zVMWZaW5lY2vDoSA2NTAsIDE5OSAwMCBMZXTFiGFueQ!5e0!3m2!1scs!2scz!4v1772030905282!5m2!1scs!2scz',
-            'match_day' => 'Pátek 19:30 hod.',
+            'match_day' => 'Středa 19:15 nebo 20:15',
 
             // SEO a Právní informace
             'footer_text' => '© 2026 Basketbalový klub Kbelští sokoli. Všechna práva vyhrazena.',
@@ -83,6 +85,32 @@ class BrandingSeeder extends Seeder
             'perf_html_minification' => true,
             'perf_livewire_navigate' => true,
             'perf_lazy_load_images' => true,
+
+            // Týmový branding (Kbelští sokoli C & E)
+            'team_logo_enabled_header' => true,
+            'team_logo_enabled_hero' => true,
+            'team_logo_enabled_hero_watermark' => false,
+            'team_logo_enabled_team_cards' => true,
+            'team_logo_enabled_recruitment_cards' => true,
+            'team_logo_enabled_footer' => true,
+            'team_logo_enabled_match_cards' => true,
+            'team_logo_enabled_match_detail' => true,
+            'team_logo_enabled_page_headers' => true,
+
+            'team_logo_size_header_desktop' => 48,
+            'team_logo_size_header_mobile' => 38,
+            'team_logo_size_hero' => 88,
+            'team_logo_size_team_card' => 44,
+            'team_logo_size_recruitment_card' => 44,
+            'team_logo_size_footer' => 56,
+            'team_logo_size_match_card' => 36,
+            'team_logo_size_match_detail' => 56,
+            'team_logo_size_page_header' => 48,
+
+            'team_logo_hero_opacity' => 1.0,
+            'team_logo_watermark_opacity' => 0.08,
+            'team_logo_border_radius' => 'none',
+            'team_logo_shadow_enabled' => false,
         ];
 
         foreach ($settings as $key => $value) {

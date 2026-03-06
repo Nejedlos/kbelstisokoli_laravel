@@ -26,7 +26,7 @@
                         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-6 ring-8 ring-primary/5">
                             <i class="fa-light fa-comments-question text-3xl"></i>
                         </div>
-                        <h2 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-3">Kontaktní formulář</h2>
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-3">Kontaktní formulář</h2>
                         <p class="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
                             Vyplňte prosím níže uvedené údaje a my se vám ozveme co nejdříve to bude možné.
                         </p>

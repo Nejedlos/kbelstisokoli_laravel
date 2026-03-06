@@ -5,7 +5,7 @@
         :title="__('teams.title')"
         :subtitle="__('teams.subtitle')"
         :breadcrumbs="[__('teams.breadcrumbs') => null]"
-        image="assets/img/teams/teams-header.jpg"
+        image="assets/img/hero/hero-teams.webp"
     />
 
 @cacheFragment('teams_index_content_' . app()->getLocale(), 3600)
@@ -21,11 +21,30 @@
                     />
                     <div class="flex flex-wrap justify-center gap-8">
                         @foreach($mainTeams as $team)
+                            @php
+                                $brandingResolver = app(\App\Services\TeamBrandingResolver::class);
+                                $teamBranding = $brandingResolver->getTeamBranding($team);
+                                $branding = app(\App\Services\BrandingService::class)->getSettings();
+                                $isTeamLogoEnabled = $branding['team_logo']['enabled_team_cards'] ?? true;
+                            @endphp
                             <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(50%-1rem)] max-w-md flex">
-                                <div class="card card-hover group flex flex-col h-full border-t-4 {{ $loop->index % 2 == 0 ? 'border-primary' : 'border-secondary' }} w-full">
+                                <div class="card card-hover group flex flex-col h-full border-t-4 {{ $loop->index % 2 == 0 ? 'border-primary' : 'border-secondary' }} w-full relative overflow-hidden">
+                                    @if($isTeamLogoEnabled)
+                                        <div class="absolute -top-1 -right-1 z-10">
+                                            <div class="bg-white p-2 rounded-bl-2xl shadow-sm border-b border-l border-slate-100">
+                                                <picture>
+                                                    <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
+                                                    <img src="{{ $teamBranding['logo_url'] }}"
+                                                         alt="{{ $teamBranding['alt'] }}"
+                                                         class="object-contain"
+                                                         style="height: {{ $branding['team_logo']['sizes']['team_card'] }}px; width: auto;">
+                                                </picture>
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="p-8 flex-1 flex flex-col">
                                         <div class="flex justify-between items-start mb-6 gap-4">
-                                            <h3 class="text-2xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight">
+                                            <h3 class="text-2xl font-black uppercase tracking-tight group-hover:text-primary transition-colors leading-tight">
                                                 {{ $team->name }}
                                             </h3>
                                             <span class="badge badge-outline uppercase tracking-widest text-[10px] py-1 px-3 shrink-0">
@@ -102,16 +121,35 @@
             @if($otherTeams->isNotEmpty())
                 <div class="mb-24">
                     <div class="max-w-3xl mx-auto text-center mb-10">
-                        <h3 class="text-2xl font-black uppercase tracking-tighter">{{ __('teams.other_teams') }}</h3>
+                        <h3 class="text-2xl font-black uppercase tracking-tight">{{ __('teams.other_teams') }}</h3>
                         <div class="w-16 h-1 bg-primary mx-auto mt-4"></div>
                     </div>
                     <div class="flex flex-wrap justify-center gap-6">
                         @foreach($otherTeams as $team)
+                            @php
+                                $brandingResolver = app(\App\Services\TeamBrandingResolver::class);
+                                $teamBranding = $brandingResolver->getTeamBranding($team);
+                                $branding = app(\App\Services\BrandingService::class)->getSettings();
+                                $isTeamLogoEnabled = $branding['team_logo']['enabled_team_cards'] ?? true;
+                            @endphp
                             <div class="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-sm flex">
-                                <div class="card card-hover group flex flex-col h-full border-t-2 border-slate-200 w-full">
+                                <div class="card card-hover group flex flex-col h-full border-t-2 border-slate-200 w-full relative overflow-hidden">
+                                    @if($isTeamLogoEnabled)
+                                        <div class="absolute -top-1 -right-1 z-10">
+                                            <div class="bg-white p-1.5 rounded-bl-xl shadow-sm border-b border-l border-slate-100">
+                                                <picture>
+                                                    <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
+                                                    <img src="{{ $teamBranding['logo_url'] }}"
+                                                         alt="{{ $teamBranding['alt'] }}"
+                                                         class="object-contain"
+                                                         style="height: {{ floor($branding['team_logo']['sizes']['team_card'] * 0.8) }}px; width: auto;">
+                                                </picture>
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="p-6 flex-1 flex flex-col">
                                         <div class="flex justify-between items-start mb-4 gap-4">
-                                            <h4 class="text-xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight">
+                                            <h4 class="text-xl font-black uppercase tracking-tight group-hover:text-primary transition-colors leading-tight">
                                                 {{ $team->name }}
                                             </h4>
                                             <span class="badge badge-outline uppercase tracking-widest text-[9px] py-0.5 px-2 shrink-0">
@@ -182,7 +220,7 @@
                 </div>
 
                 <div class="relative z-10 max-w-3xl">
-                    <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">{{ __('teams.detail.how_to_join') }}</h2>
+                    <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.how_to_join') }}</h2>
                     <p class="text-lg text-slate-300 mb-10 leading-relaxed">
                         {{ __('recruitment.hero_subheadline') }}
                     </p>

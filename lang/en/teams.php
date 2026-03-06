@@ -48,7 +48,7 @@ return [
         'faq_exp_q' => 'Do I need previous experience?',
         'faq_exp_a' => 'Yes, for our teams we are looking for players who have already played basketball and master the basics of the game, because we play organized competitions (from the 2nd League to the Prague Championship and lower classes).',
         'faq_try_q' => 'Can I come for a tryout?',
-        'faq_try_a' => 'Sure! The first training is always non-binding. Just arrange it in advance with the coach or team leader.',
+        'faq_try_a' => 'Sure! The first 3 trainings are always non-binding. Just arrange it in advance with the coach or team leader.',
         'faq_contact_q' => 'How does the contact work?',
         'faq_contact_a' => 'Fill out the recruitment form or write to us. We will get back to you and arrange a date for you to come to the gym.',
         'muzi_c_about' => 'Men C is a dynamic team focusing on competitive basketball with the goal of achieving the best possible results in the Prague Championship. Our roster consists of players with extensive experience who have the desire to constantly improve and pull together. We emphasize team chemistry, discipline on the court, and mutual respect. Off the court, we are a great group that sticks together.',

@@ -54,7 +54,7 @@
             <div class="w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
                 <i class="fa-light fa-paper-plane-check fa-3xl"></i>
             </div>
-            <h3 class="text-2xl font-black text-emerald-900 uppercase tracking-tighter mb-2">Žádost odeslána!</h3>
+            <h3 class="text-2xl font-black text-emerald-900 uppercase tracking-tight mb-2">Žádost odeslána!</h3>
             <p class="text-emerald-700/80 mb-8 leading-relaxed">
                 Děkujeme za váš zájem. Vaše žádost byla doručena trenérovi týmu. Brzy se vám ozveme zpět.
             </p>

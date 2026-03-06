@@ -13,7 +13,7 @@
         <div class="container">
             {{-- Koho hledáme --}}
             <div class="max-w-3xl mx-auto text-center mb-20">
-                <h2 class="text-3xl font-black uppercase tracking-tighter mb-6">{{ __('recruitment.who_we_look_for') }}</h2>
+                <h2 class="text-3xl font-black uppercase tracking-tight mb-6">{{ __('recruitment.who_we_look_for') }}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left mt-10">
                     <div class="p-6 bg-slate-50 rounded-2xl flex items-start gap-4 border border-slate-100">
                         <i class="fa-light fa-basketball fa-2x text-primary"></i>
@@ -48,7 +48,7 @@
 
             {{-- Výběr týmu --}}
             <div class="mb-20">
-                <h2 class="text-3xl font-black uppercase tracking-tighter text-center mb-10">{{ __('recruitment.which_team_title') }}</h2>
+                <h2 class="text-3xl font-black uppercase tracking-tight text-center mb-10">{{ __('recruitment.which_team_title') }}</h2>
                 <div @class([
                     'grid gap-8 mx-auto',
                     'grid-cols-1 md:grid-cols-2' => count($teams ?? []) == 2,
@@ -57,8 +57,26 @@
                     'max-w-6xl' => count($teams ?? []) != 2,
                 ])>
                     @foreach($teams ?? [] as $team)
-                        <div class="card card-hover border-t-4 {{ $loop->index % 2 == 0 ? 'border-t-primary' : 'border-t-secondary' }} p-8 flex flex-col items-center text-center">
-                            <h3 class="text-4xl font-black uppercase tracking-tighter mb-2">{{ $team->name }}</h3>
+                        @php
+                            $brandingResolver = app(\App\Services\TeamBrandingResolver::class);
+                            $teamBranding = $brandingResolver->getTeamBranding($team);
+                            $isTeamLogoEnabled = $branding['team_logo']['enabled_recruitment_cards'] ?? true;
+                        @endphp
+                        <div class="card card-hover border-t-4 {{ $loop->index % 2 == 0 ? 'border-t-primary' : 'border-t-secondary' }} p-8 flex flex-col items-center text-center relative overflow-hidden">
+                            @if($isTeamLogoEnabled)
+                                <div class="absolute -top-1 -right-1 z-10">
+                                    <div class="bg-white p-2 rounded-bl-2xl shadow-sm border-b border-l border-slate-100">
+                                        <picture>
+                                            <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
+                                            <img src="{{ $teamBranding['logo_url'] }}"
+                                                 alt="{{ $teamBranding['alt'] }}"
+                                                 class="object-contain"
+                                                 style="height: {{ $branding['team_logo']['sizes']['recruitment_card'] }}px; width: auto;">
+                                        </picture>
+                                    </div>
+                                </div>
+                            @endif
+                            <h3 class="text-4xl font-black uppercase tracking-tight mb-2">{{ $team->name }}</h3>
                             <p class="text-slate-600 mb-8 flex-1">
                                 {{ $team->description }}
                             </p>
@@ -71,7 +89,7 @@
             {{-- Jak probíhá kontakt --}}
             <div class="bg-slate-50 rounded-[2.5rem] p-8 md:p-16 mb-20 border border-slate-100">
                 <div class="max-w-3xl mx-auto">
-                    <h2 class="text-3xl font-black uppercase tracking-tighter text-center mb-12">{{ __('recruitment.steps_title') }}</h2>
+                    <h2 class="text-3xl font-black uppercase tracking-tight text-center mb-12">{{ __('recruitment.steps_title') }}</h2>
                     <div class="space-y-12">
                         <div class="flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
                             <div class="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center text-2xl font-black flex-shrink-0">1</div>
@@ -101,7 +119,7 @@
             {{-- Co si vzít s sebou --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
                 <div>
-                    <h2 class="text-3xl font-black uppercase tracking-tighter mb-6">{{ __('recruitment.what_to_bring') }}</h2>
+                    <h2 class="text-3xl font-black uppercase tracking-tight mb-6">{{ __('recruitment.what_to_bring') }}</h2>
                     <ul class="space-y-4">
                         <li class="flex items-start gap-3">
                             <i class="fa-light fa-shoe-prints text-primary mt-1"></i>
@@ -137,7 +155,7 @@
             {{-- Kontakt / Formulář --}}
             <div id="kontakt" class="max-w-2xl mx-auto">
                 <div class="bg-secondary p-8 md:p-12 rounded-[2rem] text-white text-center shadow-xl shadow-secondary/20">
-                    <h3 class="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4">{{ __('recruitment.cta_contact_us') }}</h3>
+                    <h3 class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">{{ __('recruitment.cta_contact_us') }}</h3>
                     <p class="text-slate-300 mb-10">{{ __('recruitment.cta_text') }}</p>
 
                     <div class="flex flex-col gap-4">
@@ -159,11 +177,19 @@
 
         <div class="container relative z-10">
             <div class="max-w-4xl mx-auto bg-white rounded-[3rem] p-8 md:p-16 shadow-xl shadow-slate-200/60 border border-slate-100 text-center">
-                <div class="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <div class="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 relative">
                     <i class="fa-light fa-children fa-3x text-primary"></i>
+                    <div class="absolute -top-2 -right-2">
+                        <picture>
+                            <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp']) }}" type="image/webp">
+                            <img src="{{ asset($branding['parent_logo']['paths']['mini']) }}"
+                                 alt="TJ Sokol Kbely Basketball"
+                                 class="w-10 h-10 object-contain drop-shadow-sm">
+                        </picture>
+                    </div>
                 </div>
 
-                <h3 class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-6">{{ __('recruitment.youth_recruitment') }}</h3>
+                <h3 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-6">{{ __('recruitment.youth_recruitment') }}</h3>
                 <p class="text-lg text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">{{ __('recruitment.youth_recruitment_text') }}</p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">

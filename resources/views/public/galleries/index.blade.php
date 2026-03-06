@@ -5,6 +5,7 @@
         :title="__('gallery.title')"
         :subtitle="__('gallery.subtitle')"
         :breadcrumbs="[__('gallery.breadcrumb') => null]"
+        image="assets/img/hero/hero-gallery.webp"
     />
 
     <div class="section-padding bg-bg">

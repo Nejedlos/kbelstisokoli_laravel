@@ -5,6 +5,7 @@
         :title="__('trainings.title')"
         :subtitle="__('trainings.subtitle')"
         :breadcrumbs="[__('trainings.breadcrumbs') => null]"
+        image="assets/img/hero/hero-trainings.webp"
     />
 
     <div class="section-padding bg-bg">
@@ -18,7 +19,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
                     @foreach($teams as $team)
                         <div class="card p-8 border-t-4 {{ $loop->first ? 'border-primary' : 'border-secondary' }}">
-                            <h2 class="text-3xl font-black uppercase tracking-tighter mb-6 text-secondary">{{ $team->name }}</h2>
+                            <h2 class="text-3xl font-black uppercase tracking-tight mb-6 text-secondary">{{ $team->name }}</h2>
                             <div class="mb-8 text-slate-600 leading-relaxed">
                                 {{ $team->description ?? __('trainings.no_description') }}
                             </div>
@@ -76,7 +77,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div class="lg:col-span-1 space-y-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-6">{{ __('trainings.practical_info') }}</h2>
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-6">{{ __('trainings.practical_info') }}</h2>
                         <ul class="space-y-4">
                             <li class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-slate-100">
                                 <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -101,7 +102,7 @@
                 </div>
 
                 <div class="lg:col-span-2">
-                    <h2 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-6">{{ __('trainings.where_we_train') }}</h2>
+                    <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-6">{{ __('trainings.where_we_train') }}</h2>
                     <div class="card h-[400px] bg-slate-100 relative overflow-hidden border-2 border-slate-200">
                         @if($branding['venue']['map_url'] ?? null)
                             <iframe src="{{ $branding['venue']['map_url'] }}"

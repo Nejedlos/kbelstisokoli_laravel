@@ -71,6 +71,8 @@ class IconHelper
 
     public const AI = AppIcon::AI;
 
+    public const PARTNERS = AppIcon::PARTNERS;
+
     public const RECAPTCHA = AppIcon::RECAPTCHA;
 
     public const DASHBOARD = AppIcon::DASHBOARD;

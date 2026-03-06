@@ -119,12 +119,21 @@ class MatchSyncService
             $match->update($data);
             $newValues = $match->only(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id']);
 
+            // Sync teams to pivot table
+            if (! $match->teams->contains($team->id)) {
+                $match->teams()->syncWithoutDetaching([$team->id]);
+            }
+
             if ($run && $match->wasChanged(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id'])) {
                 $run->addLog('updated', $match, $oldValues, $newValues);
             }
         } else {
             \Log::info("Creating match for {$team->slug} vs {$opponentName}");
             $match = BasketballMatch::create($data);
+
+            // Sync teams to pivot table
+            $match->teams()->sync([$team->id]);
+
             if ($run) {
                 $run->addLog('created', $match, null, $match->only(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id']));
             }

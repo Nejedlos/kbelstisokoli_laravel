@@ -202,7 +202,7 @@
         </div>
 
         <div class="relative w-fit mx-auto mb-4 md:mb-6 overflow-visible text-center">
-            <h1 class="w-fit mx-auto text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tighter leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-2 sm:px-12 md:px-16 lg:px-20 py-4 overflow-visible whitespace-nowrap">
+            <h1 class="w-fit mx-auto text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase italic tracking-tight leading-[0.75] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20 px-2 sm:px-12 md:px-16 lg:px-20 py-4 overflow-visible whitespace-nowrap">
                 TIME<span class="text-primary">-</span>OUT!
             </h1>
             <div class="label-pos-custom">

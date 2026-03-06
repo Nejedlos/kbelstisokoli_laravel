@@ -31,11 +31,11 @@ class BasketballMatchesTable
                             : '').$state->format('d.m.Y H:i')
                     ))
                     ->sortable(),
-                TextColumn::make('team.name')
-                    ->label('Tým')
+                TextColumn::make('teams.name')
+                    ->label('Týmy')
                     ->badge()
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->whereHas('team', function ($q) use ($search) {
+                        return $query->whereHas('teams', function ($q) use ($search) {
                             $q->where('name', 'LIKE', "%{$search}%");
                         });
                     }),
@@ -84,9 +84,9 @@ class BasketballMatchesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('team_id')
+                SelectFilter::make('teams')
                     ->label('Tým')
-                    ->relationship('team', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('season')

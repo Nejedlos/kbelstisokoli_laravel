@@ -5,6 +5,7 @@
         :title="__('history.title')"
         :subtitle="__('history.subtitle')"
         :breadcrumbs="[__('history.breadcrumbs') => null]"
+        image="assets/img/hero/hero-history.webp"
     />
 
     <div class="section-padding bg-bg relative overflow-hidden">
@@ -50,7 +51,7 @@
                 <div class="space-y-24">
                     @foreach(__('history.sections') as $key => $section)
                         <div class="relative">
-                            <h3 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-8 flex items-center gap-4">
+                            <h3 class="text-3xl font-black uppercase tracking-tight text-secondary mb-8 flex items-center gap-4">
                                 <span class="w-12 h-1px bg-primary block"></span>
                                 {{ $section['title'] }}
                             </h3>
@@ -86,7 +87,7 @@
                     <div class="absolute top-0 right-0 p-8 opacity-5">
                         <i class="fa-light fa-quote-right fa-6x"></i>
                     </div>
-                    <h3 class="text-2xl md:text-3xl font-black uppercase tracking-tighter text-secondary mb-6">{{ __('history.community') }}</h3>
+                    <h3 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary mb-6">{{ __('history.community') }}</h3>
                     <p class="text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto italic">
                         "Kbelský basketbal není jen o výsledcích na tabuli, ale o lidech, kteří tvoří jednu velkou sportovní rodinu už po generace."
                     </p>

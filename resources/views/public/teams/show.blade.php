@@ -20,13 +20,13 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 {{-- Levý sloupec - O týmu --}}
                 <div class="lg:col-span-2">
-                    <h2 class="text-3xl font-black uppercase tracking-tighter mb-6">{{ __('teams.detail.about') }}</h2>
+                    <h2 class="text-3xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.about') }}</h2>
                     <div class="prose prose-lg text-slate-600 max-w-none mb-12">
                         <p>{{ $team->description }}</p>
                         <p>{{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_about') }}</p>
                     </div>
 
-                    <h3 class="text-2xl font-black uppercase tracking-tighter mb-6">{{ __('teams.detail.suitable_for') }}</h3>
+                    <h3 class="text-2xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.suitable_for') }}</h3>
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
                         @foreach(__('teams.detail.' . str_replace('-', '_', $team->slug) . '_suitable') as $item)
                             <li class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
@@ -36,7 +36,7 @@
                         @endforeach
                     </ul>
 
-                    <h3 class="text-2xl font-black uppercase tracking-tighter mb-6">{{ __('teams.detail.how_to_join') }}</h3>
+                    <h3 class="text-2xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.how_to_join') }}</h3>
                     <div class="space-y-6">
                         <div class="flex gap-4">
                             <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black flex-shrink-0">1</div>
@@ -65,7 +65,7 @@
                 {{-- Pravý sloupec - Info panel --}}
                 <div>
                     <div class="bg-slate-50 rounded-3xl p-8 sticky top-24">
-                        <h4 class="text-xl font-black uppercase tracking-tighter mb-6">{{ __('teams.detail.info') }}</h4>
+                        <h4 class="text-xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.info') }}</h4>
 
                         <div class="space-y-6 mb-8">
                             <div class="flex items-start gap-4">
@@ -223,7 +223,7 @@
         <div class="container">
             <div class="flex flex-col md:flex-row items-center justify-between gap-8 text-white text-center md:text-left">
                 <div>
-                    <h2 class="text-3xl font-black uppercase tracking-tighter mb-2">{{ app()->getLocale() === 'cs' ? 'Chceš se stát součástí týmu' : 'Want to become part of the team' }} {{ $team->name }}?</h2>
+                    <h2 class="text-3xl font-black uppercase tracking-tight mb-2">{{ app()->getLocale() === 'cs' ? 'Chceš se stát součástí týmu' : 'Want to become part of the team' }} {{ $team->name }}?</h2>
                     <p class="text-white/80">{{ app()->getLocale() === 'cs' ? 'Ozvěte se nám a domluvíme se na prvním tréninku.' : 'Contact us and we will arrange the first training.' }}</p>
                 </div>
                 <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="btn bg-white text-primary hover:bg-secondary hover:text-white btn-lg">

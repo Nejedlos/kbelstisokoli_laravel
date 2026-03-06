@@ -3,30 +3,30 @@
 @section('title', __('search.title') . ($query ? ': ' . $query : ''))
 
 @section('content')
-    <div class="bg-slate-50 border-b border-slate-200 py-12">
-        <div class="container">
-            <x-breadcrumbs :breadcrumbs="$breadcrumbs ?? null" />
+    <x-page-header
+        :title="__('search.results_for') . ': ' . $query"
+        :breadcrumbs="$breadcrumbs ?? null"
+        image="assets/img/hero/hero-search.webp"
+    />
 
-            <h1 class="font-display font-black text-4xl md:text-5xl uppercase tracking-tighter mb-6">
-                {{ __('search.results_for') }}: <span class="text-primary italic">"{{ $query }}"</span>
-            </h1>
-
-            <form action="{{ route('public.search') }}" method="GET" class="max-w-2xl relative">
+    <div class="container py-8 md:py-12">
+        <div class="max-w-4xl mx-auto">
+            <form action="{{ route('public.search') }}" method="GET" class="relative mb-12">
                 <input type="text"
                        name="q"
                        value="{{ $query }}"
                        placeholder="{{ __('search.placeholder') }}"
-                       class="w-full bg-white border-2 border-slate-200 rounded-xl px-6 py-4 text-lg focus:border-primary focus:ring-0 transition-all outline-none pr-16"
+                       class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-5 text-lg shadow-sm focus:border-primary focus:ring-0 transition-all outline-none pr-16"
                        required
                        minlength="3">
-                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
-                    <i class="fa-light fa-magnifying-glass text-2xl"></i>
+                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-primary text-white rounded-xl hover:bg-secondary transition-colors shadow-lg shadow-primary/20">
+                    <i class="fa-light fa-magnifying-glass text-xl"></i>
                 </button>
             </form>
         </div>
     </div>
 
-    <div class="container py-16">
+    <div class="container py-8 md:py-16">
         @if($results->isEmpty())
             <x-empty-state
                 :title="__('search.no_results_title')"

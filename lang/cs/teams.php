@@ -48,7 +48,7 @@ return [
         'faq_exp_q' => 'Musím mít předchozí zkušenosti?',
         'faq_exp_a' => 'Ano, pro naše týmy hledáme hráče, kteří již basketbal hráli a ovládají základy hry, protože hrajeme organizované soutěže (od 2. ligy po Pražský přebor a nižší třídy).',
         'faq_try_q' => 'Můžu přijít na zkoušku?',
-        'faq_try_a' => 'Určitě! První trénink je vždy nezávazný. Stačí se předem domluvit s trenérem nebo vedoucím týmu.',
+        'faq_try_a' => 'Určitě! První 3 tréninky jsou vždy nezávazné. Stačí se předem domluvit s trenérem nebo vedoucím týmu.',
         'faq_contact_q' => 'Jak probíhá kontakt?',
         'faq_contact_a' => 'Vyplň náborový formulář nebo nám napiš. Ozveme se ti zpět a domluvíme termín, kdy můžeš dorazit do haly.',
         'muzi_c_about' => 'Muži C jsou dynamickým týmem, který se zaměřuje na soutěživý basketbal s cílem dosahovat co nejlepších výsledků v Pražském přeboru. Naše sestava je tvořena hráči s bohatými zkušenostmi, kteří mají chuť se neustále zlepšovat a táhnout za jeden provaz. Klademe důraz na týmovou chemii, disciplínu na hřišti a vzájemný respekt. Mimo palubovku jsme skvělá parta, která drží při sobě.',

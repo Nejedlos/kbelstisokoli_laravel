@@ -31,13 +31,13 @@ class BasketballMatchForm
                                     ->required()
                                     ->default('mistrovske')
                                     ->live(),
-                                Select::make('team_id')
-                                    ->label('Tým')
-                                    ->relationship('team', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                                Select::make('teams')
+                                    ->label('Týmy')
+                                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->multiple(false),
+                                    ->multiple(),
                                 Select::make('season_id')
                                     ->label('Sezóna')
                                     ->relationship('season', 'name')

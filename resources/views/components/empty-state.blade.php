@@ -13,7 +13,7 @@
         </div>
     @endif
 
-    <h3 class="text-2xl md:text-3xl font-display font-black uppercase tracking-tighter mb-4 text-secondary">
+    <h3 class="text-2xl md:text-3xl font-display font-black uppercase tracking-tight mb-4 text-secondary">
         {{ $title ?? __('general.empty_state.title') }}
     </h3>
 

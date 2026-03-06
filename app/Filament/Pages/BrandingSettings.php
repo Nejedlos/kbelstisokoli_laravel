@@ -73,6 +73,110 @@ class BrandingSettings extends Page implements HasForms
         return $schema
             ->statePath('data')
             ->components([
+                Section::make(__('admin/branding-settings.sections.team_branding'))
+                    ->description(__('admin/branding-settings.sections.team_branding_desc'))
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                Toggle::make('team_logo_enabled_header')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_header'))
+                                    ->default(true),
+                                Toggle::make('team_logo_enabled_hero')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_hero'))
+                                    ->default(true),
+                                Toggle::make('team_logo_enabled_hero_watermark')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_hero_watermark'))
+                                    ->default(false),
+                                Toggle::make('team_logo_enabled_team_cards')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_team_cards'))
+                                    ->default(true),
+                                Toggle::make('team_logo_enabled_recruitment_cards')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_recruitment_cards'))
+                                    ->default(true),
+                                Toggle::make('team_logo_enabled_footer')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_footer'))
+                                    ->default(true),
+                                Toggle::make('team_logo_enabled_match_cards')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_match_cards'))
+                                    ->default(true),
+                                Toggle::make('team_logo_enabled_match_detail')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_match_detail'))
+                                    ->default(true),
+                                Toggle::make('team_logo_enabled_page_headers')
+                                    ->label(__('admin/branding-settings.fields.team_logo_enabled_page_headers'))
+                                    ->default(true),
+                            ]),
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('team_logo_size_header_desktop')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_header_desktop'))
+                                    ->numeric()
+                                    ->default(40),
+                                TextInput::make('team_logo_size_header_mobile')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_header_mobile'))
+                                    ->numeric()
+                                    ->default(32),
+                                TextInput::make('team_logo_size_hero')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_hero'))
+                                    ->numeric()
+                                    ->default(88),
+                                TextInput::make('team_logo_size_team_card')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_team_card'))
+                                    ->numeric()
+                                    ->default(44),
+                                TextInput::make('team_logo_size_recruitment_card')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_recruitment_card'))
+                                    ->numeric()
+                                    ->default(44),
+                                TextInput::make('team_logo_size_footer')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_footer'))
+                                    ->numeric()
+                                    ->default(56),
+                                TextInput::make('team_logo_size_match_card')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_match_card'))
+                                    ->numeric()
+                                    ->default(36),
+                                TextInput::make('team_logo_size_match_detail')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_match_detail'))
+                                    ->numeric()
+                                    ->default(56),
+                                TextInput::make('team_logo_size_page_header')
+                                    ->label(__('admin/branding-settings.fields.team_logo_size_page_header'))
+                                    ->numeric()
+                                    ->default(40),
+                            ]),
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('team_logo_hero_opacity')
+                                    ->label(__('admin/branding-settings.fields.team_logo_hero_opacity'))
+                                    ->numeric()
+                                    ->step(0.01)
+                                    ->minValue(0)
+                                    ->maxValue(1)
+                                    ->default(1.0),
+                                TextInput::make('team_logo_watermark_opacity')
+                                    ->label(__('admin/branding-settings.fields.team_logo_watermark_opacity'))
+                                    ->numeric()
+                                    ->step(0.01)
+                                    ->minValue(0)
+                                    ->maxValue(1)
+                                    ->default(0.08),
+                                Select::make('team_logo_border_radius')
+                                    ->label(__('admin/branding-settings.fields.team_logo_border_radius'))
+                                    ->options([
+                                        'none' => __('admin/branding-settings.options.radius.none'),
+                                        'sm' => __('admin/branding-settings.options.radius.sm'),
+                                        'md' => __('admin/branding-settings.options.radius.md'),
+                                        'lg' => __('admin/branding-settings.options.radius.lg'),
+                                        'full' => __('admin/branding-settings.options.radius.full'),
+                                    ])
+                                    ->default('none'),
+                                Toggle::make('team_logo_shadow_enabled')
+                                    ->label(__('admin/branding-settings.fields.team_logo_shadow_enabled'))
+                                    ->default(false),
+                            ]),
+                    ]),
+
                 Section::make(__('admin/branding-settings.sections.theme'))
                     ->description(__('admin/branding-settings.sections.theme_desc'))
                     ->schema([

@@ -7,15 +7,11 @@
     @endphp
 
     @if(!$hasHero)
-        <div class="container">
-            <x-breadcrumbs :breadcrumbs="$breadcrumbs ?? null" />
-        </div>
-    @endif
-
-    {{-- Pro CMS stránky typicky Page Header nepotřebujeme, protože mají Hero blok --}}
-    {{-- Ale pokud by stránka neměla žádný viditelný blok, zobrazíme aspoň titulek --}}
-    @if(empty($page->content))
-        <x-page-header :title="brand_text($page->title)" />
+        <x-page-header
+            :title="brand_text($page->title)"
+            :breadcrumbs="$breadcrumbs ?? null"
+            image="assets/img/hero/hero-news.webp"
+        />
     @endif
 
     {{-- Renderování bloků --}}

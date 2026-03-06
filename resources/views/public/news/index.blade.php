@@ -5,6 +5,7 @@
         :title="__('news.title')"
         :subtitle="__('news.subtitle')"
         :breadcrumbs="[__('news.breadcrumbs') => null]"
+        image="assets/img/hero/hero-news.webp"
     />
 
     <div class="section-padding bg-bg relative overflow-hidden">
@@ -36,7 +37,7 @@
                                 <i class="fa-light fa-star mr-2"></i>
                                 {{ __('news.coming_soon') }}
                             </div>
-                            <h3 class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-6 text-secondary leading-none">
+                            <h3 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-6 text-secondary leading-none">
                                 {{ __('news.starter_title') }}
                             </h3>
                             <p class="text-slate-500 leading-relaxed text-lg text-balance mb-8">

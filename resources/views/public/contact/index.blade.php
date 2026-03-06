@@ -5,6 +5,7 @@
         :title="__('contact.title')"
         :subtitle="__('contact.subtitle')"
         :breadcrumbs="[__('contact.breadcrumbs') => null]"
+        image="assets/img/hero/hero-contact.webp"
     />
 
     <div class="section-padding bg-bg">
@@ -13,7 +14,7 @@
                 <!-- Contact Info -->
                 <div class="lg:col-span-1 space-y-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase tracking-tighter text-secondary mb-6">{{ __('contact.connect_with_us') }}</h2>
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-6">{{ __('contact.connect_with_us') }}</h2>
                         <p class="text-slate-600 mb-8 leading-relaxed">
                             {{ __('contact.connect_desc') }}
                         </p>
@@ -207,7 +208,7 @@
                             <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                             <i class="fa-light fa-basketball fa-4xl absolute -top-4 -right-4 opacity-10 rotate-12"></i>
 
-                            <h3 class="text-2xl font-black uppercase tracking-tighter mb-4">{{ __('contact.want_to_play') }}</h3>
+                            <h3 class="text-2xl font-black uppercase tracking-tight mb-4">{{ __('contact.want_to_play') }}</h3>
                             <p class="text-white/80 mb-8 leading-relaxed">{{ __('contact.want_to_play_desc') }}</p>
                             <a href="{{ route('public.recruitment.index') }}" class="btn bg-white text-primary hover:bg-secondary hover:text-white px-8">
                                 {{ __('contact.more_info') }}
@@ -218,7 +219,7 @@
                             <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-white/5 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                             <i class="fa-light fa-envelope-open-text fa-4xl absolute -top-4 -right-4 opacity-5 rotate-12"></i>
 
-                            <h3 class="text-2xl font-black uppercase tracking-tighter mb-4">{{ __('contact.write_us') }}</h3>
+                            <h3 class="text-2xl font-black uppercase tracking-tight mb-4">{{ __('contact.write_us') }}</h3>
                             <p class="text-white/80 mb-8 leading-relaxed">{{ __('contact.write_us_desc') }}</p>
                             <x-mailto :email="$branding['contact']['email'] ?? ''" class="btn btn-primary px-8">
                                 {{ __('contact.send_email') }}

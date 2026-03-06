@@ -5,6 +5,7 @@
         :title="__('matches.title')"
         :subtitle="__('matches.subtitle')"
         :breadcrumbs="[__('matches.breadcrumbs') => null]"
+        image="assets/img/hero/hero-matches.webp"
     />
 
     <div class="bg-slate-50 border-b border-slate-200">
@@ -100,7 +101,7 @@
                 <div class="mt-20 max-w-4xl mx-auto border-t border-slate-100 pt-16">
                     <div class="flex flex-col md:flex-row gap-12 items-center">
                         <div class="flex-1">
-                            <h3 class="text-2xl font-black uppercase tracking-tighter mb-4 text-secondary">{{ __('matches.starter_title') }}</h3>
+                            <h3 class="text-2xl font-black uppercase tracking-tight mb-4 text-secondary">{{ __('matches.starter_title') }}</h3>
                             <p class="text-slate-500 leading-relaxed text-balance">
                                 {{ __('matches.starter_text') }}
                             </p>

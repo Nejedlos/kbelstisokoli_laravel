@@ -5,13 +5,47 @@
     <div class="container py-4 flex items-center justify-between gap-4">
         <!-- Logo -->
         <a href="{{ url('/') }}" @wireNavigate class="flex items-center gap-3 shrink-0">
-            @if($branding['logo_path'])
+            @php
+                $teamLogo = $branding['team_logo'] ?? null;
+                $isTeamLogoEnabled = $teamLogo['enabled_header'] ?? true;
+            @endphp
+
+            @if($isTeamLogoEnabled)
+                <picture class="transition-transform duration-500 hover:rotate-3 hover:scale-110">
+                    <source srcset="{{ asset($teamLogo['paths']['mini_webp']) }}" type="image/webp">
+                    <img src="{{ asset($teamLogo['paths']['mini']) }}"
+                         alt="Kbelští sokoli C & E logo"
+                         class="object-contain"
+                         style="height: {{ $teamLogo['sizes']['header_mobile'] }}px; width: auto;"
+                         data-desktop-height="{{ $teamLogo['sizes']['header_desktop'] }}px"
+                         data-mobile-height="{{ $teamLogo['sizes']['header_mobile'] }}px"
+                         id="header-team-logo"
+                    >
+                </picture>
+
+                <script>
+                    (function() {
+                        const logo = document.getElementById('header-team-logo');
+                        if (!logo) return;
+                        const updateLogoSize = () => {
+                            if (window.innerWidth >= 1024) {
+                                logo.style.height = logo.dataset.desktopHeight;
+                            } else {
+                                logo.style.height = logo.dataset.mobileHeight;
+                            }
+                        };
+                        window.addEventListener('resize', updateLogoSize);
+                        updateLogoSize();
+                    })();
+                </script>
+            @elseif($branding['logo_path'])
                 <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-12 w-auto">
-                <div class="hidden md:block">
-                    <span class="block font-display font-bold text-xl leading-tight uppercase">{{ brand_text($branding['club_name']) }}</span>
-                    <span class="block text-xs text-slate-500 font-medium tracking-wider uppercase leading-snug">{{ brand_text($branding['slogan']) }}</span>
-                </div>
             @endif
+
+            <div class="hidden md:block opacity-80">
+                <span class="block font-display font-bold text-base leading-tight uppercase tracking-tight">{{ brand_text($branding['club_name']) }}</span>
+                <span class="block text-[10px] text-slate-400 font-medium tracking-widest uppercase leading-snug">{{ brand_text($branding['slogan']) }}</span>
+            </div>
         </a>
 
         <!-- Desktop Navigation -->

@@ -81,6 +81,7 @@ enum AppIcon: string
     case AUDIT = 'clock-rotate-left';
     case BANKNOTES = 'money-bill';
     case USER_SECRET = 'user-secret';
+    case PARTNERS = 'handshake';
 
     /**
      * Získá výchozí styl pro danou ikonu.

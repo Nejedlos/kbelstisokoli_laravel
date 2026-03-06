@@ -60,7 +60,7 @@
             </div>
 
             <!-- Content -->
-            <h1 class="text-4xl md:text-7xl font-display font-black uppercase tracking-tighter mb-8 text-secondary leading-none">
+            <h1 class="text-4xl md:text-7xl font-display font-black uppercase tracking-tight mb-8 text-secondary leading-none">
                 @yield('headline')
             </h1>
 

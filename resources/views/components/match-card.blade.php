@@ -95,14 +95,35 @@
                         </span>
                     @endif
                 </div>
-                <div class="text-xl md:text-2xl font-black uppercase tracking-tight text-secondary">
+                <div class="text-xl md:text-2xl font-black uppercase tracking-tight text-secondary flex items-center gap-3">
+                    @php
+                        $brandingResolver = app(\App\Services\TeamBrandingResolver::class);
+                        $homeBranding = $brandingResolver->getMatchLogo($match, true);
+                        $awayBranding = $brandingResolver->getMatchLogo($match, false);
+                        $isMatchLogoEnabled = $branding['team_logo']['enabled_match_cards'] ?? true;
+                    @endphp
+
+                    @if($isMatchLogoEnabled && $homeBranding)
+                        <picture class="shrink-0">
+                            <source srcset="{{ $homeBranding['logo_url_webp'] }}" type="image/webp">
+                            <img src="{{ $homeBranding['logo_url'] }}" alt="" class="object-contain" style="height: {{ $branding['team_logo']['sizes']['match_card'] ?? 36 }}px; width: auto;">
+                        </picture>
+                    @endif
+
                     <span class="{{ $match->is_home ? 'text-primary' : '' }}">
                         {{ $match->is_home ? ($branding['club_short_name'] ?? 'Sokoli') : $match->opponent->name }}
                     </span>
-                    <span class="text-slate-300 mx-2">vs</span>
+                    <span class="text-slate-300 mx-1">vs</span>
                     <span class="{{ !$match->is_home ? 'text-primary' : '' }}">
                         {{ $match->is_home ? $match->opponent->name : ($branding['club_short_name'] ?? 'Sokoli') }}
                     </span>
+
+                    @if($isMatchLogoEnabled && $awayBranding)
+                        <picture class="shrink-0">
+                            <source srcset="{{ $awayBranding['logo_url_webp'] }}" type="image/webp">
+                            <img src="{{ $awayBranding['logo_url'] }}" alt="" class="object-contain" style="height: {{ $branding['team_logo']['sizes']['match_card'] ?? 36 }}px; width: auto;">
+                        </picture>
+                    @endif
                 </div>
                 <div class="flex items-center mt-2 text-slate-500 text-sm font-medium italic">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
