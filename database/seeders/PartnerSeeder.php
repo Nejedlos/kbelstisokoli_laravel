@@ -16,9 +16,9 @@ class PartnerSeeder extends Seeder
         $partner = Partner::updateOrCreate(
             ['slug' => 'eurotechno'],
             [
-                'name' => 'EUROTECHNO',
+                'name' => 'Euro Techno',
                 'type' => 'main_partner',
-                'website_url' => 'https://www.eurotechno.cz/',
+                'website_url' => 'https://www.eurotechno.eu/sluzby',
                 'logo_path_png' => 'assets/img/partners/LOGO EUROTECHNO.png',
                 'logo_path_webp' => 'assets/img/partners/LOGO EUROTECHNO.webp',
                 'is_active' => true,
@@ -36,8 +36,8 @@ class PartnerSeeder extends Seeder
 
         $partner->setTranslation('label', 'cs', 'Hlavní partner týmu');
         $partner->setTranslation('label', 'en', 'Main team partner');
-        $partner->setTranslation('description', 'cs', 'Přední dodavatel technologií a partner našeho týmu.');
-        $partner->setTranslation('description', 'en', 'Leading technology provider and partner of our team.');
+        $partner->setTranslation('description', 'cs', 'Specialista na slaboproudé a silnoproudé systémy, bezpečnostní technologie, kamerové systémy a IT infrastrukturu.');
+        $partner->setTranslation('description', 'en', 'Specialist in low-voltage and high-voltage systems, security technologies, camera systems, and IT infrastructure.');
         $partner->save();
 
         Cache::flush();

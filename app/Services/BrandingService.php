@@ -262,6 +262,8 @@ class BrandingService
                     ->orWhere('key', 'like', 'club_%')
                     ->orWhere('key', 'like', 'team_logo_%')
                     ->orWhere('key', 'like', 'admin_contact_%')
+                    ->orWhere('key', 'like', 'partners_%')
+                    ->orWhere('key', 'like', 'partner_%')
                     ->orWhereIn('key', [
                         'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
                         'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset',

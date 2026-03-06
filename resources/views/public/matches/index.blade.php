@@ -101,7 +101,7 @@
                     @foreach($matchPartners as $partner)
                         <a href="{{ $partner->website_url ?? '#' }}"
                            @if($partner->opened_in_new_tab) target="_blank" rel="noopener noreferrer" @endif
-                           class="shrink-0 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                           class="shrink-0 transition-all duration-300 hover:scale-110">
                             <img src="{{ asset($partner->logo_path_png ?? $partner->logo_path_webp) }}"
                                  alt="{{ $partner->name }}"
                                  class="h-5 md:h-6 w-auto object-contain">

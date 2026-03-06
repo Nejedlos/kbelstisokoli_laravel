@@ -35,7 +35,7 @@
                                 @endif
                                 <img src="{{ asset($partner->logo_path_png ?? $partner->logo_path_webp) }}"
                                      alt="{{ $partner->name }}"
-                                     class="object-contain transition-all duration-500 grayscale group-hover/partner:grayscale-0 opacity-70 group-hover/partner:opacity-100"
+                                     class="object-contain transition-all duration-500 hover:scale-105"
                                      style="max-width: {{ $branding['partners']['logo_width_desktop'] }}px; max-height: {{ $branding['partners']['logo_max_height'] }}px; width: auto; height: auto;">
                             </picture>
                         </a>

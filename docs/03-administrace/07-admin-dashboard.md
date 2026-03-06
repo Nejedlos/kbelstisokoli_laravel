@@ -54,6 +54,7 @@ Tento dokument shrnuje provedené úpravy hlavní nástěnky administrace (Filam
 #### UI a ikony
 - Respektována projektová konvence pro Font Awesome (Light varianta) a integrace přes `IconHelper`/`FilamentIcon`.
 - Vizuální konzistence s brandingem (použití klubových barev přes globální CSS variables v panelu).
+- **Branding Panelu:** Horní lišta (sidebar/topbar) v administraci obsahuje brandové logo klubu v bílém zaobleném boxu s doprovodným textem "Administrace", což sjednocuje vizuální styl s členskou sekcí.
 
 #### Poznámky
 - Všechny dotazy na doménové modely jsou ošetřeny pomocí `class_exists` a try/catch, aby widgety nepadaly v prostředí bez daných tabulek/dat.

@@ -186,7 +186,23 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
             ->brandName($branding['club_name'])
-            ->brandLogo($branding['logo_path'] ? web_asset($branding['logo_path']) : null)
+            ->brandLogo(function() use ($branding) {
+                $logoUrl = $branding['logo_path']
+                    ? web_asset($branding['logo_path'])
+                    : asset($branding['team_logo']['paths']['velke'] ?? 'assets/img/loga/logo_kbelsti_sokoli_velke.png');
+
+                return new HtmlString('
+                    <div class="flex items-center gap-2 sm:gap-3 group">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 transition-all group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/5 border border-slate-100">
+                            <img src="'.$logoUrl.'" class="max-w-full max-h-full object-contain" alt="">
+                        </div>
+                        <div class="flex flex-col leading-tight">
+                            <span class="text-[12px] sm:text-sm font-black uppercase tracking-tight text-secondary group-hover:text-primary transition-colors">'.$branding['club_short_name'].'</span>
+                            <span class="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-slate-400 font-bold group-hover:text-slate-600 transition-colors">Administrace</span>
+                        </div>
+                    </div>
+                ');
+            })
             ->favicon($branding['logo_path'] ? web_asset($branding['logo_path']) : '/favicon.ico')
             ->font('Instrument Sans')
             ->userMenuItems([

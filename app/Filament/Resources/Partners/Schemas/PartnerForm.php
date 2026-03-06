@@ -91,6 +91,12 @@ class PartnerForm
                                     ->imageEditor()
                                     ->extraAttributes(['class' => 'partner-logo-preview'])
                                     ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $get): string {
+                                        $webpPath = $get('logo_path_webp');
+                                        if ($webpPath) {
+                                            $baseName = pathinfo($webpPath, PATHINFO_FILENAME);
+                                            return $baseName . '.' . $file->getClientOriginalExtension();
+                                        }
+
                                         $name = $get('slug') ?: Str::slug($get('name'));
                                         return (string) str($name . '-' . time() . '.' . $file->getClientOriginalExtension());
                                     })
@@ -101,32 +107,35 @@ class PartnerForm
                                             return;
                                         }
 
-                                        $file = $state;
-                                        if (is_array($file)) {
-                                            $file = array_key_first($file);
-                                        }
+                                        $file = is_array($state) ? reset($state) : $state;
 
-                                        // Cesta k nahranému souboru na disku public_path
-                                        $fullPath = public_path($file);
-
-                                        if (!file_exists($fullPath)) {
+                                        if (! ($file instanceof TemporaryUploadedFile)) {
                                             return;
                                         }
 
-                                        $info = pathinfo($fullPath);
-                                        $webpPath = $info['dirname'] . '/' . $info['filename'] . '.webp';
-                                        $relativeWebpPath = str_replace(public_path() . '/', '', $webpPath);
+                                        $name = $get('slug') ?: Str::slug($get('name'));
+                                        $timestamp = time();
+                                        $baseName = $name . '-' . $timestamp;
+                                        $extension = strtolower($file->getClientOriginalExtension());
+
+                                        $targetDir = public_path('assets/img/partners');
+                                        if (!file_exists($targetDir)) {
+                                            mkdir($targetDir, 0755, true);
+                                        }
+
+                                        $webpPath = $targetDir . '/' . $baseName . '.webp';
+                                        $relativeWebpPath = 'assets/img/partners/' . $baseName . '.webp';
 
                                         try {
+                                            $sourcePath = $file->getRealPath();
                                             $image = null;
-                                            $extension = strtolower($info['extension']);
 
                                             if ($extension === 'png') {
-                                                $image = imagecreatefrompng($fullPath);
+                                                $image = imagecreatefrompng($sourcePath);
                                             } elseif ($extension === 'jpg' || $extension === 'jpeg') {
-                                                $image = imagecreatefromjpeg($fullPath);
+                                                $image = imagecreatefromjpeg($sourcePath);
                                             } elseif ($extension === 'webp') {
-                                                $image = imagecreatefromwebp($fullPath);
+                                                $image = imagecreatefromwebp($sourcePath);
                                             }
 
                                             if ($image) {

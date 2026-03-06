@@ -218,7 +218,7 @@
                                                 @endif
                                                 <img src="{{ asset($partner->logo_path_png ?? $partner->logo_path_webp) }}"
                                                      alt="{{ $partner->name }}"
-                                                     class="object-contain transition-all duration-300 grayscale group-hover/mpartner:grayscale-0 opacity-60 group-hover/mpartner:opacity-100"
+                                                     class="object-contain transition-all duration-300 hover:scale-105"
                                                      style="max-height: 40px; width: auto;">
                                             </picture>
                                         </a>
