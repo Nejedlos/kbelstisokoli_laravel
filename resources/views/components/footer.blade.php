@@ -279,6 +279,44 @@
                 </div>
             </div>
         </div>
+
+        {{-- Partner Section --}}
+        @php
+            $footerPartners = app(\App\Services\PartnerService::class)->getFooterPartners();
+        @endphp
+
+        @if($footerPartners->isNotEmpty())
+            <div class="container pb-12 pt-8 border-t border-white/5">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div class="text-center md:text-left">
+                        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1 leading-none">
+                            {{ __('partners.footer_label') }}
+                        </h4>
+                        <div class="text-xs font-bold text-white/40 uppercase tracking-tight">
+                            {{ __('partners.footer_subtitle') }}
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center md:justify-end gap-8 md:gap-12">
+                        @foreach($footerPartners as $partner)
+                            <a href="{{ $partner->website_url ?? '#' }}"
+                               @if($partner->opened_in_new_tab) target="_blank" rel="noopener noreferrer" @endif
+                               class="group/fpartner transition-all duration-300"
+                               title="{{ $partner->name }}">
+                                <picture>
+                                    @if($partner->logo_path_webp)
+                                        <source srcset="{{ asset($partner->logo_path_webp) }}" type="image/webp">
+                                    @endif
+                                    <img src="{{ asset($partner->logo_path_png ?? $partner->logo_path_webp) }}"
+                                         alt="{{ $partner->name }}"
+                                         class="object-contain transition-all duration-500 grayscale opacity-40 group-hover/fpartner:grayscale-0 group-hover/fpartner:opacity-100"
+                                         style="max-height: 32px; width: auto;">
+                                </picture>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Bottom Bar --}}

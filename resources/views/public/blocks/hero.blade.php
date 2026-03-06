@@ -258,3 +258,6 @@
     @endif
 </section>
 @endCacheFragment
+
+{{-- Partner Strip --}}
+<x-partner-strip />

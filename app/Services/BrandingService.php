@@ -140,6 +140,18 @@ class BrandingService
                     'card_badge' => 44,
                 ],
             ],
+            'partners' => [
+                'enabled' => filter_var($dbSettings['partners_enabled'] ?? $cfg['partners']['enabled'], FILTER_VALIDATE_BOOLEAN),
+                'homepage_strip_enabled' => filter_var($dbSettings['partners_homepage_strip_enabled'] ?? $cfg['partners']['homepage_strip_enabled'], FILTER_VALIDATE_BOOLEAN),
+                'footer_enabled' => filter_var($dbSettings['partners_footer_enabled'] ?? $cfg['partners']['footer_enabled'], FILTER_VALIDATE_BOOLEAN),
+                'match_badge_enabled' => filter_var($dbSettings['partners_match_badge_enabled'] ?? $cfg['partners']['match_badge_enabled'], FILTER_VALIDATE_BOOLEAN),
+                'contact_enabled' => filter_var($dbSettings['partners_contact_enabled'] ?? $cfg['partners']['contact_enabled'], FILTER_VALIDATE_BOOLEAN),
+                'recruitment_enabled' => filter_var($dbSettings['partners_recruitment_enabled'] ?? $cfg['partners']['recruitment_enabled'], FILTER_VALIDATE_BOOLEAN),
+                'logo_width_desktop' => (int) ($dbSettings['partner_logo_width_desktop'] ?? $cfg['partners']['logo_width_desktop']),
+                'logo_width_mobile' => (int) ($dbSettings['partner_logo_width_mobile'] ?? $cfg['partners']['logo_width_mobile']),
+                'logo_max_height' => (int) ($dbSettings['partner_logo_max_height'] ?? $cfg['partners']['logo_max_height']),
+                'section_style' => $dbSettings['partner_section_style'] ?? $cfg['partners']['section_style'],
+            ],
         ];
 
         return $this->settings;

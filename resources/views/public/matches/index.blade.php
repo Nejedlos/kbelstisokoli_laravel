@@ -87,6 +87,31 @@
         </div>
     </div>
 
+    @php
+        $matchPartners = app(\App\Services\PartnerService::class)->getMatchPartners();
+    @endphp
+
+    @if($matchPartners->isNotEmpty())
+        <div class="bg-white border-b border-slate-100 py-3 shadow-sm relative z-10">
+            <div class="container">
+                <div class="flex items-center justify-center gap-6 overflow-x-auto no-scrollbar py-1">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
+                        {{ __('partners.team_partner') }}:
+                    </span>
+                    @foreach($matchPartners as $partner)
+                        <a href="{{ $partner->website_url ?? '#' }}"
+                           @if($partner->opened_in_new_tab) target="_blank" rel="noopener noreferrer" @endif
+                           class="shrink-0 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                            <img src="{{ asset($partner->logo_path_png ?? $partner->logo_path_webp) }}"
+                                 alt="{{ $partner->name }}"
+                                 class="h-5 md:h-6 w-auto object-contain">
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="section-padding bg-bg">
         <div class="container">
             @if($matches->isEmpty())

@@ -217,4 +217,44 @@
             </div>
         </div>
     </div>
+
+    @php
+        $recruitmentPartners = app(\App\Services\PartnerService::class)->getRecruitmentPartners();
+    @endphp
+
+    @if($recruitmentPartners->isNotEmpty())
+        <div class="section-padding bg-slate-50 border-t border-slate-100">
+            <div class="container">
+                <div class="text-center mb-12">
+                    <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary mb-4">{{ __('partners.recruitment_title') }}</h2>
+                    <p class="text-slate-500 max-w-2xl mx-auto">{{ __('partners.recruitment_subtitle') }}</p>
+                </div>
+                <div class="flex flex-wrap justify-center items-center gap-12 md:gap-20">
+                    @foreach($recruitmentPartners as $partner)
+                        <div class="group/rpartner text-center">
+                            <a href="{{ $partner->website_url ?? '#' }}"
+                               @if($partner->opened_in_new_tab) target="_blank" rel="noopener noreferrer" @endif
+                               class="block mb-6 transition-transform duration-300 hover:scale-105">
+                                <picture>
+                                    @if($partner->logo_path_webp)
+                                        <source srcset="{{ asset($partner->logo_path_webp) }}" type="image/webp">
+                                    @endif
+                                    <img src="{{ asset($partner->logo_path_png ?? $partner->logo_path_webp) }}"
+                                         alt="{{ $partner->name }}"
+                                         class="mx-auto object-contain transition-all duration-500 grayscale group-hover/rpartner:grayscale-0 opacity-70 group-hover/rpartner:opacity-100"
+                                         style="max-height: 70px; width: auto;">
+                                </picture>
+                            </a>
+                            @php $partnerLabel = $partner->getTranslation('label', app()->getLocale()); @endphp
+                            @if($partnerLabel)
+                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none">
+                                    {{ $partnerLabel }}
+                                </span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection

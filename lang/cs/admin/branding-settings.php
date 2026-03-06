@@ -23,6 +23,8 @@ return [
         'economy' => 'Ekonomika a platby',
         'team_branding' => 'Týmový branding (Kbelští sokoli C & E)',
         'team_branding_desc' => 'Nastavení zobrazení našeho týmového loga v různých částech webu. Logo hlavního oddílu je spravováno systémově.',
+        'partners' => 'Sponzoři a partneři',
+        'partners_desc' => 'Globální nastavení zobrazení partnerů na webu. Jednotliví partneři se spravují v modulu Partneři.',
     ],
     'fields' => [
         'team_logo_enabled_header' => 'Zobrazit v hlavičce',
@@ -104,6 +106,16 @@ return [
         'bank_account_help' => 'Např. 6022854477/6363',
         'bank_name' => 'Název banky',
         'bank_name_help' => 'Např. Partners banka a.s.',
+        'partners_enabled' => 'Povolit systém partnerů',
+        'partners_homepage_strip_enabled' => 'Zobrazit strip pod Hero na homepage',
+        'partners_footer_enabled' => 'Zobrazit partnery v patičce',
+        'partners_match_badge_enabled' => 'Zobrazit partner badge u zápasů',
+        'partners_contact_enabled' => 'Zobrazit na stránce Kontakt',
+        'partners_recruitment_enabled' => 'Zobrazit na stránce Nábor',
+        'partner_logo_width_desktop' => 'Šířka loga na desktopu [px]',
+        'partner_logo_width_mobile' => 'Šířka loga na mobilu [px]',
+        'partner_logo_max_height' => 'Maximální výška loga [px]',
+        'partner_section_style' => 'Styl sekce partnerů',
     ],
     'options' => [
         'header' => [
@@ -121,6 +133,11 @@ return [
             'md' => 'Střední (výchozí)',
             'lg' => 'Velké',
             'full' => 'Kulatá',
+        ],
+        'partners' => [
+            'inline' => 'V řádku (Inline)',
+            'logo_with_label' => 'Logo se štítkem',
+            'card_minimal' => 'Minimální karta',
         ],
     ],
     'placeholders' => [

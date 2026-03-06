@@ -105,4 +105,18 @@ return [
 
     // Výchozí preset
     'default_theme' => 'club-default',
+
+    // Nastavení sponzorů / partnerů
+    'partners' => [
+        'enabled' => env('APP_PARTNERS_ENABLED', true),
+        'homepage_strip_enabled' => env('APP_PARTNERS_HOMEPAGE_STRIP_ENABLED', true),
+        'footer_enabled' => env('APP_PARTNERS_FOOTER_ENABLED', true),
+        'match_badge_enabled' => env('APP_PARTNERS_MATCH_BADGE_ENABLED', true),
+        'contact_enabled' => env('APP_PARTNERS_CONTACT_ENABLED', true),
+        'recruitment_enabled' => env('APP_PARTNERS_RECRUITMENT_ENABLED', true),
+        'logo_width_desktop' => (int) env('APP_PARTNERS_LOGO_WIDTH_DESKTOP', 180),
+        'logo_width_mobile' => (int) env('APP_PARTNERS_LOGO_WIDTH_MOBILE', 140),
+        'logo_max_height' => (int) env('APP_PARTNERS_LOGO_MAX_HEIGHT', 80),
+        'section_style' => env('APP_PARTNERS_SECTION_STYLE', 'logo_with_label'),
+    ],
 ];

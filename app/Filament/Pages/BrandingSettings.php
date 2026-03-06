@@ -63,6 +63,16 @@ class BrandingSettings extends Page implements HasForms
             'club_short_name' => config('branding.club_short_name'),
             'slogan' => config('branding.slogan'),
             'footer_text' => config('branding.footer_text'),
+            'partners_enabled' => config('branding.partners.enabled'),
+            'partners_homepage_strip_enabled' => config('branding.partners.homepage_strip_enabled'),
+            'partners_footer_enabled' => config('branding.partners.footer_enabled'),
+            'partners_match_badge_enabled' => config('branding.partners.match_badge_enabled'),
+            'partners_contact_enabled' => config('branding.partners.contact_enabled'),
+            'partners_recruitment_enabled' => config('branding.partners.recruitment_enabled'),
+            'partner_logo_width_desktop' => config('branding.partners.logo_width_desktop'),
+            'partner_logo_width_mobile' => config('branding.partners.logo_width_mobile'),
+            'partner_logo_max_height' => config('branding.partners.logo_max_height'),
+            'partner_section_style' => config('branding.partners.section_style'),
         ];
 
         $this->data = array_merge($configDefaults, $dbData);
@@ -175,6 +185,55 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.team_logo_shadow_enabled'))
                                     ->default(false),
                             ]),
+                    ]),
+
+                Section::make(__('admin/branding-settings.sections.partners'))
+                    ->description(__('admin/branding-settings.sections.partners_desc'))
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                Toggle::make('partners_enabled')
+                                    ->label(__('admin/branding-settings.fields.partners_enabled'))
+                                    ->default(true),
+                                Toggle::make('partners_homepage_strip_enabled')
+                                    ->label(__('admin/branding-settings.fields.partners_homepage_strip_enabled'))
+                                    ->default(true),
+                                Toggle::make('partners_footer_enabled')
+                                    ->label(__('admin/branding-settings.fields.partners_footer_enabled'))
+                                    ->default(true),
+                                Toggle::make('partners_match_badge_enabled')
+                                    ->label(__('admin/branding-settings.fields.partners_match_badge_enabled'))
+                                    ->default(true),
+                                Toggle::make('partners_contact_enabled')
+                                    ->label(__('admin/branding-settings.fields.partners_contact_enabled'))
+                                    ->default(true),
+                                Toggle::make('partners_recruitment_enabled')
+                                    ->label(__('admin/branding-settings.fields.partners_recruitment_enabled'))
+                                    ->default(true),
+                            ]),
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('partner_logo_width_desktop')
+                                    ->label(__('admin/branding-settings.fields.partner_logo_width_desktop'))
+                                    ->numeric()
+                                    ->default(180),
+                                TextInput::make('partner_logo_width_mobile')
+                                    ->label(__('admin/branding-settings.fields.partner_logo_width_mobile'))
+                                    ->numeric()
+                                    ->default(140),
+                                TextInput::make('partner_logo_max_height')
+                                    ->label(__('admin/branding-settings.fields.partner_logo_max_height'))
+                                    ->numeric()
+                                    ->default(80),
+                            ]),
+                        Select::make('partner_section_style')
+                            ->label(__('admin/branding-settings.fields.partner_section_style'))
+                            ->options([
+                                'inline' => __('admin/branding-settings.options.partners.inline'),
+                                'logo_with_label' => __('admin/branding-settings.options.partners.logo_with_label'),
+                                'card_minimal' => __('admin/branding-settings.options.partners.card_minimal'),
+                            ])
+                            ->default('logo_with_label'),
                     ]),
 
                 Section::make(__('admin/branding-settings.sections.theme'))

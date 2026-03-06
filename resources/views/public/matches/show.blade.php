@@ -196,6 +196,44 @@
                         </ul>
                     </aside>
 
+                    <!-- Partner Badge -->
+                    @php
+                        $matchPartners = app(\App\Services\PartnerService::class)->getMatchPartners();
+                    @endphp
+
+                    @if($matchPartners->isNotEmpty())
+                        <aside class="card p-6 border-l-4 border-l-primary/30 shadow-sm">
+                            <h3 class="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-6 leading-none">
+                                {{ __('partners.match_label') }}
+                            </h3>
+                            <div class="space-y-6">
+                                @foreach($matchPartners as $partner)
+                                    <div class="group/mpartner">
+                                        <a href="{{ $partner->website_url ?? '#' }}"
+                                           @if($partner->opened_in_new_tab) target="_blank" rel="noopener noreferrer" @endif
+                                           class="block mb-2">
+                                            <picture>
+                                                @if($partner->logo_path_webp)
+                                                    <source srcset="{{ asset($partner->logo_path_webp) }}" type="image/webp">
+                                                @endif
+                                                <img src="{{ asset($partner->logo_path_png ?? $partner->logo_path_webp) }}"
+                                                     alt="{{ $partner->name }}"
+                                                     class="object-contain transition-all duration-300 grayscale group-hover/mpartner:grayscale-0 opacity-60 group-hover/mpartner:opacity-100"
+                                                     style="max-height: 40px; width: auto;">
+                                            </picture>
+                                        </a>
+                                        @php $partnerLabel = $partner->getTranslation('label', app()->getLocale()); @endphp
+                                        @if($partnerLabel)
+                                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-tight leading-none">
+                                                {{ $partnerLabel }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </aside>
+                    @endif
+
                     <!-- Back Link -->
                     <a href="{{ route('public.matches.index') }}" class="btn btn-outline-primary w-full py-4 uppercase tracking-widest font-black text-sm">
                         &larr; {{ app()->getLocale() === 'cs' ? 'Zpět na seznam zápasů' : 'Back to match list' }}
