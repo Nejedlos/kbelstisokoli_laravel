@@ -2,8 +2,8 @@
 
 @section('content')
     <x-page-header
-        title="Chci hrát za C & E"
-        subtitle="Vyplňte krátkou žádost a my se vám brzy ozveme. Těšíme se na vás na palubovce!"
+        :title="__('recruitment.join.title')"
+        :subtitle="__('recruitment.join.subtitle')"
         image="assets/img/hero/hero-trainings.webp"
     />
 
@@ -22,7 +22,7 @@
         <div class="mt-12 text-center">
             <a href="{{ route('public.recruitment.index') }}" class="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors flex items-center justify-center gap-2">
                 <i class="fa-light fa-arrow-left"></i>
-                Zpět na informace o náboru
+                {{ __('recruitment.join.back_link') }}
             </a>
         </div>
     </div>

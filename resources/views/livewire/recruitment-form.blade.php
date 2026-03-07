@@ -40,7 +40,7 @@
             } else {
                 console.error('[Form] Nepodařilo se získat reCAPTCHA token.');
                 this.isSubmitting = false;
-                alert('Chyba reCAPTCHA. Zkontrolujte prosím připojení nebo nastavení.');
+                alert('{{ __('recruitment.form.recaptcha.error') }}');
             }
         }
     }"
@@ -54,12 +54,12 @@
             <div class="w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
                 <i class="fa-light fa-paper-plane-check fa-3xl"></i>
             </div>
-            <h3 class="text-2xl font-black text-emerald-900 uppercase tracking-tight mb-2">Žádost odeslána!</h3>
+            <h3 class="text-2xl font-black text-emerald-900 uppercase tracking-tight mb-2">{{ __('recruitment.form.success_title') }}</h3>
             <p class="text-emerald-700/80 mb-8 leading-relaxed">
-                Děkujeme za váš zájem. Vaše žádost byla doručena trenérovi týmu. Brzy se vám ozveme zpět.
+                {{ __('recruitment.form.success_message') }}
             </p>
             <button type="button" wire:click="$set('success', false)" class="btn btn-primary px-8">
-                Poslat další žádost
+                {{ __('recruitment.form.send_another') }}
             </button>
         </div>
     @else
@@ -80,7 +80,7 @@
             @endif
 
             <div class="space-y-4">
-                <label class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Vyberte tým</label>
+                <label class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.select_team') }}</label>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     @foreach($teams as $slug => $label)
                         <label class="relative cursor-pointer">
@@ -99,18 +99,18 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                    <label for="name" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Vaše jméno</label>
+                    <label for="name" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.name') }}</label>
                     <div class="relative group">
                         <i class="fa-light fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></i>
-                        <input wire:model.blur="name" type="text" id="name" class="w-full bg-slate-50 border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('name') border-rose-500 ring-rose-200 @enderror" placeholder="Jan Novák" required>
+                        <input wire:model.blur="name" type="text" id="name" class="w-full bg-slate-50 border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('name') border-rose-500 ring-rose-200 @enderror" placeholder="{{ __('recruitment.form.placeholders.name') }}" required>
                     </div>
                     @error('name') <span class="text-xs text-rose-600 font-bold tracking-tight ml-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="space-y-2">
-                    <label for="email" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Váš e-mail</label>
+                    <label for="email" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.email') }}</label>
                     <div class="relative group">
                         <i class="fa-light fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></i>
-                        <input wire:model.blur="email" type="email" id="email" class="w-full bg-slate-50 border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('email') border-rose-500 ring-rose-200 @enderror" placeholder="email@priklad.cz" required>
+                        <input wire:model.blur="email" type="email" id="email" class="w-full bg-slate-50 border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('email') border-rose-500 ring-rose-200 @enderror" placeholder="{{ __('recruitment.form.placeholders.email') }}" required>
                     </div>
                     @error('email') <span class="text-xs text-rose-600 font-bold tracking-tight ml-1">{{ $message }}</span> @enderror
                 </div>
@@ -121,40 +121,40 @@
                     <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                         <i class="fa-light fa-basketball"></i>
                     </div>
-                    <h4 class="text-sm font-black uppercase tracking-widest text-slate-700">Basketbalový dotazník</h4>
+                    <h4 class="text-sm font-black uppercase tracking-widest text-slate-700">{{ __('recruitment.form.sections.basketball_info') }}</h4>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="space-y-2">
-                        <label for="age" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Věk</label>
+                        <label for="age" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.age') }}</label>
                         <div class="relative group">
                             <i class="fa-light fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></i>
-                            <input wire:model.blur="age" type="number" id="age" class="w-full bg-white border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('age') border-rose-500 ring-rose-200 @enderror" placeholder="Např. 25">
+                            <input wire:model.blur="age" type="number" id="age" class="w-full bg-white border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('age') border-rose-500 ring-rose-200 @enderror" placeholder="{{ __('recruitment.form.placeholders.age') }}">
                         </div>
                         @error('age') <span class="text-xs text-rose-600 font-bold tracking-tight ml-1">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="space-y-2">
-                        <label for="height" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Výška (cm)</label>
+                        <label for="height" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.height') }}</label>
                         <div class="relative group">
                             <i class="fa-light fa-ruler-vertical absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></i>
-                            <input wire:model.blur="height" type="number" id="height" class="w-full bg-white border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('height') border-rose-500 ring-rose-200 @enderror" placeholder="Např. 195">
+                            <input wire:model.blur="height" type="number" id="height" class="w-full bg-white border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('height') border-rose-500 ring-rose-200 @enderror" placeholder="{{ __('recruitment.form.placeholders.height') }}">
                         </div>
                         @error('height') <span class="text-xs text-rose-600 font-bold tracking-tight ml-1">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="space-y-2">
-                        <label for="position" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Preferovaná pozice</label>
+                        <label for="position" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.position') }}</label>
                         <div class="relative group">
                             <i class="fa-light fa-users-viewfinder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></i>
                             <select wire:model.blur="position" id="position" class="w-full bg-white border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all appearance-none @error('position') border-rose-500 ring-rose-200 @enderror">
-                                <option value="">Vyberte pozici...</option>
-                                <option value="PG">Rozehrávač (PG)</option>
-                                <option value="SG">Křídlo / Rozehrávač (SG)</option>
-                                <option value="SF">Křídlo (SF)</option>
-                                <option value="PF">Pivot / Křídlo (PF)</option>
-                                <option value="C">Pivot (C)</option>
-                                <option value="all-around">Všestranný hráč</option>
+                                <option value="">{{ __('recruitment.form.placeholders.position') }}</option>
+                                <option value="PG">{{ __('recruitment.form.positions.pg') }}</option>
+                                <option value="SG">{{ __('recruitment.form.positions.sg') }}</option>
+                                <option value="SF">{{ __('recruitment.form.positions.sf') }}</option>
+                                <option value="PF">{{ __('recruitment.form.positions.pf') }}</option>
+                                <option value="C">{{ __('recruitment.form.positions.c') }}</option>
+                                <option value="all-around">{{ __('recruitment.form.positions.all_around') }}</option>
                             </select>
                             <i class="fa-light fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
                         </div>
@@ -162,10 +162,10 @@
                     </div>
 
                     <div class="space-y-2">
-                        <label for="level" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Nejvyšší hraná soutěž</label>
+                        <label for="level" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.level') }}</label>
                         <div class="relative group">
                             <i class="fa-light fa-trophy absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></i>
-                            <input wire:model.blur="level" type="text" id="level" class="w-full bg-white border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('level') border-rose-500 ring-rose-200 @enderror" placeholder="Např. 2. liga, Přebor...">
+                            <input wire:model.blur="level" type="text" id="level" class="w-full bg-white border-slate-200 rounded-2xl pl-11 py-3 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('level') border-rose-500 ring-rose-200 @enderror" placeholder="{{ __('recruitment.form.placeholders.level') }}">
                         </div>
                         @error('level') <span class="text-xs text-rose-600 font-bold tracking-tight ml-1">{{ $message }}</span> @enderror
                     </div>
@@ -173,8 +173,8 @@
             </div>
 
             <div class="space-y-2">
-                <label for="message" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Zpráva pro trenéra</label>
-                <textarea wire:model.blur="message" id="message" rows="5" class="w-full bg-slate-50 border-slate-200 rounded-2xl p-4 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('message') border-rose-500 ring-rose-200 @enderror" placeholder="Představte se nám krátce..." required></textarea>
+                <label for="message" class="block text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{{ __('recruitment.form.labels.message') }}</label>
+                <textarea wire:model.blur="message" id="message" rows="5" class="w-full bg-slate-50 border-slate-200 rounded-2xl p-4 text-sm focus:border-primary focus:ring-primary/20 transition-all @error('message') border-rose-500 ring-rose-200 @enderror" placeholder="{{ __('recruitment.form.placeholders.message') }}" required></textarea>
                 @error('message') <span class="text-xs text-rose-600 font-bold tracking-tight ml-1">{{ $message }}</span> @enderror
             </div>
 
@@ -185,25 +185,28 @@
                     class="btn btn-primary btn-lg w-full relative group disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
                 >
                     <span x-show="!isSubmitting" class="flex items-center gap-3">
-                        Odeslat žádost o nábor
+                        {{ __('recruitment.form.submit_button') }}
                         <i class="fa-light fa-arrow-right text-sm transition-transform group-hover:translate-x-1"></i>
                     </span>
                     <span x-show="isSubmitting" x-cloak class="flex items-center gap-3">
                         <i class="fa-light fa-spinner-third animate-spin"></i>
-                        Odesílám...
+                        {{ __('recruitment.form.submitting') }}
                     </span>
                 </button>
             </div>
 
             @if($recaptchaEnabled && $siteKey)
                 <div class="flex items-center gap-4 bg-emerald-50/50 p-5 rounded-[1.5rem] border border-emerald-100/50 group/captcha transition-all hover:bg-emerald-50 hover:border-emerald-200">
-                    <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm transition-transform group-hover/captcha:scale-110">
-                        <i class="fa-light fa-shield-check fa-lg"></i>
+                    <div class="w-10 h-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm transition-transform group-hover/captcha:scale-110">
+                        <i class="fa-light fa-shield-check fa-lg leading-none"></i>
                     </div>
                     <div class="flex-1">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-emerald-800 mb-0.5 leading-none">Antispamová ochrana aktivní</p>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-emerald-800 mb-0.5 leading-none">{{ __('recruitment.form.recaptcha.active') }}</p>
                         <p class="text-[10px] text-emerald-600/80 leading-tight">
-                            Tento web je chráněn pomocí reCAPTCHA. Platí <a href="https://policies.google.com/privacy" class="font-bold underline hover:text-primary">Soukromí</a> a <a href="https://policies.google.com/terms" class="font-bold underline hover:text-primary">Podmínky</a> Google.
+                            {!! __('recruitment.form.recaptcha.text', [
+                                'privacy' => '<a href="https://policies.google.com/privacy" class="font-bold underline hover:text-primary">' . __('recruitment.form.recaptcha.privacy') . '</a>',
+                                'terms' => '<a href="https://policies.google.com/terms" class="font-bold underline hover:text-primary">' . __('recruitment.form.recaptcha.terms') . '</a>'
+                            ]) !!}
                         </p>
                     </div>
                     <div class="hidden sm:block opacity-20 group-hover/captcha:opacity-40 transition-opacity">

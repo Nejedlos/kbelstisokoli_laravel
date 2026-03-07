@@ -57,7 +57,7 @@ class RecruitmentForm extends Component
         }
 
         // Předvyplnění zprávy pro snazší vyplnění (user request: "formulář nějak předvyplněný")
-        $this->message = "Dobrý den,\n\nměl bych zájem o hraní ve vašem týmu. Mám za sebou zkušenosti z...";
+        $this->message = __('recruitment.form.default_message');
     }
 
     public function updated($propertyName): void
@@ -70,12 +70,12 @@ class RecruitmentForm extends Component
         return [
             'name' => __('user.fields.first_name'),
             'email' => __('user.fields.email'),
-            'selectedTeam' => 'tým',
+            'selectedTeam' => __('recruitment.form.fields.team'),
             'height' => __('user.fields.height_cm'),
             'position' => __('user.fields.position'),
-            'level' => 'úroveň',
-            'age' => 'věk',
-            'message' => 'zpráva',
+            'level' => __('recruitment.form.fields.level'),
+            'age' => __('recruitment.form.fields.age'),
+            'message' => __('recruitment.form.fields.message'),
         ];
     }
 
@@ -109,7 +109,7 @@ class RecruitmentForm extends Component
                 senderEmail: $this->email,
                 teamName: $teamName,
                 messageBody: $this->message,
-                subjectText: "Nábor do týmu {$teamName}: {$this->name}",
+                subjectText: __('recruitment.form.email_subject', ['team' => $teamName, 'name' => $this->name]),
                 extraData: [
                     'height' => $this->height,
                     'position' => $this->position,
@@ -123,7 +123,7 @@ class RecruitmentForm extends Component
 
         } catch (\Exception $e) {
             Log::error('Chyba při odesílání náborového formuláře: '.$e->getMessage());
-            $this->errorMessage = 'Při odesílání žádosti došlo k chybě. Zkuste to prosím později.';
+            $this->errorMessage = __('recruitment.form.error_sending');
         }
     }
 
