@@ -176,10 +176,10 @@
         </div>
 
         <div class="container relative z-10">
-            <div class="max-w-4xl mx-auto bg-white rounded-[3rem] p-8 md:p-16 shadow-xl shadow-slate-200/60 border border-slate-100 text-center">
+            <div class="max-w-4xl mx-auto bg-white rounded-[3rem] p-8 md:p-16 shadow-xl shadow-slate-200/60 border border-slate-100 text-center group">
                 <div class="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 relative">
                     <i class="fa-light fa-children fa-3x text-primary"></i>
-                    <div class="absolute -top-3 -right-3 opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300">
+                    <div class="absolute -top-3 -right-3 opacity-30 group-hover:opacity-100 transition-all duration-300">
                         <picture>
                             <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp']) }}" type="image/webp">
                             <img src="{{ asset($branding['parent_logo']['paths']['mini']) }}"
