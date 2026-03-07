@@ -198,7 +198,7 @@
             @if($recaptchaEnabled && $siteKey)
                 <div class="flex items-center gap-4 bg-emerald-50/50 p-5 rounded-[1.5rem] border border-emerald-100/50 group/captcha transition-all hover:bg-emerald-50 hover:border-emerald-200">
                     <div class="w-10 h-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm transition-transform group-hover/captcha:scale-110">
-                        <i class="fa-light fa-shield-check fa-lg leading-none"></i>
+                        <i class="fa-light fa-shield-check text-2xl flex items-center justify-center"></i>
                     </div>
                     <div class="flex-1">
                         <p class="text-[10px] font-black uppercase tracking-widest text-emerald-800 mb-0.5 leading-none">{{ __('recruitment.form.recaptcha.active') }}</p>

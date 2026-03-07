@@ -29,21 +29,8 @@
                             @endphp
                             <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(50%-1rem)] max-w-md flex">
                                 <div class="card card-hover group flex flex-col h-full border-t-4 {{ $loop->index % 2 == 0 ? 'border-primary' : 'border-secondary' }} w-full relative overflow-hidden">
-                                    @if($isTeamLogoEnabled)
-                                        <div class="absolute -top-1 -right-1 z-10">
-                                            <div class="bg-white p-2 rounded-bl-2xl shadow-sm border-b border-l border-slate-100">
-                                                <picture>
-                                                    <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
-                                                    <img src="{{ $teamBranding['logo_url'] }}"
-                                                         alt="{{ $teamBranding['alt'] }}"
-                                                         class="object-contain"
-                                                         style="height: {{ $branding['team_logo']['sizes']['team_card'] }}px; width: auto;">
-                                                </picture>
-                                            </div>
-                                        </div>
-                                    @endif
                                     <div class="p-8 flex-1 flex flex-col">
-                                        <div class="flex justify-between items-start mb-6 gap-4">
+                                        <div class="flex justify-between items-start mb-4 gap-4">
                                             <h3 class="text-2xl font-black uppercase tracking-tight group-hover:text-primary transition-colors leading-tight">
                                                 {{ $team->name }}
                                             </h3>
@@ -57,6 +44,20 @@
                                                 } }}
                                             </span>
                                         </div>
+
+                                        @if($isTeamLogoEnabled)
+                                            <div class="mb-6">
+                                                <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 inline-flex items-center justify-center">
+                                                    <picture>
+                                                        <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
+                                                        <img src="{{ $teamBranding['logo_url'] }}"
+                                                             alt="{{ $teamBranding['alt'] }}"
+                                                             class="object-contain"
+                                                             style="height: 48px; width: auto;">
+                                                    </picture>
+                                                </div>
+                                            </div>
+                                        @endif
 
                                         <p class="text-slate-600 mb-8 leading-relaxed text-sm flex-1">
                                             {{ $team->description }}
@@ -134,19 +135,6 @@
                             @endphp
                             <div class="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-sm flex">
                                 <div class="card card-hover group flex flex-col h-full border-t-2 border-slate-200 w-full relative overflow-hidden">
-                                    @if($isTeamLogoEnabled)
-                                        <div class="absolute -top-1 -right-1 z-10">
-                                            <div class="bg-white p-1.5 rounded-bl-xl shadow-sm border-b border-l border-slate-100">
-                                                <picture>
-                                                    <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
-                                                    <img src="{{ $teamBranding['logo_url'] }}"
-                                                         alt="{{ $teamBranding['alt'] }}"
-                                                         class="object-contain"
-                                                         style="height: {{ floor($branding['team_logo']['sizes']['team_card'] * 0.8) }}px; width: auto;">
-                                                </picture>
-                                            </div>
-                                        </div>
-                                    @endif
                                     <div class="p-6 flex-1 flex flex-col">
                                         <div class="flex justify-between items-start mb-4 gap-4">
                                             <h4 class="text-xl font-black uppercase tracking-tight group-hover:text-primary transition-colors leading-tight">
@@ -162,6 +150,20 @@
                                                 } }}
                                             </span>
                                         </div>
+
+                                        @if($isTeamLogoEnabled)
+                                            <div class="mb-4">
+                                                <div class="bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 inline-flex items-center justify-center">
+                                                    <picture>
+                                                        <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
+                                                        <img src="{{ $teamBranding['logo_url'] }}"
+                                                             alt="{{ $teamBranding['alt'] }}"
+                                                             class="object-contain"
+                                                             style="height: 32px; width: auto;">
+                                                    </picture>
+                                                </div>
+                                            </div>
+                                        @endif
 
                                         <p class="text-slate-500 mb-6 leading-relaxed text-xs flex-1">
                                             {{ Str::limit($team->description, 100) }}

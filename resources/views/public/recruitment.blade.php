@@ -63,20 +63,20 @@
                             $isTeamLogoEnabled = $branding['team_logo']['enabled_recruitment_cards'] ?? true;
                         @endphp
                         <div class="card card-hover border-t-4 {{ $loop->index % 2 == 0 ? 'border-t-primary' : 'border-t-secondary' }} p-8 flex flex-col items-center text-center relative overflow-hidden">
+                            <h3 class="text-4xl font-black uppercase tracking-tight mb-2">{{ $team->name }}</h3>
                             @if($isTeamLogoEnabled)
-                                <div class="absolute -top-1 -right-1 z-10">
-                                    <div class="bg-white p-2 rounded-bl-2xl shadow-sm border-b border-l border-slate-100">
+                                <div class="mb-6">
+                                    <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 inline-flex items-center justify-center">
                                         <picture>
                                             <source srcset="{{ $teamBranding['logo_url_webp'] }}" type="image/webp">
                                             <img src="{{ $teamBranding['logo_url'] }}"
                                                  alt="{{ $teamBranding['alt'] }}"
                                                  class="object-contain"
-                                                 style="height: {{ $branding['team_logo']['sizes']['recruitment_card'] }}px; width: auto;">
+                                                 style="height: 48px; width: auto;">
                                         </picture>
                                     </div>
                                 </div>
                             @endif
-                            <h3 class="text-4xl font-black uppercase tracking-tight mb-2">{{ $team->name }}</h3>
                             <p class="text-slate-600 mb-8 flex-1">
                                 {{ $team->description }}
                             </p>
@@ -179,12 +179,12 @@
             <div class="max-w-4xl mx-auto bg-white rounded-[3rem] p-8 md:p-16 shadow-xl shadow-slate-200/60 border border-slate-100 text-center">
                 <div class="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 relative">
                     <i class="fa-light fa-children fa-3x text-primary"></i>
-                    <div class="absolute -top-2 -right-2">
+                    <div class="absolute -top-3 -right-3 opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300">
                         <picture>
                             <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp']) }}" type="image/webp">
                             <img src="{{ asset($branding['parent_logo']['paths']['mini']) }}"
                                  alt="TJ Sokol Kbely Basketball"
-                                 class="w-10 h-10 object-contain drop-shadow-sm">
+                                 class="w-9 h-9 object-contain drop-shadow-sm">
                         </picture>
                     </div>
                 </div>
