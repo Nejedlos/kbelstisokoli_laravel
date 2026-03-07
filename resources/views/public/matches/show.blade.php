@@ -160,7 +160,7 @@
                     @if($match->notes_public)
                         <section class="card p-8">
                             <h2 class="text-2xl font-black uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
-                                {{ app()->getLocale() === 'cs' ? 'Informace k zápasu' : 'Match information' }}
+                                {{ app()->getLocale() === 'cs' ? 'Informace k zápasu' : 'Match information' }}
                             </h2>
                             <div class="prose prose-slate max-w-none prose-headings:font-display prose-headings:uppercase prose-headings:tracking-tight prose-a:text-primary">
                                 {!! nl2br(e($match->notes_public)) !!}
@@ -174,7 +174,7 @@
                         </h2>
                         <x-empty-state
                             :title="app()->getLocale() === 'cs' ? 'Reportáž připravujeme' : 'Report in preparation'"
-                            :subtitle="app()->getLocale() === 'cs' ? 'Podrobné statistiky a komentář k zápasu budou doplněny co nejdříve po jeho skončení.' : 'Detailed statistics and match commentary will be added as soon as possible after the game.'"
+                            :subtitle="app()->getLocale() === 'cs' ? 'Podrobné statistiky a komentář k zápasu budou doplněny co nejdříve po jeho skončení.' : 'Detailed statistics and match commentary will be added as soon as possible after the game.'"
                         />
                     </section>
                 </div>

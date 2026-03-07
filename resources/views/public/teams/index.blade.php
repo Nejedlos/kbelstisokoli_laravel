@@ -11,7 +11,7 @@
 @cacheFragment('teams_index_content_' . app()->getLocale(), 3600)
     <div class="section-padding bg-bg">
         <div class="container">
-            {{-- Hlavní týmy s náborem --}}
+            {{-- Hlavní týmy s náborem --}}
             @if($mainTeams->isNotEmpty())
                 <div class="mb-20">
                     <x-section-heading

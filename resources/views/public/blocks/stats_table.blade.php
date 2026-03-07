@@ -57,7 +57,7 @@
                         @empty
                             <tr>
                                 <td colspan="{{ count($columns) + 2 }}" class="px-5 py-5 bg-white text-sm text-center italic text-gray-500">
-                                    Žádná data nejsou k dispozici.
+                                    Žádná data nejsou k dispozici.
                                 </td>
                             </tr>
                         @endforelse

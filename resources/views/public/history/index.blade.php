@@ -89,7 +89,7 @@
                     </div>
                     <h3 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-secondary mb-6">{{ __('history.community') }}</h3>
                     <p class="text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto italic">
-                        "Kbelský basketbal není jen o výsledcích na tabuli, ale o lidech, kteří tvoří jednu velkou sportovní rodinu už po generace."
+                        "Kbelský basketbal není jen o výsledcích na tabuli, ale o lidech, kteří tvoří jednu velkou sportovní rodinu už po generace."
                     </p>
                 </div>
 

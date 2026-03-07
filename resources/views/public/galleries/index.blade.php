@@ -10,7 +10,7 @@
 
     <div class="section-padding bg-bg">
         <div class="container">
-            {{-- Sekce: Náhodný výběr z poolu --}}
+            {{-- Sekce: Náhodný výběr z poolu --}}
             @if($randomPhotos->isNotEmpty())
                 <div class="mb-20">
                     <x-section-heading

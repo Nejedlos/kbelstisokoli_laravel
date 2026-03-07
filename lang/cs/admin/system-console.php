@@ -15,7 +15,7 @@ return [
     'commands' => [
         'ai_index' => [
             'label' => 'AI: Hard Reindexace',
-            'desc' => 'Kompletní sestavení vyhledávacího indexu z obsahu webu a administrace.',
+            'desc' => 'Kompletní sestavení vyhledávacího indexu z obsahu webu a administrace.',
             'flags' => [
                 'all' => 'Všechny jazyky',
                 'cs' => 'Pouze čeština',
@@ -31,34 +31,34 @@ return [
         ],
         'sync' => [
             'label' => 'Produkce: Synchronizovat',
-            'desc' => 'Spustí migrace a optimalizaci na produkci (pouze po manuálním nahrání souborů).',
+            'desc' => 'Spustí migrace a optimalizaci na produkci (pouze po manuálním nahrání souborů).',
         ],
         'local_prepare' => [
             'label' => 'Local: Příprava pro FTP',
-            'desc' => 'Sestaví assety a připraví vše pro ruční nahrání na hosting přes FTP.',
+            'desc' => 'Sestaví assety a připraví vše pro ruční nahrání na hosting přes FTP.',
         ],
         'prod_setup' => [
             'label' => 'Setup: Produkce',
-            'desc' => 'Prvotní nastavení produkčního prostředí a nasazení.',
+            'desc' => 'Prvotní nastavení produkčního prostředí a nasazení.',
         ],
         'icons_sync' => [
             'label' => 'Ikony: Synchronizace',
-            'desc' => 'Stáhne ikony Font Awesome Pro a vygeneruje cache pro aplikaci.',
+            'desc' => 'Stáhne ikony Font Awesome Pro a vygeneruje cache pro aplikaci.',
             'flags' => [
                 'pro' => 'Vynutit Pro verzi',
             ],
         ],
         'icons_doctor' => [
             'label' => 'Ikony: Diagnostika',
-            'desc' => 'Zkontroluje integritu fontů a SVG ikon v projektu.',
+            'desc' => 'Zkontroluje integritu fontů a SVG ikon v projektu.',
         ],
         'announcements_sync' => [
             'label' => 'Oznámení: Sync',
-            'desc' => 'Synchronizuje stav oznámení a deaktivuje expirovaná.',
+            'desc' => 'Synchronizuje stav oznámení a deaktivuje expirovaná.',
         ],
         'finance_sync' => [
             'label' => 'Finance: Sync',
-            'desc' => 'Synchronizuje platby a stavy účtů.',
+            'desc' => 'Synchronizuje platby a stavy účtů.',
             'flags' => [
                 '--fresh' => 'Fresh (vymaže stará data + import)',
                 '--import' => 'Importovat (z legacy DB)',
@@ -74,7 +74,7 @@ return [
         ],
         'stats_import' => [
             'label' => 'Statistiky: Import',
-            'desc' => 'Spustí import externích statistik zápasů a hráčů.',
+            'desc' => 'Spustí import externích statistik zápasů a hráčů.',
         ],
         'system_cleanup' => [
             'label' => 'Systém: Údržba',
@@ -82,7 +82,7 @@ return [
         ],
         'audit_cleanup' => [
             'label' => 'Audit Log: Čištění',
-            'desc' => 'Odstraní staré záznamy z audit logu.',
+            'desc' => 'Odstraní staré záznamy z audit logu.',
             'flags' => [
                 '30' => '30 dní',
                 '90' => '90 dní',
@@ -91,9 +91,9 @@ return [
         ],
         'backfill_ids' => [
             'label' => 'Uživatelé: Doplnit ID',
-            'desc' => 'Doplní chybějící club_member_id a payment_vs.',
+            'desc' => 'Doplní chybějící club_member_id a payment_vs.',
             'flags' => [
-                'regenerate' => 'Regenerovat i existující',
+                'regenerate' => 'Regenerovat i existující',
             ],
         ],
         'rsvp_reminders' => [
@@ -104,7 +104,7 @@ return [
             'label' => 'Migrace (migrate)',
             'desc' => 'Spustí chybějící databázové migrace.',
             'flags' => [
-                'force' => 'Vynutit v produkci',
+                'force' => 'Vynutit v produkci',
                 'seed' => 'Spustí seedy',
             ],
         ],
@@ -126,7 +126,7 @@ return [
         ],
         'app_seed' => [
             'label' => 'App: Seed',
-            'desc' => 'Globální seedování s podporou fresh režimu.',
+            'desc' => 'Globální seedování s podporou fresh režimu.',
             'flags' => [
                 'fresh' => 'Fresh mode',
             ],
@@ -173,21 +173,21 @@ return [
         ],
         'git_pull' => [
             'label' => 'Git: Pull',
-            'desc' => 'Stáhne nejnovější změny z GitHubu.',
+            'desc' => 'Stáhne nejnovější změny z GitHubu.',
         ],
         'legacy_sync' => [
             'label' => 'Legacy: Kompletní Sync',
             'desc' => 'Kompletní synchronizace dat ze starého systému (členové, akce, docházka, finance).',
             'flags' => [
-                '--fresh' => 'Fresh (smazat a znovu načíst)',
+                '--fresh' => 'Fresh (smazat a znovu načíst)',
                 '--users' => '⚠️ Sync uživatelů (může přepsat účty!)',
             ],
         ],
         'legacy_attendance_sync' => [
             'label' => 'Legacy: Jen docházka',
-            'desc' => 'Samostatná synchronizace pouze pro docházku a související události.',
+            'desc' => 'Samostatná synchronizace pouze pro docházku a související události.',
             'flags' => [
-                '--fresh' => 'Fresh (smazat a znovu načíst)',
+                '--fresh' => 'Fresh (smazat a znovu načíst)',
             ],
         ],
     ],
@@ -201,7 +201,7 @@ return [
     ],
     'ui' => [
         'internal_execution' => 'Internal Execution',
-        'internal_tooltip' => 'Spustí příkaz přímo v PHP procesu aplikace (Artisan::call) místo volání shellu. Doporučeno, pokud selhává binárka PHP v shellu. Nedoporučuje se pro dlouhotrvající operace (timeout).',
+        'internal_tooltip' => 'Spustí příkaz přímo v PHP procesu aplikace (Artisan::call) místo volání shellu. Doporučeno, pokud selhává binárka PHP v shellu. Nedoporučuje se pro dlouhotrvající operace (timeout).',
         'run' => 'Spustit',
         'working' => 'Pracuji...',
     ],

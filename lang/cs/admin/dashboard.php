@@ -3,25 +3,25 @@
 return [
     'welcome' => [
         'title' => 'Vítejte zpět, :name!',
-        'text' => 'V klubu je aktuálně :active_players aktivních hráčů a systém běží bez chyb.',
+        'text' => 'V klubu je aktuálně :active_players aktivních hráčů a systém běží bez chyb.',
         'quick_actions' => [
             'new_match' => 'Nový zápas',
             'new_match_hint' => 'Vytvořit nový zápas do kalendáře',
             'new_user' => 'Nový člen',
             'new_user_hint' => 'Registrovat nového člena nebo trenéra',
             'new_post' => 'Napsat novinku',
-            'new_post_hint' => 'Publikovat článek na web a do aplikace',
+            'new_post_hint' => 'Publikovat článek na web a do aplikace',
             'new_training' => 'Nový trénink',
             'new_training_hint' => 'Naplánovat tréninkovou jednotku',
             'new_event' => 'Nová akce',
             'new_event_hint' => 'Vytvořit klubovou akci nebo kemp',
             'media_upload' => 'Multimédia',
-            'media_upload_hint' => 'Správa fotografií a videí v galerii',
+            'media_upload_hint' => 'Správa fotografií a videí v galerii',
             'audit_log' => 'Auditní log',
-            'audit_log_hint' => 'Prohlížet historii změn v systému',
+            'audit_log_hint' => 'Prohlížet historii změn v systému',
             'finance' => 'Finance',
             'finance_cta' => 'Přejít do financí',
-            'finance_hint' => 'Přehled plateb a členských příspěvků',
+            'finance_hint' => 'Přehled plateb a členských příspěvků',
         ],
     ],
 
@@ -47,8 +47,8 @@ return [
         ],
         'subjects' => [
             'technical' => 'Technický problém',
-            'access' => 'Problém s přístupem',
-            'finance' => 'Dotaz k financím',
+            'access' => 'Problém s přístupem',
+            'finance' => 'Dotaz k financím',
             'other' => 'Ostatní',
         ],
     ],
@@ -71,7 +71,7 @@ return [
 
     'recent_activity' => [
         'title' => 'Poslední aktivity',
-        'empty' => 'Žádné záznamy k zobrazení.',
+        'empty' => 'Žádné záznamy k zobrazení.',
         'actor_system' => 'Systém',
         'actions' => [
             'created' => 'Vytvořeno',
@@ -102,7 +102,7 @@ return [
     ],
 
     'health' => [
-        'title' => 'Stav a zdraví systému',
+        'title' => 'Stav a zdraví systému',
         'mismatches' => 'Rozpory',
         'missing_configs' => 'Bez plátce',
         'renewal_warning' => 'Pozor! Chybí konfigurace plátců pro novou sezónu.',
@@ -116,10 +116,10 @@ return [
 
     'finance' => [
         'total_receivables' => 'Pohledávky celkem',
-        'total_receivables_desc' => 'Otevřené a částečně zaplacené předpisy',
+        'total_receivables_desc' => 'Otevřené a částečně zaplacené předpisy',
         'overdue' => 'Po splatnosti',
         'overdue_desc' => 'Předpisy po termínu splatnosti',
         'payments_month' => 'Příjmy (tento měsíc)',
-        'payments_month_desc' => 'Celkem přijaté platby v tomto měsíci',
+        'payments_month_desc' => 'Celkem přijaté platby v tomto měsíci',
     ],
 ];

@@ -197,7 +197,7 @@
                             </iframe>
                         @else
                             <div class="flex items-center justify-center h-full text-slate-400 italic">
-                                {{ __('contact.map_not_available') ?? 'Mapa není k dispozici' }}
+                                {{ __('contact.map_not_available') ?? 'Mapa není k dispozici' }}
                             </div>
                         @endif
                     </div>

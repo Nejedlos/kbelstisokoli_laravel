@@ -6,16 +6,16 @@ return [
     'breadcrumb' => 'Galerie',
 
     'random_title' => 'Náhodné momentky',
-    'random_subtitle' => 'Průřez zajímavými okamžiky z našich akcí.',
+    'random_subtitle' => 'Průřez zajímavými okamžiky z našich akcí.',
 
     'pools_title' => 'Sbírky fotografií',
-    'pools_subtitle' => 'Tématické kolekce snímků z turnajů, zápasů a tréninků.',
+    'pools_subtitle' => 'Tématické kolekce snímků z turnajů, zápasů a tréninků.',
 
     'photos' => 'fotek',
     'view_pool' => 'Prohlédnout sbírku →',
 
     'other_galleries' => 'Ostatní galerie',
-    'other_galleries_subtitle' => 'Další fotoalba z archivu a starších akcí.',
+    'other_galleries_subtitle' => 'Další fotoalba z archivu a starších akcí.',
     'view_gallery' => 'Prohlédnout galerii →',
 
     'none_title' => 'Žádné galerie',

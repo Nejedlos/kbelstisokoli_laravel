@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? __('Web v přípravě') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
+    <title>{{ $title ?? __('Web v přípravě') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -91,7 +91,7 @@
             animation: aura-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
-        /* Garantované pozicování štítku i při problémech s buildem */
+        /* Garantované pozicování štítku i při problémech s buildem */
         .mobile-top-air {
             padding-top: 60px !important; /* Optimalizovaný vzduch pro mobil */
         }
@@ -149,7 +149,7 @@
 
     <!-- Taktické prvky na pozadí -->
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <!-- Velká červená záře v pozadí - navrácena a vycentrována -->
+        <!-- Velká červená záře v pozadí - navrácena a vycentrována -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(100vw,80rem)] h-[min(100vw,80rem)] bg-primary/20 blur-[150px] rounded-full opacity-60 z-0"></div>
 
         <!-- Vertikální stmívání - upraveno pro lepší viditelnost prvků -->
@@ -162,7 +162,7 @@
             <rect x="250" y="0" width="500" height="200" class="court-line" style="stroke-opacity: 0.08;" />
             <rect x="250" y="800" width="500" height="200" class="court-line" style="stroke-opacity: 0.08;" />
 
-            <!-- Taktika (X a O) - Zmenšeno a vycentrováno pro lepší viditelnost na mobilech -->
+            <!-- Taktika (X a O) - Zmenšeno a vycentrováno pro lepší viditelnost na mobilech -->
             <g class="animate-pulse" style="animation-duration: 8s;">
                 <!-- Levá horní skupina -->
                 <g transform="translate(200, 250) scale(0.6)">
@@ -178,7 +178,7 @@
                     <path d="M -30 30 Q -70 80 -90 110" class="chalk-line" style="opacity: 0.3;" />
                 </g>
 
-                <!-- Šipka k cíli - posunuta blíž ke středu -->
+                <!-- Šipka k cíli - posunuta blíž ke středu -->
                 <g transform="translate(550, 550) scale(0.7)">
                     <path d="M 0 0 Q 60 100 120 150" class="chalk-line" style="stroke: white; opacity: 0.2;" />
                     <text x="130" y="180" class="chalk-text-primary text-4xl" style="opacity: 0.6;">{{ app()->getLocale() === 'en' ? 'VICTORY!' : 'VÍTĚZSTVÍ!' }}</text>
@@ -255,7 +255,7 @@
                     </svg>
                 </div>
 
-                <!-- Statická část (Stínování a Odlesk - nerotuje s míčem pro větší realismus) -->
+                <!-- Statická část (Stínování a Odlesk - nerotuje s míčem pro větší realismus) -->
                 <div class="absolute inset-0 pointer-events-none transition-all duration-700 group-hover:scale-110">
                     <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">
                         <defs>

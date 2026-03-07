@@ -116,7 +116,7 @@
                 </div>
             </div>
 
-            {{-- Co si vzít s sebou --}}
+            {{-- Co si vzít s sebou --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
                 <div>
                     <h2 class="text-3xl font-black uppercase tracking-tight mb-6">{{ __('recruitment.what_to_bring') }}</h2>

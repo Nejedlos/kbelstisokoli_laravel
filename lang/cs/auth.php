@@ -7,7 +7,7 @@ return [
     | Přihlašovací hlášky
     |--------------------------------------------------------------------------
     |
-    | Následující řádky se používají při přihlašování a zobrazují se uživateli.
+    | Následující řádky se používají při přihlašování a zobrazují se uživateli.
     |
     */
 

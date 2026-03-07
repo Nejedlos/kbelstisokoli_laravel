@@ -28,7 +28,7 @@
                         </div>
                         <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-3">Kontaktní formulář</h2>
                         <p class="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
-                            Vyplňte prosím níže uvedené údaje a my se vám ozveme co nejdříve to bude možné.
+                            Vyplňte prosím níže uvedené údaje a my se vám ozveme co nejdříve to bude možné.
                         </p>
                     </div>
 
@@ -37,7 +37,7 @@
 
                 <div class="mt-16 text-center">
                     <div class="inline-flex items-center gap-2 px-6 py-3 bg-white rounded-full border border-slate-100 shadow-sm text-sm text-slate-500">
-                        <span>Potřebujete poradit s něčím jiným?</span>
+                        <span>Potřebujete poradit s něčím jiným?</span>
                         <a href="{{ route('public.contact.index') }}" class="text-primary font-black uppercase tracking-widest text-[11px] hover:text-secondary transition-colors ml-2">
                             Zpět na kontakty
                             <i class="fa-light fa-arrow-right ml-1"></i>

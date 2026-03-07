@@ -6,7 +6,7 @@
         :subtitle="match($team->slug) {
             'muzi-a' => 'Vlajková loď klubu (2. liga skupina A)',
             'muzi-b' => 'Zkušený tým (Pražský přebor A)',
-            'muzi-c' => 'Soutěžní tým s ambicemi (Pražský přebor B)',
+            'muzi-c' => 'Soutěžní tým s ambicemi (Pražský přebor B)',
             'muzi-e' => 'Tým se skvělou partou (3. třída B)',
             default => $team->name
         }"
@@ -18,7 +18,7 @@
     <div class="section-padding bg-white">
         <div class="container">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                {{-- Levý sloupec - O týmu --}}
+                {{-- Levý sloupec - O týmu --}}
                 <div class="lg:col-span-2">
                     <h2 class="text-3xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.about') }}</h2>
                     <div class="prose prose-lg text-slate-600 max-w-none mb-12">
@@ -102,7 +102,7 @@
                                 </div>
                                 <div>
                                     <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.training_time') }}</span>
-                                    <span class="font-bold text-secondary">{{ app()->getLocale() === 'cs' ? 'Dle rozpisu v hale' : 'According to gym schedule' }}</span>
+                                    <span class="font-bold text-secondary">{{ app()->getLocale() === 'cs' ? 'Dle rozpisu v hale' : 'According to gym schedule' }}</span>
                                 </div>
                             </div>
 
@@ -174,7 +174,7 @@
         <div class="container text-center">
             <x-section-heading
                 title="{{ __('teams.detail.gallery') }}"
-                :subtitle="app()->getLocale() === 'cs' ? 'Nahlédněte do života našeho týmu na hřišti i mimo něj.' : 'Take a look at the life of our team on and off the court.'"
+                :subtitle="app()->getLocale() === 'cs' ? 'Nahlédněte do života našeho týmu na hřišti i mimo něj.' : 'Take a look at the life of our team on and off the court.'"
                 alignment="center"
             />
 
@@ -224,7 +224,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-8 text-white text-center md:text-left">
                 <div>
                     <h2 class="text-3xl font-black uppercase tracking-tight mb-2">{{ app()->getLocale() === 'cs' ? 'Chceš se stát součástí týmu' : 'Want to become part of the team' }} {{ $team->name }}?</h2>
-                    <p class="text-white/80">{{ app()->getLocale() === 'cs' ? 'Ozvěte se nám a domluvíme se na prvním tréninku.' : 'Contact us and we will arrange the first training.' }}</p>
+                    <p class="text-white/80">{{ app()->getLocale() === 'cs' ? 'Ozvěte se nám a domluvíme se na prvním tréninku.' : 'Contact us and we will arrange the first training.' }}</p>
                 </div>
                 <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="btn bg-white text-primary hover:bg-secondary hover:text-white btn-lg">
                     {{ app()->getLocale() === 'cs' ? 'Chci se přidat' : 'I want to join' }}

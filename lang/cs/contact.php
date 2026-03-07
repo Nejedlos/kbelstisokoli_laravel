@@ -2,16 +2,16 @@
 
 return [
     'title' => 'Kontakt',
-    'subtitle' => 'Zde nás najdete. Neváhejte se na nás obrátit s jakýmkoliv dotazem.',
+    'subtitle' => 'Zde nás najdete. Neváhejte se na nás obrátit s jakýmkoliv dotazem.',
     'breadcrumbs' => 'Kontakt',
-    'connect_with_us' => 'Spojte se s námi',
-    'connect_desc' => 'Máte dotaz k náboru, tréninkům nebo zápasům? Jsme tu pro vás.',
+    'connect_with_us' => 'Spojte se s námi',
+    'connect_desc' => 'Máte dotaz k náboru, tréninkům nebo zápasům? Jsme tu pro vás.',
     'address' => 'Adresa',
     'email' => 'Email',
     'phone' => 'Telefon',
     'follow_us' => 'Sledujte nás',
     'map_title' => 'Interaktivní mapa',
-    'map_desc' => 'Zde se zobrazí mapa s polohou naší haly.',
+    'map_desc' => 'Zde se zobrazí mapa s polohou naší haly.',
     'want_to_play' => 'Chcete hrát?',
     'want_to_play_desc' => 'Pořádáme nábor nových hráčů do všech kategorií. Přijďte si vyzkoušet trénink zdarma!',
     'more_info' => 'Více informací',
@@ -23,5 +23,5 @@ return [
     'team_leader' => 'Vedoucí týmu',
     'venue' => 'Hala / Aréna',
     'match_day' => 'Hlavní hrací den',
-    'map_not_available' => 'Mapa není k dispozici',
+    'map_not_available' => 'Mapa není k dispozici',
 ];

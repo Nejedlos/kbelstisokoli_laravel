@@ -2,11 +2,11 @@
 
 return [
     'title' => 'Aktuality',
-    'subtitle' => 'Sledujte nejnovější dění v našem basketbalovém oddíle.',
+    'subtitle' => 'Sledujte nejnovější dění v našem basketbalovém oddíle.',
     'breadcrumbs' => 'Novinky',
     'empty_title' => 'Zatím žádné novinky',
-    'empty_subtitle' => 'Zatím tu žádná zpráva nepadla do koše. Právě pro vás ale připravujeme nové články a reportáže ze života našich týmů. Brzy se tu objeví něco nového!',
-    'empty_cta_matches' => 'Zápasy a program',
+    'empty_subtitle' => 'Zatím tu žádná zpráva nepadla do koše. Právě pro vás ale připravujeme nové články a reportáže ze života našich týmů. Brzy se tu objeví něco nového!',
+    'empty_cta_matches' => 'Zápasy a program',
     'empty_cta_contact' => 'Kontaktujte nás',
     'view_detail' => 'Celý článek',
     'back_to_news' => 'Zpět na novinky',
@@ -14,7 +14,7 @@ return [
     'category' => 'Kategorie',
     'no_content' => 'Tento článek zatím nemá žádný obsah.',
     'starter_title' => 'Co zde najdete?',
-    'starter_text' => 'Tato sekce bude sloužit jako hlavní zpravodajský kanál našeho týmu. Těšit se můžete na reportáže ze zápasů, rozhovory s hráči, organizační informace o klubu a exkluzivní fotogalerie z palubovky i ze šatny. Právě pro vás připravujeme první várku obsahu!',
+    'starter_text' => 'Tato sekce bude sloužit jako hlavní zpravodajský kanál našeho týmu. Těšit se můžete na reportáže ze zápasů, rozhovory s hráči, organizační informace o klubu a exkluzivní fotogalerie z palubovky i ze šatny. Právě pro vás připravujeme první várku obsahu!',
     'starter_media' => 'Foto & Video',
     'starter_interviews' => 'Rozhovory',
     'starter_reports' => 'Reporty',

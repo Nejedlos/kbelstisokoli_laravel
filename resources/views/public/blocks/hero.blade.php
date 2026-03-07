@@ -20,7 +20,7 @@
     {{-- Background Image / Video / Overlay --}}
     @if(($imageUrl || $videoUrl) && $variant !== 'minimal')
         <div class="absolute inset-0 z-0 bg-secondary">
-            {{-- Image-First: Prioritní <x-picture> element pro mobil i desktop --}}
+            {{-- Image-First: Prioritní <x-picture> element pro mobil i desktop --}}
             <x-picture
                 :src="$imageUrl"
                 class="absolute inset-0 w-full h-full object-cover"
@@ -80,7 +80,7 @@
                                 }
                             }, { once: true });
 
-                            // Záložní zobrazení po 2 sekundách, i kdyby event nepřišel
+                            // Záložní zobrazení po 2 sekundách, i kdyby event nepřišel
                             setTimeout(() => {
                                 const section = video.closest('.block-hero');
                                 if (section && section.__x) {

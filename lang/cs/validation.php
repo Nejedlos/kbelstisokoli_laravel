@@ -7,7 +7,7 @@ return [
     | Validační hlášky
     |--------------------------------------------------------------------------
     |
-    | Následující hlášky se používají k informování uživatele o chybách v poli.
+    | Následující hlášky se používají k informování uživatele o chybách v poli.
     |
     */
 
@@ -17,16 +17,16 @@ return [
     'after' => ':attribute musí být datum po :date.',
     'after_or_equal' => ':attribute musí být datum po nebo rovno :date.',
     'alpha' => ':attribute může obsahovat pouze písmena.',
-    'alpha_dash' => ':attribute může obsahovat pouze písmena, čísla, pomlčky a podtržítka.',
-    'alpha_num' => ':attribute může obsahovat pouze písmena a čísla.',
+    'alpha_dash' => ':attribute může obsahovat pouze písmena, čísla, pomlčky a podtržítka.',
+    'alpha_num' => ':attribute může obsahovat pouze písmena a čísla.',
     'array' => ':attribute musí být pole.',
     'before' => ':attribute musí být datum před :date.',
     'before_or_equal' => ':attribute musí být datum před nebo rovno :date.',
     'between' => [
-        'numeric' => ':attribute musí být mezi :min a :max.',
-        'file' => ':attribute musí být mezi :min a :max kilobajty.',
-        'string' => ':attribute musí mít mezi :min a :max znaky.',
-        'array' => ':attribute musí mít mezi :min a :max položkami.',
+        'numeric' => ':attribute musí být mezi :min a :max.',
+        'file' => ':attribute musí být mezi :min a :max kilobajty.',
+        'string' => ':attribute musí mít mezi :min a :max znaky.',
+        'array' => ':attribute musí mít mezi :min a :max položkami.',
     ],
     'boolean' => ':attribute musí být pravda nebo nepravda.',
     'confirmed' => 'Potvrzení :attribute nesouhlasí.',
@@ -36,13 +36,13 @@ return [
     'date_format' => ':attribute neodpovídá formátu :format.',
     'declined' => ':attribute musí být odmítnut.',
     'declined_if' => ':attribute musí být odmítnut, když :other je :value.',
-    'different' => ':attribute a :other se musí lišit.',
+    'different' => ':attribute a :other se musí lišit.',
     'digits' => ':attribute musí mít :digits číslic.',
-    'digits_between' => ':attribute musí mít mezi :min a :max číslic.',
+    'digits_between' => ':attribute musí mít mezi :min a :max číslic.',
     'dimensions' => ':attribute má neplatné rozměry obrázku.',
     'distinct' => ':attribute má duplicitní hodnotu.',
     'email' => ':attribute musí být platná e-mailová adresa.',
-    'ends_with' => ':attribute musí končit jednou z následujících hodnot: :values.',
+    'ends_with' => ':attribute musí končit jednou z následujících hodnot: :values.',
     'enum' => 'Vybraný :attribute je neplatný.',
     'exists' => 'Vybraný :attribute je neplatný.',
     'file' => ':attribute musí být soubor.',
@@ -61,7 +61,7 @@ return [
     ],
     'image' => ':attribute musí být obrázek.',
     'in' => 'Vybraný :attribute je neplatný.',
-    'in_array' => ':attribute neexistuje v :other.',
+    'in_array' => ':attribute neexistuje v :other.',
     'integer' => ':attribute musí být celé číslo.',
     'ip' => ':attribute musí být platná IP adresa.',
     'ipv4' => ':attribute musí být platná IPv4 adresa.',
@@ -99,32 +99,32 @@ return [
     'numeric' => ':attribute musí být číslo.',
     'password' => [
         'letters' => ':attribute musí obsahovat alespoň jedno písmeno.',
-        'mixed' => ':attribute musí obsahovat alespoň jedno velké a jedno malé písmeno.',
+        'mixed' => ':attribute musí obsahovat alespoň jedno velké a jedno malé písmeno.',
         'numbers' => ':attribute musí obsahovat alespoň jedno číslo.',
         'symbols' => ':attribute musí obsahovat alespoň jeden symbol.',
-        'uncompromised' => 'Zadané :attribute se objevilo v únicích dat. Zvolte prosím jiné.',
+        'uncompromised' => 'Zadané :attribute se objevilo v únicích dat. Zvolte prosím jiné.',
     ],
     'present' => ':attribute musí být přítomen.',
     'prohibited' => ':attribute je zakázán.',
     'prohibited_if' => ':attribute je zakázán, když :other je :value.',
-    'prohibited_unless' => ':attribute je zakázán, pokud :other není v :values.',
-    'prohibits' => ':attribute zakazuje :other v přítomnosti.',
+    'prohibited_unless' => ':attribute je zakázán, pokud :other není v :values.',
+    'prohibits' => ':attribute zakazuje :other v přítomnosti.',
     'regex' => 'Formát :attribute je neplatný.',
     'required' => ':attribute musíte vyplnit, bez toho to nepůjde.',
     'required_if' => ':attribute musí být vyplněn, když :other je :value.',
-    'required_unless' => ':attribute musí být vyplněn, pokud :other není v :values.',
+    'required_unless' => ':attribute musí být vyplněn, pokud :other není v :values.',
     'required_with' => ':attribute musí být vyplněn, když :values je přítomno.',
     'required_with_all' => ':attribute musí být vyplněn, když :values jsou přítomny.',
     'required_without' => ':attribute musí být vyplněn, když :values není přítomno.',
-    'required_without_all' => ':attribute musí být vyplněn, když žádné z :values nejsou přítomny.',
-    'same' => ':attribute a :other se musí shodovat.',
+    'required_without_all' => ':attribute musí být vyplněn, když žádné z :values nejsou přítomny.',
+    'same' => ':attribute a :other se musí shodovat.',
     'size' => [
         'numeric' => ':attribute musí být :size.',
         'file' => ':attribute musí mít :size kilobajtů.',
         'string' => ':attribute musí mít :size znaků.',
         'array' => ':attribute musí obsahovat :size položek.',
     ],
-    'starts_with' => ':attribute musí začínat jednou z následujících hodnot: :values.',
+    'starts_with' => ':attribute musí začínat jednou z následujících hodnot: :values.',
     'string' => ':attribute musí být řetězec.',
     'timezone' => ':attribute musí být platná časová zóna.',
     'unique' => ':attribute je již obsazen.',
@@ -158,7 +158,7 @@ return [
     | Vlastní názvy atributů
     |--------------------------------------------------------------------------
     |
-    | Následující řádky se používají k nahrazení zástupných symbolů atributů.
+    | Následující řádky se používají k nahrazení zástupných symbolů atributů.
     |
     */
 

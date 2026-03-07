@@ -3,17 +3,17 @@
 return [
     'navigation' => [
         'groups' => [
-            'content_and_media' => 'Obsah a média',
+            'content_and_media' => 'Obsah a média',
             'sports_agenda' => 'Sportovní agenda',
-            'statistics_and_data' => 'Statistiky a data',
+            'statistics_and_data' => 'Statistiky a data',
             'external_data' => 'Externí statistiky',
-            'users_and_people' => 'Lidé a uživatelé',
+            'users_and_people' => 'Lidé a uživatelé',
             'finance' => 'Finance',
             'admin_tools' => 'Admin nástroje',
         ],
         'pages' => [
             'dashboard' => 'Nástěnka',
-            'branding' => 'Branding a vzhled',
+            'branding' => 'Branding a vzhled',
             'ai_settings' => 'AI Nastavení',
             'member_section' => 'Členská sekce',
             'public_web' => 'Veřejný web',
@@ -61,7 +61,7 @@ return [
                 'plural_label' => 'Galerie',
             ],
             'media_asset' => [
-                'label' => 'Asset v knihovně',
+                'label' => 'Asset v knihovně',
                 'plural_label' => 'Knihovna médií',
             ],
             'menu' => [
@@ -170,7 +170,7 @@ return [
                 ],
                 'tabs' => [
                     'general' => 'Základní informace',
-                    'actor_subject' => 'Aktér a Předmět',
+                    'actor_subject' => 'Aktér a Předmět',
                     'context' => 'Kontext požadavku',
                 ],
                 'actors' => [
@@ -221,7 +221,7 @@ return [
                     'coach_email_help' => 'Pokud je vyplněn, zobrazí se na webu místo hlavního e-mailu trenéra.',
                     'coach_phone' => 'Kontaktní telefon (pro tento tým)',
                     'coach_phone_help' => 'Pokud je vyplněn, zobrazí se na webu místo hlavního telefonu trenéra.',
-                    'role_in_team' => 'Role v týmu',
+                    'role_in_team' => 'Role v týmu',
                     'is_primary_team' => 'Primární tým',
                     'roles' => [
                         'player' => 'Hráč',
@@ -257,7 +257,7 @@ return [
                 'actions' => [
                     'create_wizard' => 'Přidat galerii',
                     'regenerate_ai' => 'Vylepšit pomocí AI',
-                    'detach' => 'Odebrat z poolu',
+                    'detach' => 'Odebrat z poolu',
                 ],
                 'notifications' => [
                     'ai_regenerated' => 'Metadata byla znovu vygenerována pomocí AI.',
@@ -304,7 +304,7 @@ return [
             'other' => 'Ostatní',
         ],
         'details' => [
-            'group' => 'Sekce v menu',
+            'group' => 'Sekce v menu',
             'content' => 'Obsah',
         ],
     ],

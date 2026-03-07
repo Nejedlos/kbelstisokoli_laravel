@@ -5,7 +5,7 @@ return [
     'results_for' => 'Výsledky hledání pro',
     'placeholder' => 'Co hledáte?',
     'no_results_title' => 'Tato střela nepadla do koše',
-    'no_results_text' => 'Bohužel jsme pro váš dotaz nenašli žádné výsledky. Zkuste prosím jiné klíčové slovo nebo zkuste hledat v konkrétních sekcích.',
+    'no_results_text' => 'Bohužel jsme pro váš dotaz nenašli žádné výsledky. Zkuste prosím jiné klíčové slovo nebo zkuste hledat v konkrétních sekcích.',
     'empty_cta_news' => 'Novinky',
     'empty_cta_matches' => 'Zápasy',
     'empty_cta_teams' => 'Týmy',
@@ -22,7 +22,7 @@ return [
     'ai_search_placeholder' => 'Zadejte svůj dotaz...',
     'ai_try_asking' => 'Zkuste se zeptat:',
     'ai_tips' => [
-        'omluva' => 'Chci omluvit syna z tréninku',
+        'omluva' => 'Chci omluvit syna z tréninku',
         'zapas' => 'Kdy máme další zápas?',
         'platba' => 'Kde najdu QR kód pro platbu?',
         'heslo' => 'Chci si změnit heslo',

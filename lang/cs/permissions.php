@@ -2,11 +2,11 @@
 
 return [
     'access_admin' => 'Přístup do administrace',
-    'manage_users' => 'Správa uživatelů a rolí',
+    'manage_users' => 'Správa uživatelů a rolí',
     'manage_content' => 'Správa obsahu (články, stránky)',
     'manage_teams' => 'Správa týmů',
     'manage_rosters' => 'Správa soupisek (přidávání hráčů)',
-    'manage_attendance' => 'Správa docházky a tréninků',
+    'manage_attendance' => 'Správa docházky a tréninků',
     'view_member_section' => 'Přístup do členské sekce',
     'use_raw_html' => 'Možnost používat surové HTML',
     'manage_advanced_settings' => 'Pokročilé nastavení systému',
@@ -24,7 +24,7 @@ return [
     'impersonate_confirm' => 'Opravdu se chcete přepnout na uživatele: ',
     'impersonation_switch_title' => 'Střídání uživatelů',
     'impersonation_coach_decision' => 'Coach decision',
-    'impersonation_info_text' => 'Budete moci jednat jménem tohoto uživatele. Pro návrat použijte tlačítko v horní liště.',
+    'impersonation_info_text' => 'Budete moci jednat jménem tohoto uživatele. Pro návrat použijte tlačítko v horní liště.',
     'impersonation_enter_game' => 'Vstoupit do hry',
     'impersonation_stay_bench' => 'Zůstat na střídačce',
     'impersonation_return_success' => 'Vrátili jste se ke svému účtu.',
