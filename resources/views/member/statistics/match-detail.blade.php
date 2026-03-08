@@ -83,70 +83,76 @@
 
                             {{-- Tým 1 --}}
                             <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right group/team w-full min-w-0">
-                                <div class="w-16 h-16 md:w-20 md:h-20 mb-2 rounded-xl bg-white shadow-lg flex items-center justify-center transition-all duration-500 group-hover/team:scale-105 overflow-hidden p-1.5 border border-white/20 relative">
+                                <div class="w-12 h-12 md:w-16 md:h-16 mb-2 rounded-xl bg-white shadow-lg flex items-center justify-center transition-all duration-500 group-hover/team:scale-105 overflow-hidden p-1 border border-white/20 relative shrink-0">
                                     <div class="absolute inset-0 bg-gray-50/50"></div>
-                                    @if($match->is_home && isset($branding['logo_path']))
-                                        <img src="{{ asset($branding['logo_path']) }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @php
+                                        $ourLogo = isset($branding['logo_path']) ? (str_starts_with($branding['logo_path'], 'branding/') ? asset('uploads/'.$branding['logo_path']) : asset($branding['logo_path'])) : asset('assets/img/loga/logo_kbelsti_sokoli_velke.png');
+                                    @endphp
+                                    @if($match->is_home)
+                                        <img src="{{ $ourLogo }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield-halved text-2xl"></i>
+                                            <i class="fa-light fa-shield-halved text-xl"></i>
                                         </div>
                                     @elseif(!$match->is_home && $match->opponent?->logo)
                                         <img src="{{ asset($match->opponent->logo) }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield text-2xl"></i>
+                                            <i class="fa-light fa-shield text-xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light fa-shield-halved text-2xl md:text-3xl text-gray-300 relative"></i>
+                                        <i class="fa-light fa-shield-halved text-xl md:text-2xl text-gray-300 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-base md:text-xl font-black text-white mb-1 tracking-tight group-hover/team:text-white transition-colors leading-tight break-words w-full">
+                                <h2 class="text-sm md:text-lg font-black text-white mb-0.5 tracking-tight group-hover/team:text-white transition-colors leading-tight break-words w-full">
                                     {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                                 </h2>
-                                <span class="px-2 py-0.5 {{ $match->is_home ? 'bg-brand-500/60' : 'bg-black/30' }} text-white text-[7px] font-black rounded uppercase tracking-widest border border-white/10 shadow-inner">
+                                <span class="px-1.5 py-0.5 {{ $match->is_home ? 'bg-brand-500/60' : 'bg-black/30' }} text-white text-[6px] md:text-[7px] font-black rounded uppercase tracking-widest border border-white/10 shadow-inner">
                                     {{ __('matches.is_home') }}
                                 </span>
                             </div>
 
                             {{-- Skóre --}}
-                            <div class="flex flex-col items-center group/score shrink-0 z-10">
-                                <div class="relative px-5 py-3 md:px-8 md:py-5 bg-white/15 rounded-2xl md:rounded-[2rem] shadow-xl border border-white/25 flex items-center gap-3 md:gap-6 transition-all duration-500 group-hover:bg-white/20 backdrop-blur-xl">
-                                    <div class="relative text-3xl md:text-6xl font-black tabular-nums tracking-tighter text-white drop-shadow-lg leading-none">
+                            <div class="flex flex-col items-center group/score shrink-0 z-10 mx-2 md:mx-4">
+                                <div class="relative px-4 py-2 md:px-6 md:py-4 bg-white/15 rounded-xl md:rounded-[1.5rem] shadow-xl border border-white/25 flex items-center gap-2 md:gap-4 transition-all duration-500 group-hover:bg-white/20 backdrop-blur-xl">
+                                    <div class="relative text-2xl md:text-5xl font-black tabular-nums tracking-tighter text-white drop-shadow-lg leading-none">
                                         {{ $match->score_home ?? 0 }}
                                     </div>
-                                    <div class="relative text-xl md:text-3xl font-black text-white/40 select-none animate-pulse">:</div>
-                                    <div class="relative text-3xl md:text-6xl font-black tabular-nums tracking-tighter text-white drop-shadow-lg leading-none">
+                                    <div class="relative text-lg md:text-2xl font-black text-white/40 select-none animate-pulse">:</div>
+                                    <div class="relative text-2xl md:text-5xl font-black tabular-nums tracking-tighter text-white drop-shadow-lg leading-none">
                                         {{ $match->score_away ?? 0 }}
                                     </div>
                                 </div>
-                                <div class="mt-2">
-                                    <div class="px-3 py-0.5 bg-black/40 rounded-full backdrop-blur-md border border-white/10 shadow-lg">
-                                        <span class="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-white/60 whitespace-nowrap">{{ $hasScore ? 'Konečný výsledek' : 'Zatím neodehráno' }}</span>
+                                <div class="mt-1.5">
+                                    <div class="px-2 py-0.5 bg-black/40 rounded-full backdrop-blur-md border border-white/10 shadow-lg">
+                                        <span class="text-[6px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/60 whitespace-nowrap">{{ $hasScore ? 'Konečný výsledek' : 'Zatím neodehráno' }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Tým 2 --}}
                             <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left group/team w-full min-w-0">
-                                <div class="w-16 h-16 md:w-20 md:h-20 mb-2 rounded-xl bg-white shadow-lg flex items-center justify-center transition-all duration-500 group-hover/team:scale-105 overflow-hidden p-1.5 border border-white/20 relative">
+                                <div class="w-12 h-12 md:w-16 md:h-16 mb-2 rounded-xl bg-white shadow-lg flex items-center justify-center transition-all duration-500 group-hover/team:scale-105 overflow-hidden p-1 border border-white/20 relative shrink-0">
                                     <div class="absolute inset-0 bg-gray-50/50"></div>
-                                    @if(!$match->is_home && isset($branding['logo_path']))
-                                        <img src="{{ asset($branding['logo_path']) }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @php
+                                        $ourLogo = isset($branding['logo_path']) ? (str_starts_with($branding['logo_path'], 'branding/') ? asset('uploads/'.$branding['logo_path']) : asset($branding['logo_path'])) : asset('assets/img/loga/logo_kbelsti_sokoli_velke.png');
+                                    @endphp
+                                    @if(!$match->is_home)
+                                        <img src="{{ $ourLogo }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield-halved text-2xl"></i>
+                                            <i class="fa-light fa-shield-halved text-xl"></i>
                                         </div>
                                     @elseif($match->is_home && $match->opponent?->logo)
                                         <img src="{{ asset($match->opponent->logo) }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield text-2xl"></i>
+                                            <i class="fa-light fa-shield text-xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light fa-shield text-2xl md:text-3xl text-gray-300 relative"></i>
+                                        <i class="fa-light fa-shield text-xl md:text-2xl text-gray-300 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-base md:text-xl font-black text-white mb-1 tracking-tight group-hover/team:text-white transition-colors leading-tight break-words w-full">
+                                <h2 class="text-sm md:text-lg font-black text-white mb-0.5 tracking-tight group-hover/team:text-white transition-colors leading-tight break-words w-full">
                                     {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                                 </h2>
-                                <span class="px-2 py-0.5 {{ !$match->is_home ? 'bg-brand-500/60' : 'bg-black/30' }} text-white text-[7px] font-black rounded uppercase tracking-widest border border-white/10 shadow-inner">
+                                <span class="px-1.5 py-0.5 {{ !$match->is_home ? 'bg-brand-500/60' : 'bg-black/30' }} text-white text-[6px] md:text-[7px] font-black rounded uppercase tracking-widest border border-white/10 shadow-inner">
                                     {{ __('matches.is_away') }}
                                 </span>
                             </div>
@@ -193,12 +199,12 @@
                     {{-- Spodní lišta s doplňkovými informacemi (velmi kompaktní) --}}
                     @if(!empty($match->metadata['referees']) || !empty($match->metadata['commissioner']) || !empty($match->metadata['attendance']))
                         <div class="pt-6 border-t border-white/10 w-full max-w-4xl">
-                            <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
+                                <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
                                 @if(!empty($match->metadata['referees']))
                                     <div class="flex items-center gap-3 group/info">
                                         <i class="fa-light fa-whistle text-white/50 group-hover/info:text-white transition-colors"></i>
-                                        <div class="flex flex-col">
-                                            <span class="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.referees') }}</span>
+                                        <div class="flex flex-col leading-none">
+                                            <span class="text-[7px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.referees') }}</span>
                                             <span class="text-xs font-bold text-white/80 group-hover/info:text-white transition-colors">{{ $match->metadata['referees'] }}</span>
                                         </div>
                                     </div>
@@ -206,8 +212,8 @@
                                 @if(!empty($match->metadata['commissioner']))
                                     <div class="flex items-center gap-3 group/info">
                                         <i class="fa-light fa-user-tie text-white/50 group-hover/info:text-white transition-colors"></i>
-                                        <div class="flex flex-col">
-                                            <span class="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.commissioner') }}</span>
+                                        <div class="flex flex-col leading-none">
+                                            <span class="text-[7px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.commissioner') }}</span>
                                             <span class="text-xs font-bold text-white/80 group-hover/info:text-white transition-colors">{{ $match->metadata['commissioner'] }}</span>
                                         </div>
                                     </div>
@@ -215,8 +221,8 @@
                                 @if(!empty($match->metadata['attendance']))
                                     <div class="flex items-center gap-3 group/info">
                                         <i class="fa-light fa-users text-white/50 group-hover/info:text-white transition-colors"></i>
-                                        <div class="flex flex-col">
-                                            <span class="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.attendance') }}</span>
+                                        <div class="flex flex-col leading-none">
+                                            <span class="text-[7px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.attendance') }}</span>
                                             <span class="text-xs font-bold text-white/80 group-hover/info:text-white transition-colors">{{ $match->metadata['attendance'] }}</span>
                                         </div>
                                     </div>
@@ -236,14 +242,14 @@
                 <div class="relative overflow-hidden bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 group">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
                     <div class="relative flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/20 shrink-0">
                             <i class="fa-light fa-magnifying-glass-chart text-2xl"></i>
                         </div>
-                        <div>
-                            <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1">
+                        <div class="min-w-0">
+                            <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1 truncate">
                                 {{ __('matches.pre_match_stats') }}
                             </h2>
-                            <p class="text-[9px] font-black text-brand-500 uppercase tracking-widest">{{ __('matches.pre_match_analysis_desc') ?? 'Hloubková analýza před zápasem' }}</p>
+                            <p class="text-[9px] font-black text-brand-500 uppercase tracking-widest truncate">{{ __('matches.pre_match_analysis_desc') ?? 'Hloubková analýza před zápasem' }}</p>
                         </div>
                     </div>
                 </div>
@@ -251,7 +257,9 @@
                     {{-- Best Players (Lídři zápasu / Klíčoví hráči) --}}
                     <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                         <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                            <i class="fa-light fa-star text-brand-500 bg-brand-50 w-10 h-10 rounded-xl flex items-center justify-center"></i>
+                            <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
+                                <i class="fa-light fa-star text-brand-500 text-lg"></i>
+                            </div>
                             {{ __('matches.best_players') }}
                         </h3>
 
@@ -281,10 +289,38 @@
                                                     @if(!empty($players[$side]))
                                                         @php
                                                             $isOur = ($side === 'home' && $match->is_home) || ($side === 'away' && ! $match->is_home);
+                                                            $scoreHome = (int)($match->score_home ?? 0);
+                                                            $scoreAway = (int)($match->score_away ?? 0);
+
+                                                            $sideWinner = ($side === 'home' && $scoreHome > $scoreAway) || ($side === 'away' && $scoreAway > $scoreHome);
+                                                            $sideLoser = ($side === 'home' && $scoreHome < $scoreAway) || ($side === 'away' && $scoreAway < $scoreHome);
+                                                            $sideDraw = $hasScore && $scoreHome == $scoreAway;
+
+                                                            if (!$hasScore) {
+                                                                $cardBg = $isOur ? 'bg-brand-50/50 border-brand-100' : 'bg-gray-50 border-gray-100';
+                                                                $badgeClass = $isOur ? 'bg-brand-500 text-white' : 'bg-gray-200 text-gray-600';
+                                                                $crownClass = $isOur ? 'bg-brand-500' : 'bg-gray-400';
+                                                                $valColor = 'text-brand-600';
+                                                            } elseif ($sideDraw) {
+                                                                $cardBg = 'bg-slate-50/50 border-slate-100';
+                                                                $badgeClass = 'bg-slate-500 text-white';
+                                                                $crownClass = 'bg-slate-400';
+                                                                $valColor = 'text-slate-600';
+                                                            } elseif ($sideWinner) {
+                                                                $cardBg = 'bg-emerald-50/50 border-emerald-100';
+                                                                $badgeClass = 'bg-emerald-500 text-white';
+                                                                $crownClass = 'bg-emerald-500';
+                                                                $valColor = 'text-emerald-600';
+                                                            } else {
+                                                                $cardBg = 'bg-rose-50/50 border-rose-100';
+                                                                $badgeClass = 'bg-rose-500 text-white';
+                                                                $crownClass = 'bg-rose-400';
+                                                                $valColor = 'text-rose-600';
+                                                            }
                                                         @endphp
-                                                        <div class="group relative flex items-center gap-5 p-2 rounded-[2rem] {{ $isOur ? 'bg-brand-50/50 border-brand-100' : 'bg-gray-50 border-gray-100' }} border-2 transition-all hover:shadow-2xl hover:bg-white hover:-translate-y-1 overflow-hidden">
-                                                            @if($isOur)
-                                                                <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full -mr-8 -mt-8"></div>
+                                                        <div class="group relative flex items-center gap-5 p-2 rounded-[2rem] {{ $cardBg }} border-2 transition-all hover:shadow-2xl hover:bg-white hover:-translate-y-1 overflow-hidden">
+                                                            @if($sideWinner || ($isOur && !$hasScore))
+                                                                <div class="absolute top-0 right-0 w-24 h-24 {{ $sideWinner ? 'bg-emerald-500/5' : 'bg-brand-500/5' }} rounded-full -mr-8 -mt-8"></div>
                                                             @endif
 
                                                             <div class="relative flex-shrink-0">
@@ -297,13 +333,13 @@
                                                                         </div>
                                                                     @endif
                                                                 </div>
-                                                                <div class="absolute -top-2 -right-2 w-8 h-8 rounded-full {{ $isOur ? 'bg-brand-500' : 'bg-gray-400' }} text-white flex items-center justify-center text-xs shadow-lg border-2 border-white">
+                                                                <div class="absolute -top-2 -right-2 w-8 h-8 rounded-full {{ $crownClass }} text-white flex items-center justify-center text-xs shadow-lg border-2 border-white">
                                                                     <i class="fa-solid fa-crown"></i>
                                                                 </div>
                                                             </div>
 
                                                             <div class="flex-grow min-w-0 relative">
-                                                                <span class="px-2 py-0.5 {{ $isOur ? 'bg-brand-500 text-white' : 'bg-gray-200 text-gray-600' }} text-[8px] font-black rounded uppercase tracking-widest mb-1.5 inline-block">
+                                                                <span class="px-2 py-0.5 {{ $badgeClass }} text-[8px] font-black rounded uppercase tracking-widest mb-1.5 inline-block">
                                                                     {{ $isOur ? 'Kbelský Sokol' : 'Soupeř' }}
                                                                 </span>
                                                                 <span class="text-lg font-black text-gray-900 leading-tight block truncate group-hover:text-brand-600 transition-colors">{{ $players[$side]['name'] }}</span>
@@ -311,7 +347,7 @@
 
                                                             <div class="flex-shrink-0 text-right relative">
                                                                 <div class="flex flex-col items-end">
-                                                                    <span class="text-2xl font-black text-brand-600 tabular-nums leading-none mb-1">{{ $players[$side]['value'] ?? '' }}</span>
+                                                                    <span class="text-2xl font-black {{ $valColor }} tabular-nums leading-none mb-1">{{ $players[$side]['value'] ?? '' }}</span>
                                                                     <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">HODNOTA</span>
                                                                 </div>
                                                             </div>
@@ -339,7 +375,9 @@
                     @if(!empty($teamComparison))
                         <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                             <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                                <i class="fa-light fa-scale-balanced text-brand-500 bg-brand-50 w-10 h-10 rounded-xl flex items-center justify-center"></i>
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
+                                    <i class="fa-light fa-scale-balanced text-brand-500 text-lg"></i>
+                                </div>
                                 {{ __('matches.team_comparison') }}
                             </h3>
 
@@ -389,7 +427,9 @@
                     @if(!empty($lastMatches['home']) || !empty($lastMatches['away']))
                         <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                             <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                                <i class="fa-light fa-history text-brand-500 bg-brand-50 w-10 h-10 rounded-xl flex items-center justify-center"></i>
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
+                                    <i class="fa-light fa-history text-brand-500 text-lg"></i>
+                                </div>
                                 {{ __('matches.last_matches') }}
                             </h3>
 
@@ -491,16 +531,16 @@
 
                     {{-- Section Header --}}
                     <div class="relative overflow-hidden bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 group">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-{{ $statusColor }}-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
                         <div class="relative flex items-center gap-5">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-{{ $statusColor }}-500 to-{{ $statusColor }}-600 flex items-center justify-center text-white shadow-lg shadow-{{ $statusColor }}-500/20">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500 to-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-600 flex items-center justify-center text-white shadow-lg shadow-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500/20 shrink-0">
                                 <i class="fa-light fa-chart-simple text-2xl"></i>
                             </div>
-                            <div>
-                                <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1">
+                            <div class="min-w-0">
+                                <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1 truncate">
                                     {{ __('matches.match_stats') }}
                                 </h2>
-                                <p class="text-[9px] font-black text-{{ $statusColor }}-500 uppercase tracking-widest">{{ $statusText }}</p>
+                                <p class="text-[9px] font-black text-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500 uppercase tracking-widest truncate">{{ $statusText }}</p>
                             </div>
                         </div>
                     </div>
@@ -510,21 +550,46 @@
                     @if(!empty($match->metadata['periods_detailed']))
                         <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                             <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                                <i class="fa-light fa-list-ol text-brand-500 bg-brand-50 w-10 h-10 rounded-xl flex items-center justify-center"></i>
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
+                                    <i class="fa-light fa-list-ol text-brand-500 text-lg"></i>
+                                </div>
                                 {{ __('matches.periods') }}
                             </h3>
                             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                 @foreach($match->metadata['periods_detailed'] as $period)
-                                    <div class="flex flex-col items-center justify-center p-2 bg-gray-50 rounded-[2rem] border-2 border-gray-50 transition-all hover:bg-white hover:border-brand-100 hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden">
-                                        <div class="absolute top-0 right-0 w-16 h-16 bg-brand-500/5 rounded-full -mr-8 -mt-8"></div>
+                                    @php
+                                        $qHome = (int)$period['home'];
+                                        $qAway = (int)$period['away'];
+                                        $ourQScore = $match->is_home ? $qHome : $qAway;
+                                        $oppQScore = $match->is_home ? $qAway : $qHome;
+
+                                        if ($ourQScore > $oppQScore) {
+                                            $qBg = 'bg-emerald-50/50 border-emerald-100';
+                                            $qText = 'text-emerald-600';
+                                            $qDot = 'bg-emerald-500/10';
+                                            $qBadge = 'bg-emerald-500 text-white';
+                                        } elseif ($ourQScore < $oppQScore) {
+                                            $qBg = 'bg-rose-50/50 border-rose-100';
+                                            $qText = 'text-rose-600';
+                                            $qDot = 'bg-rose-500/10';
+                                            $qBadge = 'bg-rose-500 text-white';
+                                        } else {
+                                            $qBg = 'bg-slate-50/50 border-slate-100';
+                                            $qText = 'text-slate-600';
+                                            $qDot = 'bg-slate-500/10';
+                                            $qBadge = 'bg-slate-500 text-white';
+                                        }
+                                    @endphp
+                                    <div class="flex flex-col items-center justify-center p-2 rounded-[2rem] border-2 {{ $qBg }} transition-all hover:bg-white hover:border-brand-100 hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden">
+                                        <div class="absolute top-0 right-0 w-16 h-16 {{ $qDot }} rounded-full -mr-8 -mt-8"></div>
                                         <span class="relative text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 group-hover:text-brand-500 transition-colors">{{ $loop->iteration }}. {{ __('matches.period') ?? 'čtvrtina' }}</span>
                                         <div class="relative flex items-center gap-3">
-                                            <span class="text-4xl font-black text-gray-900 tabular-nums">
-                                                {{ $period['home'] }}
+                                            <span class="text-4xl font-black {{ $match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
+                                                {{ $qHome }}
                                             </span>
-                                            <span class="text-xl font-black text-brand-500/20">:</span>
-                                            <span class="text-4xl font-black text-gray-900 tabular-nums">
-                                                {{ $period['away'] }}
+                                            <span class="text-xl font-black text-gray-300">:</span>
+                                            <span class="text-4xl font-black {{ !$match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
+                                                {{ $qAway }}
                                             </span>
                                         </div>
                                     </div>
@@ -641,7 +706,9 @@
                             <div class="p-6 border-b border-gray-100 bg-gray-50/50">
                                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                     <h3 class="text-lg font-black text-gray-900 flex items-center gap-3">
-                                        <i class="fa-light fa-chart-user text-brand-500 bg-white w-10 h-10 rounded-xl shadow-sm flex items-center justify-center border border-gray-100"></i>
+                                        <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-gray-100 shrink-0">
+                                            <i class="fa-light fa-chart-user text-brand-500 text-lg"></i>
+                                        </div>
                                         {{ __('matches.boxscore') }}
                                     </h3>
 
