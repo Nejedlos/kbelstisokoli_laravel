@@ -108,6 +108,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\MinifyHtmlMiddleware::class,
+            \App\Http\Middleware\InjectFeedbackWidget::class,
         ]);
 
         $middleware->group('member', [

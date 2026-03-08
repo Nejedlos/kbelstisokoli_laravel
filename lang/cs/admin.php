@@ -10,6 +10,7 @@ return [
             'users_and_people' => 'Lidé a uživatelé',
             'finance' => 'Finance',
             'admin_tools' => 'Admin nástroje',
+            'system' => 'Systém',
         ],
         'pages' => [
             'dashboard' => 'Nástěnka',
@@ -47,6 +48,29 @@ return [
             'external_stat_source' => [
                 'label' => 'Externí zdroj',
                 'plural_label' => 'Externí zdroje',
+            ],
+            'feedback_report' => [
+                'label' => 'Zpětná vazba',
+                'plural_label' => 'Zpětná vazba',
+                'fields' => [
+                    'type' => 'Typ',
+                    'severity' => 'Závažnost',
+                    'title' => 'Nadpis',
+                    'description' => 'Popis',
+                    'steps' => 'Kroky k reprodukci',
+                    'status' => 'Stav',
+                    'user' => 'Uživatel',
+                    'url' => 'URL',
+                    'source_area' => 'Oblast',
+                    'created_at' => 'Vytvořeno',
+                ],
+                'status' => [
+                    'new' => 'Nové',
+                    'triaging' => 'Prověřování',
+                    'in_progress' => 'V řešení',
+                    'resolved' => 'Vyřešeno',
+                    'wont_fix' => 'Nebude se řešit',
+                ],
             ],
             'finance_charge' => [
                 'label' => 'Předpis platby',

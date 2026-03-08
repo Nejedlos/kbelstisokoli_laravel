@@ -42,6 +42,7 @@ enum AppIcon: string
     case RECAPTCHA = 'shield-halved';
     case SETTINGS = 'gear';
     case GAUGE = 'gauge-high';
+    case BUG = 'bug';
 
     // --- UI Akce a Stavy ---
     case CREATE = 'circle-plus';

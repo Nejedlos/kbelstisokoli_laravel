@@ -53,6 +53,11 @@ Route::get('/auth/two-factor-setup', \App\Http\Controllers\Auth\TwoFactorSetupCo
 Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'])
     ->name('media.download');
 
+// Feedback systém (přístupný pouze přihlášeným)
+Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])
+    ->middleware(['web', 'auth', 'throttle:' . config('feedback.limits.rate_limit', '10,1')])
+    ->name('feedback.store');
+
 // Impersonifikace uživatelů (pro adminy)
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/admin/users/search-ajax', [\App\Http\Controllers\Admin\ImpersonateController::class, 'search'])
