@@ -51,6 +51,9 @@ class UsersTable
                         ($record->duplicates_count > 0
                             ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="Možná duplicita (shoda jména)"></i> '
                             : '') .
+                        ($record->isGhost()
+                            ? '<i class="fa-light fa-ghost fa-fw text-gray-400 mr-1" title="Dočasný Ghost profil"></i> '
+                            : '') .
                         ($record->externalMappings->isNotEmpty()
                             ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
                             : '') . e($state)
@@ -202,6 +205,40 @@ class UsersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    BulkAction::make('mergeAutomatically')
+                        ->label('Sloučit Ghosty automaticky')
+                        ->icon(new HtmlString('<i class="fa-light fa-object-group"></i>'))
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hromadné sloučení Ghost profilů')
+                        ->modalDescription('Systém u vybraných Ghost uživatelů vyhledá reálné uživatele se stejným jménem a automaticky je sloučí. Pokud shoda není jednoznačná, bude uživatel přeskočen.')
+                        ->modalSubmitActionLabel('Spustit sloučení')
+                        ->action(function (Collection $records, \App\Services\Users\UserMergeService $service) {
+                            $mergedCount = 0;
+                            $skippedCount = 0;
+
+                            foreach ($records as $record) {
+                                if (!$record->isGhost()) {
+                                    $skippedCount++;
+                                    continue;
+                                }
+
+                                $targetUser = $service->findMergeTarget($record);
+
+                                if ($targetUser) {
+                                    $service->merge($record, $targetUser);
+                                    $mergedCount++;
+                                } else {
+                                    $skippedCount++;
+                                }
+                            }
+
+                            FilamentNotification::make()
+                                ->title('Hromadné sloučení dokončeno')
+                                ->body("Úspěšně sloučeno: {$mergedCount}, Přeskočeno: {$skippedCount}")
+                                ->success()
+                                ->send();
+                        }),
                     BulkAction::make('activate')
                         ->label('Aktivovat vybrané')
                         ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::ACTIVATE))

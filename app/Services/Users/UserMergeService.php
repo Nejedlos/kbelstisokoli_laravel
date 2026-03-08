@@ -118,6 +118,20 @@ class UserMergeService
             AuditLog::where('actor_user_id', $source->id)->update(['actor_user_id' => $target->id]);
             AuditLog::where('subject_type', User::class)->where('subject_id', $source->id)->update(['subject_id' => $target->id]);
 
+            // 10.2 Ostatní systémové vazby (vytvořil/nahrál)
+            DB::table('finance_charges')->where('created_by_id', $source->id)->update(['created_by_id' => $target->id]);
+            DB::table('external_import_runs')->where('created_by_user_id', $source->id)->update(['created_by_user_id' => $target->id]);
+            DB::table('legacy_import_batches')->where('created_by_user_id', $source->id)->update(['created_by_user_id' => $target->id]);
+            DB::table('redirects')->where('created_by', $source->id)->update(['created_by' => $target->id]);
+            DB::table('feedback_reports')->where('user_id', $source->id)->update(['user_id' => $target->id]);
+            DB::table('ai_request_logs')->where('user_id', $source->id)->update(['user_id' => $target->id]);
+            DB::table('media_assets')->where('uploaded_by_id', $source->id)->update(['uploaded_by_id' => $target->id]);
+
+            // 10.5 Média (Spatie Media Library)
+            foreach ($source->media as $media) {
+                $media->copy($target, $media->collection_name);
+            }
+
             // 11. Smazání zdrojového uživatele
             // Před smazáním odstraníme vazby, které by mohly bránit smazání (pokud nejsou smazány přes cascade)
             $source->roles()->detach();
@@ -137,5 +151,41 @@ class UserMergeService
                 $this->statisticSyncService->recomputePlayerSummaries($seasonId);
             }
         });
+    }
+
+    /**
+     * Najde reálného uživatele, se kterým by mohl být tento (typicky Ghost) uživatel sloučen.
+     */
+    public function findMergeTarget(User $user): ?User
+    {
+        if (!$user->isGhost()) {
+            return null;
+        }
+
+        $parts = explode(' ', trim($user->name));
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $p1 = $parts[0];
+        $p2 = implode(' ', array_slice($parts, 1));
+
+        // Hledáme pouze mezi reálnými uživateli (ne ghosty) se stejným jménem
+        $candidates = User::where('id', '!=', $user->id)
+            ->where(fn ($q) => $q->whereNull('metadata->is_ghost')->orWhere('metadata->is_ghost', false))
+            ->where(function ($q) use ($user, $p1, $p2) {
+                $q->where('name', $user->name)
+                    ->orWhere('name', "{$p2} {$p1}")
+                    ->orWhere(fn ($q2) => $q2->where('first_name', $p1)->where('last_name', $p2))
+                    ->orWhere(fn ($q2) => $q2->where('first_name', $p2)->where('last_name', $p1));
+            })
+            ->get();
+
+        // Pokud najdeme právě jednoho kandidáta, považujeme to za shodu
+        if ($candidates->count() === 1) {
+            return $candidates->first();
+        }
+
+        return null;
     }
 }

@@ -269,6 +269,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
     }
 
     /**
+     * Zda se jedná o dočasného "Ghost" uživatele vytvořeného synchronizací.
+     */
+    public function isGhost(): bool
+    {
+        return str_starts_with($this->email ?? '', 'ghost_');
+    }
+
+    /**
      * Determine if the user can access the Filament admin panel.
      */
     public function canAccessPanel(Panel $panel): bool
