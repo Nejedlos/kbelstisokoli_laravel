@@ -15,6 +15,11 @@ use Illuminate\Support\Str;
 
 class FeedbackController extends Controller
 {
+    public function renderWidget(Request $request): string
+    {
+        return view('partials.feedback-widget')->render();
+    }
+
     public function store(Request $request): JsonResponse
     {
         // 1. Rate limiting (v configu je '10,1' - 10 za minutu)

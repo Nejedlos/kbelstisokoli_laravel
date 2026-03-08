@@ -24,6 +24,7 @@
 
     <!-- Overlay -->
     <div x-show="isOpen"
+         x-cloak
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -35,6 +36,7 @@
 
         <!-- Modal -->
         <div x-show="isOpen"
+             x-cloak
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-95 translate-y-4"
              x-transition:enter-end="opacity-100 scale-100 translate-y-0"

@@ -54,6 +54,10 @@ Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'
     ->name('media.download');
 
 // Feedback systém (přístupný pouze přihlášeným)
+Route::get('/feedback/widget', [\App\Http\Controllers\FeedbackController::class, 'renderWidget'])
+    ->middleware(['web', 'auth'])
+    ->name('feedback.widget');
+
 Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])
     ->middleware(['web', 'auth', 'throttle:' . config('feedback.limits.rate_limit', '10,1')])
     ->name('feedback.store');
