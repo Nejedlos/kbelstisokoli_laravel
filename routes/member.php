@@ -59,6 +59,7 @@ Route::middleware(['member'])
             Route::get('/moje', [\App\Http\Controllers\Member\StatisticsController::class, 'me'])->name('me');
             Route::get('/hraci', [\App\Http\Controllers\Member\StatisticsController::class, 'players'])->name('players');
             Route::get('/zapasy', [\App\Http\Controllers\Member\StatisticsController::class, 'matches'])->name('matches');
+            Route::get('/zapasy/{matchId}', [\App\Http\Controllers\Member\StatisticsController::class, 'matchDetail'])->name('matches.show');
         });
 
         // Týmové přehledy (původní trenérské, ponecháno pro kompatibilitu, odstraněno z menu)

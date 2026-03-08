@@ -42,4 +42,13 @@ return [
     'home' => 'Home',
     'away' => 'Away',
     'result_missing' => 'Result not specified',
+    'action_took_place' => 'Action took place',
+    'match_detail' => 'Match detail',
+    'boxscore' => 'Player statistics',
+    'best_players' => 'Best players',
+    'periods' => 'Quarters',
+    'referees' => 'Referees',
+    'venue' => 'Venue',
+    'attendance' => 'Attendance',
+    'commissioner' => 'Commissioner',
 ];

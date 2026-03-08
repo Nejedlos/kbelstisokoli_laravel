@@ -17,7 +17,8 @@ class RosterSyncService
 {
     public function __construct(
         protected StatFetcherInterface $fetcher,
-        protected TeamRosterExtractor $extractor
+        protected TeamRosterExtractor $extractor,
+        protected PlayerSyncService $playerSyncService
     ) {}
 
     /**
@@ -102,6 +103,9 @@ class RosterSyncService
 
                 // 3. Aktualizovat pivot tabulku (is_on_roster = true)
                 $this->updateRosterStatus($profile, $config->team_id, true);
+
+                // 4. Synchronizovat detail hráče (fotka, historie, atd.)
+                $this->playerSyncService->syncPlayer($user);
 
                 $importedCount++;
             }

@@ -1,49 +1,58 @@
 <div class="space-y-8 relative" x-data="{ view: @entangle('view') }" x-init="
     console.log('MyStatistics initialized');
 ">
+    <style>
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(-10%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+            50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce-subtle 2s infinite;
+        }
+    </style>
     {{-- Top Navigation & Selection --}}
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-2 rounded-[2rem] shadow-xl shadow-gray-200/40 dark:shadow-none border border-white/20 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-4 z-30">
         {{-- View Switcher --}}
-        <div class="flex p-1 bg-gray-100 dark:bg-gray-900 rounded-xl w-full md:w-auto">
+        <div class="flex p-1.5 bg-gray-100/50 dark:bg-gray-900/50 rounded-2xl w-full md:w-auto border border-gray-200/30 dark:border-gray-800">
             <a
                 href="{{ route('member.statistics.me') }}"
                 @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all text-center"
-                :class="view === 'personal' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                :class="view === 'personal' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
             >
-                <i class="fa-light fa-user-chart mr-2"></i> Moje osobní
+                <i class="fa-light fa-user-chart mr-2"></i> Osobní
             </a>
             <a
                 href="{{ route('member.statistics.players') }}"
                 @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all text-center"
-                :class="view === 'team' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                :class="view === 'team' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
             >
-                <i class="fa-light fa-users-viewfinder mr-2"></i> Týmový přehled
+                <i class="fa-light fa-users-viewfinder mr-2"></i> Tým
             </a>
             <a
                 href="{{ route('member.statistics.matches') }}"
                 @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all text-center"
-                :class="view === 'matches' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                :class="view === 'matches' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
             >
                 <i class="fa-light fa-calendar-lines mr-2"></i> Zápasy
             </a>
         </div>
 
         {{-- Filters --}}
-        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto px-2 pb-2 md:pb-0">
             <div class="relative min-w-[140px]">
                 <select
                     wire:model.live="seasonId"
                     @change="window.dispatchEvent(new CustomEvent('loading-start'))"
-                    class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none"
+                    class="w-full bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-2xl text-xs font-black focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none shadow-sm cursor-pointer hover:border-primary-200 transition-colors uppercase tracking-tight"
                 >
                     @foreach($seasons as $season)
                         <option value="{{ $season->id }}">{{ $season->name }}</option>
                     @endforeach
                 </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary-500">
                     <i class="fa-light fa-calendar-range text-xs"></i>
                 </div>
             </div>
@@ -52,7 +61,7 @@
                 <select
                     wire:model.live="teamId"
                     @change="window.dispatchEvent(new CustomEvent('loading-start'))"
-                    class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none"
+                    class="w-full bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-2xl text-xs font-black focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none shadow-sm cursor-pointer hover:border-primary-200 transition-colors uppercase tracking-tight"
                 >
                     <optgroup label="Moje týmy">
                         @foreach($userTeams as $team)
@@ -67,7 +76,7 @@
                         @endforeach
                     </optgroup>
                 </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary-500">
                     <i class="fa-light fa-basketball text-xs"></i>
                 </div>
             </div>
@@ -78,7 +87,7 @@
         {{-- PERSONAL VIEW --}}
         @if($summary)
             {{-- Summary Cards --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-6">
                 @php
                     $cards = [
                         ['label' => 'Zápasy', 'value' => $summary['gp'] ?? 0, 'icon' => 'fa-basketball', 'color' => 'primary'],
@@ -90,44 +99,61 @@
                     if (isset($summary['fg2_pct'])) $cards[] = ['label' => '2B %', 'value' => $summary['fg2_pct'] . '%', 'icon' => 'fa-arrow-progress', 'color' => 'orange'];
                     if (isset($summary['fg3_pct'])) $cards[] = ['label' => '3B %', 'value' => $summary['fg3_pct'] . '%', 'icon' => 'fa-arrow-up-right-dots', 'color' => 'violet'];
                     if (isset($summary['ft_pct'])) $cards[] = ['label' => 'TH %', 'value' => $summary['ft_pct'] . '%', 'icon' => 'fa-bullseye-arrow', 'color' => 'pink'];
+
+                    $colorClasses = [
+                        'primary' => 'from-primary-500 to-primary-600 text-primary-50',
+                        'blue' => 'from-blue-500 to-blue-600 text-blue-50',
+                        'indigo' => 'from-indigo-500 to-indigo-600 text-indigo-50',
+                        'emerald' => 'from-emerald-500 to-emerald-600 text-emerald-50',
+                        'orange' => 'from-orange-500 to-orange-600 text-orange-50',
+                        'violet' => 'from-violet-500 to-violet-600 text-violet-50',
+                        'pink' => 'from-pink-500 to-pink-600 text-pink-50',
+                    ];
                 @endphp
                         @foreach($cards as $card)
-                            <div wire:key="card-{{ $loop->index }}" class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center relative overflow-hidden">
-                        <div class="absolute -right-2 -bottom-2 opacity-5">
-                            <i class="fa-light {{ $card['icon'] }} text-5xl"></i>
+                            <div wire:key="card-{{ $loop->index }}" class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-lg shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 flex flex-col items-center justify-center relative overflow-hidden group hover:scale-[1.03] transition-all">
+                        <div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
+                            <i class="fa-light {{ $card['icon'] }} text-7xl"></i>
                         </div>
-                        <div class="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-widest text-center">{{ $card['label'] }}</div>
-                        <div class="text-3xl font-black text-gray-800 dark:text-white">{{ $card['value'] }}</div>
+                        <div class="text-[10px] text-gray-400 font-black mb-1 uppercase tracking-[0.2em] text-center">{{ $card['label'] }}</div>
+                        <div @class([
+                            'text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br',
+                            $colorClasses[$card['color']] ?? 'from-gray-700 to-gray-900 dark:from-white dark:to-gray-400'
+                        ])>
+                            {{ $card['value'] }}
+                        </div>
                     </div>
                 @endforeach
             </div>
 
             {{-- Insights & Rankings --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {{-- Insights --}}
-                <div class="lg:col-span-2 space-y-4">
-                    <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center px-1">
-                        <i class="fa-light fa-lightbulb-on mr-2 text-yellow-500"></i> Sezónní postřehy
+                <div class="lg:col-span-2 space-y-6">
+                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center px-1">
+                        <i class="fa-light fa-lightbulb-on mr-3 text-yellow-500"></i> Sezónní postřehy
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         @forelse($insights as $insight)
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex-shrink-0 flex items-center justify-center">
-                                    @if($insight['type'] === 'best_match') <i class="fa-light fa-star text-yellow-500"></i>
-                                    @elseif($insight['type'] === 'stability') <i class="fa-light fa-wave-pulse text-primary-500"></i>
-                                    @elseif($insight['type'] === 'trend_up') <i class="fa-light fa-arrow-trend-up text-green-500"></i>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 flex items-start gap-5 group hover:scale-[1.03] transition-all cursor-default">
+                                <div class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-900 flex-shrink-0 flex items-center justify-center shadow-inner group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20 transition-colors">
+                                    @if($insight['type'] === 'best_match') <i class="fa-light fa-star text-2xl text-yellow-500 drop-shadow-sm group-hover:rotate-12 transition-transform"></i>
+                                    @elseif($insight['type'] === 'stability') <i class="fa-light fa-wave-pulse text-2xl text-primary-500 drop-shadow-sm group-hover:scale-110 transition-transform"></i>
+                                    @elseif($insight['type'] === 'trend_up') <i class="fa-light fa-arrow-trend-up text-2xl text-green-500 drop-shadow-sm group-hover:-translate-y-1 transition-transform"></i>
                                     @endif
                                 </div>
-                                <div>
-                                    <div class="text-xs font-bold text-gray-400">{{ $insight['label'] }}</div>
-                                    <div class="text-sm font-black text-gray-800 dark:text-white">{{ $insight['value'] }}</div>
+                                <div class="flex-1">
+                                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $insight['label'] }}</div>
+                                    <div class="text-lg font-black text-gray-800 dark:text-white leading-tight group-hover:text-primary-600 transition-colors">{{ $insight['value'] }}</div>
                                     @if(isset($insight['date']))
-                                        <div class="text-[10px] text-gray-400 mt-1 italic">{{ $insight['date'] }}</div>
+                                        <div class="text-[10px] text-primary-500 mt-2 font-bold flex items-center">
+                                            <i class="fa-light fa-calendar-day mr-1.5 opacity-50"></i> {{ $insight['date'] }}
+                                        </div>
                                     @endif
                                 </div>
                             </div>
                         @empty
-                            <div class="sm:col-span-2 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 text-center text-gray-400 text-sm italic">
+                            <div class="sm:col-span-2 bg-gray-50/50 dark:bg-gray-900/50 p-10 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-700 text-center text-gray-400 text-sm font-bold italic">
                                 Zatím nemáme dostatek dat pro generování postřehů.
                             </div>
                         @endforelse
@@ -135,15 +161,15 @@
                 </div>
 
                 {{-- Rankings --}}
-                <div class="space-y-4">
-                    <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center px-1">
-                        <i class="fa-light fa-ranking-star mr-2 text-primary-500"></i> Týmový ranking
+                <div class="space-y-6">
+                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center px-1">
+                        <i class="fa-light fa-ranking-star mr-3 text-primary-500"></i> Týmový ranking
                     </h3>
-                    <div class="bg-primary-600 p-6 rounded-2xl text-white shadow-lg shadow-primary-500/20 relative overflow-hidden">
-                        <div class="absolute -right-4 -bottom-4 opacity-10">
-                            <i class="fa-light fa-medal text-9xl"></i>
+                    <div class="bg-gradient-to-br from-primary-600 to-primary-800 p-8 rounded-[2rem] text-white shadow-2xl shadow-primary-500/30 relative overflow-hidden group hover:scale-[1.02] transition-all">
+                        <div class="absolute -right-8 -bottom-8 opacity-10 group-hover:rotate-12 group-hover:scale-110 transition-all">
+                            <i class="fa-light fa-medal text-[12rem]"></i>
                         </div>
-                        <div class="space-y-4 relative z-10">
+                        <div class="space-y-6 relative z-10">
                             @foreach($rankings as $key => $rank)
                                 @php
                                     $label = match($key) {
@@ -154,16 +180,16 @@
                                         default => $key
                                     };
                                 @endphp
-                                <div class="flex justify-between items-end border-b border-primary-500 pb-2">
-                                    <div class="text-[10px] font-bold uppercase opacity-80">{{ $label }}</div>
-                                    <div class="font-black">
-                                        <span class="text-xl">#{{ $rank['rank'] }}</span>
-                                        <span class="text-[10px] opacity-60">/ {{ $rank['total'] }}</span>
+                                <div class="flex justify-between items-end border-b border-white/10 pb-3 hover:border-white/30 transition-colors">
+                                    <div class="text-[10px] font-black uppercase tracking-widest opacity-70">{{ $label }}</div>
+                                    <div class="font-black text-right">
+                                        <span class="text-3xl drop-shadow-md">#{{ $rank['rank'] }}</span>
+                                        <span class="text-xs opacity-50 block mt-0.5">z {{ $rank['total'] }} hráčů</span>
                                     </div>
                                 </div>
                             @endforeach
                             @if(empty($rankings))
-                                <div class="text-center py-4 opacity-80 italic text-sm">
+                                <div class="text-center py-6 opacity-80 italic text-sm font-bold">
                                     Rankings se počítají z kompletních statistik týmu.
                                 </div>
                             @endif
@@ -213,13 +239,71 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                             @foreach($perGameSeries as $m)
-                            <tr wire:key="row-{{ $loop->index }}" class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ $m['opponent'] }}</div>
-                                    <div class="text-[10px] text-gray-400">{{ \Carbon\Carbon::parse($m['date'])->format('d.m.Y') }}</div>
+                            @php
+                                $hasScore = isset($m['score_home']) && isset($m['score_away']);
+                                $isWin = false;
+                                $isDraw = false;
+                                $isLoss = false;
+
+                                if ($hasScore) {
+                                    $isWin = $m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home']);
+                                    $isDraw = $m['score_home'] == $m['score_away'];
+                                    $isLoss = !$isWin && !$isDraw;
+                                }
+                            @endphp
+                            <tr
+                                wire:key="row-{{ $loop->index }}"
+                                @class([
+                                    'hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-all border-l-[6px] relative group',
+                                    'border-green-500 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-900/10' => $isWin,
+                                    'border-red-400/30' => $isLoss,
+                                    'border-gray-300' => $isDraw,
+                                    'border-transparent' => !$isWin && !$isLoss && !$isDraw,
+                                ])
+                            >
+                                <td class="px-6 py-5">
+                                    <div class="flex items-center gap-4">
+                                        <div @class([
+                                            'flex flex-col items-center justify-center w-10 h-10 rounded-xl shadow-sm border transition-transform group-hover:scale-110',
+                                            'bg-green-50 border-green-100 dark:bg-green-900/20 dark:border-green-800' => $isWin,
+                                            'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700' => !$isWin,
+                                        ])>
+                                            <i @class([
+                                                'fa-light text-base',
+                                                'fa-house-chimney text-blue-500' => $m['is_home'],
+                                                'fa-bus-simple text-orange-500' => !$m['is_home'],
+                                            ])></i>
+                                        </div>
+                                        <div>
+                                            <div @class([
+                                                'text-sm font-black transition-colors',
+                                                'text-green-700 dark:text-green-400' => $isWin,
+                                                'text-gray-800 dark:text-gray-200' => !$isWin,
+                                            ])>
+                                                {{ $m['opponent'] }}
+                                                @if($isWin)
+                                                    <i class="fa-light fa-trophy-star ml-1 text-yellow-500 text-xs animate-bounce-subtle"></i>
+                                                @endif
+                                            </div>
+                                            <div class="text-[10px] text-gray-400 flex items-center gap-2">
+                                                <span class="font-bold uppercase tracking-wider">{{ \Carbon\Carbon::parse($m['date'])->format('d. m. Y') }}</span>
+                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                                <span @class(['font-black tracking-widest', 'text-blue-500/80' => $m['is_home'], 'text-orange-500/80' => !$m['is_home']])>
+                                                    {{ $m['is_home'] ? 'DOMA' : 'VENKU' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="text-lg font-black text-primary-600">{{ $m['values']['pts'] ?? 0 }}</span>
+                                <td class="px-6 py-5 text-center">
+                                    <div @class([
+                                        'text-2xl font-black transition-transform group-hover:scale-110',
+                                        'text-green-600 dark:text-green-400 drop-shadow-sm' => $isWin,
+                                        'text-primary-600' => !$isWin,
+                                    ])>
+                                        {{ $m['values']['pts'] ?? 0 }}
+                                    </div>
+                                    <div class="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">Body</div>
                                 </td>
                                 <td class="px-6 py-4 text-center text-xs text-gray-500">
                                     {{ ($m['values']['fg2_made'] ?? 0) }}/{{ ($m['values']['fg2_att'] ?? 0) }}
@@ -255,47 +339,51 @@
         {{-- TEAM VIEW --}}
         @if($teamSummary)
             {{-- Team Metrics --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {{-- Record --}}
-                <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
-                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
-                        <i class="fa-light fa-trophy-star text-9xl"></i>
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 relative overflow-hidden group hover:scale-[1.02] transition-all">
+                    <div class="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:opacity-[0.08] transition-all group-hover:rotate-12 group-hover:scale-125">
+                        <i class="fa-light fa-trophy-star text-[12rem]"></i>
                     </div>
                     <div class="relative z-10 text-center md:text-left">
-                        <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Sezónní bilance</h3>
-                        <div class="text-4xl font-black text-gray-800 dark:text-white">
-                            <span class="text-green-500">{{ $teamSummary['wins'] ?? 0 }}</span>
-                            <span class="text-gray-300">/</span>
-                            <span class="text-red-500">{{ $teamSummary['losses'] ?? 0 }}</span>
+                        <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Sezónní bilance</h3>
+                        <div class="flex items-end justify-center md:justify-start gap-2">
+                            <div class="text-6xl font-black text-green-500 drop-shadow-sm">{{ $teamSummary['wins'] ?? 0 }}</div>
+                            <div class="text-2xl font-black text-gray-200 mb-1">/</div>
+                            <div class="text-4xl font-black text-red-400 mb-1">{{ $teamSummary['losses'] ?? 0 }}</div>
                         </div>
-                        <div class="mt-2 text-xs font-bold text-gray-400">Celkem {{ $teamSummary['gp'] ?? 0 }} zápasů</div>
+                        <div class="mt-4 inline-flex items-center px-3 py-1 bg-gray-50 dark:bg-gray-900 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            <i class="fa-light fa-basketball mr-2"></i> Celkem {{ $teamSummary['gp'] ?? 0 }} zápasů
+                        </div>
                     </div>
                 </div>
 
                 {{-- Points --}}
-                <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Průměrná ofenzíva</h3>
-                    <div class="text-5xl font-black text-primary-600">
+                <div class="bg-primary-600 p-8 rounded-3xl shadow-xl shadow-primary-500/20 text-center relative overflow-hidden group hover:scale-[1.02] transition-all">
+                    <div class="absolute -left-4 -top-4 opacity-10 group-hover:scale-110 transition-transform">
+                        <i class="fa-light fa-fire-flame-curved text-8xl text-white"></i>
+                    </div>
+                    <h3 class="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] mb-4 relative z-10">Průměrná ofenzíva</h3>
+                    <div class="text-7xl font-black text-white drop-shadow-md relative z-10">
                         {{ $teamSummary['pts_avg'] ?? 0 }}
                     </div>
-                    <div class="mt-4 flex justify-center gap-4 text-[10px] font-black uppercase text-gray-400">
-                        <span>Skóre: {{ $teamSummary['pts_for'] }}</span>
-                        <span class="text-gray-200">|</span>
-                        <span>Inkasované: {{ $teamSummary['pts_against'] }}</span>
+                    <div class="mt-6 flex justify-center gap-4 text-[10px] font-black uppercase text-white/60 relative z-10">
+                        <span class="bg-white/10 px-3 py-1 rounded-lg">Dáno: {{ $teamSummary['pts_for'] }}</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-lg">Dostáno: {{ $teamSummary['pts_against'] }}</span>
                     </div>
                 </div>
 
                 {{-- Form --}}
-                <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Aktuální forma</h3>
-                    <div class="flex justify-center gap-2">
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 text-center flex flex-col justify-center items-center group hover:scale-[1.02] transition-all">
+                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Aktuální forma</h3>
+                    <div class="flex justify-center gap-3">
                         @foreach($recentForm as $f)
                             <div
                                 wire:key="form-{{ $loop->index }}"
-                                class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shadow-sm"
+                                class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-md transition-transform hover:scale-110 cursor-help"
                                 @class([
-                                    'bg-green-500 text-white' => $f['result'] === 'W',
-                                    'bg-red-500 text-white' => $f['result'] === 'L'
+                                    'bg-gradient-to-br from-green-400 to-green-600 text-white ring-4 ring-green-500/10' => $f['result'] === 'W',
+                                    'bg-gradient-to-br from-red-400 to-red-600 text-white ring-4 ring-red-500/10' => $f['result'] === 'L'
                                 ])
                                 title="{{ $f['opponent'] }} ({{ $f['pts_for'] }}:{{ $f['pts_against'] }})"
                             >
@@ -306,46 +394,53 @@
                             <span class="text-gray-400 italic text-xs">Bez nedávných zápasů</span>
                         @endif
                     </div>
-                    <div class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Posledních {{ count($recentForm) }} zápasů</div>
+                    <div class="mt-6 text-[10px] font-black text-gray-300 uppercase tracking-widest">Posledních {{ count($recentForm) }} zápasů</div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {{-- Top Scorers --}}
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6 border-b border-gray-50 dark:border-gray-700 flex items-center justify-between">
-                        <h3 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-widest">Tahouni týmu (Body)</h3>
-                        <i class="fa-light fa-fire-flame-curved text-orange-500"></i>
+                <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 overflow-hidden group">
+                    <div class="p-8 border-b border-gray-50 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/50">
+                        <h3 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-[0.2em]">Tahouni týmu <span class="text-primary-500">(Body)</span></h3>
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-500">
+                            <i class="fa-light fa-fire-flame-curved animate-pulse"></i>
+                        </div>
                     </div>
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 dark:bg-gray-900/30">
-                            <tr>
-                                <th class="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Hráč</th>
-                                <th class="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Z</th>
-                                <th class="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">B celkem</th>
-                                <th class="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">B/Z</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700 text-sm">
-                            @foreach($topScorers as $scorer)
-                            <tr wire:key="scorer-{{ $loop->index }}" class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
-                                <td class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">{{ $scorer['name'] }}</td>
-                                <td class="px-6 py-3 text-center text-gray-500">{{ $scorer['gp'] }}</td>
-                                <td class="px-6 py-3 text-center font-bold">{{ $scorer['pts_total'] }}</td>
-                                <td class="px-6 py-3 text-center">
-                                    <span class="bg-primary-50 text-primary-600 px-2 py-0.5 rounded text-[10px] font-black">
-                                        {{ $scorer['ppg'] }}
-                                    </span>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50/50 dark:bg-gray-900/30">
+                                <tr>
+                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Hráč</th>
+                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Z</th>
+                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">B celkem</th>
+                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">B/Z</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 dark:divide-gray-700 text-sm">
+                                @foreach($topScorers as $scorer)
+                                <tr wire:key="scorer-{{ $loop->index }}" class="hover:bg-primary-50/30 dark:hover:bg-primary-900/10 transition-colors group/row">
+                                    <td class="px-8 py-4 font-black text-gray-800 dark:text-gray-200 group-hover/row:text-primary-600 transition-colors">{{ $scorer['name'] }}</td>
+                                    <td class="px-8 py-4 text-center text-gray-500 font-bold">{{ $scorer['gp'] }}</td>
+                                    <td class="px-8 py-4 text-center font-black text-lg">{{ $scorer['pts_total'] }}</td>
+                                    <td class="px-8 py-4 text-center">
+                                        <span class="bg-primary-600 text-white px-3 py-1 rounded-lg text-xs font-black shadow-sm group-hover/row:scale-110 transition-transform inline-block">
+                                            {{ $scorer['ppg'] }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 {{-- Team Chart --}}
-                <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-[450px]" wire:ignore>
-                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Bodový vývoj týmu (vs Soupeři)</h3>
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-[2rem] shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 flex flex-col h-[480px] group" wire:ignore>
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Bodový vývoj týmu <span class="text-primary-500">(vs Soupeři)</span></h3>
+                        <i class="fa-light fa-chart-area text-primary-500 opacity-30 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
                     <div id="team-evolution-chart" class="flex-1"></div>
                 </div>
             </div>
@@ -373,69 +468,159 @@
                             <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Místo</th>
                             <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Výsledek</th>
                             <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Skóre</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                         @forelse($matches as $m)
-                        <tr wire:key="match-{{ $m['id'] ?? $loop->index }}" class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-gray-800 dark:text-gray-200">
-                                    {{ \Carbon\Carbon::parse($m['scheduled_at'])->format('d.m.Y') }}
+                        @php
+                            $hasScore = isset($m['score_home']) && isset($m['score_away']);
+                            $isWin = false;
+                            $isDraw = false;
+                            $isLoss = false;
+
+                            if ($hasScore && $m['status'] === 'finished') {
+                                $isWin = $m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home']);
+                                $isDraw = $m['score_home'] == $m['score_away'];
+                                $isLoss = !$isWin && !$isDraw;
+                            }
+
+                            $scheduledAt = $m['scheduled_at'] ? \Carbon\Carbon::parse($m['scheduled_at']) : null;
+                            $isPast = $scheduledAt ? $scheduledAt->isPast() : ($m['season_id'] < 3);
+                            $isActionTookPlace = ($m['status'] === 'finished' && !$hasScore) || ($m['status'] !== 'finished' && $isPast);
+
+                            $typeIcon = match($m['match_type'] ?? '') {
+                                'mistrovske' => 'fa-trophy text-amber-500',
+                                'poharove' => 'fa-award text-indigo-500',
+                                'pratelske' => 'fa-handshake text-green-500',
+                                'TUR' => 'fa-globe text-blue-500',
+                                default => 'fa-basketball text-gray-400'
+                            };
+
+                            $typeLabel = match($m['match_type'] ?? '') {
+                                'mistrovske' => 'Mistrovské',
+                                'poharove' => 'Pohárové',
+                                'pratelske' => 'Přátelské',
+                                'TUR' => 'Turnaj',
+                                default => 'Ostatní'
+                            };
+                        @endphp
+                        <tr
+                            wire:key="match-{{ $m['id'] ?? $loop->index }}"
+                            @class([
+                                'hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-all border-l-[6px] group relative',
+                                'border-green-500 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-900/10' => $isWin,
+                                'border-red-400/30' => $isLoss,
+                                'border-gray-300' => $isDraw,
+                                'border-blue-400/30 bg-blue-50/10 dark:bg-blue-900/5' => $isActionTookPlace,
+                                'border-transparent' => !$isWin && !$isLoss && !$isDraw && !$isActionTookPlace,
+                            ])
+                        >
+                            <td class="px-6 py-5">
+                                <div class="text-sm font-black text-gray-800 dark:text-gray-200">
+                                    {{ $scheduledAt ? $scheduledAt->format('d. m. Y') : '-' }}
                                 </div>
-                                <div class="text-[10px] text-gray-400">
-                                    {{ \Carbon\Carbon::parse($m['scheduled_at'])->format('H:i') }}
+                                <div class="text-[10px] text-gray-400 font-bold tracking-widest uppercase">
+                                    {{ $scheduledAt ? $scheduledAt->format('H:i') : '' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-gray-800 dark:text-gray-200">
-                                    {{ $m['opponent']['name'] ?? 'Neznámý soupeř' }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-2 py-1 rounded text-[10px] font-bold {{ $m['is_home'] ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500' }}">
-                                    {{ $m['is_home'] ? 'DOMA' : 'VENKU' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($m['status'] === 'finished')
-                                    @php
-                                        $hasScore = isset($m['score_home']) && isset($m['score_away']);
-                                        $isWin = $hasScore ? ($m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home'])) : false;
-                                        $isDraw = $hasScore ? ($m['score_home'] == $m['score_away']) : false;
-                                    @endphp
-                                    @if($hasScore)
-                                        <span @class([
-                                            'px-2 py-1 rounded text-[10px] font-black',
-                                            'bg-green-50 text-green-600' => $isWin,
-                                            'bg-gray-50 text-gray-600' => $isDraw,
-                                            'bg-red-50 text-red-600' => !$isWin && !$isDraw
+                            <td class="px-6 py-5">
+                                <div class="flex items-center gap-4">
+                                    <div @class([
+                                        'w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm border transition-transform group-hover:scale-110',
+                                        'border-green-100 dark:border-green-900' => $isWin,
+                                        'border-gray-100 dark:border-gray-700' => !$isWin,
+                                    ])>
+                                        <i class="fa-light {{ $typeIcon }} text-base"></i>
+                                    </div>
+                                    <div>
+                                        <div @class([
+                                            'text-sm font-black transition-colors',
+                                            'text-green-700 dark:text-green-400' => $isWin,
+                                            'text-gray-800 dark:text-gray-200' => !$isWin,
                                         ])>
-                                            {{ $isWin ? 'VÝHRA' : ($isDraw ? 'REMIZA' : 'PROHRA') }}
-                                        </span>
-                                    @else
-                                        <span class="px-2 py-1 rounded bg-blue-50 text-blue-600 text-[10px] font-black">
-                                            ODEHRÁNO
-                                        </span>
-                                    @endif
-                                @else
-                                    <span class="px-2 py-1 rounded bg-gray-50 text-gray-400 text-[10px] font-bold">
-                                        PLÁNOVÁNO
-                                    </span>
-                                @endif
+                                            {{ $m['opponent']['name'] ?? 'Neznámý soupeř' }}
+                                            @if($isWin)
+                                                <i class="fa-light fa-trophy-star ml-1 text-yellow-500 text-xs animate-bounce-subtle"></i>
+                                            @endif
+                                        </div>
+                                        <div class="text-[10px] text-gray-400 uppercase font-black tracking-widest opacity-70">
+                                            {{ $typeLabel }}
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($m['status'] === 'finished' && isset($m['score_home']) && isset($m['score_away']))
-                                    <div class="text-sm font-black text-gray-800 dark:text-white">
-                                        {{ $m['score_home'] }}:{{ $m['score_away'] }}
+                            <td class="px-6 py-5 text-center">
+                                <div class="flex flex-col items-center gap-1.5 transition-transform group-hover:scale-105">
+                                    <i @class([
+                                        'fa-light text-xl',
+                                        'fa-house-chimney text-blue-500 drop-shadow-sm' => $m['is_home'],
+                                        'fa-bus-simple text-orange-500 drop-shadow-sm' => !$m['is_home'],
+                                    ])></i>
+                                    <span @class([
+                                        'text-[9px] font-black uppercase tracking-[0.2em]',
+                                        'text-blue-600/80 dark:text-blue-400/80' => $m['is_home'],
+                                        'text-orange-600/80 dark:text-orange-400/80' => !$m['is_home'],
+                                    ])>
+                                        {{ $m['is_home'] ? 'DOMA' : 'VENKU' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 text-center">
+                                @if($isWin || $isLoss || $isDraw)
+                                    <div @class([
+                                        'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase shadow-sm border transition-all group-hover:scale-105',
+                                        'bg-green-500 text-white border-green-400 ring-4 ring-green-500/10' => $isWin,
+                                        'bg-gray-100 text-gray-500 border-gray-200' => $isDraw,
+                                        'bg-red-50 text-red-500 border-red-100' => $isLoss
+                                    ])>
+                                        @if($isWin) <i class="fa-light fa-trophy-star text-xs"></i>
+                                        @elseif($isDraw) <i class="fa-light fa-equals text-xs"></i>
+                                        @else <i class="fa-light fa-circle-xmark text-xs"></i>
+                                        @endif
+                                        {{ $isWin ? 'VÝHRA' : ($isDraw ? 'REMIZA' : 'PROHRA') }}
+                                    </div>
+                                @elseif($isActionTookPlace)
+                                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-500 border border-blue-100 text-[10px] font-black uppercase shadow-sm">
+                                        <i class="fa-light fa-calendar-check"></i>
+                                        {{ __('matches.action_took_place') }}
                                     </div>
                                 @else
-                                    <div class="text-sm text-gray-300">- : -</div>
+                                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 text-gray-400 border border-gray-100 text-[10px] font-black uppercase">
+                                        <i class="fa-light fa-calendar-clock"></i>
+                                        {{ __('matches.planned') }}
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-5 text-center">
+                                @if($hasScore)
+                                    <div @class([
+                                        'text-2xl font-black transition-transform group-hover:scale-110',
+                                        'text-green-600 dark:text-green-400 drop-shadow-sm' => $isWin,
+                                        'text-gray-800 dark:text-white' => !$isWin,
+                                    ])>
+                                        {{ $m['score_home'] }}<span class="text-gray-300 mx-1">:</span>{{ $m['score_away'] }}
+                                    </div>
+                                @else
+                                    <div class="text-lg text-gray-200 font-black">- : -</div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                @if($m['status'] === 'finished')
+                                    <a
+                                        href="{{ route('member.statistics.matches.show', $m['id']) }}"
+                                        @click="window.dispatchEvent(new CustomEvent('loading-start'))"
+                                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-primary-500 hover:text-white transition-all shadow-sm group/btn"
+                                        title="Detail zápasu"
+                                    >
+                                        <i class="fa-light fa-chevron-right transition-transform group-hover/btn:translate-x-0.5"></i>
+                                    </a>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-400 italic">
                                 Žádné zápasy pro tým {{ $activeTeamName }} v sezóně {{ $activeSeasonName }} nebyly nalezeny.
                             </td>
                         </tr>

@@ -60,4 +60,17 @@ class StatisticsController extends Controller
             'activeTeamId' => $activeTeamId,
         ]);
     }
+
+    /**
+     * Display match detail.
+     */
+    public function matchDetail(int $matchId): View
+    {
+        $match = \App\Models\BasketballMatch::with(['team', 'opponent', 'season'])->findOrFail($matchId);
+
+        return view('member.statistics.match-detail', [
+            'title' => __('matches.match_detail'),
+            'match' => $match,
+        ]);
+    }
 }

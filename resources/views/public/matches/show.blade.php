@@ -79,9 +79,22 @@
                             @else
                                 <div class="text-4xl md:text-5xl font-black opacity-30 mb-4 uppercase tracking-widest italic">VS</div>
                             @endif
-                            <span class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-700' }}">
-                                {{ $statusLabels[$match->status] ?? $match->status }}
-                            </span>
+                            @php
+                                $isPast = $match->scheduled_at ? $match->scheduled_at->isPast() : ($match->season_id < 3);
+                            @endphp
+                            @if(($match->status === 'planned' || $match->status === 'scheduled') && $isPast)
+                                <span class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-blue-600 text-white">
+                                    {{ __('matches.action_took_place') }}
+                                </span>
+                            @else
+                                <span @class([
+                                    'px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest',
+                                    'bg-blue-600 text-white' => $match->status === 'finished' && $match->score_home === null && $match->score_away === null,
+                                    $statusColors[$match->status] ?? 'bg-slate-700' => !($match->status === 'finished' && $match->score_home === null && $match->score_away === null)
+                                ])>
+                                    {{ ($match->status === 'finished' && $match->score_home === null && $match->score_away === null) ? __('matches.action_took_place') : ($statusLabels[$match->status] ?? $match->status) }}
+                                </span>
+                            @endif
                             @if($match->status === 'finished' && $match->score_home === null && $match->score_away === null)
                                 <div class="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
                                     {{ __('matches.result_missing') }}

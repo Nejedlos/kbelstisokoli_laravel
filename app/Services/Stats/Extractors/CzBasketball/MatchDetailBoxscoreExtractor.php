@@ -36,24 +36,26 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
     ];
 
     /**
-     * Extrahuje boxscore ze stránky detailu zápasu.
+     * Extrahuje boxscore a detailní informace ze stránky detailu zápasu.
      */
     public function extract(string $content, array $config = []): array
     {
         $crawler = new Crawler($content);
         $warnings = [];
 
-        // 1. Hlavička zápasu
+        // 1. Hlavička zápasu (včetně rozpisu čtvrtin, rozhodčích, atd.)
         $matchHeader = $this->extractHeader($crawler);
 
-        // 2. Tabulky statistik
-        // Na cz.basketball bývají pod sebou dvě tabulky .table-condensed
+        // 2. Nejlepší hráči (Best player)
+        $bestPlayers = $this->extractBestPlayers($crawler);
+
+        // 3. Tabulky statistik
         $tables = $crawler->filter('table.table-condensed');
 
         $allTablesData = [];
         $allFragmentHtml = '';
 
-        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings) {
+        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
             if ($table->filter('thead th')->count() < 5) {
                 return;
@@ -62,7 +64,6 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $tableName = $i === 0 ? ($matchHeader['home_team'] ?? 'Home Team Boxscore') : ($matchHeader['away_team'] ?? 'Away Team Boxscore');
 
             // Zkusíme najít název týmu nad tabulkou.
-            // Často je to v h4 nad div.overflow-auto, nebo přímo nad tabulkou.
             $teamNameNode = $table->previousAll()->filter('h3, h4, .title')->last();
             if ($teamNameNode->count() === 0) {
                 $container = $table->closest('div');
@@ -92,6 +93,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
         $mainTable->metadata = array_merge($mainTable->metadata, [
             'header' => $matchHeader,
+            'best_players' => $bestPlayers,
             'all_tables' => array_map(fn ($t) => $t->toArray(), $allTablesData),
             'warnings' => $warnings,
         ]);
@@ -107,11 +109,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
     {
         $header = [];
 
-        // Najdeme hlavní kontejner zápasu, pokud existuje (obvykle .match-detail-header, .match-teams nebo .match-summary)
+        // Najdeme hlavní kontejner zápasu
         $mainContainer = $crawler->filter('.match-detail-header, .match-teams, .match-summary, .match_box, .match-header')->first();
         $searchIn = $mainContainer->count() > 0 ? $mainContainer : $crawler;
 
-        // Týmy (zkusíme .alfa/.beta, .score-home-team/.score-away-team, .team-name, nebo h4.text-center)
+        // Týmy
         $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-name, .team-home h1, .team-home h2, h1, h2, h4.text-center')->first();
         if ($homeNode->count() > 0) {
             $header['home_team'] = trim($homeNode->text());
@@ -121,7 +123,6 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         if ($awayNodes->count() >= 2) {
             $header['away_team'] = trim($awayNodes->eq(1)->text());
         } elseif ($awayNodes->count() === 1) {
-             // Fallback pokud máme jen jeden match na tyhle selektory, zkusíme .beta samostatně
              $beta = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2')->first();
              if ($beta->count() > 0) {
                  $header['away_team'] = trim($beta->text());
@@ -131,24 +132,63 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         // Skóre
         $scoreNodes = $searchIn->filter('.delta, .match-score, .score, .final-score, .score-total');
         if ($scoreNodes->count() >= 2) {
-            // Skóre rozdělené do dvou částí
             $header['score'] = trim($scoreNodes->eq(0)->text()).':'.trim($scoreNodes->eq(1)->text());
         } elseif ($scoreNodes->count() > 0) {
             $header['score'] = trim($scoreNodes->first()->text());
         }
 
         // Skóre po čtvrtinách (periods)
-        // Často v závorkách pod hlavním skóre nebo v .periods
+        $periods = [];
         $periodsNode = $searchIn->filter('.periods, .score-periods, .score-quarters');
         if ($periodsNode->count() > 0) {
             $header['periods_text'] = trim($periodsNode->text());
+            // Zkusíme naparsovat čtvrtiny (např. 20:15, 10:12, ...)
+            if (preg_match_all('/(\d+):(\d+)/', $header['periods_text'], $m)) {
+                foreach ($m[0] as $i => $pair) {
+                    $periods[] = [
+                        'home' => (int)$m[1][$i],
+                        'away' => (int)$m[2][$i],
+                    ];
+                }
+            }
         } else {
-            // Zkusíme najít text v závorkách v searchIn
-            $allText = $searchIn->text();
-            if (preg_match('/\(([\d:\s,]+)\)/', $allText, $m)) {
-                $header['periods_text'] = trim($m[1]);
+            // Hledáme tabulku s průběhem skóre po čtvrtinách (často v detailu zápasu)
+            $scoreByQuartersTable = $crawler->filter('.table-quarters, .score-quarters-table, table:contains("1.č")')->first();
+            if ($scoreByQuartersTable->count() > 0) {
+                $qRows = $scoreByQuartersTable->filter('tr');
+                if ($qRows->count() >= 2) {
+                    $homeRow = $qRows->eq(0)->filter('td, th');
+                    $awayRow = $qRows->eq(1)->filter('td, th');
+
+                    for ($i = 1; $i < $homeRow->count(); $i++) {
+                        $hVal = trim($homeRow->eq($i)->text());
+                        $aVal = trim($awayRow->eq($i)->text());
+                        if (is_numeric($hVal) && is_numeric($aVal)) {
+                            $periods[] = [
+                                'home' => (int)$hVal,
+                                'away' => (int)$aVal,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            if (empty($periods)) {
+                $allText = $searchIn->text();
+                if (preg_match('/\(([\d:\s,]+)\)/', $allText, $m)) {
+                    $header['periods_text'] = trim($m[1]);
+                    if (preg_match_all('/(\d+):(\d+)/', $header['periods_text'], $pm)) {
+                        foreach ($pm[0] as $i => $pair) {
+                            $periods[] = [
+                                'home' => (int)$pm[1][$i],
+                                'away' => (int)$pm[2][$i],
+                            ];
+                        }
+                    }
+                }
             }
         }
+        $header['periods'] = $periods;
 
         $dateNode = $searchIn->filter('.match-date, .date-time, .datetime')->first();
         if ($dateNode->count() > 0) {
@@ -172,7 +212,6 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         if ($attendanceNode->count() > 0) {
             $header['attendance'] = trim(str_replace('Diváci:', '', $attendanceNode->text()));
         } else {
-            // Zkusíme najít text "Diváci:" v celém kontejneru
             $allText = $searchIn->text();
             if (preg_match('/Diváci:\s*(\d+)/u', $allText, $m)) {
                 $header['attendance'] = $m[1];
@@ -185,6 +224,55 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         }
 
         return $header;
+    }
+
+    protected function extractBestPlayers(Crawler $crawler): array
+    {
+        $bestPlayers = [];
+
+        // Na cz.basketball jsou nejlepší hráči v sekci s ID "nejlepsi-hrac" nebo v .best-player-card
+        $bestPlayerSection = $crawler->filter('#nejlepsi-hrac, .best-players-section, .match-best-players');
+
+        if ($bestPlayerSection->count() > 0) {
+            $bestPlayerSection->filter('.best-player-card, .player-card, .best-player-item')->each(function (Crawler $card) use (&$bestPlayers) {
+                $player = [];
+
+                // Jméno a odkaz
+                $nameNode = $card->filter('.player-name, h4, a')->first();
+                if ($nameNode->count() > 0) {
+                    $player['name'] = trim($nameNode->text());
+                    $link = $card->filter('a[href*="/hrac/"]')->first();
+                    if ($link->count() > 0 && preg_match('/\/hrac\/(\d+)/', $link->attr('href'), $m)) {
+                        $player['external_id'] = $m[1];
+                    }
+                }
+
+                // Fotka
+                $imgNode = $card->filter('img')->first();
+                if ($imgNode->count() > 0) {
+                    $src = $imgNode->attr('src');
+                    if ($src && !str_contains($src, 'data:image')) {
+                        // Převod na absolutní URL pokud je relativní
+                        if (str_starts_with($src, '/')) {
+                            $src = 'https://cz.basketball' . $src;
+                        }
+                        $player['photo_url'] = $src;
+                    }
+                }
+
+                // Tým (obvykle v záhlaví karty nebo jako text)
+                $teamNode = $card->filter('.team-name, .team, small')->first();
+                if ($teamNode->count() > 0) {
+                    $player['team'] = trim($teamNode->text());
+                }
+
+                if (!empty($player)) {
+                    $bestPlayers[] = $player;
+                }
+            });
+        }
+
+        return $bestPlayers;
     }
 
     protected function processBoxscoreTable(Crawler $table, string $tableName, array &$warnings): NormalizedTableDTO

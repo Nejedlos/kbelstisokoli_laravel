@@ -28,7 +28,8 @@ class ExternalStatsSyncService
         protected RosterSyncService $rosterSyncService,
         protected MatchSyncService $matchSyncService,
         protected StatisticSyncService $statisticSyncService,
-        protected StatNormalizerInterface $normalizer
+        protected StatNormalizerInterface $normalizer,
+        protected PlayerSyncService $playerSyncService
     ) {}
 
     /**
@@ -674,6 +675,9 @@ class ExternalStatsSyncService
             if (!empty($header['periods_text'])) {
                 $matchMetadata['periods'] = $header['periods_text'];
             }
+            if (!empty($header['periods'])) {
+                $matchMetadata['periods_detailed'] = $header['periods'];
+            }
             if (!empty($header['venue'])) {
                 $matchMetadata['venue'] = $header['venue'];
                 if (empty($match->location)) {
@@ -690,6 +694,14 @@ class ExternalStatsSyncService
                 $matchMetadata['commissioner'] = $header['commissioner'];
             }
 
+            // Uložení nejlepších hráčů
+            $bestPlayers = $mainData->metadata['best_players'] ?? [];
+            if (!empty($bestPlayers)) {
+                $matchMetadata['best_players'] = $bestPlayers;
+                // Zpracování fotografií nejlepších hráčů (pokud jsou naši)
+                $this->processBestPlayerPhotos($bestPlayers, $run);
+            }
+
             $updateData = ['metadata' => $matchMetadata];
 
             if (!empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {
@@ -700,7 +712,7 @@ class ExternalStatsSyncService
                 if (($options['force'] ?? false) || ($options['fresh'] ?? false) || ($match->score_home === null && $match->score_away === null)) {
                     $updateData['score_home'] = $scoreHome;
                     $updateData['score_away'] = $scoreAway;
-                    $updateData['status'] = 'played';
+                    $updateData['status'] = 'finished'; // Sjednoceno na 'finished' dle předchozích úkolů
                 }
             }
 
@@ -719,6 +731,44 @@ class ExternalStatsSyncService
             }
             $run->fail($e);
             throw $e;
+        }
+    }
+
+    /**
+     * Zpracuje fotografie nejlepších hráčů a uloží je do jejich portfolia.
+     */
+    protected function processBestPlayerPhotos(array $bestPlayers, ExternalImportRun $run): void
+    {
+        foreach ($bestPlayers as $playerData) {
+            $extId = $playerData['external_id'] ?? null;
+            $photoUrl = $playerData['photo_url'] ?? null;
+
+            if (!$extId || !$photoUrl) {
+                continue;
+            }
+
+            // Hledáme uživatele podle externího ID (mapování v external_mappings)
+            $user = \App\Models\User::whereHas('externalMappings', function ($q) use ($extId) {
+                $q->where('source_key', 'czbasketball')
+                  ->where('external_id', $extId);
+            })->first();
+
+            if (!$user) {
+                // Zkusíme najít podle jména, pokud je to náš tým (Kbely)
+                if (str_contains(mb_strtolower($playerData['team'] ?? ''), 'kbely')) {
+                    $nameParts = explode(' ', $playerData['name'] ?? '');
+                    if (count($nameParts) >= 2) {
+                        $user = \App\Models\User::where('last_name', 'like', $nameParts[count($nameParts)-1])
+                            ->where('first_name', 'like', $nameParts[0])
+                            ->first();
+                    }
+                }
+            }
+
+            if ($user) {
+                // Pokud je to náš hráč, provedeme kompletní synchronizaci detailu (včetně historie a všech fotek)
+                $this->playerSyncService->syncPlayer($user);
+            }
         }
     }
 

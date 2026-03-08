@@ -42,4 +42,13 @@ return [
     'home' => 'Doma',
     'away' => 'Venku',
     'result_missing' => 'Výsledek nebyl zadán',
+    'action_took_place' => 'Akce proběhla',
+    'match_detail' => 'Detail zápasu',
+    'boxscore' => 'Statistiky hráčů',
+    'best_players' => 'Nejlepší hráči',
+    'periods' => 'Čtvrtiny',
+    'referees' => 'Rozhodčí',
+    'venue' => 'Hala',
+    'attendance' => 'Diváci',
+    'commissioner' => 'Komisař',
 ];

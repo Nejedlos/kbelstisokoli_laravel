@@ -171,16 +171,25 @@
                         {{ $isWin ? __('matches.victory') : ($isLoss ? __('matches.loss') : __('matches.draw')) }}
                     </span>
                 @elseif($isPlayed)
-                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
-                        {{ $statusLabels[$match->status] ?? $match->status }}
+                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
+                        {{ __('matches.action_took_place') }}
                     </span>
                     <span class="text-[9px] font-bold text-slate-400 mt-1 italic uppercase tracking-tighter">
                         {{ __('matches.result_missing') }}
                     </span>
                 @else
-                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
-                        {{ $statusLabels[$match->status] ?? $match->status }}
-                    </span>
+                    @php
+                        $isPast = $match->scheduled_at ? $match->scheduled_at->isPast() : ($match->season_id < 3);
+                    @endphp
+                    @if($isPast)
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
+                            {{ __('matches.action_took_place') }}
+                        </span>
+                    @else
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
+                            {{ $statusLabels[$match->status] ?? $match->status }}
+                        </span>
+                    @endif
                 @endif
             </div>
         </div>
