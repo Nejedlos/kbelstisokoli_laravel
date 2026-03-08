@@ -505,6 +505,8 @@ class DebugOperations extends Page
         $teamSlugs = config('external_sources.czbasketball.teams', []);
         $stats = [];
 
+        $boxscoreSet = StatisticSet::where('slug', 'match-boxscore-external')->first();
+
         foreach ($teamSlugs as $slug) {
             $team = Team::where('slug', $slug)->first();
             if (! $team) {
@@ -528,18 +530,27 @@ class DebugOperations extends Page
                 ->filter(fn($m) => isset($m->metadata['external_id']) || isset($m->metadata['season_external_match_id']))
                 ->count();
 
-            $boxscoreSet = StatisticSet::where('slug', 'match-boxscore')->first();
             $statRowsCount = $boxscoreSet ? StatisticRow::where('statistic_set_id', $boxscoreSet->id)
                 ->where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)
                 ->count() : 0;
 
-            // Unmatched players
+            // Unmatched players (Ghost users) pro tento tým
             $unmatchedCount = DB::table('external_entity_mappings')
-                ->where('source_key', 'czbasketball')
-                ->where('season_id', $activeSeason->id)
-                ->where('entity_type', 'player')
-                ->whereNull('internal_id')
+                ->leftJoin('users', 'external_entity_mappings.internal_id', '=', 'users.id')
+                ->leftJoin('player_profiles', 'users.id', '=', 'player_profiles.user_id')
+                ->leftJoin('player_profile_team', 'player_profiles.id', '=', 'player_profile_team.player_profile_id')
+                ->where('external_entity_mappings.source_key', 'czbasketball')
+                ->where('external_entity_mappings.season_id', $activeSeason->id)
+                ->where('external_entity_mappings.entity_type', 'player')
+                ->where(function($q) use ($team) {
+                    $q->where('player_profile_team.team_id', $team->id)
+                      ->orWhereNull('external_entity_mappings.internal_id');
+                })
+                ->where(function ($q) {
+                    $q->whereNull('external_entity_mappings.internal_id')
+                        ->orWhere('users.metadata', 'LIKE', '%"is_ghost":true%');
+                })
                 ->count();
 
             $lastError = ExternalImportRun::where('team_id', $team->id)
