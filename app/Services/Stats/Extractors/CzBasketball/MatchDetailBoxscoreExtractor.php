@@ -208,31 +208,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     }
                 });
 
-                // Pokud jsme našli průběžné stavy, musíme je převést na skóre jednotlivých čtvrtin
+                // Pokud jsme našli stavy, uložíme je tak, jak jsou (kumulativně)
                 if (!empty($periods)) {
-                    $normalizedPeriods = [];
-                    $lastHome = 0;
-                    $lastAway = 0;
-                    foreach ($periods as $p) {
-                        $normalizedPeriods[] = [
-                            'home' => $p['home'] - $lastHome,
-                            'away' => $p['away'] - $lastAway,
-                        ];
-                        $lastHome = $p['home'];
-                        $lastAway = $p['away'];
-                    }
-                    // Přidáme i konečné skóre jako poslední čtvrtinu, pokud se liší
-                    if (isset($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $sm)) {
-                        $finalHome = (int)$sm[1];
-                        $finalAway = (int)$sm[2];
-                        if ($finalHome > $lastHome || $finalAway > $lastAway) {
-                            $normalizedPeriods[] = [
-                                'home' => $finalHome - $lastHome,
-                                'away' => $finalAway - $lastAway,
-                            ];
-                        }
-                    }
-                    $periods = $normalizedPeriods;
+                    // Už neprovádíme normalizaci (odečítání) ani nepřidáváme poslední čtvrtinu
+                    // Uživatel chce vidět přesně to, co je na webu (stavy po Q1, Q2, Q3)
                 }
             }
         }
@@ -243,26 +222,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             if (preg_match('/\(((\d+\s*:\s*\d+[\s,]*)+)\)/', $allText, $m)) {
                 $header['periods_text'] = trim($m[1]);
                 if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $pm)) {
-                    $lastHome = 0;
-                    $lastAway = 0;
                     foreach ($pm[0] as $i => $pair) {
-                        $currentHome = (int)$pm[1][$i];
-                        $currentAway = (int)$pm[2][$i];
-
-                        // Pokud skóre roste, je to pravděpodobně průběžný stav
-                        if ($currentHome >= $lastHome && $currentAway >= $lastAway && $i > 0) {
-                             $periods[] = [
-                                'home' => $currentHome - $lastHome,
-                                'away' => $currentAway - $lastAway,
-                            ];
-                        } else {
-                            $periods[] = [
-                                'home' => $currentHome,
-                                'away' => $currentAway,
-                            ];
-                        }
-                        $lastHome = $currentHome;
-                        $lastAway = $currentAway;
+                        $periods[] = [
+                            'home' => (int)$pm[1][$i],
+                            'away' => (int)$pm[2][$i],
+                        ];
                     }
                 }
             }

@@ -54,4 +54,5 @@ return [
     'attendance' => 'Attendance',
     'commissioner' => 'Commissioner',
     'external_detail' => 'View on cz.basketball',
+    'after_period' => 'Score after',
 ];

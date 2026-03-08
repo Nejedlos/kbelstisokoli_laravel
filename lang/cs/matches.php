@@ -54,4 +54,5 @@ return [
     'attendance' => 'Diváci',
     'commissioner' => 'Komisař',
     'external_detail' => 'Zobrazit na cz.basketball',
+    'after_period' => 'Stav po',
 ];
