@@ -214,15 +214,24 @@
                         </p>
 
                         <div class="pt-2 space-y-2">
-                            <x-filament::button color="info" size="sm" class="w-full" wire:click="mountAction('discoverSeasons')">
+                            <x-filament::button color="info" size="sm" class="w-full" wire:click="mountAction('discoverSeasons')" title="Prohledá externí web a najde ID chybějících sezón pro konfiguraci">
                                 <i class="fa-light fa-magnifying-glass mr-1"></i> Spustit Discovery
                             </x-filament::button>
 
                             <div class="grid grid-cols-2 gap-2 mt-4">
-                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl() }}">
+                                <x-filament::button color="primary" size="sm" wire:click="mountAction('syncAllSeasons')" title="Spustí import dat pro všechny nakonfigurované sezóny a týmy">
+                                    <i class="fa-light fa-arrows-rotate mr-1"></i> Import vše
+                                </x-filament::button>
+                                <x-filament::button color="warning" size="sm" wire:click="mountAction('recomputeAllSeasons')" title="Přepočítá statistiky pro všechny sezóny v databázi">
+                                    <i class="fa-light fa-gauge-high mr-1"></i> Přepočet vše
+                                </x-filament::button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl() }}" title="Historie všech importů a discovery běhů">
                                     <i class="fa-light fa-list-bullet mr-1"></i> Historie
                                 </x-filament::button>
-                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalEntityMappings\ExternalEntityMappingResource::getUrl() }}">
+                                <x-filament::button color="gray" size="sm" tag="a" href="{{ \App\Filament\Resources\ExternalEntityMappings\ExternalEntityMappingResource::getUrl() }}" title="Správa párování externích entit na naše modely">
                                     <i class="fa-light fa-users mr-1"></i> Párování
                                 </x-filament::button>
                             </div>

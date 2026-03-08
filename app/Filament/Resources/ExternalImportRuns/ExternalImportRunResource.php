@@ -19,6 +19,8 @@ class ExternalImportRunResource extends Resource
 {
     protected static ?string $model = ExternalImportRun::class;
 
+    protected static ?string $slug = 'external-import-runs';
+
     public static function getNavigationSort(): ?int
     {
         return 35;
