@@ -3,7 +3,10 @@
         <!-- Sidebar s navigací -->
         <div class="md:col-span-3 overflow-y-auto pr-2 border-r border-gray-100 dark:border-gray-800">
             <div class="mb-4 sticky top-0 bg-white dark:bg-gray-900 pt-1 pb-4 z-10">
-                <x-filament::input.wrapper prefix-icon="heroicon-m-magnifying-glass">
+                <x-filament::input.wrapper>
+                    <x-slot name="prefix">
+                        <i class="fa-light fa-magnifying-glass text-gray-400"></i>
+                    </x-slot>
                     <x-filament::input
                         type="search"
                         placeholder="Hledat v dokumentaci..."
@@ -46,11 +49,10 @@
                                     @click="open = !open"
                                     class="flex items-center w-full px-2 py-1.5 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-primary-600 transition-colors group"
                                 >
-                                    <x-filament::icon
-                                        icon="heroicon-m-chevron-right"
-                                        class="w-3 h-3 mr-2 transition group-hover:text-primary-500"
+                                    <i
+                                        class="fa-light fa-chevron-right w-3 h-3 mr-2 transition group-hover:text-primary-500"
                                         :class="open ? 'rotate-90' : ''"
-                                    />
+                                    ></i>
                                     {{ $item['name'] }}
                                 </button>
                                 <div x-show="open" x-collapse class="pl-3 space-y-1 mt-1 border-l border-gray-100 dark:border-gray-800 ml-3.5">

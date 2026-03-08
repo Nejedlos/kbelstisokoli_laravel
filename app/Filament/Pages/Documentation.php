@@ -7,6 +7,7 @@ use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
 
 class Documentation extends Page
@@ -40,9 +41,9 @@ class Documentation extends Page
         return app(DocumentationService::class)->search($this->searchQuery);
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|HtmlString|null
     {
-        return FilamentIcon::get(AppIcon::DOCUMENTATION);
+        return FilamentIcon::render(AppIcon::DOCUMENTATION);
     }
 
     public static function shouldRegisterNavigation(): bool
