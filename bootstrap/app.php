@@ -133,6 +133,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('admin*') || $request->is('clenska-sekce*')) {
+                return response()->view('errors.shot-clock', [], 401);
+            }
+        });
+
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
             if ($e->getStatusCode() === 419 && $request->is('logout')) {
                 return redirect()->to('/');
@@ -254,6 +260,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 // Pokud je uživatel přihlášen, zkusíme mu zachovat session tím, že ho jen přesměrujeme zpět s hláškou
                 if ($request->user()) {
                     return redirect()->back()->withErrors(['error' => __('Platnost relace vypršela, zkuste akci zopakovat.')]);
+                }
+
+                // Pokud je to GET požadavek na admin/členskou sekci, zobrazíme Shot clock violation
+                if ($request->isMethod('GET') && ($request->is('admin*') || $request->is('clenska-sekce*'))) {
+                    return response()->view('errors.shot-clock', [], 419);
                 }
 
                 return null;

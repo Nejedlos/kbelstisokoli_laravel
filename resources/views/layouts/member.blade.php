@@ -174,7 +174,7 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach(['omluva', 'zapas', 'platba', 'heslo'] as $key)
-                                    <button @click.stop="$dispatch('loading-start'); $refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
+                                    <button @click.stop="$dispatch('loading-start'); $refs.searchInput.value = {{ Js::from(__('search.ai_tips.' . $key)) }}; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
                                             class="flex items-start gap-2 text-left p-2.5 rounded-xl bg-slate-50 hover:bg-accent/5 border border-slate-100 hover:border-accent/20 transition-all group/tip">
                                         <div class="w-5 h-5 rounded bg-white flex items-center justify-center shadow-sm text-[10px] text-accent group-hover/tip:bg-accent group-hover/tip:text-white transition-colors">
                                             <i class="fa-light @if($key === 'omluva') fa-calendar-xmark @elseif($key === 'zapas') fa-basketball @elseif($key === 'platba') fa-wallet @else fa-key @endif"></i>

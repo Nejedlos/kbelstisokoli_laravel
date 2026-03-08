@@ -37,7 +37,7 @@
                             ];
                         @endphp
                         @foreach($tips as $tip)
-                            <button @click="$wire.set('query', '{{ $tip['text'] }}'); $wire.askAi()" class="flex items-start gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-primary/30 hover:bg-primary/5 transition-all text-left group/tip">
+                            <button @click="$wire.set('query', {{ Js::from($tip['text']) }}); $wire.askAi()" class="flex items-start gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-primary/30 hover:bg-primary/5 transition-all text-left group/tip">
                                 <div class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center shrink-0 group-hover/tip:bg-primary group-hover/tip:text-white transition-colors">
                                     <i class="fa-light {{ $tip['icon'] }} text-lg"></i>
                                 </div>

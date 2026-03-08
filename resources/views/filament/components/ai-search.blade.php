@@ -68,7 +68,7 @@
                     $tips = ['branding', 'cleny', 'omluva', 'zapas'];
                 @endphp
                 @foreach($tips as $key)
-                    <button @click.stop="loading = true; $refs.searchInput.value = '{{ __('search.ai_tips.' . $key) }}'; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
+                    <button @click.stop="loading = true; $refs.searchInput.value = {{ Js::from(__('search.ai_tips.' . $key)) }}; $refs.searchInput.form.dispatchEvent(new Event('submit'))"
                             class="flex items-start gap-2 text-left p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/30 hover:bg-primary/5 dark:hover:bg-primary/10 border border-gray-100 dark:border-gray-800 hover:border-primary/20 transition-all group/tip">
                         <div class="w-5 h-5 rounded bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm text-[10px] text-primary group-hover/tip:bg-primary group-hover/tip:text-white transition-colors">
                             <i class="fa-light @if($key === 'branding') fa-palette @elseif($key === 'cleny') fa-user-gear @elseif($key === 'omluva') fa-calendar-xmark @else fa-basketball @endif"></i>

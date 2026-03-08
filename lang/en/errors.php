@@ -28,6 +28,13 @@ return [
         'tagline' => 'Please try to repeat the action.',
         'button' => 'Refresh page',
     ],
+    'shot_clock' => [
+        'title' => 'SHOT CLOCK VIOLATION!',
+        'headline' => 'Shot clock expired',
+        'message' => 'Your login has expired because you were out of the game for too long. The tactical meeting has ended and you must report to the locker room again.',
+        'tagline' => 'The rules of the game are strict.',
+        'login' => 'Back to the locker room (log in)',
+    ],
     '500' => [
         'title' => 'Technical error in the team',
         'message' => 'Something went wrong on our side of the court. Our technicians are already working on it.',

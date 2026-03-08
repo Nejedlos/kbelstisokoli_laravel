@@ -28,6 +28,13 @@ return [
         'tagline' => 'Zkuste akci zopakovat znovu.',
         'button' => 'Obnovit stránku',
     ],
+    'shot_clock' => [
+        'title' => 'SHOT CLOCK VIOLATION!',
+        'headline' => 'Vypršel čas na střelu',
+        'message' => 'Vaše přihlášení vypršelo, protože jste byl příliš dlouho mimo hru. Taktická porada skončila a musíte se znovu nahlásit v šatně.',
+        'tagline' => 'Pravidla hry jsou neúprosná.',
+        'login' => 'Zpět do šatny (přihlásit se)',
+    ],
     '500' => [
         'title' => 'Technická chyba v týmu',
         'message' => 'Něco se nepovedlo na naší straně hřiště. Naši technici už na tom pracují a ladí formu.',
