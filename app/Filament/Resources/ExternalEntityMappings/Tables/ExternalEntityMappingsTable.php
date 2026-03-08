@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ExternalEntityMappings\Tables;
 
 use App\Models\User;
+use App\Models\ExternalEntityMapping;
 use App\Services\Stats\Sync\StatisticSyncService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -12,9 +13,11 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class ExternalEntityMappingsTable
 {
@@ -42,6 +45,9 @@ class ExternalEntityMappingsTable
                     ->color(fn ($record) => $record->internal_id ? 'success' : 'danger')
                     ->searchable()
                     ->sortable(),
+                ViewColumn::make('proposal')
+                    ->label('Návrh párování')
+                    ->view('filament.resources.external-entity-mappings.columns.proposal-column'),
             ])
             ->filters([
                 TernaryFilter::make('is_matched')
@@ -119,7 +125,7 @@ class ExternalEntityMappingsTable
                         }),
                     BulkAction::make('batchRecompute')
                         ->label('Hromadně přepočítat')
-                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                        ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
                         ->action(function (\Illuminate\Support\Collection $records, StatisticSyncService $service) {
                             $records->each(function ($record) use ($service) {
@@ -133,9 +139,89 @@ class ExternalEntityMappingsTable
                                 ->success()
                                 ->send();
                         }),
+                    BulkAction::make('autoPair')
+                        ->label('Automaticky spárovat')
+                        ->icon(new HtmlString('<i class="fa-light fa-magic"></i>'))
+                        ->color('success')
+                        ->action(function (\Illuminate\Support\Collection $records, StatisticSyncService $service) {
+                            $count = 0;
+                            foreach ($records as $record) {
+                                if ($record->internal_id) {
+                                    continue;
+                                }
+
+                                $proposal = $this->getMappingProposal($record);
+                                if ($proposal['user'] && ! $proposal['is_duplicate']) {
+                                    $service->linkPlayerAndRecompute($record, $proposal['user']->id);
+                                    $count++;
+                                }
+                            }
+
+                            Notification::make()
+                                ->title("Automaticky spárováno {$count} hráčů")
+                                ->success()
+                                ->send();
+                        }),
                     DeleteBulkAction::make()
                         ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-trash"></i>')),
                 ]),
             ]);
+    }
+
+    public static function getMappingProposal($record): array
+    {
+        $externalName = $record->metadata['player_name'] ?? null;
+        if (! $externalName) {
+            return ['user' => null, 'is_ghost' => false, 'is_duplicate' => false];
+        }
+
+        $parts = explode(' ', trim($externalName));
+        if (count($parts) < 2) {
+            return ['user' => null, 'is_ghost' => false, 'is_duplicate' => false];
+        }
+
+        $p1 = $parts[0];
+        $p2 = implode(' ', array_slice($parts, 1));
+
+        // 1. Najít reálné uživatele (ne ghosty)
+        $realUsers = User::where(function ($q) {
+            $q->whereNull('metadata->is_ghost')
+                ->orWhere('metadata->is_ghost', false);
+        })
+            ->where(function ($q) use ($externalName, $p1, $p2) {
+                $q->where('name', $externalName)
+                    ->orWhere('name', "{$p2} {$p1}")
+                    ->orWhere(function ($q2) use ($p1, $p2) {
+                        $q2->where('first_name', $p1)->where('last_name', $p2);
+                    })
+                    ->orWhere(function ($q2) use ($p1, $p2) {
+                        $q2->where('first_name', $p2)->where('last_name', $p1);
+                    });
+            })->get();
+
+        // 2. Najít ghost uživatele se stejným jménem
+        $ghostUsers = User::where('metadata->is_ghost', true)
+            ->where(function ($q) use ($externalName, $p1, $p2) {
+                $q->where('name', $externalName)
+                    ->orWhere('name', "{$p2} {$p1}")
+                    ->orWhere(function ($q2) use ($p1, $p2) {
+                        $q2->where('first_name', $p1)->where('last_name', $p2);
+                    })
+                    ->orWhere(function ($q2) use ($p1, $p2) {
+                        $q2->where('first_name', $p2)->where('last_name', $p1);
+                    });
+            })->get();
+
+        $isDuplicate = $realUsers->count() > 0 && $ghostUsers->count() > 0;
+
+        if ($realUsers->count() === 1) {
+            return ['user' => $realUsers->first(), 'is_ghost' => false, 'is_duplicate' => $isDuplicate];
+        }
+
+        if ($ghostUsers->count() === 1) {
+            return ['user' => $ghostUsers->first(), 'is_ghost' => true, 'is_duplicate' => $isDuplicate];
+        }
+
+        return ['user' => null, 'is_ghost' => false, 'is_duplicate' => $isDuplicate];
     }
 }

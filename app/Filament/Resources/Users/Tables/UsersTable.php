@@ -27,9 +27,15 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
+        $userTable = (new \App\Models\User)->getTable();
+
         return $table
             ->striped()
-            ->modifyQueryUsing(fn ($query) => $query->with(['externalMappings']))
+            ->modifyQueryUsing(fn ($query) => $query
+                ->with(['externalMappings'])
+                ->select("{$userTable}.*")
+                ->selectRaw("(SELECT COUNT(*) FROM {$userTable} as u2 WHERE u2.name = {$userTable}.name AND u2.id != {$userTable}.id) as duplicates_count")
+            )
             ->columns([
                 SpatieMediaLibraryImageColumn::make('avatar')
                     ->label(__('user.fields.avatar'))
@@ -42,6 +48,9 @@ class UsersTable
                     ->label(__('user.fields.first_name').' '.__('user.fields.last_name'))
                     ->description(fn ($record) => $record->email)
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
+                        ($record->duplicates_count > 0
+                            ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="Možná duplicita (shoda jména)"></i> '
+                            : '') .
                         ($record->externalMappings->isNotEmpty()
                             ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
                             : '') . e($state)
@@ -126,6 +135,15 @@ class UsersTable
                 SelectFilter::make('gender')
                     ->label(__('user.fields.gender'))
                     ->options(Gender::class),
+                \Filament\Tables\Filters\Filter::make('duplicates')
+                    ->label('Duplicity podle jména')
+                    ->indicator('Duplicity')
+                    ->query(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->whereIn('name', function ($sub) {
+                        $sub->select('name')
+                            ->from((new \App\Models\User)->getTable())
+                            ->groupBy('name')
+                            ->havingRaw('COUNT(*) > 1');
+                    })),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -151,6 +169,33 @@ class UsersTable
                         ->requiresConfirmation(fn ($record) => __('permissions.impersonate_confirm').$record->name.'?')
                         ->url(fn ($record) => route('admin.impersonate.start', ['userId' => $record->id]))
                         ->visible(fn ($record) => auth()->user()->can('impersonate_users') && auth()->user()->id !== $record->id),
+                    Action::make('merge')
+                        ->label('Sloučit s...')
+                        ->icon(new HtmlString('<i class="fa-light fa-object-group"></i>'))
+                        ->color('warning')
+                        ->form([
+                            \Filament\Forms\Components\Select::make('target_user_id')
+                                ->label('Cílový uživatel (ten, který zůstane)')
+                                ->options(fn ($record) => \App\Models\User::where('id', '!=', $record->id)
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id'))
+                                ->searchable()
+                                ->required()
+                                ->helperText('Všechny vazby, statistiky a mapování budou převedeny na vybraného uživatele. Tento (původní) uživatel bude následně smazán.'),
+                        ])
+                        ->requiresConfirmation()
+                        ->modalHeading('Sloučení uživatelů')
+                        ->modalDescription('Tato operace je nevratná. Dojde k převodu všech dat na cílového uživatele.')
+                        ->modalSubmitActionLabel('Sloučit uživatele')
+                        ->action(function ($record, array $data, \App\Services\Users\UserMergeService $service) {
+                            $targetUser = \App\Models\User::findOrFail($data['target_user_id']);
+                            $service->merge($record, $targetUser);
+
+                            FilamentNotification::make()
+                                ->title('Uživatelé byli úspěšně sloučeni')
+                                ->success()
+                                ->send();
+                        }),
                     EditAction::make(),
                 ]),
             ])

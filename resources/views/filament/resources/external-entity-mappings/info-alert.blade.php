@@ -33,7 +33,7 @@
                             <i class="fa-light fa-network-wired mr-3 text-info-500 text-lg"></i> Propojení
                         </h3>
                         <p class="text-[13px] leading-relaxed opacity-90">
-                            Systém automaticky spojuje data podle jména. Pokud hráče nezná, vytvoří dočasný <strong>'Ghost' profil</strong>. Spárováním zde Ghosta nahradíte reálným uživatelem a data se mu okamžitě připíší.
+                            Systém v tabulce navrhuje <strong>shody podle jména</strong>. Pokud reálný uživatel existuje, uvidíte jej v návrhu a stačí použít hromadnou akci <strong>'Automaticky spárovat'</strong>. Pokud návrh neexistuje, při první synchronizaci se vytvoří <strong>Ghost profil</strong>.
                         </p>
                     </div>
                 </div>
