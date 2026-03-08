@@ -204,85 +204,158 @@
             </div>
 
             {{-- Stats / Boxscore Column --}}
-            <div class="lg:col-span-2 space-y-8">
+            <div class="lg:col-span-2 space-y-8" x-data="{ activeTab: 'ours' }">
                 <div class="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="p-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
-                            <i class="fa-light fa-chart-user text-brand-500"></i>
-                            {{ __('matches.boxscore') }}
-                        </h3>
-                        <div class="flex gap-2">
-                            <span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-[10px] font-bold text-gray-500 uppercase">{{ $match->team->name }}</span>
+                    <div class="p-8 border-b border-gray-100 bg-gray-50/50">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                                <i class="fa-light fa-chart-user text-brand-500"></i>
+                                {{ __('matches.boxscore') }}
+                            </h3>
+
+                            {{-- Custom Tabs Trigger --}}
+                            <div class="flex p-1 bg-gray-200/50 rounded-xl">
+                                <button
+                                    @click="activeTab = 'ours'"
+                                    :class="activeTab === 'ours' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
+                                >
+                                    <i class="fa-light fa-shield-halved"></i>
+                                    {{ $match->team->name }}
+                                </button>
+                                <button
+                                    @click="activeTab = 'opponent'"
+                                    :class="activeTab === 'opponent' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
+                                >
+                                    <i class="fa-light fa-shield"></i>
+                                    {{ $match->opponent?->name ?? __('matches.opponent') }}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Hráč</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Body</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Min</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">REB</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">AST</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">STL</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TOV</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">BLK</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F+</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F-</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TH</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">2B</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">3B</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">VAL</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                @php
-                                    $allStats = \App\Models\StatisticRow::where('basketball_match_id', $match->id)
-                                        ->with(['player', 'team'])
-                                        ->whereHas('set', fn($q) => $q->where('slug', 'match-boxscore'))
-                                        ->get();
+                    @php
+                        $boxscoreSets = \App\Models\StatisticSet::whereIn('slug', ['match-boxscore', 'match-boxscore-external'])->pluck('id')->toArray();
+                        $allStats = \App\Models\StatisticRow::where('basketball_match_id', $match->id)
+                            ->with(['player', 'team'])
+                            ->whereIn('statistic_set_id', $boxscoreSets)
+                            ->get();
 
-                                    $homeStats = $allStats->filter(fn($s) => $match->is_home ? $s->team_id === $match->team_id : $s->source_metadata['is_opponent'] ?? false);
-                                    $awayStats = $allStats->filter(fn($s) => $match->is_home ? $s->source_metadata['is_opponent'] ?? false : $s->team_id === $match->team_id);
+                        $ourStats = $allStats->filter(function($s) use ($match) {
+                             if ($s->team_id && $s->team_id == $match->team_id) return true;
+                             $meta = is_array($s->source_metadata) ? $s->source_metadata : [];
+                             return ($meta['is_opponent'] ?? false) === false;
+                        });
 
-                                    // Pokud nejsou rozděleny (např. stará data), použijeme vše
-                                    if ($homeStats->isEmpty() && $awayStats->isEmpty()) {
-                                        $homeStats = $allStats;
-                                    }
-                                @endphp
+                        // Statistiky soupeře z metadat (nový způsob) nebo z StatisticRow (fallback)
+                        $opponentData = $match->metadata['opponent_boxscore'] ?? null;
+                        if ($opponentData) {
+                            $opponentStats = $opponentData['rows'] ?? [];
+                        } else {
+                            $opponentStats = $allStats->filter(function($s) {
+                                if ($s->opponent_id) return true;
+                                $meta = is_array($s->source_metadata) ? $s->source_metadata : [];
+                                return ($meta['is_opponent'] ?? false) === true;
+                            });
+                        }
 
-                                @if($homeStats->isNotEmpty())
-                                    <tr class="bg-gray-100/50">
-                                        <td colspan="14" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                            {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
-                                        </td>
+                        // Detekce, zda máme rozšířené statistiky (asistence, doskoky atd.)
+                        $hasExtended = false;
+                        foreach($ourStats as $s) {
+                            $v = is_object($s) ? $s->values : $s['values'];
+                            if (!empty($v['rebounds']) || !empty($v['assists']) || !empty($v['steals']) || !empty($v['efficiency'])) {
+                                $hasExtended = true; break;
+                            }
+                        }
+                        if (!$hasExtended && !empty($opponentStats)) {
+                             foreach($opponentStats as $s) {
+                                $v = is_object($s) ? $s->values : $s['values'];
+                                if (!empty($v['rebounds']) || !empty($v['assists']) || !empty($v['steals']) || !empty($v['efficiency'])) {
+                                    $hasExtended = true; break;
+                                }
+                            }
+                        }
+                    @endphp
+
+                    {{-- Our Team Tab --}}
+                    <div x-show="activeTab === 'ours'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50/80">
+                                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Hráč</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">2B</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">3B</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TH</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F-</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Body</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">+/-</th>
+                                        @if($hasExtended)
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Min</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">REB</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">AST</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">STL</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TOV</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">BLK</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F+</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">VAL</th>
+                                        @endif
                                     </tr>
-                                    @foreach($homeStats as $stat)
-                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat])
-                                    @endforeach
-                                @endif
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    @forelse($ourStats as $stat)
+                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat, 'showExtended' => $hasExtended])
+                                    @empty
+                                        <tr>
+                                            <td colspan="15" class="px-6 py-12 text-center text-gray-400 italic text-sm">
+                                                Statistiky našeho týmu nejsou k dispozici.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                                @if($awayStats->isNotEmpty())
-                                    <tr class="bg-gray-100/50">
-                                        <td colspan="14" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                            {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
-                                        </td>
+                    {{-- Opponent Tab --}}
+                    <div x-show="activeTab === 'opponent'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50/80">
+                                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">{{ $match->opponent?->name ?? 'Soupeř' }}</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">2B</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">3B</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TH</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F-</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Body</th>
+                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">+/-</th>
+                                        @if($hasExtended)
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Min</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">REB</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">AST</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">STL</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TOV</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">BLK</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F+</th>
+                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">VAL</th>
+                                        @endif
                                     </tr>
-                                    @foreach($awayStats as $stat)
-                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat])
-                                    @endforeach
-                                @endif
-
-                                @if($allStats->isEmpty())
-                                    <tr>
-                                        <td colspan="14" class="px-6 py-12 text-center text-gray-400 italic text-sm">
-                                            Statistiky hráčů pro tento zápas nejsou v databázi uloženy.
-                                        </td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    @forelse($opponentStats as $stat)
+                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat, 'showExtended' => $hasExtended])
+                                    @empty
+                                        <tr>
+                                            <td colspan="15" class="px-6 py-12 text-center text-gray-400 italic text-sm">
+                                                Statistiky soupeře nejsou k dispozici.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 

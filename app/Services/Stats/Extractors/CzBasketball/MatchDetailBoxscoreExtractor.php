@@ -366,21 +366,20 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 }
             }
 
-            // Pokud jméno obsahuje "Trenér", řádek přeskočíme
-            if ($playerName && (str_contains(mb_strtolower($playerName), 'trenér') || str_contains(mb_strtolower($playerName), 'coach'))) {
-                return;
-            }
-
             // Mapujeme hodnoty buněk na klíče z hlavičky
             $i = 0;
             foreach ($columns as $key => $label) {
                 if ($cells->count() > $i) {
                     $cell = $cells->eq($i);
-                    $val = trim($cell->text());
-
-                    // Ignorujeme řádky s trenéry i podle čísla dresu (pokud obsahuje licenci místo čísla)
-                    if ($i === 0 && preg_match('/[A-Z]{2}\d+/', $val)) {
-                         return;
+                    // Pro buňky se statistikami (2B, 3B, TH) zkusíme vyčistit vnořené tagy,
+                    // které by mohly způsobit spojení textu (např. procenta u celkem)
+                    if ($cell->filter('div, span, small')->count() > 0) {
+                        $html = $cell->html();
+                        $val = trim(str_replace(['<br>', '<br/>', '<br />', '<div>', '</div>', '<span>', '</span>', '<small>', '</small>'], ' ', $html));
+                        // Nahradíme vícenásobné mezery jednou
+                        $val = preg_replace('/\s+/', ' ', $val);
+                    } else {
+                        $val = trim($cell->text());
                     }
 
                     // Pokud jsme jméno nenašli přes odkaz, zkusíme první buňky
@@ -401,7 +400,9 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     }
 
                     // Pokud hodnota obsahuje lomítko (např. 4/6), zkusíme ji rozdělit na made/att
-                    if (str_contains($val, '/') && preg_match('/(\d+)\s*\/\s*(\d+)/', $val, $ratioMatches)) {
+                    // Odstraníme případná procenta nebo doplňující text za čísly (např. "12/17 70%")
+                    $cleanRatio = preg_replace('/[^\d\/].*$/', '', $val);
+                    if (str_contains($cleanRatio, '/') && preg_match('/(\d+)\s*\/\s*(\d+)/', $cleanRatio, $ratioMatches)) {
                         $made = (int) $ratioMatches[1];
                         $att = (int) $ratioMatches[2];
 

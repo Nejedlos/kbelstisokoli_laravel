@@ -146,6 +146,28 @@ class StatisticSyncService
                 }
             }
 
+            // Pokud je to soupeř, uložíme ho jako jeden záznam do metadat zápasu a nevytváříme řádky
+            if (! $isOurTeam) {
+                $matchMetadata = $match->metadata ?? [];
+                $matchMetadata['opponent_boxscore'] = $data->toArray();
+                $match->metadata = $matchMetadata;
+                $match->save(); // Uložíme hned, aby se to v DB projevilo, pokud by někdo četl z DB
+
+                // Smažeme případné existující řádky statistik soupeře, pokud tam nějaké zůstaly
+                StatisticRow::where('statistic_set_id', $set->id)
+                    ->where('basketball_match_id', $match->id)
+                    ->where(function($query) use ($match) {
+                        $query->whereNotNull('opponent_id')
+                              ->orWhere('team_id', '!=', $match->team_id)
+                              ->orWhere(function($q) {
+                                  $q->whereNull('team_id')->whereNull('player_id');
+                              });
+                    })
+                    ->delete();
+
+                return;
+            }
+
             foreach ($data->rows as $row) {
                 $externalPlayerId = $row->metadata['external_player_id'] ?? $row->playerId;
                 $playerName = $row->rowLabel;
