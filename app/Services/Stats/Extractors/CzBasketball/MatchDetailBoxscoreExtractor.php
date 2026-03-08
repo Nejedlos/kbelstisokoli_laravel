@@ -59,7 +59,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         // 2. Nejlepší hráči (Best player)
         $bestPlayers = $this->extractBestPlayers($crawler);
 
-        // 3. Tabulky statistik
+        // 3. Srovnání týmů
+        $teamComparison = $this->extractTeamComparison($crawler);
+
+        // 4. Tabulky statistik
         $tables = $crawler->filter('table.table-condensed');
 
         $allTablesData = [];
@@ -104,6 +107,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $mainTable->metadata = array_merge($mainTable->metadata, [
             'header' => $matchHeader,
             'best_players' => $bestPlayers,
+            'team_comparison' => $teamComparison,
             'all_tables' => array_map(fn ($t) => $t->toArray(), $allTablesData),
             'warnings' => $warnings,
         ]);
@@ -273,49 +277,146 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
     {
         $bestPlayers = [];
 
-        // Na cz.basketball jsou nejlepší hráči v sekci s ID "nejlepsi-hrac" nebo v .best-player-card
-        $bestPlayerSection = $crawler->filter('#nejlepsi-hrac, .best-players-section, .match-best-players, .best-players, .match-top-players');
+        // Mapování českých popisků kategorií na kanonické klíče
+        $categoryMapping = [
+            'Body' => 'points',
+            'Doskoky' => 'rebounds',
+            'Asistence' => 'assists',
+            'Zisky' => 'steals',
+            'Bloky' => 'blocks',
+        ];
 
-        if ($bestPlayerSection->count() > 0) {
-            $bestPlayerSection->filter('.best-player-card, .player-card, .best-player-item')->each(function (Crawler $card) use (&$bestPlayers) {
-                $player = [];
+        // Hledáme řádky s kategoriemi nejlepších hráčů
+        // Každá kategorie (Body, Doskoky, ...) je v jednom řádku (row)
+        $crawler->filter('.match-best-players-row, .row:contains("Body"), .row:contains("Doskoky"), .row:contains("Asistence"), .row:contains("Zisky"), .row:contains("Bloky")')->each(function (Crawler $row) use (&$bestPlayers, $categoryMapping) {
+            $categoryNode = $row->filter('h4')->first();
+            if ($categoryNode->count() === 0) {
+                return;
+            }
 
-                // Jméno a odkaz
-                $nameNode = $card->filter('.player-name, .name, h4, h5, a')->first();
-                if ($nameNode->count() > 0) {
-                    $player['name'] = trim($nameNode->text());
-                    $link = $card->filter('a[href*="/hrac/"]')->first();
-                    if ($link->count() > 0 && preg_match('/\/hrac\/(\d+)/', $link->attr('href'), $m)) {
-                        $player['external_id'] = $m[1];
+            $originalCategory = trim($categoryNode->text());
+            if (empty($originalCategory)) {
+                return;
+            }
+
+            $category = $categoryMapping[$originalCategory] ?? $originalCategory;
+
+            $playersInCategory = [
+                'label' => $originalCategory,
+                'home' => null,
+                'away' => null,
+            ];
+
+            // Domácí hráč (vlevo, obvykle order-xl-1)
+            $homeCard = $row->filter('.order-xl-1 .box-shadow, .order-md-1 .box-shadow')->first();
+            if ($homeCard->count() > 0) {
+                $playersInCategory['home'] = $this->parsePlayerCard($homeCard);
+            }
+
+            // Hostující hráč (vpravo, obvykle order-xl-3)
+            $awayCard = $row->filter('.order-xl-3 .box-shadow, .order-md-3 .box-shadow')->first();
+            if ($awayCard->count() > 0) {
+                $playersInCategory['away'] = $this->parsePlayerCard($awayCard);
+            }
+
+            if ($playersInCategory['home'] || $playersInCategory['away']) {
+                $bestPlayers[$category] = $playersInCategory;
+            }
+        });
+
+        // Fallback pro starší strukturu (pokud se nepoužívá nová řádková struktura)
+        if (empty($bestPlayers)) {
+            $bestPlayerSection = $crawler->filter('#nejlepsi-hrac, .best-players-section, .match-best-players, .best-players, .match-top-players');
+            if ($bestPlayerSection->count() > 0) {
+                $bestPlayerSection->filter('.best-player-card, .player-card, .best-player-item')->each(function (Crawler $card) use (&$bestPlayers) {
+                    $player = $this->parsePlayerCard($card);
+                    if ($player) {
+                        $bestPlayers['General'][] = $player;
                     }
-                }
-
-                // Fotka
-                $imgNode = $card->filter('img')->first();
-                if ($imgNode->count() > 0) {
-                    $src = $imgNode->attr('src');
-                    if ($src && !str_contains($src, 'data:image')) {
-                        // Převod na absolutní URL pokud je relativní
-                        if (str_starts_with($src, '/')) {
-                            $src = 'https://cz.basketball' . $src;
-                        }
-                        $player['photo_url'] = $src;
-                    }
-                }
-
-                // Tým (obvykle v záhlaví karty nebo jako text)
-                $teamNode = $card->filter('.team-name, .team, small')->first();
-                if ($teamNode->count() > 0) {
-                    $player['team'] = trim($teamNode->text());
-                }
-
-                if (!empty($player)) {
-                    $bestPlayers[] = $player;
-                }
-            });
+                });
+            }
         }
 
         return $bestPlayers;
+    }
+
+    protected function parsePlayerCard(Crawler $card): ?array
+    {
+        $player = [];
+
+        // Jméno a odkaz
+        $nameNode = $card->filter('.player-name, .name, h4, h5, a .text-primary, .gamma a')->first();
+        if ($nameNode->count() > 0) {
+            $player['name'] = trim($nameNode->text());
+            $link = $card->filter('a[href*="/hrac/"]')->first();
+            if ($link->count() > 0 && preg_match('/\/hrac\/(\d+)/', $link->attr('href'), $m)) {
+                $player['external_id'] = $m[1];
+            }
+        }
+
+        // Fotka
+        $imgNode = $card->filter('img')->first();
+        if ($imgNode->count() > 0) {
+            $src = $imgNode->attr('data-src') ?: $imgNode->attr('src');
+            if ($src && !str_contains($src, 'data:image')) {
+                // Převod na absolutní URL pokud je relativní
+                if (str_starts_with($src, '/')) {
+                    $src = 'https://cz.basketball' . $src;
+                }
+                $player['photo_url'] = $src;
+            }
+        }
+
+        // Hodnota (např. 18.0 bodů)
+        $valueNode = $card->filter('.gamma.text-green, .value, .pts, .score')->first();
+        if ($valueNode->count() > 0) {
+            $player['value'] = trim($valueNode->text());
+        }
+
+        return !empty($player['name']) ? $player : null;
+    }
+
+    protected function extractTeamComparison(Crawler $crawler): array
+    {
+        $comparison = [];
+
+        // Mapování českých popisků na kanonické klíče
+        $labelMapping = [
+            'Průměrný věk' => 'average_age',
+            'Počet národností' => 'nationality_count',
+            'Prům. zápasová zkušenost' => 'average_match_experience',
+        ];
+
+        // Najdeme sekci "srovnání kádrů"
+        $section = $crawler->filter('.row:contains("srovnání kádrů"), .row:contains("Srovnání kádrů")');
+        if ($section->count() === 0) {
+            return [];
+        }
+
+        // Iterujeme přes řádky srovnání (věk, národnosti, zkušenosti)
+        // Každý parametr je v jednom řádku
+        $crawler->filter('.row.no-gutters.justify-content-md-center.pb-2.mb-2')->each(function (Crawler $row) use (&$comparison, $labelMapping) {
+            $labelNode = $row->filter('h4')->first();
+            if ($labelNode->count() === 0) {
+                return;
+            }
+
+            $originalLabel = trim($labelNode->text());
+            $label = $labelMapping[$originalLabel] ?? $originalLabel;
+
+            $homeValNode = $row->filter('.order-md-1 .delta')->first();
+            $awayValNode = $row->filter('.order-md-3 .delta')->first();
+
+            if ($homeValNode->count() > 0 && $awayValNode->count() > 0) {
+                $comparison[$label] = [
+                    'label' => $originalLabel,
+                    'home' => trim($homeValNode->text()),
+                    'away' => trim($awayValNode->text()),
+                ];
+            }
+        });
+
+        return $comparison;
     }
 
     protected function processBoxscoreTable(Crawler $table, string $tableName, array &$warnings): NormalizedTableDTO

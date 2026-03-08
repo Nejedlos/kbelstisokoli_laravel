@@ -109,6 +109,26 @@ class StatisticSyncService
             $isOurTeam = true;
             $currentTeamId = $match->team_id;
 
+            // Uložíme globální metadata (header, best_players, team_comparison), pokud tam jsou
+            $matchMetadata = $match->metadata ?? [];
+            $updatedMetadata = false;
+            if (isset($data->metadata['header'])) {
+                $matchMetadata['match_header_external'] = $data->metadata['header'];
+                $updatedMetadata = true;
+            }
+            if (isset($data->metadata['best_players'])) {
+                $matchMetadata['best_players_external'] = $data->metadata['best_players'];
+                $updatedMetadata = true;
+            }
+            if (isset($data->metadata['team_comparison'])) {
+                $matchMetadata['team_comparison_external'] = $data->metadata['team_comparison'];
+                $updatedMetadata = true;
+            }
+            if ($updatedMetadata) {
+                $match->metadata = $matchMetadata;
+                $match->save();
+            }
+
             // Zkusíme detekovat, zda je to tabulka našeho týmu nebo soupeře
             $teamNameValue = $match->team->getTranslation('name', 'cs') ?: ($match->team->name ?: '');
             if (is_array($teamNameValue)) {
@@ -150,6 +170,19 @@ class StatisticSyncService
             if (! $isOurTeam) {
                 $matchMetadata = $match->metadata ?? [];
                 $matchMetadata['opponent_boxscore'] = $data->toArray();
+
+                // Uložíme také globální metadata (header, best_players, team_comparison), pokud tam jsou
+                // a pokud jsme v první tabulce (aby se to nepřepisovalo zbytečně)
+                if (isset($data->metadata['header'])) {
+                    $matchMetadata['match_header_external'] = $data->metadata['header'];
+                }
+                if (isset($data->metadata['best_players'])) {
+                    $matchMetadata['best_players_external'] = $data->metadata['best_players'];
+                }
+                if (isset($data->metadata['team_comparison'])) {
+                    $matchMetadata['team_comparison_external'] = $data->metadata['team_comparison'];
+                }
+
                 $match->metadata = $matchMetadata;
                 $match->save(); // Uložíme hned, aby se to v DB projevilo, pokud by někdo četl z DB
 
