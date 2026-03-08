@@ -652,7 +652,7 @@ class DebugOperations extends Page
             ->where('entity_type', 'player')
             ->count();
 
-        $syncedPlayers = \App\Models\PlayerProfile::whereNotNull('metadata->last_sync_at')->count();
+        $syncedPlayers = \App\Models\PlayerProfile::where('metadata', 'LIKE', '%"last_sync_at":%')->count();
 
         $lastSync = ExternalImportRun::where('run_type', 'player_detail')
             ->where('status', 'success')
