@@ -589,10 +589,15 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     private function indexDocumentation(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
-        $docsPath = base_path('docs');
+        $docsPath = base_path('docs' . DIRECTORY_SEPARATOR . $locale);
 
         if (! File::exists($docsPath)) {
-            return 0;
+            // Pokud neexistuje složka pro daný locale, zkusíme fallback na cs pouze pokud indexujeme cs
+            if ($locale === 'cs') {
+                $docsPath = base_path('docs');
+            } else {
+                return 0;
+            }
         }
 
         $files = File::allFiles($docsPath);
@@ -602,27 +607,32 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 continue;
             }
 
+            // Ignorujeme kořenové složky cs/en pokud jsme v docs rootu (fallback)
             $relativePath = $file->getRelativePathname();
+            if (($locale === 'cs' || $locale === 'en') && Str::startsWith($relativePath, [$locale . '/', $locale . '\\'])) {
+                continue;
+            }
+
             $content = File::get($file->getPathname());
 
             // Základní extrakce titulku z Markdownu (# Title)
-            $title = $relativePath;
+            $title = $file->getFilenameWithoutExtension();
             if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
                 $title = trim($matches[1]);
             }
 
             if ($onProgress) {
-                $onProgress("Documentation: {$title}");
+                $onProgress("Documentation [{$locale}]: {$title}");
             }
 
             $this->updateOrCreateDocument([
                 'type' => 'documentation.resource',
-                'source' => 'docs/'.$relativePath,
+                'source' => 'docs/'.$locale.'/'.$relativePath,
                 'title' => $title,
                 'url' => route('filament.admin.pages.documentation', ['file' => $relativePath]),
-                'locale' => $locale, // Dokumentace je primárně česky, indexujeme do aktuálního locale
+                'locale' => $locale,
                 'content' => $content,
-                'checksum' => hash('sha256', $content.$relativePath),
+                'checksum' => hash('sha256', $content.$relativePath.$locale),
             ], $force);
 
             $count++;

@@ -11,10 +11,25 @@ use Symfony\Component\Finder\Finder;
 class DocumentationService
 {
     protected string $docsPath;
+    protected string $baseDocsPath;
 
     public function __construct()
     {
-        $this->docsPath = base_path('docs');
+        $this->baseDocsPath = base_path('docs');
+        $this->setPathByLocale();
+    }
+
+    protected function setPathByLocale(?string $locale = null): void
+    {
+        $locale = $locale ?: app()->getLocale();
+        $path = $this->baseDocsPath . DIRECTORY_SEPARATOR . $locale;
+
+        // Fallback na cs, pokud složka pro daný jazyk neexistuje
+        if (!File::exists($path)) {
+            $path = $this->baseDocsPath . DIRECTORY_SEPARATOR . 'cs';
+        }
+
+        $this->docsPath = $path;
     }
 
     /**
@@ -23,7 +38,11 @@ class DocumentationService
     public function getTree(): Collection
     {
         if (!File::exists($this->docsPath)) {
-            return collect();
+            // Pokud ani cs neexistuje, zkusíme kořen jako nouzovku (pro zpětnou kompatibilitu)
+            if (!File::exists($this->baseDocsPath)) {
+                return collect();
+            }
+            return $this->scanDirectory($this->baseDocsPath);
         }
 
         return $this->scanDirectory($this->docsPath);
@@ -91,14 +110,16 @@ class DocumentationService
     }
 
     /**
-     * Vyhledávání v dokumentaci.
+     * Vyhledávání v dokumentaci (v rámci aktuálního jazyka).
      */
     public function search(string $query): Collection
     {
         if (empty($query)) return collect();
 
+        $path = File::exists($this->docsPath) ? $this->docsPath : $this->baseDocsPath;
+
         $finder = new Finder();
-        $finder->files()->in($this->docsPath)->name('*.md');
+        $finder->files()->in($path)->name('*.md');
 
         $results = collect();
 
@@ -120,8 +141,41 @@ class DocumentationService
 
     protected function formatName(string $name): string
     {
+        $originalName = $name;
+
         // Odstranění číselných předpon typu 01-
         $name = preg_replace('/^\d+-/', '', $name);
+
+        // Mapování lokalizovaných názvů složek (pokud je locale cs)
+        if (app()->getLocale() === 'cs') {
+            $mapping = [
+                'general' => 'Základní koncepty',
+                'development' => 'Vývoj a standardy',
+                'administration' => 'Administrace a Systém',
+                'modules' => 'Funkční moduly',
+                'ai' => 'AI a Pokročilé funkce',
+                'ops' => 'Provoz a Nasazení',
+                'manuals' => 'Manuály a QA',
+                'users-profiles' => 'Uživatelé a profily',
+                'sports-module' => 'Sportovní modul',
+                'economy-module' => 'Ekonomický modul',
+                'web-cms' => 'Web a CMS',
+                'external-data' => 'Externí data a Importy',
+                'sync-architecture' => 'Architektura synchronizace',
+                'cbf-czbasketball' => 'Zdroj: cz.basketball',
+                'legacy-import' => 'Historické importy',
+                'system' => 'Systémové nastavení',
+                'email' => 'E-mailová bezpečnost',
+                'migration' => 'Migrační plán a strategie',
+                'branding' => 'Branding a vizuální styl',
+                'fixes' => 'Opravy a drobné změny',
+            ];
+
+            if (isset($mapping[$name])) {
+                return $mapping[$name];
+            }
+        }
+
         // Nahrazení pomlček mezerami a kapitálky
         return Str::headline($name);
     }
