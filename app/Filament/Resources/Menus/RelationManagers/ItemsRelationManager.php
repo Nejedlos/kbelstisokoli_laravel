@@ -63,7 +63,11 @@ class ItemsRelationManager extends RelationManager
         return $table
             ->reorderable('sort_order')
             ->columns([
-                TextColumn::make('label')->label('Popisek')->sortable()->searchable(),
+                TextColumn::make('label')
+                    ->label('Popisek')
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('label', 'LIKE', "%{$search}%");
+                    }),
                 TextColumn::make('route_name')->label('Route')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('url')->label('URL')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('parent.label')->label('Nadřazená'),

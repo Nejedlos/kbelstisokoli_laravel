@@ -20,7 +20,9 @@ class ClubEventsTable
             ->columns([
                 TextColumn::make('title')
                     ->label('Název')
-                    ->searchable()
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('title', 'LIKE', "%{$search}%");
+                    })
                     ->sortable(),
                 TextColumn::make('event_type')
                     ->label('Typ')
@@ -44,7 +46,9 @@ class ClubEventsTable
                     ->placeholder('Celý klub')
                     ->badge()
                     ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
-                    ->searchable(),
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->whereHas('teams', fn ($q) => $q->where('name', 'LIKE', "%{$search}%"));
+                    }),
                 TextColumn::make('starts_at')
                     ->label('Od')
                     ->dateTime('d.m.Y H:i')

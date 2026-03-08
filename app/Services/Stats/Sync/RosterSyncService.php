@@ -157,8 +157,8 @@ class RosterSyncService
 
         // Hledáme pouze mezi reálnými uživateli (ne ghosty)
         $query = User::where(function ($q) {
-            $q->whereNull('metadata->is_ghost')
-                ->orWhere('metadata->is_ghost', false);
+            $q->whereNull('email')
+                ->orWhere('email', 'NOT LIKE', 'ghost_%');
         });
 
         $candidates = $query->where(function ($q) use ($externalName, $p1, $p2) {

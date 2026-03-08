@@ -403,8 +403,9 @@ class PhotoPoolResource extends Resource
                 TextColumn::make('title')
                     ->label('Název akce')
                     ->formatStateUsing(fn ($state, PhotoPool $record) => (string) $record->getTranslation('title', app()->getLocale()))
-                    ->searchable()
-                    ->sortable()
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('title', 'LIKE', "%{$search}%");
+                    })
                     ->limit(50),
                 TextColumn::make('event_type')
                     ->label('Typ')
@@ -428,7 +429,9 @@ class PhotoPoolResource extends Resource
                     ->label(__('admin.navigation.resources.team.plural_label'))
                     ->badge()
                     ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
-                    ->searchable(),
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->whereHas('teams', fn ($q) => $q->where('name', 'LIKE', "%{$search}%"));
+                    }),
                 TextColumn::make('event_date')
                     ->label('Datum')
                     ->formatStateUsing(function ($state) {

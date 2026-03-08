@@ -75,8 +75,9 @@ class PostCategoryResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label('Název')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('name', 'LIKE', "%{$search}%");
+                    }),
 
                 TextColumn::make('slug')
                     ->label('Slug')

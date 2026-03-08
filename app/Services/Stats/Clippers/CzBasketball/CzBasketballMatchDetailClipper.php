@@ -30,13 +30,17 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
     {
         // Najdeme blok se skóre a týmy (obvykle horní část stránky)
         // Hledáme h1 nebo specifický kontejner pro zápas
-        $header = $crawler->filter('.match-detail-header')->first();
+        $header = $crawler->filter('.match-detail-header, .match-teams, .match-summary')->first();
         if ($header->count() === 0) {
             // Fallback na první h1 a jeho okolí
-            $header = $crawler->filter('h1')->closest('.row') ?? $crawler->filter('h1')->closest('div');
+            $h1 = $crawler->filter('h1')->first();
+            $header = $h1->closest('.row');
+            if ($header->count() === 0) {
+                $header = $h1->closest('div');
+            }
         }
 
-        if (!$header) {
+        if ($header->count() === 0) {
             return null;
         }
 
@@ -55,7 +59,9 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
         $clips = [];
 
         // Heuristika: tabulka, kde je mnoho hráčských řádků (/hrac/) a obsahuje statistické hlavičky (Body, 2B, 3B, TH)
-        $tables = $crawler->filter('table')->reduce(function (Crawler $node) {
+        // Omezíme se na tabulky s třídou .table-condensed nebo .boxscore, které jsou pro nás zajímavé.
+        $tables = $crawler->filter('table.table-condensed, table.boxscore, table')->reduce(function (Crawler $node) {
+            // Pokud jich je hodně, text() může být náročný, ale dom-crawler ho má docela rychlý.
             $text = $node->text();
 
             // Obsahuje aspoň 2 hráče?
@@ -63,7 +69,7 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
             if ($playerLinks->count() < 2) return false;
 
             // Obsahuje body nebo jiné basketbalové zkratky?
-            return str_contains($text, 'Body') || str_contains($text, '2B') || str_contains($text, '3B') || str_contains($text, 'TH');
+            return str_contains($text, 'Body') || str_contains($text, '2B') || str_contains($text, '3B') || str_contains($text, 'TH') || str_contains($text, 'PTS');
         });
 
         $tables->each(function (Crawler $table, $i) use (&$clips) {

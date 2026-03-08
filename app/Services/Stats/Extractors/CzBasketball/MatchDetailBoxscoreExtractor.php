@@ -62,12 +62,14 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $teamNameNode = $table->previousAll()->filter('h3, h4, .title')->last();
             if ($teamNameNode->count() === 0) {
                 $container = $table->closest('div');
-                while ($container->count() > 0 && $teamNameNode->count() === 0) {
+                $depth = 0;
+                while ($container->count() > 0 && $teamNameNode->count() === 0 && $depth < 5) {
                     $teamNameNode = $container->previousAll()->filter('h3, h4, .title')->last();
                     if ($teamNameNode->count() > 0) {
                         break;
                     }
-                    $container = $container->parent();
+                    $container = $container->ancestors()->first();
+                    $depth++;
                 }
             }
 
@@ -101,25 +103,29 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
     {
         $header = [];
 
+        // Najdeme hlavní kontejner zápasu, pokud existuje (obvykle .match-detail-header, .match-teams nebo .match-summary)
+        $mainContainer = $crawler->filter('.match-detail-header, .match-teams, .match-summary, .match_box')->first();
+        $searchIn = $mainContainer->count() > 0 ? $mainContainer : $crawler;
+
         // Týmy (zkusíme .alfa/.beta, .score-home-team/.score-away-team, .team-name, nebo h4.text-center)
-        $homeNode = $crawler->filter('.alfa, .score-home-team, .team-name, .match-teams h1, .match-teams h2, h4.text-center')->first();
+        $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-name, h1, h2, h4.text-center')->first();
         if ($homeNode->count() > 0) {
             $header['home_team'] = trim($homeNode->text());
         }
 
-        $awayNodes = $crawler->filter('.beta, .score-away-team, .team-name, .match-teams h1, .match-teams h2, h4.text-center');
+        $awayNodes = $searchIn->filter('.beta, .score-away-team, .team-name, h1, h2, h4.text-center');
         if ($awayNodes->count() >= 2) {
             $header['away_team'] = trim($awayNodes->eq(1)->text());
         } elseif ($awayNodes->count() === 1) {
              // Fallback pokud máme jen jeden match na tyhle selektory, zkusíme .beta samostatně
-             $beta = $crawler->filter('.beta')->first();
+             $beta = $searchIn->filter('.beta')->first();
              if ($beta->count() > 0) {
                  $header['away_team'] = trim($beta->text());
              }
         }
 
         // Skóre
-        $scoreNodes = $crawler->filter('.delta, .match-score, .score, .final-score');
+        $scoreNodes = $searchIn->filter('.delta, .match-score, .score, .final-score');
         if ($scoreNodes->count() >= 2) {
             // Skóre rozdělené do dvou částí
             $header['score'] = trim($scoreNodes->eq(0)->text()).':'.trim($scoreNodes->eq(1)->text());
@@ -127,7 +133,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $header['score'] = trim($scoreNodes->first()->text());
         }
 
-        $dateNode = $crawler->filter('.match-date, .date-time')->first();
+        $dateNode = $searchIn->filter('.match-date, .date-time')->first();
         if ($dateNode->count() > 0) {
             $header['date'] = trim($dateNode->text());
         }
@@ -138,6 +144,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
     protected function processBoxscoreTable(Crawler $table, string $tableName, array &$warnings): NormalizedTableDTO
     {
         // Hlavička tabulky pro mapování sloupců
+        $columns = [];
         $table->filter('thead tr')->last()->filter('th')->each(function (Crawler $th, $i) use (&$columns, $table) {
             $label = trim($th->text());
             if ($th->attr('colspan') > 1 && $table->filter('thead tr')->count() > 1) {
@@ -150,6 +157,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         });
 
         // Řádky hráčů
+        $rows = [];
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $columns, &$warnings) {
             $cells = $tr->filter('td');
             if ($cells->count() < 2) {

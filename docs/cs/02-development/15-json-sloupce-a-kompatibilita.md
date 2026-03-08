@@ -33,6 +33,19 @@ Při použití standardní Laravel syntaxe pro dotazování do JSONu (`->where('
       }
       ```
 
+## Ghost uživatelé
+Speciálním případem jsou tzv. "Ghost" uživatelé. Ti jsou v systému označeni v `metadata->is_ghost`.
+
+**Pravidlo:** K detekci Ghost uživatelů nepoužívejte dotazy do `metadata`, ale kontrolu emailu. Ghost uživatelé mají vždy email začínající prefixem `ghost_`.
+
+```php
+// Špatně:
+User::where('metadata->is_ghost', true)->get();
+
+// Správně:
+User::where('email', 'LIKE', 'ghost_%')->get();
+```
+
 ## Příklad bezpečné úpravy
 **Špatně (způsobí pád):**
 ```php

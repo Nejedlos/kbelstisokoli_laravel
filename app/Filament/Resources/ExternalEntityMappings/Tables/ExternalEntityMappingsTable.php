@@ -185,8 +185,8 @@ class ExternalEntityMappingsTable
 
         // 1. Najít reálné uživatele (ne ghosty)
         $realUsers = User::where(function ($q) {
-            $q->whereNull('metadata->is_ghost')
-                ->orWhere('metadata->is_ghost', false);
+            $q->whereNull('email')
+                ->orWhere('email', 'NOT LIKE', 'ghost_%');
         })
             ->where(function ($q) use ($externalName, $p1, $p2) {
                 $q->where('name', $externalName)
@@ -200,7 +200,7 @@ class ExternalEntityMappingsTable
             })->get();
 
         // 2. Najít ghost uživatele se stejným jménem
-        $ghostUsers = User::where('metadata->is_ghost', true)
+        $ghostUsers = User::where('email', 'LIKE', 'ghost_%')
             ->where(function ($q) use ($externalName, $p1, $p2) {
                 $q->where('name', $externalName)
                     ->orWhere('name', "{$p2} {$p1}")

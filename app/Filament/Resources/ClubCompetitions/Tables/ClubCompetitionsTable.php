@@ -18,7 +18,9 @@ class ClubCompetitionsTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Soutěž')
-                    ->searchable()
+                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                        return $query->where('name', 'LIKE', "%{$search}%");
+                    })
                     ->sortable()
                     ->description(fn ($record) => $record->metric_description),
                 TextColumn::make('season.name')

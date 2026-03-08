@@ -44,13 +44,85 @@ class UserMergeService
             StatisticRow::where('player_id', $source->id)->update(['player_id' => $target->id]);
 
             // 2. Hráčské profily
-            $source->playerProfiles()->update(['user_id' => $target->id]);
+            // Používáme playerProfiles() (HasMany) místo playerProfile (HasOne/active),
+            // abychom našli jakýkoliv profil a předešli UniqueConstraintViolation.
+            $sourceProfiles = $source->playerProfiles;
+            $targetProfile = $target->playerProfiles()->first();
+
+            foreach ($sourceProfiles as $sourceProfile) {
+                if ($targetProfile) {
+                    // Sloučení do existujícího cílového profilu (nebo prvního převedeného)
+
+                    // Převod týmů z pivot tabulky
+                    foreach ($sourceProfile->teams as $team) {
+                        $exists = DB::table('player_profile_team')
+                            ->where('player_profile_id', $targetProfile->id)
+                            ->where('team_id', $team->id)
+                            ->exists();
+
+                        if (!$exists) {
+                            $targetProfile->teams()->attach($team->id, [
+                                'role_in_team' => $team->pivot->role_in_team,
+                                'is_primary_team' => false,
+                                'is_on_roster' => $team->pivot->is_on_roster,
+                                'active_from' => $team->pivot->active_from,
+                                'active_to' => $team->pivot->active_to,
+                            ]);
+                        }
+                    }
+
+                    // Převod externích mapování profilu
+                    $sourceProfile->externalMappings()->update([
+                        'internal_id' => $targetProfile->id,
+                        'internal_type' => PlayerProfile::class,
+                    ]);
+
+                    // Doplnění chybějících polí
+                    $updateData = [];
+                    if (empty($targetProfile->jersey_number) && !empty($sourceProfile->jersey_number)) {
+                        $updateData['jersey_number'] = $sourceProfile->jersey_number;
+                    }
+                    if (empty($targetProfile->position) && !empty($sourceProfile->position)) {
+                        $updateData['position'] = $sourceProfile->position;
+                    }
+                    if (!empty($updateData)) {
+                        $targetProfile->update($updateData);
+                    }
+
+                    $sourceProfile->delete();
+                } else {
+                    // Cílový uživatel zatím profil nemá, převedeme tento
+                    $sourceProfile->update(['user_id' => $target->id]);
+                    $targetProfile = $sourceProfile;
+                }
+            }
 
             // 3. Docházka
-            $source->attendances()->update(['user_id' => $target->id]);
+            foreach ($source->attendances as $attendance) {
+                $exists = Attendance::where('user_id', $target->id)
+                    ->where('attendable_id', $attendance->attendable_id)
+                    ->where('attendable_type', $attendance->attendable_type)
+                    ->exists();
+
+                if (!$exists) {
+                    $attendance->update(['user_id' => $target->id]);
+                } else {
+                    $attendance->delete();
+                }
+            }
 
             // 4. Souhlasy
-            $source->consents()->update(['user_id' => $target->id]);
+            foreach ($source->consents as $consent) {
+                $exists = UserConsent::where('user_id', $target->id)
+                    ->where('consent_type', $consent->consent_type)
+                    ->exists();
+
+                if (!$exists) {
+                    $consent->update(['user_id' => $target->id]);
+                } else {
+                    $consent->delete();
+                }
+            }
 
             // 5. Finance (předpisy a platby)
             $source->financeCharges()->update(['user_id' => $target->id]);
@@ -173,11 +245,8 @@ class UserMergeService
         // Hledáme pouze mezi reálnými uživateli (ne ghosty) se stejným jménem
         $candidates = User::where('id', '!=', $user->id)
             ->where(function ($q) {
-                $q->where(fn ($q2) => $q2->whereNull('metadata->is_ghost')->orWhere('metadata->is_ghost', false))
-                    ->where(function ($q2) {
-                        $q2->whereNull('email')
-                            ->orWhere('email', 'NOT LIKE', 'ghost_%');
-                    });
+                $q->whereNull('email')
+                    ->orWhere('email', 'NOT LIKE', 'ghost_%');
             })
             ->where(function ($q) use ($user, $p1, $p2) {
                 $q->where('name', $user->name)

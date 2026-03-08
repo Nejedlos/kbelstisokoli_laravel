@@ -14,9 +14,10 @@ Slučování probíhá přes `UserMergeService` a zajišťuje kompletní přenos
 Při sloučení uživatele A (zdroj) do uživatele B (cíl) dojde k převodu následujících dat:
 1.  **Externí mapování:** Všechny vazby na externí zdroje (ID z cz.basketball) budou směřovat na uživatele B.
 2.  **Statistiky:** Všechny odehrané zápasy a statistické řádky budou připsány uživateli B.
-3.  **Hráčské profily:** Historie profilů (výška, váha, číslo dresu atd.) se převede pod uživatele B.
-4.  **Docházka:** Kompletní historie účasti na trénincích a akcích.
-5.  **Finance:** Všechny vystavené předpisy plateb a zaznamenané platby.
+3.  **Hráčské profily:** Dojde ke sloučení záznamu z tabulky profilů. Pokud cílový uživatel profil již má (i když je neaktivní), přenesou se do něj týmy, v nichž hráč působí, a externí statistická mapování. Chybějící údaje (např. číslo dresu) jsou v cílovém profilu doplněny ze zdrojového.
+4.  **Docházka:** Kompletní historie účasti na trénincích a akcích. V případě, že mají oba uživatelé záznam pro stejnou událost, je zachován záznam cílového uživatele.
+5.  **Souhlasy:** Souhlasy s GDPR a jinými dokumenty. Při duplicitě typu souhlasu je zachován ten od cílového uživatele.
+6.  **Finance:** Všechny vystavené předpisy plateb a zaznamenané platby.
 6.  **Rodinné vztahy:** Pokud byl uživatel A rodičem nebo dítětem někoho jiného, tyto vazby přebírá uživatel B.
 7.  **Trenérské vazby:** Pokud byl uživatel A trenérem týmu, stává se jím uživatel B.
 8.  **Role a oprávnění:** Uživatel B získá všechny role a oprávnění, které měl uživatel A (pokud je již nemá).
