@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ExternalImportRuns;
 use App\Filament\Resources\ExternalImportRuns\Pages\CreateExternalImportRun;
 use App\Filament\Resources\ExternalImportRuns\Pages\EditExternalImportRun;
 use App\Filament\Resources\ExternalImportRuns\Pages\ListExternalImportRuns;
+use App\Filament\Resources\ExternalImportRuns\Pages\ViewExternalImportRun;
 use App\Filament\Resources\ExternalImportRuns\Schemas\ExternalImportRunForm;
 use App\Filament\Resources\ExternalImportRuns\Tables\ExternalImportRunsTable;
 use App\Models\ExternalImportRun;
@@ -70,6 +71,7 @@ class ExternalImportRunResource extends Resource
         return [
             'index' => ListExternalImportRuns::route('/'),
             'create' => CreateExternalImportRun::route('/create'),
+            'view' => ViewExternalImportRun::route('/{record}'),
             'edit' => EditExternalImportRun::route('/{record}/edit'),
         ];
     }

@@ -6,6 +6,7 @@ use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -151,6 +152,79 @@ class ExternalImportRunForm
                             ->disableEditingKeys()
                             ->disableEditingValues(),
                     ]),
+                Section::make('Provedené změny v datech')
+                    ->schema([
+                        Repeater::make('logs')
+                            ->relationship('logs')
+                            ->label('Logy změn')
+                            ->schema([
+                                TextInput::make('action')
+                                    ->label('Akce')
+                                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                        'created' => 'Vytvořeno',
+                                        'updated' => 'Aktualizováno',
+                                        'skipped' => 'Přeskočeno',
+                                        'error' => 'Chyba',
+                                        default => $state ?? '-',
+                                    })
+                                    ->readOnly(),
+                                TextInput::make('model_type')
+                                    ->label('Model')
+                                    ->formatStateUsing(fn (?string $state) => $state ? match (class_basename($state)) {
+                                        'Player' => 'Hráč',
+                                        'Team' => 'Tým',
+                                        'Season' => 'Sezóna',
+                                        'Match' => 'Zápas',
+                                        'Opponent' => 'Soupeř',
+                                        'Club' => 'Klub',
+                                        'ExternalImportLog' => 'Log importu',
+                                        'ExternalImportRun' => 'Běh importu',
+                                        default => class_basename($state)
+                                    } : '-')
+                                    ->readOnly(),
+                                TextInput::make('model_id')
+                                    ->label('ID')
+                                    ->readOnly(),
+                                Textarea::make('message')
+                                    ->label('Zpráva')
+                                    ->columnSpanFull()
+                                    ->readOnly()
+                                    ->rows(2)
+                                    ->hidden(fn ($state) => ! $state),
+                                KeyValue::make('new_values')
+                                    ->label('Nová/Změněná data')
+                                    ->columnSpanFull()
+                                    ->readOnly()
+                                    ->hidden(fn ($state) => empty($state)),
+                            ])
+                            ->columns(3)
+                            ->addable(false)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->collapsed()
+                            ->itemLabel(fn (array $state): ?string =>
+                                ($state['action'] === 'created' ? '🆕 ' : ($state['action'] === 'updated' ? '📝 ' : 'ℹ️ ')) .
+                                (match ($state['action'] ?? '') {
+                                    'created' => 'Vytvořeno',
+                                    'updated' => 'Aktualizováno',
+                                    'skipped' => 'Přeskočeno',
+                                    'error' => 'Chyba',
+                                    default => $state['action'] ?? 'Log',
+                                }) . ': ' .
+                                ($state['model_type'] ? match (class_basename($state['model_type'])) {
+                                    'Player' => 'Hráč',
+                                    'Team' => 'Tým',
+                                    'Season' => 'Sezóna',
+                                    'Match' => 'Zápas',
+                                    'Opponent' => 'Soupeř',
+                                    'Club' => 'Klub',
+                                    default => class_basename($state['model_type'])
+                                } : '') .
+                                ($state['model_id'] ? ' (#' . $state['model_id'] . ')' : '')
+                            )
+                    ])
+                    ->collapsible()
+                    ->hidden(fn ($record) => ! $record || $record->logs()->count() === 0),
             ]);
     }
 }
