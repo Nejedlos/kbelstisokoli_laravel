@@ -78,6 +78,7 @@ class DebugOperations extends Page
             'legacyImport' => $this->getLegacyImportStats(),
             'auditLogs' => $this->getAuditLogs(),
             'discoveryStats' => $this->getDiscoveryStats(),
+            'activeSeason' => Season::where('is_active', true)->first(),
         ];
     }
 

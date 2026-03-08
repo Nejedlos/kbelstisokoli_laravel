@@ -25,7 +25,7 @@
             </div>
 
             <div class="mt-8 space-y-4">
-                <h2 class="text-xl font-bold">Externí Statistiky (Aktivní sezóna)</h2>
+                <h2 class="text-xl font-bold">Externí Statistiky (Aktivní sezóna: {{ $activeSeason?->name ?? 'Není vybrána' }})</h2>
                 <div class="space-y-6">
                     @foreach($externalSync as $team)
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -72,7 +72,10 @@
                                     <div @class(['text-2xl font-bold', 'text-danger-500' => $team['unmatched_count'] > 0])>
                                         {{ $team['unmatched_count'] }}
                                     </div>
-                                    <div class="text-xs text-gray-500">Unmatched</div>
+                                    <div class="text-xs text-gray-500 flex items-center justify-center gap-1">
+                                        Unmatched
+                                        <i class="fa-light fa-circle-info text-[10px] cursor-help opacity-70 hover:opacity-100" title="Hráči nalezení na cz.basketball, které systém nedokázal automaticky spárovat s našimi uživateli. Statistiky jsou uloženy u dočasných profilů (Ghosts). Pro nápravu klikněte na tlačítko 'Párování' níže, přiřaďte hráče ručně a systém data automaticky přepočítá."></i>
+                                    </div>
                                 </div>
                             </div>
 
@@ -256,6 +259,7 @@
                             <thead class="bg-gray-50 dark:bg-gray-900 font-medium">
                                 <tr>
                                     <th class="px-4 py-3">ID</th>
+                                    <th class="px-4 py-3">Sezóna</th>
                                     <th class="px-4 py-3">Tým</th>
                                     <th class="px-4 py-3">Typ</th>
                                     <th class="px-4 py-3">Cíl (ID)</th>
@@ -271,6 +275,9 @@
                                             <a href="{{ \App\Filament\Resources\ExternalImportRuns\ExternalImportRunResource::getUrl('edit', ['record' => $log->id]) }}" class="font-bold text-primary-600 hover:underline">
                                                 #{{ $log->id }}
                                             </a>
+                                        </td>
+                                        <td class="px-4 py-3 text-xs font-bold text-gray-600 dark:text-gray-400">
+                                            {{ $log->season?->name ?? '-' }}
                                         </td>
                                         <td class="px-4 py-3 font-medium">{{ $log->team?->name ?? 'Klub (Global)' }}</td>
                                         <td class="px-4 py-3 font-mono text-[10px] uppercase text-gray-500">
