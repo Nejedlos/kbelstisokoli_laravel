@@ -21,18 +21,17 @@ class OpponentSyncService
             $opponent = Opponent::where('metadata', 'LIKE', '%"external_id":"' . $externalId . '"%')->first();
         }
 
-        // 2. Pokud nemáme external_id nebo jsme nenašli, hledáme podle jména
+        // 2. Pokud nemáme external_id nebo jsme nenašli, hledáme podle jména nebo variant v metadatech
         if (! $opponent) {
-            $query = Opponent::where('name', $name);
-
-            if ($city) {
-                $query->where('city', $city);
-            } else {
-                $query->whereNull('city');
-            }
-
-            $opponent = $query->first();
+            $opponent = Opponent::where('name', $name)
+                ->orWhere('metadata', 'LIKE', '%"external_name_variants":%["' . $name . '"%')
+                ->orWhere('metadata', 'LIKE', '%"' . $name . '"%')
+                ->first();
         }
+
+        // 3. Poslední záchrana: Pokud jsme stále nenašli, zkusíme najít, zda neexistuje přijatý merge
+        // pro toto jméno v minulosti (pokud bychom ho museli vytvořit znovu).
+        // Poznámka: Toto je spíše pojistka, protože varianty jmen by měly být v metadatech cíle.
 
         if (! $opponent) {
             $opponent = Opponent::create([

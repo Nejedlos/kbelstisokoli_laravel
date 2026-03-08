@@ -4,6 +4,7 @@ namespace App\Services\Stats\Sync;
 
 use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
+use App\Models\OpponentMergeSuggestion;
 use App\Models\Season;
 use App\Models\Team;
 use App\Support\MatchIdentityKey;
@@ -70,7 +71,7 @@ class MatchSyncService
         // 1. Přednost má external_id (hledáme v rámci sezóny napříč týmy pro případ overlapu)
         if ($externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
-                ->where('metadata->external_id', (string) $externalMatchId)
+                ->where('metadata', 'LIKE', '%"external_id":"' . $externalMatchId . '"%')
                 ->first();
         }
 
@@ -78,7 +79,7 @@ class MatchSyncService
         if (! $match) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata->match_identity_key', $matchIdentityKey)
+                ->where('metadata', 'LIKE', '%"match_identity_key":"' . $matchIdentityKey . '"%')
                 ->first();
         }
 
@@ -98,6 +99,94 @@ class MatchSyncService
             }
         }
 
+        // 4. NOVÉ KRITICKÉ PRAVIDLO: Tým nemůže hrát ve stejný den a čas dva zápasy.
+        // Pokud existuje jakýkoliv zápas našeho týmu v tento čas (tolerance 120 min), je to on, bez ohledu na jméno soupeře.
+        if (! $match && $scheduledAt) {
+            $match = BasketballMatch::where('team_id', $team->id)
+                ->where('scheduled_at', '>=', $scheduledAt->copy()->subMinutes(120))
+                ->where('scheduled_at', '<=', $scheduledAt->copy()->addMinutes(120))
+                ->first();
+
+            if ($match) {
+                \Log::info("Match matched by team and close time (New rule): ID {$match->id}, diff: " . abs($match->scheduled_at->diffInMinutes($scheduledAt)) . " min, old opponent: " . ($match->opponent->name ?? 'None') . ", new opponent: {$opponentName}");
+            }
+        }
+
+        // 5. Detekce duplicit pro ručně vytvořené zápasy s podobným názvem soupeře (pokud nebyl nalezen přesný)
+        if (! $match && $scheduledAt) {
+            $potentialMatches = BasketballMatch::where('season_id', $season->id)
+                ->where('team_id', $team->id)
+                ->where('is_home', $isHome)
+                ->whereDate('scheduled_at', $scheduledAt->format('Y-m-d'))
+                ->with('opponent')
+                ->get();
+
+            foreach ($potentialMatches as $potential) {
+                // Pokud už má external_id jinde, tak to pravděpodobně není on
+                if (! empty($potential->metadata['external_id']) && ($potential->metadata['external_id'] != $externalMatchId)) {
+                    continue;
+                }
+
+                $potentialOpponentName = $potential->opponent?->name;
+                if ($potentialOpponentName) {
+                    $nameA = mb_strtolower(trim($opponentName));
+                    $nameB = mb_strtolower(trim($potentialOpponentName));
+
+                    // 1. Přesná shoda po ořezání
+                    if ($nameA === $nameB) {
+                        $sim = 100;
+                    } else {
+                        // 2. Levenshtein
+                        $lev = levenshtein($nameA, $nameB);
+                        $maxLen = max(strlen($nameA), strlen($nameB));
+                        $sim = $maxLen > 0 ? (1 - ($lev / $maxLen)) * 100 : 0;
+                    }
+
+                    $isMatch = ($sim > 70);
+
+                    // 3. Robustnější kontrola pro podřetězce (např. "TJ ČSA" vs "TJ ČSA Praha")
+                    if (! $isMatch && (strlen($nameA) > 3 && strlen($nameB) > 3)) {
+                        if (str_contains($nameA, $nameB) || str_contains($nameB, $nameA)) {
+                            // Pokud jeden obsahuje druhý, je to pravděpodobně shoda, pokud se neliší v suffixu týmu (A/B/C)
+                            $isMatch = true;
+
+                            // Ale pozor na suffixy (pokud má jeden B a druhý C, tak to není stejný tým)
+                            preg_match('/\b([a-g])\b$/', $nameA, $suffixA);
+                            preg_match('/\b([a-g])\b$/', $nameB, $suffixB);
+                            if (isset($suffixA[1]) && isset($suffixB[1]) && $suffixA[1] !== $suffixB[1]) {
+                                $isMatch = false;
+                            }
+                        }
+                    }
+
+                    if ($isMatch) {
+                        // Kontrola zamítnutých merge návrhů mezi soupeři
+                        if ($opponent->id != $potential->opponent_id) {
+                            $isRejected = OpponentMergeSuggestion::where('status', 'rejected')
+                                ->where(function ($query) use ($opponent, $potential) {
+                                    $query->where(function ($q) use ($opponent, $potential) {
+                                        $q->where('source_opponent_id', $opponent->id)
+                                            ->where('target_opponent_id', $potential->opponent_id);
+                                    })->orWhere(function ($q) use ($opponent, $potential) {
+                                        $q->where('source_opponent_id', $potential->opponent_id)
+                                            ->where('target_opponent_id', $opponent->id);
+                                    });
+                                })->exists();
+
+                            if ($isRejected) {
+                                \Log::info("Match fuzzy-match skipped: Opponent merge was previously rejected by user between {$opponent->id} and {$potential->opponent_id}");
+                                continue;
+                            }
+                        }
+
+                        $match = $potential;
+                        \Log::info("Match detected as potential duplicate by similar opponent name: {$match->id} (Sim: {$sim}%, {$potentialOpponentName} vs {$opponentName})");
+                        break;
+                    }
+                }
+            }
+        }
+
         // Zpracování skóre
         $scoreHome = null;
         $scoreAway = null;
@@ -107,6 +196,7 @@ class MatchSyncService
         }
 
         $data = [
+            'match_type' => 'mistrovske',
             'team_id' => $team->id,
             'season_id' => $season->id,
             'opponent_id' => $opponent->id,
