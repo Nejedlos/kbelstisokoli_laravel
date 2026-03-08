@@ -85,11 +85,21 @@ class InjectFeedbackWidget
                     if (!html || document.getElementById('ks-fb-root')) return;
                     const temp = document.createElement('div');
                     temp.innerHTML = html.trim();
-                    const fragment = document.createDocumentFragment();
+
+                    // 1. Nejprve najdeme a vložíme všechny skripty, aby byly funkce v globálním scope před inicializací Alpine
+                    const scripts = Array.from(temp.querySelectorAll('script'));
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                        oldScript.remove();
+                    });
+
+                    // 2. Poté vložíme zbytek (Strukturu widgetu)
                     while (temp.firstChild) {
-                        fragment.appendChild(temp.firstChild);
+                        document.body.appendChild(temp.firstChild);
                     }
-                    document.body.appendChild(fragment);
                 })
                 .finally(() => {
                     isFeedbackLoading = false;

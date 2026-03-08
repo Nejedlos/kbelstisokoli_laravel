@@ -118,7 +118,11 @@
                     </div>
 
                     <!-- Steps (Conditional for bugs) -->
-                    <div x-show="form.type === 'bug'" x-collapse class="space-y-1.5 mb-4">
+                    <div x-show="form.type === 'bug'"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="space-y-1.5 mb-4">
                         <label class="text-sm font-semibold text-slate-700">Kroky k reprodukci</label>
                         <textarea x-model="form.steps" rows="3" maxlength="10000" placeholder="1. Klikněte na... 2. Pak udělejte..."
                                   class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all"></textarea>
@@ -227,7 +231,7 @@
     </style>
 
     <!-- Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@2.9.5/dist/dom-to-image-more.min.js" integrity="sha256-6mFNCzL6D1p99rG+M9B9U+I1+6qQzYI0+G9Q9v+q08w=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@2.9.5/dist/dom-to-image-more.min.js" integrity="sha256-R5wZ4OkG/PtxfpvdJIqyzPKdjbhU0Y88vrmVrz3w8aE=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
     <script>

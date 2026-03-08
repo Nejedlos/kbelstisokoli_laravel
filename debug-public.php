@@ -1608,7 +1608,7 @@ pro týmy Sokol Kbely C &amp; E
     </style>
 
     <!-- Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@2.9.5/dist/dom-to-image-more.min.js" integrity="sha256-6mFNCzL6D1p99rG+M9B9U+I1+6qQzYI0+G9Q9v+q08w=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@2.9.5/dist/dom-to-image-more.min.js" integrity="sha256-R5wZ4OkG/PtxfpvdJIqyzPKdjbhU0Y88vrmVrz3w8aE=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
     <script>
