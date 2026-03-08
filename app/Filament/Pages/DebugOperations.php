@@ -90,7 +90,7 @@ class DebugOperations extends Page
                 ->icon(IconHelper::render(IconHelper::REFRESH))
                 ->color('primary')
                 ->form([
-                    \Filament\Forms\Components\Grid::make(3)
+                    \Filament\Schemas\Components\Grid::make(3)
                         ->schema([
                             \Filament\Forms\Components\Toggle::make('force')
                                 ->label('Force mode')
