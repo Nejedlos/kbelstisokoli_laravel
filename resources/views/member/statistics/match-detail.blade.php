@@ -3,7 +3,7 @@
 ])
 
 @section('content')
-    <div class="max-w-7xl mx-auto space-y-8 pb-12">
+    <div class="space-y-8 pb-12">
         {{-- Header / Scoreboard --}}
         <div class="relative overflow-hidden rounded-3xl bg-white shadow-xl">
             <div class="absolute inset-0 bg-gradient-to-br from-brand-600/10 via-transparent to-brand-500/5"></div>
@@ -114,17 +114,19 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
             {{-- Left Column: Pre-match / Analysis --}}
-            <div class="lg:col-span-5 space-y-8 order-1 lg:order-1">
-                <div class="flex flex-col gap-1 px-2">
+            <div class="md:col-span-5 space-y-8 order-1">
+                <div class="flex flex-col gap-2 px-4 py-6 bg-gradient-to-r from-gray-50 to-transparent rounded-2xl border-l-4 border-brand-500 mb-4">
                     <div class="flex items-center gap-3">
-                        <i class="fa-light fa-magnifying-glass-chart text-brand-500"></i>
+                        <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600 shadow-sm">
+                            <i class="fa-light fa-magnifying-glass-chart text-xl"></i>
+                        </div>
                         <h2 class="text-xl font-black text-gray-900 uppercase tracking-widest">
                             {{ __('matches.pre_match_stats') }}
                         </h2>
                     </div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-7">Analýza a srovnání před úvodním hvizdem</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-13">Komplexní analýza před úvodním hvizdem</p>
                 </div>
 
                 {{-- Best Players (Lídři zápasu / Klíčoví hráči) --}}
@@ -330,15 +332,17 @@
             </div>
 
             {{-- Right Column: Stats / Boxscore --}}
-            <div class="lg:col-span-7 space-y-8 order-2 lg:order-2">
-                <div class="flex flex-col gap-1 px-2">
+            <div class="md:col-span-7 space-y-8 order-2">
+                <div class="flex flex-col gap-2 px-4 py-6 bg-gradient-to-r from-emerald-50/50 to-transparent rounded-2xl border-l-4 border-emerald-500 mb-4">
                     <div class="flex items-center gap-3">
-                        <i class="fa-light fa-chart-simple text-emerald-600"></i>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
+                            <i class="fa-light fa-chart-simple text-xl"></i>
+                        </div>
                         <h2 class="text-xl font-black text-gray-900 uppercase tracking-widest">
                             {{ __('matches.match_stats') }}
                         </h2>
                     </div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-7">Výsledky, průběh a individuální výkony</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-13">Konečné výsledky a individuální výkony</p>
                 </div>
 
                 {{-- Win/Loss Badge Card (Result Summary) --}}
@@ -502,7 +506,9 @@
                         $opponentStats = $transformForJs($opponentStatsRaw);
                     @endphp
 
-                    <div x-data="{
+                {{-- Boxscore Table Card --}}
+                <div class="bg-white rounded-3xl shadow-lg overflow-hidden"
+                    x-data="{
                         activeTab: 'ours',
                         sortField: 'pts',
                         sortDirection: 'desc',
