@@ -9,7 +9,7 @@ return [
 
     'enabled' => env('FEEDBACK_ENABLED', true),
 
-    'environments' => explode(',', env('FEEDBACK_ENVIRONMENTS', 'production,staging,local')),
+    'environments' => explode(',', env('FEEDBACK_ENVIRONMENTS', 'production,staging,local,testing')),
 
     'recipients' => explode(',', env('FEEDBACK_RECIPIENTS', 'it@kbelstisokoli.cz')),
 

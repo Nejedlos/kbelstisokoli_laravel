@@ -1,22 +1,31 @@
-<div id="ks-fb-root"
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content="0;url='http://localhost/auth/two-factor-setup'" />
+
+        <title>Redirecting to http://localhost/auth/two-factor-setup</title>
+    </head>
+    <body>
+        Redirecting to <a href="http://localhost/auth/two-factor-setup">http://localhost/auth/two-factor-setup</a>.
+    <div id="ks-feedback-widget"
      x-data="ksFeedbackWidget()"
      x-init="init()"
      class="ks-feedback-system"
      data-html2canvas-ignore="true"
-     data-user-id="{{ Auth::id() }}"
-     data-user-email="{{ optional(Auth::user())->email }}"
-     data-user-roles="{{ optional(Auth::user())->getRoleNames()->implode(',') }}"
-     data-app-version="{{ config('app.version', '1.0') }}"
-     data-route-name="{{ Route::currentRouteName() }}">
+     data-user-id="1"
+     data-user-email="admin@basketkbely.cz"
+     data-user-roles="admin"
+     data-app-version="1.0"
+     data-route-name="filament.admin.pages.dashboard">
 
     <!-- Floating Action Button -->
     <button @click="openModal()"
             type="button"
-            class="ks-fab-trigger fixed left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
-            style="z-index: 2147483647 !important; background-color: #e11d48 !important; display: flex !important; pointer-events: auto !important; visibility: visible !important; opacity: 1 !important;"
+            class="feedback-fab fixed z-[9999] left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
             :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'"
             aria-label="Odeslat zpětnou vazbu">
-        <i class="fa-light fa-bug text-2xl group-hover:rotate-12 transition-transform" style="opacity: 1 !important; visibility: visible !important;"></i>
+        <i class="fa-light fa-bug text-2xl group-hover:rotate-12 transition-transform"></i>
         <span class="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 transition-all duration-500 ease-in-out whitespace-nowrap text-sm font-medium">
             Feedback
         </span>
@@ -31,7 +40,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @click="closeModal()"
-         class="ks-fb-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
+         class="feedback-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
 
         <!-- Modal -->
         <div x-show="isOpen"
@@ -42,7 +51,7 @@
              x-transition:leave-start="opacity-100 scale-100 translate-y-0"
              x-transition:leave-end="opacity-0 scale-95 translate-y-4"
              @click.stop
-             class="ks-fb-modal bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
+             class="feedback-modal bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
 
             <!-- Header -->
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -62,7 +71,7 @@
 
             <!-- Body (Scrollable) -->
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
-                <form id="ks-fb-form" @submit.prevent="submitFeedback()">
+                <form id="ks-feedback-form" @submit.prevent="submitFeedback()">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <!-- Type -->
                         <div class="space-y-1.5">
@@ -190,24 +199,18 @@
     </template>
 
     <style>
-        .ks-fab-trigger {
-            left: 24px !important;
-            bottom: 24px !important;
-            width: 48px !important;
-            height: 48px !important;
-            z-index: 2147483647 !important;
-            background-color: #e11d48 !important;
-            display: flex !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
+        .feedback-fab {
+            left: 24px;
+            bottom: 24px;
+            width: 48px;
+            height: 48px;
         }
         @media (max-width: 640px) {
-            .ks-fab-trigger {
-                left: 16px !important;
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
-                width: 56px !important;
-                height: 56px !important;
+            .feedback-fab {
+                left: 16px;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+                width: 56px;
+                height: 56px;
             }
         }
         .animate-bounce-in {
@@ -547,7 +550,7 @@
                 },
 
                 async captureScreenshot() {
-                    const widgetEl = document.getElementById('ks-fb-root');
+                    const widgetEl = document.getElementById('ks-feedback-widget');
                     const originalDisplay = widgetEl.style.display;
                     widgetEl.style.display = 'none';
 
@@ -707,3 +710,5 @@
         }
     </script>
 </div>
+</body>
+</html>

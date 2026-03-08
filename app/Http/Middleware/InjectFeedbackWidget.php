@@ -47,7 +47,7 @@ class InjectFeedbackWidget
 
         // Only inject in HTML responses
         $contentType = $response->headers->get('Content-Type');
-        if (strpos($contentType, 'text/html') === false) {
+        if (!str_contains((string)$contentType, 'text/html')) {
             return false;
         }
 
@@ -57,13 +57,22 @@ class InjectFeedbackWidget
     protected function injectWidget(Response $response): void
     {
         $content = $response->getContent();
+
+        if (str_contains($content, 'feedback-fab')) {
+            return; // Already injected
+        }
+
         $widget = view('partials.feedback-widget')->render();
 
         $pos = strripos($content, '</body>');
 
         if (false !== $pos) {
             $content = substr($content, 0, $pos) . $widget . substr($content, $pos);
-            $response->setContent($content);
+        } else {
+            // Fallback: append to the end
+            $content .= $widget;
         }
+
+        $response->setContent($content);
     }
 }

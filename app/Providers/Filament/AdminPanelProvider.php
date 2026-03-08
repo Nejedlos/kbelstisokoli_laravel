@@ -256,6 +256,7 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 \App\Http\Middleware\PerformanceProfilingMiddleware::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\InjectFeedbackWidget::class,
             ])
             ->authMiddleware([
                 '2fa.required',
