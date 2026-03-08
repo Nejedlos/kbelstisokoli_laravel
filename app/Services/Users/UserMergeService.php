@@ -2,20 +2,15 @@
 
 namespace App\Services\Users;
 
-use App\Models\User;
-use App\Models\ExternalEntityMapping;
-use App\Models\PlayerProfile;
 use App\Models\Attendance;
-use App\Models\UserConsent;
-use App\Models\FinanceCharge;
-use App\Models\FinancePayment;
-use App\Models\UserSeasonConfig;
-use App\Models\UserRelationship;
 use App\Models\AuditLog;
+use App\Models\PlayerProfile;
 use App\Models\StatisticRow;
+use App\Models\User;
+use App\Models\UserConsent;
+use App\Models\UserSeasonConfig;
 use App\Services\Stats\Sync\StatisticSyncService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class UserMergeService
 {
@@ -60,7 +55,7 @@ class UserMergeService
                             ->where('team_id', $team->id)
                             ->exists();
 
-                        if (!$exists) {
+                        if (! $exists) {
                             $targetProfile->teams()->attach($team->id, [
                                 'role_in_team' => $team->pivot->role_in_team,
                                 'is_primary_team' => false,
@@ -79,13 +74,13 @@ class UserMergeService
 
                     // Doplnění chybějících polí
                     $updateData = [];
-                    if (empty($targetProfile->jersey_number) && !empty($sourceProfile->jersey_number)) {
+                    if (empty($targetProfile->jersey_number) && ! empty($sourceProfile->jersey_number)) {
                         $updateData['jersey_number'] = $sourceProfile->jersey_number;
                     }
-                    if (empty($targetProfile->position) && !empty($sourceProfile->position)) {
+                    if (empty($targetProfile->position) && ! empty($sourceProfile->position)) {
                         $updateData['position'] = $sourceProfile->position;
                     }
-                    if (!empty($updateData)) {
+                    if (! empty($updateData)) {
                         $targetProfile->update($updateData);
                     }
 
@@ -104,7 +99,7 @@ class UserMergeService
                     ->where('attendable_type', $attendance->attendable_type)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     $attendance->update(['user_id' => $target->id]);
                 } else {
                     $attendance->delete();
@@ -117,7 +112,7 @@ class UserMergeService
                     ->where('consent_type', $consent->consent_type)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     $consent->update(['user_id' => $target->id]);
                 } else {
                     $consent->delete();
@@ -136,19 +131,19 @@ class UserMergeService
                     ->where('season_id', $config->season_id)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     $config->update(['user_id' => $target->id]);
                 }
             }
 
             // 7. Role a oprávnění
             foreach ($source->roles as $role) {
-                if (!$target->hasRole($role)) {
+                if (! $target->hasRole($role)) {
                     $target->assignRole($role);
                 }
             }
             foreach ($source->permissions as $permission) {
-                if (!$target->hasPermissionTo($permission)) {
+                if (! $target->hasPermissionTo($permission)) {
                     $target->givePermissionTo($permission);
                 }
             }
@@ -196,7 +191,7 @@ class UserMergeService
 
             // 9. Trenérské týmy (coach_team)
             foreach ($source->teams as $team) {
-                if (!$target->teams()->where('teams.id', $team->id)->exists()) {
+                if (! $target->teams()->where('teams.id', $team->id)->exists()) {
                     $target->teams()->attach($team->id, [
                         'email' => $team->pivot->email,
                         'phone' => $team->pivot->phone,
@@ -248,7 +243,7 @@ class UserMergeService
      */
     public function findMergeTarget(User $user): ?User
     {
-        if (!$user->isGhost()) {
+        if (! $user->isGhost()) {
             return null;
         }
 
