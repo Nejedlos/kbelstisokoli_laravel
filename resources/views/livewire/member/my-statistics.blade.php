@@ -1,10 +1,17 @@
-<div class="space-y-8" x-data="{ view: @entangle('view') }">
+<div class="space-y-8 relative" x-data="{ view: @entangle('view') }" x-init="
+    console.log('MyStatistics initialized');
+    $watch('view', value => {
+        console.log('View changed to:', value);
+        window.dispatchEvent(new CustomEvent('loading-start'));
+    });
+">
     {{-- Top Navigation & Selection --}}
     <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
         {{-- View Switcher --}}
         <div class="flex p-1 bg-gray-100 dark:bg-gray-900 rounded-xl w-full md:w-auto">
             <button
                 wire:click="setView('personal')"
+                @click="window.dispatchEvent(new CustomEvent('loading-start'))"
                 class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all"
                 :class="view === 'personal' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
             >
@@ -12,6 +19,7 @@
             </button>
             <button
                 wire:click="setView('team')"
+                @click="window.dispatchEvent(new CustomEvent('loading-start'))"
                 class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all"
                 :class="view === 'team' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
             >
@@ -19,6 +27,7 @@
             </button>
             <button
                 wire:click="setView('matches')"
+                @click="window.dispatchEvent(new CustomEvent('loading-start'))"
                 class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all"
                 :class="view === 'matches' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
             >
@@ -29,7 +38,11 @@
         {{-- Filters --}}
         <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
             <div class="relative min-w-[140px]">
-                <select wire:model.change="seasonId" class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none">
+                <select
+                    wire:model.live="seasonId"
+                    @change="window.dispatchEvent(new CustomEvent('loading-start'))"
+                    class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none"
+                >
                     @foreach($seasons as $season)
                         <option value="{{ $season->id }}">{{ $season->name }}</option>
                     @endforeach
@@ -40,7 +53,11 @@
             </div>
 
             <div class="relative min-w-[200px]">
-                <select wire:model.change="teamId" class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none">
+                <select
+                    wire:model.live="teamId"
+                    @change="window.dispatchEvent(new CustomEvent('loading-start'))"
+                    class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none"
+                >
                     <optgroup label="Moje týmy">
                         @foreach($userTeams as $team)
                             <option value="{{ $team->id }}">{{ $team->name }}</option>
@@ -78,8 +95,8 @@
                     if (isset($summary['fg3_pct'])) $cards[] = ['label' => '3B %', 'value' => $summary['fg3_pct'] . '%', 'icon' => 'fa-arrow-up-right-dots', 'color' => 'violet'];
                     if (isset($summary['ft_pct'])) $cards[] = ['label' => 'TH %', 'value' => $summary['ft_pct'] . '%', 'icon' => 'fa-bullseye-arrow', 'color' => 'pink'];
                 @endphp
-                @foreach($cards as $card)
-                    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center relative overflow-hidden">
+                        @foreach($cards as $card)
+                            <div wire:key="card-{{ $loop->index }}" class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center relative overflow-hidden">
                         <div class="absolute -right-2 -bottom-2 opacity-5">
                             <i class="fa-light {{ $card['icon'] }} text-5xl"></i>
                         </div>
@@ -200,7 +217,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                             @foreach($perGameSeries as $m)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
+                            <tr wire:key="row-{{ $loop->index }}" class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ $m['opponent'] }}</div>
                                     <div class="text-[10px] text-gray-400">{{ \Carbon\Carbon::parse($m['date'])->format('d.m.Y') }}</div>
@@ -278,6 +295,7 @@
                     <div class="flex justify-center gap-2">
                         @foreach($recentForm as $f)
                             <div
+                                wire:key="form-{{ $loop->index }}"
                                 class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shadow-sm"
                                 @class([
                                     'bg-green-500 text-white' => $f['result'] === 'W',
@@ -314,7 +332,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700 text-sm">
                             @foreach($topScorers as $scorer)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
+                            <tr wire:key="scorer-{{ $loop->index }}" class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
                                 <td class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">{{ $scorer['name'] }}</td>
                                 <td class="px-6 py-3 text-center text-gray-500">{{ $scorer['gp'] }}</td>
                                 <td class="px-6 py-3 text-center font-bold">{{ $scorer['pts_total'] }}</td>
@@ -363,7 +381,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                         @forelse($matches as $m)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
+                        <tr wire:key="match-{{ $m['id'] ?? $loop->index }}" class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="text-sm font-bold text-gray-800 dark:text-gray-200">
                                     {{ \Carbon\Carbon::parse($m['scheduled_at'])->format('d.m.Y') }}
@@ -433,86 +451,121 @@
         };
 
         const initPersonalCharts = () => {
-            const seriesData = @json($perGameSeries);
-            if (!seriesData || seriesData.length === 0) return;
-
-            const dates = seriesData.map(m => new Date(m.date).toLocaleDateString('cs-CZ'));
-            const points = seriesData.map(m => m.values.pts || 0);
-            const opponents = seriesData.map(m => m.opponent);
-
-            // Points Evolution
-            new ApexCharts(document.querySelector("#points-evolution-chart"), {
-                series: [{ name: 'Moje body', data: points }],
-                chart: { type: 'line', height: '100%', toolbar: { show: false }, zoom: { enabled: false } },
-                stroke: { curve: 'smooth', width: 4, colors: [colors.primary] },
-                colors: [colors.primary],
-                markers: { size: 5, strokeColors: '#fff', strokeWidth: 2, hover: { size: 7 } },
-                xaxis: { categories: dates, labels: { show: false }, tooltip: { enabled: false } },
-                yaxis: { title: { text: 'Body' } },
-                tooltip: {
-                    y: { formatter: (val, { dataPointIndex }) => `${val} bodů vs ${opponents[dataPointIndex]}` }
+            console.log('initPersonalCharts starting');
+            try {
+                const seriesData = $wire.perGameSeries;
+                if (!seriesData || seriesData.length === 0) {
+                    console.log('initPersonalCharts - no series data');
+                    return;
                 }
-            }).render();
 
-            // Comparison vs Team Avg
-            const teamAvg = @json($teamAverages['pts_avg'] ?? 0);
-            new ApexCharts(document.querySelector("#comparison-chart"), {
-                series: [
-                    { name: 'Moje body', type: 'column', data: points },
-                    { name: 'Průměr týmu', type: 'line', data: Array(points.length).fill(teamAvg) }
-                ],
-                chart: { height: '100%', type: 'line', toolbar: { show: false } },
-                colors: [colors.primary, colors.gray],
-                stroke: { width: [0, 2], dashArray: [0, 5] },
-                plotOptions: { bar: { columnWidth: '50%', borderRadius: 4 } },
-                xaxis: { categories: dates, labels: { show: false } },
-                legend: { position: 'top' }
-            }).render();
+                const chartEl1 = document.querySelector("#points-evolution-chart");
+                const chartEl2 = document.querySelector("#comparison-chart");
+
+                if (!chartEl1 || !chartEl2) {
+                    console.warn('initPersonalCharts - chart elements not found in DOM');
+                    return;
+                }
+
+                const dates = seriesData.map(m => new Date(m.date).toLocaleDateString('cs-CZ'));
+                const points = seriesData.map(m => (m.values ? m.values.pts : 0) || 0);
+                const opponents = seriesData.map(m => m.opponent);
+
+                // Points Evolution
+                new ApexCharts(chartEl1, {
+                    series: [{ name: 'Moje body', data: points }],
+                    chart: { type: 'line', height: '100%', toolbar: { show: false }, zoom: { enabled: false } },
+                    stroke: { curve: 'smooth', width: 4, colors: [colors.primary] },
+                    colors: [colors.primary],
+                    markers: { size: 5, strokeColors: '#fff', strokeWidth: 2, hover: { size: 7 } },
+                    xaxis: { categories: dates, labels: { show: false }, tooltip: { enabled: false } },
+                    yaxis: { title: { text: 'Body' } },
+                    tooltip: {
+                        y: { formatter: (val, { dataPointIndex }) => `${val} bodů vs ${opponents[dataPointIndex]}` }
+                    }
+                }).render();
+
+                // Comparison vs Team Avg
+                const teamAvg = $wire.teamAverages ? ($wire.teamAverages.pts_avg ?? 0) : 0;
+                new ApexCharts(chartEl2, {
+                    series: [
+                        { name: 'Moje body', type: 'column', data: points },
+                        { name: 'Průměr týmu', type: 'line', data: Array(points.length).fill(teamAvg) }
+                    ],
+                    chart: { height: '100%', type: 'line', toolbar: { show: false } },
+                    colors: [colors.primary, colors.gray],
+                    stroke: { width: [0, 2], dashArray: [0, 5] },
+                    plotOptions: { bar: { columnWidth: '50%', borderRadius: 4 } },
+                    xaxis: { categories: dates, labels: { show: false } },
+                    legend: { position: 'top' }
+                }).render();
+                console.log('initPersonalCharts finished');
+            } catch (e) {
+                console.error('initPersonalCharts error:', e);
+            }
         };
 
         const initTeamCharts = () => {
-            const seriesData = @json($pointsSeries);
-            if (!seriesData || seriesData.length === 0) return;
+            console.log('initTeamCharts starting');
+            try {
+                const seriesData = $wire.pointsSeries;
+                if (!seriesData || seriesData.length === 0) {
+                    console.log('initTeamCharts - no series data');
+                    return;
+                }
 
-            const dates = seriesData.map(m => new Date(m.date).toLocaleDateString('cs-CZ'));
-            const ptsFor = seriesData.map(m => m.pts_for || 0);
-            const ptsAgainst = seriesData.map(m => m.pts_against || 0);
+                const chartEl = document.querySelector("#team-evolution-chart");
+                if (!chartEl) {
+                    console.warn('initTeamCharts - chart element not found in DOM');
+                    return;
+                }
 
-            new ApexCharts(document.querySelector("#team-evolution-chart"), {
-                series: [
-                    { name: 'My', data: ptsFor },
-                    { name: 'Soupeř', data: ptsAgainst }
-                ],
-                chart: { type: 'area', height: '100%', toolbar: { show: false } },
-                colors: [colors.primary, colors.blue],
-                fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } },
-                stroke: { curve: 'smooth', width: 2 },
-                xaxis: { categories: dates, labels: { show: false } },
-                dataLabels: { enabled: false }
-            }).render();
+                const dates = seriesData.map(m => new Date(m.date).toLocaleDateString('cs-CZ'));
+                const ptsFor = seriesData.map(m => m.pts_for || 0);
+                const ptsAgainst = seriesData.map(m => m.pts_against || 0);
+
+                new ApexCharts(chartEl, {
+                    series: [
+                        { name: 'My', data: ptsFor },
+                        { name: 'Soupeř', data: ptsAgainst }
+                    ],
+                    chart: { type: 'area', height: '100%', toolbar: { show: false } },
+                    colors: [colors.primary, colors.blue],
+                    fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } },
+                    stroke: { curve: 'smooth', width: 2 },
+                    xaxis: { categories: dates, labels: { show: false } },
+                    dataLabels: { enabled: false }
+                }).render();
+                console.log('initTeamCharts finished');
+            } catch (e) {
+                console.error('initTeamCharts error:', e);
+            }
         };
 
         // Initialize based on initial view
         $wire.view === 'personal' ? initPersonalCharts() : ($wire.view === 'team' ? initTeamCharts() : null);
 
         // Re-initialize on Livewire updates
-        document.addEventListener('livewire:initialized', () => {
-             Livewire.on('statsLoaded', () => {
-                 // Clear charts before re-render if needed or just let Livewire refresh the DOM
-                 // But since we use wire:ignore, we need to manual refresh
-                 if (document.querySelector("#points-evolution-chart"))
-                    document.querySelector("#points-evolution-chart").innerHTML = '';
-                 if (document.querySelector("#comparison-chart"))
-                    document.querySelector("#comparison-chart").innerHTML = '';
-                 if (document.querySelector("#team-evolution-chart"))
-                    document.querySelector("#team-evolution-chart").innerHTML = '';
+        $wire.on('statsLoaded', () => {
+            console.log('statsLoaded event received');
 
-                 if ($wire.view === 'personal') {
-                    initPersonalCharts();
-                 } else if ($wire.view === 'team') {
-                    initTeamCharts();
-                 }
-             });
+            // Force hide global loader
+            window.dispatchEvent(new CustomEvent('loading-stop'));
+
+            // Clear charts before re-render if needed or just let Livewire refresh the DOM
+            // But since we use wire:ignore, we need to manual refresh
+            if (document.querySelector("#points-evolution-chart"))
+                document.querySelector("#points-evolution-chart").innerHTML = '';
+            if (document.querySelector("#comparison-chart"))
+                document.querySelector("#comparison-chart").innerHTML = '';
+            if (document.querySelector("#team-evolution-chart"))
+                document.querySelector("#team-evolution-chart").innerHTML = '';
+
+            if ($wire.view === 'personal') {
+                initPersonalCharts();
+            } else if ($wire.view === 'team') {
+                initTeamCharts();
+            }
         });
     </script>
     @endscript

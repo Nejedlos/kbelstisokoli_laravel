@@ -69,38 +69,54 @@ class MyStatistics extends Component
 
     public function loadStats()
     {
+        \Log::debug('MyStatistics::loadStats starting', [
+            'userId' => Auth::id(),
+            'seasonId' => $this->seasonId,
+            'teamId' => $this->teamId,
+            'view' => $this->view
+        ]);
+
         if (! $this->seasonId || ! $this->teamId) {
+            \Log::debug('MyStatistics::loadStats skipping - missing seasonId or teamId');
             return;
         }
 
-        if ($this->view === 'personal') {
-            $service = app(PlayerStatsService::class);
-            $userId = Auth::id();
+        try {
+            if ($this->view === 'personal') {
+                $service = app(PlayerStatsService::class);
+                $userId = Auth::id();
 
-            $this->summary = $service->getSeasonSummary($userId, $this->seasonId, $this->teamId);
-            $this->perGameSeries = $service->getPerGameSeries($userId, $this->seasonId, $this->teamId)->toArray();
-            $this->rankings = $service->getRankings($userId, $this->seasonId, $this->teamId);
-            $this->insights = $service->getInsights($userId, $this->seasonId, $this->teamId);
-            $this->teamAverages = $service->getTeamAverages($this->seasonId, $this->teamId);
-        } elseif ($this->view === 'team') {
-            $service = app(TeamStatsService::class);
-            $this->teamSummary = $service->getSeasonSummary($this->teamId, $this->seasonId);
-            $this->topScorers = $service->getTopScorers($this->teamId, $this->seasonId)->toArray();
-            $this->pointsSeries = $service->getPointsSeries($this->teamId, $this->seasonId)->toArray();
-            $this->recentForm = $service->getRecentForm($this->teamId, $this->seasonId)->toArray();
-        } elseif ($this->view === 'matches') {
-            $this->matches = \App\Models\BasketballMatch::query()
-                ->where('season_id', $this->seasonId)
-                ->where(function ($query) {
-                    $query->where('team_id', $this->teamId)
-                        ->orWhereHas('teams', function ($q) {
-                            $q->where('teams.id', $this->teamId);
-                        });
-                })
-                ->with(['opponent'])
-                ->orderBy('scheduled_at', 'desc')
-                ->get()
-                ->toArray();
+                $this->summary = $service->getSeasonSummary($userId, $this->seasonId, $this->teamId);
+                $this->perGameSeries = $service->getPerGameSeries($userId, $this->seasonId, $this->teamId)->toArray();
+                $this->rankings = $service->getRankings($userId, $this->seasonId, $this->teamId);
+                $this->insights = $service->getInsights($userId, $this->seasonId, $this->teamId);
+                $this->teamAverages = $service->getTeamAverages($this->seasonId, $this->teamId);
+            } elseif ($this->view === 'team') {
+                $service = app(TeamStatsService::class);
+                $this->teamSummary = $service->getSeasonSummary($this->teamId, $this->seasonId);
+                $this->topScorers = $service->getTopScorers($this->teamId, $this->seasonId)->toArray();
+                $this->pointsSeries = $service->getPointsSeries($this->teamId, $this->seasonId)->toArray();
+                $this->recentForm = $service->getRecentForm($this->teamId, $this->seasonId)->toArray();
+            } elseif ($this->view === 'matches') {
+                $this->matches = \App\Models\BasketballMatch::query()
+                    ->where('season_id', $this->seasonId)
+                    ->where(function ($query) {
+                        $query->where('team_id', $this->teamId)
+                            ->orWhereHas('teams', function ($q) {
+                                $q->where('teams.id', $this->teamId);
+                            });
+                    })
+                    ->with(['opponent'])
+                    ->orderBy('scheduled_at', 'desc')
+                    ->get()
+                    ->toArray();
+            }
+            \Log::debug('MyStatistics::loadStats finished successfully');
+        } catch (\Exception $e) {
+            \Log::error('MyStatistics::loadStats failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
         }
 
         $this->dispatch('statsLoaded');
