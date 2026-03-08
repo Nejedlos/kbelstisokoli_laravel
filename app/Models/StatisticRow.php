@@ -11,6 +11,7 @@ class StatisticRow extends Model
         'statistic_set_id',
         'player_id',
         'team_id',
+        'opponent_id',
         'basketball_match_id',
         'season_id',
         'row_label',
@@ -45,6 +46,11 @@ class StatisticRow extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function opponent(): BelongsTo
+    {
+        return $this->belongsTo(Opponent::class);
     }
 
     public function match(): BelongsTo
