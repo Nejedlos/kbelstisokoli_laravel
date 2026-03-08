@@ -18,7 +18,7 @@ return [
     'score' => 'Skóre',
     'vs' => 'vs',
     'planned' => 'Plánováno',
-    'completed' => 'Odehráno',
+    'finished' => 'Odehráno',
     'cancelled' => 'Zrušeno',
     'postponed' => 'Odloženo',
     'starter_title' => 'Program a výsledky',

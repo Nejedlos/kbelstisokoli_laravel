@@ -72,9 +72,7 @@ class BasketballMatchForm
                                     ->label('Stav zápasu')
                                     ->options([
                                         'planned' => 'Plánováno',
-                                        'scheduled' => 'Naplánováno (ze svazu)',
-                                        'played' => 'Odehráno (ze svazu)',
-                                        'completed' => 'Odehráno (ručně)',
+                                        'finished' => 'Odehráno',
                                         'cancelled' => 'Zrušeno',
                                         'postponed' => 'Odloženo',
                                     ])
@@ -93,7 +91,7 @@ class BasketballMatchForm
                                     ->numeric()
                                     ->default(null),
                             ])
-                            ->visible(fn ($get) => in_array($get('status'), ['completed', 'played'])),
+                            ->visible(fn ($get) => in_array($get('status'), ['finished', 'completed', 'played'])),
                     ]),
 
                 Section::make('Poznámky')

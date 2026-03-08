@@ -6,6 +6,7 @@
     $statusColors = [
         'planned' => 'bg-accent text-white',
         'scheduled' => 'bg-accent text-white',
+        'finished' => 'bg-success text-white',
         'completed' => 'bg-success text-white',
         'played' => 'bg-success text-white',
         'cancelled' => 'bg-danger text-white',
@@ -14,8 +15,9 @@
     $statusLabels = [
         'planned' => __('matches.planned') ?? 'Plánováno',
         'scheduled' => __('matches.planned') ?? 'Plánováno',
-        'completed' => __('matches.completed') ?? 'Odehráno',
-        'played' => __('matches.completed') ?? 'Odehráno',
+        'finished' => __('matches.finished') ?? 'Odehráno',
+        'completed' => __('matches.finished') ?? 'Odehráno',
+        'played' => __('matches.finished') ?? 'Odehráno',
         'cancelled' => __('matches.cancelled') ?? 'Zrušeno',
         'postponed' => __('matches.postponed') ?? 'Odloženo',
     ];
@@ -38,7 +40,7 @@
         'PRATEL' => 'fa-handshake',
     ];
 
-    $isPlayed = in_array($match->status, ['completed', 'played']);
+    $isPlayed = in_array($match->status, ['completed', 'played', 'finished']);
     $homeScore = $match->score_home ?? 0;
     $awayScore = $match->score_away ?? 0;
     $hasScore = isset($match->score_home) || isset($match->score_away);

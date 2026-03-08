@@ -18,7 +18,7 @@ return [
     'score' => 'Score',
     'vs' => 'vs',
     'planned' => 'Planned',
-    'completed' => 'Completed',
+    'finished' => 'Finished',
     'cancelled' => 'Cancelled',
     'postponed' => 'Postponed',
     'starter_title' => 'Schedule and Results',
