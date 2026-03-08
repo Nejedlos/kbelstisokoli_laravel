@@ -25,10 +25,25 @@ class ExternalImportRunsTable
                 TextColumn::make('run_type')
                     ->label('Typ')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'team_page' => 'Tým (soupiska)',
+                        'matches_list' => 'Seznam zápasů',
+                        'match_detail' => 'Detail zápasu',
+                        'preview' => 'Náhled (preview)',
+                        default => $state,
+                    })
                     ->sortable(),
                 TextColumn::make('status')
                     ->label('Stav')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'success' => 'Úspěch',
+                        'skipped' => 'Přeskočeno',
+                        'failed' => 'Chyba',
+                        'partial_failed' => 'Částečná chyba',
+                        'running' => 'Běží',
+                        default => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'success' => 'success',
                         'skipped' => 'gray',

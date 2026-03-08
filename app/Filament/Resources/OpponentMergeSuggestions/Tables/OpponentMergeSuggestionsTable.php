@@ -4,10 +4,12 @@ namespace App\Filament\Resources\OpponentMergeSuggestions\Tables;
 
 use App\Models\OpponentMergeSuggestion;
 use App\Services\Stats\OpponentMergeService;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
@@ -67,18 +69,24 @@ class OpponentMergeSuggestionsTable
             ->recordActions([
                 Action::make('accept')
                     ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.accept'))
-                    ->icon('heroicon-o-check')
+                    ->icon(FilamentIcon::get(AppIcon::ACTIVATE))
                     ->color('success')
                     ->hidden(fn (OpponentMergeSuggestion $record) => $record->status !== 'pending')
                     ->form(fn (OpponentMergeSuggestion $record) => [
-                        Select::make('new_name')
+                        TextInput::make('new_name')
                             ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.new_name'))
-                            ->options([
-                                $record->targetOpponent->name => $record->targetOpponent->name . ' (' . __('admin.navigation.resources.opponent_merge_suggestion.fields.target_opponent') . ')',
-                                $record->sourceOpponent->name => $record->sourceOpponent->name . ' (' . __('admin.navigation.resources.opponent_merge_suggestion.fields.source_opponent') . ')',
-                            ])
                             ->default($record->targetOpponent->name)
-                            ->required(),
+                            ->required()
+                            ->hintActions([
+                                Action::make('use_target')
+                                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.use_target'))
+                                    ->icon(FilamentIcon::get(AppIcon::REFRESH))
+                                    ->action(fn ($set) => $set('new_name', $record->targetOpponent->name)),
+                                Action::make('use_source')
+                                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.use_source'))
+                                    ->icon(FilamentIcon::get(AppIcon::REFRESH))
+                                    ->action(fn ($set) => $set('new_name', $record->sourceOpponent->name)),
+                            ]),
                     ])
                     ->action(function (OpponentMergeSuggestion $record, array $data, OpponentMergeService $service) {
                         $success = $service->merge($record, $data['new_name']);
@@ -97,7 +105,7 @@ class OpponentMergeSuggestionsTable
                     }),
                 Action::make('reject')
                     ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.reject'))
-                    ->icon('heroicon-o-x-mark')
+                    ->icon(FilamentIcon::get(AppIcon::CANCEL))
                     ->color('danger')
                     ->hidden(fn (OpponentMergeSuggestion $record) => $record->status !== 'pending')
                     ->action(function (OpponentMergeSuggestion $record, OpponentMergeService $service) {

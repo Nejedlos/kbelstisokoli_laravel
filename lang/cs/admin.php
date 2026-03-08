@@ -133,6 +133,8 @@ return [
                     'hard_scan' => 'Tvrdý sken duplicit',
                     'accept' => 'Přijmout',
                     'reject' => 'Odmítnout',
+                    'use_target' => 'Použít cílový',
+                    'use_source' => 'Použít zdrojový',
                 ],
                 'notifications' => [
                     'scan_finished' => 'Nalezeno :count nových návrhů na sloučení',

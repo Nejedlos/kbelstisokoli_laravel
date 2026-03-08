@@ -8,6 +8,8 @@ use App\Filament\Resources\OpponentMergeSuggestions\Pages\ListOpponentMergeSugge
 use App\Filament\Resources\OpponentMergeSuggestions\Schemas\OpponentMergeSuggestionForm;
 use App\Filament\Resources\OpponentMergeSuggestions\Tables\OpponentMergeSuggestionsTable;
 use App\Models\OpponentMergeSuggestion;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -25,7 +27,7 @@ class OpponentMergeSuggestionResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'heroicon-o-arrows-pointing-in';
+        return FilamentIcon::get(AppIcon::OPPONENTS);
     }
 
     public static function getNavigationLabel(): string

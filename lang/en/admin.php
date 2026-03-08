@@ -132,6 +132,8 @@ return [
                     'hard_scan' => 'Hard Scan for Duplicates',
                     'accept' => 'Accept',
                     'reject' => 'Reject',
+                    'use_target' => 'Use target',
+                    'use_source' => 'Use source',
                 ],
                 'notifications' => [
                     'scan_finished' => 'Found :count new merge suggestions',
