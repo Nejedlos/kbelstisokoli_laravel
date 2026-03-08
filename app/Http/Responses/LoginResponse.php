@@ -17,6 +17,13 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
     public function toResponse($request): RedirectResponse|Redirector
     {
         $user = auth()->user();
+        $email = $user ? $user->email : 'null';
+
+        \Illuminate\Support\Facades\Log::info('LoginResponse.enter', [
+            'user_id' => $user?->id,
+            'email' => $email,
+            'session_id' => \Illuminate\Support\Facades\Session::getId(),
+        ]);
 
         if ($user && (empty($user->club_member_id) || empty($user->payment_vs))) {
             GenerateUserIdentifiersJob::dispatch($user->id);
@@ -32,12 +39,18 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
                     session()->put('url.intended', url(config('filament.panels.admin.path', 'admin')));
                 }
 
+                \Illuminate\Support\Facades\Log::info('LoginResponse.redirect_to_2fa_setup', [
+                    'user_id' => $user->id,
+                    'email' => $email,
+                ]);
+
                 return redirect()->route('auth.two-factor-setup');
             }
 
-            $confirmedAt = $request->session()->get('auth.2fa_confirmed_at');
-            $timeout = (int) config('auth.2fa_timeout', 86400);
-            $hasValidSession2fa = $confirmedAt && (now()->timestamp - $confirmedAt) < $timeout;
+            // Po zadání hesla na login stránce VŽDY vyžadujeme kód 2FA,
+            // pokud má uživatel 2FA aktivované. Ignorujeme případný starý příznak v session,
+            // abychom předešli probliknutí administrace (přímý redirect na challenge).
+            $hasValidSession2fa = false;
 
             $rememberCookie = $request->cookie('2fa_remember');
             $remembered = false;
@@ -51,6 +64,11 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
             }
 
             if (! $hasValidSession2fa && ! $remembered) {
+                \Illuminate\Support\Facades\Log::info('LoginResponse.redirect_to_2fa_challenge', [
+                    'user_id' => $user->id,
+                    'email' => $email,
+                ]);
+
                 session()->put('login.id', $user->id);
 
                 if (! session()->has('url.intended')) {
@@ -62,6 +80,11 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
         }
 
         $targetUrl = AuthRedirect::getTargetUrl($user, $request);
+
+        \Illuminate\Support\Facades\Log::info('LoginResponse.redirect_to_target', [
+            'user_id' => $user?->id,
+            'target_url' => $targetUrl,
+        ]);
 
         return redirect()->to($targetUrl);
     }

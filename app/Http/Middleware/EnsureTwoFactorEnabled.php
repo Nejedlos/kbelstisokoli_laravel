@@ -16,6 +16,13 @@ class EnsureTwoFactorEnabled
     {
         $user = $request->user();
 
+        \Illuminate\Support\Facades\Log::info('EnsureTwoFactorEnabled.enter', [
+            'user_id' => $user?->id,
+            'email' => $user?->email,
+            'route' => $request->route()?->getName(),
+            'url' => $request->fullUrl(),
+        ]);
+
         // Pokud je uživatel přihlášen a má oprávnění pro přístup do adminu
         // A ZÁROVEŇ se pokouší přistoupit k admin sekci (včetně Filamentu)
         $isAdminRoute = $request->is('admin*') || $request->routeIs('admin.*') || $request->routeIs('filament.admin.*');
@@ -37,6 +44,12 @@ class EnsureTwoFactorEnabled
 
                 // Pokud už není na stránce nastavení 2FA, přesměrujeme ho tam
                 if (! $request->routeIs('auth.two-factor-setup')) {
+                    \Illuminate\Support\Facades\Log::info('EnsureTwoFactorEnabled.redirect_to_setup', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'target' => $request->fullUrl(),
+                    ]);
+
                     return redirect()->route('auth.two-factor-setup');
                 }
             }

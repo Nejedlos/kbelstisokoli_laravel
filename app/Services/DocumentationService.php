@@ -114,6 +114,7 @@ class DocumentationService
      */
     public function search(string $query): Collection
     {
+        $query = trim($query);
         if (empty($query)) return collect();
 
         $path = File::exists($this->docsPath) ? $this->docsPath : $this->baseDocsPath;
@@ -122,14 +123,19 @@ class DocumentationService
         $finder->files()->in($path)->name('*.md');
 
         $results = collect();
+        $lowercaseQuery = mb_strtolower($query);
 
         foreach ($finder as $file) {
             $content = $file->getContents();
-            if (Str::contains(mb_strtolower($content), mb_strtolower($query)) ||
-                Str::contains(mb_strtolower($file->getFilename()), mb_strtolower($query))) {
+            $filename = $file->getFilename();
+            $formattedName = $this->formatName($file->getFilenameWithoutExtension());
+
+            if (Str::contains(mb_strtolower($content), $lowercaseQuery) ||
+                Str::contains(mb_strtolower($filename), $lowercaseQuery) ||
+                Str::contains(mb_strtolower($formattedName), $lowercaseQuery)) {
 
                 $results->push([
-                    'title' => $this->formatName($file->getFilenameWithoutExtension()),
+                    'title' => $formattedName,
                     'path' => $this->getRelativePath($file->getPathname()),
                     'excerpt' => $this->getExcerpt($content, $query),
                 ]);

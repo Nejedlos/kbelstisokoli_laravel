@@ -259,10 +259,10 @@ class AdminPanelProvider extends PanelProvider
                 \App\Http\Middleware\InjectFeedbackWidget::class,
             ])
             ->authMiddleware([
-                '2fa.required',
-                '2fa.timeout',
-                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
                 Authenticate::class,
+                \App\Http\Middleware\EnsureTwoFactorEnabled::class,
+                \App\Http\Middleware\CheckTwoFactorTimeout::class,
+                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
             ]);
     }
 }

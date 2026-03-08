@@ -17,6 +17,13 @@ class CheckTwoFactorTimeout
     {
         $user = $request->user();
 
+        \Illuminate\Support\Facades\Log::info('CheckTwoFactorTimeout.enter', [
+            'user_id' => $user?->id,
+            'email' => $user?->email,
+            'route' => $request->route()?->getName(),
+            'url' => $request->fullUrl(),
+        ]);
+
         // Pokud uživatel není přihlášen, neřešíme (vyřeší auth middleware)
         if (! $user) {
             return $next($request);
@@ -72,6 +79,12 @@ class CheckTwoFactorTimeout
         // DŮLEŽITÉ: Fortify challenge potřebuje 'login.id' v session pro identifikaci uživatele,
         // jinak přesměruje zpět na login (což vytvoří redirect loop u přihlášeného uživatele).
         session()->put('login.id', $user->id);
+
+        \Illuminate\Support\Facades\Log::info('CheckTwoFactorTimeout.redirect_to_2fa', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'target' => $request->fullUrl(),
+        ]);
 
         return redirect()->route('two-factor.login');
     }

@@ -1,8 +1,8 @@
 <x-filament-panels::page>
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-[calc(100vh-14rem)] overflow-hidden">
         <!-- Sidebar s navigací -->
-        <div class="md:col-span-3 overflow-y-auto pr-2 border-r border-gray-100 dark:border-gray-800">
-            <div class="mb-4 sticky top-0 bg-white dark:bg-gray-900 pt-1 pb-4 z-10">
+        <div class="md:col-span-3 overflow-y-auto pl-1 pr-2 border-r border-gray-100 dark:border-gray-800">
+            <div class="mb-4 sticky top-0 bg-white dark:bg-gray-900 pt-1 px-1 pb-4 z-10">
                 <x-filament::input.wrapper>
                     <x-slot name="prefix">
                         <i class="fa-light fa-magnifying-glass text-gray-400"></i>
@@ -11,6 +11,7 @@
                         type="search"
                         placeholder="Hledat v dokumentaci..."
                         wire:model.live.debounce.500ms="searchQuery"
+                        autocomplete="off"
                     />
                 </x-filament::input.wrapper>
             </div>
@@ -30,7 +31,7 @@
                                 {{ $result['title'] }}
                             </div>
                             <div class="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
-                                {!! str_replace($searchQuery, '<mark class="bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded px-0.5">' . $searchQuery . '</mark>', e($result['excerpt'])) !!}
+                                {!! preg_replace('/' . preg_quote($searchQuery, '/') . '/iu', '<mark class="bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded px-0.5">$0</mark>', e($result['excerpt'])) !!}
                             </div>
                         </button>
                     @empty
