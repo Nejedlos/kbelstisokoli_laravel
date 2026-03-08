@@ -63,7 +63,7 @@ class AiIndexService
             $count += $this->indexFrontend($locale, $onProgress, $force);
         }
 
-        if ($section === 'documentation') {
+        if (! $section || $section === 'documentation') {
             Log::info("AI Indexing: Starting documentation section for locale '{$locale}'");
             $count += $this->indexDocumentation($locale, $onProgress, $force);
         }
@@ -619,7 +619,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 'type' => 'documentation.resource',
                 'source' => 'docs/'.$relativePath,
                 'title' => $title,
-                'url' => null, // Dokumentace nemá přímou URL v aplikaci, ale slouží jako kontext
+                'url' => route('filament.admin.pages.documentation', ['file' => $relativePath]),
                 'locale' => $locale, // Dokumentace je primárně česky, indexujeme do aktuálního locale
                 'content' => $content,
                 'checksum' => hash('sha256', $content.$relativePath),

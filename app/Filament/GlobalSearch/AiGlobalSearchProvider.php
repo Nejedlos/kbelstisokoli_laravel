@@ -17,9 +17,12 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
 
         // Vyhledávání v AiDocument
         // Priorita: Title (LIKE %) > Keywords (JSON) > Content (LIKE %)
-        // Omezíme na admin dokumenty
+        // Omezíme na admin dokumenty a dokumentaci
         $documents = AiDocument::where('locale', $locale)
-            ->where('type', 'like', 'admin.%')
+            ->where(function ($q) {
+                $q->where('type', 'like', 'admin.%')
+                  ->orWhere('type', 'like', 'documentation.%');
+            })
             ->where(function ($q) use ($query) {
                 $queryLower = mb_strtolower($query);
                 $q->whereRaw('LOWER(title) LIKE ?', ["%{$queryLower}%"])
@@ -55,6 +58,10 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
 
     protected function getCategoryName(string $type): string
     {
+        if (str_starts_with($type, 'documentation.')) {
+            return __('admin.search.categories.documentation') ?: 'Dokumentace';
+        }
+
         return match ($type) {
             'admin.resource' => __('admin.search.categories.resources'),
             default => __('admin.search.categories.other'),
