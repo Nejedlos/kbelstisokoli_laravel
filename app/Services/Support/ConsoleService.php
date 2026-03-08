@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 class ConsoleService
 {
     protected const CACHE_KEY = 'debug_console_output';
+    protected const STOP_FLAG_KEY = 'debug_sync_stop_flag';
     protected const MAX_LINES = 500;
 
     public static function log(string $message, string $type = 'info'): void
@@ -39,6 +40,22 @@ class ConsoleService
         $newContent = implode("\n", array_filter($lines));
 
         Cache::put(self::CACHE_KEY, $newContent, now()->addHours(2));
+    }
+
+    public static function requestStop(): void
+    {
+        Cache::put(self::STOP_FLAG_KEY, true, now()->addMinutes(10));
+        self::log('!!! POŽADAVEK NA ZASTAVENÍ SYNCHRONIZACE !!!', 'error');
+    }
+
+    public static function isStopped(): bool
+    {
+        return (bool) Cache::get(self::STOP_FLAG_KEY, false);
+    }
+
+    public static function resetStop(): void
+    {
+        Cache::forget(self::STOP_FLAG_KEY);
     }
 
     public static function getContent(): string

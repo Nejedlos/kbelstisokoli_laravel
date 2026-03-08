@@ -38,6 +38,12 @@ class ExternalStatsSyncService
      */
     public function syncTeamSeason(int $teamId, int $seasonId, array $options = []): void
     {
+        if (ConsoleService::isStopped()) {
+            ConsoleService::log('Synchronizace týmu přeskočena (STOP flag aktivní).', 'warning');
+
+            return;
+        }
+
         $config = ExternalTeamSeasonConfig::where('team_id', $teamId)
             ->where('season_id', $seasonId)
             ->where('is_enabled', true)
@@ -105,6 +111,10 @@ class ExternalStatsSyncService
         }
 
         try {
+            if (ConsoleService::isStopped()) {
+                throw new \Exception('Synchronizace soupisky zastavena uživatelem.');
+            }
+
             $run->updateMetadata(['url' => $config->team_season_url]);
             $html = $this->fetcher->fetch($config->team_season_url, $run);
 
@@ -141,6 +151,10 @@ class ExternalStatsSyncService
             $fragmentHtml = '';
 
             if ($aiOnly) {
+                if (ConsoleService::isStopped()) {
+                    throw new \Exception('AI normalizace soupisky zastavena uživatelem.');
+                }
+
                 if (!$rosterClip) {
                     throw new \Exception('Roster table clip not found for AI-only mode.');
                 }
@@ -249,6 +263,10 @@ class ExternalStatsSyncService
      */
     protected function syncMatchesList(Team $team, Season $season, ExternalTeamSeasonConfig $config, array $options): void
     {
+        if (ConsoleService::isStopped()) {
+            throw new \Exception('Synchronizace seznamu zápasů zastavena uživatelem.');
+        }
+
         \Log::info("START: syncMatchesList for team {$team->slug}");
         $run = ExternalImportRun::start('czbasketball', $season->id, $team->id, 'matches_list', $config->external_team_id);
 
@@ -440,6 +458,11 @@ class ExternalStatsSyncService
 
         $dispatchedCount = 0;
         foreach ($matches as $match) {
+            if (ConsoleService::isStopped()) {
+                ConsoleService::log('Plánování detailů zápasů zastaveno uživatelem.', 'warning');
+                break;
+            }
+
             if ($dispatchedCount >= $limit) {
                 break;
             }
@@ -462,6 +485,11 @@ class ExternalStatsSyncService
      */
     public function syncMatchDetail(int $matchId, array $options = []): void
     {
+        if (ConsoleService::isStopped()) {
+            // Log::info('syncMatchDetail přeskočen - STOP flag');
+            return;
+        }
+
         $match = BasketballMatch::with(['team', 'season'])->findOrFail($matchId);
         $externalMatchId = $match->metadata['external_id'] ?? null;
 

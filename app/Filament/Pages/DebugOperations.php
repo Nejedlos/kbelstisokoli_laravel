@@ -147,6 +147,7 @@ class DebugOperations extends Page
                     }
 
                     ConsoleService::log("Spouštím synchronizaci všech týmů{$mode} pro sezónu: {$season->name}");
+                    ConsoleService::resetStop();
 
                     $teams = Team::whereHas('externalMappings')->get();
                     foreach ($teams as $team) {
@@ -162,6 +163,19 @@ class DebugOperations extends Page
                     }
 
                     Notification::make()->title('Sync jobs dispatched'.($mode ?: ''))->success()->send();
+                }),
+
+            Action::make('stopSync')
+                ->label('ZASTAVIT SYNCHRONIZACI')
+                ->tooltip('Okamžitě zastaví všechny běžící a naplánované synchronizační joby (využívá stop-flag v cache).')
+                ->icon(IconHelper::render(IconHelper::CANCEL))
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('Zastavit synchronizaci?')
+                ->modalDescription('Tato akce nastaví příznak pro zastavení všech běžících synchronizací. Joby, které již začaly, se ukončí při dalším kontrolním bodu.')
+                ->action(function () {
+                    ConsoleService::requestStop();
+                    Notification::make()->title('Požadavek na zastavení byl odeslán.')->warning()->send();
                 }),
 
             Action::make('discoverSeasons')
@@ -531,6 +545,7 @@ class DebugOperations extends Page
         }
 
         ConsoleService::log("Ruční spuštění synchronizace{$mode} pro tým: ".($team?->name ?? $teamId), 'info');
+        ConsoleService::resetStop();
 
         SyncTeamSeasonJob::dispatch($teamId, $activeSeason->id, $options);
         Notification::make()->title('Sync started for team'.($mode ?: ''))->success()->send();
