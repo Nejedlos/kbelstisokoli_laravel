@@ -157,6 +157,34 @@
                             </div>
                         </div>
                     @endforeach
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold">Hloubková synchronizace hráčů</h3>
+                                <p class="text-xs text-gray-500">
+                                    Profilové údaje, fotografie a historie kariéry z cz.basketball.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold">{{ $playerSync['total'] }}</div>
+                                <div class="text-xs text-gray-500">Hráčů s mapováním</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-success-500">{{ $playerSync['synced'] }}</div>
+                                <div class="text-xs text-gray-500">Synchronizováno</div>
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium">
+                                    {{ $playerSync['last_sync'] ? \Illuminate\Support\Carbon::parse($playerSync['last_sync'])->diffForHumans() : 'Nikdy' }}
+                                </div>
+                                <div class="text-xs text-gray-500">Poslední sync</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

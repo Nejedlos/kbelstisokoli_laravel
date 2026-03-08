@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Jobs\Stats\DiscoverSeasonsJob;
 use App\Jobs\Stats\SyncMatchDetailJob;
+use App\Jobs\Stats\SyncPlayersJob;
 use App\Jobs\Stats\SyncTeamSeasonJob;
 use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
@@ -76,6 +77,7 @@ class DebugOperations extends Page
         return [
             'health' => $this->getHealthStatus(),
             'externalSync' => $this->getExternalSyncStats(),
+            'playerSync' => $this->getPlayerSyncStats(),
             'legacyImport' => $this->getLegacyImportStats(),
             'auditLogs' => $this->getAuditLogs(),
             'discoveryStats' => $this->getDiscoveryStats(),
@@ -187,6 +189,28 @@ class DebugOperations extends Page
                         }
 
                         Notification::make()->title('Sync jobs dispatched'.($mode ?: ''))->success()->send();
+                    }),
+
+                Action::make('syncPlayers')
+                    ->label('Synchronizace hráčů')
+                    ->tooltip('Spustí hloubkovou synchronizaci detailů (fotky, historie) pro všechny hráče s externím mapováním.')
+                    ->icon(IconHelper::render(IconHelper::USER))
+                    ->color('info')
+                    ->form([
+                        \Filament\Forms\Components\Toggle::make('force')
+                            ->label('Force mode')
+                            ->helperText('Ignoruje hash obsahu.')
+                            ->onColor('warning'),
+                        \Filament\Forms\Components\Select::make('team_id')
+                            ->label('Pouze pro tým')
+                            ->options(Team::pluck('name', 'id'))
+                            ->placeholder('Všichni hráči'),
+                    ])
+                    ->requiresConfirmation()
+                    ->action(function (array $data) {
+                        ConsoleService::log("Spouštím hloubkovou synchronizaci hráčů...");
+                        SyncPlayersJob::dispatch($data);
+                        Notification::make()->title('Synchronizace hráčů naplánována.')->info()->send();
                     }),
 
                 Action::make('syncAllSeasons')
@@ -619,6 +643,27 @@ class DebugOperations extends Page
         }
 
         return $stats;
+    }
+
+    protected function getPlayerSyncStats(): array
+    {
+        $totalPlayersWithMapping = DB::table('external_entity_mappings')
+            ->where('source_key', 'czbasketball')
+            ->where('entity_type', 'player')
+            ->count();
+
+        $syncedPlayers = \App\Models\PlayerProfile::whereNotNull('metadata->last_sync_at')->count();
+
+        $lastSync = ExternalImportRun::where('run_type', 'player_detail')
+            ->where('status', 'success')
+            ->latest('finished_at')
+            ->first();
+
+        return [
+            'total' => $totalPlayersWithMapping,
+            'synced' => $syncedPlayers,
+            'last_sync' => $lastSync?->finished_at,
+        ];
     }
 
     protected function getLegacyImportStats(): ?array

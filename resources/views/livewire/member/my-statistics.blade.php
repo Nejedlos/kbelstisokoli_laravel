@@ -475,11 +475,13 @@
                         @forelse($matches as $m)
                         @php
                             $hasScore = isset($m['score_home']) && isset($m['score_away']);
+                            $isOdehrano = in_array($m['status'], ['finished', 'completed', 'played']);
+
                             $isWin = false;
                             $isDraw = false;
                             $isLoss = false;
 
-                            if ($hasScore && $m['status'] === 'finished') {
+                            if ($hasScore && $isOdehrano) {
                                 $isWin = $m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home']);
                                 $isDraw = $m['score_home'] == $m['score_away'];
                                 $isLoss = !$isWin && !$isDraw;
@@ -487,7 +489,9 @@
 
                             $scheduledAt = $m['scheduled_at'] ? \Carbon\Carbon::parse($m['scheduled_at']) : null;
                             $isPast = $scheduledAt ? $scheduledAt->isPast() : ($m['season_id'] < 3);
-                            $isActionTookPlace = ($m['status'] === 'finished' && !$hasScore) || ($m['status'] !== 'finished' && $isPast);
+                            $isActionTookPlace = ($isOdehrano && !$hasScore) || (!$isOdehrano && $isPast);
+
+                            $hasDetail = !empty($m['metadata']['external_id']) || !empty($m['metadata']['season_external_match_id']) || $isOdehrano;
 
                             $typeIcon = match($m['match_type'] ?? '') {
                                 'mistrovske' => 'fa-trophy text-amber-500',
@@ -517,7 +521,10 @@
                             ])
                         >
                             <td class="px-6 py-5">
-                                <div class="text-sm font-black text-gray-800 dark:text-gray-200">
+                                <div class="text-sm font-black text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                    @if(!empty($m['metadata']['external_id']) || !empty($m['metadata']['season_external_match_id']))
+                                        <i class="fa-light fa-cloud-arrow-down text-blue-400 text-xs" title="Synchronizováno z externího zdroje"></i>
+                                    @endif
                                     {{ $scheduledAt ? $scheduledAt->format('d. m. Y') : '-' }}
                                 </div>
                                 <div class="text-[10px] text-gray-400 font-bold tracking-widest uppercase">
@@ -606,13 +613,14 @@
                                 @endif
                             </td>
                             <td class="px-6 py-5 text-right">
-                                @if($m['status'] === 'finished')
+                                @if($hasDetail && \Illuminate\Support\Facades\Route::has('member.statistics.matches.show'))
                                     <a
                                         href="{{ route('member.statistics.matches.show', $m['id']) }}"
                                         @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-primary-500 hover:text-white transition-all shadow-sm group/btn"
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-primary-500 hover:text-white transition-all shadow-sm group/btn font-bold text-[10px] uppercase tracking-wider"
                                         title="Detail zápasu"
                                     >
+                                        <span>{{ __('matches.match_detail') }}</span>
                                         <i class="fa-light fa-chevron-right transition-transform group-hover/btn:translate-x-0.5"></i>
                                     </a>
                                 @endif

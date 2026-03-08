@@ -88,7 +88,7 @@ class PlayerSyncService
     /**
      * Synchronizuje fotografii do Media Library.
      */
-    protected function syncPhoto(User $user, string $photoUrl): void
+    public function syncPhoto(User $user, string $photoUrl): void
     {
         try {
             // Kontrola, zda už fotku v portfoliu nemá

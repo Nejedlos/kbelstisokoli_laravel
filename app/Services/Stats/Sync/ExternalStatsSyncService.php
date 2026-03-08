@@ -766,8 +766,9 @@ class ExternalStatsSyncService
             }
 
             if ($user) {
-                // Pokud je to náš hráč, provedeme kompletní synchronizaci detailu (včetně historie a všech fotek)
-                $this->playerSyncService->syncPlayer($user);
+                // Pokud je to náš hráč, synchronizujeme alespoň tuto fotografii
+                // Hloubková synchronizace detailu (historie atd.) se provádí samostatně
+                $this->playerSyncService->syncPhoto($user, $photoUrl);
             }
         }
     }

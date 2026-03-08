@@ -231,7 +231,7 @@
                             <tbody class="divide-y divide-gray-50">
                                 @php
                                     $playerStats = \App\Models\StatisticRow::where('basketball_match_id', $match->id)
-                                        ->whereHas('statisticSet', fn($q) => $q->where('slug', 'match-boxscore'))
+                                        ->whereHas('set', fn($q) => $q->where('slug', 'match-boxscore'))
                                         ->get();
                                 @endphp
 

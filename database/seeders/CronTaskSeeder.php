@@ -27,6 +27,13 @@ class CronTaskSeeder extends Seeder
                 'priority' => 5,
             ],
             [
+                'name' => 'Synchronizace detailů hráčů (Hluboká)',
+                'command' => 'stats:sync-players',
+                'expression' => '0 5 * * *', // Každý den v 5:00
+                'description' => 'Hloubková synchronizace profilových údajů hráčů (fotky, historie kariéry) z cz.basketball.',
+                'priority' => 5,
+            ],
+            [
                 'name' => 'Synchronizace statistik (Celková - vše)',
                 'command' => 'stats:import',
                 'expression' => '30 3 * * *', // Denně ve 3:30 (baseline)
