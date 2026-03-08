@@ -51,18 +51,16 @@ abstract class BaseNotification extends Notification implements ShouldQueue
             ? (__($data['title']).' | '.$clubName)
             : __('member.notifications.mail.subject_default', ['club' => $clubName]);
 
-        $mail = (new MailMessage)
+        return (new MailMessage)
             ->subject($subject)
-            ->greeting(__('member.notifications.mail.greeting', ['name' => $notifiable->name]))
-            ->line(! empty($data['message']) ? $data['message'] : '')
-            ->action(
-                ! empty($data['action_label']) ? __($data['action_label']) : __('member.notifications.mail.view_portal'),
-                $data['action_url'] ?? route('member.dashboard')
-            )
-            ->line(__('member.notifications.mail.footer'))
-            ->salutation(__('member.notifications.mail.salutation', ['club' => $clubName]));
-
-        return $mail;
+            ->view('emails.notification', [
+                'greeting' => __('member.notifications.mail.greeting', ['name' => $notifiable->name]),
+                'introLines' => [! empty($data['message']) ? $data['message'] : ''],
+                'actionText' => ! empty($data['action_label']) ? __($data['action_label']) : __('member.notifications.mail.view_portal'),
+                'actionUrl' => $data['action_url'] ?? route('member.dashboard'),
+                'outroLines' => [__('member.notifications.mail.footer')],
+                'salutation' => __('member.notifications.mail.salutation', ['club' => $clubName]),
+            ]);
     }
 
     /**

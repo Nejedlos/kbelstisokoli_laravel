@@ -2,12 +2,17 @@
      x-data="ksFeedbackWidget()"
      x-init="init()"
      class="ks-feedback-system"
-     data-html2canvas-ignore="true">
+     data-html2canvas-ignore="true"
+     data-user-id="{{ Auth::id() }}"
+     data-user-email="{{ optional(Auth::user())->email }}"
+     data-user-roles="{{ optional(Auth::user())->getRoleNames()->implode(',') }}"
+     data-app-version="{{ config('app.version', '1.0') }}"
+     data-route-name="{{ Route::currentRouteName() }}">
 
     <!-- Floating Action Button -->
     <button @click="openModal()"
             type="button"
-            class="feedback-fab fixed z-[9999] bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group"
+            class="feedback-fab fixed z-[9999] left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
             :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'"
             aria-label="Odeslat zpětnou vazbu">
         <i class="fa-light fa-bug text-2xl group-hover:rotate-12 transition-transform"></i>
@@ -286,7 +291,7 @@
                     this.setupBreadcrumbs();
                     this.setupClickTracking();
 
-                    this.debugInfo = `v${document.documentElement.dataset.appVersion || '1.0'}`;
+                    this.debugInfo = `v${this.$el.dataset.appVersion || '1.0'}`;
 
                     // ESC to close
                     window.addEventListener('keydown', (e) => {
@@ -590,18 +595,18 @@
                             include: this.options,
                             context: {
                                 url: window.location.href,
-                                route: document.documentElement.dataset.routeName || null,
+                                route: this.$el.dataset.routeName || null,
                                 referrer: document.referrer,
                                 area: this.getSourceArea(),
                                 locale: document.documentElement.lang || 'cs',
                                 timestamp: new Date().toISOString(),
                                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                                appVersion: document.documentElement.dataset.appVersion || '1.0',
+                                appVersion: this.$el.dataset.appVersion || '1.0',
                                 requestId: this.getResponseHeader('X-Request-ID'),
                                 user: {
-                                    id: document.documentElement.dataset.userId || null,
-                                    email: document.documentElement.dataset.userEmail || null,
-                                    roles: (document.documentElement.dataset.userRoles || '').split(',').filter(Boolean)
+                                    id: this.$el.dataset.userId || null,
+                                    email: this.$el.dataset.userEmail || null,
+                                    roles: (this.$el.dataset.userRoles || '').split(',').filter(Boolean)
                                 },
                                 device: {
                                     userAgent: navigator.userAgent,

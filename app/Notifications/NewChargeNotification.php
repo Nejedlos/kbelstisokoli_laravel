@@ -24,20 +24,27 @@ class NewChargeNotification extends BaseNotification
 
         return (new MailMessage)
             ->subject(__('member.notifications.mail.new_charge_subject', ['title' => $this->charge->title]))
-            ->greeting(__('member.notifications.mail.greeting', ['name' => $notifiable->name]))
-            ->line(__('member.notifications.new_charge_message', [
-                'title' => $this->charge->title,
-                'amount' => number_format($this->charge->amount_total, 0, ',', ' '),
-            ]))
-            ->line(__('member.notifications.mail.charge_item', ['title' => $this->charge->title]))
-            ->line(__('member.notifications.mail.charge_amount', ['amount' => number_format($this->charge->amount_total, 0, ',', ' ')]))
-            ->line(__('member.notifications.mail.charge_due_date', [
-                'date' => $this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : __('member.notifications.mail.charge_due_date_unknown'),
-            ]))
-            ->action(__('member.notifications.view_payments'), route('member.economy.index'))
-            ->line(__('member.notifications.mail.charge_please_pay'))
-            ->line(__('member.notifications.mail.footer'))
-            ->salutation(__('member.notifications.mail.salutation', ['club' => $clubName]));
+            ->view('emails.notification', [
+                'greeting' => __('member.notifications.mail.greeting', ['name' => $notifiable->name]),
+                'introLines' => [
+                    __('member.notifications.new_charge_message', [
+                        'title' => $this->charge->title,
+                        'amount' => number_format($this->charge->amount_total, 0, ',', ' '),
+                    ]),
+                    __('member.notifications.mail.charge_item', ['title' => $this->charge->title]),
+                    __('member.notifications.mail.charge_amount', ['amount' => number_format($this->charge->amount_total, 0, ',', ' ')]),
+                    __('member.notifications.mail.charge_due_date', [
+                        'date' => $this->charge->due_date ? $this->charge->due_date->format('d. m. Y') : __('member.notifications.mail.charge_due_date_unknown'),
+                    ]),
+                ],
+                'actionText' => __('member.notifications.view_payments'),
+                'actionUrl' => route('member.economy.index'),
+                'outroLines' => [
+                    __('member.notifications.mail.charge_please_pay'),
+                    __('member.notifications.mail.footer'),
+                ],
+                'salutation' => __('member.notifications.mail.salutation', ['club' => $clubName]),
+            ]);
     }
 
     /**

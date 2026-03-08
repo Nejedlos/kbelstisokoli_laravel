@@ -42,6 +42,24 @@ class FeedbackSystemTest extends TestCase
         $response->assertSee('ks-feedback-widget');
     }
 
+    public function test_auth_admin_sees_widget_in_admin_panel(): void
+    {
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->assignRole($adminRole);
+
+        $response = $this->actingAs($admin)->get('/admin');
+
+        // Filament can redirect to dashboard or login if session is not right,
+        // but since we are actingAs, it should be 200 or 302 to dashboard.
+        if ($response->status() === 302) {
+            $response = $this->followRedirects($response);
+        }
+
+        $response->assertStatus(200);
+        $response->assertSee('ks-feedback-widget');
+    }
+
     public function test_guest_cannot_post_feedback(): void
     {
         $response = $this->postJson('/feedback', [

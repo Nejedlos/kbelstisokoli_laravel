@@ -79,3 +79,11 @@ Route::get('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::cl
 Route::post('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'store'])
     ->middleware(['web', 'throttle:two-factor'])
     ->name('two-factor.login.store');
+
+// --- Mail Preview (pouze pro local nebo adminy s právy) ---
+Route::middleware(['web'])->group(function () {
+    Route::get('/dev/mail-preview', [\App\Http\Controllers\Dev\MailPreviewController::class, 'index'])
+        ->name('dev.mail-preview.index');
+    Route::get('/dev/mail-preview/{type}', [\App\Http\Controllers\Dev\MailPreviewController::class, 'show'])
+        ->name('dev.mail-preview.show');
+});

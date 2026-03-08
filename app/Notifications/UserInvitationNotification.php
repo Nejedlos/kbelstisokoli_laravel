@@ -38,19 +38,27 @@ class UserInvitationNotification extends BaseNotification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $branding = app(\App\Services\BrandingService::class)->getSettings();
+        $clubName = $branding['club_name'];
         $resetUrl = url(route('password.reset', [
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
         ], false));
 
         return (new MailMessage)
-            ->subject('Pozvánka do členské sekce | '.$branding['club_name'])
-            ->greeting('Ahoj '.$notifiable->name.'!')
-            ->line('Byl vám vytvořen přístup do členské sekce basketbalového klubu '.$branding['club_name'].'.')
-            ->line('Pro aktivaci účtu a nastavení hesla klikněte na tlačítko níže:')
-            ->action('Nastavit přístupové heslo', $resetUrl)
-            ->line('Tento odkaz je platný po omezenou dobu.')
-            ->line('Pokud jste pozvánku nečekali, můžete tento e-mail ignorovat.')
-            ->salutation('Tvůj tým '.$branding['club_name']);
+            ->subject('Pozvánka do členské sekce | '.$clubName)
+            ->view('emails.notification', [
+                'greeting' => 'Ahoj '.$notifiable->name.'!',
+                'introLines' => [
+                    'Byl vám vytvořen přístup do členské sekce basketbalového klubu '.$clubName.'.',
+                    'Pro aktivaci účtu a nastavení hesla klikněte na tlačítko níže:',
+                ],
+                'actionText' => 'Nastavit přístupové heslo',
+                'actionUrl' => $resetUrl,
+                'outroLines' => [
+                    'Tento odkaz je platný po omezenou dobu.',
+                    'Pokud jste pozvánku nečekali, můžete tento e-mail ignorovat.',
+                ],
+                'salutation' => 'Tvůj tým '.$clubName,
+            ]);
     }
 }
