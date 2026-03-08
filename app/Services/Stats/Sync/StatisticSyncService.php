@@ -158,11 +158,11 @@ class StatisticSyncService
                     'basketball_match_id' => $match->id,
                     'team_id' => $currentTeamId,
                     'player_id' => $playerId,
-                    'row_label' => $playerId ? null : $playerName,
                 ];
 
                 $values = [
                     'season_id' => $match->season_id,
+                    'row_label' => $playerName,
                     'values' => $row->values,
                     'source_metadata' => [
                         'source' => 'czbasketball',

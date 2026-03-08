@@ -18,6 +18,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         '2B' => 'fg2_made',
         '3B' => 'fg3_made',
         'TH' => 'ft_made',
+        'TH-Ú' => 'ft_made',
+        'TH-P' => 'ft_att',
         'F+' => 'fouls_drawn',
         'F-' => 'fouls',
         'CH' => 'fouls',
@@ -29,8 +31,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         'U' => 'rebounds_off',
         'O' => 'rebounds_def',
         'AS' => 'assists',
+        'A' => 'assists',
         'ZIS' => 'steals',
+        'Z' => 'steals',
         'ZTR' => 'turnovers',
+        'T' => 'turnovers',
         'BL' => 'blocks',
         'VAL' => 'efficiency',
     ];
@@ -139,11 +144,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
         // Skóre po čtvrtinách (periods)
         $periods = [];
-        $periodsNode = $searchIn->filter('.periods, .score-periods, .score-quarters');
+        $periodsNode = $searchIn->filter('.periods, .score-periods, .score-quarters, .match-quarters');
         if ($periodsNode->count() > 0) {
             $header['periods_text'] = trim($periodsNode->text());
             // Zkusíme naparsovat čtvrtiny (např. 20:15, 10:12, ...)
-            if (preg_match_all('/(\d+):(\d+)/', $header['periods_text'], $m)) {
+            if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $m)) {
                 foreach ($m[0] as $i => $pair) {
                     $periods[] = [
                         'home' => (int)$m[1][$i],
@@ -175,9 +180,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
             if (empty($periods)) {
                 $allText = $searchIn->text();
-                if (preg_match('/\(([\d:\s,]+)\)/', $allText, $m)) {
+                // Zpřísněný regex pro čtvrtiny v závorkách: hledáme aspoň dvě dvojice čísel s dvojtečkou
+                if (preg_match('/\(((\d+\s*:\s*\d+[\s,]*){2,})\)/', $allText, $m)) {
                     $header['periods_text'] = trim($m[1]);
-                    if (preg_match_all('/(\d+):(\d+)/', $header['periods_text'], $pm)) {
+                    if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $pm)) {
                         foreach ($pm[0] as $i => $pair) {
                             $periods[] = [
                                 'home' => (int)$pm[1][$i],
@@ -231,14 +237,14 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $bestPlayers = [];
 
         // Na cz.basketball jsou nejlepší hráči v sekci s ID "nejlepsi-hrac" nebo v .best-player-card
-        $bestPlayerSection = $crawler->filter('#nejlepsi-hrac, .best-players-section, .match-best-players');
+        $bestPlayerSection = $crawler->filter('#nejlepsi-hrac, .best-players-section, .match-best-players, .best-players, .match-top-players');
 
         if ($bestPlayerSection->count() > 0) {
             $bestPlayerSection->filter('.best-player-card, .player-card, .best-player-item')->each(function (Crawler $card) use (&$bestPlayers) {
                 $player = [];
 
                 // Jméno a odkaz
-                $nameNode = $card->filter('.player-name, h4, a')->first();
+                $nameNode = $card->filter('.player-name, .name, h4, h5, a')->first();
                 if ($nameNode->count() > 0) {
                     $player['name'] = trim($nameNode->text());
                     $link = $card->filter('a[href*="/hrac/"]')->first();
@@ -394,7 +400,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                        str_contains($classString, 'success') ||
                        str_contains($classString, 'info') ||
                        str_contains(mb_strtolower($playerName ?? ''), 'celkem') ||
-                       str_contains(mb_strtolower($playerName ?? ''), 'tým');
+                       (str_contains(mb_strtolower($playerName ?? ''), 'tým') && ! str_contains(mb_strtolower($playerName ?? ''), '/'));
 
             if ($playerName || $isTotal) {
                 $rowLabel = $isTotal ? ($playerName ?: 'Tým celkem') : $playerName;

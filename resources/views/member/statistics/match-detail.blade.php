@@ -230,61 +230,49 @@
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 @php
-                                    $playerStats = \App\Models\StatisticRow::where('basketball_match_id', $match->id)
+                                    $allStats = \App\Models\StatisticRow::where('basketball_match_id', $match->id)
+                                        ->with(['player', 'team'])
                                         ->whereHas('set', fn($q) => $q->where('slug', 'match-boxscore'))
                                         ->get();
+
+                                    $homeStats = $allStats->filter(fn($s) => $match->is_home ? $s->team_id === $match->team_id : $s->source_metadata['is_opponent'] ?? false);
+                                    $awayStats = $allStats->filter(fn($s) => $match->is_home ? $s->source_metadata['is_opponent'] ?? false : $s->team_id === $match->team_id);
+
+                                    // Pokud nejsou rozděleny (např. stará data), použijeme vše
+                                    if ($homeStats->isEmpty() && $awayStats->isEmpty()) {
+                                        $homeStats = $allStats;
+                                    }
                                 @endphp
 
-                                @forelse($playerStats as $stat)
-                                    <tr class="hover:bg-brand-50/30 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400">
-                                                    {{ $stat->metadata['jersey'] ?? '#' }}
-                                                </div>
-                                                <div class="flex flex-col">
-                                                    <span class="text-sm font-bold text-gray-900">{{ $stat->row_label }}</span>
-                                                    @if(!empty($stat->metadata['is_starter']))
-                                                        <span class="text-[9px] font-bold text-brand-500 uppercase tracking-tighter">Základní pětka</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-4 text-center">
-                                            <span class="text-base font-black text-gray-900 tabular-nums">{{ $stat->values['pts'] ?? 0 }}</span>
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums">
-                                            {{ $stat->values['minutes'] ?? '-' }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-sm font-bold text-green-600 tabular-nums">
-                                            {{ $stat->values['fouls_drawn'] ?? 0 }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-sm font-bold text-red-500 tabular-nums">
-                                            {{ $stat->values['fouls'] ?? 0 }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums">
-                                            {{ $stat->values['ft_made'] ?? 0 }}/{{ $stat->values['ft_att'] ?? 0 }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums">
-                                            {{ $stat->values['fg2_made'] ?? 0 }}/{{ $stat->values['fg2_att'] ?? 0 }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums">
-                                            {{ $stat->values['fg3_made'] ?? 0 }}/{{ $stat->values['fg3_att'] ?? 0 }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center">
-                                            @php $val = $stat->values['efficiency'] ?? 0; @endphp
-                                            <span class="px-2 py-1 rounded-lg text-xs font-black tabular-nums {{ $val >= 15 ? 'bg-green-100 text-green-700' : ($val < 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700') }}">
-                                                {{ $val }}
-                                            </span>
+                                @if($homeStats->isNotEmpty())
+                                    <tr class="bg-gray-100/50">
+                                        <td colspan="9" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            {{ $match->is_home ? $match->team->name : $match->opponent->name }}
                                         </td>
                                     </tr>
-                                @empty
+                                    @foreach($homeStats as $stat)
+                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat])
+                                    @endforeach
+                                @endif
+
+                                @if($awayStats->isNotEmpty())
+                                    <tr class="bg-gray-100/50">
+                                        <td colspan="9" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            {{ $match->is_home ? $match->opponent->name : $match->team->name }}
+                                        </td>
+                                    </tr>
+                                    @foreach($awayStats as $stat)
+                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat])
+                                    @endforeach
+                                @endif
+
+                                @if($allStats->isEmpty())
                                     <tr>
                                         <td colspan="9" class="px-6 py-12 text-center text-gray-400 italic text-sm">
                                             Statistiky hráčů pro tento zápas nejsou v databázi uloženy.
                                         </td>
                                     </tr>
-                                @endforelse
+                                @endif
                             </tbody>
                         </table>
                     </div>
