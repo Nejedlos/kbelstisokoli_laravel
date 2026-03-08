@@ -222,11 +222,11 @@
                             </x-filament::button>
 
                             <div class="grid grid-cols-2 gap-2 mt-4">
-                                <x-filament::button color="primary" size="sm" wire:click="mountAction('syncAllSeasons')" title="Spustí import dat pro všechny nakonfigurované sezóny a týmy">
-                                    <i class="fa-light fa-arrows-rotate mr-1"></i> Import vše
+                                <x-filament::button color="primary" size="sm" wire:click="mountAction('syncAllSeasons')" title="Spustí import dat pro vybrané (nebo všechny) nakonfigurované sezóny">
+                                    <i class="fa-light fa-arrows-rotate mr-1"></i> Import sezón
                                 </x-filament::button>
-                                <x-filament::button color="warning" size="sm" wire:click="mountAction('recomputeAllSeasons')" title="Přepočítá statistiky pro všechny sezóny v databázi">
-                                    <i class="fa-light fa-gauge-high mr-1"></i> Přepočet vše
+                                <x-filament::button color="warning" size="sm" wire:click="mountAction('recomputeAllSeasons')" title="Přepočítá statistiky pro vybrané (nebo všechny) sezóny">
+                                    <i class="fa-light fa-gauge-high mr-1"></i> Přepočet sezón
                                 </x-filament::button>
                             </div>
 

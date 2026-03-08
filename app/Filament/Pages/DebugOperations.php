@@ -181,21 +181,36 @@ class DebugOperations extends Page
                     }),
 
                 Action::make('syncAllSeasons')
-                    ->label('Hromadný import všech sezón')
-                    ->tooltip('Spustí synchronizaci pro VŠECHNY týmy a VŠECHNY dostupné sezóny, které mají konfiguraci.')
+                    ->label('Hromadný import sezón')
+                    ->tooltip('Spustí synchronizaci pro všechny týmy a vybrané sezóny (nebo všechny), které mají konfiguraci.')
                     ->icon(IconHelper::render(IconHelper::REFRESH))
                     ->color('primary')
+                    ->form([
+                        \Filament\Forms\Components\Select::make('season_id')
+                            ->label('Sezóna')
+                            ->helperText('Ponechte prázdné pro VŠECHNY sezóny.')
+                            ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
+                            ->nullable(),
+                    ])
                     ->requiresConfirmation()
-                    ->modalHeading('Hromadný import všech sezón')
-                    ->modalDescription('Tato akce zařadí do fronty synchronizaci pro všechny týmy a všechny historické i aktuální sezóny. Může trvat dlouho.')
-                    ->action(function () {
-                        $seasons = Season::all();
+                    ->modalHeading('Hromadný import sezón')
+                    ->modalDescription('Tato akce zařadí do fronty synchronizaci pro všechny týmy a vybrané (nebo všechny) sezóny. Může trvat dlouho.')
+                    ->action(function (array $data) {
+                        $seasonId = $data['season_id'] ?? null;
+                        $seasons = $seasonId ? Season::where('id', $seasonId)->get() : Season::all();
                         $teams = Team::whereHas('externalMappings')->get();
 
-                        ConsoleService::log('Spouštím hromadnou synchronizaci VŠECH sezón (celkem: ' . $seasons->count() . ' sezón, ' . $teams->count() . ' týmů).');
+                        if ($seasonId) {
+                            $seasonName = Season::find($seasonId)?->name ?? '???';
+                            ConsoleService::log("Spouštím synchronizaci pro sezónu: {$seasonName} (celkem: " . $teams->count() . " týmů).");
+                        } else {
+                            ConsoleService::log('Spouštím hromadnou synchronizaci VŠECH sezón (celkem: ' . $seasons->count() . ' sezón, ' . $teams->count() . ' týmů).');
+                        }
 
                         foreach ($seasons as $season) {
-                            ConsoleService::log("Plánuji sezónu: {$season->name}", 'info');
+                            if (! $seasonId) {
+                                ConsoleService::log("Plánuji sezónu: {$season->name}", 'info');
+                            }
                             foreach ($teams as $team) {
                                 ConsoleService::log("  - Naplánováno: {$team->name}", 'info');
                                 SyncTeamSeasonJob::dispatch($team->id, $season->id, [
@@ -206,7 +221,7 @@ class DebugOperations extends Page
                             }
                         }
 
-                        Notification::make()->title('All seasons sync jobs dispatched')->success()->send();
+                        Notification::make()->title($seasonId ? "Sync jobs dispatched for $seasonName" : 'All seasons sync jobs dispatched')->success()->send();
                     }),
 
                 Action::make('fullSeasonProcess')
@@ -272,6 +287,11 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::SEO))
                     ->color('info')
                     ->form([
+                        \Filament\Forms\Components\Select::make('season_id')
+                            ->label('Konkrétní sezóna')
+                            ->helperText('Vyberte, pokud chcete hledat jen pro jednu sezónu. Jinak se projdou všechny prázdné.')
+                            ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
+                            ->nullable(),
                         \Filament\Forms\Components\Select::make('mode')
                             ->label('Spouštěcí mód')
                             ->options([
@@ -286,22 +306,25 @@ class DebugOperations extends Page
                     ])
                     ->requiresConfirmation()
                     ->action(function (array $data) {
+                        $seasonId = $data['season_id'] ?? null;
+                        $seasonName = $seasonId ? Season::find($seasonId)?->name : null;
+
                         $options = [
                             'force' => $data['force'] ?? false,
                         ];
 
                         if ($data['mode'] === 'job') {
-                            DiscoverSeasonsJob::dispatch(null, null, $options);
-                            ConsoleService::log('Discovery proces naplánován jako job na pozadí.', 'info');
+                            DiscoverSeasonsJob::dispatch(null, $seasonName, $options);
+                            ConsoleService::log('Discovery proces ' . ($seasonName ? "pro sezónu $seasonName " : '') . 'naplánován jako job na pozadí.', 'info');
                             Notification::make()->title('Discovery job dispatched')->success()->send();
 
                             return;
                         }
 
                         // Synchronní běh (původní)
-                        ConsoleService::log('Zahajuji proces vyhledávání chybějících sezón (Discovery)...', 'info');
+                        ConsoleService::log('Zahajuji proces vyhledávání chybějících sezón (Discovery)' . ($seasonName ? " pro sezónu $seasonName" : '') . '...', 'info');
                         $discoveryService = app(\App\Services\Stats\Sync\SeasonDiscoveryService::class);
-                        $results = $discoveryService->discover(null, null, $options);
+                        $results = $discoveryService->discover(null, $seasonName, $options);
 
                         $found = count(array_filter($results, fn ($r) => ! in_array($r['status'], ['not found', 'error'])));
 
@@ -358,29 +381,44 @@ class DebugOperations extends Page
                     }),
 
                 Action::make('recomputeAllSeasons')
-                    ->label('Přepočítat VŠECHNY sezóny')
-                    ->tooltip('Přepočítá statistiky pro VŠECHNY týmy a VŠECHNY sezóny.')
+                    ->label('Přepočítat sezóny')
+                    ->tooltip('Přepočítá statistiky pro všechny týmy a vybrané sezóny (nebo všechny).')
                     ->icon(IconHelper::render(IconHelper::GAUGE))
                     ->color('warning')
+                    ->form([
+                        \Filament\Forms\Components\Select::make('season_id')
+                            ->label('Sezóna')
+                            ->helperText('Ponechte prázdné pro VŠECHNY sezóny.')
+                            ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
+                            ->nullable(),
+                    ])
                     ->requiresConfirmation()
-                    ->action(function () {
-                        $seasons = Season::all();
+                    ->action(function (array $data) {
+                        $seasonId = $data['season_id'] ?? null;
+                        $seasons = $seasonId ? Season::where('id', $seasonId)->get() : Season::all();
                         $teams = Team::whereHas('externalMappings')->get();
                         $statService = app(\App\Services\Stats\Sync\StatisticSyncService::class);
 
-                        ConsoleService::log('Spouštím hromadný přepočet VŠECH sezón (celkem: ' . $seasons->count() . ' sezón).');
+                        if ($seasonId) {
+                            $seasonName = Season::find($seasonId)?->name ?? '???';
+                            ConsoleService::log("Spouštím přepočet statistiky pro sezónu: {$seasonName} (celkem: " . $teams->count() . " týmů).");
+                        } else {
+                            ConsoleService::log('Spouštím hromadný přepočet VŠECH sezón (celkem: ' . $seasons->count() . ' sezón).');
+                        }
 
                         foreach ($seasons as $season) {
                             ConsoleService::log("Zpracovávám sezónu: {$season->name}", 'info');
                             $statService->recomputePlayerSummaries($season->id);
                             foreach ($teams as $team) {
-                                ConsoleService::log("  - Tým: {$team->name}", 'info');
+                                if (! $seasonId) {
+                                    ConsoleService::log("  - Tým: {$team->name}", 'info');
+                                }
                                 $statService->recomputeTeamSummary($season->id, $team->id);
                             }
                         }
 
-                        ConsoleService::log('Hromadný přepočet dokončen.', 'success');
-                        Notification::make()->title('Aggregations recomputed for ALL seasons')->success()->send();
+                        ConsoleService::log($seasonId ? "Přepočet sezóny $seasonName dokončen." : 'Hromadný přepočet dokončen.', 'success');
+                        Notification::make()->title($seasonId ? "Aggregations recomputed for season: $seasonName" : 'Aggregations recomputed for ALL seasons')->success()->send();
                     }),
             ])
                 ->label('Přepočty statistik')
