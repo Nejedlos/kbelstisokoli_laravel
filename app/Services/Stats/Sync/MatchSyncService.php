@@ -197,12 +197,12 @@ class MatchSyncService
 
         // Zpracování statusu
         $status = $matchData['status'] ?? 'planned';
-        if (($scoreHome !== null && $scoreAway !== null) || $status === 'played' || $status === 'completed') {
+        if (($scoreHome !== null && $scoreAway !== null) || in_array($status, ['played', 'completed'])) {
             $status = 'finished';
         }
 
         // Pokud je zápas v minulosti, měl by být označen jako odehraný (finished), i když nemá skóre
-        if ($status === 'planned' && $scheduledAt && $scheduledAt->isPast()) {
+        if (in_array($status, ['planned', 'scheduled']) && $scheduledAt && $scheduledAt->isPast()) {
             $status = 'finished';
         }
 

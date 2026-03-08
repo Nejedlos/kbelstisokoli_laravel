@@ -399,15 +399,24 @@
                             <td class="px-6 py-4 text-center">
                                 @if($m['status'] === 'finished')
                                     @php
-                                        $isWin = $m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home']);
+                                        $hasScore = isset($m['score_home']) && isset($m['score_away']);
+                                        $isWin = $hasScore ? ($m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home'])) : false;
+                                        $isDraw = $hasScore ? ($m['score_home'] == $m['score_away']) : false;
                                     @endphp
-                                    <span @class([
-                                        'px-2 py-1 rounded text-[10px] font-black',
-                                        'bg-green-50 text-green-600' => $isWin,
-                                        'bg-red-50 text-red-600' => !$isWin
-                                    ])>
-                                        {{ $isWin ? 'VÝHRA' : 'PROHRA' }}
-                                    </span>
+                                    @if($hasScore)
+                                        <span @class([
+                                            'px-2 py-1 rounded text-[10px] font-black',
+                                            'bg-green-50 text-green-600' => $isWin,
+                                            'bg-gray-50 text-gray-600' => $isDraw,
+                                            'bg-red-50 text-red-600' => !$isWin && !$isDraw
+                                        ])>
+                                            {{ $isWin ? 'VÝHRA' : ($isDraw ? 'REMIZA' : 'PROHRA') }}
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-1 rounded bg-blue-50 text-blue-600 text-[10px] font-black">
+                                            ODEHRÁNO
+                                        </span>
+                                    @endif
                                 @else
                                     <span class="px-2 py-1 rounded bg-gray-50 text-gray-400 text-[10px] font-bold">
                                         PLÁNOVÁNO
@@ -415,7 +424,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-center">
-                                @if($m['status'] === 'finished')
+                                @if($m['status'] === 'finished' && isset($m['score_home']) && isset($m['score_away']))
                                     <div class="text-sm font-black text-gray-800 dark:text-white">
                                         {{ $m['score_home'] }}:{{ $m['score_away'] }}
                                     </div>
