@@ -41,6 +41,8 @@ return [
     'draw' => 'Draw',
     'home' => 'Home',
     'away' => 'Away',
+    'is_home' => 'Home',
+    'is_away' => 'Away',
     'result_missing' => 'Result not specified',
     'action_took_place' => 'Action took place',
     'match_detail' => 'Match detail',
@@ -51,4 +53,5 @@ return [
     'venue' => 'Venue',
     'attendance' => 'Attendance',
     'commissioner' => 'Commissioner',
+    'external_detail' => 'View on cz.basketball',
 ];

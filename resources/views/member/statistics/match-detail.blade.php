@@ -26,39 +26,44 @@
                                 {{ $match->metadata['venue'] ?? $match->location }}
                             </span>
                         @endif
+                        @if(!empty($match->metadata['external_id']))
+                            <a href="https://cz.basketball/zapas/{{ $match->metadata['external_id'] }}" target="_blank" class="flex items-center gap-2 px-4 py-1.5 bg-brand-50 text-brand-600 rounded-full hover:bg-brand-100 transition-colors">
+                                <i class="fa-light fa-basketball"></i>
+                                {{ __('matches.external_detail') }}
+                                <i class="fa-light fa-up-right-from-square text-[10px]"></i>
+                            </a>
+                        @endif
                     </div>
 
                     {{-- Teams and Score --}}
                     <div class="w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4 max-w-5xl">
-                        {{-- Home Team --}}
+                        {{-- Home Team (Vždy vlevo) --}}
                         <div class="flex-1 text-center md:text-right">
                             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                                {{ $match->is_home ? $match->team->name : $match->opponent->name }}
+                                {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                             </h2>
-                            @if($match->is_home)
-                                <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-full uppercase tracking-wider">DOMÁCÍ</span>
-                            @endif
+                            <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-full uppercase tracking-wider">{{ __('matches.is_home') }}</span>
                         </div>
 
                         {{-- Score --}}
                         <div class="flex flex-col items-center">
                             <div class="flex items-center gap-6">
                                 <div class="text-6xl md:text-8xl font-black tabular-nums tracking-tighter text-gray-900">
-                                    {{ $match->is_home ? ($match->score_home ?? 0) : ($match->score_away ?? 0) }}
+                                    {{ $match->score_home ?? 0 }}
                                 </div>
                                 <div class="text-3xl font-light text-gray-300">:</div>
                                 <div class="text-6xl md:text-8xl font-black tabular-nums tracking-tighter text-gray-900">
-                                    {{ $match->is_home ? ($match->score_away ?? 0) : ($match->score_home ?? 0) }}
+                                    {{ $match->score_away ?? 0 }}
                                 </div>
                             </div>
 
                             @if(!empty($match->metadata['periods_detailed']))
-                                <div class="mt-4 flex gap-3">
+                                <div class="mt-6 flex flex-wrap justify-center gap-3">
                                     @foreach($match->metadata['periods_detailed'] as $period)
-                                        <div class="flex flex-col items-center px-3 py-1.5 bg-gray-50 rounded-xl border border-gray-100">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase">{{ $loop->iteration }}.</span>
+                                        <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 shadow-sm">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{{ $loop->iteration }}.Q</span>
                                             <span class="text-sm font-bold text-gray-700 tabular-nums">
-                                                {{ $match->is_home ? $period['home'] : $period['away'] }}:{{ $match->is_home ? $period['away'] : $period['home'] }}
+                                                {{ $period['home'] }}:{{ $period['away'] }}
                                             </span>
                                         </div>
                                     @endforeach
@@ -70,14 +75,12 @@
                             @endif
                         </div>
 
-                        {{-- Away Team --}}
+                        {{-- Away Team (Vždy vpravo) --}}
                         <div class="flex-1 text-center md:text-left">
                             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                                {{ $match->is_home ? $match->opponent->name : $match->team->name }}
+                                {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                             </h2>
-                            @if(!$match->is_home)
-                                <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-full uppercase tracking-wider">DOMÁCÍ</span>
-                            @endif
+                            <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full uppercase tracking-wider">{{ __('matches.is_away') }}</span>
                         </div>
                     </div>
 

@@ -196,7 +196,9 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $scoreContainer = $searchIn->filter('.font-size-normal.font-weight-normal.mt-1.d-flex.justify-content-center')->first();
             if ($scoreContainer->count() > 0) {
                 $scoreContainer->filter('.font-size-smaller.text-gray.font-weight-bold')->each(function (Crawler $div) use (&$periods) {
-                    $text = trim($div->text());
+                    // Použijeme html() a nahradíme <br> mezerou, aby se čísla nespojila (např. 18<br>18 -> "18 18")
+                    $html = $div->html();
+                    $text = trim(str_replace(['<br>', '<br/>', '<br />'], ' ', $html));
                     $parts = preg_split('/\s+/', $text);
                     if (count($parts) >= 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
                         $periods[] = [

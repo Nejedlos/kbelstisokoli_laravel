@@ -41,6 +41,8 @@ return [
     'draw' => 'Remíza',
     'home' => 'Doma',
     'away' => 'Venku',
+    'is_home' => 'Domácí',
+    'is_away' => 'Hosté',
     'result_missing' => 'Výsledek nebyl zadán',
     'action_took_place' => 'Akce proběhla',
     'match_detail' => 'Detail zápasu',
@@ -51,4 +53,5 @@ return [
     'venue' => 'Hala',
     'attendance' => 'Diváci',
     'commissioner' => 'Komisař',
+    'external_detail' => 'Zobrazit na cz.basketball',
 ];

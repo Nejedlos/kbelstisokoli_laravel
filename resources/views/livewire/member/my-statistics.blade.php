@@ -522,7 +522,11 @@
                         >
                             <td class="px-6 py-5">
                                 <div class="text-sm font-black text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                                    @if(!empty($m['metadata']['external_id']) || !empty($m['metadata']['season_external_match_id']))
+                                    @if(!empty($m['metadata']['external_id']))
+                                        <a href="https://cz.basketball/zapas/{{ $m['metadata']['external_id'] }}" target="_blank" class="text-brand-500 hover:text-brand-600 transition-colors" title="{{ __('matches.external_detail') }}">
+                                            <i class="fa-light fa-basketball text-xs"></i>
+                                        </a>
+                                    @elseif(!empty($m['metadata']['season_external_match_id']))
                                         <i class="fa-light fa-cloud-arrow-down text-blue-400 text-xs" title="Synchronizováno z externího zdroje"></i>
                                     @endif
                                     {{ $scheduledAt ? $scheduledAt->format('d. m. Y') : '-' }}
@@ -604,7 +608,8 @@
                                     <div @class([
                                         'text-2xl font-black transition-transform group-hover:scale-110',
                                         'text-green-600 dark:text-green-400 drop-shadow-sm' => $isWin,
-                                        'text-gray-800 dark:text-white' => !$isWin,
+                                        'text-red-500/80 dark:text-red-400/80' => $isLoss,
+                                        'text-gray-800 dark:text-white' => !$isWin && !$isLoss,
                                     ])>
                                         {{ $m['score_home'] }}<span class="text-gray-300 mx-1">:</span>{{ $m['score_away'] }}
                                     </div>
