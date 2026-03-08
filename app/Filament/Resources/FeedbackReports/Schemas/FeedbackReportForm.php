@@ -22,104 +22,105 @@ class FeedbackReportForm
     {
         return $schema
             ->components([
-                Tabs::make('Feedback Details')
+                Tabs::make(__('admin.resources.feedback_report.fields.summary'))
                     ->tabs([
-                        Tabs\Tab::make('Souhrn')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.summary'))
                             ->icon(FilamentIcon::get(AppIcon::LIST))
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        Section::make('Základní informace')
+                                        Section::make(__('admin.resources.feedback_report.fields.basic_info'))
                                             ->schema([
                                                 TextInput::make('title')
-                                                    ->label('Nadpis')
+                                                    ->label(__('admin.resources.feedback_report.fields.title'))
                                                     ->disabled(),
                                                 Grid::make(2)
                                                     ->schema([
                                                         TextInput::make('type')
-                                                            ->label('Typ')
+                                                            ->label(__('admin.resources.feedback_report.fields.type'))
+                                                            ->formatStateUsing(fn (string $state): string => __("admin.resources.feedback_report.type.{$state}"))
                                                             ->disabled(),
                                                         TextInput::make('severity')
-                                                            ->label('Závažnost')
+                                                            ->label(__('admin.resources.feedback_report.fields.severity'))
+                                                            ->formatStateUsing(fn (?string $state): string => $state ? __("admin.resources.feedback_report.severity.{$state}") : '-')
                                                             ->disabled(),
                                                     ]),
                                                 Textarea::make('description')
-                                                    ->label('Popis')
+                                                    ->label(__('admin.resources.feedback_report.fields.description'))
                                                     ->rows(5)
                                                     ->disabled(),
                                                 Textarea::make('steps')
-                                                    ->label('Kroky k reprodukci')
+                                                    ->label(__('admin.resources.feedback_report.fields.steps'))
                                                     ->rows(3)
                                                     ->disabled()
-                                                    ->visible(fn ($record) => !empty($record->steps)),
+                                                    ->visible(fn ($record) => !empty($record?->steps)),
                                             ])->columnSpan(1),
 
-                                        Section::make('Stav a Poznámky')
+                                        Section::make(__('admin.resources.feedback_report.fields.status_and_notes'))
                                             ->schema([
                                                 Select::make('status')
-                                                    ->label('Stav')
+                                                    ->label(__('admin.resources.feedback_report.fields.status'))
                                                     ->options([
-                                                        'new' => 'Nové',
-                                                        'triaging' => 'Prověřování',
-                                                        'in_progress' => 'V řešení',
-                                                        'resolved' => 'Vyřešeno',
-                                                        'wont_fix' => 'Nebude se řešit',
+                                                        'new' => __('admin.resources.feedback_report.status.new'),
+                                                        'triaging' => __('admin.resources.feedback_report.status.triaging'),
+                                                        'in_progress' => __('admin.resources.feedback_report.status.in_progress'),
+                                                        'resolved' => __('admin.resources.feedback_report.status.resolved'),
+                                                        'wont_fix' => __('admin.resources.feedback_report.status.wont_fix'),
                                                     ])
                                                     ->required(),
                                                 Textarea::make('admin_notes')
-                                                    ->label('Poznámky administrátora')
+                                                    ->label(__('admin.resources.feedback_report.fields.admin_notes'))
                                                     ->rows(8)
-                                                    ->placeholder('Zde můžete uvést interní poznámky k řešení...'),
+                                                    ->placeholder(__('admin.resources.feedback_report.fields.admin_notes')),
                                             ])->columnSpan(1),
                                     ]),
 
-                                Section::make('Kontext')
+                                Section::make(__('admin.resources.feedback_report.fields.context'))
                                     ->schema([
                                         Grid::make(3)
                                             ->schema([
                                                 Placeholder::make('user_name')
-                                                    ->label('Uživatel')
-                                                    ->content(fn ($record) => $record->user?->name),
+                                                    ->label(__('admin.resources.feedback_report.fields.user'))
+                                                    ->content(fn ($record) => $record?->user?->name),
                                                 Placeholder::make('source_area')
-                                                    ->label('Oblast')
-                                                    ->content(fn ($record) => ucfirst($record->source_area)),
+                                                    ->label(__('admin.resources.feedback_report.fields.source_area'))
+                                                    ->content(fn ($record) => $record ? ucfirst($record->source_area) : null),
                                                 Placeholder::make('app_version')
-                                                    ->label('Verze aplikace')
-                                                    ->content(fn ($record) => $record->app_version),
+                                                    ->label(__('admin.resources.feedback_report.fields.app_version'))
+                                                    ->content(fn ($record) => $record?->app_version),
                                                 Placeholder::make('url')
-                                                    ->label('URL')
-                                                    ->content(fn ($record) => new HtmlString("<a href='{$record->url}' target='_blank' class='text-primary-600 underline'>{$record->url}</a>")),
+                                                    ->label(__('admin.resources.feedback_report.fields.url'))
+                                                    ->content(fn ($record) => $record ? new HtmlString("<a href='{$record->url}' target='_blank' class='text-primary-600 underline'>{$record->url}</a>") : null),
                                                 Placeholder::make('ip')
-                                                    ->label('IP Adresa')
-                                                    ->content(fn ($record) => $record->ip),
+                                                    ->label(__('admin.resources.feedback_report.fields.ip'))
+                                                    ->content(fn ($record) => $record?->ip),
                                                 Placeholder::make('created_at')
-                                                    ->label('Vytvořeno')
-                                                    ->content(fn ($record) => $record->created_at->format('d.m.Y H:i:s')),
+                                                    ->label(__('admin.resources.feedback_report.fields.created_at'))
+                                                    ->content(fn ($record) => $record?->created_at?->format('d.m.Y H:i:s')),
                                             ]),
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Screenshot')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.screenshot'))
                             ->icon(FilamentIcon::get(AppIcon::MEDIA_LIBRARY))
                             ->schema([
                                 Placeholder::make('screenshot')
                                     ->label('')
-                                    ->content(fn ($record) => $record->screenshot_path
+                                    ->content(fn ($record) => ($record && $record->screenshot_path)
                                         ? new HtmlString("<img src='" . Storage::url($record->screenshot_path) . "' class='max-w-full rounded-xl shadow-lg' />")
-                                        : 'Žádný screenshot nebyl přiložen.'),
+                                        : __('admin.resources.feedback_report.fields.no_screenshot')),
                             ]),
-
-                        Tabs\Tab::make('DOM Snapshot')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.dom_snapshot'))
                             ->icon(FilamentIcon::get(AppIcon::CODE))
                             ->schema([
                                 Placeholder::make('dom_snapshot')
                                     ->label('')
-                                    ->content(fn ($record) => $record->dom_path && Storage::exists($record->dom_path)
+                                    ->content(fn ($record) => $record?->dom_path && Storage::exists($record->dom_path)
                                         ? new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs max-h-[600px]'>" . e(Storage::get($record->dom_path)) . "</pre>")
-                                        : 'Žádný DOM snapshot nebyl přiložen.'),
+                                        : __('admin.resources.feedback_report.fields.no_dom_snapshot')),
                             ]),
 
-                        Tabs\Tab::make('Logy Konzole')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.console_logs'))
                             ->icon(FilamentIcon::get(AppIcon::TERMINAL))
                             ->schema([
                                 ViewField::make('logs_content')
@@ -133,7 +134,7 @@ class FeedbackReportForm
                                     }),
                             ]),
 
-                        Tabs\Tab::make('Breadcrumbs')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.breadcrumbs'))
                             ->icon(FilamentIcon::get(AppIcon::SHOE_PRINTS))
                             ->schema([
                                 ViewField::make('breadcrumbs_content')
@@ -157,12 +158,12 @@ class FeedbackReportForm
                                     }),
                             ]),
 
-                        Tabs\Tab::make('Síť a Kliky')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.network_and_clicks'))
                             ->icon(FilamentIcon::get(AppIcon::NETWORK))
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        Section::make('Síťové chyby')
+                                        Section::make(__('admin.resources.feedback_report.fields.network_errors'))
                                             ->schema([
                                                 ViewField::make('network_logs_view')
                                                     ->label('')
@@ -179,7 +180,7 @@ class FeedbackReportForm
                                                         }
                                                     }),
                                             ]),
-                                        Section::make('Detailní kliky')
+                                        Section::make(__('admin.resources.feedback_report.fields.detailed_clicks'))
                                             ->schema([
                                                 ViewField::make('click_logs_view')
                                                     ->label('')
@@ -199,24 +200,24 @@ class FeedbackReportForm
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Výkon')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.performance'))
                             ->icon(FilamentIcon::get(AppIcon::GAUGE))
                             ->schema([
                                 Placeholder::make('performance_data')
                                     ->label('')
                                     ->content(function ($record) {
-                                        if (!$record->performance_path || !Storage::exists($record->performance_path)) return 'Žádná data.';
+                                        if (!$record?->performance_path || !Storage::exists($record->performance_path)) return __('admin.resources.feedback_report.fields.no_performance_data');
                                         $perf = json_decode(Storage::get($record->performance_path), true);
                                         return new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . json_encode($perf, JSON_PRETTY_PRINT) . "</pre>");
                                     }),
                             ]),
 
-                        Tabs\Tab::make('Meta')
+                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.meta'))
                             ->icon(FilamentIcon::get(AppIcon::CODE))
                             ->schema([
                                 Placeholder::make('meta_raw')
                                     ->label('')
-                                    ->content(fn ($record) => new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . json_encode($record->meta, JSON_PRETTY_PRINT) . "</pre>")),
+                                    ->content(fn ($record) => $record ? new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . json_encode($record->meta, JSON_PRETTY_PRINT) . "</pre>") : null),
                             ]),
                     ])->columnSpanFull(),
             ]);

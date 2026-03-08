@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\FeedbackReports;
 
-use App\Filament\Resources\FeedbackReports\Pages\CreateFeedbackReport;
-use App\Filament\Resources\FeedbackReports\Pages\EditFeedbackReport;
 use App\Filament\Resources\FeedbackReports\Pages\ListFeedbackReports;
+use App\Filament\Resources\FeedbackReports\Pages\ViewFeedbackReport;
 use App\Filament\Resources\FeedbackReports\Schemas\FeedbackReportForm;
 use App\Filament\Resources\FeedbackReports\Tables\FeedbackReportsTable;
 use App\Models\FeedbackReport;
@@ -25,7 +24,17 @@ class FeedbackReportResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.system');
+        return __('admin.navigation.groups.admin_tools');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 999;
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
     }
 
     public static function getModelLabel(): string
@@ -59,8 +68,7 @@ class FeedbackReportResource extends Resource
     {
         return [
             'index' => ListFeedbackReports::route('/'),
-            'create' => CreateFeedbackReport::route('/create'),
-            'edit' => EditFeedbackReport::route('/{record}/edit'),
+            'view' => ViewFeedbackReport::route('/{record}'),
         ];
     }
 }

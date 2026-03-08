@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\FeedbackReports\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -25,6 +24,7 @@ class FeedbackReportsTable
                         'feedback' => 'info',
                         default => 'gray',
                     })
+                    ->formatStateUsing(fn (string $state): string => __("admin.resources.feedback_report.type.{$state}"))
                     ->label(__('admin.resources.feedback_report.fields.type')),
 
                 TextColumn::make('severity')
@@ -35,6 +35,7 @@ class FeedbackReportsTable
                         'low' => 'info',
                         default => 'gray',
                     })
+                    ->formatStateUsing(fn (?string $state): string => $state ? __("admin.resources.feedback_report.severity.{$state}") : '-')
                     ->label(__('admin.resources.feedback_report.fields.severity')),
 
                 TextColumn::make('title')
@@ -71,31 +72,35 @@ class FeedbackReportsTable
             ->filters([
                 SelectFilter::make('type')
                     ->options([
-                        'bug' => 'Bug',
-                        'idea' => 'Nápad',
-                        'feedback' => 'Ostatní',
-                    ]),
+                        'bug' => __('admin.resources.feedback_report.type.bug'),
+                        'idea' => __('admin.resources.feedback_report.type.idea'),
+                        'feedback' => __('admin.resources.feedback_report.type.feedback'),
+                    ])
+                    ->label(__('admin.resources.feedback_report.fields.type')),
                 SelectFilter::make('severity')
                     ->options([
-                        'low' => 'Nízká',
-                        'medium' => 'Střední',
-                        'high' => 'Vysoká',
-                    ]),
+                        'low' => __('admin.resources.feedback_report.severity.low'),
+                        'medium' => __('admin.resources.feedback_report.severity.medium'),
+                        'high' => __('admin.resources.feedback_report.severity.high'),
+                    ])
+                    ->label(__('admin.resources.feedback_report.fields.severity')),
                 SelectFilter::make('status')
                     ->options([
-                        'new' => 'Nové',
-                        'triaging' => 'Prověřování',
-                        'in_progress' => 'V řešení',
-                        'resolved' => 'Vyřešeno',
-                        'wont_fix' => 'Nebude se řešit',
-                    ]),
+                        'new' => __('admin.resources.feedback_report.status.new'),
+                        'triaging' => __('admin.resources.feedback_report.status.triaging'),
+                        'in_progress' => __('admin.resources.feedback_report.status.in_progress'),
+                        'resolved' => __('admin.resources.feedback_report.status.resolved'),
+                        'wont_fix' => __('admin.resources.feedback_report.status.wont_fix'),
+                    ])
+                    ->label(__('admin.resources.feedback_report.fields.status')),
             ])
-            ->recordActions([
-                EditAction::make(),
+            ->actions([
+                ViewAction::make(),
+                DeleteAction::make(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+            ->bulkActions([
+                \Filament\Tables\Actions\BulkActionGroup::make([
+                    \Filament\Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
