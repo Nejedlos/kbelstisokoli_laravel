@@ -30,14 +30,26 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
     {
         // Najdeme blok se skóre a týmy (obvykle horní část stránky)
         // Hledáme h1 nebo specifický kontejner pro zápas
-        $header = $crawler->filter('.match-detail-header, .match-teams, .match-summary')->first();
+        $header = $crawler->filter('.match-detail-header, .match-teams, .match-summary, h1.row, .match-header-row')->first();
+
         if ($header->count() === 0) {
             // Fallback na první h1 a jeho okolí
             $h1 = $crawler->filter('h1')->first();
-            $header = $h1->closest('.row');
-            if ($header->count() === 0) {
-                $header = $h1->closest('div');
+            if ($h1->count() > 0) {
+                $header = $h1->closest('.row');
+                if ($header->count() === 0) {
+                    $header = $h1->closest('div');
+                }
             }
+        }
+
+        // Pokud stále nic, zkusíme najít kontejner, který obsahuje názvy týmů a skóre/čas
+        if ($header->count() === 0) {
+            $potentialHeaders = $crawler->filter('.row')->reduce(function (Crawler $node) {
+                $text = $node->text();
+                return str_contains($text, ':') && (strlen($text) < 1000);
+            });
+            $header = $potentialHeaders->first();
         }
 
         if ($header->count() === 0) {

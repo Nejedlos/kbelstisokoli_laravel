@@ -355,7 +355,11 @@ class AppSyncCommand extends Command
                     // 1. Rsync
                     $checkRsync = Process::run('rsync --version');
                     if ($checkRsync->successful()) {
-                        $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($remoteDir);
+                        // Pro adresáře s nahraným obsahem (uploads) nepoužíváme --delete,
+                        // abychom zachovali soubory, které existují pouze na produkci.
+                        $deleteFlag = str_contains($dir, 'uploads/') ? '' : '--delete';
+
+                        $rsyncCmd = "rsync -avz {$deleteFlag} -e 'ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($remoteDir);
                         $result = Process::forever()->run($rsyncCmd, function (string $type, string $output) {
                             if ($type === 'out' && strlen(trim($output)) > 0) {
                                 $this->line('  '.trim($output));
@@ -370,7 +374,8 @@ class AppSyncCommand extends Command
                     if (! $synced && $ftpHost && $ftpUser) {
                         // Pokud rsync selhal nebo není k dispozici, vyčistíme cílový adresář ručně přes SSH,
                         // abychom předešli hromadění starých souborů (náhrada za rsync --delete).
-                        if (is_dir($localDir)) {
+                        // VYNECHÁME adresáře s nahraným obsahem (uploads).
+                        if (is_dir($localDir) && ! str_contains($dir, 'uploads/')) {
                             $this->line("  Cleaning remote directory before FTP sync: $remoteDir");
                             Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
                         }
@@ -383,8 +388,8 @@ class AppSyncCommand extends Command
 
                     // 3. SCP Fallback
                     if (! $synced) {
-                        // Obdobně pro SCP fallback vyčistíme cílový adresář
-                        if (is_dir($localDir)) {
+                        // Obdobně pro SCP fallback vyčistíme cílový adresář (pokud to není uploads)
+                        if (is_dir($localDir) && ! str_contains($dir, 'uploads/')) {
                             $this->line("  Cleaning remote directory before SCP sync: $remoteDir");
                             Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
                         }

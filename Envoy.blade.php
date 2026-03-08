@@ -215,7 +215,9 @@
             find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
                 dir_name=$(basename "$dir")
                 echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
-                rm -rf "{{ $public_path }}/$dir_name"
+                if [ "$dir_name" != "uploads" ]; then
+                    rm -rf "{{ $public_path }}/$dir_name"
+                fi
                 mkdir -p "{{ $public_path }}/$dir_name"
                 cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
             done
@@ -431,7 +433,9 @@
             find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
                 dir_name=$(basename "$dir")
                 echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
-                rm -rf "{{ $public_path }}/$dir_name"
+                if [ "$dir_name" != "uploads" ]; then
+                    rm -rf "{{ $public_path }}/$dir_name"
+                fi
                 mkdir -p "{{ $public_path }}/$dir_name"
                 cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
             done
@@ -535,7 +539,9 @@
             find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
                 dir_name=$(basename "$dir")
                 echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
-                rm -rf "{{ $public_path }}/$dir_name"
+                if [ "$dir_name" != "uploads" ]; then
+                    rm -rf "{{ $public_path }}/$dir_name"
+                fi
                 mkdir -p "{{ $public_path }}/$dir_name"
                 # Kopírování obsahu včetně skrytých souborů
                 cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"

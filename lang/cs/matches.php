@@ -64,7 +64,7 @@ return [
     'average_age' => 'Průměrný věk',
     'average_height' => 'Průměrná výška',
     'nationality_count' => 'Počet národností',
-    'average_match_experience' => 'Prům. zápasová zkušenost',
+    'average_match_experience' => 'Zápasová zkušenost',
     'empty_best_players' => 'Data o nejlepších hráčích nejsou k dispozici.',
     'points' => 'Body',
     'rebounds' => 'Doskoky',

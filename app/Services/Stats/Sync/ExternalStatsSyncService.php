@@ -649,9 +649,11 @@ class ExternalStatsSyncService
             foreach ($tables as $tableData) {
                 $this->statisticSyncService->syncMatchBoxscore($match, $tableData, $run);
 
-                // OSVĚŽENÍ: Pokud syncMatchBoxscore přidal soupeřův boxscore do metadat instance $match, musíme ho dostat i do naší lokální proměnné $matchMetadata
-                if (isset($match->metadata['opponent_boxscore'])) {
-                    $matchMetadata['opponent_boxscore'] = $match->metadata['opponent_boxscore'];
+                // OSVĚŽENÍ: syncMatchBoxscore mění metadata přímo v DB (opponent_boxscore),
+                // musíme je znovu načíst z DB, abychom je nepřepsali na konci metody zastaralými lokálními daty.
+                $freshMatch = DB::table('matches')->where('id', $match->id)->first();
+                if ($freshMatch && $freshMatch->metadata) {
+                    $matchMetadata = json_decode($freshMatch->metadata, true) ?: $matchMetadata;
                 }
 
                 // Pokud tabulka obsahuje sumární řádek, uložíme ho do metadat zápasu pro rychlý přístup

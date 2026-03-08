@@ -64,7 +64,7 @@ return [
     'average_age' => 'Average age',
     'average_height' => 'Average height',
     'nationality_count' => 'Number of nationalities',
-    'average_match_experience' => 'Avg. match experience',
+    'average_match_experience' => 'Match experience',
     'empty_best_players' => 'Best players data is not available.',
     'points' => 'Points',
     'rebounds' => 'Rebounds',

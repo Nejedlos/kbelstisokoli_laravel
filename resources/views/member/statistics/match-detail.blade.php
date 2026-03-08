@@ -67,26 +67,26 @@
                 <div class="flex flex-col items-center space-y-10 md:space-y-12">
 
                     {{-- Horní informační lišta - Plovoucí pilulky (výraznější) --}}
-                    <div class="w-full flex flex-wrap justify-center gap-2 md:gap-3 text-[9px] md:text-xs font-black uppercase tracking-[0.15em] md:tracking-[0.25em]">
-                        <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-white/15 border border-white/30 rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
+                    <div class="w-full flex flex-col sm:flex-row flex-wrap justify-center gap-2 md:gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.15em] md:tracking-[0.25em]">
+                        <div class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-white/15 border border-white/30 rounded-2xl sm:rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
                             <i class="fa-light fa-calendar text-white group-hover/pill:scale-110 transition-transform"></i>
                             <span class="text-white">{{ $match->scheduled_at?->format('d. m. Y H:i') }}</span>
                         </div>
-                        <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-white/15 border border-white/30 rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
+                        <div class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-white/15 border border-white/30 rounded-2xl sm:rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
                             <i class="fa-light fa-trophy text-white group-hover/pill:scale-110 transition-transform"></i>
                             <span class="text-white">
                                 {{ $match->match_type ? (__('matches.type_' . strtolower($match->match_type)) !== 'matches.type_' . strtolower($match->match_type) ? __('matches.type_' . strtolower($match->match_type)) : $match->match_type) : __('matches.type_mi') }}
                             </span>
                         </div>
                         @if($match->metadata['venue'] ?? $match->location)
-                            <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-white/15 border border-white/30 rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
+                            <div class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-white/15 border border-white/30 rounded-2xl sm:rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
                                 <i class="fa-light fa-location-dot text-white group-hover/pill:scale-110 transition-transform"></i>
                                 <span class="text-white">{{ $match->metadata['venue'] ?? $match->location }}</span>
                             </div>
                         @endif
                         @if(!empty($match->metadata['external_id']))
                             <a href="https://cz.basketball/zapas/{{ $match->metadata['external_id'] }}" target="_blank"
-                               class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-2.5 bg-white text-gray-950 font-black rounded-full shadow-2xl hover:bg-white hover:-translate-y-1 hover:scale-105 active:scale-95 transition-all group/ext">
+                               class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 sm:py-2.5 bg-white text-gray-950 font-black rounded-2xl sm:rounded-full shadow-2xl hover:bg-white hover:-translate-y-1 hover:scale-[1.02] sm:hover:scale-105 active:scale-95 transition-all group/ext">
                                 <i class="fa-light fa-basketball text-brand-600 animate-pulse"></i>
                                 <span>{{ __('matches.external_detail') }}</span>
                             </a>
@@ -99,58 +99,58 @@
 
                             {{-- Tým 1 --}}
                             <div class="flex-1 flex flex-col items-center lg:items-end text-center lg:text-right group/team w-full min-w-0">
-                                <div class="w-20 h-20 md:w-32 md:h-32 mb-4 rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:rotate-3 group-hover/team:scale-110 overflow-hidden p-3 border-4 border-white/20 relative shrink-0">
+                                <div class="w-16 h-16 md:w-32 md:h-32 mb-3 md:mb-4 rounded-2xl md:rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:rotate-3 group-hover/team:scale-110 overflow-hidden p-2 md:p-3 border-4 border-white/20 relative shrink-0">
                                     @if($logoHome)
                                         <img src="{{ $logoHome }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light {{ $fallbackHome }} text-4xl"></i>
+                                            <i class="fa-light {{ $fallbackHome }} text-2xl md:text-4xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light {{ $fallbackHome }} text-4xl md:text-6xl text-gray-200 relative"></i>
+                                        <i class="fa-light {{ $fallbackHome }} text-3xl md:text-6xl text-gray-200 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-2xl md:text-4xl font-black text-white mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
+                                <h2 class="text-xl md:text-4xl font-black text-white mb-1 md:mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
                                     {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                                 </h2>
-                                <span class="px-3 py-1 bg-black/40 text-white text-[10px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
+                                <span class="px-2 py-0.5 md:px-3 md:py-1 bg-black/40 text-white text-[8px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
                                     {{ __('matches.is_home') }}
                                 </span>
                             </div>
 
                             {{-- Skóre (Centrální prvek) --}}
-                            <div class="flex flex-col items-center group/score shrink-0 z-10 mx-4">
-                                <div class="relative px-8 py-6 md:px-12 md:py-8 bg-white/10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex items-center gap-6 md:gap-10 transition-all duration-700 group-hover:bg-white/20 backdrop-blur-2xl group-hover:scale-105">
-                                    <div class="relative text-6xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
+                            <div class="flex flex-col items-center group/score shrink-0 z-10 mx-2 md:mx-4">
+                                <div class="relative px-6 py-4 md:px-12 md:py-8 bg-white/10 rounded-[2rem] md:rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex items-center gap-4 md:gap-10 transition-all duration-700 group-hover:bg-white/20 backdrop-blur-2xl group-hover:scale-105">
+                                    <div class="relative text-5xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_home ?? 0 }}
                                     </div>
-                                    <div class="relative text-4xl md:text-6xl font-black text-white/30 select-none animate-pulse">:</div>
-                                    <div class="relative text-6xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
+                                    <div class="relative text-2xl md:text-6xl font-black text-white/30 select-none animate-pulse">:</div>
+                                    <div class="relative text-5xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_away ?? 0 }}
                                     </div>
                                 </div>
-                                <div class="mt-4">
-                                    <div class="px-4 py-1.5 bg-black/50 rounded-full backdrop-blur-xl border border-white/10 shadow-2xl">
-                                        <span class="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80 whitespace-nowrap">{{ $hasScore ? 'Konečný výsledek' : 'Zatím neodehráno' }}</span>
+                                <div class="mt-3 md:mt-4">
+                                    <div class="px-3 py-1 md:px-4 md:py-1.5 bg-black/50 rounded-full backdrop-blur-xl border border-white/10 shadow-2xl">
+                                        <span class="text-[8px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/80 whitespace-nowrap">{{ $hasScore ? 'Konečný výsledek' : 'Zatím neodehráno' }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Tým 2 --}}
                             <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left group/team w-full min-w-0">
-                                <div class="w-20 h-20 md:w-32 md:h-32 mb-4 rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:-rotate-3 group-hover/team:scale-110 overflow-hidden p-3 border-4 border-white/20 relative shrink-0">
+                                <div class="w-16 h-16 md:w-32 md:h-32 mb-3 md:mb-4 rounded-2xl md:rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:-rotate-3 group-hover/team:scale-110 overflow-hidden p-2 md:p-3 border-4 border-white/20 relative shrink-0">
                                     @if($logoAway)
                                         <img src="{{ $logoAway }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light {{ $fallbackAway }} text-4xl"></i>
+                                            <i class="fa-light {{ $fallbackAway }} text-2xl md:text-4xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light {{ $fallbackAway }} text-4xl md:text-6xl text-gray-200 relative"></i>
+                                        <i class="fa-light {{ $fallbackAway }} text-3xl md:text-6xl text-gray-200 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-2xl md:text-4xl font-black text-white mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
+                                <h2 class="text-xl md:text-4xl font-black text-white mb-1 md:mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
                                     {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                                 </h2>
-                                <span class="px-3 py-1 {{ !$match->is_home ? 'bg-brand-500' : 'bg-black/40' }} text-white text-[10px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
+                                <span class="px-2 py-0.5 md:px-3 md:py-1 {{ !$match->is_home ? 'bg-brand-500' : 'bg-black/40' }} text-white text-[8px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
                                     {{ __('matches.is_away') }}
                                 </span>
                             </div>
@@ -161,25 +161,25 @@
                             <div class="w-full flex flex-col items-center gap-6 pt-4">
                                 {{-- Result Text & Message --}}
                                 <div class="flex flex-col items-center gap-4 w-full">
-                                    <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-3 md:gap-4">
                                         @if($isVictory)
-                                            <div class="w-12 h-12 md:w-16 md:h-16 bg-yellow-400/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-yellow-400/30 shadow-2xl shadow-yellow-400/20 animate-bounce-subtle">
-                                                <i class="fa-light fa-trophy text-3xl md:text-4xl text-yellow-300 drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]"></i>
+                                            <div class="w-10 h-10 md:w-16 md:h-16 bg-yellow-400/20 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-yellow-400/30 shadow-2xl shadow-yellow-400/20 animate-bounce-subtle">
+                                                <i class="fa-light fa-trophy text-2xl md:text-4xl text-yellow-300 drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]"></i>
                                             </div>
                                         @elseif($isDraw)
-                                            <div class="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
-                                                <i class="fa-light fa-equals text-3xl md:text-4xl text-white"></i>
+                                            <div class="w-10 h-10 md:w-16 md:h-16 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                                                <i class="fa-light fa-equals text-2xl md:text-4xl text-white"></i>
                                             </div>
                                         @else
-                                            <div class="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
-                                                <i class="fa-light fa-basketball text-3xl md:text-4xl text-white/80"></i>
+                                            <div class="w-10 h-10 md:w-16 md:h-16 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                                                <i class="fa-light fa-basketball text-2xl md:text-4xl text-white/80"></i>
                                             </div>
                                         @endif
-                                        <h4 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.3)]">{{ $resultText }}</h4>
+                                        <h4 class="text-3xl md:text-6xl font-black uppercase tracking-tighter text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.3)]">{{ $resultText }}</h4>
                                     </div>
 
                                     @if($motivationalMessage)
-                                        <p class="text-xl md:text-3xl font-bold text-white leading-tight italic text-center max-w-3xl px-6 drop-shadow-lg">
+                                        <p class="text-lg md:text-3xl font-bold text-white leading-tight italic text-center max-w-3xl px-6 drop-shadow-lg">
                                             "{{ $motivationalMessage }}"
                                         </p>
                                     @endif
@@ -187,9 +187,9 @@
 
                                 {{-- Badges (Větší a výraznější) --}}
                                 @if(!empty($badges))
-                                    <div class="flex flex-wrap justify-center gap-3">
+                                    <div class="w-full flex flex-wrap justify-center gap-2 md:gap-3">
                                         @foreach($badges as $badge)
-                                            <span class="px-6 py-3 bg-white/15 text-white text-xs font-black rounded-2xl uppercase tracking-[0.2em] backdrop-blur-xl border border-white/30 shadow-2xl flex items-center gap-3 hover:bg-white/25 hover:-translate-y-1 transition-all cursor-default">
+                                            <span class="w-full sm:w-auto px-5 md:px-6 py-2.5 md:py-3 bg-white/15 text-white text-[10px] md:text-xs font-black rounded-xl md:rounded-2xl uppercase tracking-[0.15em] md:tracking-[0.2em] backdrop-blur-xl border border-white/30 shadow-2xl flex items-center justify-center gap-3 hover:bg-white/25 hover:-translate-y-1 transition-all cursor-default text-center">
                                                 <i class="fa-light fa-award text-lg {{ $isVictory ? 'text-yellow-300' : 'text-brand-300' }}"></i>
                                                 {{ $badge }}
                                             </span>
@@ -202,42 +202,42 @@
 
                     {{-- Spodní lišta s doplňkovými informacemi (Jasná hierarchie) --}}
                     @if(!empty($match->metadata['referees']) || !empty($match->metadata['commissioner']) || !empty($match->metadata['attendance']))
-                        <div class="pt-10 border-t border-white/20 w-full max-w-5xl">
-                                <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-20">
+                        <div class="pt-8 md:pt-10 border-t border-white/20 w-full max-w-5xl">
+                                <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-20">
                                 @if(!empty($match->metadata['referees']))
-                                    <div class="flex items-center gap-5 group/info">
-                                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl">
-                                            <i class="fa-light fa-whistle text-2xl"></i>
+                                    <div class="w-full md:w-auto flex items-center justify-center md:justify-start gap-4 md:gap-5 group/info">
+                                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
+                                            <i class="fa-light fa-whistle text-xl md:text-2xl"></i>
                                         </div>
                                         <div class="flex flex-col leading-tight">
-                                            <span class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">{{ __('matches.referees') }}</span>
-                                            <span class="text-lg md:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['referees'] }}</span>
+                                            <span class="text-[8px] md:text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.referees') }}</span>
+                                            <span class="text-base md:text-lg lg:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['referees'] }}</span>
                                         </div>
                                     </div>
                                 @endif
                                 @if(!empty($match->metadata['commissioner']))
-                                    <div class="flex items-center gap-5 group/info">
-                                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl">
-                                            <i class="fa-light fa-user-tie text-2xl"></i>
+                                    <div class="w-full md:w-auto flex items-center justify-center md:justify-start gap-4 md:gap-5 group/info">
+                                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
+                                            <i class="fa-light fa-user-tie text-xl md:text-2xl"></i>
                                         </div>
                                         <div class="flex flex-col leading-tight">
-                                            <span class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">{{ __('matches.commissioner') }}</span>
-                                            <span class="text-lg md:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['commissioner'] }}</span>
+                                            <span class="text-[8px] md:text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.commissioner') }}</span>
+                                            <span class="text-base md:text-lg lg:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['commissioner'] }}</span>
                                         </div>
                                     </div>
                                 @endif
                                 @if(!empty($match->metadata['attendance']))
-                                    <div class="flex items-center gap-5 group/info">
-                                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl">
-                                            <i class="fa-light fa-users text-2xl"></i>
+                                    <div class="w-full md:w-auto flex items-center justify-center md:justify-start gap-4 md:gap-5 group/info">
+                                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
+                                            <i class="fa-light fa-users text-xl md:text-2xl"></i>
                                         </div>
                                         <div class="flex flex-col leading-tight">
-                                            <span class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">{{ __('matches.attendance') }}</span>
-                                            <span class="text-lg md:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['attendance'] }}</span>
+                                            <span class="text-[8px] md:text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.attendance') }}</span>
+                                            <span class="text-base md:text-lg lg:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['attendance'] }}</span>
                                         </div>
                                     </div>
                                 @endif
-                            </div>
+                                </div>
                         </div>
                     @endif
                 </div>
@@ -256,10 +256,10 @@
                             <i class="fa-light fa-magnifying-glass-chart text-2xl"></i>
                         </div>
                         <div class="min-w-0">
-                            <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1 truncate">
+                            <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1">
                                 {{ __('matches.pre_match_stats') }}
                             </h2>
-                            <p class="text-[9px] font-black text-brand-500 uppercase tracking-widest truncate">{{ __('matches.pre_match_analysis_desc') ?? 'Hloubková analýza před zápasem' }}</p>
+                            <p class="text-[9px] font-black text-brand-500 uppercase tracking-widest">{{ __('matches.pre_match_analysis_desc') ?? 'Hloubková analýza před zápasem' }}</p>
                         </div>
                     </div>
                 </div>
@@ -267,8 +267,8 @@
                     {{-- Best Players (Lídři zápasu / Klíčoví hráči) --}}
                     <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                         <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
-                                <i class="fa-light fa-star text-brand-500 text-lg"></i>
+                            <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50 shadow-sm">
+                                <i class="fa-light fa-star text-brand-500 text-xl"></i>
                             </div>
                             {{ __('matches.best_players') }}
                         </h3>
@@ -278,7 +278,7 @@
                         @endphp
 
                         @if(!empty($bestPlayers))
-                            <div class="space-y-6">
+                            <div class="space-y-4">
                                 @foreach($bestPlayers as $category => $players)
                                     @if(is_array($players) && (isset($players['home']) || isset($players['away'])))
                                         @php
@@ -287,7 +287,7 @@
                                                 $localizedCategory = $players['label'] ?? $category;
                                             }
                                         @endphp
-                                        <div class="space-y-3">
+                                        <div class="space-y-2">
                                             <div class="flex items-center gap-4">
                                                 <div class="h-px flex-1 bg-gradient-to-r from-transparent via-gray-100 to-transparent"></div>
                                                 <span class="text-[11px] font-black text-gray-400 uppercase tracking-[0.25em] px-4">{{ $localizedCategory }}</span>
@@ -328,7 +328,7 @@
                                                                 $valColor = 'text-rose-600';
                                                             }
                                                         @endphp
-                                                        <div class="group relative flex items-center gap-5 p-2 rounded-[2rem] {{ $cardBg }} border-2 transition-all hover:shadow-2xl hover:bg-white hover:-translate-y-1 overflow-hidden">
+                                                        <div class="group relative flex items-center gap-4 p-2 rounded-[2rem] {{ $cardBg }} border-2 transition-all hover:shadow-2xl hover:bg-white hover:-translate-y-1 overflow-hidden">
                                                             @if($sideWinner || ($isOur && !$hasScore))
                                                                 <div class="absolute top-0 right-0 w-24 h-24 {{ $sideWinner ? 'bg-emerald-500/5' : 'bg-brand-500/5' }} rounded-full -mr-8 -mt-8"></div>
                                                             @endif
@@ -349,10 +349,10 @@
                                                             </div>
 
                                                             <div class="flex-grow min-w-0 relative">
-                                                                <span class="px-2 py-0.5 {{ $badgeClass }} text-[8px] font-black rounded uppercase tracking-widest mb-1.5 inline-block">
+                                                                <span class="px-2 py-0.5 {{ $badgeClass }} text-[8px] font-black rounded uppercase tracking-widest mb-1.5 inline-block whitespace-nowrap">
                                                                     {{ $isOur ? 'Kbelský Sokol' : 'Soupeř' }}
                                                                 </span>
-                                                                <span class="text-lg font-black text-gray-900 leading-tight block truncate group-hover:text-brand-600 transition-colors">{{ $players[$side]['name'] }}</span>
+                                                                <span class="text-sm md:text-base font-black text-gray-900 leading-tight block group-hover:text-brand-600 transition-colors break-words">{{ $players[$side]['name'] }}</span>
                                                             </div>
 
                                                             <div class="flex-shrink-0 text-right relative">
@@ -385,42 +385,46 @@
                     @if(!empty($teamComparison))
                         <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                             <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
-                                    <i class="fa-light fa-scale-balanced text-brand-500 text-lg"></i>
+                                <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50 shadow-sm">
+                                    <i class="fa-light fa-scale-balanced text-brand-500 text-xl"></i>
                                 </div>
                                 {{ __('matches.team_comparison') }}
                             </h3>
 
                         <div class="space-y-4">
                                 @foreach($teamComparison as $key => $data)
-                                    <div class="bg-gray-50 rounded-[2rem] p-3 border-2 border-gray-100 transition-all hover:shadow-2xl hover:bg-white hover:border-brand-100 group overflow-hidden relative">
+                                    <div class="bg-gray-50 rounded-[2rem] p-2 border-2 border-gray-100 transition-all hover:shadow-2xl hover:bg-white hover:border-brand-100 group overflow-hidden relative">
                                         <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
 
                                         <div class="text-center relative mb-4">
-                                            <span class="px-4 py-1.5 bg-white shadow-sm border border-gray-100 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] group-hover:text-brand-500 transition-colors">
+                                            <span class="inline-block px-4 py-1.5 bg-white shadow-sm border border-gray-100 rounded-full text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] md:tracking-[0.25em] group-hover:text-brand-500 transition-colors leading-tight">
                                                 {{ $data['label'] ?? $key }}
                                             </span>
                                         </div>
 
-                                        <div class="flex items-center justify-between gap-6 relative">
-                                            <div class="text-center flex-1">
-                                                <span class="px-2 py-0.5 bg-brand-100 text-brand-700 text-[8px] font-black rounded uppercase tracking-widest block mb-3 mx-auto w-fit">
+                                        <div class="flex items-center justify-between gap-2 md:gap-6 relative">
+                                            <div class="text-center flex-1 min-w-0">
+                                                <span class="px-2 py-0.5 bg-brand-100 text-brand-700 text-[8px] font-black rounded uppercase tracking-widest block mb-2 mx-auto w-fit whitespace-nowrap">
                                                     {{ $match->is_home ? 'Doma' : 'Soupeř' }}
                                                 </span>
-                                                <span class="text-4xl font-black text-brand-600 tabular-nums drop-shadow-sm">{{ $data['home'] }}</span>
+                                                <span class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-brand-600 tabular-nums drop-shadow-sm block break-words">
+                                                    {{ $data['home'] }}
+                                                </span>
                                             </div>
 
-                                            <div class="flex flex-col items-center gap-2">
-                                                <div class="h-8 w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent"></div>
-                                                <div class="w-3 h-3 rounded-full bg-brand-500 shadow-[0_0_10px_rgba(225,29,72,0.3)]"></div>
-                                                <div class="h-8 w-px bg-gradient-to-t from-transparent via-gray-200 to-transparent"></div>
+                                            <div class="flex flex-col items-center gap-1 shrink-0 px-1">
+                                                <div class="h-6 md:h-8 w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent"></div>
+                                                <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-brand-500 shadow-[0_0_10px_rgba(225,29,72,0.3)]"></div>
+                                                <div class="h-6 md:h-8 w-px bg-gradient-to-t from-transparent via-gray-200 to-transparent"></div>
                                             </div>
 
-                                            <div class="text-center flex-1">
-                                                <span class="px-2 py-0.5 bg-gray-200 text-gray-600 text-[8px] font-black rounded uppercase tracking-widest block mb-3 mx-auto w-fit">
+                                            <div class="text-center flex-1 min-w-0">
+                                                <span class="px-2 py-0.5 bg-gray-200 text-gray-600 text-[8px] font-black rounded uppercase tracking-widest block mb-2 mx-auto w-fit whitespace-nowrap">
                                                     {{ $match->is_home ? 'Soupeř' : 'Doma' }}
                                                 </span>
-                                                <span class="text-4xl font-black text-gray-900 tabular-nums drop-shadow-sm">{{ $data['away'] }}</span>
+                                                <span class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 tabular-nums drop-shadow-sm block break-words">
+                                                    {{ $data['away'] }}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -437,8 +441,8 @@
                     @if(!empty($lastMatches['home']) || !empty($lastMatches['away']))
                         <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                             <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
-                                    <i class="fa-light fa-history text-brand-500 text-lg"></i>
+                                <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50 shadow-sm">
+                                    <i class="fa-light fa-history text-brand-500 text-xl"></i>
                                 </div>
                                 {{ __('matches.last_matches') }}
                             </h3>
@@ -453,22 +457,28 @@
                                                 {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                                             </h4>
                                         </div>
-                                        <div class="space-y-2">
+                                        <div class="space-y-3">
                                             @foreach($lastMatches['home'] as $m)
-                                                <div class="group flex items-center justify-between p-2 bg-gray-50 rounded-[2rem] border-2 border-gray-50 shadow-sm text-sm transition-all hover:bg-white hover:border-brand-200 hover:shadow-2xl hover:-translate-y-1">
-                                                    <div class="flex flex-col">
-                                                        <span class="text-[10px] font-black text-gray-400 mb-1.5 uppercase tracking-widest">{{ $m['date'] }}</span>
-                                                        <span class="text-base font-bold text-gray-700 leading-tight group-hover:text-brand-600 transition-colors">{{ $m['team_home'] }} vs {{ $m['team_away'] }}</span>
+                                                <div class="group relative flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-2.5 bg-gray-50 rounded-3xl sm:rounded-[2rem] border-2 border-gray-50 transition-all hover:bg-white hover:border-brand-200 hover:shadow-xl hover:-translate-y-0.5 gap-3 sm:gap-4 overflow-hidden">
+                                                    {{-- Decorative background element --}}
+                                                    <div class="absolute top-0 right-0 w-16 h-16 bg-brand-500/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-700"></div>
+
+                                                    <div class="flex-1 min-w-0 relative z-10 text-center sm:text-left">
+                                                        <span class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $m['date'] }}</span>
+                                                        <h5 class="text-sm font-bold text-gray-700 group-hover:text-brand-600 transition-colors leading-tight break-words">
+                                                            {{ $m['team_home'] }} <span class="text-brand-500/30 mx-1">vs</span> {{ $m['team_away'] }}
+                                                        </h5>
                                                     </div>
-                                                    <div class="flex items-center gap-5">
-                                                        <div class="bg-white px-4 py-2 rounded-2xl shadow-inner border border-gray-100">
-                                                            <span class="text-xl font-black tabular-nums {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-brand-600' : 'text-gray-900' }}">
-                                                                {{ $m['score_home'] }}:{{ $m['score_away'] }}
+
+                                                    <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto relative z-10">
+                                                        <div class="bg-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl shadow-inner border border-gray-100 shrink-0 flex-1 sm:flex-none text-center">
+                                                            <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-brand-600' : 'text-gray-900' }}">
+                                                                {{ $m['score_home'] }}<span class="mx-0.5 opacity-30">:</span>{{ $m['score_away'] }}
                                                             </span>
                                                         </div>
                                                         @if(!empty($m['external_id']))
-                                                            <a href="https://cz.basketball/zapas/{{ $m['external_id'] }}" target="_blank" class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-300 hover:text-brand-500 hover:shadow-xl hover:border-brand-100 border border-gray-100 transition-all">
-                                                                <i class="fa-light fa-chevron-right text-lg"></i>
+                                                            <a href="https://cz.basketball/zapas/{{ $m['external_id'] }}" target="_blank" class="w-11 h-11 sm:w-9 sm:h-9 rounded-2xl sm:rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-300 hover:text-brand-500 hover:shadow-md hover:border-brand-100 border border-gray-100 transition-all shrink-0">
+                                                                <i class="fa-light fa-chevron-right text-lg sm:text-base"></i>
                                                             </a>
                                                         @endif
                                                     </div>
@@ -487,22 +497,28 @@
                                                 {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                                             </h4>
                                         </div>
-                                        <div class="space-y-2">
+                                        <div class="space-y-3">
                                             @foreach($lastMatches['away'] as $m)
-                                                <div class="group flex items-center justify-between p-2 bg-gray-50 rounded-[2rem] border-2 border-gray-50 shadow-sm text-sm transition-all hover:bg-white hover:border-brand-200 hover:shadow-2xl hover:-translate-y-1">
-                                                    <div class="flex flex-col">
-                                                        <span class="text-[10px] font-black text-gray-400 mb-1.5 uppercase tracking-widest">{{ $m['date'] }}</span>
-                                                        <span class="text-base font-bold text-gray-700 leading-tight group-hover:text-brand-600 transition-colors">{{ $m['team_home'] }} vs {{ $m['team_away'] }}</span>
+                                                <div class="group relative flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-2.5 bg-gray-50 rounded-3xl sm:rounded-[2rem] border-2 border-gray-50 transition-all hover:bg-white hover:border-brand-200 hover:shadow-xl hover:-translate-y-0.5 gap-3 sm:gap-4 overflow-hidden">
+                                                    {{-- Decorative background element --}}
+                                                    <div class="absolute top-0 right-0 w-16 h-16 bg-brand-500/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-700"></div>
+
+                                                    <div class="flex-1 min-w-0 relative z-10 text-center sm:text-left">
+                                                        <span class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $m['date'] }}</span>
+                                                        <h5 class="text-sm font-bold text-gray-700 group-hover:text-brand-600 transition-colors leading-tight break-words">
+                                                            {{ $m['team_home'] }} <span class="text-brand-500/30 mx-1">vs</span> {{ $m['team_away'] }}
+                                                        </h5>
                                                     </div>
-                                                    <div class="flex items-center gap-5">
-                                                        <div class="bg-white px-4 py-2 rounded-2xl shadow-inner border border-gray-100">
-                                                            <span class="text-xl font-black tabular-nums {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-brand-600' : 'text-gray-900' }}">
-                                                                {{ $m['score_home'] }}:{{ $m['score_away'] }}
+
+                                                    <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto relative z-10">
+                                                        <div class="bg-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl shadow-inner border border-gray-100 shrink-0 flex-1 sm:flex-none text-center">
+                                                            <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-brand-600' : 'text-gray-900' }}">
+                                                                {{ $m['score_home'] }}<span class="mx-0.5 opacity-30">:</span>{{ $m['score_away'] }}
                                                             </span>
                                                         </div>
                                                         @if(!empty($m['external_id']))
-                                                            <a href="https://cz.basketball/zapas/{{ $m['external_id'] }}" target="_blank" class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-300 hover:text-brand-500 hover:shadow-xl hover:border-brand-100 border border-gray-100 transition-all">
-                                                                <i class="fa-light fa-chevron-right text-lg"></i>
+                                                            <a href="https://cz.basketball/zapas/{{ $m['external_id'] }}" target="_blank" class="w-11 h-11 sm:w-9 sm:h-9 rounded-2xl sm:rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-300 hover:text-brand-500 hover:shadow-md hover:border-brand-100 border border-gray-100 transition-all shrink-0">
+                                                                <i class="fa-light fa-chevron-right text-lg sm:text-base"></i>
                                                             </a>
                                                         @endif
                                                     </div>
@@ -567,10 +583,10 @@
                                 <i class="fa-light fa-chart-simple text-2xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1 truncate">
+                                <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1">
                                     {{ __('matches.match_stats') }}
                                 </h2>
-                                <p class="text-[9px] font-black {{ $statusTextAccent }} uppercase tracking-widest truncate">{{ $statusText }}</p>
+                                <p class="text-[9px] font-black {{ $statusTextAccent }} uppercase tracking-widest">{{ $statusText }}</p>
                             </div>
                         </div>
                     </div>
@@ -580,12 +596,12 @@
                     @if(!empty($match->metadata['periods_detailed']))
                         <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
                             <h3 class="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50">
-                                    <i class="fa-light fa-list-ol text-brand-500 text-lg"></i>
+                                <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50 shadow-sm">
+                                    <i class="fa-light fa-list-ol text-brand-500 text-xl"></i>
                                 </div>
                                 {{ __('matches.periods') }}
                             </h3>
-                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                                 @foreach($match->metadata['periods_detailed'] as $period)
                                     @php
                                         $qHome = (int)$period['home'];
@@ -610,15 +626,15 @@
                                             $qBadge = 'bg-slate-500 text-white';
                                         }
                                     @endphp
-                                    <div class="flex flex-col items-center justify-center p-2 rounded-[2rem] border-2 {{ $qBg }} transition-all hover:bg-white hover:border-brand-100 hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden">
+                                    <div class="flex flex-col items-center justify-center p-4 sm:p-3 md:p-4 rounded-[2rem] border-2 {{ $qBg }} transition-all hover:bg-white hover:border-brand-100 hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden">
                                         <div class="absolute top-0 right-0 w-16 h-16 {{ $qDot }} rounded-full -mr-8 -mt-8"></div>
-                                        <span class="relative text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 group-hover:text-brand-500 transition-colors">{{ $loop->iteration }}. {{ __('matches.period') ?? 'čtvrtina' }}</span>
-                                        <div class="relative flex items-center gap-3">
-                                            <span class="text-4xl font-black {{ $match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
+                                        <span class="relative inline-block text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 group-hover:text-brand-500 transition-colors whitespace-nowrap">{{ $loop->iteration }}. {{ __('matches.period') ?? 'čtvrtina' }}</span>
+                                        <div class="relative flex items-center gap-2 md:gap-3">
+                                            <span class="text-3xl md:text-4xl font-black {{ $match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
                                                 {{ $qHome }}
                                             </span>
-                                            <span class="text-xl font-black text-gray-300">:</span>
-                                            <span class="text-4xl font-black {{ !$match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
+                                            <span class="text-lg md:text-xl font-black text-gray-300">:</span>
+                                            <span class="text-3xl md:text-4xl font-black {{ !$match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
                                                 {{ $qAway }}
                                             </span>
                                         </div>
@@ -770,8 +786,8 @@
                                     <table class="w-full text-left border-collapse min-w-[800px]">
                                         <thead>
                                             <tr class="bg-gray-900 text-white sticky top-0 z-10">
-                                                <th class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center border-r border-white/5">#</th>
-                                                <th @click="sortBy('name')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-800 transition-colors group">
+                                                <th class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center border-r border-white/5 sticky left-0 bg-gray-900 z-20">#</th>
+                                                <th @click="sortBy('name')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-800 transition-colors group sticky left-[41px] bg-gray-900 z-20 border-r border-white/5">
                                                     <div class="flex items-center gap-2">
                                                         Hráč
                                                         <i :class="sortField === 'name' ? (sortDirection === 'asc' ? 'fa-sort-up text-brand-400' : 'fa-sort-down text-brand-400') : 'fa-sort text-gray-600'" class="fa-light"></i>
@@ -812,17 +828,17 @@
                                         <tbody class="divide-y divide-gray-100">
                                             <template x-for="(stat, index) in getSortedStats(ourStats)" :key="stat.id">
                                                 <tr :class="stat.is_special ? 'bg-gray-50 font-bold' : 'hover:bg-brand-50/30 transition-colors'">
-                                                    <td class="px-4 py-1 text-center text-[10px] font-black text-gray-300 border-r border-gray-50">
+                                                    <td class="px-4 py-1 text-center text-[10px] font-black text-gray-300 border-r border-gray-50 sticky left-0 bg-inherit z-10">
                                                         <span x-show="!stat.is_special" x-text="(index + 1) + '.'"></span>
                                                         <i x-show="stat.is_special && !stat.is_team" class="fa-light fa-sigma text-brand-500"></i>
                                                         <i x-show="stat.is_team" class="fa-light fa-users-gear text-gray-400"></i>
                                                     </td>
-                                                    <td class="px-4 py-1 whitespace-nowrap">
+                                                    <td class="px-4 py-1 whitespace-nowrap sticky left-[41px] bg-inherit z-10 border-r border-gray-50 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.05)]">
                                                         <div class="flex items-center gap-3">
-                                                            <div x-show="!stat.is_special" class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500 shadow-inner" x-text="stat.number"></div>
-                                                            <div class="flex flex-col leading-tight">
-                                                                <span class="text-sm font-bold" :class="stat.is_special ? 'text-gray-900' : 'text-gray-700'" x-text="stat.name"></span>
-                                                                <span x-show="stat.is_starter" class="text-[7px] font-black text-brand-500 uppercase tracking-widest mt-0.5">Základní pětka</span>
+                                                            <div x-show="!stat.is_special" class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500 shadow-inner shrink-0" x-text="stat.number"></div>
+                                                            <div class="flex flex-col leading-tight min-w-0">
+                                                                <span class="text-sm font-bold truncate" :class="stat.is_special ? 'text-gray-900' : 'text-gray-700'" x-text="stat.name"></span>
+                                                                <span x-show="stat.is_starter" class="text-[7px] font-black text-brand-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Základní pětka</span>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -868,10 +884,10 @@
                                     <table class="w-full text-left border-collapse min-w-[800px]">
                                         <thead>
                                             <tr class="bg-gray-900 text-white sticky top-0 z-10">
-                                                <th class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center border-r border-white/5">#</th>
-                                                <th @click="sortBy('name')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-800 transition-colors group">
+                                                <th class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center border-r border-white/5 sticky left-0 bg-gray-900 z-20">#</th>
+                                                <th @click="sortBy('name')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-800 transition-colors group sticky left-[41px] bg-gray-900 z-20 border-r border-white/5">
                                                     <div class="flex items-center gap-2">
-                                                        {{ $match->opponent?->name ?? 'Soupeř' }}
+                                                        Hráč
                                                         <i :class="sortField === 'name' ? (sortDirection === 'asc' ? 'fa-sort-up text-brand-400' : 'fa-sort-down text-brand-400') : 'fa-sort text-gray-600'" class="fa-light"></i>
                                                     </div>
                                                 </th>
@@ -888,17 +904,17 @@
                                         <tbody class="divide-y divide-gray-100">
                                             <template x-for="(stat, index) in getSortedStats(opponentStats)" :key="stat.id">
                                                 <tr :class="stat.is_special ? 'bg-gray-50 font-bold' : 'hover:bg-brand-50/30 transition-colors'">
-                                                    <td class="px-4 py-1 text-center text-[10px] font-black text-gray-300 border-r border-gray-50">
+                                                    <td class="px-4 py-1 text-center text-[10px] font-black text-gray-300 border-r border-gray-50 sticky left-0 bg-inherit z-10">
                                                         <span x-show="!stat.is_special" x-text="(index + 1) + '.'"></span>
                                                         <i x-show="stat.is_special && !stat.is_team" class="fa-light fa-sigma text-brand-500"></i>
                                                         <i x-show="stat.is_team" class="fa-light fa-users-gear text-gray-400"></i>
                                                     </td>
-                                                    <td class="px-4 py-1 whitespace-nowrap">
+                                                    <td class="px-4 py-1 whitespace-nowrap sticky left-[41px] bg-inherit z-10 border-r border-gray-50 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.05)]">
                                                         <div class="flex items-center gap-3">
-                                                            <div x-show="!stat.is_special" class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500 shadow-inner" x-text="stat.number"></div>
-                                                            <div class="flex flex-col leading-tight">
-                                                                <span class="text-sm font-bold" :class="stat.is_special ? 'text-gray-900' : 'text-gray-700'" x-text="stat.name"></span>
-                                                                <span x-show="stat.is_starter" class="text-[7px] font-black text-brand-500 uppercase tracking-widest mt-0.5">Základní pětka</span>
+                                                            <div x-show="!stat.is_special" class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500 shadow-inner shrink-0" x-text="stat.number"></div>
+                                                            <div class="flex flex-col leading-tight min-w-0">
+                                                                <span class="text-sm font-bold truncate" :class="stat.is_special ? 'text-gray-900' : 'text-gray-700'" x-text="stat.name"></span>
+                                                                <span x-show="stat.is_starter" class="text-[7px] font-black text-brand-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Základní pětka</span>
                                                             </div>
                                                         </div>
                                                     </td>

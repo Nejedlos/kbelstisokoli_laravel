@@ -201,8 +201,9 @@ class MatchSyncService
             $status = 'finished';
         }
 
-        // Pokud je zápas v minulosti, měl by být označen jako odehraný (finished), i když nemá skóre
-        if (in_array($status, ['planned', 'scheduled']) && $scheduledAt && $scheduledAt->isPast()) {
+        // Pokud je zápas v minulosti (před více než 2 hodinami od začátku), měl by být označen jako odehraný (finished), i když nemá skóre.
+        // Důležité: kontrolujeme, zda je v minulosti i s rezervou, abychom nepřepínali právě probíhající zápasy.
+        if (in_array($status, ['planned', 'scheduled']) && $scheduledAt && $scheduledAt->copy()->addHours(3)->isPast()) {
             $status = 'finished';
         }
 
