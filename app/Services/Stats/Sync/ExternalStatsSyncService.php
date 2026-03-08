@@ -200,6 +200,21 @@ class ExternalStatsSyncService
 
                     if ($headerData && isset($headerData->metadata['team_name'])) {
                         $run->updateMetadata(['team_name_external' => $headerData->metadata['team_name']]);
+
+                        // Aktualizace konfigurace o metadata týmu
+                        $configMetadata = $config->metadata ?? [];
+                        $configMetadata['coach'] = $headerData->metadata['coach'] ?? $configMetadata['coach'] ?? null;
+                        $configMetadata['assistants'] = $headerData->metadata['assistants'] ?? $configMetadata['assistants'] ?? [];
+                        $configMetadata['manager'] = $headerData->metadata['manager'] ?? $configMetadata['manager'] ?? null;
+                        $configMetadata['venue'] = $headerData->metadata['venue'] ?? $configMetadata['venue'] ?? null;
+                        $configMetadata['website'] = $headerData->metadata['website'] ?? $configMetadata['website'] ?? null;
+                        $configMetadata['last_full_header_sync_at'] = now()->toDateTimeString();
+
+                        $config->update(['metadata' => array_filter($configMetadata)]);
+
+                        if (!empty($headerData->metadata['competition']) && empty($config->competition_label)) {
+                            $config->update(['competition_label' => $headerData->metadata['competition']]);
+                        }
                     }
                 } catch (\Exception $e) {
                     Log::warning("Nepodařilo se extrahovat team header: " . $e->getMessage());
@@ -431,9 +446,12 @@ class ExternalStatsSyncService
      */
     protected function dispatchMatchDetailJobs(Team $team, Season $season, array $options): void
     {
-        $limit = $options['maxMatchDetails'] ?? $options['limit'] ?? 15;
-        $force = $options['force'] ?? false;
+        $force = ($options['force'] ?? false) || ($options['fresh'] ?? false);
+        $defaultLimit = $force ? 100 : 15;
+        $limit = $options['maxMatchDetails'] ?? $options['limit'] ?? $defaultLimit;
         $recentOnly = $options['recentOnly'] ?? false;
+
+        ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').", recentOnly=".($recentOnly ? 'true' : 'false'), 'debug');
 
         $query = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
@@ -467,6 +485,8 @@ class ExternalStatsSyncService
 
         $dispatchedCount = 0;
         foreach ($matches as $match) {
+            $matchExtId = $match->metadata['external_id'] ?? 'N/A';
+
             if (ConsoleService::isStopped()) {
                 ConsoleService::log('Plánování detailů zápasů zastaveno uživatelem.', 'warning');
                 break;
@@ -479,10 +499,12 @@ class ExternalStatsSyncService
             if (! $force) {
                 $lastSynced = $match->metadata['last_synced_at'] ?? null;
                 if ($lastSynced && \Illuminate\Support\Carbon::parse($lastSynced)->gt(now()->subDay())) {
+                    ConsoleService::log("    - Zápas {$match->id} ($matchExtId) přeskočen (naposledy synchronizováno: $lastSynced)", 'debug');
                     continue;
                 }
             }
 
+            ConsoleService::log("    - Plánuji detail zápasu: ID {$match->id} ($matchExtId)", 'debug');
             $job = SyncMatchDetailJob::dispatch($match->id, $options);
 
             // Pokud používáme sync frontu, přidáme malou pauzu, aby se ulevilo CPU a API
@@ -617,9 +639,72 @@ class ExternalStatsSyncService
                 $this->statisticSyncService->clearMatchBoxscore($match, $run);
             }
 
+            // Předběžná příprava metadat z hlavičky pro detekci týmů v tabulkách
+            $header = $mainData->metadata['header'] ?? [];
+            $matchMetadata = $match->metadata ?? [];
+            $matchMetadata['last_synced_at'] = now()->toDateTimeString();
+
             foreach ($tables as $tableData) {
                 $this->statisticSyncService->syncMatchBoxscore($match, $tableData, $run);
+
+                // Pokud tabulka obsahuje sumární řádek, uložíme ho do metadat zápasu pro rychlý přístup
+                $totalRow = collect($tableData->rows)->first(fn($r) => !empty($r->metadata['is_total']));
+                if ($totalRow) {
+                    $tableName = mb_strtolower($tableData->name);
+                    $homeName = mb_strtolower($header['home_team'] ?? '');
+                    $awayName = mb_strtolower($header['away_team'] ?? '');
+
+                    if ($homeName && str_contains($tableName, $homeName)) {
+                        $matchMetadata['stats_home'] = $totalRow->values;
+                    } elseif ($awayName && str_contains($tableName, $awayName)) {
+                        $matchMetadata['stats_away'] = $totalRow->values;
+                    } else {
+                        // Fallback podle pořadí (první je obvykle domácí)
+                        $index = array_search($tableData, $tables);
+                        if ($index === 0 && !isset($matchMetadata['stats_home'])) {
+                            $matchMetadata['stats_home'] = $totalRow->values;
+                        } elseif ($index === 1 && !isset($matchMetadata['stats_away'])) {
+                            $matchMetadata['stats_away'] = $totalRow->values;
+                        }
+                    }
+                }
             }
+
+            // Aktualizace metadat a skóre zápasu z extrahované hlavičky
+            if (!empty($header['periods_text'])) {
+                $matchMetadata['periods'] = $header['periods_text'];
+            }
+            if (!empty($header['venue'])) {
+                $matchMetadata['venue'] = $header['venue'];
+                if (empty($match->location)) {
+                    $match->location = $header['venue'];
+                }
+            }
+            if (!empty($header['referees'])) {
+                $matchMetadata['referees'] = $header['referees'];
+            }
+            if (!empty($header['attendance'])) {
+                $matchMetadata['attendance'] = $header['attendance'];
+            }
+            if (!empty($header['commissioner'])) {
+                $matchMetadata['commissioner'] = $header['commissioner'];
+            }
+
+            $updateData = ['metadata' => $matchMetadata];
+
+            if (!empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {
+                $scoreHome = (int) $scoreMatches[1];
+                $scoreAway = (int) $scoreMatches[2];
+
+                // Aktualizujeme skóre jen pokud je validní a buď chybí, nebo jsme v force/fresh módu
+                if (($options['force'] ?? false) || ($options['fresh'] ?? false) || ($match->score_home === null && $match->score_away === null)) {
+                    $updateData['score_home'] = $scoreHome;
+                    $updateData['score_away'] = $scoreAway;
+                    $updateData['status'] = 'completed';
+                }
+            }
+
+            $match->update($updateData);
 
             $run->finish([
                 'extracted_count' => count($mainData?->rows ?? []),

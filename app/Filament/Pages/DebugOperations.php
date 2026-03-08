@@ -140,7 +140,13 @@ class DebugOperations extends Page
                                     ->label('Statistiky')
                                     ->default(true)
                                     ->hidden(fn ($get) => ! $get('sync_matches')),
-                            ])->columns(3),
+                                \Filament\Forms\Components\TextInput::make('max_match_details')
+                                    ->label('Max detailů')
+                                    ->numeric()
+                                    ->default(15)
+                                    ->helperText('Limit pro počet zápasů k hloubkové synchronizaci (pro FRESH/FORCE je default 100).')
+                                    ->hidden(fn ($get) => ! $get('sync_details')),
+                            ])->columns(4),
                     ])
                     ->requiresConfirmation()
                     ->action(function (array $data) {
@@ -175,6 +181,7 @@ class DebugOperations extends Page
                                 'sync_roster' => $data['sync_roster'] ?? true,
                                 'sync_matches' => $data['sync_matches'] ?? true,
                                 'sync_details' => $data['sync_details'] ?? true,
+                                'maxMatchDetails' => $data['max_match_details'] ?? null,
                             ]);
                         }
 
@@ -192,6 +199,15 @@ class DebugOperations extends Page
                             ->helperText('Ponechte prázdné pro VŠECHNY sezóny.')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
                             ->nullable(),
+                        \Filament\Forms\Components\Toggle::make('force')
+                            ->label('Force mode')
+                            ->helperText('Ignoruje hash obsahu u synchronizace.')
+                            ->default(false),
+                        \Filament\Forms\Components\TextInput::make('max_match_details')
+                            ->label('Max detailů zápasů')
+                            ->numeric()
+                            ->default(15)
+                            ->helperText('Limit pro hloubkovou synchronizaci zápasů (na jeden tým).'),
                     ])
                     ->requiresConfirmation()
                     ->modalHeading('Hromadný import sezón')
@@ -215,9 +231,11 @@ class DebugOperations extends Page
                             foreach ($teams as $team) {
                                 ConsoleService::log("  - Naplánováno: {$team->name}", 'info');
                                 SyncTeamSeasonJob::dispatch($team->id, $season->id, [
+                                    'force' => $data['force'] ?? false,
                                     'sync_roster' => true,
                                     'sync_matches' => true,
                                     'sync_details' => true,
+                                    'maxMatchDetails' => $data['max_match_details'] ?? null,
                                 ]);
                             }
                         }
@@ -241,6 +259,11 @@ class DebugOperations extends Page
                             ->label('Force mode')
                             ->helperText('Ignoruje hash obsahu u synchronizace.')
                             ->default(false),
+                        \Filament\Forms\Components\TextInput::make('max_match_details')
+                            ->label('Max detailů zápasů')
+                            ->numeric()
+                            ->default(100)
+                            ->helperText('Limit pro hloubkovou synchronizaci zápasů (při plném zpracování doporučeno 100+).'),
                     ])
                     ->requiresConfirmation()
                     ->modalHeading('Kompletní zpracování sezóny')
@@ -266,6 +289,7 @@ class DebugOperations extends Page
                                 'sync_roster' => true,
                                 'sync_matches' => true,
                                 'sync_details' => true,
+                                'maxMatchDetails' => $data['max_match_details'] ?? null,
                             ]);
                         }
                         ConsoleService::log("Synchronizační joby byly přidány do fronty. Poznámka: samotná data se v DB objeví až po doběhnutí jobů na pozadí.", 'warning');

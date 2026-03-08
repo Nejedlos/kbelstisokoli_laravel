@@ -54,6 +54,18 @@ class TeamRosterExtractor implements StatExtractorInterface
             $playerLink = $tr->filter('a[href*="/hrac/"]')->first();
             $playerId = null;
             $playerName = null;
+            $jerseyNumber = null;
+            $position = null;
+            $height = null;
+            $weight = null;
+            $birthYear = null;
+            $nationality = null;
+
+            // Číslo dresu (obvykle první buňka, pokud je to číslo)
+            $firstCellText = trim($cells->first()->text());
+            if (is_numeric($firstCellText)) {
+                $jerseyNumber = (int) $firstCellText;
+            }
 
             if ($playerLink->count() > 0) {
                 $href = $playerLink->attr('href');
@@ -64,41 +76,59 @@ class TeamRosterExtractor implements StatExtractorInterface
                     $playerId = $matches[1];
                 }
             } else {
-                // Pokud není odkaz, zkusíme první buňku s textem jako jméno
-                $playerName = trim($cells->first()->text());
+                // Pokud není odkaz, zkusíme druhou buňku jako jméno, pokud první je číslo
+                if ($jerseyNumber !== null && $cells->count() > 1) {
+                    $playerName = trim($cells->eq(1)->text());
+                } else {
+                    $playerName = trim($cells->first()->text());
+                }
             }
 
-            // Rok narození - obvykle v jedné z buněk, zkusíme najít 4-místné číslo
-            $birthYear = null;
-            $cells->each(function (Crawler $td) use (&$birthYear) {
+            // Procházíme ostatní buňky a hledáme specifické údaje
+            $cells->each(function (Crawler $td, $i) use (&$birthYear, &$height, &$weight, &$position, &$nationality, $jerseyNumber) {
                 $text = trim($td->text());
+                if (empty($text)) return;
+
+                // Rok narození (4-místné číslo 19xx nebo 20xx)
                 if (preg_match('/^(19|20)\d{2}$/', $text)) {
-                    $birthYear = $text;
+                    $birthYear = (int) $text;
+                }
+                // Výška (3-místné číslo, obvykle 150-230)
+                elseif (preg_match('/^\d{3}$/', $text) && (int)$text > 140 && (int)$text < 230 && $i > 1) {
+                    $height = (int) $text;
+                }
+                // Pozice (1, 2, 3, 4, 5 nebo kód jako G, F, C, PG, SG, SF, PF)
+                elseif (preg_match('/^[1-5]$/', $text) || in_array(mb_strtoupper($text), ['G', 'F', 'C', 'PG', 'SG', 'SF', 'PF'])) {
+                    $position = $text;
+                }
+                // Národnost (často vlajka nebo zkratka státu CZE, SVK, atd.)
+                elseif (preg_match('/^[A-Z]{3}$/', $text) && !in_array($text, ['MIN', 'VAL', 'PTS'])) {
+                    $nationality = $text;
                 }
             });
 
-            if ($playerId) {
+            // Speciální detekce z CSS tříd nebo obrázků (vlajky)
+            $flagImg = $tr->filter('img[src*="/flags/"], img[alt*="Flag"]')->first();
+            if ($flagImg->count() > 0 && !$nationality) {
+                $nationality = $flagImg->attr('alt') ?: preg_replace('/.*\/([a-z]{2,3})\..*/i', '$1', $flagImg->attr('src'));
+            }
+
+            if ($playerName) {
                 $rows[] = new NormalizedRowDTO(
-                    values: [
+                    values: array_filter([
                         'player_name' => $playerName,
+                        'jersey_number' => $jerseyNumber,
+                        'position' => $position,
+                        'height' => $height,
+                        'weight' => $weight,
                         'birth_year' => $birthYear,
-                    ],
-                    playerId: (int) $playerId,
-                    metadata: [
+                        'nationality' => $nationality,
+                    ]),
+                    playerId: $playerId ? (int) $playerId : null,
+                    metadata: array_filter([
                         'external_player_id' => $playerId,
-                    ]
-                );
-            } else {
-                $warnings[] = 'Player ID not found for row: '.$playerName;
-                $rows[] = new NormalizedRowDTO(
-                    values: [
-                        'player_name' => $playerName,
-                        'birth_year' => $birthYear,
-                    ],
-                    rowLabel: $playerName,
-                    metadata: [
-                        'warning' => 'Missing external ID',
-                    ]
+                        'warning' => $playerId ? null : 'Missing external ID',
+                    ])
                 );
             }
         });
@@ -107,7 +137,11 @@ class TeamRosterExtractor implements StatExtractorInterface
             name: 'Soupiska',
             columns: [
                 'player_name' => 'Jméno hráče',
+                'jersey_number' => 'Č.',
+                'position' => 'Pozice',
+                'height' => 'Výška',
                 'birth_year' => 'Rok narození',
+                'nationality' => 'Národnost',
             ],
             rows: $rows,
             metadata: [

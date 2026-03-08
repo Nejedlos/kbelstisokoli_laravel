@@ -23,6 +23,33 @@ class TeamHeaderExtractor implements StatExtractorInterface
             }
         });
 
+        // Zkusíme najít další detaily (Trenér, Hala, atd.)
+        $coach = null;
+        $assistants = [];
+        $manager = null;
+        $venue = null;
+        $website = null;
+
+        $crawler->filter('.contact-list, .team-info, .team-details, .table-condensed')->each(function (Crawler $node) use (&$coach, &$assistants, &$manager, &$venue, &$website) {
+            $text = $node->text();
+
+            if (preg_match('/Trenér:\s*([^<>\n]+)/u', $text, $m)) {
+                $coach = trim($m[1]);
+            }
+            if (preg_match('/Asistent[^\s]*:\s*([^<>\n]+)/u', $text, $m)) {
+                $assistants[] = trim($m[1]);
+            }
+            if (preg_match('/Vedoucí[^\s]*:\s*([^<>\n]+)/u', $text, $m)) {
+                $manager = trim($m[1]);
+            }
+            if (preg_match('/Hala:\s*([^<>\n]+)/u', $text, $m)) {
+                $venue = trim($m[1]);
+            }
+            if (preg_match('/Web[^\s]*:\s*([^<>\n\s]+)/u', $text, $m)) {
+                $website = trim($m[1]);
+            }
+        });
+
         $dto = new NormalizedTableDTO(
             name: 'Team Header',
             columns: [],
@@ -30,6 +57,11 @@ class TeamHeaderExtractor implements StatExtractorInterface
             metadata: [
                 'team_name' => $teamName,
                 'competition' => $competition,
+                'coach' => $coach,
+                'assistants' => $assistants,
+                'manager' => $manager,
+                'venue' => $venue,
+                'website' => $website,
                 'source' => 'czbasketball',
             ]
         );

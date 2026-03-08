@@ -92,8 +92,13 @@ class RosterSyncService
                 // 1. Najít nebo vytvořit mapping a uživatele
                 $user = $this->findOrCreateUserForExternalPlayer($externalPlayerId, $playerName, $config);
 
-                // 2. Zajistit existenci PlayerProfile
-                $profile = $user->playerProfile ?: $this->createPlayerProfile($user, $row->values);
+                // 2. Zajistit existenci a aktualizaci PlayerProfile
+                $profile = $user->playerProfile;
+                if (! $profile) {
+                    $profile = $this->createPlayerProfile($user, $row->values);
+                } else {
+                    $this->updatePlayerProfile($profile, $row->values);
+                }
 
                 // 3. Aktualizovat pivot tabulku (is_on_roster = true)
                 $this->updateRosterStatus($profile, $config->team_id, true);
@@ -228,13 +233,66 @@ class RosterSyncService
 
     protected function createPlayerProfile(User $user, array $values): PlayerProfile
     {
-        return PlayerProfile::create([
-            'user_id' => $user->id,
-            'license_number' => $values['license_number'] ?? null,
-            'position' => $values['position'] ?? null,
-            'height_cm' => $values['height_cm'] ?? null,
-            'is_active' => true,
-        ]);
+        $data = $this->prepareProfileData($values);
+        $data['user_id'] = $user->id;
+        $data['is_active'] = true;
+
+        return PlayerProfile::create($data);
+    }
+
+    protected function updatePlayerProfile(PlayerProfile $profile, array $values): void
+    {
+        $data = $this->prepareProfileData($values);
+
+        // Aktualizujeme jen pokud jsou hodnoty nové a nejsou v profilu
+        $toUpdate = [];
+        foreach ($data as $key => $value) {
+            if ($value !== null && (empty($profile->{$key}) || $key === 'metadata')) {
+                if ($key === 'metadata') {
+                    $toUpdate[$key] = array_merge($profile->metadata ?? [], $value);
+                } else {
+                    $toUpdate[$key] = $value;
+                }
+            }
+        }
+
+        if (!empty($toUpdate)) {
+            $profile->update($toUpdate);
+        }
+    }
+
+    protected function prepareProfileData(array $values): array
+    {
+        $metadata = [];
+        if (!empty($values['birth_year'])) {
+            $metadata['birth_year'] = $values['birth_year'];
+        }
+        if (!empty($values['nationality'])) {
+            $metadata['nationality'] = $values['nationality'];
+        }
+
+        return [
+            'jersey_number' => $values['jersey_number'] ?? null,
+            'position' => $this->mapPosition($values['position'] ?? null),
+            'height_cm' => $values['height'] ?? null,
+            'weight_kg' => $values['weight'] ?? null,
+            'metadata' => !empty($metadata) ? $metadata : null,
+        ];
+    }
+
+    protected function mapPosition(?string $pos): ?string
+    {
+        if (!$pos) return null;
+
+        $pos = mb_strtoupper(trim($pos));
+        return match ($pos) {
+            '1', 'PG' => 'PG',
+            '2', 'SG', 'G' => 'SG',
+            '3', 'SF', 'F' => 'SF',
+            '4', 'PF' => 'PF',
+            '5', 'C' => 'C',
+            default => null,
+        };
     }
 
     protected function updateRosterStatus(PlayerProfile $profile, int $teamId, bool $isOnRoster): void
