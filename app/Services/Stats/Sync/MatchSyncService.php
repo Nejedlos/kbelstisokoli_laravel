@@ -67,20 +67,35 @@ class MatchSyncService
 
         $match = null;
 
-        // 1. Přednost má external_id
+        // 1. Přednost má external_id (hledáme v rámci sezóny napříč týmy pro případ overlapu)
         if ($externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
-                ->where('team_id', $team->id)
-                ->where('metadata', 'LIKE', '%"external_id":"' . $externalMatchId . '"%')
+                ->where('metadata->external_id', (string) $externalMatchId)
                 ->first();
         }
 
-        // 2. Fallback na identity key
+        // 2. Fallback na identity key (v rámci sezóny a týmu)
         if (! $match) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'LIKE', '%"match_identity_key":"' . $matchIdentityKey . '"%')
+                ->where('metadata->match_identity_key', $matchIdentityKey)
                 ->first();
+        }
+
+        // 3. Poslední záchrana: vyhledání podle data, soupeře a směru zápasu (is_home)
+        // Toto pomáhá identifikovat zápasy, které byly importovány z jiného zdroje (legacy)
+        // a nemají v metadatech identity key ani external_id.
+        if (! $match && $scheduledAt && $opponent) {
+            $match = BasketballMatch::where('season_id', $season->id)
+                ->where('team_id', $team->id)
+                ->where('opponent_id', $opponent->id)
+                ->where('is_home', $isHome)
+                ->whereDate('scheduled_at', $scheduledAt->format('Y-m-d'))
+                ->first();
+
+            if ($match) {
+                \Log::info("Match found by date/opponent/is_home fallback: {$match->id} for {$team->slug} vs {$opponentName} on {$scheduledAt->format('Y-m-d')}");
+            }
         }
 
         // Zpracování skóre

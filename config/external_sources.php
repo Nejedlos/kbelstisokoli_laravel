@@ -18,7 +18,7 @@ return [
 
         // Výchozí limity pro jeden běh synchronizace
         'limits' => [
-            'max_match_details_per_run' => 10,
+            'max_match_details_per_run' => 100,
             'recent_match_days' => 3, // kolik dní zpětně kontrolovat boxscore
         ],
 

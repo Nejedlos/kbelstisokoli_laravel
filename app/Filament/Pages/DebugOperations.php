@@ -143,10 +143,10 @@ class DebugOperations extends Page
                                 \Filament\Forms\Components\TextInput::make('max_match_details')
                                     ->label('Max detailů')
                                     ->numeric()
-                                    ->default(15)
-                                    ->helperText('Limit pro počet zápasů k hloubkové synchronizaci (pro FRESH/FORCE je default 100).')
+                                    ->default(100)
+                                    ->helperText('Limit pro počet zápasů k hloubkové synchronizaci.')
                                     ->hidden(fn ($get) => ! $get('sync_details')),
-                            ])->columns(4),
+                            ])->columns(2),
                     ])
                     ->requiresConfirmation()
                     ->action(function (array $data) {
@@ -206,7 +206,7 @@ class DebugOperations extends Page
                         \Filament\Forms\Components\TextInput::make('max_match_details')
                             ->label('Max detailů zápasů')
                             ->numeric()
-                            ->default(15)
+                            ->default(100)
                             ->helperText('Limit pro hloubkovou synchronizaci zápasů (na jeden tým).'),
                     ])
                     ->requiresConfirmation()
