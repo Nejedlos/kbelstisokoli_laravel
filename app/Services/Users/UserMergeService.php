@@ -89,7 +89,7 @@ class UserMergeService
                     $query->select(DB::raw(1))
                         ->from('user_relationships as ur2')
                         ->where('ur2.parent_id', $target->id)
-                        ->whereRaw('ur2.child_id = user_relationships.child_id');
+                        ->whereColumn('ur2.child_id', 'user_relationships.child_id');
                 })
                 ->update(['parent_id' => $target->id]);
 
@@ -100,7 +100,7 @@ class UserMergeService
                     $query->select(DB::raw(1))
                         ->from('user_relationships as ur2')
                         ->where('ur2.child_id', $target->id)
-                        ->whereRaw('ur2.parent_id = user_relationships.parent_id');
+                        ->whereColumn('ur2.parent_id', 'user_relationships.parent_id');
                 })
                 ->update(['child_id' => $target->id]);
 

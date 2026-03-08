@@ -27,14 +27,19 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
-        $userTable = (new \App\Models\User)->getTable();
+        $userModel = new \App\Models\User;
+        $userTable = $userModel->getTable();
 
         return $table
             ->striped()
             ->modifyQueryUsing(fn ($query) => $query
                 ->with(['externalMappings'])
                 ->select("{$userTable}.*")
-                ->selectRaw("(SELECT COUNT(*) FROM {$userTable} as u2 WHERE u2.name = {$userTable}.name AND u2.id != {$userTable}.id) as duplicates_count")
+                ->addSelect(['duplicates_count' => \App\Models\User::query()
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('name', "{$userTable}.name")
+                    ->whereColumn('id', '!=', "{$userTable}.id")
+                ])
             )
             ->columns([
                 SpatieMediaLibraryImageColumn::make('avatar')
@@ -49,14 +54,14 @@ class UsersTable
                     ->description(fn ($record) => $record->email)
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->duplicates_count > 0
-                            ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="Možná duplicita (shoda jména)"></i> '
+                            ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="Nalezeny další záznamy se stejným jménem ('.$record->duplicates_count.')"></i> '
                             : '') .
                         ($record->isGhost()
                             ? '<i class="fa-light fa-ghost fa-fw text-gray-400 mr-1" title="Dočasný Ghost profil"></i> '
                             : '') .
                         ($record->externalMappings->isNotEmpty()
                             ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
-                            : '') . e($state)
+                            : '') . e($state) . ($record->duplicates_count > 0 ? ' <span class="text-xs text-warning">('.$record->duplicates_count.' duplicity)</span>' : '')
                     ))
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
                     ->sortable(),
@@ -149,6 +154,14 @@ class UsersTable
                     })),
             ])
             ->recordActions([
+                Action::make('viewDuplicates')
+                    ->label('Zobrazit duplicity')
+                    ->icon(new HtmlString('<i class="fa-light fa-users-viewfinder"></i>'))
+                    ->color('info')
+                    ->url(fn ($record) => route('filament.admin.resources.users.index', [
+                        'tableSearch' => $record->name,
+                    ]))
+                    ->visible(fn ($record) => $record->duplicates_count > 0),
                 ActionGroup::make([
                     Action::make('sendInvitation')
                         ->label(__('user.actions.send_invitation'))
@@ -202,7 +215,7 @@ class UsersTable
                     EditAction::make(),
                 ]),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     BulkAction::make('mergeAutomatically')
