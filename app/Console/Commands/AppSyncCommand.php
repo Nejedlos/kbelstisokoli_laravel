@@ -146,9 +146,23 @@ class AppSyncCommand extends Command
 
         // Ověření dostupnosti PHP na serveru
         \Laravel\Prompts\info('🔍 Ověřuji dostupnost PHP na serveru...');
-        $checkPhp = Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
+        $checkPhp = Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 {$user}@{$host} '{$phpBinary} -v'");
         if (! $checkPhp->successful()) {
             $this->error("❌ PHP binárka '{$phpBinary}' není na serveru dostupná nebo nefunguje.");
+            $sshError = trim($checkPhp->errorOutput());
+            if ($sshError) {
+                $this->line("Výstup SSH: <fg=red>{$sshError}</>");
+            }
+
+            if (str_contains($sshError, 'Permission denied') || empty($sshError)) {
+                $this->warn('⚠️  Pravděpodobně selhala SSH autentizace. Pokud jste nedávno změnili heslo k hostingu, je nutné znovu nahrát SSH klíč.');
+                if (confirm('Chcete nyní spustit setup pro opravu spojení (nahrání klíčů)?', true)) {
+                    $this->call('app:production:setup');
+                    $this->info('Nyní můžete zkusit app:sync znovu.');
+
+                    return self::SUCCESS;
+                }
+            }
 
             return self::FAILURE;
         }
@@ -192,7 +206,7 @@ class AppSyncCommand extends Command
                 }
             ';
 
-            $dbCheckCmd = "ssh -p {$port} {$user}@{$host} \"{$phpBinary} -r 'eval(stream_get_contents(STDIN));'\"";
+            $dbCheckCmd = "ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} \"{$phpBinary} -r 'eval(stream_get_contents(STDIN));'\"";
             $checkDb = Process::input($dbCheckPhp)->run($dbCheckCmd);
             $output = trim($checkDb->output());
 
@@ -248,7 +262,7 @@ class AppSyncCommand extends Command
         // Node.js selection logic
         if ($nodeBinary === 'node' || empty($nodeBinary)) {
             \Laravel\Prompts\info('🔍 Hledám optimální verzi Node.js (v18+)...');
-            $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node22 node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
+            $findNode = Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} 'for n in $(which -a node22 node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
             if ($findNode->successful() && ! empty(trim($findNode->output()))) {
                 $nodeBinary = trim($findNode->output());
                 \Laravel\Prompts\info("✅ Použiji: {$nodeBinary}");
@@ -336,12 +350,12 @@ class AppSyncCommand extends Command
                 foreach ($remoteDirs as $remoteDir) {
                     // Zajistíme, že cílový adresář na serveru existuje (pro soubory vytvoříme rodičovský adresář)
                     $remoteParentDir = is_dir($localDir) ? $remoteDir : dirname($remoteDir);
-                    Process::run("ssh -p {$port} {$user}@{$host} 'mkdir -p ".escapeshellarg($remoteParentDir)."'");
+                    Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} 'mkdir -p ".escapeshellarg($remoteParentDir)."'");
 
                     // 1. Rsync
                     $checkRsync = Process::run('rsync --version');
                     if ($checkRsync->successful()) {
-                        $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port}' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($remoteDir);
+                        $rsyncCmd = "rsync -avz --delete -e 'ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($remoteDir);
                         $result = Process::forever()->run($rsyncCmd, function (string $type, string $output) {
                             if ($type === 'out' && strlen(trim($output)) > 0) {
                                 $this->line('  '.trim($output));
@@ -358,7 +372,7 @@ class AppSyncCommand extends Command
                         // abychom předešli hromadění starých souborů (náhrada za rsync --delete).
                         if (is_dir($localDir)) {
                             $this->line("  Cleaning remote directory before FTP sync: $remoteDir");
-                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
+                            Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
                         }
 
                         $this->line("  Trying FTP fallback for $remoteDir...");
@@ -372,12 +386,12 @@ class AppSyncCommand extends Command
                         // Obdobně pro SCP fallback vyčistíme cílový adresář
                         if (is_dir($localDir)) {
                             $this->line("  Cleaning remote directory before SCP sync: $remoteDir");
-                            Process::run("ssh -p {$port} {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
+                            Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} 'rm -rf ".escapeshellarg($remoteDir)."/*'");
                         }
 
                         $this->line('  Falling back to SCP...');
                         $sourcePath = is_dir($localDir) ? $localDir.'/.' : $localDir;
-                        $scpCmd = "scp -P {$port} -r ".escapeshellarg($sourcePath)." {$user}@{$host}:".escapeshellarg($remoteDir);
+                        $scpCmd = "scp -P {$port} -o BatchMode=yes -o StrictHostKeyChecking=no -r ".escapeshellarg($sourcePath)." {$user}@{$host}:".escapeshellarg($remoteDir);
                         Process::forever()->run($scpCmd);
                     }
                 }
