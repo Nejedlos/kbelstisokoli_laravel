@@ -68,7 +68,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $allTablesData = [];
         $allFragmentHtml = '';
 
-        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader) {
+        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
             if ($table->filter('thead th')->count() < 5) {
                 return;
@@ -98,6 +98,14 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $allFragmentHtml .= '<h3>'.$tableName."</h3>\n";
             $allFragmentHtml .= $table->outerHtml()."\n";
             $tableDto = $this->processBoxscoreTable($table, $tableName, $warnings);
+
+            // Přidáme globální metadata ke každé tabulce
+            $tableDto->metadata = array_merge($tableDto->metadata, [
+                'header' => $matchHeader,
+                'best_players' => $bestPlayers,
+                'team_comparison' => $teamComparison,
+            ]);
+
             $allTablesData[] = $tableDto;
         });
 
@@ -288,18 +296,18 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
         // Hledáme řádky s kategoriemi nejlepších hráčů
         // Každá kategorie (Body, Doskoky, ...) je v jednom řádku (row)
-        $crawler->filter('.match-best-players-row, .row:contains("Body"), .row:contains("Doskoky"), .row:contains("Asistence"), .row:contains("Zisky"), .row:contains("Bloky")')->each(function (Crawler $row) use (&$bestPlayers, $categoryMapping) {
+        $crawler->filter('.row')->each(function (Crawler $row) use (&$bestPlayers, $categoryMapping) {
             $categoryNode = $row->filter('h4')->first();
             if ($categoryNode->count() === 0) {
                 return;
             }
 
             $originalCategory = trim($categoryNode->text());
-            if (empty($originalCategory)) {
+            $category = $categoryMapping[$originalCategory] ?? null;
+
+            if (!$category) {
                 return;
             }
-
-            $category = $categoryMapping[$originalCategory] ?? $originalCategory;
 
             $playersInCategory = [
                 'label' => $originalCategory,
@@ -307,14 +315,14 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 'away' => null,
             ];
 
-            // Domácí hráč (vlevo, obvykle order-xl-1)
-            $homeCard = $row->filter('.order-xl-1 .box-shadow, .order-md-1 .box-shadow')->first();
+            // Domácí hráč (vlevo, obvykle order-xl-1 nebo order-md-1)
+            $homeCard = $row->filter('.order-xl-1 .box-shadow, .order-md-1 .box-shadow, .order-xl-1 .bg-white, .order-md-1 .bg-white')->first();
             if ($homeCard->count() > 0) {
                 $playersInCategory['home'] = $this->parsePlayerCard($homeCard);
             }
 
-            // Hostující hráč (vpravo, obvykle order-xl-3)
-            $awayCard = $row->filter('.order-xl-3 .box-shadow, .order-md-3 .box-shadow')->first();
+            // Hostující hráč (vpravo, obvykle order-xl-3 nebo order-md-3)
+            $awayCard = $row->filter('.order-xl-3 .box-shadow, .order-md-3 .box-shadow, .order-xl-3 .bg-white, .order-md-3 .bg-white')->first();
             if ($awayCard->count() > 0) {
                 $playersInCategory['away'] = $this->parsePlayerCard($awayCard);
             }
@@ -368,10 +376,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         }
 
         // Hodnota (např. 18.0 bodů)
-        $valueNode = $card->filter('.gamma.text-green, .value, .pts, .score')->first();
-        if ($valueNode->count() > 0) {
-            $player['value'] = trim($valueNode->text());
-        }
+        $valueNode = $card->filter('.gamma.text-green, .gamma.text-secondary, .value, .pts, .score')->first();
+        $player['value'] = $valueNode->count() > 0 ? trim($valueNode->text()) : '';
 
         return !empty($player['name']) ? $player : null;
     }
@@ -387,25 +393,22 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             'Prům. zápasová zkušenost' => 'average_match_experience',
         ];
 
-        // Najdeme sekci "srovnání kádrů"
-        $section = $crawler->filter('.row:contains("srovnání kádrů"), .row:contains("Srovnání kádrů")');
-        if ($section->count() === 0) {
-            return [];
-        }
-
-        // Iterujeme přes řádky srovnání (věk, národnosti, zkušenosti)
-        // Každý parametr je v jednom řádku
-        $crawler->filter('.row.no-gutters.justify-content-md-center.pb-2.mb-2')->each(function (Crawler $row) use (&$comparison, $labelMapping) {
+        // Iterujeme přes všechny řádky a hledáme ty, které odpovídají našim štítkům
+        $crawler->filter('.row')->each(function (Crawler $row) use (&$comparison, $labelMapping) {
             $labelNode = $row->filter('h4')->first();
             if ($labelNode->count() === 0) {
                 return;
             }
 
             $originalLabel = trim($labelNode->text());
-            $label = $labelMapping[$originalLabel] ?? $originalLabel;
+            $label = $labelMapping[$originalLabel] ?? null;
 
-            $homeValNode = $row->filter('.order-md-1 .delta')->first();
-            $awayValNode = $row->filter('.order-md-3 .delta')->first();
+            if (!$label) {
+                return;
+            }
+
+            $homeValNode = $row->filter('.order-md-1 .delta, .order-1 .delta')->first();
+            $awayValNode = $row->filter('.order-md-3 .delta, .order-3 .delta')->first();
 
             if ($homeValNode->count() > 0 && $awayValNode->count() > 0) {
                 $comparison[$label] = [

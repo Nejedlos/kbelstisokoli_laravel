@@ -152,6 +152,10 @@
                                     $total = $homeVal + $awayVal;
                                     $homePct = $total > 0 ? ($homeVal / $total) * 100 : 50;
                                     $awayPct = $total > 0 ? ($awayVal / $total) * 100 : 50;
+
+                                    // Barvy: náš tým má vždy značkovou barvu
+                                    $homeBarColor = $match->is_home ? 'bg-brand-500' : 'bg-gray-300';
+                                    $awayBarColor = $match->is_home ? 'bg-gray-300' : 'bg-brand-500';
                                 @endphp
 
                                 <div class="space-y-3">
@@ -169,9 +173,9 @@
                                         </div>
                                     </div>
                                     <div class="h-3 w-full flex rounded-full overflow-hidden shadow-inner bg-gray-100 p-0.5">
-                                        <div class="h-full rounded-l-full bg-brand-500 transition-all duration-1000" style="width: {{ $homePct }}%"></div>
+                                        <div class="h-full rounded-l-full {{ $homeBarColor }} transition-all duration-1000" style="width: {{ $homePct }}%"></div>
                                         <div class="w-1 bg-white"></div>
-                                        <div class="h-full rounded-r-full bg-gray-300 transition-all duration-1000" style="width: {{ $awayPct }}%"></div>
+                                        <div class="h-full rounded-r-full {{ $awayBarColor }} transition-all duration-1000" style="width: {{ $awayPct }}%"></div>
                                     </div>
                                 </div>
                             @endforeach
@@ -222,7 +226,7 @@
                                                                     </div>
                                                                 @endif
                                                             </div>
-                                                            <div class="absolute -top-2 -right-2 w-6 h-6 rounded-full {{ $side === 'home' ? 'bg-brand-500' : 'bg-gray-400' }} text-white flex items-center justify-center text-[10px] shadow-lg">
+                                                            <div class="absolute -top-2 -right-2 w-6 h-6 rounded-full {{ ($side === 'home' && $match->is_home) || ($side === 'away' && ! $match->is_home) ? 'bg-brand-500' : 'bg-gray-400' }} text-white flex items-center justify-center text-[10px] shadow-lg">
                                                                 <i class="fa-solid fa-crown"></i>
                                                             </div>
                                                         </div>
@@ -233,7 +237,7 @@
                                                             <span class="text-base font-bold text-gray-900 leading-tight block truncate">{{ $players[$side]['name'] }}</span>
                                                         </div>
                                                         <div class="flex-shrink-0 text-right">
-                                                            <span class="text-xl font-black text-brand-600 tabular-nums">{{ $players[$side]['value'] }}</span>
+                                                            <span class="text-xl font-black text-brand-600 tabular-nums">{{ $players[$side]['value'] ?? '' }}</span>
                                                         </div>
                                                     </div>
                                                 @endif
@@ -260,7 +264,7 @@
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="text-[10px] font-bold text-brand-500 uppercase tracking-widest mb-0.5">{{ $players['team'] ?? '' }}</span>
-                                            <span class="text-base font-bold text-gray-900 leading-tight">{{ $players['name'] }}</span>
+                                            <span class="text-base font-bold text-gray-900 leading-tight">{{ $players['name'] ?? '' }}</span>
                                         </div>
                                     </div>
                                     @if($loop->last) </div> @endif

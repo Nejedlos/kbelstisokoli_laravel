@@ -138,7 +138,10 @@ class PhotoPoolResource extends Resource
 
                         if ($isConfirming) {
                             return new HtmlString("
-                                <div class='relative overflow-hidden p-8 bg-red-50 dark:bg-red-950/20 backdrop-blur-2xl border border-red-200 dark:border-red-900/50 rounded-[2.5rem] flex items-center gap-8 shadow-2xl shadow-red-200/20 dark:shadow-none transition-all duration-500'>
+                                <div
+                                    x-init=\"\$el.scrollIntoView({ behavior: 'smooth', block: 'center' })\"
+                                    class='relative overflow-hidden p-8 bg-red-50 dark:bg-red-950/20 backdrop-blur-2xl border border-red-200 dark:border-red-900/50 rounded-[2.5rem] flex items-center gap-8 shadow-2xl shadow-red-200/20 dark:shadow-none transition-all duration-500'
+                                >
                                     <div class='flex-shrink-0'>
                                         <div class='w-20 h-20 rounded-[1.75rem] bg-red-600 flex items-center justify-center text-4xl text-white shadow-xl border border-red-500'>
                                             <i class='fa-light fa-trash-can-xmark animate-pulse'></i>
@@ -172,7 +175,11 @@ class PhotoPoolResource extends Resource
                         }
 
                         return new HtmlString("
-                            <div class='relative overflow-hidden p-8 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] flex items-center gap-8 shadow-2xl shadow-slate-200/20 dark:shadow-none transition-all duration-500' wire:poll.3s='processImportQueue'>
+                            <div
+                                x-init=\"\$el.scrollIntoView({ behavior: 'smooth', block: 'center' })\"
+                                class='relative overflow-hidden p-8 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] flex items-center gap-8 shadow-2xl shadow-slate-200/20 dark:shadow-none transition-all duration-500'
+                                wire:poll.3s='processImportQueue'
+                            >
                                 <div class='absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl'></div>
 
                                 <div class='relative flex-shrink-0'>

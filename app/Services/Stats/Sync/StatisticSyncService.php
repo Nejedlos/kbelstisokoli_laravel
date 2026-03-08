@@ -109,24 +109,28 @@ class StatisticSyncService
             $isOurTeam = true;
             $currentTeamId = $match->team_id;
 
-            // Uložíme globální metadata (header, best_players, team_comparison), pokud tam jsou
-            $matchMetadata = $match->metadata ?? [];
-            $updatedMetadata = false;
+            // Znovu načteme aktuální metadata z DB pro jistotu (pro atomicitu v transakci)
+            $freshMatch = DB::table('matches')->where('id', $match->id)->lockForUpdate()->first();
+            $matchMetadata = json_decode($freshMatch->metadata ?? '[]', true) ?: [];
+            $metaChanged = false;
+
             if (isset($data->metadata['header'])) {
                 $matchMetadata['match_header_external'] = $data->metadata['header'];
-                $updatedMetadata = true;
+                $metaChanged = true;
             }
             if (isset($data->metadata['best_players'])) {
                 $matchMetadata['best_players_external'] = $data->metadata['best_players'];
-                $updatedMetadata = true;
+                $metaChanged = true;
             }
             if (isset($data->metadata['team_comparison'])) {
                 $matchMetadata['team_comparison_external'] = $data->metadata['team_comparison'];
-                $updatedMetadata = true;
+                $metaChanged = true;
             }
-            if ($updatedMetadata) {
-                $match->metadata = $matchMetadata;
-                $match->save();
+
+            if ($metaChanged) {
+                DB::table('matches')->where('id', $match->id)->update([
+                    'metadata' => json_encode($matchMetadata)
+                ]);
             }
 
             // Zkusíme detekovat, zda je to tabulka našeho týmu nebo soupeře
@@ -168,23 +172,14 @@ class StatisticSyncService
 
             // Pokud je to soupeř, uložíme ho jako jeden záznam do metadat zápasu a nevytváříme řádky
             if (! $isOurTeam) {
-                $matchMetadata = $match->metadata ?? [];
+                // Znovu načteme, protože se mohla metadata změnit v předchozím kroku (header atd.)
+                $freshMatch = DB::table('matches')->where('id', $match->id)->first();
+                $matchMetadata = json_decode($freshMatch->metadata ?? '[]', true) ?: [];
                 $matchMetadata['opponent_boxscore'] = $data->toArray();
 
-                // Uložíme také globální metadata (header, best_players, team_comparison), pokud tam jsou
-                // a pokud jsme v první tabulce (aby se to nepřepisovalo zbytečně)
-                if (isset($data->metadata['header'])) {
-                    $matchMetadata['match_header_external'] = $data->metadata['header'];
-                }
-                if (isset($data->metadata['best_players'])) {
-                    $matchMetadata['best_players_external'] = $data->metadata['best_players'];
-                }
-                if (isset($data->metadata['team_comparison'])) {
-                    $matchMetadata['team_comparison_external'] = $data->metadata['team_comparison'];
-                }
-
-                $match->metadata = $matchMetadata;
-                $match->save(); // Uložíme hned, aby se to v DB projevilo, pokud by někdo četl z DB
+                DB::table('matches')->where('id', $match->id)->update([
+                    'metadata' => json_encode($matchMetadata)
+                ]);
 
                 // Smažeme případné existující řádky statistik soupeře, pokud tam nějaké zůstaly
                 StatisticRow::where('statistic_set_id', $set->id)
