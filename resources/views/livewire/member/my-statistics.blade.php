@@ -17,6 +17,13 @@
             >
                 <i class="fa-light fa-users-viewfinder mr-2"></i> Týmový přehled
             </button>
+            <button
+                wire:click="setView('matches')"
+                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all"
+                :class="view === 'matches' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            >
+                <i class="fa-light fa-calendar-lines mr-2"></i> Zápasy
+            </button>
         </div>
 
         {{-- Filters --}}
@@ -335,6 +342,85 @@
                 <div class="text-gray-400 font-medium italic">Tento tým v dané sezóně zatím nemá synchronizované týmové statistiky.</div>
             </div>
         @endif
+    @elseif($view === 'matches')
+        {{-- MATCHES VIEW --}}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="p-6 border-b border-gray-50 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-widest">
+                    Přehled zápasů týmu
+                </h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 dark:bg-gray-900/30">
+                        <tr>
+                            <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Datum</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Soupeř</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Místo</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Výsledek</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Skóre</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                        @forelse($matches as $m)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                                    {{ \Carbon\Carbon::parse($m['scheduled_at'])->format('d.m.Y') }}
+                                </div>
+                                <div class="text-[10px] text-gray-400">
+                                    {{ \Carbon\Carbon::parse($m['scheduled_at'])->format('H:i') }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                                    {{ $m['opponent']['name'] ?? 'Neznámý soupeř' }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 rounded text-[10px] font-bold {{ $m['is_home'] ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500' }}">
+                                    {{ $m['is_home'] ? 'DOMA' : 'VENKU' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                @if($m['status'] === 'finished')
+                                    @php
+                                        $isWin = $m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home']);
+                                    @endphp
+                                    <span @class([
+                                        'px-2 py-1 rounded text-[10px] font-black',
+                                        'bg-green-50 text-green-600' => $isWin,
+                                        'bg-red-50 text-red-600' => !$isWin
+                                    ])>
+                                        {{ $isWin ? 'VÝHRA' : 'PROHRA' }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 rounded bg-gray-50 text-gray-400 text-[10px] font-bold">
+                                        PLÁNOVÁNO
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                @if($m['status'] === 'finished')
+                                    <div class="text-sm font-black text-gray-800 dark:text-white">
+                                        {{ $m['score_home'] }}:{{ $m['score_away'] }}
+                                    </div>
+                                @else
+                                    <div class="text-sm text-gray-300">- : -</div>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">
+                                Žádné zápasy pro tento tým v této sezóně nebyly nalezeny.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     @endif
 
     {{-- ApexCharts Logic --}}
@@ -407,19 +493,25 @@
         };
 
         // Initialize based on initial view
-        $wire.view === 'personal' ? initPersonalCharts() : initTeamCharts();
+        $wire.view === 'personal' ? initPersonalCharts() : ($wire.view === 'team' ? initTeamCharts() : null);
 
         // Re-initialize on Livewire updates
         document.addEventListener('livewire:initialized', () => {
              Livewire.on('statsLoaded', () => {
                  // Clear charts before re-render if needed or just let Livewire refresh the DOM
                  // But since we use wire:ignore, we need to manual refresh
-                 document.querySelector("#points-evolution-chart").innerHTML = '';
-                 document.querySelector("#comparison-chart").innerHTML = '';
+                 if (document.querySelector("#points-evolution-chart"))
+                    document.querySelector("#points-evolution-chart").innerHTML = '';
+                 if (document.querySelector("#comparison-chart"))
+                    document.querySelector("#comparison-chart").innerHTML = '';
                  if (document.querySelector("#team-evolution-chart"))
                     document.querySelector("#team-evolution-chart").innerHTML = '';
 
-                 $wire.view === 'personal' ? initPersonalCharts() : initTeamCharts();
+                 if ($wire.view === 'personal') {
+                    initPersonalCharts();
+                 } else if ($wire.view === 'team') {
+                    initTeamCharts();
+                 }
              });
         });
     </script>
