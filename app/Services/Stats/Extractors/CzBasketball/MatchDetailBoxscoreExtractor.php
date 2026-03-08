@@ -38,6 +38,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         'T' => 'turnovers',
         'BL' => 'blocks',
         'VAL' => 'efficiency',
+        'U%' => 'fg_pct',
+        '2B-Ú' => 'fg2_made',
+        '2B-P' => 'fg2_att',
+        '3B-Ú' => 'fg3_made',
+        '3B-P' => 'fg3_att',
     ];
 
     /**
@@ -135,16 +140,21 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         }
 
         // Skóre
-        $scoreNodes = $searchIn->filter('.delta, .match-score, .score, .final-score, .score-total');
-        if ($scoreNodes->count() >= 2) {
-            $header['score'] = trim($scoreNodes->eq(0)->text()).':'.trim($scoreNodes->eq(1)->text());
-        } elseif ($scoreNodes->count() > 0) {
-            $header['score'] = trim($scoreNodes->first()->text());
+        $scoreNodes = $searchIn->filter('.match-header-score, .alfa.article-title, .match-score, .score, h1');
+        if ($scoreNodes->count() > 0) {
+            foreach ($scoreNodes as $node) {
+                $text = trim($node->nodeValue);
+                // Regex pro skóre (např. 82:55), kterému nepředchází jiná čísla (aby se nevzalo datum 3.8.)
+                if (preg_match('/(?<![\d:])(\d{1,3}\s*:\s*\d{1,3})(?![\d:])/u', $text, $m)) {
+                    $header['score'] = str_replace(' ', '', $m[1]);
+                    break;
+                }
+            }
         }
 
         // Skóre po čtvrtinách (periods)
         $periods = [];
-        $periodsNode = $searchIn->filter('.periods, .score-periods, .score-quarters, .match-quarters');
+        $periodsNode = $searchIn->filter('.periods, .score-periods, .score-quarters, .match-quarters, .match-score-quarters');
         if ($periodsNode->count() > 0) {
             $header['periods_text'] = trim($periodsNode->text());
             // Zkusíme naparsovat čtvrtiny (např. 20:15, 10:12, ...)
@@ -156,9 +166,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     ];
                 }
             }
-        } else {
+        }
+
+        if (empty($periods)) {
             // Hledáme tabulku s průběhem skóre po čtvrtinách (často v detailu zápasu)
-            $scoreByQuartersTable = $crawler->filter('.table-quarters, .score-quarters-table, table:contains("1.č")')->first();
+            $scoreByQuartersTable = $crawler->filter('.table-quarters, .score-quarters-table, table:contains("1.č"), table:contains("1. č")')->first();
             if ($scoreByQuartersTable->count() > 0) {
                 $qRows = $scoreByQuartersTable->filter('tr');
                 if ($qRows->count() >= 2) {
@@ -177,19 +189,78 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     }
                 }
             }
+        }
 
-            if (empty($periods)) {
-                $allText = $searchIn->text();
-                // Zpřísněný regex pro čtvrtiny v závorkách: hledáme aspoň dvě dvojice čísel s dvojtečkou
-                if (preg_match('/\(((\d+\s*:\s*\d+[\s,]*){2,})\)/', $allText, $m)) {
-                    $header['periods_text'] = trim($m[1]);
-                    if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $pm)) {
-                        foreach ($pm[0] as $i => $pair) {
-                            $periods[] = [
-                                'home' => (int)$pm[1][$i],
-                                'away' => (int)$pm[2][$i],
+        if (empty($periods)) {
+            // Hledáme strukturu pod skóre v hlavičce (časté na cz.basketball)
+            $scoreContainer = $searchIn->filter('.font-size-normal.font-weight-normal.mt-1.d-flex.justify-content-center')->first();
+            if ($scoreContainer->count() > 0) {
+                $scoreContainer->filter('.font-size-smaller.text-gray.font-weight-bold')->each(function (Crawler $div) use (&$periods) {
+                    $text = trim($div->text());
+                    $parts = preg_split('/\s+/', $text);
+                    if (count($parts) >= 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                        $periods[] = [
+                            'home' => (int)$parts[0],
+                            'away' => (int)$parts[1],
+                        ];
+                    }
+                });
+
+                // Pokud jsme našli průběžné stavy, musíme je převést na skóre jednotlivých čtvrtin
+                if (!empty($periods)) {
+                    $normalizedPeriods = [];
+                    $lastHome = 0;
+                    $lastAway = 0;
+                    foreach ($periods as $p) {
+                        $normalizedPeriods[] = [
+                            'home' => $p['home'] - $lastHome,
+                            'away' => $p['away'] - $lastAway,
+                        ];
+                        $lastHome = $p['home'];
+                        $lastAway = $p['away'];
+                    }
+                    // Přidáme i konečné skóre jako poslední čtvrtinu, pokud se liší
+                    if (isset($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $sm)) {
+                        $finalHome = (int)$sm[1];
+                        $finalAway = (int)$sm[2];
+                        if ($finalHome > $lastHome || $finalAway > $lastAway) {
+                            $normalizedPeriods[] = [
+                                'home' => $finalHome - $lastHome,
+                                'away' => $finalAway - $lastAway,
                             ];
                         }
+                    }
+                    $periods = $normalizedPeriods;
+                }
+            }
+        }
+
+        if (empty($periods)) {
+            $allText = $searchIn->text();
+            // Zkusíme najít čtvrtiny v závorkách (např. 26:8, 44:27, 60:48, 82:55)
+            if (preg_match('/\(((\d+\s*:\s*\d+[\s,]*)+)\)/', $allText, $m)) {
+                $header['periods_text'] = trim($m[1]);
+                if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $pm)) {
+                    $lastHome = 0;
+                    $lastAway = 0;
+                    foreach ($pm[0] as $i => $pair) {
+                        $currentHome = (int)$pm[1][$i];
+                        $currentAway = (int)$pm[2][$i];
+
+                        // Pokud skóre roste, je to pravděpodobně průběžný stav
+                        if ($currentHome >= $lastHome && $currentAway >= $lastAway && $i > 0) {
+                             $periods[] = [
+                                'home' => $currentHome - $lastHome,
+                                'away' => $currentAway - $lastAway,
+                            ];
+                        } else {
+                            $periods[] = [
+                                'home' => $currentHome,
+                                'away' => $currentAway,
+                            ];
+                        }
+                        $lastHome = $currentHome;
+                        $lastAway = $currentAway;
                     }
                 }
             }
@@ -329,12 +400,22 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 }
             }
 
+            // Pokud jméno obsahuje "Trenér", řádek přeskočíme
+            if ($playerName && (str_contains(mb_strtolower($playerName), 'trenér') || str_contains(mb_strtolower($playerName), 'coach'))) {
+                return;
+            }
+
             // Mapujeme hodnoty buněk na klíče z hlavičky
             $i = 0;
             foreach ($columns as $key => $label) {
                 if ($cells->count() > $i) {
                     $cell = $cells->eq($i);
                     $val = trim($cell->text());
+
+                    // Ignorujeme řádky s trenéry i podle čísla dresu (pokud obsahuje licenci místo čísla)
+                    if ($i === 0 && preg_match('/[A-Z]{2}\d+/', $val)) {
+                         return;
+                    }
 
                     // Pokud jsme jméno nenašli přes odkaz, zkusíme první buňky
                     if (! $playerName && ($key === 'col_0' || $key === 'col_1' || $key === 'player_name')) {
@@ -404,6 +485,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
             if ($playerName || $isTotal) {
                 $rowLabel = $isTotal ? ($playerName ?: 'Tým celkem') : $playerName;
+
+                // Vyčištění jména (pokud obsahuje hvězdičku nebo (C))
+                if ($rowLabel) {
+                    $rowLabel = trim(str_replace(['*', '(C)'], '', $rowLabel));
+                }
 
                 $rows[] = new NormalizedRowDTO(
                     values: $values,

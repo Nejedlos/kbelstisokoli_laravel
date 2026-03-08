@@ -147,33 +147,63 @@ class StatisticSyncService
             }
 
             foreach ($data->rows as $row) {
-                $externalPlayerId = $row->metadata['external_player_id'] ?? null;
+                $externalPlayerId = $row->metadata['external_player_id'] ?? $row->playerId;
                 $playerName = $row->rowLabel;
 
                 // Párování hráče (jen pro náš tým má smysl hledat internal_id)
                 $playerId = $isOurTeam ? $this->findInternalPlayerId($externalPlayerId, $match->season_id, 'czbasketball') : null;
 
+                // Pokud jsme v našem týmu a hráče jsme nenašli, ale máme externalId, zkusíme ho vytvořit jako ghosta
+                if ($isOurTeam && ! $playerId && $externalPlayerId && $playerName) {
+                    $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $match->team_id)
+                        ->where('season_id', $match->season_id)
+                        ->first();
+
+                    if ($config) {
+                        // Využijeme RosterSyncService pro vytvoření uživatele/mappingu
+                        $rosterService = app(\App\Services\Stats\Sync\RosterSyncService::class);
+                        // Reflection/hack abychom se dostali k chráněné metodě nebo prostě zkusíme veřejné rozhraní pokud existuje
+                        // RosterSyncService::findOrCreateUserForExternalPlayer je protected.
+                        // Ale můžeme zkusit najít mapping přímo zde.
+                        $user = $this->ensureUserExists($externalPlayerId, $playerName, $config);
+                        $playerId = $user->id;
+                    }
+                }
+
                 $attributes = [
                     'statistic_set_id' => $set->id,
                     'basketball_match_id' => $match->id,
-                    'team_id' => $currentTeamId,
+                    'team_id' => $isOurTeam ? $match->team_id : null, // Pro soupeře necháváme null nebo ID soupeře?
                     'player_id' => $playerId,
                 ];
+
+                // Pokud je to soupeř, zkusíme najít ID soupeře
+                if (! $isOurTeam && $match->opponent_id) {
+                     $attributes['opponent_id'] = $match->opponent_id;
+                }
 
                 $values = [
                     'season_id' => $match->season_id,
                     'row_label' => $playerName,
                     'values' => $row->values,
-                    'source_metadata' => [
+                    'source_metadata' => array_merge($row->metadata ?? [], [
                         'source' => 'czbasketball',
                         'match_external_id' => $match->metadata['external_id'] ?? null,
                         'player_external_id' => $externalPlayerId,
                         'scraped_at' => now()->toDateTimeString(),
                         'is_opponent' => ! $isOurTeam,
-                    ],
+                    ]),
                 ];
 
-                $statRow = StatisticRow::where($attributes)->first();
+                // Pokud známe player_id, row_label už není v DB striktně nutný pro unikátnost, ale pro zobrazení je super ho mít
+                // Unikátnost v DB je (statistic_set_id, basketball_match_id, player_id, team_id, opponent_id, season_id)
+                // Pokud player_id je null, pak se bere row_label (v některých verzích migrace).
+
+                $statRow = StatisticRow::where($attributes);
+                if (! $playerId) {
+                    $statRow->where('row_label', $playerName);
+                }
+                $statRow = $statRow->first();
                 if ($statRow) {
                     $oldValues = $statRow->only(['values']);
                     $statRow->update($values);
@@ -191,6 +221,30 @@ class StatisticSyncService
 
         $this->recomputePlayerSummaries($match->season_id);
         $this->recomputeTeamSummary($match->season_id, $match->team_id);
+    }
+
+    /**
+     * Zajistí existenci uživatele pro externí ID (včetně vytvoření ghosta).
+     */
+    protected function ensureUserExists(string $externalId, string $name, \App\Models\ExternalTeamSeasonConfig $config): User
+    {
+        // Zkusíme najít mapping
+        $mapping = ExternalEntityMapping::where([
+            'source_key' => $config->source_key,
+            'entity_type' => 'player',
+            'external_id' => $externalId,
+        ])->first();
+
+        if ($mapping && $mapping->internal_id) {
+            return User::findOrFail($mapping->internal_id);
+        }
+
+        // Pokud neexistuje, použijeme RosterSyncService (přes reflexi abychom nemuseli duplikovat logiku)
+        $rosterService = app(\App\Services\Stats\Sync\RosterSyncService::class);
+        $method = new \ReflectionMethod($rosterService, 'findOrCreateUserForExternalPlayer');
+        $method->setAccessible(true);
+
+        return $method->invoke($rosterService, $externalId, $name, $config);
     }
 
     /**

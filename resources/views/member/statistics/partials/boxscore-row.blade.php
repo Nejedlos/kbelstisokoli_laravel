@@ -22,6 +22,21 @@
     <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums">
         {{ $stat->values['minutes'] ?? ($stat->values['min'] ?? '-') }}
     </td>
+    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums">
+        {{ $stat->values['rebounds'] ?? ($stat->values['reb'] ?? 0) }}
+    </td>
+    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums">
+        {{ $stat->values['assists'] ?? ($stat->values['ast'] ?? 0) }}
+    </td>
+    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums">
+        {{ $stat->values['steals'] ?? ($stat->values['stl'] ?? 0) }}
+    </td>
+    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums text-red-400">
+        {{ $stat->values['turnovers'] ?? ($stat->values['tov'] ?? 0) }}
+    </td>
+    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums">
+        {{ $stat->values['blocks'] ?? ($stat->values['blk'] ?? 0) }}
+    </td>
     <td class="px-4 py-4 text-center text-sm font-bold text-green-600 tabular-nums">
         {{ $stat->values['fouls_drawn'] ?? ($stat->values['f_plus'] ?? 0) }}
     </td>

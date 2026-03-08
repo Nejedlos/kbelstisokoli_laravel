@@ -220,6 +220,11 @@
                                     <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Hráč</th>
                                     <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Body</th>
                                     <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Min</th>
+                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">REB</th>
+                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">AST</th>
+                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">STL</th>
+                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TOV</th>
+                                    <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">BLK</th>
                                     <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F+</th>
                                     <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F-</th>
                                     <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TH</th>
@@ -246,8 +251,8 @@
 
                                 @if($homeStats->isNotEmpty())
                                     <tr class="bg-gray-100/50">
-                                        <td colspan="9" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                            {{ $match->is_home ? $match->team->name : $match->opponent->name }}
+                                        <td colspan="14" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                                         </td>
                                     </tr>
                                     @foreach($homeStats as $stat)
@@ -257,8 +262,8 @@
 
                                 @if($awayStats->isNotEmpty())
                                     <tr class="bg-gray-100/50">
-                                        <td colspan="9" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                            {{ $match->is_home ? $match->opponent->name : $match->team->name }}
+                                        <td colspan="14" class="px-6 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                                         </td>
                                     </tr>
                                     @foreach($awayStats as $stat)
@@ -268,7 +273,7 @@
 
                                 @if($allStats->isEmpty())
                                     <tr>
-                                        <td colspan="9" class="px-6 py-12 text-center text-gray-400 italic text-sm">
+                                        <td colspan="14" class="px-6 py-12 text-center text-gray-400 italic text-sm">
                                             Statistiky hráčů pro tento zápas nejsou v databázi uloženy.
                                         </td>
                                     </tr>
