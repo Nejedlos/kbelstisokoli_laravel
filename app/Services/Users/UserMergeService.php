@@ -162,7 +162,7 @@ class UserMergeService
             return null;
         }
 
-        $parts = explode(' ', trim($user->name));
+        $parts = preg_split('/\s+/', trim($user->name));
         if (count($parts) < 2) {
             return null;
         }
@@ -172,7 +172,13 @@ class UserMergeService
 
         // Hledáme pouze mezi reálnými uživateli (ne ghosty) se stejným jménem
         $candidates = User::where('id', '!=', $user->id)
-            ->where(fn ($q) => $q->whereNull('metadata->is_ghost')->orWhere('metadata->is_ghost', false))
+            ->where(function ($q) {
+                $q->where(fn ($q2) => $q2->whereNull('metadata->is_ghost')->orWhere('metadata->is_ghost', false))
+                    ->where(function ($q2) {
+                        $q2->whereNull('email')
+                            ->orWhere('email', 'NOT LIKE', 'ghost_%');
+                    });
+            })
             ->where(function ($q) use ($user, $p1, $p2) {
                 $q->where('name', $user->name)
                     ->orWhere('name', "{$p2} {$p1}")

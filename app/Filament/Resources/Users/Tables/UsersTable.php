@@ -36,9 +36,10 @@ class UsersTable
                 ->with(['externalMappings'])
                 ->select("{$userTable}.*")
                 ->addSelect(['duplicates_count' => \App\Models\User::query()
+                    ->from("{$userTable} as u2")
                     ->selectRaw('COUNT(*)')
-                    ->whereColumn('name', "{$userTable}.name")
-                    ->whereColumn('id', '!=', "{$userTable}.id")
+                    ->whereColumn('u2.name', "{$userTable}.name")
+                    ->whereColumn('u2.id', '!=', "{$userTable}.id")
                 ])
             )
             ->columns([
@@ -214,6 +215,42 @@ class UsersTable
                         }),
                     EditAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Action::make('mergeAllGhosts')
+                    ->label('Sloučit identifikované Ghosty')
+                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-object-group"></i>'))
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalDescription('Tato akce vyhledá v databázi všechny dočasné "Ghost" profily, které mají jednoznačný protějšek mezi reálnými uživateli, a automaticky je sloučí. Tato operace je nevratná.')
+                    ->action(function (\App\Services\Users\UserMergeService $service) {
+                        // Musíme pracovat s query, abychom se vyhnuli problémům s pamětí u velkého množství uživatelů
+                        // Ale pro začátek stačí filter na kolekci, pokud jich není tisíce
+                        $ghosts = \App\Models\User::all()->filter(fn ($u) => $u->isGhost());
+                        $mergedCount = 0;
+
+                        foreach ($ghosts as $ghost) {
+                            $target = $service->findMergeTarget($ghost);
+                            if ($target) {
+                                $service->merge($ghost, $target);
+                                $mergedCount++;
+                            }
+                        }
+
+                        if ($mergedCount > 0) {
+                            \Filament\Notifications\Notification::make()
+                                ->success()
+                                ->title('Hromadné sloučení dokončeno')
+                                ->body("Úspěšně sloučeno {$mergedCount} profilů.")
+                                ->send();
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->info()
+                                ->title('Nebyly nalezeny žádné jasné duplicity')
+                                ->body('Všechny Ghost profily jsou buď již spárované, nebo nemají jednoznačný protějšek.')
+                                ->send();
+                        }
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
