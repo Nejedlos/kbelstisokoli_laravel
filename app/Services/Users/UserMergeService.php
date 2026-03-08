@@ -154,26 +154,44 @@ class UserMergeService
             }
 
             // 8. Rodinné vztahy (children / parents)
+            // MySQL/MariaDB neumožňuje UPDATE se subquery nad stejnou tabulkou (Error 1093).
+            // Proto nejdříve identifikujeme a smažeme vazby, které by po sloučení byly duplicitní,
+            // a poté provedeme jednoduchý update.
+
             // Převod vazeb, kde je zdrojový uživatel rodičem
+            $targetChildrenIds = DB::table('user_relationships')
+                ->where('parent_id', $target->id)
+                ->pluck('child_id');
+
+            $duplicateParentRelationships = DB::table('user_relationships')
+                ->where('parent_id', $source->id)
+                ->whereIn('child_id', $targetChildrenIds)
+                ->pluck('id');
+
+            if ($duplicateParentRelationships->isNotEmpty()) {
+                DB::table('user_relationships')->whereIn('id', $duplicateParentRelationships)->delete();
+            }
+
             DB::table('user_relationships')
                 ->where('parent_id', $source->id)
-                ->whereNotExists(function ($query) use ($target) {
-                    $query->select(DB::raw(1))
-                        ->from('user_relationships as ur2')
-                        ->where('ur2.parent_id', $target->id)
-                        ->whereColumn('ur2.child_id', 'user_relationships.child_id');
-                })
                 ->update(['parent_id' => $target->id]);
 
             // Převod vazeb, kde je zdrojový uživatel dítětem
+            $targetParentIds = DB::table('user_relationships')
+                ->where('child_id', $target->id)
+                ->pluck('parent_id');
+
+            $duplicateChildRelationships = DB::table('user_relationships')
+                ->where('child_id', $source->id)
+                ->whereIn('parent_id', $targetParentIds)
+                ->pluck('id');
+
+            if ($duplicateChildRelationships->isNotEmpty()) {
+                DB::table('user_relationships')->whereIn('id', $duplicateChildRelationships)->delete();
+            }
+
             DB::table('user_relationships')
                 ->where('child_id', $source->id)
-                ->whereNotExists(function ($query) use ($target) {
-                    $query->select(DB::raw(1))
-                        ->from('user_relationships as ur2')
-                        ->where('ur2.child_id', $target->id)
-                        ->whereColumn('ur2.parent_id', 'user_relationships.parent_id');
-                })
                 ->update(['child_id' => $target->id]);
 
             // 9. Trenérské týmy (coach_team)

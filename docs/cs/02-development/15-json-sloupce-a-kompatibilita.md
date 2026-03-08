@@ -33,6 +33,52 @@ Při použití standardní Laravel syntaxe pro dotazování do JSONu (`->where('
       }
       ```
 
+## Omezení UPDATE a DELETE se subquery (Error 1093)
+MySQL a MariaDB nepodporují aktualizaci nebo mazání z tabulky, která je zároveň použita v subquery v klauzuli `WHERE`. 
+Chyba: `SQLSTATE[HY000]: General error: 1093 You can't specify target table 'table_name' for update in FROM clause`.
+
+Tento problém se typicky vyskytuje při sloučení záznamů (merge), kdy se snažíme převést vazby a zároveň zabránit duplicitám.
+
+### Řešení
+Místo subquery v SQL načtěte potřebná ID do PHP (např. pomocí `pluck()`) a následně je předejte do `whereIn()`. Tím se operace rozdělí do dvou nezávislých SQL dotazů a MariaDB nebude hlásit chybu.
+
+**Špatně (způsobí pád v MariaDB):**
+```php
+DB::table('user_relationships')
+    ->where('parent_id', $sourceId)
+    ->whereNotExists(function ($query) use ($targetId) {
+        $query->select(DB::raw(1))
+            ->from('user_relationships as ur2')
+            ->where('ur2.parent_id', $targetId)
+            ->whereColumn('ur2.child_id', 'user_relationships.child_id');
+    })
+    ->update(['parent_id' => $targetId]);
+```
+
+**Správně (bezpečné a kompatibilní):**
+```php
+// 1. Načtení ID do PHP kolekce
+$targetChildrenIds = DB::table('user_relationships')
+    ->where('parent_id', $targetId)
+    ->pluck('child_id');
+
+// 2. Identifikace duplicit, které by po updatu kolidovaly
+$duplicateIds = DB::table('user_relationships')
+    ->where('parent_id', $sourceId)
+    ->whereIn('child_id', $targetChildrenIds)
+    ->pluck('id');
+
+// 3. Smazání duplicit (volitelně)
+if ($duplicateIds->isNotEmpty()) {
+    DB::table('user_relationships')->whereIn('id', $duplicateIds)->delete();
+}
+
+// 4. Samotný update bez subquery
+DB::table('user_relationships')
+    ->where('parent_id', $sourceId)
+    ->update(['parent_id' => $targetId]);
+```
+
 ## Ghost uživatelé
 Speciálním případem jsou tzv. "Ghost" uživatelé. Ti jsou v systému označeni v `metadata->is_ghost`.
 
