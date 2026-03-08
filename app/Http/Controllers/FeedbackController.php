@@ -151,9 +151,14 @@ class FeedbackController extends Controller
 
         // 8. Notifikace
         if (config('feedback.notifications.mail')) {
-            $recipients = config('feedback.recipients');
+            $branding = app(\App\Services\BrandingService::class)->getSettings();
+            // Prioritně admin email z nastavení brandingu, pak z configu (který bere ENV ERROR_REPORT_EMAIL)
+            $recipients = $branding['admin_contact']['email'] ?? config('feedback.recipients');
+
             if (!empty($recipients)) {
-                Mail::to($recipients)->send(new FeedbackReportNotification($report));
+                // Podpora pro více adres oddělených čárkou
+                $recipientList = is_string($recipients) ? array_map('trim', explode(',', $recipients)) : $recipients;
+                Mail::to($recipientList)->send(new FeedbackReportNotification($report));
             }
         }
 

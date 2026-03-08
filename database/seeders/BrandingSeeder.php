@@ -16,9 +16,13 @@ class BrandingSeeder extends Seeder
      */
     public function run(): void
     {
+        $currentYear = (int) date('Y');
+        $yearRange = ($currentYear > 2026) ? "2026–{$currentYear}" : "2026";
+        $clubName = 'TJ Sokol Kbely C & E';
+
         $settings = [
             // Identita klubu
-            'club_name' => 'TJ Sokol Kbely C & E',
+            'club_name' => $clubName,
             'club_short_name' => 'Sokoli',
             'slogan' => 'Více než jen basketbal.',
             'logo_path' => 'branding/logo_kbelsti_sokoli_velke.png',
@@ -43,9 +47,9 @@ class BrandingSeeder extends Seeder
             'contact_fax' => '',
 
             // Administrační kontakt (např. pro technické záležitosti)
-            'admin_contact_email' => 'spanily@pro-nemo.cz',
-            'admin_contact_name' => 'Tomáš Spanilý',
-            'admin_contact_phone' => '+420 602 285 447',
+            'admin_contact_email' => 'nejedlymi@gmail.com',
+            'admin_contact_name' => 'Michal Nejedlý',
+            'admin_contact_phone' => '+420 777220966',
 
             // Globální odkazy
             'main_club_url' => 'https://www.basketkbely.cz/',
@@ -69,7 +73,7 @@ class BrandingSeeder extends Seeder
             'match_day' => 'Středa 19:15 nebo 20:15',
 
             // SEO a Právní informace
-            'footer_text' => '© 2026 Basketbalový klub Kbelští sokoli. Všechna práva vyhrazena.',
+            'footer_text' => "© {$yearRange} {$clubName}. Všechna práva vyhrazena.",
             'seo_description' => 'Oficiální web basketbalového klubu Kbelští sokoli. Informace o týmech, trénincích, zápasech a náborech pro děti i dospělé v Praze 9.',
             'seo_title_suffix' => ' | Kbelští sokoli',
             'seo_robots_index' => true,

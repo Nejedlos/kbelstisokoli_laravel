@@ -18,14 +18,14 @@ Tento modul implementuje robustní systém pro sběr zpětné vazby od přihlá�
 
 ## Backend a Administrace
 - **Ukládání:** Reporty jsou uloženy v databázi `feedback_reports`, soubory (screenshoty, logy) v `storage/app/feedback/{id}/`.
-- **Notifikace:** Po odeslání je zaslán e-mail s přehledem a přílohami na konfigurované adresáře (Klub IT).
-- **Admin UI:** Správa hlášení ve Filamentu (`Zpětná vazba`), s náhledy screenshotů a detailním prohlížečem logů.
+- **Notifikace:** Po odeslání je zaslán e-mail na adresu konfigurovanou v `.env` (`ERROR_REPORT_EMAIL`) nebo na e-mail hlavního administrátora nastavený v sekci **Branding** v administraci.
+- **Admin UI:** Správa hlášení ve Filamentu (`Zpětná vazba`), s náhledy screenshotů, detailním prohlížečem logů, breadcrumbs a výkonnostními daty.
 
 ## Konfigurace
-Konfigurace se nachází v `config/feedback.php`.
-- `enabled`: Globální zapnutí/vypnutí.
-- `environments`: V jakých prostředích se má widget zobrazovat.
-- `recipients`: Seznam e-mailů pro notifikace.
+Konfigurace se nachází v `config/feedback.php` a v obecném brandingu.
+- `ERROR_REPORT_EMAIL` (.env): Výchozí adresa pro hlášení chyb.
+- `admin_contact_email` (Administrace -> Branding): Prioritní adresa pro příjem hlášení, pokud je nastavena.
+- `enabled`: Globální zapnutí/vypnutí v `config/feedback.php`.
 - `limits`: Limity pro logy, velikost payloadu a rate limiting.
 - `redaction`: Seznam klíčů a vzorů pro maskování citlivých dat.
 

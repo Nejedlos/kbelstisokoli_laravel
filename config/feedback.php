@@ -11,7 +11,7 @@ return [
 
     'environments' => explode(',', env('FEEDBACK_ENVIRONMENTS', 'production,staging,local,testing')),
 
-    'recipients' => explode(',', env('FEEDBACK_RECIPIENTS', 'it@kbelstisokoli.cz')),
+    'recipients' => env('ERROR_REPORT_EMAIL', env('FEEDBACK_RECIPIENTS', 'it@kbelstisokoli.cz')),
 
     'notifications' => [
         'mail' => true,

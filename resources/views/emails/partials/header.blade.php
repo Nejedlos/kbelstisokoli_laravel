@@ -6,9 +6,6 @@
                      width="{{ config('email_branding.logo_width') }}"
                      alt="{{ config('email_branding.logo_alt') }}"
                      style="border: none; display: block; margin: 0 auto; max-width: 100%;">
-                <span style="display: block; font-size: 18px; font-weight: bold; color: {{ config('email_branding.colors.secondary') }}; margin-top: 10px; font-family: Arial, Helvetica, sans-serif;">
-                    {{ config('email_branding.brand_name') }}
-                </span>
             </a>
             <hr style="border: none; border-top: 1px solid {{ config('email_branding.colors.border') }}; margin: 25px auto 0 auto; width: 50px;">
         </td>

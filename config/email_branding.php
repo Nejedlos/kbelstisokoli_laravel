@@ -11,13 +11,13 @@ return [
     |
     */
 
-    'brand_name' => config('branding.club_name', 'Kbelští sokoli'),
+    'brand_name' => config('branding.club_name', 'TJ Sokol Kbely C & E'),
     'brand_short_name' => config('branding.club_short_name', 'Sokoli'),
     'brand_url' => config('app.url'),
 
     // Logo musí být dostupné přes absolutní URL
     'logo_url' => config('app.url') . '/assets/img/brand/email-logo.png',
-    'logo_width' => 140,
+    'logo_width' => 120,
     'logo_alt' => 'Sokoli',
 
     // Barvy (odpovídá club-default preset v branding.php)
@@ -31,6 +31,6 @@ return [
         'border' => '#E2E8F0',     // Slate 200
     ],
 
-    'footer_note' => 'Tento e-mail byl odeslán automaticky z informačního systému Kbelští sokoli.',
-    'copyright' => '© ' . date('Y') . ' TJ Sokol Kbely Basketball. Všechna práva vyhrazena.',
+    'footer_note' => 'Tento e-mail byl odeslán automaticky z informačního systému TJ Sokol Kbely C & E.',
+    'copyright' => '© 2026 TJ Sokol Kbely Basketball. Všechna práva vyhrazena.',
 ];

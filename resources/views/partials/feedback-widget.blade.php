@@ -92,7 +92,7 @@
                         <!-- Severity -->
                         <div class="space-y-1.5">
                             <label class="text-sm font-semibold text-slate-700">Závažnost</label>
-                            <select x-model="form.severity" class="w-full rounded-xl border-slate-200 text-sm focus:ring-primary-500 focus:border-primary-500">
+                            <select x-model="form.severity" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all">
                                 <option value="low">Nízká</option>
                                 <option value="medium">Střední</option>
                                 <option value="high">Vysoká / Kritická</option>
@@ -104,21 +104,21 @@
                     <div class="space-y-1.5 mb-4">
                         <label class="text-sm font-semibold text-slate-700">Nadpis <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.title" required maxlength="120" placeholder="Stručně popište problém..."
-                               class="w-full rounded-xl border-slate-200 text-sm focus:ring-primary-500 focus:border-primary-500">
+                               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all">
                     </div>
 
                     <!-- Description -->
                     <div class="space-y-1.5 mb-4">
                         <label class="text-sm font-semibold text-slate-700">Popis <span class="text-red-500">*</span></label>
                         <textarea x-model="form.description" required rows="4" maxlength="5000" placeholder="Detailnější popis..."
-                                  class="w-full rounded-xl border-slate-200 text-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
+                                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all"></textarea>
                     </div>
 
                     <!-- Steps (Conditional for bugs) -->
                     <div x-show="form.type === 'bug'" x-collapse class="space-y-1.5 mb-4">
                         <label class="text-sm font-semibold text-slate-700">Kroky k reprodukci</label>
                         <textarea x-model="form.steps" rows="3" maxlength="10000" placeholder="1. Klikněte na... 2. Pak udělejte..."
-                                  class="w-full rounded-xl border-slate-200 text-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
+                                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all"></textarea>
                     </div>
 
                     <!-- Options -->
@@ -131,11 +131,11 @@
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" x-model="options.logs" class="rounded text-primary-600 focus:ring-primary-500">
-                                <span class="text-sm text-slate-600 group-hover:text-slate-900">Logy konzole (<span x-text="logs.length"></span>)</span>
+                                <span class="text-sm text-slate-600 group-hover:text-slate-900">Logy konzole (<span x-text="logs ? logs.length : 0"></span>)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" x-model="options.network" class="rounded text-primary-600 focus:ring-primary-500">
-                                <span class="text-sm text-slate-600 group-hover:text-slate-900">Chyby sítě (<span x-text="networkFailures.length"></span>)</span>
+                                <span class="text-sm text-slate-600 group-hover:text-slate-900">Chyby sítě (<span x-text="networkFailures ? networkFailures.length : 0"></span>)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" x-model="options.performance" class="rounded text-primary-600 focus:ring-primary-500">
@@ -273,8 +273,8 @@
                     logs: true,
                     network: true,
                     performance: true,
-                    clicks: false,
-                    dom: false,
+                    clicks: true,
+                    dom: true,
                     maskSensitive: true
                 },
                 status: {
@@ -352,6 +352,8 @@
                                     timestamp: new Date().toISOString(),
                                     message: args.map(arg => typeof arg === 'string' ? arg : this.safeStringify(arg)).join(' ')
                                 });
+                                // Force Alpine update
+                                this.logs = this.logs;
                             } catch (e) {}
                             originalConsole[level].apply(console, args);
                         };
@@ -442,9 +444,12 @@
                             error: error?.substring(0, 500),
                             timestamp: new Date().toISOString()
                         });
+                        // Force Alpine update
+                        this.networkFailures = this.networkFailures;
                     } catch (e) {
                         // Fallback if URL is invalid
                         this.networkFailures.push({ method, url: String(url).substring(0, 200), status, duration_ms: duration, timestamp: new Date().toISOString() });
+                        this.networkFailures = this.networkFailures;
                     }
                 },
 
