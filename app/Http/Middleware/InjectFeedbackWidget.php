@@ -33,7 +33,7 @@ class InjectFeedbackWidget
             return false;
         }
 
-        if (!in_array(app()->environment(), config('feedback.environments', ['production']))) {
+        if (!in_array(app()->environment(), config('feedback.environments', ['production', 'local']))) {
             return false;
         }
 
@@ -41,7 +41,7 @@ class InjectFeedbackWidget
             return false;
         }
 
-        if (!Auth::check()) {
+        if (!Auth::check() && app()->environment() !== 'local') {
             return false;
         }
 
@@ -62,7 +62,12 @@ class InjectFeedbackWidget
             return; // Již injektováno nebo přítomno
         }
 
-        $widgetUrl = route('feedback.widget');
+        try {
+            $widgetUrl = route('feedback.widget');
+        } catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
+            \Illuminate\Support\Facades\Log::warning('Feedback widget route not found, skipping injection.');
+            return;
+        }
         $loader = <<<HTML
 <script id="ks-fb-loader" data-navigate-once>
     (function() {
