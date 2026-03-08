@@ -39,5 +39,7 @@ return [
     'victory' => 'Victory',
     'loss' => 'Loss',
     'draw' => 'Draw',
+    'home' => 'Home',
+    'away' => 'Away',
     'result_missing' => 'Result not specified',
 ];

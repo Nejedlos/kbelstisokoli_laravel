@@ -195,6 +195,17 @@ class MatchSyncService
             $scoreAway = (int) $m[2];
         }
 
+        // Zpracování statusu
+        $status = $matchData['status'] ?? 'planned';
+        if (($scoreHome !== null && $scoreAway !== null) || $status === 'played' || $status === 'completed') {
+            $status = 'finished';
+        }
+
+        // Pokud je zápas v minulosti, měl by být označen jako odehraný (finished), i když nemá skóre
+        if ($status === 'planned' && $scheduledAt && $scheduledAt->isPast()) {
+            $status = 'finished';
+        }
+
         $data = [
             'match_type' => 'mistrovske',
             'team_id' => $team->id,
@@ -202,7 +213,7 @@ class MatchSyncService
             'opponent_id' => $opponent->id,
             'scheduled_at' => $scheduledAt,
             'is_home' => $isHome,
-            'status' => $matchData['status'] ?? 'planned',
+            'status' => $status,
             'score_home' => $scoreHome,
             'score_away' => $scoreAway,
         ];

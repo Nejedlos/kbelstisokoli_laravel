@@ -38,10 +38,26 @@
         'PRATEL' => 'fa-handshake',
     ];
 
+    $isPlayed = in_array($match->status, ['completed', 'played']);
+    $homeScore = $match->score_home ?? 0;
+    $awayScore = $match->score_away ?? 0;
+    $hasScore = isset($match->score_home) || isset($match->score_away);
+
+    $isWin = $isPlayed && $hasScore && (($match->is_home && $homeScore > $awayScore) || (!$match->is_home && $awayScore > $homeScore));
+    $isLoss = $isPlayed && $hasScore && (($match->is_home && $homeScore < $awayScore) || (!$match->is_home && $awayScore < $homeScore));
+    $isDraw = $isPlayed && $hasScore && ($homeScore === $awayScore);
+
+    $resultColor = 'border-l-primary';
+    if ($isPlayed && $hasScore) {
+        if ($isWin) $resultColor = 'border-l-success';
+        elseif ($isLoss) $resultColor = 'border-l-danger';
+        elseif ($isDraw) $resultColor = 'border-l-slate-400';
+    }
+
     $branding = $branding ?? app(\App\Services\BrandingService::class)->getSettings();
 @endphp
 
-<div class="card card-hover overflow-hidden border-l-4 border-l-primary group">
+<div class="card card-hover overflow-hidden border-l-4 {{ $resultColor }} group">
     <div class="p-5 md:p-8 flex flex-col md:flex-row md:items-center gap-6 relative">
         <div class="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.07] transition-opacity">
             @if(isset($typeIcons[$match->match_type]))
@@ -89,6 +105,11 @@
                         <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{{ $singleTeam?->name }}</span>
                     @endif
 
+                    <span class="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest {{ $match->is_home ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-amber-50 text-amber-600 border border-amber-100' }}">
+                        <i class="fa-light {{ $match->is_home ? 'fa-house-chimney' : 'fa-bus' }} text-[10px]"></i>
+                        {{ $match->is_home ? __('matches.home') : __('matches.away') }}
+                    </span>
+
                     @if($match->match_type)
                         <span class="text-[9px] font-black uppercase tracking-wider md:hidden px-1.5 py-0.5 rounded border {{ $typeColors[$match->match_type] ?? 'bg-slate-50 text-slate-400 border-slate-200' }}">
                             {{ $typeLabels[$match->match_type] ?? $match->match_type }}
@@ -135,22 +156,23 @@
             </div>
 
             <div class="flex flex-col items-center sm:items-end min-w-[100px]">
-                @if(in_array($match->status, ['completed', 'played']) && (isset($match->score_home) || isset($match->score_away)))
+                @if($isPlayed && $hasScore)
                     <div class="flex items-center gap-2">
-                        <div class="text-3xl md:text-4xl font-black tabular-nums tracking-tighter text-secondary">
+                        <div class="text-3xl md:text-4xl font-black tabular-nums tracking-tighter {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-secondary') }}">
                             {{ $match->score_home ?? 0 }} : {{ $match->score_away ?? 0 }}
                         </div>
                     </div>
-                    @php
-                        $homeScore = $match->score_home ?? 0;
-                        $awayScore = $match->score_away ?? 0;
-                        $isWin = ($match->is_home && $homeScore > $awayScore) || (!$match->is_home && $awayScore > $homeScore);
-                        $isLoss = ($match->is_home && $homeScore < $awayScore) || (!$match->is_home && $awayScore < $homeScore);
-                    @endphp
-                    <span class="text-[10px] font-black uppercase tracking-widest mt-1 {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-slate-400') }}">
+                    <span class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest mt-1 {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-slate-400') }}">
+                        @if($isWin)
+                            <i class="fa-light fa-trophy-star text-xs"></i>
+                        @elseif($isLoss)
+                            <i class="fa-light fa-face-frown text-xs"></i>
+                        @else
+                            <i class="fa-light fa-handshake text-xs"></i>
+                        @endif
                         {{ $isWin ? __('matches.victory') : ($isLoss ? __('matches.loss') : __('matches.draw')) }}
                     </span>
-                @elseif(in_array($match->status, ['completed', 'played']))
+                @elseif($isPlayed)
                     <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
                         {{ $statusLabels[$match->status] ?? $match->status }}
                     </span>

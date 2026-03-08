@@ -39,5 +39,7 @@ return [
     'victory' => 'Vítězství',
     'loss' => 'Prohra',
     'draw' => 'Remíza',
+    'home' => 'Doma',
+    'away' => 'Venku',
     'result_missing' => 'Výsledek nebyl zadán',
 ];

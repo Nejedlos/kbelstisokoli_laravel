@@ -154,7 +154,9 @@ class MatchesListExtractor implements StatExtractorInterface
 
             $status = 'scheduled';
             if ($score && preg_match('/\d+\s*:\s*\d+/', $score)) {
-                $status = 'played';
+                $status = 'finished';
+            } elseif ($scheduledAt && $scheduledAt->isPast()) {
+                $status = 'finished';
             }
 
             $rows[] = new NormalizedRowDTO(
