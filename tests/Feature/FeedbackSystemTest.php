@@ -62,11 +62,19 @@ class FeedbackSystemTest extends TestCase
             'severity' => 'low',
             'title' => 'Test Bug',
             'description' => 'Detailed bug description',
-            'url' => 'http://localhost/test',
-            'user_agent' => 'TestBot',
-            'source_area' => 'public',
-            'screenshot' => 'data:image/jpeg;base64,' . base64_encode('fake-image'),
-            'logs' => [['type' => 'log', 'data' => ['test log']]],
+            'context' => [
+                'url' => 'http://localhost/test',
+                'area' => 'public',
+                'device' => ['userAgent' => 'TestBot'],
+                'timestamp' => now()->toISOString(),
+            ],
+            'capture' => [
+                'screenshot' => 'data:image/jpeg;base64,' . base64_encode('fake-image'),
+                'domLight' => '<div>test</div>',
+            ],
+            'logs' => [
+                'console' => [['level' => 'log', 'timestamp' => now()->toISOString(), 'message' => 'test log']],
+            ],
         ]);
 
         $response->assertStatus(200);
@@ -80,6 +88,7 @@ class FeedbackSystemTest extends TestCase
         $report = FeedbackReport::first();
         Storage::assertExists($report->screenshot_path);
         Storage::assertExists($report->logs_path);
+        Storage::assertExists($report->dom_path);
     }
 
     public function test_redaction_works(): void
@@ -91,10 +100,10 @@ class FeedbackSystemTest extends TestCase
             'type' => 'bug',
             'title' => 'Redaction Test',
             'description' => 'Test description',
-            'url' => 'http://localhost/test',
-            'user_agent' => 'TestBot',
-            'source_area' => 'public',
-            'meta' => [
+            'context' => [
+                'url' => 'http://localhost/test',
+                'area' => 'public',
+                'device' => ['userAgent' => 'TestBot'],
                 'password' => 'secret123',
                 'other' => 'safe',
             ]
@@ -104,6 +113,8 @@ class FeedbackSystemTest extends TestCase
         $report = FeedbackReport::first();
 
         $meta = $report->meta;
+        // dump($meta);
+        $this->assertArrayHasKey('password', $meta);
         $this->assertEquals('[REDACTED]', $meta['password']);
         $this->assertEquals('safe', $meta['other']);
     }
@@ -115,18 +126,20 @@ class FeedbackSystemTest extends TestCase
         $payload = [
             'type' => 'bug',
             'description' => 'Desc',
-            'url' => 'http://localhost/test',
-            'user_agent' => 'TestBot',
-            'source_area' => 'public',
+            'context' => [
+                'url' => 'http://localhost/test',
+                'area' => 'public',
+                'device' => ['userAgent' => 'TestBot'],
+            ],
         ];
 
-        // Send 10 successful requests (default limit is 10,1 per config/routes)
+        // Send 10 successful requests
         for ($i = 1; $i <= 10; $i++) {
-            $this->actingAs($user)->postJson('/feedback', array_merge($payload, ['title' => "Test $i"]))->assertStatus(200);
+            $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test $i"]))->assertStatus(200);
         }
 
         // 11th should be throttled (429)
-        $this->actingAs($user)->postJson('/feedback', array_merge($payload, ['title' => "Test 11"]))->assertStatus(429);
+        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test 11"]))->assertStatus(429);
     }
 
     public function test_duplicate_guard_works(): void
@@ -137,9 +150,11 @@ class FeedbackSystemTest extends TestCase
             'type' => 'bug',
             'title' => 'Duplicate Test',
             'description' => 'Exact same description',
-            'url' => 'http://localhost/test',
-            'user_agent' => 'TestBot',
-            'source_area' => 'public',
+            'context' => [
+                'url' => 'http://localhost/test',
+                'area' => 'public',
+                'device' => ['userAgent' => 'TestBot'],
+            ],
         ];
 
         $this->actingAs($user)->postJson('/feedback', $payload)->assertStatus(200);

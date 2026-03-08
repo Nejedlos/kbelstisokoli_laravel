@@ -107,6 +107,16 @@ class FeedbackReportForm
                                         : 'Žádný screenshot nebyl přiložen.'),
                             ]),
 
+                        Tabs\Tab::make('DOM Snapshot')
+                            ->icon('fa-light-file-code')
+                            ->schema([
+                                Placeholder::make('dom_snapshot')
+                                    ->label('')
+                                    ->content(fn ($record) => $record->dom_path && Storage::exists($record->dom_path)
+                                        ? new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs max-h-[600px]'>" . e(Storage::get($record->dom_path)) . "</pre>")
+                                        : 'Žádný DOM snapshot nebyl přiložen.'),
+                            ]),
+
                         Tabs\Tab::make('Logy Konzole')
                             ->icon('fa-light-terminal')
                             ->schema([
@@ -121,6 +131,30 @@ class FeedbackReportForm
                                     }),
                             ]),
 
+                        Tabs\Tab::make('Breadcrumbs')
+                            ->icon('fa-light-shoe-prints')
+                            ->schema([
+                                ViewField::make('breadcrumbs_content')
+                                    ->label('')
+                                    ->view('filament.admin.feedback-logs')
+                                    ->afterStateHydrated(function (ViewField $component, $record) {
+                                        if ($record && $record->breadcrumbs_path && Storage::exists($record->breadcrumbs_path)) {
+                                            $data = json_decode(Storage::get($record->breadcrumbs_path), true);
+                                            $logs = array_map(fn($b) => [
+                                                'type' => $b['type'],
+                                                'timestamp' => $b['timestamp'],
+                                                'data' => [
+                                                    ($b['type'] === 'click' ? "Klik na <{$b['tag']}>: {$b['text']}" :
+                                                     ($b['type'] === 'nav' ? "Navigace na: {$b['to']}" :
+                                                      ($b['type'] === 'scroll' ? "Scroll depth: {$b['depth']}" :
+                                                       ($b['type'] === 'submit' ? "Odeslání formuláře: {$b['form']}" : json_encode($b)))))
+                                                ]
+                                            ], $data);
+                                            $component->state(['logs' => $logs]);
+                                        }
+                                    }),
+                            ]),
+
                         Tabs\Tab::make('Síť a Kliky')
                             ->icon('fa-light-network-wired')
                             ->schema([
@@ -128,25 +162,51 @@ class FeedbackReportForm
                                     ->schema([
                                         Section::make('Síťové chyby')
                                             ->schema([
-                                                Placeholder::make('network_logs')
+                                                ViewField::make('network_logs_view')
                                                     ->label('')
-                                                    ->content(function ($record) {
-                                                        if (!$record->network_path || !Storage::exists($record->network_path)) return 'Žádné záznamy.';
-                                                        $data = json_decode(Storage::get($record->network_path), true);
-                                                        return view('filament.admin.feedback-logs', ['logs' => array_map(fn($f) => ['type' => 'error', 'timestamp' => $f['timestamp'], 'data' => ["{$f['method']} {$f['url']} - Status: {$f['status']}"]], $data)])->render();
+                                                    ->view('filament.admin.feedback-logs')
+                                                    ->afterStateHydrated(function (ViewField $component, $record) {
+                                                        if ($record && $record->network_path && Storage::exists($record->network_path)) {
+                                                            $data = json_decode(Storage::get($record->network_path), true);
+                                                            $logs = array_map(fn($f) => [
+                                                                'type' => 'error',
+                                                                'timestamp' => $f['timestamp'],
+                                                                'data' => ["{$f['method']} {$f['url']} - Status: {$f['status']} ({$f['duration_ms']}ms)", $f['error'] ?? null]
+                                                            ], $data);
+                                                            $component->state(['logs' => $logs]);
+                                                        }
                                                     }),
                                             ]),
-                                        Section::make('Klikání')
+                                        Section::make('Detailní kliky')
                                             ->schema([
-                                                Placeholder::make('click_logs')
+                                                ViewField::make('click_logs_view')
                                                     ->label('')
-                                                    ->content(function ($record) {
-                                                        if (!$record->clicks_path || !Storage::exists($record->clicks_path)) return 'Žádné záznamy.';
-                                                        $data = json_decode(Storage::get($record->clicks_path), true);
-                                                        return view('filament.admin.feedback-logs', ['logs' => array_map(fn($c) => ['type' => 'info', 'timestamp' => $c['timestamp'], 'data' => ["Klik na: {$c['element']} (Text: {$c['text']})"]], $data)])->render();
+                                                    ->view('filament.admin.feedback-logs')
+                                                    ->afterStateHydrated(function (ViewField $component, $record) {
+                                                        if ($record && $record->clicks_path && Storage::exists($record->clicks_path)) {
+                                                            $data = json_decode(Storage::get($record->clicks_path), true);
+                                                            $logs = array_map(fn($c) => [
+                                                                'type' => 'info',
+                                                                'timestamp' => $c['timestamp'],
+                                                                'data' => ["Klik na: {$c['element']} (Text: {$c['text']}) at [{$c['x']}, {$c['y']}]"]
+                                                            ], $data);
+                                                            $component->state(['logs' => $logs]);
+                                                        }
                                                     }),
                                             ]),
                                     ]),
+                            ]),
+
+                        Tabs\Tab::make('Výkon')
+                            ->icon('fa-light-gauge-high')
+                            ->schema([
+                                Placeholder::make('performance_data')
+                                    ->label('')
+                                    ->content(function ($record) {
+                                        if (!$record->performance_path || !Storage::exists($record->performance_path)) return 'Žádná data.';
+                                        $perf = json_decode(Storage::get($record->performance_path), true);
+                                        return new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . json_encode($perf, JSON_PRETTY_PRINT) . "</pre>");
+                                    }),
                             ]),
 
                         Tabs\Tab::make('Meta')

@@ -19,18 +19,23 @@ return [
     ],
 
     'limits' => [
-        'max_payload_bytes' => 6 * 1024 * 1024, // 6MB
+        'max_payload_bytes' => 8 * 1024 * 1024, // Zvýšeno na 8MB kvůli screenshotu + DOM dumpu
         'max_console_logs' => 300,
         'max_runtime_errors' => 100,
         'max_network_failures' => 100,
         'max_clicks' => 200,
+        'max_breadcrumbs' => 50,
         'duplicate_check_minutes' => 5,
         'rate_limit' => '10,1', // 10 per 1 minute
     ],
 
     'screenshot' => [
         'quality' => 0.80,
-        'max_width' => 1920,
+        'max_width' => 1600,
+    ],
+
+    'dom_snapshot' => [
+        'max_length' => 100 * 1024, // 100KB
     ],
 
     'redaction' => [

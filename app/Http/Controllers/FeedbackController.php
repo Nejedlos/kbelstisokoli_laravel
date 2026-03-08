@@ -40,31 +40,33 @@ class FeedbackController extends Controller
             'title' => 'required|string|max:120',
             'description' => 'required|string|max:5000',
             'steps' => 'nullable|string|max:10000',
-            'url' => 'required|string',
-            'route_name' => 'nullable|string',
-            'page_title' => 'nullable|string',
-            'user_agent' => 'required|string',
-            'viewport' => 'nullable|array',
-            'screen' => 'nullable|array',
-            'timezone' => 'nullable|string',
-            'source_area' => 'required|in:public,member,admin',
-            'screenshot' => 'nullable|string', // Base64
+            'include' => 'nullable|array',
+            'context' => 'required|array',
+            'context.url' => 'required|string',
+            'context.route' => 'nullable|string',
+            'context.area' => 'required|in:public,member,admin',
+            'context.requestId' => 'nullable|string',
+            'capture' => 'nullable|array',
+            'capture.screenshot' => 'nullable|string',
+            'capture.domLight' => 'nullable|string',
             'logs' => 'nullable|array',
-            'network' => 'nullable|array',
-            'clicks' => 'nullable|array',
-            'meta' => 'nullable|array',
+            'logs.console' => 'nullable|array',
+            'logs.errors' => 'nullable|array',
+            'logs.network' => 'nullable|array',
+            'logs.breadcrumbs' => 'nullable|array',
+            'performance' => 'nullable|array',
         ]);
 
         // 4. Payload size guard (rough check)
         $payloadSize = strlen(serialize($request->all()));
-        if ($payloadSize > config('feedback.limits.max_payload_bytes', 6291456)) {
+        if ($payloadSize > config('feedback.limits.max_payload_bytes', 8388608)) {
              return response()->json([
-                'message' => 'Payload je příliš velký. Zkuste prosím vypnout přiložení screenshotu nebo logů.',
+                'message' => 'Payload je příliš velký. Zkuste prosím vypnout přiložení screenshotu nebo DOM snapshotu.',
             ], 413);
         }
 
         // 5. Redaction
-        $validated = $this->redactData($validated);
+        $redacted = $this->redactData($request->all());
 
         // 6. Uložení Reportu
         $report = new FeedbackReport();
@@ -74,49 +76,72 @@ class FeedbackController extends Controller
         $report->title = $validated['title'];
         $report->description = $validated['description'];
         $report->steps = $validated['steps'] ?? null;
-        $report->url = $validated['url'];
-        $report->route_name = $validated['route_name'] ?? null;
-        $report->locale = app()->getLocale();
-        $report->user_agent = $validated['user_agent'];
-        $report->viewport = $validated['viewport'] ?? null;
-        $report->screen = $validated['screen'] ?? null;
-        $report->timezone = $validated['timezone'] ?? null;
-        $report->source_area = $validated['source_area'];
-        $report->app_version = AppVersion::get();
+        $report->url = $redacted['context']['url'] ?? $validated['context']['url'];
+        $report->route_name = $redacted['context']['route'] ?? null;
+        $report->locale = $redacted['context']['locale'] ?? app()->getLocale();
+        $report->user_agent = $redacted['context']['device']['userAgent'] ?? $request->userAgent();
+        $report->viewport = $redacted['context']['device']['viewport'] ?? null;
+        $report->screen = $redacted['context']['device']['screen'] ?? null;
+        $report->timezone = $redacted['context']['timezone'] ?? null;
+        $report->source_area = $redacted['context']['area'] ?? $validated['context']['area'];
+        $report->app_version = $redacted['context']['appVersion'] ?? AppVersion::get();
         $report->ip = $request->ip();
-        $report->meta = array_merge($validated['meta'] ?? [], [
-            'page_title' => $validated['page_title'] ?? null,
+        $report->correlation_id = $redacted['context']['requestId'] ?? $request->attributes->get('request_id');
+        $report->meta = array_merge($redacted['context'] ?? [], [
             'user_email' => $user->email,
             'user_roles' => $user->getRoleNames(),
+            'include_options' => $redacted['include'] ?? [],
         ]);
         $report->save();
 
         // 7. Uložení souborů
         $storageDir = "feedback/{$report->id}";
 
-        if (!empty($validated['screenshot'])) {
-            $screenshotData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $validated['screenshot']));
+        if (!empty($redacted['capture']['screenshot'])) {
+            $screenshotData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $redacted['capture']['screenshot']));
             $path = "{$storageDir}/screenshot.jpg";
             Storage::put($path, $screenshotData);
             $report->screenshot_path = $path;
         }
 
-        if (!empty($validated['logs'])) {
+        if (!empty($redacted['capture']['domLight'])) {
+            $path = "{$storageDir}/dom.html";
+            Storage::put($path, $redacted['capture']['domLight']);
+            $report->dom_path = $path;
+        }
+
+        if (!empty($redacted['logs']['console']) || !empty($redacted['logs']['errors'])) {
             $path = "{$storageDir}/logs.json";
-            Storage::put($path, json_encode($validated['logs'], JSON_PRETTY_PRINT));
+            Storage::put($path, json_encode([
+                'console' => $redacted['logs']['console'] ?? [],
+                'errors' => $redacted['logs']['errors'] ?? []
+            ], JSON_PRETTY_PRINT));
             $report->logs_path = $path;
         }
 
-        if (!empty($validated['network'])) {
+        if (!empty($redacted['logs']['network'])) {
             $path = "{$storageDir}/network.json";
-            Storage::put($path, json_encode($validated['network'], JSON_PRETTY_PRINT));
+            Storage::put($path, json_encode($redacted['logs']['network'], JSON_PRETTY_PRINT));
             $report->network_path = $path;
         }
 
-        if (!empty($validated['clicks'])) {
-            $path = "{$storageDir}/clicks.json";
-            Storage::put($path, json_encode($validated['clicks'], JSON_PRETTY_PRINT));
-            $report->clicks_path = $path;
+        if (!empty($redacted['logs']['breadcrumbs'])) {
+            $path = "{$storageDir}/breadcrumbs.json";
+            Storage::put($path, json_encode($redacted['logs']['breadcrumbs'], JSON_PRETTY_PRINT));
+            $report->breadcrumbs_path = $path;
+        }
+
+        // Clicks jsou nyní v breadcrumbs nebo meta, pokud jsou povoleny
+        if (!empty($redacted['clicks'])) {
+             $path = "{$storageDir}/clicks.json";
+             Storage::put($path, json_encode($redacted['clicks'], JSON_PRETTY_PRINT));
+             $report->clicks_path = $path;
+        }
+
+        if (!empty($redacted['performance'])) {
+            $path = "{$storageDir}/performance.json";
+            Storage::put($path, json_encode($redacted['performance'], JSON_PRETTY_PRINT));
+            $report->performance_path = $path;
         }
 
         $report->save();

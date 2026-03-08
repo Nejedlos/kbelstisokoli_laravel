@@ -1,23 +1,48 @@
+@php
+    $allLogs = [];
+    if (!empty($logs['console'])) {
+        foreach($logs['console'] as $l) $allLogs[] = ['type' => $l['level'], 'timestamp' => $l['timestamp'], 'data' => [$l['message']]];
+    }
+    if (!empty($logs['errors'])) {
+        foreach($logs['errors'] as $e) {
+            $msg = ($e['type'] ?? 'Error') . ': ' . $e['message'];
+            if (!empty($e['filename'])) $msg .= " in {$e['filename']}:{$e['lineno']}";
+            $allLogs[] = ['type' => 'error', 'timestamp' => $e['timestamp'], 'data' => [$msg, $e['stack'] ?? null, $e['reason'] ?? null]];
+        }
+    }
+
+    // Pokud jsou logy postaru (pole), převedeme je na allLogs
+    if (empty($allLogs) && is_array($logs) && !isset($logs['console']) && !isset($logs['errors'])) {
+        $allLogs = $logs;
+    }
+
+    // Seřadit podle času
+    usort($allLogs, fn($a, $b) => strtotime($a['timestamp']) - strtotime($b['timestamp']));
+@endphp
+
 <div class="space-y-4">
-    @if(empty($logs))
+    @if(empty($allLogs))
         <div class="p-4 bg-slate-50 rounded-xl text-slate-500 text-sm italic border border-slate-100">
-            Žádné logy k zobrazení.
+            Žádné záznamy k zobrazení.
         </div>
     @else
-        <div class="flex flex-col gap-2 font-mono text-xs max-h-[500px] overflow-y-auto custom-scrollbar p-4 bg-slate-900 rounded-xl">
-            @foreach($logs as $log)
-                <div class="flex gap-3 border-b border-slate-800 pb-2 last:border-0">
+        <div class="flex flex-col gap-2 font-mono text-xs max-h-[600px] overflow-y-auto custom-scrollbar p-4 bg-slate-900 rounded-xl">
+            @foreach($allLogs as $log)
+                <div class="flex gap-3 border-b border-slate-800 pb-2 last:border-0 hover:bg-slate-800/50 transition-colors px-1">
                     <span class="text-slate-500 shrink-0">[{{ date('H:i:s', strtotime($log['timestamp'])) }}]</span>
                     <span @class([
-                        'font-bold shrink-0 w-16 uppercase',
-                        'text-blue-400' => $log['type'] === 'info' || $log['type'] === 'log',
-                        'text-yellow-400' => $log['type'] === 'warn',
-                        'text-red-400' => $log['type'] === 'error' || $log['type'] === 'exception',
-                        'text-emerald-400' => $log['type'] === 'debug',
-                    ])>{{ $log['type'] }}</span>
-                    <div class="flex flex-col gap-1 text-slate-300">
-                        @foreach($log['data'] as $dataItem)
-                            <pre class="whitespace-pre-wrap break-all">{{ is_string($dataItem) ? $dataItem : json_encode($dataItem, JSON_PRETTY_PRINT) }}</pre>
+                        'font-bold shrink-0 w-20 uppercase',
+                        'text-blue-400' => in_array($log['type'] ?? '', ['info', 'log']),
+                        'text-yellow-400' => ($log['type'] ?? '') === 'warn',
+                        'text-red-400' => in_array($log['type'] ?? '', ['error', 'exception', 'promise-rejection']),
+                        'text-emerald-400' => ($log['type'] ?? '') === 'debug',
+                        'text-slate-400' => !in_array($log['type'] ?? '', ['info', 'log', 'warn', 'error', 'exception', 'promise-rejection', 'debug']),
+                    ])>{{ $log['type'] ?? 'LOG' }}</span>
+                    <div class="flex flex-col gap-1 text-slate-300 flex-1 overflow-hidden">
+                        @foreach($log['data'] ?? [] as $dataItem)
+                            @if($dataItem)
+                                <pre class="whitespace-pre-wrap break-all">{{ is_string($dataItem) ? $dataItem : json_encode($dataItem, JSON_PRETTY_PRINT) }}</pre>
+                            @endif
                         @endforeach
                     </div>
                 </div>

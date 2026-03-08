@@ -34,11 +34,24 @@ class FeedbackSmokeCommand extends Command
             'severity' => 'low',
             'title' => 'SMOKE TEST: ' . now()->toDateTimeString(),
             'description' => 'Toto je automatický smoke test feedback systému.',
-            'url' => config('app.url') . '/smoke-test',
-            'user_agent' => 'Junie Smoke Runner',
-            'source_area' => 'public',
-            'screenshot' => $fakeScreenshot,
-            'logs' => [['type' => 'log', 'timestamp' => now()->toISOString(), 'data' => ['Smoke test log entry']]],
+            'context' => [
+                'url' => config('app.url') . '/smoke-test',
+                'area' => 'public',
+                'device' => ['userAgent' => 'Junie Smoke Runner'],
+                'requestId' => 'SMOKE-UUID',
+                'timestamp' => now()->toISOString(),
+            ],
+            'capture' => [
+                'screenshot' => $fakeScreenshot,
+                'domLight' => '<html><body>SMOKE</body></html>',
+            ],
+            'logs' => [
+                'console' => [['level' => 'log', 'timestamp' => now()->toISOString(), 'message' => 'Smoke test log entry']],
+                'errors' => [],
+                'network' => [],
+                'breadcrumbs' => [['type' => 'nav', 'to' => '/smoke', 'timestamp' => now()->toISOString()]],
+            ],
+            'performance' => ['nav' => ['ttfb' => 100]],
         ];
 
         try {

@@ -132,8 +132,16 @@
                                 <span class="text-sm text-slate-600 group-hover:text-slate-900">Chyby sítě (<span x-text="networkFailures.length"></span>)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" x-model="options.performance" class="rounded text-primary-600 focus:ring-primary-500">
+                                <span class="text-sm text-slate-600 group-hover:text-slate-900">Výkonnostní data</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" x-model="options.clicks" class="rounded text-primary-600 focus:ring-primary-500">
-                                <span class="text-sm text-slate-600 group-hover:text-slate-900">Posledních 200 kliků</span>
+                                <span class="text-sm text-slate-600 group-hover:text-slate-900">Kliky (aktivovat)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" x-model="options.dom" class="rounded text-primary-600 focus:ring-primary-500">
+                                <span class="text-sm text-slate-600 group-hover:text-slate-900">DOM Snapshot (struktura)</span>
                             </label>
                         </div>
                     </div>
@@ -208,13 +216,39 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
     <script>
+        /**
+         * RingBuffer pro efektivní ukládání logů s limitem.
+         */
+        class RingBuffer {
+            constructor(maxSize) {
+                this.maxSize = maxSize;
+                this.buffer = [];
+            }
+            push(item) {
+                this.buffer.push(item);
+                if (this.buffer.length > this.maxSize) {
+                    this.buffer.shift();
+                }
+            }
+            toArray() {
+                return [...this.buffer];
+            }
+            get length() {
+                return this.buffer.length;
+            }
+        }
+
         function ksFeedbackWidget() {
             return {
                 isOpen: false,
                 submitting: false,
-                logs: [],
-                networkFailures: [],
-                clicks: [],
+                // Ring Buffery inicializované v init()
+                logs: null,
+                errors: null,
+                networkFailures: null,
+                breadcrumbs: null,
+                clicks: null,
+
                 form: {
                     type: 'bug',
                     severity: 'medium',
@@ -226,7 +260,10 @@
                     screenshot: true,
                     logs: true,
                     network: true,
+                    performance: true,
                     clicks: false,
+                    dom: false,
+                    maskSensitive: true
                 },
                 status: {
                     show: false,
@@ -236,15 +273,28 @@
                 debugInfo: '',
 
                 init() {
+                    // Inicializace Ring Bufferů
+                    this.logs = new RingBuffer(300);
+                    this.errors = new RingBuffer(100);
+                    this.networkFailures = new RingBuffer(100);
+                    this.breadcrumbs = new RingBuffer(50);
+                    this.clicks = new RingBuffer(200);
+
                     this.setupLogging();
+                    this.setupErrorTracking();
                     this.setupNetworkTracking();
+                    this.setupBreadcrumbs();
                     this.setupClickTracking();
+
                     this.debugInfo = `v${document.documentElement.dataset.appVersion || '1.0'}`;
 
                     // ESC to close
                     window.addEventListener('keydown', (e) => {
                         if (e.key === 'Escape' && this.isOpen) this.closeModal();
                     });
+
+                    // Pre-fill steps template
+                    this.resetForm();
                 },
 
                 openModal() {
@@ -257,46 +307,63 @@
                     document.body.style.overflow = '';
                 },
 
+                safeStringify(obj, maxLen = 800) {
+                    try {
+                        const cache = new Set();
+                        let str = JSON.stringify(obj, (key, value) => {
+                            if (typeof value === 'object' && value !== null) {
+                                if (cache.has(value)) return '[Circular]';
+                                cache.add(value);
+                            }
+                            if (value instanceof Error) {
+                                return { message: value.message, stack: value.stack?.substring(0, 2000) };
+                            }
+                            return value;
+                        });
+                        if (str.length > maxLen) return str.substring(0, maxLen) + '... [truncated]';
+                        return str;
+                    } catch (e) {
+                        return '[unserializable]';
+                    }
+                },
+
                 setupLogging() {
                     const originalConsole = {
-                        log: console.log,
-                        warn: console.warn,
-                        error: console.error,
-                        info: console.info,
-                        debug: console.debug
+                        log: console.log, warn: console.warn, error: console.error, info: console.info, debug: console.debug
                     };
 
-                    const pushLog = (type, args) => {
-                        try {
-                            const entry = {
-                                type,
-                                timestamp: new Date().toISOString(),
-                                data: Array.from(args).map(arg => {
-                                    try {
-                                        return typeof arg === 'object' ? JSON.parse(JSON.stringify(arg)) : String(arg);
-                                    } catch (e) {
-                                        return '[unserializable]';
-                                    }
-                                })
-                            };
-                            this.logs.push(entry);
-                            if (this.logs.length > 300) this.logs.shift();
-                        } catch (e) {}
-                    };
-
-                    ['log', 'warn', 'error', 'info', 'debug'].forEach(type => {
-                        console[type] = (...args) => {
-                            pushLog(type, args);
-                            originalConsole[type].apply(console, args);
+                    ['log', 'warn', 'error', 'info', 'debug'].forEach(level => {
+                        console[level] = (...args) => {
+                            try {
+                                this.logs.push({
+                                    level,
+                                    timestamp: new Date().toISOString(),
+                                    message: args.map(arg => typeof arg === 'string' ? arg : this.safeStringify(arg)).join(' ')
+                                });
+                            } catch (e) {}
+                            originalConsole[level].apply(console, args);
                         };
                     });
+                },
 
-                    window.addEventListener('error', (event) => {
-                        pushLog('exception', [event.message, event.filename, event.lineno]);
+                setupErrorTracking() {
+                    window.addEventListener('error', (e) => {
+                        this.errors.push({
+                            message: e.message,
+                            filename: e.filename,
+                            lineno: e.lineno,
+                            colno: e.colno,
+                            stack: e.error?.stack?.substring(0, 2000),
+                            timestamp: new Date().toISOString()
+                        });
                     });
 
-                    window.addEventListener('unhandledrejection', (event) => {
-                        pushLog('promise-rejection', [event.reason]);
+                    window.addEventListener('unhandledrejection', (e) => {
+                        this.errors.push({
+                            type: 'promise-rejection',
+                            reason: this.safeStringify(e.reason),
+                            timestamp: new Date().toISOString()
+                        });
                     });
                 },
 
@@ -308,49 +375,106 @@
                         try {
                             const response = await originalFetch(...args);
                             if (!response.ok) {
-                                this.networkFailures.push({
-                                    method: args[1]?.method || 'GET',
-                                    url: args[0],
-                                    status: response.status,
-                                    duration: Date.now() - start,
-                                    timestamp: new Date().toISOString()
-                                });
+                                this.logNetworkFailure(args[0], args[1]?.method || 'GET', response.status, Date.now() - start);
                             }
                             return response;
                         } catch (error) {
-                            this.networkFailures.push({
-                                method: args[1]?.method || 'GET',
-                                url: args[0],
-                                status: 'EXCEPTION',
-                                error: error.message,
-                                duration: Date.now() - start,
-                                timestamp: new Date().toISOString()
-                            });
+                            this.logNetworkFailure(args[0], args[1]?.method || 'GET', 'EXCEPTION', Date.now() - start, error.message);
                             throw error;
                         }
                     };
 
                     // XHR wrap
-                    const originalXhr = window.XMLHttpRequest.prototype.open;
-                    window.XMLHttpRequest.prototype.open = function(method, url, ...args) {
+                    const originalXhrOpen = window.XMLHttpRequest.prototype.open;
+                    const originalXhrSend = window.XMLHttpRequest.prototype.send;
+
+                    window.XMLHttpRequest.prototype.open = function(method, url) {
+                        this._method = method;
+                        this._url = url;
+                        this._startTime = Date.now();
+                        return originalXhrOpen.apply(this, arguments);
+                    };
+
+                    window.XMLHttpRequest.prototype.send = function() {
                         this.addEventListener('load', () => {
                             if (this.status >= 400) {
                                 window.dispatchEvent(new CustomEvent('ks-network-failure', {
-                                    detail: { method, url, status: this.status, timestamp: new Date().toISOString() }
+                                    detail: { method: this._method, url: this._url, status: this.status, duration: Date.now() - this._startTime }
                                 }));
                             }
                         });
-                        return originalXhr.apply(this, [method, url, ...args]);
+                        this.addEventListener('error', () => {
+                            window.dispatchEvent(new CustomEvent('ks-network-failure', {
+                                detail: { method: this._method, url: this._url, status: 'EXCEPTION', duration: Date.now() - this._startTime }
+                            }));
+                        });
+                        return originalXhrSend.apply(this, arguments);
                     };
 
                     window.addEventListener('ks-network-failure', (e) => {
-                        this.networkFailures.push(e.detail);
-                        if (this.networkFailures.length > 100) this.networkFailures.shift();
+                        this.logNetworkFailure(e.detail.url, e.detail.method, e.detail.status, e.detail.duration);
                     });
+                },
+
+                logNetworkFailure(url, method, status, duration, error = null) {
+                    try {
+                        const parsedUrl = new URL(url, window.location.origin);
+                        // Redact query values
+                        parsedUrl.searchParams.forEach((val, key) => parsedUrl.searchParams.set(key, '[redacted]'));
+
+                        this.networkFailures.push({
+                            method,
+                            url: parsedUrl.toString(),
+                            status,
+                            duration_ms: duration,
+                            error: error?.substring(0, 500),
+                            timestamp: new Date().toISOString()
+                        });
+                    } catch (e) {
+                        // Fallback if URL is invalid
+                        this.networkFailures.push({ method, url: String(url).substring(0, 200), status, duration_ms: duration, timestamp: new Date().toISOString() });
+                    }
+                },
+
+                setupBreadcrumbs() {
+                    // Navigation
+                    window.addEventListener('popstate', () => this.breadcrumbs.push({ type: 'nav', to: window.location.pathname, timestamp: new Date().toISOString() }));
+
+                    // Scroll milestones
+                    let milestones = [25, 50, 75, 100];
+                    let reached = new Set();
+                    window.addEventListener('scroll', () => {
+                        const scrollPct = Math.round((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100);
+                        milestones.forEach(m => {
+                            if (scrollPct >= m && !reached.has(m)) {
+                                reached.add(m);
+                                this.breadcrumbs.push({ type: 'scroll', depth: m + '%', timestamp: new Date().toISOString() });
+                            }
+                        });
+                    }, { passive: true });
+
+                    // Interactions (delegated)
+                    document.addEventListener('submit', (e) => {
+                        this.breadcrumbs.push({ type: 'submit', form: e.target.id || e.target.className || 'unknown', timestamp: new Date().toISOString() });
+                    }, true);
                 },
 
                 setupClickTracking() {
                     document.addEventListener('click', (e) => {
+                        // Breadcrumb interaction (vždy)
+                        if (this.breadcrumbs.length < 50) {
+                            const el = e.target.closest('button, a, input[type="submit"], [data-track]');
+                            if (el) {
+                                this.breadcrumbs.push({
+                                    type: 'click',
+                                    tag: el.tagName.toLowerCase(),
+                                    text: (el.innerText || el.ariaLabel || el.title || '').substring(0, 30).trim(),
+                                    timestamp: new Date().toISOString()
+                                });
+                            }
+                        }
+
+                        // Detailed click tracking (pokud zapnuto)
                         if (!this.options.clicks) return;
 
                         const el = e.target;
@@ -360,12 +484,54 @@
                             x: e.clientX,
                             y: e.clientY,
                             element: descriptor.substring(0, 100),
-                            text: (el.innerText || el.value || '').substring(0, 30),
+                            text: (el.innerText || el.value || '').substring(0, 80).trim(),
                             timestamp: new Date().toISOString()
                         });
-
-                        if (this.clicks.length > 200) this.clicks.shift();
                     }, true);
+                },
+
+                getPerformanceContext() {
+                    const ctx = { nav: {}, slowResources: [], longTasks: { count: 0, top: [] } };
+
+                    // Navigation Timing
+                    const nav = performance.getEntriesByType('navigation')[0];
+                    if (nav) {
+                        ctx.nav = {
+                            ttfb: Math.round(nav.responseStart - nav.startTime),
+                            domReady: Math.round(nav.domContentLoadedEventEnd - nav.startTime),
+                            load: Math.round(nav.loadEventEnd - nav.startTime),
+                            type: nav.type
+                        };
+                    }
+
+                    // Slow resources (Top 20)
+                    ctx.slowResources = performance.getEntriesByType('resource')
+                        .sort((a, b) => b.duration - a.duration)
+                        .slice(0, 20)
+                        .map(r => ({ name: r.name.split('/').pop().substring(0, 100), type: r.initiatorType, duration: Math.round(r.duration) }));
+
+                    // Memory (Chrome only)
+                    if (performance.memory) {
+                        ctx.memory = {
+                            limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576) + 'MB',
+                            used: Math.round(performance.memory.usedJSHeapSize / 1048576) + 'MB'
+                        };
+                    }
+
+                    return ctx;
+                },
+
+                getDomSnapshot() {
+                    if (!this.options.dom) return null;
+                    const main = document.querySelector('main') || document.body;
+                    let html = main.outerHTML;
+
+                    // Sanitize
+                    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+                    // Mask inputs
+                    html = html.replace(/value="[^"]*"/gi, 'value="[redacted]"');
+
+                    return html.substring(0, 102400); // 100KB limit
                 },
 
                 async captureScreenshot() {
@@ -375,21 +541,24 @@
 
                     try {
                         let dataUrl = '';
+                        const options = {
+                            quality: 0.8,
+                            bgcolor: '#ffffff',
+                            filter: (node) => {
+                                if (node.dataset?.html2canvasIgnore === 'true') return false;
+                                if (this.options.maskSensitive && (node.classList?.contains('bugmask') || node.dataset?.bugmask === 'true')) return false;
+                                if (node.tagName === 'INPUT' && node.type === 'password') return false;
+                                return true;
+                            }
+                        };
+
                         if (typeof domtoimage !== 'undefined') {
-                            dataUrl = await domtoimage.toJpeg(document.body, {
-                                quality: 0.8,
-                                bgcolor: '#ffffff',
-                                filter: (node) => {
-                                    if (node.dataset?.html2canvasIgnore === 'true') return false;
-                                    if (node.classList?.contains('bugmask')) return false;
-                                    return true;
-                                }
-                            });
+                            dataUrl = await domtoimage.toJpeg(document.body, options);
                         } else if (typeof html2canvas !== 'undefined') {
                             const canvas = await html2canvas(document.body, {
                                 useCORS: true,
                                 scale: Math.min(window.devicePixelRatio, 2),
-                                ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask')
+                                ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true'
                             });
                             dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                         }
@@ -405,29 +574,59 @@
 
                 async submitFeedback() {
                     if (!this.form.title || !this.form.description) return;
-
                     this.submitting = true;
 
                     try {
-                        let screenshot = null;
-                        if (this.options.screenshot) {
-                            screenshot = await this.captureScreenshot();
-                        }
+                        const screenshot = this.options.screenshot ? await this.captureScreenshot() : null;
+                        const domSnapshot = this.options.dom ? this.getDomSnapshot() : null;
+                        const perf = this.options.performance ? this.getPerformanceContext() : {};
 
                         const payload = {
-                            ...this.form,
-                            url: window.location.href,
-                            route_name: document.documentElement.dataset.routeName || null,
-                            page_title: document.title,
-                            user_agent: navigator.userAgent,
-                            viewport: { w: window.innerWidth, h: window.innerHeight },
-                            screen: { w: window.screen.width, h: window.screen.height, dpr: window.devicePixelRatio },
-                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                            source_area: this.getSourceArea(),
-                            screenshot: screenshot,
-                            logs: this.options.logs ? this.logs : [],
-                            network: this.options.network ? this.networkFailures : [],
-                            clicks: this.options.clicks ? this.clicks : []
+                            type: this.form.type,
+                            severity: this.form.severity,
+                            title: this.form.title,
+                            description: this.form.description,
+                            steps: this.form.steps,
+                            include: this.options,
+                            context: {
+                                url: window.location.href,
+                                route: document.documentElement.dataset.routeName || null,
+                                referrer: document.referrer,
+                                area: this.getSourceArea(),
+                                locale: document.documentElement.lang || 'cs',
+                                timestamp: new Date().toISOString(),
+                                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                                appVersion: document.documentElement.dataset.appVersion || '1.0',
+                                requestId: this.getResponseHeader('X-Request-ID'),
+                                user: {
+                                    id: document.documentElement.dataset.userId || null,
+                                    email: document.documentElement.dataset.userEmail || null,
+                                    roles: (document.documentElement.dataset.userRoles || '').split(',').filter(Boolean)
+                                },
+                                device: {
+                                    userAgent: navigator.userAgent,
+                                    platform: navigator.platform,
+                                    viewport: { w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio },
+                                    screen: { w: window.screen.width, h: window.screen.height, depth: window.screen.colorDepth },
+                                    connection: navigator.connection ? { type: navigator.connection.effectiveType, rtt: navigator.connection.rtt } : null
+                                },
+                                state: {
+                                    isOnline: navigator.onLine,
+                                    visibility: document.visibilityState,
+                                    detectedError: this.detectErrorOnPage()
+                                }
+                            },
+                            capture: {
+                                screenshot: screenshot,
+                                domLight: domSnapshot
+                            },
+                            logs: {
+                                console: this.logs.toArray(),
+                                errors: this.errors.toArray(),
+                                network: this.networkFailures.toArray(),
+                                breadcrumbs: this.breadcrumbs.toArray()
+                            },
+                            performance: perf
                         };
 
                         const response = await fetch('/feedback', {
@@ -441,7 +640,6 @@
                         });
 
                         const result = await response.json();
-
                         if (response.ok) {
                             this.showStatus(result.message, 'success');
                             this.resetForm();
@@ -457,6 +655,21 @@
                     }
                 },
 
+                detectErrorOnPage() {
+                    const errorEl = document.querySelector('.alert-danger, .toast-error, .text-danger, [data-error]');
+                    return errorEl ? errorEl.innerText.substring(0, 200).trim() : null;
+                },
+
+                getResponseHeader(name) {
+                    // Toto je trik, jak získat header z aktuální stránky, pokud byl nastaven serverem
+                    // Funguje to jen pro některé requesty, ale X-Request-ID by tam měl být z navigace
+                    try {
+                        const perf = performance.getEntriesByType('navigation')[0];
+                        // PerformanceNavigationTiming bohužel standardně neukazuje custom headers bez Server-Timing
+                        return null;
+                    } catch (e) { return null; }
+                },
+
                 getSourceArea() {
                     const path = window.location.pathname;
                     if (path.startsWith('/admin')) return 'admin';
@@ -470,7 +683,13 @@
                 },
 
                 resetForm() {
-                    this.form = { type: 'bug', severity: 'medium', title: '', description: '', steps: '' };
+                    this.form = {
+                        type: 'bug',
+                        severity: 'medium',
+                        title: '',
+                        description: '',
+                        steps: "1) Šel jsem na ...\n2) Klikl jsem na ...\n3) Očekával jsem ...\n4) Stalo se ..."
+                    };
                 }
             }
         }

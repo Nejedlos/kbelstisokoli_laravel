@@ -6,11 +6,15 @@ Tento modul implementuje robustní systém pro sběr zpětné vazby od přihlá�
 - **Plovoucí widget:** Přístupný vlevo dole pro všechny přihlášené uživatele.
 - **Inline modal:** Formulář se otevírá přímo na stránce jako overlay.
 - **Automatická diagnostika:** Sběr URL, titulu stránky, informací o prohlížeči, viewportu a verzi aplikace.
-- **Screenshoty:** Automatické pořízení screenshotu aktuální obrazovky (přes `dom-to-image-more` s fallbackem na `html2canvas`).
-- **Logy konzole:** Sběr posledních 300 logů z prohlížeče (console.log, warn, error).
+- **Screenshoty:** Automatické pořízení screenshotu aktuální obrazovky při odeslání (přes `dom-to-image-more` s fallbackem na `html2canvas`).
+- **Výkonnostní data:** Sběr TTFB, DOMContentLoaded, Load eventu a TOP 20 nejpomalejších resources přes Performance API.
+- **Breadcrumbs:** Historie navigace, scrollování a interakcí (kliknutí na tlačítka, odeslání formulářů).
+- **Logy konzole:** Sběr posledních 300 logů z prohlížeče (console.log, warn, error) a 100 runtime chyb (onerror, unhandledrejection).
 - **Network failure tracking:** Automatický sběr neúspěšných síťových požadavků (status >= 400).
-- **Click tracking:** Volitelný sběr posledních 200 kliknutí uživatele pro snadnější reprodukci.
-- **Privacy First:** Automatické maskování prvků s třídou `.bugmask` nebo atributem `data-bugmask="true"` na screenshotu a redakce citlivých dat (hesla, tokeny) v logách.
+- **DOM Snapshot Light:** Volitelný sběr HTML struktury hlavní části stránky (max 100KB, maskované inputy).
+- **Click tracking:** Volitelný sběr posledních 200 kliknutí s přesnými souřadnicemi.
+- **Privacy First:** Automatické maskování prvků s třídou `.bugmask` nebo atributem `data-bugmask="true"` na screenshotu a rekurzivní redakce citlivých dat (hesla, tokeny, cookie) ve všech datech.
+- **Lehký provoz:** Sběr dat využívá Ring Buffery a nezpomaluje běžný chod aplikace. Těžké operace (screenshot, DOM snapshot, performance dump) se provádějí až při odeslání hlášení.
 
 ## Backend a Administrace
 - **Ukládání:** Reporty jsou uloženy v databázi `feedback_reports`, soubory (screenshoty, logy) v `storage/app/feedback/{id}/`.

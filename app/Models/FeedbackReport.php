@@ -31,6 +31,10 @@ class FeedbackReport extends Model
         'logs_path',
         'network_path',
         'clicks_path',
+        'performance_path',
+        'dom_path',
+        'breadcrumbs_path',
+        'correlation_id',
         'meta',
     ];
 
