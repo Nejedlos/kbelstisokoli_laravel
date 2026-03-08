@@ -5,8 +5,8 @@
          class="ks-feedback-system"
      data-html2canvas-ignore="true"
      data-user-id="{{ Auth::id() }}"
-     data-user-email="{{ optional(Auth::user())->email }}"
-     data-user-roles="{{ optional(Auth::user())->getRoleNames()->implode(',') }}"
+     data-user-email="{{ Auth::user()?->email }}"
+     data-user-roles="{{ Auth::user()?->getRoleNames()?->implode(',') }}"
      data-app-version="{{ config('app.version', '1.0') }}"
      data-route-name="{{ Route::currentRouteName() }}">
 

@@ -29,7 +29,7 @@ class FeedbackSystemTest extends TestCase
     {
         $response = $this->get('/');
         $response->assertStatus(200);
-        $response->assertDontSee('ks-feedback-widget');
+        $response->assertDontSee('ks-fb-loader');
     }
 
     public function test_auth_user_sees_widget_in_html_response(): void
@@ -39,7 +39,7 @@ class FeedbackSystemTest extends TestCase
         $response = $this->actingAs($user)->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('ks-feedback-widget');
+        $response->assertSee('ks-fb-loader');
     }
 
     public function test_auth_admin_sees_widget_in_admin_panel(): void
@@ -57,7 +57,18 @@ class FeedbackSystemTest extends TestCase
         }
 
         $response->assertStatus(200);
-        $response->assertSee('ks-feedback-widget');
+        $response->assertSee('ks-fb-loader');
+    }
+
+    public function test_widget_renders_successfully_for_guest(): void
+    {
+        $response = $this->get('/feedback/widget');
+
+        $response->assertStatus(200);
+        $response->assertSee('ks-feedback-system');
+        $response->assertSee('data-user-id=');
+        $response->assertSee('data-user-email=');
+        $response->assertSee('data-user-roles=');
     }
 
     public function test_guest_cannot_post_feedback(): void
