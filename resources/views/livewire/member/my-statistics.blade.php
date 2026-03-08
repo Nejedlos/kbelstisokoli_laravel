@@ -238,7 +238,7 @@
                 <div class="text-gray-400 font-medium italic">Zatím nemáme nahrané žádné tvé osobní statistiky v této sezóně.</div>
             </div>
         @endif
-    @else
+    @elseif($view === 'team')
         {{-- TEAM VIEW --}}
         @if($teamSummary)
             {{-- Team Metrics --}}
