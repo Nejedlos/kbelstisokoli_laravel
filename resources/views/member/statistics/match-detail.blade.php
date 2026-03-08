@@ -429,36 +429,6 @@
                     </div>
                 @endif
 
-                <div class="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100" x-data="{ activeTab: 'ours' }">
-                    <div class="p-8 border-b border-gray-100 bg-gray-50/50">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
-                                <i class="fa-light fa-chart-user text-brand-500"></i>
-                                {{ __('matches.boxscore') }}
-                            </h3>
-
-                            {{-- Custom Tabs Trigger --}}
-                            <div class="flex p-1 bg-gray-200/50 rounded-xl">
-                                <button
-                                    @click="activeTab = 'ours'"
-                                    :class="activeTab === 'ours' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-                                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
-                                >
-                                    <i class="fa-light fa-shield-halved"></i>
-                                    {{ $match->team->name }}
-                                </button>
-                                <button
-                                    @click="activeTab = 'opponent'"
-                                    :class="activeTab === 'opponent' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-                                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
-                                >
-                                    <i class="fa-light fa-shield"></i>
-                                    {{ $match->opponent?->name ?? __('matches.opponent') }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     @php
                         $boxscoreSets = \App\Models\StatisticSet::whereIn('slug', ['match-boxscore', 'match-boxscore-external'])->pluck('id')->toArray();
                         $allStats = \App\Models\StatisticRow::where('basketball_match_id', $match->id)
@@ -466,7 +436,7 @@
                             ->whereIn('statistic_set_id', $boxscoreSets)
                             ->get();
 
-                        $ourStats = $allStats->filter(function($s) use ($match) {
+                        $ourStatsRaw = $allStats->filter(function($s) use ($match) {
                              if ($s->team_id && $s->team_id == $match->team_id) return true;
                              $meta = is_array($s->source_metadata) ? $s->source_metadata : [];
                              return ($meta['is_opponent'] ?? false) === false;
@@ -475,110 +445,349 @@
                         // Statistiky soupeře z metadat (nový způsob) nebo z StatisticRow (fallback)
                         $opponentData = $match->metadata['opponent_boxscore'] ?? null;
                         if ($opponentData) {
-                            $opponentStats = $opponentData['rows'] ?? [];
+                            $opponentStatsRaw = $opponentData['rows'] ?? [];
                         } else {
-                            $opponentStats = $allStats->filter(function($s) {
+                            $opponentStatsRaw = $allStats->filter(function($s) {
                                 if ($s->opponent_id) return true;
                                 $meta = is_array($s->source_metadata) ? $s->source_metadata : [];
                                 return ($meta['is_opponent'] ?? false) === true;
                             });
                         }
 
-                        // Detekce, zda máme rozšířené statistiky (asistence, doskoky atd.)
+                        // Detekce, zda máme rozšířené statistiky
                         $hasExtended = false;
-                        foreach($ourStats as $s) {
-                            $v = is_object($s) ? $s->values : $s['values'];
+                        foreach($ourStatsRaw as $s) {
+                            $v = is_object($s) ? $s->values : ($s['values'] ?? []);
                             if (!empty($v['rebounds']) || !empty($v['assists']) || !empty($v['steals']) || !empty($v['efficiency'])) {
                                 $hasExtended = true; break;
                             }
                         }
-                        if (!$hasExtended && !empty($opponentStats)) {
-                             foreach($opponentStats as $s) {
-                                $v = is_object($s) ? $s->values : $s['values'];
-                                if (!empty($v['rebounds']) || !empty($v['assists']) || !empty($v['steals']) || !empty($v['efficiency'])) {
-                                    $hasExtended = true; break;
-                                }
-                            }
-                        }
+
+                        // Pomocná funkce pro transformaci pro Alpine.js
+                        $transformForJs = function($stats) {
+                            return collect($stats)->map(function($s) {
+                                $rowLabel = is_object($s) ? $s->row_label : ($s['row_label'] ?? '');
+                                $values = is_object($s) ? $s->values : ($s['values'] ?? []);
+                                $sourceMetadata = is_object($s) ? ($s->source_metadata ?? []) : ($s['metadata'] ?? []);
+                                $player = is_object($s) ? $s->player : null;
+
+                                return [
+                                    'id' => is_object($s) ? $s->id : (isset($s['id']) ? $s['id'] : uniqid()),
+                                    'name' => $player?->name ?? ($rowLabel ?: ($values['col_1'] ?? 'Hráč')),
+                                    'number' => $values['col_0'] ?? ($sourceMetadata['jersey'] ?? ($sourceMetadata['player_number'] ?? '#')),
+                                    'is_starter' => !empty($values['is_starter']) || !empty($sourceMetadata['is_starter']),
+                                    'pts' => (int)($values['pts'] ?? ($values['points'] ?? 0)),
+                                    'fg2_made' => (int)($values['fg2_made'] ?? 0),
+                                    'fg3_made' => (int)($values['fg3_made'] ?? 0),
+                                    'ft_made' => (int)($values['ft_made'] ?? 0),
+                                    'ft_att' => (int)($values['ft_att'] ?? 0),
+                                    'fouls' => (int)($values['fouls'] ?? ($values['f_minus'] ?? 0)),
+                                    'plus_minus' => (int)($values['plus_minus'] ?? 0),
+                                    'minutes' => $values['minutes'] ?? ($values['min'] ?? '-'),
+                                    'rebounds' => (int)($values['rebounds'] ?? ($values['reb'] ?? 0)),
+                                    'assists' => (int)($values['assists'] ?? ($values['ast'] ?? 0)),
+                                    'steals' => (int)($values['steals'] ?? ($values['stl'] ?? 0)),
+                                    'turnovers' => (int)($values['turnovers'] ?? ($values['tov'] ?? 0)),
+                                    'blocks' => (int)($values['blocks'] ?? ($values['blk'] ?? 0)),
+                                    'fouls_drawn' => (int)($values['fouls_drawn'] ?? ($values['f_plus'] ?? 0)),
+                                    'efficiency' => (int)($values['efficiency'] ?? ($values['val'] ?? 0)),
+                                    'is_special' => in_array(mb_strtolower($rowLabel), ['celkem', 'total', 'tým/trenéři', 'team/coaches']),
+                                    'is_team' => in_array(mb_strtolower($rowLabel), ['tým/trenéři', 'team/coaches']),
+                                    'row_label' => $rowLabel
+                                ];
+                            })->values()->toArray();
+                        };
+
+                        $ourStats = $transformForJs($ourStatsRaw);
+                        $opponentStats = $transformForJs($opponentStatsRaw);
                     @endphp
 
-                    {{-- Our Team Tab --}}
-                    <div x-show="activeTab === 'ours'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-50/80">
-                                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Hráč</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">2B</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">3B</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TH</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F-</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Body</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">+/-</th>
-                                        @if($hasExtended)
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Min</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">REB</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">AST</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">STL</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TOV</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">BLK</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F+</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">VAL</th>
-                                        @endif
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50">
-                                    @forelse($ourStats as $stat)
-                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat, 'showExtended' => $hasExtended])
-                                    @empty
-                                        <tr>
-                                            <td colspan="15" class="px-6 py-12 text-center text-gray-400 italic text-sm">
-                                                Statistiky našeho týmu nejsou k dispozici.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div x-data="{
+                        activeTab: 'ours',
+                        sortField: 'pts',
+                        sortDirection: 'desc',
+                        ourStats: {{ json_encode($ourStats) }},
+                        opponentStats: {{ json_encode($opponentStats) }},
+                        sortBy(field) {
+                            if (this.sortField === field) {
+                                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                            } else {
+                                this.sortField = field;
+                                this.sortDirection = 'desc';
+                            }
+                        },
+                        getSortedStats(stats) {
+                            const players = stats.filter(s => !s.is_special);
+                            const specials = stats.filter(s => s.is_special);
 
-                    {{-- Opponent Tab --}}
-                    <div x-show="activeTab === 'opponent'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-50/80">
-                                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">{{ $match->opponent?->name ?? 'Soupeř' }}</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">2B</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">3B</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TH</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F-</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Body</th>
-                                        <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">+/-</th>
-                                        @if($hasExtended)
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Min</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">REB</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">AST</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">STL</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">TOV</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">BLK</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">F+</th>
-                                            <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">VAL</th>
-                                        @endif
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50">
-                                    @forelse($opponentStats as $stat)
-                                        @include('member.statistics.partials.boxscore-row', ['stat' => $stat, 'showExtended' => $hasExtended])
-                                    @empty
-                                        <tr>
-                                            <td colspan="15" class="px-6 py-12 text-center text-gray-400 italic text-sm">
-                                                Statistiky soupeře nejsou k dispozici.
-                                            </td>
+                            players.sort((a, b) => {
+                                let valA = a[this.sortField];
+                                let valB = b[this.sortField];
+
+                                if (typeof valA === 'string') valA = valA.toLowerCase();
+                                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                                if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+                                if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+                                return 0;
+                            });
+
+                            return [...players, ...specials];
+                        }
+                    }">
+                        <div class="p-8 border-b border-gray-100 bg-gray-50/50">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                                    <i class="fa-light fa-chart-user text-brand-500"></i>
+                                    {{ __('matches.boxscore') }}
+                                </h3>
+
+                                {{-- Custom Tabs Trigger --}}
+                                <div class="flex p-1 bg-gray-200/50 rounded-xl">
+                                    <button
+                                        @click="activeTab = 'ours'"
+                                        :class="activeTab === 'ours' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                                        class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
+                                    >
+                                        <i class="fa-light fa-shield-halved"></i>
+                                        {{ $match->team->name }}
+                                    </button>
+                                    <button
+                                        @click="activeTab = 'opponent'"
+                                        :class="activeTab === 'opponent' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                                        class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
+                                    >
+                                        <i class="fa-light fa-shield"></i>
+                                        {{ $match->opponent?->name ?? __('matches.opponent') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Our Team Tab --}}
+                        <div x-show="activeTab === 'ours'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50/80">
+                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">#</th>
+                                            <th @click="sortBy('name')" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 cursor-pointer hover:text-brand-500 transition-colors">
+                                                Hráč
+                                                <template x-if="sortField === 'name'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('fg2_made')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                2B
+                                                <template x-if="sortField === 'fg2_made'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('fg3_made')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                3B
+                                                <template x-if="sortField === 'fg3_made'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('ft_made')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                TH
+                                                <template x-if="sortField === 'ft_made'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('fouls')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                F-
+                                                <template x-if="sortField === 'fouls'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('pts')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                Body
+                                                <template x-if="sortField === 'pts'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('plus_minus')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                +/-
+                                                <template x-if="sortField === 'plus_minus'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            @if($hasExtended)
+                                                <th @click="sortBy('minutes')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">Min</th>
+                                                <th @click="sortBy('rebounds')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">REB</th>
+                                                <th @click="sortBy('assists')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">AST</th>
+                                                <th @click="sortBy('steals')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">STL</th>
+                                                <th @click="sortBy('turnovers')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">TOV</th>
+                                                <th @click="sortBy('blocks')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">BLK</th>
+                                                <th @click="sortBy('fouls_drawn')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">F+</th>
+                                                <th @click="sortBy('efficiency')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">VAL</th>
+                                            @endif
                                         </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-50">
+                                        <template x-for="(stat, index) in getSortedStats(ourStats)" :key="stat.id">
+                                            <tr :class="stat.is_special ? 'bg-gray-100/50' : 'hover:bg-brand-50/30 transition-colors'">
+                                                <td class="px-6 py-4 text-center text-[10px] font-black text-gray-300">
+                                                    <span x-show="!stat.is_special" x-text="(index + 1) + '.'"></span>
+                                                    <i x-show="stat.is_special && !stat.is_team" class="fa-light fa-sigma text-gray-400"></i>
+                                                    <i x-show="stat.is_team" class="fa-light fa-users-gear text-gray-400"></i>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center gap-3">
+                                                        <div x-show="!stat.is_special" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400" x-text="stat.number"></div>
+                                                        <div class="flex flex-col">
+                                                            <span class="text-sm font-bold" :class="stat.is_special ? 'text-gray-900' : 'text-gray-700'" x-text="stat.name"></span>
+                                                            <span x-show="stat.is_starter" class="text-[9px] font-bold text-brand-500 uppercase tracking-tighter">Základní pětka</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.fg2_made"></td>
+                                                <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.fg3_made"></td>
+                                                <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : (stat.ft_made + '/' + stat.ft_att)"></td>
+                                                <td class="px-4 py-4 text-center text-sm font-bold text-red-500 tabular-nums" x-text="stat.fouls"></td>
+                                                <td class="px-4 py-4 text-center">
+                                                    <span class="text-base font-black text-gray-900 tabular-nums" x-text="stat.is_team ? '-' : stat.pts"></span>
+                                                </td>
+                                                <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.plus_minus"></td>
+                                                @if($hasExtended)
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.minutes"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.rebounds"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.assists"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.steals"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums text-red-400" x-text="stat.is_team ? '-' : stat.turnovers"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.blocks"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-bold text-green-600 tabular-nums" x-text="stat.is_team ? '-' : stat.fouls_drawn"></td>
+                                                    <td class="px-4 py-4 text-center">
+                                                        <template x-if="!stat.is_team">
+                                                            <span class="px-2 py-1 rounded-lg text-xs font-black tabular-nums"
+                                                                :class="stat.efficiency >= 15 ? 'bg-green-100 text-green-700' : (stat.efficiency < 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700')"
+                                                                x-text="stat.efficiency">
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="stat.is_team">
+                                                            <span>-</span>
+                                                        </template>
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {{-- Opponent Tab --}}
+                        <div x-show="activeTab === 'opponent'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50/80">
+                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">#</th>
+                                            <th @click="sortBy('name')" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 cursor-pointer hover:text-brand-500 transition-colors">
+                                                {{ $match->opponent?->name ?? 'Soupeř' }}
+                                                <template x-if="sortField === 'name'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('fg2_made')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                2B
+                                                <template x-if="sortField === 'fg2_made'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('fg3_made')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                3B
+                                                <template x-if="sortField === 'fg3_made'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('ft_made')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                TH
+                                                <template x-if="sortField === 'ft_made'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('fouls')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                F-
+                                                <template x-if="sortField === 'fouls'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('pts')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                Body
+                                                <template x-if="sortField === 'pts'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            <th @click="sortBy('plus_minus')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">
+                                                +/-
+                                                <template x-if="sortField === 'plus_minus'">
+                                                    <i :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'" class="fa-light ml-1"></i>
+                                                </template>
+                                            </th>
+                                            @if($hasExtended)
+                                                <th @click="sortBy('minutes')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">Min</th>
+                                                <th @click="sortBy('rebounds')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">REB</th>
+                                                <th @click="sortBy('assists')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">AST</th>
+                                                <th @click="sortBy('steals')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">STL</th>
+                                                <th @click="sortBy('turnovers')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">TOV</th>
+                                                <th @click="sortBy('blocks')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">BLK</th>
+                                                <th @click="sortBy('fouls_drawn')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">F+</th>
+                                                <th @click="sortBy('efficiency')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center cursor-pointer hover:text-brand-500 transition-colors">VAL</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-50">
+                                        <template x-for="(stat, index) in getSortedStats(opponentStats)" :key="stat.id">
+                                            <tr :class="stat.is_special ? 'bg-gray-100/50' : 'hover:bg-brand-50/30 transition-colors'">
+                                                <td class="px-6 py-4 text-center text-[10px] font-black text-gray-300">
+                                                    <span x-show="!stat.is_special" x-text="(index + 1) + '.'"></span>
+                                                    <i x-show="stat.is_special && !stat.is_team" class="fa-light fa-sigma text-gray-400"></i>
+                                                    <i x-show="stat.is_team" class="fa-light fa-users-gear text-gray-400"></i>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center gap-3">
+                                                        <div x-show="!stat.is_special" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400" x-text="stat.number"></div>
+                                                        <div class="flex flex-col">
+                                                            <span class="text-sm font-bold" :class="stat.is_special ? 'text-gray-900' : 'text-gray-700'" x-text="stat.name"></span>
+                                                            <span x-show="stat.is_starter" class="text-[9px] font-bold text-brand-500 uppercase tracking-tighter">Základní pětka</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.fg2_made"></td>
+                                                <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.fg3_made"></td>
+                                                <td class="px-4 py-4 text-center text-xs font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : (stat.ft_made + '/' + stat.ft_att)"></td>
+                                                <td class="px-4 py-4 text-center text-sm font-bold text-red-500 tabular-nums" x-text="stat.fouls"></td>
+                                                <td class="px-4 py-4 text-center">
+                                                    <span class="text-base font-black text-gray-900 tabular-nums" x-text="stat.is_team ? '-' : stat.pts"></span>
+                                                </td>
+                                                <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.plus_minus"></td>
+                                                @if($hasExtended)
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.minutes"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.rebounds"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.assists"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.steals"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums text-red-400" x-text="stat.is_team ? '-' : stat.turnovers"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 tabular-nums" x-text="stat.is_team ? '-' : stat.blocks"></td>
+                                                    <td class="px-4 py-4 text-center text-sm font-bold text-green-600 tabular-nums" x-text="stat.is_team ? '-' : stat.fouls_drawn"></td>
+                                                    <td class="px-4 py-4 text-center">
+                                                        <template x-if="!stat.is_team">
+                                                            <span class="px-2 py-1 rounded-lg text-xs font-black tabular-nums"
+                                                                :class="stat.efficiency >= 15 ? 'bg-green-100 text-green-700' : (stat.efficiency < 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700')"
+                                                                x-text="stat.efficiency">
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="stat.is_team">
+                                                            <span>-</span>
+                                                        </template>
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

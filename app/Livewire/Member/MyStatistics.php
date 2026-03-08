@@ -143,7 +143,7 @@ class MyStatistics extends Component
                 $this->pointsSeries = $service->getPointsSeries($this->teamId, $this->seasonId)->toArray();
                 $this->recentForm = $service->getRecentForm($this->teamId, $this->seasonId)->toArray();
             } elseif ($this->view === 'matches') {
-                $this->matches = \App\Models\BasketballMatch::query()
+                $query = \App\Models\BasketballMatch::query()
                     ->where('season_id', $this->seasonId)
                     ->where(function ($query) {
                         $query->where('team_id', $this->teamId)
@@ -151,8 +151,13 @@ class MyStatistics extends Component
                                 $q->where('teams.id', $this->teamId);
                             });
                     })
-                    ->with(['opponent'])
-                    ->orderBy('scheduled_at', 'desc')
+                    ->with(['opponent']);
+
+                // Mapování polí pro řazení zápasů
+                $sortField = $this->sortField;
+                if ($sortField === 'date') $sortField = 'scheduled_at';
+
+                $this->matches = $query->orderBy($sortField, $this->sortDirection)
                     ->get()
                     ->toArray();
             }

@@ -554,7 +554,12 @@
                 <table class="w-full text-left">
                     <thead class="bg-gray-50 dark:bg-gray-900/30">
                         <tr>
-                            <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Datum</th>
+                            <th wire:click="sortBy('date')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest cursor-pointer hover:text-primary-500 transition-colors">
+                                Datum
+                                @if($sortField === 'date' || $sortField === 'scheduled_at')
+                                    <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                @endif
+                            </th>
                             <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Soupeř</th>
                             <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Místo</th>
                             <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Výsledek</th>
