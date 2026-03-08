@@ -21,7 +21,12 @@ class SyncMatchDetailJob implements ShouldQueue
     /**
      * @var int
      */
-    public $timeout = 60;
+    public $timeout = 180;
+
+    /**
+     * @var int
+     */
+    public $backoff = [30, 60, 120];
 
     public function __construct(
         protected int $matchId,

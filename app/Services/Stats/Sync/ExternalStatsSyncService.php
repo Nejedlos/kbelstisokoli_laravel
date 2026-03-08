@@ -474,7 +474,16 @@ class ExternalStatsSyncService
                 }
             }
 
-            SyncMatchDetailJob::dispatch($match->id, $options);
+            $job = SyncMatchDetailJob::dispatch($match->id, $options);
+
+            // Pokud používáme sync frontu, přidáme malou pauzu, aby se ulevilo CPU a API
+            if (config('queue.default') === 'sync' || env('QUEUE_CONNECTION') === 'sync') {
+                usleep(500000); // 0.5s pauza mezi zápasy v sync módu
+            } else {
+                // V asynchronní frontě můžeme přidat delay, aby se joby nespustily všechny naráz (Throttling)
+                $job->delay(now()->addSeconds($dispatchedCount * 2));
+            }
+
             ConsoleService::log("    -> Naplánován detail zápasu: ID {$match->id} ({$match->metadata['external_id']})", 'debug');
             $dispatchedCount++;
         }

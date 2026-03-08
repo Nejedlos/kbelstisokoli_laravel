@@ -14,6 +14,11 @@ class SyncTeamSeasonJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
+     * @var int
+     */
+    public $timeout = 300; // 5 minut pro celou synchronizaci sezóny týmu
+
+    /**
      * @param  array  $options  [limit, force]
      */
     public function __construct(

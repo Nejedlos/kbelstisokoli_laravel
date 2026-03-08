@@ -58,6 +58,10 @@ class OpenAiNormalizer implements StatNormalizerInterface
             $response = Http::withToken($this->apiKey)
                 ->connectTimeout($connectTimeout)
                 ->timeout($timeout)
+                ->retry(3, 2000, function (\Exception $exception, $request) use (&$debugLogs) {
+                    $debugLogs[] = "[" . date('H:i:s') . "] OpenAI API Retry: " . $exception->getMessage();
+                    return true;
+                }, throw: false)
                 ->post($this->baseUrl.'/chat/completions', [
                     'model' => $this->model,
                     'messages' => [
