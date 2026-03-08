@@ -79,6 +79,12 @@ class IconHelper
 
     public const SETTINGS = AppIcon::SETTINGS;
 
+    public const GAUGE = AppIcon::GAUGE;
+
+    public const BOLT = AppIcon::BOLT;
+
+    public const TRASH_CAN_ARROW_UP = AppIcon::TRASH_CAN_ARROW_UP;
+
     // --- UI Akce ---
     public const CREATE = AppIcon::CREATE;
 

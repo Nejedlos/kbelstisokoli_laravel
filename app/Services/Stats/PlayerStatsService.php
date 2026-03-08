@@ -39,8 +39,8 @@ class PlayerStatsService
     public function getPerGameSeries(int $userId, int $seasonId, ?int $teamId = null): Collection
     {
         $query = StatisticRow::with(['basketballMatch', 'basketballMatch.opponent'])
-            ->where('player_id', $userId)
-            ->where('season_id', $seasonId)
+            ->where('statistic_rows.player_id', $userId)
+            ->where('statistic_rows.season_id', $seasonId)
             ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::MATCH_BOXSCORE_SET);
             })

@@ -11,6 +11,7 @@
     <div id="ks-feedback-widget"
      x-data="ksFeedbackWidget()"
      x-init="init()"
+     @ks-feedback-open.window="openModal()"
      class="ks-feedback-system"
      data-html2canvas-ignore="true"
      data-user-id="1"
@@ -20,7 +21,7 @@
      data-route-name="filament.admin.pages.dashboard">
 
     <!-- Floating Action Button -->
-    <button @click="openModal()"
+    <button @click="$dispatch('ks-feedback-open')"
             type="button"
             class="feedback-fab fixed z-[9999] left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
             :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'"

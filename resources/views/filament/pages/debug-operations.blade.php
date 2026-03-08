@@ -1,8 +1,8 @@
 <x-filament-panels::page>
-    <div class="flex flex-col xl:flex-row gap-6 items-start" wire:poll.3s="refreshConsoleLogs">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start" wire:poll.3s="refreshConsoleLogs">
         {{-- Left Column: Content --}}
-        <div class="flex-1 space-y-8 w-full">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="space-y-8 w-full">
+            <div class="grid grid-cols-2 gap-4">
                 @foreach($health as $key => $h)
                     <div class="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-2">
@@ -26,7 +26,7 @@
 
             <div class="mt-8 space-y-4">
                 <h2 class="text-xl font-bold">Externí Statistiky (Aktivní sezóna)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-6">
                     @foreach($externalSync as $team)
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                             <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
@@ -42,16 +42,16 @@
                                 </div>
                                 <div class="flex flex-wrap gap-1">
                                     <x-filament::button size="xs" color="gray" wire:click="runTeamSync({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Standardní synchronizace">
-                                        Sync
+                                        <i class="fa-light fa-arrows-rotate mr-1"></i> Sync
                                     </x-filament::button>
                                     <x-filament::button size="xs" color="warning" wire:click="runTeamSyncForce({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Force Sync (ignorovat hash)">
-                                        Force
+                                        <i class="fa-light fa-bolt mr-1"></i> Force
                                     </x-filament::button>
                                     <x-filament::button size="xs" color="danger" wire:click="runTeamSyncFresh({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Fresh Sync (přepsat data!)">
-                                        Fresh
+                                        <i class="fa-light fa-trash-can-arrow-up mr-1"></i> Fresh
                                     </x-filament::button>
                                     <x-filament::button size="xs" color="info" wire:click="runTeamSyncAiFresh({{ $team['team_id'] }})" wire:loading.attr="disabled" title="AI Fresh Sync (přepsat data pomocí AI!)">
-                                        AI Fresh
+                                        <i class="fa-light fa-sparkles mr-1"></i> AI
                                     </x-filament::button>
                                 </div>
                             </div>
@@ -154,7 +154,7 @@
                 </div>
             </div>
 
-            <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="mt-8 space-y-8">
                 {{-- Legacy Import --}}
                 <div class="space-y-4">
                     <h2 class="text-xl font-bold">Legacy Import</h2>
@@ -317,7 +317,7 @@
         </div>
 
         {{-- Right Column: Terminal --}}
-        <div class="w-full xl:w-[450px] sticky top-8 space-y-4">
+        <div class="w-full sticky top-8 space-y-4">
             <div class="flex items-center justify-between px-2">
                 <h2 class="text-sm font-bold uppercase tracking-widest text-gray-500 flex items-center gap-2">
                     <i class="fa-light fa-terminal w-4 h-4"></i>

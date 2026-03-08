@@ -24,6 +24,12 @@ class TeamSeasonStats extends Component
     public function mount($teamId = null, $seasonId = null)
     {
         $this->seasonId = $seasonId ?? Season::where('is_active', true)->first()?->id ?? Season::latest()->first()?->id;
+
+        // Pokud je teamId null a jsme v členské sekci (request začíná clenska-sekce), zkusíme MemberContext
+        if (! $teamId && request()->is('clenska-sekce/*')) {
+            $teamId = app(\App\Services\Member\MemberContext::class)->getActiveTeamId();
+        }
+
         $this->teamId = $teamId ?? Team::first()?->id;
 
         $this->loadStats();

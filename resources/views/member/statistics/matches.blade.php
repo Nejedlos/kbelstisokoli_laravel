@@ -4,6 +4,6 @@
 
 @section('content')
     <div class="space-y-10">
-        @livewire('public.team-season-stats')
+        @livewire('public.team-season-stats', ['teamId' => $activeTeamId])
     </div>
 @endsection

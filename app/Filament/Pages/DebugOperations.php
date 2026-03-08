@@ -14,6 +14,7 @@ use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\Team;
 use App\Services\Support\ConsoleService;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 class DebugOperations extends Page
 {
@@ -82,31 +84,37 @@ class DebugOperations extends Page
     {
         return [
             Action::make('syncAll')
-                ->label('Sync All Active')
-                ->icon('heroicon-m-arrow-path')
+                ->label('Hromadná synchronizace')
+                ->modalHeading('Synchronizace všech aktivních týmů')
+                ->modalDescription('Tato akce zařadí do fronty synchronizaci pro všechny týmy v aktuální sezóně.')
+                ->icon(IconHelper::render(IconHelper::REFRESH))
                 ->color('primary')
                 ->form([
-                    \Filament\Forms\Components\Toggle::make('force')
-                        ->label('Force mode')
-                        ->helperText('Ignoruje hash obsahu.'),
-                    \Filament\Forms\Components\Toggle::make('fresh')
-                        ->label('Fresh mode')
-                        ->helperText('Smaže stávající statistiky a znovu je importuje (nebezpečné!).')
-                        ->hidden(fn ($get) => ! $get('force')),
-                    \Filament\Forms\Components\Toggle::make('ai')
-                        ->label('AI mode')
-                        ->helperText('Použije AI (OpenAI) pro synchronizaci místo DOM extraktoru.')
-                        ->hidden(fn ($get) => ! $get('fresh')),
-                    \Filament\Schemas\Components\Section::make('Rozsah synchronizace')
+                    \Filament\Forms\Components\Grid::make(3)
+                        ->schema([
+                            \Filament\Forms\Components\Toggle::make('force')
+                                ->label('Force mode')
+                                ->helperText('Ignoruje hash obsahu.')
+                                ->onColor('warning'),
+                            \Filament\Forms\Components\Toggle::make('fresh')
+                                ->label('Fresh mode')
+                                ->helperText('Smaže a znovu importuje (nebezpečné!).')
+                                ->onColor('danger'),
+                            \Filament\Forms\Components\Toggle::make('ai')
+                                ->label('AI mode')
+                                ->helperText('Použije OpenAI pro synchronizaci.')
+                                ->onColor('info'),
+                        ]),
+                    \Filament\Schemas\Components\Section::make(new HtmlString(IconHelper::render(IconHelper::LIST_ICON) . ' Rozsah synchronizace'))
                         ->schema([
                             \Filament\Forms\Components\Toggle::make('sync_roster')
-                                ->label('Synchronizovat soupisku')
+                                ->label('Soupiska')
                                 ->default(true),
                             \Filament\Forms\Components\Toggle::make('sync_matches')
-                                ->label('Synchronizovat zápasy (seznam)')
+                                ->label('Zápasy')
                                 ->default(true),
                             \Filament\Forms\Components\Toggle::make('sync_details')
-                                ->label('Synchronizovat detaily (statistiky)')
+                                ->label('Statistiky')
                                 ->default(true)
                                 ->hidden(fn ($get) => ! $get('sync_matches')),
                         ])->columns(3),
@@ -151,8 +159,8 @@ class DebugOperations extends Page
                 }),
 
             Action::make('discoverSeasons')
-                ->label('Discover Missing Seasons')
-                ->icon('heroicon-m-magnifying-glass')
+                ->label('Hledat sezóny')
+                ->icon(IconHelper::render(IconHelper::SEO))
                 ->color('info')
                 ->form([
                     \Filament\Forms\Components\Select::make('mode')
@@ -198,8 +206,8 @@ class DebugOperations extends Page
                 }),
 
             Action::make('recomputeAll')
-                ->label('Recompute Stats')
-                ->icon('heroicon-m-calculator')
+                ->label('Přepočítat statistiky')
+                ->icon(IconHelper::render(IconHelper::GAUGE))
                 ->color('warning')
                 ->requiresConfirmation()
                 ->action(function () {

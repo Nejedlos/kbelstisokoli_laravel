@@ -17,6 +17,12 @@ class TeamRosterExtractor implements StatExtractorInterface
         $crawler = new Crawler($content);
         $warnings = [];
 
+        // Extrahujeme název týmu z nadpisu h1
+        $teamName = trim($crawler->filter('h1')->first()->text() ?? '');
+        // Pokud h1 obsahuje i sezónu (např. "Tým XYZ - 2024/25"), ořízneme to
+        $teamName = explode('-', $teamName)[0];
+        $teamName = trim($teamName);
+
         // Hledáme tabulku soupisky - obvykle table.js-table-fixed-order v sekci "Soupiska"
         // Zkusíme najít tabulku, která obsahuje odkaz na /hrac/
         $table = $crawler->filter('table.js-table-fixed-order')->first();
@@ -107,6 +113,7 @@ class TeamRosterExtractor implements StatExtractorInterface
             metadata: [
                 'warnings' => $warnings,
                 'source' => 'czbasketball',
+                'team_name' => $teamName,
             ]
         );
 

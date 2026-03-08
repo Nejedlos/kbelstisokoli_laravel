@@ -4,6 +4,6 @@
 
 @section('content')
     <div class="space-y-10">
-        @livewire('member.my-statistics', ['view' => 'team'])
+        @livewire('member.my-statistics', ['view' => 'team', 'teamId' => $activeTeamId])
     </div>
 @endsection

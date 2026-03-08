@@ -44,6 +44,12 @@ class RosterSyncService
 
             $run->update(['content_hash' => $hash]);
 
+            // Uložíme název týmu do konfigurace, pokud tam ještě není (pro boxscore párování)
+            if (empty($config->team_name_in_source) && isset($tableDto->metadata['team_name'])) {
+                $config->update(['team_name_in_source' => $tableDto->metadata['team_name']]);
+                $run->addLog('info', null, null, null, "Zjištěn název týmu ve zdroji: {$tableDto->metadata['team_name']}");
+            }
+
             $this->syncWithData($config, $tableDto);
 
             $run->finish([

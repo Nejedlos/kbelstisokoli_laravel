@@ -43,6 +43,8 @@ enum AppIcon: string
     case SETTINGS = 'gear';
     case GAUGE = 'gauge-high';
     case BUG = 'bug';
+    case BOLT = 'bolt';
+    case TRASH_CAN_ARROW_UP = 'trash-can-arrow-up';
 
     // --- UI Akce a Stavy ---
     case CREATE = 'circle-plus';

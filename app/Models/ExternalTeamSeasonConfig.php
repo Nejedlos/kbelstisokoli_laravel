@@ -15,6 +15,7 @@ class ExternalTeamSeasonConfig extends Model
         'team_season_url',
         'matches_list_url',
         'competition_label',
+        'team_name_in_source',
         'is_enabled',
         'last_synced_at',
         'metadata',

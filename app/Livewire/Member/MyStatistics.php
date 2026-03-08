@@ -36,18 +36,24 @@ class MyStatistics extends Component
 
     public $recentForm = [];
 
-    public function mount()
+    public function mount($teamId = null, $seasonId = null)
     {
-        $this->seasonId = Season::where('is_active', true)->first()?->id ?? Season::latest()->first()?->id;
+        $this->seasonId = $seasonId ?? Season::where('is_active', true)->first()?->id ?? Season::latest()->first()?->id;
 
-        // Zkusíme najít první tým uživatele v dané sezóně
-        $user = Auth::user();
+        // Pokud je teamId null, zkusíme MemberContext
+        if (! $teamId) {
+            $teamId = app(\App\Services\Member\MemberContext::class)->getActiveTeamId();
+        }
 
-        if (! $this->teamId) {
-            $this->teamId = $user->playerProfile?->teams()
+        if (! $teamId) {
+            // Zkusíme najít první tým uživatele v dané sezóně
+            $user = Auth::user();
+            $teamId = $user->playerProfile?->teams()
                 ->wherePivot('is_on_roster', true)
                 ->first()?->id ?? Team::first()?->id;
         }
+
+        $this->teamId = $teamId;
 
         $this->loadStats();
     }

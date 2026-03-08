@@ -14,9 +14,9 @@
     <link rel="manifest" href="http://localhost/site.webmanifest">
 
     <!-- Google Tag Manager / Analytics -->
-        
+
     <!-- Facebook Pixel -->
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@
     <meta name="twitter:description" content="Oficiální web basketbalových týmů TJ Sokol Kbely C a E. Hrajeme v Letňanech (RumcajsArena). Přidejte se k naší basketbalové komunitě v Praze 9.">
             <meta name="twitter:image" content="http://localhost/assets/img/home/home-hero.jpg">
         <meta name="twitter:image:alt" content="TJ Sokol Kbely C &amp; E">
-    
+
     <!-- Structured Data -->
             <script type="application/ld+json">
             {"@context":"https://schema.org","@type":"SportsOrganization","name":"TJ Sokol Kbely C & E","url":"http://localhost","logo":"http://localhost/uploads/branding/logo_kbelsti_sokoli_velke.png","sameAs":{"3":"https://www.linkedin.com/company/kbelstisokoli"}}
@@ -45,7 +45,7 @@
             <script type="application/ld+json">
             {"@context":"https://schema.org","@type":"LocalBusiness","name":"TJ Sokol Kbely C & E","image":"http://localhost/uploads/branding/logo_kbelsti_sokoli_velke.png","url":"http://localhost","telephone":"+420 602 285 447","email":"spanily@pro-nemo.cz","address":{"@type":"PostalAddress","streetAddress":"Toužimská 700, Praha 9 - Kbely","addressLocality":"Praha","postalCode":"19700","addressCountry":"CZ"},"geo":{"@type":"GeoCoordinates","latitude":"50.1315","longitude":"14.5492"},"priceRange":"$$","sameAs":{"3":"https://www.linkedin.com/company/kbelstisokoli"}}
         </script>
-    
+
     <meta name="theme-color" content="#E11D48">
     <style>:root {
     --color-brand-navy: #0B1F3A;
@@ -75,15 +75,15 @@
         }
     </style>
     <link rel="preload" as="style" href="http://localhost/build/assets/app-B20P-y55.css"/><link rel="preload" as="style" href="http://localhost/build/assets/app-B27Da3fw.css"/><link rel="modulepreload" as="script" href="http://localhost/build/assets/app-BTujcUz3.js"/><link rel="stylesheet" href="http://localhost/build/assets/app-B20P-y55.css" data-navigate-track="reload"/><link rel="stylesheet" href="http://localhost/build/assets/app-B27Da3fw.css" data-navigate-track="reload"/><script type="module" src="http://localhost/build/assets/app-BTujcUz3.js" data-navigate-track="reload"></script>
-    
+
         <style>[x-cloak] { display: none !important; }</style></head><body class="min-h-screen flex flex-col bg-slate-50">
-        
+
     <!-- Header -->
     <header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container py-4 flex items-center justify-between gap-4">
         <!-- Logo -->
         <a href="http://localhost" wire:navigate class="flex items-center gap-3 shrink-0">
-            
+
                             <picture class="transition-transform duration-500 hover:rotate-3 hover:scale-110">
                     <source srcset="http://localhost/assets/img/loga/logo_kbelsti_sokoli_mini.webp" type="image/webp">
                     <img src="http://localhost/assets/img/loga/logo_kbelsti_sokoli_mini.png" alt="Kbelští sokoli C & E logo" class="object-contain" style="height: 38px; width: auto;" data-desktop-height="48px" data-mobile-height="38px" id="header-team-logo">
@@ -104,7 +104,7 @@
                         updateLogoSize();
                     })();
                 </script>
-            
+
             <div class="hidden md:block opacity-80">
                 <span class="block font-display font-bold text-base leading-tight uppercase tracking-tight">TJ Sokol Kbely C &amp; E</span>
                 <span class="block text-[10px] text-slate-400 font-medium tracking-widest uppercase leading-snug">Více než jen basketbal.</span>
@@ -141,7 +141,7 @@
                     Kontakt
                 </a>
                                     </nav>
-        
+
         <!-- Right Side / CTA -->
         <div class="flex items-center gap-2 sm:gap-4">
             <!-- Search Toggle -->
@@ -184,7 +184,7 @@
                                 <i class="fa-light fa-lock-keyhole w-5 text-center"></i>
                                 Administrace
                             </a>
-                        
+
                         <div class="border-t border-slate-50 mt-1 pt-1">
                             <form method="POST" action="http://localhost/logout">
                                 <input type="hidden" name="_token" value="PovWmTLX6C2PQxIhZyUuD2shB4gy9YP3sSr2KX8i" autocomplete="off">                                <button type="submit" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors">
@@ -195,7 +195,7 @@
                         </div>
                     </div>
                 </div>
-            
+
             <!-- Mobile Toggle -->
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-3 -mr-2 text-slate-700 hover:text-primary focus:outline-none transition-colors" aria-label="Menu">
                 <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
@@ -262,21 +262,21 @@
     <!-- Content -->
     <main class="flex-1">
                     <div class="page-blocks">
-            
+
                     <div class="block-wrapper block-hero " data-aos="fade-up" data-aos-delay="0">
                 <section class="block-hero relative overflow-hidden min-h-[60vh] flex items-center bg-secondary text-white py-16 md:py-24" x-data="{ videoLoaded: false }">
-    
+
             <div class="absolute inset-0 z-0 bg-secondary">
-            
+
             <picture class="">
                         <source media="(max-width: 639px)" srcset="http://localhost/assets/img/home/home-hero-mobile.webp" type="image/webp">
                 <source media="(max-width: 639px)" srcset="http://localhost/assets/img/home/home-hero-mobile.jpg">
-    
+
             <source srcset="http://localhost/assets/img/home/home-hero.webp" type="image/webp" sizes="100vw">
         <img src="http://localhost/assets/img/home/home-hero.jpg" alt="Basketbal v Letňanech
 pro týmy Sokol Kbely C &amp; E" class="absolute inset-0 w-full h-full object-cover" loading="eager" decoding="async" fetchpriority="high" sizes="100vw"></picture>
 
-                            
+
                 <div class="hidden sm:block">
                     <video class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 js-hero-video" :class="videoLoaded ? 'opacity-100' : 'opacity-0'" autoplay muted loop playsinline poster="assets/img/home/home-hero.jpg" preload="auto" aria-hidden="true">
                                                     <source src="http://localhost/assets/video/hero.webm" type="video/webm">
@@ -330,20 +330,20 @@ pro týmy Sokol Kbely C &amp; E" class="absolute inset-0 w-full h-full object-co
                         }
                     })();
                 </script>
-            
+
                             <div class="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent z-[1]"></div>
                     </div>
-    
-    
-    
-    
-    
+
+
+
+
+
             <div class="absolute top-0 right-0 w-1/2 h-full bg-primary/5 -skew-x-12 translate-x-1/3 pointer-events-none z-0"></div>
         <div class="absolute bottom-0 right-0 w-1/4 h-1/2 border-r-[16px] border-b-[16px] border-primary/10 mr-8 mb-8 pointer-events-none z-0"></div>
         <div class="absolute top-1/2 left-0 w-64 h-64 bg-primary/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
-    
+
     <div class="container relative z-10">
-        
+
         <div class="max-w-3xl">
                             <div class="mb-10 inline-flex items-center px-4 py-2.5 sm:px-6 sm:py-3 rounded-full text-[11px] sm:text-[13px] font-display font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] max-w-[calc(100vw-2rem)] sm:max-w-full overflow-hidden leading-tight sm:leading-none shadow-2xl transition-all duration-300 hover:scale-[1.02] group/badge bg-white/95 backdrop-blur-sm text-secondary shadow-black/40">
                                             <picture class="mr-3 sm:mr-5 shrink-0 transition-transform duration-500 group-hover/badge:rotate-3" style="opacity: 1;">
@@ -356,27 +356,27 @@ pro týmy Sokol Kbely C &amp; E" class="absolute inset-0 w-full h-full object-co
                             <span class="inline text-primary">C &amp; E</span>
                                             </span>
                 </div>
-            
+
                             <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-display uppercase tracking-tight text-balance">
                     Basketbal v Letňanech<br>
 pro týmy Sokol Kbely C &amp; E
                 </h1>
-            
+
                             <p class="text-base sm:text-lg md:text-xl lg:text-2xl mb-10 text-white/80 font-medium leading-relaxed italic border-l-4 border-primary pl-4 md:pl-6 py-2 text-balance">
                     Vítejte na stránkách týmů C &amp; E, které hrají v RumcajsAreně (Třinecká 650, Letňany). Jsme hrdou součástí TJ Sokol Kbely Basketball. Hledáte tým s tradicí, skvělou partou a chutí vyhrávat? Jste na správném místě.
                 </p>
-            
+
                             <div class="flex flex-wrap items-center gap-4 sm:gap-6 ">
                                             <a href="/join" class="btn btn-primary btn-glow group w-full sm:w-auto" data-track-click="hero_cta" data-track-label="Primary: Chci hrát za Sokol Kbely C &amp; E" data-track-category="conversion">
                             <span>Chci hrát za Sokol Kbely C &amp; E</span>
                             <i class="fa-light fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                         </a>
-                    
+
                                                                     <a href="https://www.basketkbely.cz/zacnihrat" target="_blank" rel="noopener" class="btn btn-outline-white w-full sm:w-auto group" data-track-click="external_link" data-track-label="Secondary: Ostatní týmy (Mládež &amp; Elita)" data-track-category="external">
                             <span>Ostatní týmy (Mládež &amp; Elita)</span>
                                                             <i class="fa-light fa-arrow-up-right ml-2 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform opacity-70"></i>
                                                     </a>
-                    
+
                                     </div>
 
                                     <div class="mt-6 text-sm text-white/60 max-w-xl  leading-snug">
@@ -385,7 +385,7 @@ pro týmy Sokol Kbely C &amp; E
                                     </div>
     </div>
 
-    
+
             <div class="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 w-1/3 opacity-20 pointer-events-none group-hover:rotate-45 transition-transform duration-1000">
             <i class="fa-light fa-basketball text-[25rem] rotate-12 text-primary/20"></i>
         </div>
@@ -395,7 +395,7 @@ pro týmy Sokol Kbely C &amp; E
 <div class="bg-white border-b border-ui-border relative z-20 shadow-sm">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row items-center justify-center py-4 md:py-6 gap-6 md:gap-12">
-                
+
                 <div class="shrink-0 text-center md:text-left">
                     <span class="block text-[10px] md:text-[11px] font-display font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">
                         Hlavní partner týmu
@@ -405,7 +405,7 @@ pro týmy Sokol Kbely C &amp; E
                     </h3>
                 </div>
 
-                
+
                 <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12">
                                             <a href="https://www.eurotechno.eu/sluzby" target="_blank" rel="noopener noreferrer" class="group/partner transition-all duration-300 hover:scale-105" title="Euro Techno">
 
@@ -419,32 +419,32 @@ pro týmy Sokol Kbely C &amp; E
         </div>
     </div>
             </div>
-                    
+
                     <div class="block-wrapper block-cta " data-aos="fade-up" data-aos-delay="100">
                 <section class="block-cta py-20 relative overflow-hidden bg-white border-y border-slate-100">
-    
+
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none hero-mesh opacity-10">
         <div class="absolute top-0 right-0 w-64 h-64 border-t-8 border-r-8 -mr-12 -mt-12 border-white"></div>
         <div class="absolute bottom-0 left-0 w-64 h-64 border-b-8 border-l-8 -ml-12 -mb-12 border-white"></div>
     </div>
 
-    
+
     <div class="container mx-auto px-4 relative z-10">
         <div class="max-w-4xl mx-auto text-left">
                             <h2 class="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight mb-8 leading-display text-balance text-secondary">
                     Tento web patří týmům Sokol Kbely C &amp; E
                 </h2>
-            
+
                             <p class="text-lg md:text-xl mb-12 font-medium opacity-90 leading-relaxed text-slate-500">
                     TJ Sokol Kbely C &amp; E jsou součástí širšího oddílu TJ Sokol Kbely Basketball. Náš web se zaměřuje na týmy C a E – jejich zápasy, týmové dění a komunitu v Letňanech. Pokud hledáte elitní týmy (A, B) nebo mládežnické kategorie, pokračujte na hlavní web oddílu.
                 </p>
-            
+
             <div class="flex gap-4 flex-wrap justify-start">
                                     <a href="/tymy" class="btn px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl font-black shadow-2xl transition-all duration-300 transform hover:scale-105 group w-full sm:w-auto btn-primary">
                         <span>Naše týmy (C &amp; E)</span>
                         <i class="fa-light fa-chevron-right ml-3 group-hover:translate-x-1 transition-transform"></i>
                     </a>
-                
+
                                                         <a href="https://www.basketkbely.cz/zacnihrat" target="_blank" rel="noopener" class="btn px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl font-black transition-all duration-300 transform hover:scale-105 group w-full sm:w-auto btn-outline-primary">
                         <span>Ostatní nábory (Mládež &amp; Elita)</span>
                                                     <i class="fa-light fa-arrow-up-right ml-3 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform text-sm opacity-70"></i>
@@ -453,15 +453,15 @@ pro týmy Sokol Kbely C &amp; E
         </div>
     </div>
 
-    
+
     <div class="absolute -bottom-12 -right-12 pointer-events-none text-white/5">
         <i class="fa-light fa-basketball-hoop text-[15rem] -rotate-12"></i>
     </div></section>
             </div>
-                    
+
                     <div class="block-wrapper block-cards_grid " data-aos="fade-up" data-aos-delay="200">
                 <section class="block-cards-grid section-padding bg-bg relative overflow-hidden">
-    
+
     <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-slate-100 to-transparent opacity-50"></div>
 
     <div class="container relative z-10">
@@ -469,12 +469,12 @@ pro týmy Sokol Kbely C &amp; E
             <div class="text-[min(3.5vw,0.875rem)] sm:text-sm uppercase tracking-widest-responsive text-primary font-bold mb-3 max-w-full leading-tight break-words [overflow-wrap:anywhere] hyphens-auto">Hrajeme v Letňanech, ale patříme do velké kbelské rodiny.</div>
                 <h2 class="section-title text-balance section-title-center">Naše týmy a funnel</h2>
         </div>
-        
+
                     <div class="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                                                     <div class="relative h-64 overflow-hidden">
                                 <picture class="">
-    
+
             <source srcset="http://localhost/assets/img/home/team-muzi-c.webp" type="image/webp" sizes="100vw">
         <img src="http://localhost/assets/img/home/team-muzi-c.jpg" alt="Sokol Kbely C" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" width="1600" height="900" sizes="100vw"></picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
@@ -502,7 +502,7 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Detail Sokol Kbely C</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                             <a href="/zapasy" class="text-xs sm:text-[10px] font-bold uppercase tracking-widest-responsive text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1 ml-auto sm:ml-0">
                                             Zápasy Sokol Kbely C
                                         </a>
@@ -512,7 +512,7 @@ pro týmy Sokol Kbely C &amp; E
                                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                                                     <div class="relative h-64 overflow-hidden">
                                 <picture class="">
-    
+
             <source srcset="http://localhost/assets/img/home/team-muzi-e.webp" type="image/webp" sizes="100vw">
         <img src="http://localhost/assets/img/home/team-muzi-e.jpg" alt="Sokol Kbely E" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" width="1600" height="900" sizes="100vw"></picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
@@ -540,7 +540,7 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Detail Sokol Kbely E</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                             <a href="/zapasy" class="text-xs sm:text-[10px] font-bold uppercase tracking-widest-responsive text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1 ml-auto sm:ml-0">
                                             Zápasy Sokol Kbely E
                                         </a>
@@ -550,7 +550,7 @@ pro týmy Sokol Kbely C &amp; E
                                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                                                     <div class="relative h-64 overflow-hidden">
                                 <picture class="">
-    
+
             <source srcset="http://localhost/assets/img/home/basketball-court-detail.webp" type="image/webp" sizes="100vw">
         <img src="http://localhost/assets/img/home/basketball-court-detail.jpg" alt="Ostatní týmy (A, B, D)" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" width="1600" height="900" sizes="100vw"></picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
@@ -578,48 +578,48 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Zobrazit na basketkbely.cz</span>
                                                 <i class="fa-light fa-arrow-up-right ml-2 text-[10px]"></i>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
                             </div>
             </div></section>
             </div>
-                    
+
                     <div class="block-wrapper block-cta " data-aos="fade-up" data-aos-delay="300">
                 <section class="block-cta py-20 relative overflow-hidden bg-secondary text-white shadow-[inset_0_0_100px_rgba(255,255,255,0.05)]">
-    
+
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none hero-mesh opacity-10">
         <div class="absolute top-0 right-0 w-64 h-64 border-t-8 border-r-8 -mr-12 -mt-12 border-white"></div>
         <div class="absolute bottom-0 left-0 w-64 h-64 border-b-8 border-l-8 -ml-12 -mb-12 border-white"></div>
     </div>
 
-    
+
     <div class="container mx-auto px-4 relative z-10">
         <div class="max-w-4xl mx-auto text-center">
                             <h2 class="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight mb-8 leading-display text-balance text-white">
                     Navazujeme na tradici kbelského basketu
                 </h2>
-            
+
                             <p class="text-lg md:text-xl mb-12 font-medium opacity-90 leading-relaxed text-white/80">
                     TJ Sokol Kbely Basketbal sdružuje dospělé týmy i mládežnické kategorie a dlouhodobě buduje basketbalovou komunitu ve Kbelích. Naším cílem je držet kvalitní týmové prostředí, chuť hrát a dobré jméno klubu – na hřišti i mimo něj.
                 </p>
-            
+
             <div class="flex gap-4 flex-wrap justify-center">
-                
+
                             </div>
         </div>
     </div>
 
-    
+
     <div class="absolute -bottom-12 -right-12 pointer-events-none text-white/5">
         <i class="fa-light fa-basketball-hoop text-[15rem] -rotate-12"></i>
     </div></section>
             </div>
-                    
+
                     <div class="block-wrapper block-cards_grid " data-aos="fade-up" data-aos-delay="400">
                 <section class="block-cards-grid section-padding bg-bg relative overflow-hidden">
-    
+
     <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-slate-100 to-transparent opacity-50"></div>
 
     <div class="container relative z-10">
@@ -627,12 +627,12 @@ pro týmy Sokol Kbely C &amp; E
             <div class="text-[min(3.5vw,0.875rem)] sm:text-sm uppercase tracking-widest-responsive text-primary font-bold mb-3 max-w-full leading-tight break-words [overflow-wrap:anywhere] hyphens-auto">Rozlišujeme nábor do našich mužských týmů C &amp; E a do ostatních kategorií oddílu.</div>
                 <h2 class="section-title text-balance section-title-center">Chcete se k nám přidat?</h2>
         </div>
-        
+
                     <div class="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                                                     <div class="relative h-64 overflow-hidden">
                                 <picture class="">
-    
+
             <source srcset="http://localhost/assets/img/home/team-muzi-c-nabor.webp" type="image/webp" sizes="100vw">
         <img src="http://localhost/assets/img/home/team-muzi-c-nabor.webp" alt="Nábor do Sokol Kbely C" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" width="1600" height="900" sizes="100vw"></picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
@@ -660,14 +660,14 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Chci hrát za Sokol Kbely C</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
                                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                                                     <div class="relative h-64 overflow-hidden">
                                 <picture class="">
-    
+
             <source srcset="http://localhost/assets/img/home/team-muzi-e-nabor.webp" type="image/webp" sizes="100vw">
         <img src="http://localhost/assets/img/home/team-muzi-e-nabor.webp" alt="Nábor do Sokol Kbely E" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" width="1600" height="900" sizes="100vw"></picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
@@ -695,14 +695,14 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Chci hrát za Sokol Kbely E</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
                                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                                                     <div class="relative h-64 overflow-hidden">
                                 <picture class="">
-    
+
             <source srcset="http://localhost/assets/img/home/kids-youth-basket-training.webp" type="image/webp" sizes="100vw">
         <img src="http://localhost/assets/img/home/kids-youth-basket-training.jpg" alt="Ostatní (A, B, D &amp; Mládež)" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" width="1600" height="900" sizes="100vw"></picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent opacity-40"></div>
@@ -730,31 +730,31 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Nábor dětí a elit</span>
                                                 <i class="fa-light fa-arrow-up-right ml-2 text-[10px]"></i>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
                             </div>
             </div></section>
             </div>
-                    
+
                     <div class="block-wrapper block-cards_grid " data-aos="fade-up" data-aos-delay="500">
                 <section class="block-cards-grid section-padding bg-bg relative overflow-hidden">
-    
+
     <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-slate-100 to-transparent opacity-50"></div>
 
     <div class="container relative z-10">
                     <div class="mb-10 text-center">
                 <h2 class="section-title text-balance section-title-center">Co na tomto webu najdete</h2>
         </div>
-        
+
                     <div class="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                                     <div class="card card-hover group flex flex-col h-full bg-white border border-slate-100 overflow-hidden">
                                                 <div class="p-6 md:p-8 flex flex-col h-full flex-grow">
                             <div class="mb-6 flex items-center justify-between">
                                                                     <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                                        
-                                                                                    
+
+
                                             <i class="fa-light fa-calendar-days text-2xl md:text-3xl"></i>
                                                                             </div>
                                                                 <div class="text-primary opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 transition-transform duration-300">
@@ -775,7 +775,7 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Více informací</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
@@ -783,8 +783,8 @@ pro týmy Sokol Kbely C &amp; E
                                                 <div class="p-6 md:p-8 flex flex-col h-full flex-grow">
                             <div class="mb-6 flex items-center justify-between">
                                                                     <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                                        
-                                                                                    
+
+
                                             <i class="fa-light fa-users-gear text-2xl md:text-3xl"></i>
                                                                             </div>
                                                                 <div class="text-primary opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 transition-transform duration-300">
@@ -805,7 +805,7 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Více informací</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
@@ -813,8 +813,8 @@ pro týmy Sokol Kbely C &amp; E
                                                 <div class="p-6 md:p-8 flex flex-col h-full flex-grow">
                             <div class="mb-6 flex items-center justify-between">
                                                                     <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                                        
-                                                                                    
+
+
                                             <i class="fa-light fa-newspaper text-2xl md:text-3xl"></i>
                                                                             </div>
                                                                 <div class="text-primary opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 transition-transform duration-300">
@@ -835,7 +835,7 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Více informací</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
@@ -843,8 +843,8 @@ pro týmy Sokol Kbely C &amp; E
                                                 <div class="p-6 md:p-8 flex flex-col h-full flex-grow">
                             <div class="mb-6 flex items-center justify-between">
                                                                     <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                                        
-                                                                                    
+
+
                                             <i class="fa-light fa-lock text-2xl md:text-3xl"></i>
                                                                             </div>
                                                                 <div class="text-primary opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 transition-transform duration-300">
@@ -865,14 +865,14 @@ pro týmy Sokol Kbely C &amp; E
                                                 <span>Více informací</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
-                                                                            
+
                                                                     </div>
                                                     </div>
                     </div>
                             </div>
             </div></section>
             </div>
-                    
+
                     <div class="block-wrapper block-news_listing " data-aos="fade-up" data-aos-delay="600">
                 <section class="block-news-listing section-padding">
     <div class="container">
@@ -883,7 +883,7 @@ pro týmy Sokol Kbely C &amp; E
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                                     <article class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-full relative">
-    
+
     <div class="absolute top-0 right-0 w-32 h-32 opacity-[0.03] text-secondary pointer-events-none transform translate-x-1/2 -translate-y-1/2 rotate-12 z-20 group-hover:opacity-[0.08] transition-opacity">
         <i class="fa-light fa-basketball text-8xl"></i>
     </div>
@@ -894,7 +894,7 @@ pro týmy Sokol Kbely C &amp; E
                 <i class="fa-light fa-basketball text-[120px]"></i>
             </div>
         </div>
-    
+
     <div class="p-8 flex flex-col flex-1 relative z-10">
         <div class="flex items-center space-x-3 mb-5">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
@@ -917,7 +917,7 @@ pro týmy Sokol Kbely C &amp; E
                     <p class="text-slate-500 line-clamp-3 mb-8 flex-1 leading-relaxed">
                 Uzavřeli jsme první veřejnou verzi webu s moderní úvodní stránkou zaměřenou na Muži C &amp; E.
             </p>
-        
+
         <div class="mt-auto pt-6 border-t border-slate-50">
             <a href="http://localhost/novinky/dokonceni-prvni-verze-moderni-homepage-a-pripraveny-obsah" class="inline-flex items-center text-xs font-black uppercase tracking-[0.2em] text-secondary group-hover:text-primary transition-all duration-300">
                 <span>Celý článek</span>
@@ -926,7 +926,7 @@ pro týmy Sokol Kbely C &amp; E
         </div>
     </div></article>
                                     <article class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-full relative">
-    
+
     <div class="absolute top-0 right-0 w-32 h-32 opacity-[0.03] text-secondary pointer-events-none transform translate-x-1/2 -translate-y-1/2 rotate-12 z-20 group-hover:opacity-[0.08] transition-opacity">
         <i class="fa-light fa-basketball text-8xl"></i>
     </div>
@@ -937,7 +937,7 @@ pro týmy Sokol Kbely C &amp; E
                 <i class="fa-light fa-basketball text-[120px]"></i>
             </div>
         </div>
-    
+
     <div class="p-8 flex flex-col flex-1 relative z-10">
         <div class="flex items-center space-x-3 mb-5">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
@@ -960,7 +960,7 @@ pro týmy Sokol Kbely C &amp; E
                     <p class="text-slate-500 line-clamp-3 mb-8 flex-1 leading-relaxed">
                 Prošli jsme klíčové scénáře a doladili redirecty pro spolehlivý provoz.
             </p>
-        
+
         <div class="mt-auto pt-6 border-t border-slate-50">
             <a href="http://localhost/novinky/testy-a-provozni-stabilita-overeni-roli-a-pristupu" class="inline-flex items-center text-xs font-black uppercase tracking-[0.2em] text-secondary group-hover:text-primary transition-all duration-300">
                 <span>Celý článek</span>
@@ -969,7 +969,7 @@ pro týmy Sokol Kbely C &amp; E
         </div>
     </div></article>
                                     <article class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-full relative">
-    
+
     <div class="absolute top-0 right-0 w-32 h-32 opacity-[0.03] text-secondary pointer-events-none transform translate-x-1/2 -translate-y-1/2 rotate-12 z-20 group-hover:opacity-[0.08] transition-opacity">
         <i class="fa-light fa-basketball text-8xl"></i>
     </div>
@@ -980,7 +980,7 @@ pro týmy Sokol Kbely C &amp; E
                 <i class="fa-light fa-basketball text-[120px]"></i>
             </div>
         </div>
-    
+
     <div class="p-8 flex flex-col flex-1 relative z-10">
         <div class="flex items-center space-x-3 mb-5">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
@@ -1003,7 +1003,7 @@ pro týmy Sokol Kbely C &amp; E
                     <p class="text-slate-500 line-clamp-3 mb-8 flex-1 leading-relaxed">
                 Přidali jsme veřejné formuláře a admin přehled pro zpracování zpráv od zájemců.
             </p>
-        
+
         <div class="mt-auto pt-6 border-t border-slate-50">
             <a href="http://localhost/novinky/formulare-kontakt-a-nabor-lead-workflow" class="inline-flex items-center text-xs font-black uppercase tracking-[0.2em] text-secondary group-hover:text-primary transition-all duration-300">
                 <span>Celý článek</span>
@@ -1020,10 +1020,10 @@ pro týmy Sokol Kbely C &amp; E
             </div>
             </div></section>
             </div>
-                    
+
                     <div class="block-wrapper block-cta " data-aos="fade-up" data-aos-delay="700">
                 <section class="block-cta py-20 relative overflow-hidden bg-white text-secondary border-y border-slate-100">
-    
+
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none hero-mesh opacity-5">
         <div class="absolute top-0 right-0 w-64 h-64 border-t-8 border-r-8 -mr-12 -mt-12 border-primary/5"></div>
         <div class="absolute bottom-0 left-0 w-64 h-64 border-b-8 border-l-8 -ml-12 -mb-12 border-primary/5"></div>
@@ -1034,23 +1034,23 @@ pro týmy Sokol Kbely C &amp; E
             <div class="absolute -top-24 -left-24 w-[30rem] h-[30rem] bg-primary/5 blur-[100px] rounded-full"></div>
             <div class="absolute -bottom-24 -right-24 w-[30rem] h-[30rem] bg-accent/5 blur-[100px] rounded-full"></div>
         </div>
-    
+
     <div class="container mx-auto px-4 relative z-10">
         <div class="max-w-4xl mx-auto text-center">
                             <h2 class="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight mb-8 leading-display text-balance text-secondary">
                     Hrajeme pro radost ze hry, tým a Kbely
                 </h2>
-            
+
                             <p class="text-lg md:text-xl mb-12 font-medium opacity-90 leading-relaxed text-slate-500">
                     Sledujte dění kolem našich mužských týmů C &amp; E, fanděte s námi a pokud hledáte basket pro děti nebo mládež, navštivte hlavní stránky kbelského basketu.
                 </p>
-            
+
             <div class="flex gap-4 flex-wrap justify-center">
                                     <a href="/join" class="btn px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl font-black shadow-2xl transition-all duration-300 transform hover:scale-105 group w-full sm:w-auto bg-primary text-white hover:bg-primary-hover">
                         <span>Chci hrát za C &amp; E</span>
                         <i class="fa-light fa-chevron-right ml-3 group-hover:translate-x-1 transition-transform"></i>
                     </a>
-                
+
                                                         <a href="https://www.basketkbely.cz/zacnihrat" target="_blank" rel="noopener" class="btn px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl font-black transition-all duration-300 transform hover:scale-105 group w-full sm:w-auto btn-outline-primary">
                         <span>Nábor Mládež &amp; Elita</span>
                                                     <i class="fa-light fa-arrow-up-right ml-3 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform text-sm opacity-70"></i>
@@ -1059,7 +1059,7 @@ pro týmy Sokol Kbely C &amp; E
         </div>
     </div>
 
-    
+
     <div class="absolute -bottom-12 -right-12 pointer-events-none text-primary/5">
         <i class="fa-light fa-basketball-hoop text-[15rem] -rotate-12"></i>
     </div></section>
@@ -1069,19 +1069,19 @@ pro týmy Sokol Kbely C &amp; E
 
     <!-- Footer -->
     <footer class="bg-secondary pt-6 pb-6 text-slate-300 relative overflow-hidden">
-    
+
     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
 
-    
+
     <div class="absolute top-0 right-0 w-1/3 h-full pointer-events-none opacity-[0.03] overflow-hidden">
         <i class="fa-light fa-basketball text-[15rem] md:text-[30rem] translate-x-1/2 -translate-y-1/4"></i>
     </div>
 
     <div class="container pt-12 md:pt-20 pb-6 relative z-10">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-x-8 lg:gap-y-16">
-            
+
             <div class="space-y-6 sm:col-span-2 lg:col-span-3">
-                
+
                                     <a href="http://localhost" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl shadow-lg shadow-black/20">
                             <picture>
@@ -1093,7 +1093,7 @@ pro týmy Sokol Kbely C &amp; E
                             Kbelští sokoli
                         </span>
                     </a>
-                
+
                 <div class="space-y-4">
                     <p class="font-bold text-white leading-snug">
                         Web mužských týmů C &amp; E v rámci TJ Sokol Kbely Basketbal.
@@ -1112,14 +1112,14 @@ pro týmy Sokol Kbely C &amp; E
                 </div>
             </div>
 
-            
+
             <div class="lg:col-span-3">
                 <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
                     Navigace
                 </h3>
                 <ul class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
-                                            
+
                                                     <li>
                                 <a href="http://localhost" wire:navigate class="hover:text-primary transition-all flex items-center group text-primary">
                                     <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
@@ -1183,7 +1183,7 @@ pro týmy Sokol Kbely C &amp; E
                 </ul>
             </div>
 
-            
+
             <div class="lg:col-span-3">
                 <div class="flex items-center gap-3 mb-8">
                     <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm flex items-center leading-tight">
@@ -1250,7 +1250,7 @@ pro týmy Sokol Kbely C &amp; E
                 </div>
             </div>
 
-            
+
             <div class="sm:col-span-2 lg:col-span-3">
                 <h3 class="text-white font-black uppercase tracking-widest-responsive text-sm mb-8 flex items-center leading-tight">
                     <span class="w-8 h-px bg-primary mr-3"></span>
@@ -1276,7 +1276,7 @@ pro týmy Sokol Kbely C &amp; E
                                                                             </div>
                                 </div>
                             </li>
-                        
+
                                                     <li class="flex items-center gap-4 group">
                                 <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
                                     <i class="fa-light fa-user"></i>
@@ -1288,8 +1288,8 @@ pro týmy Sokol Kbely C &amp; E
                                         </div>
                                                                     </div>
                             </li>
-                        
-                        
+
+
                                                     <li class="flex items-center gap-4 group">
                                 <a href="http://localhost/napiste-nam?to=c3BhbmlseUBwcm8tbmVtby5jeg%3D%3D" data-protected-email="c3BhbmlseUBwcm8tbmVtby5jeg==" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
     <i class="fa-light fa-envelope"></i></a>
@@ -1299,14 +1299,14 @@ pro týmy Sokol Kbely C &amp; E
 </a>
                                 </div>
                             </li>
-                        
+
                                                     <li class="flex items-center gap-4 group">
                                 <a href="tel:+420602285447" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
                                     <i class="fa-light fa-phone"></i>
                                 </a>
                                 <a href="tel:+420602285447" class="hover:text-primary transition-colors font-bold py-1 inline-block">+420 602 285 447</a>
                             </li>
-                        
+
                                             </ul>
 
                     <div class="flex flex-wrap gap-3 sm:gap-4 pt-4 border-t border-white/5">
@@ -1323,8 +1323,8 @@ pro týmy Sokol Kbely C &amp; E
             </div>
         </div>
 
-        
-        
+
+
                     <div class="container pb-12 pt-8 border-t border-white/5">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-8">
                     <div class="text-center md:text-left">
@@ -1347,7 +1347,7 @@ pro týmy Sokol Kbely C &amp; E
             </div>
             </div>
 
-    
+
     <div class="bg-black/40 border-t border-white/5 text-slate-500 text-xs md:text-sm">
         <div class="container py-10 md:py-8 flex flex-col md:flex-row items-center justify-between gap-10 md:gap-8">
             <div class="text-center md:text-left w-full md:w-auto">
@@ -1410,26 +1410,26 @@ pro týmy Sokol Kbely C &amp; E
 
     <button @click="scrollToTop()" class="group relative flex items-center justify-center w-14 h-14 rounded-full text-white shadow-2xl transition-all duration-300 overflow-hidden hover:scale-110 active:scale-95" style="background-color: #E11D48; shadow: 0 20px 25px -5px #E11D484D;" title="Zpět nahoru">
 
-        
+
         <div class="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-        
+
         <i class="fa-light fa-basketball text-2xl group-hover:rotate-[360deg] transition-transform duration-700 ease-in-out"></i>
 
-        
+
         <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-secondary text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-white/10">
             Nahoru
         </div>
 
-        
+
         <div class="absolute inset-0 rounded-full border border-white/30 animate-ping opacity-20 pointer-events-none"></div>
     </button></div>
 
-    
-    <div id="ks-feedback-widget" x-data="ksFeedbackWidget()" x-init="init()" class="ks-feedback-system" data-html2canvas-ignore="true" data-user-id="1" data-user-email="admin@basketkbely.cz" data-user-roles="admin" data-app-version="1.0" data-route-name="public.home">
+
+    <div id="ks-feedback-widget" x-data="ksFeedbackWidget()" x-init="init()" @ks-feedback-open.window="openModal()" class="ks-feedback-system" data-html2canvas-ignore="true" data-user-id="1" data-user-email="admin@basketkbely.cz" data-user-roles="admin" data-app-version="1.0" data-route-name="public.home">
 
     <!-- Floating Action Button -->
-    <button @click="openModal()" type="button" class="feedback-fab fixed z-[9999] left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden" :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'" aria-label="Odeslat zpětnou vazbu">
+    <button @click="$dispatch('ks-feedback-open')" type="button" class="feedback-fab fixed z-[9999] left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden" :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'" aria-label="Odeslat zpětnou vazbu">
         <i class="fa-light fa-bug text-2xl group-hover:rotate-12 transition-transform"></i>
         <span class="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 transition-all duration-500 ease-in-out whitespace-nowrap text-sm font-medium">
             Feedback

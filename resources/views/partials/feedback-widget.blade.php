@@ -1,7 +1,8 @@
-<div id="ks-fb-root"
-     x-data="ksFeedbackWidget()"
-     x-init="init()"
-     class="ks-feedback-system"
+    <div id="ks-fb-root"
+         x-data="ksFeedbackWidget()"
+         x-init="init()"
+         @ks-feedback-open.window="openModal()"
+         class="ks-feedback-system"
      data-html2canvas-ignore="true"
      data-user-id="{{ Auth::id() }}"
      data-user-email="{{ optional(Auth::user())->email }}"
@@ -10,7 +11,7 @@
      data-route-name="{{ Route::currentRouteName() }}">
 
     <!-- Floating Action Button -->
-    <button @click="openModal()"
+    <button @click="$dispatch('ks-feedback-open')"
             type="button"
             class="ks-fab-trigger fixed left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
             style="z-index: 2147483647 !important; background-color: #e11d48 !important; display: flex !important; pointer-events: auto !important; visibility: visible !important; opacity: 1 !important;"

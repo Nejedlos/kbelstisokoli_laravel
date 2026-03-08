@@ -58,6 +58,9 @@ class ExternalTeamSeasonConfigForm
                     ->schema([
                         TextInput::make('competition_label')
                             ->label('Název soutěže (nepovinné)'),
+                        TextInput::make('team_name_in_source')
+                            ->label('Název týmu ve zdroji (nepovinné)')
+                            ->helperText('Např. "Sokol Kbely E". Pomáhá s párováním v boxscoru.'),
                         Toggle::make('is_enabled')
                             ->label('Aktivní pro synchronizaci')
                             ->default(true),

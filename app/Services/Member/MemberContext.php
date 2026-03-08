@@ -34,8 +34,14 @@ class MemberContext
             return null;
         }
 
-        // 3. Zkusíme primární tým z aktivního hráčského profilu
+        // 3. Zkusíme primární tým z aktivního hráčského profilu (pole v modelu nebo pivotu)
         $primaryTeamId = $user->activePlayerProfile?->primary_team_id;
+        if (! $primaryTeamId) {
+            $primaryTeamId = $user->activePlayerProfile?->teams()
+                ->wherePivot('is_primary_team', true)
+                ->first()?->id;
+        }
+
         if ($primaryTeamId) {
             return $primaryTeamId;
         }
@@ -45,10 +51,14 @@ class MemberContext
             return $user->member_default_team_id;
         }
 
-        // 5. Zkusíme první tým uživatele (hráčský profil -> týmy)
-        $firstTeamId = $user->teams()->first()?->id;
+        // 5. Zkusíme první tým z aktivního hráčského profilu (vztah přes pivot)
+        $firstPlayerTeamId = $user->activePlayerProfile?->teams()->first()?->id;
+        if ($firstPlayerTeamId) {
+            return $firstPlayerTeamId;
+        }
 
-        return $firstTeamId;
+        // 6. Zkusíme první tým, který uživatel trénuje
+        return $user->teams()->first()?->id;
     }
 
     /**
