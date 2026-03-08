@@ -39,154 +39,158 @@
                 $motivationalMessage = null;
                 $badges = [];
             }
+
+            // Logo logic
+            $ourLogoPath = $branding['logo_path'] ?? 'assets/img/loga/logo_kbelsti_sokoli_velke.png';
+            $ourLogo = web_asset($ourLogoPath);
+            $opponentLogo = $match->opponent?->logo ? web_asset($match->opponent->logo) : null;
+
+            $logoHome = $match->is_home ? $ourLogo : $opponentLogo;
+            $logoAway = $match->is_home ? $opponentLogo : $ourLogo;
+
+            $fallbackHome = $match->is_home ? 'fa-shield-halved' : 'fa-shield';
+            $fallbackAway = $match->is_home ? 'fa-shield' : 'fa-shield-halved';
         @endphp
 
-        <div class="{{ $bgClass }} rounded-[2rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.2)] {{ $glowClass }} text-white relative overflow-hidden group transition-all duration-700 border border-white/10">
+        <div class="{{ $bgClass }} rounded-[3rem] shadow-[0_30px_60px_-12px_rgba(0,0,0,0.3)] {{ $glowClass }} text-white relative overflow-hidden group transition-all duration-700 border border-white/10">
             {{-- Pokročilé dekorativní prvky na pozadí --}}
-            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/5 rounded-full blur-[80px] transition-all duration-1000 group-hover:bg-white/10 group-hover:scale-125"></div>
-            <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-black/10 rounded-full blur-[60px] transition-all duration-1000 group-hover:scale-110"></div>
+            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-white/10 rounded-full blur-[100px] transition-all duration-1000 group-hover:bg-white/15 group-hover:scale-125"></div>
+            <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-black/20 rounded-full blur-[80px] transition-all duration-1000 group-hover:scale-110"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br from-white/5 via-transparent to-black/5 pointer-events-none"></div>
 
-            <div class="relative p-6 md:p-10">
-                <div class="flex flex-col items-center space-y-8 md:space-y-10">
+            {{-- Velké logo na pozadí pro vyplnění prostoru --}}
+            <div class="absolute right-0 bottom-0 opacity-[0.03] pointer-events-none translate-x-1/4 translate-y-1/4 group-hover:scale-110 transition-transform duration-1000">
+                <img src="{{ $ourLogo }}" class="w-[500px] h-[500px] object-contain grayscale invert" alt="">
+            </div>
 
-                    {{-- Horní informační lišta - Plovoucí pilulky (kompaktnější) --}}
-                    <div class="flex flex-wrap justify-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]">
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full shadow-lg backdrop-blur-md hover:bg-white/20 transition-all cursor-default group/pill">
-                            <i class="fa-light fa-calendar text-white/70 group-hover/pill:text-white transition-colors"></i>
-                            <span class="text-white/80 group-hover/pill:text-white transition-colors">{{ $match->scheduled_at?->format('d. m. Y H:i') }}</span>
+            <div class="relative p-6 md:p-12">
+                <div class="flex flex-col items-center space-y-10 md:space-y-12">
+
+                    {{-- Horní informační lišta - Plovoucí pilulky (výraznější) --}}
+                    <div class="w-full flex flex-wrap justify-center gap-2 md:gap-3 text-[9px] md:text-xs font-black uppercase tracking-[0.15em] md:tracking-[0.25em]">
+                        <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-white/15 border border-white/30 rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
+                            <i class="fa-light fa-calendar text-white group-hover/pill:scale-110 transition-transform"></i>
+                            <span class="text-white">{{ $match->scheduled_at?->format('d. m. Y H:i') }}</span>
                         </div>
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full shadow-lg backdrop-blur-md hover:bg-white/20 transition-all cursor-default group/pill">
-                            <i class="fa-light fa-trophy text-white/70 group-hover/pill:text-white transition-colors"></i>
-                            <span class="text-white/80 group-hover/pill:text-white transition-colors">
+                        <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-white/15 border border-white/30 rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
+                            <i class="fa-light fa-trophy text-white group-hover/pill:scale-110 transition-transform"></i>
+                            <span class="text-white">
                                 {{ $match->match_type ? (__('matches.type_' . strtolower($match->match_type)) !== 'matches.type_' . strtolower($match->match_type) ? __('matches.type_' . strtolower($match->match_type)) : $match->match_type) : __('matches.type_mi') }}
                             </span>
                         </div>
                         @if($match->metadata['venue'] ?? $match->location)
-                            <div class="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full shadow-lg backdrop-blur-md hover:bg-white/20 transition-all cursor-default group/pill">
-                                <i class="fa-light fa-location-dot text-white/70 group-hover/pill:text-white transition-colors"></i>
-                                <span class="text-white/80 group-hover/pill:text-white transition-colors">{{ $match->metadata['venue'] ?? $match->location }}</span>
+                            <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-white/15 border border-white/30 rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
+                                <i class="fa-light fa-location-dot text-white group-hover/pill:scale-110 transition-transform"></i>
+                                <span class="text-white">{{ $match->metadata['venue'] ?? $match->location }}</span>
                             </div>
                         @endif
                         @if(!empty($match->metadata['external_id']))
                             <a href="https://cz.basketball/zapas/{{ $match->metadata['external_id'] }}" target="_blank"
-                               class="flex items-center gap-2 px-4 py-2 bg-white text-gray-950 font-black rounded-full shadow-xl hover:bg-gray-100 hover:-translate-y-0.5 transition-all group/ext">
+                               class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-2.5 bg-white text-gray-950 font-black rounded-full shadow-2xl hover:bg-white hover:-translate-y-1 hover:scale-105 active:scale-95 transition-all group/ext">
                                 <i class="fa-light fa-basketball text-brand-600 animate-pulse"></i>
                                 <span>{{ __('matches.external_detail') }}</span>
                             </a>
                         @endif
                     </div>
 
-                    {{-- Hlavní Scoreboard (více kompaktní a stabilní) --}}
-                    <div class="w-full max-w-4xl flex flex-col items-center gap-6">
-                        <div class="w-full flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
+                    {{-- Hlavní Scoreboard (Dominantní typografie) --}}
+                    <div class="w-full max-w-6xl flex flex-col items-center gap-8">
+                        <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
 
                             {{-- Tým 1 --}}
-                            <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right group/team w-full min-w-0">
-                                <div class="w-12 h-12 md:w-16 md:h-16 mb-2 rounded-xl bg-white shadow-lg flex items-center justify-center transition-all duration-500 group-hover/team:scale-105 overflow-hidden p-1 border border-white/20 relative shrink-0">
-                                    <div class="absolute inset-0 bg-gray-50/50"></div>
-                                    @php
-                                        $ourLogo = isset($branding['logo_path']) ? (str_starts_with($branding['logo_path'], 'branding/') ? asset('uploads/'.$branding['logo_path']) : asset($branding['logo_path'])) : asset('assets/img/loga/logo_kbelsti_sokoli_velke.png');
-                                    @endphp
-                                    @if($match->is_home)
-                                        <img src="{{ $ourLogo }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="flex-1 flex flex-col items-center lg:items-end text-center lg:text-right group/team w-full min-w-0">
+                                <div class="w-20 h-20 md:w-32 md:h-32 mb-4 rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:rotate-3 group-hover/team:scale-110 overflow-hidden p-3 border-4 border-white/20 relative shrink-0">
+                                    @if($logoHome)
+                                        <img src="{{ $logoHome }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield-halved text-xl"></i>
-                                        </div>
-                                    @elseif(!$match->is_home && $match->opponent?->logo)
-                                        <img src="{{ asset($match->opponent->logo) }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield text-xl"></i>
+                                            <i class="fa-light {{ $fallbackHome }} text-4xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light fa-shield-halved text-xl md:text-2xl text-gray-300 relative"></i>
+                                        <i class="fa-light {{ $fallbackHome }} text-4xl md:text-6xl text-gray-200 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-sm md:text-lg font-black text-white mb-0.5 tracking-tight group-hover/team:text-white transition-colors leading-tight break-words w-full">
+                                <h2 class="text-2xl md:text-4xl font-black text-white mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
                                     {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                                 </h2>
-                                <span class="px-1.5 py-0.5 {{ $match->is_home ? 'bg-brand-500/60' : 'bg-black/30' }} text-white text-[6px] md:text-[7px] font-black rounded uppercase tracking-widest border border-white/10 shadow-inner">
+                                <span class="px-3 py-1 bg-black/40 text-white text-[10px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
                                     {{ __('matches.is_home') }}
                                 </span>
                             </div>
 
-                            {{-- Skóre --}}
-                            <div class="flex flex-col items-center group/score shrink-0 z-10 mx-2 md:mx-4">
-                                <div class="relative px-4 py-2 md:px-6 md:py-4 bg-white/15 rounded-xl md:rounded-[1.5rem] shadow-xl border border-white/25 flex items-center gap-2 md:gap-4 transition-all duration-500 group-hover:bg-white/20 backdrop-blur-xl">
-                                    <div class="relative text-2xl md:text-5xl font-black tabular-nums tracking-tighter text-white drop-shadow-lg leading-none">
+                            {{-- Skóre (Centrální prvek) --}}
+                            <div class="flex flex-col items-center group/score shrink-0 z-10 mx-4">
+                                <div class="relative px-8 py-6 md:px-12 md:py-8 bg-white/10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex items-center gap-6 md:gap-10 transition-all duration-700 group-hover:bg-white/20 backdrop-blur-2xl group-hover:scale-105">
+                                    <div class="relative text-6xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_home ?? 0 }}
                                     </div>
-                                    <div class="relative text-lg md:text-2xl font-black text-white/40 select-none animate-pulse">:</div>
-                                    <div class="relative text-2xl md:text-5xl font-black tabular-nums tracking-tighter text-white drop-shadow-lg leading-none">
+                                    <div class="relative text-4xl md:text-6xl font-black text-white/30 select-none animate-pulse">:</div>
+                                    <div class="relative text-6xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_away ?? 0 }}
                                     </div>
                                 </div>
-                                <div class="mt-1.5">
-                                    <div class="px-2 py-0.5 bg-black/40 rounded-full backdrop-blur-md border border-white/10 shadow-lg">
-                                        <span class="text-[6px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/60 whitespace-nowrap">{{ $hasScore ? 'Konečný výsledek' : 'Zatím neodehráno' }}</span>
+                                <div class="mt-4">
+                                    <div class="px-4 py-1.5 bg-black/50 rounded-full backdrop-blur-xl border border-white/10 shadow-2xl">
+                                        <span class="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80 whitespace-nowrap">{{ $hasScore ? 'Konečný výsledek' : 'Zatím neodehráno' }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Tým 2 --}}
-                            <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left group/team w-full min-w-0">
-                                <div class="w-12 h-12 md:w-16 md:h-16 mb-2 rounded-xl bg-white shadow-lg flex items-center justify-center transition-all duration-500 group-hover/team:scale-105 overflow-hidden p-1 border border-white/20 relative shrink-0">
-                                    <div class="absolute inset-0 bg-gray-50/50"></div>
-                                    @php
-                                        $ourLogo = isset($branding['logo_path']) ? (str_starts_with($branding['logo_path'], 'branding/') ? asset('uploads/'.$branding['logo_path']) : asset($branding['logo_path'])) : asset('assets/img/loga/logo_kbelsti_sokoli_velke.png');
-                                    @endphp
-                                    @if(!$match->is_home)
-                                        <img src="{{ $ourLogo }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left group/team w-full min-w-0">
+                                <div class="w-20 h-20 md:w-32 md:h-32 mb-4 rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:-rotate-3 group-hover/team:scale-110 overflow-hidden p-3 border-4 border-white/20 relative shrink-0">
+                                    @if($logoAway)
+                                        <img src="{{ $logoAway }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield-halved text-xl"></i>
-                                        </div>
-                                    @elseif($match->is_home && $match->opponent?->logo)
-                                        <img src="{{ asset($match->opponent->logo) }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light fa-shield text-xl"></i>
+                                            <i class="fa-light {{ $fallbackAway }} text-4xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light fa-shield text-xl md:text-2xl text-gray-300 relative"></i>
+                                        <i class="fa-light {{ $fallbackAway }} text-4xl md:text-6xl text-gray-200 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-sm md:text-lg font-black text-white mb-0.5 tracking-tight group-hover/team:text-white transition-colors leading-tight break-words w-full">
+                                <h2 class="text-2xl md:text-4xl font-black text-white mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
                                     {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                                 </h2>
-                                <span class="px-1.5 py-0.5 {{ !$match->is_home ? 'bg-brand-500/60' : 'bg-black/30' }} text-white text-[6px] md:text-[7px] font-black rounded uppercase tracking-widest border border-white/10 shadow-inner">
+                                <span class="px-3 py-1 {{ !$match->is_home ? 'bg-brand-500' : 'bg-black/40' }} text-white text-[10px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
                                     {{ __('matches.is_away') }}
                                 </span>
                             </div>
                         </div>
 
-                        {{-- Motivační sekce a Result Badge (vše kompaktněji) --}}
+                        {{-- Motivační sekce a Result Badge (Hero styl) --}}
                         @if($hasScore || !empty($motivationalMessage))
-                            <div class="w-full flex flex-col items-center gap-4 pt-2">
+                            <div class="w-full flex flex-col items-center gap-6 pt-4">
                                 {{-- Result Text & Message --}}
-                                <div class="flex flex-col items-center gap-2 w-full">
-                                    <div class="flex items-center gap-3">
+                                <div class="flex flex-col items-center gap-4 w-full">
+                                    <div class="flex items-center gap-4">
                                         @if($isVictory)
-                                            <i class="fa-light fa-trophy text-2xl text-yellow-300 drop-shadow-[0_0_8px_rgba(253,224,71,0.5)]"></i>
+                                            <div class="w-12 h-12 md:w-16 md:h-16 bg-yellow-400/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-yellow-400/30 shadow-2xl shadow-yellow-400/20 animate-bounce-subtle">
+                                                <i class="fa-light fa-trophy text-3xl md:text-4xl text-yellow-300 drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]"></i>
+                                            </div>
                                         @elseif($isDraw)
-                                            <i class="fa-light fa-equals text-2xl text-white/80"></i>
+                                            <div class="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                                                <i class="fa-light fa-equals text-3xl md:text-4xl text-white"></i>
+                                            </div>
                                         @else
-                                            <i class="fa-light fa-basketball text-2xl text-white/60"></i>
+                                            <div class="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                                                <i class="fa-light fa-basketball text-3xl md:text-4xl text-white/80"></i>
+                                            </div>
                                         @endif
-                                        <h4 class="text-2xl md:text-4xl font-black uppercase tracking-tighter text-white drop-shadow-lg">{{ $resultText }}</h4>
+                                        <h4 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.3)]">{{ $resultText }}</h4>
                                     </div>
 
                                     @if($motivationalMessage)
-                                        <p class="text-sm md:text-base font-bold text-white/90 leading-tight italic text-center max-w-lg px-4">
+                                        <p class="text-xl md:text-3xl font-bold text-white leading-tight italic text-center max-w-3xl px-6 drop-shadow-lg">
                                             "{{ $motivationalMessage }}"
                                         </p>
                                     @endif
                                 </div>
 
-                                {{-- Badges --}}
+                                {{-- Badges (Větší a výraznější) --}}
                                 @if(!empty($badges))
-                                    <div class="flex flex-wrap justify-center gap-2">
+                                    <div class="flex flex-wrap justify-center gap-3">
                                         @foreach($badges as $badge)
-                                            <span class="px-3 py-1.5 bg-white/10 text-white text-[8px] font-black rounded-lg uppercase tracking-widest backdrop-blur-md border border-white/15 shadow-lg flex items-center gap-2 hover:bg-white/20 transition-all">
-                                                <i class="fa-light fa-award {{ $isVictory ? 'text-yellow-300' : 'text-brand-300' }}"></i>
+                                            <span class="px-6 py-3 bg-white/15 text-white text-xs font-black rounded-2xl uppercase tracking-[0.2em] backdrop-blur-xl border border-white/30 shadow-2xl flex items-center gap-3 hover:bg-white/25 hover:-translate-y-1 transition-all cursor-default">
+                                                <i class="fa-light fa-award text-lg {{ $isVictory ? 'text-yellow-300' : 'text-brand-300' }}"></i>
                                                 {{ $badge }}
                                             </span>
                                         @endforeach
@@ -196,34 +200,40 @@
                         @endif
                     </div>
 
-                    {{-- Spodní lišta s doplňkovými informacemi (velmi kompaktní) --}}
+                    {{-- Spodní lišta s doplňkovými informacemi (Jasná hierarchie) --}}
                     @if(!empty($match->metadata['referees']) || !empty($match->metadata['commissioner']) || !empty($match->metadata['attendance']))
-                        <div class="pt-6 border-t border-white/10 w-full max-w-4xl">
-                                <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
+                        <div class="pt-10 border-t border-white/20 w-full max-w-5xl">
+                                <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-20">
                                 @if(!empty($match->metadata['referees']))
-                                    <div class="flex items-center gap-3 group/info">
-                                        <i class="fa-light fa-whistle text-white/50 group-hover/info:text-white transition-colors"></i>
-                                        <div class="flex flex-col leading-none">
-                                            <span class="text-[7px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.referees') }}</span>
-                                            <span class="text-xs font-bold text-white/80 group-hover/info:text-white transition-colors">{{ $match->metadata['referees'] }}</span>
+                                    <div class="flex items-center gap-5 group/info">
+                                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl">
+                                            <i class="fa-light fa-whistle text-2xl"></i>
+                                        </div>
+                                        <div class="flex flex-col leading-tight">
+                                            <span class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">{{ __('matches.referees') }}</span>
+                                            <span class="text-lg md:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['referees'] }}</span>
                                         </div>
                                     </div>
                                 @endif
                                 @if(!empty($match->metadata['commissioner']))
-                                    <div class="flex items-center gap-3 group/info">
-                                        <i class="fa-light fa-user-tie text-white/50 group-hover/info:text-white transition-colors"></i>
-                                        <div class="flex flex-col leading-none">
-                                            <span class="text-[7px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.commissioner') }}</span>
-                                            <span class="text-xs font-bold text-white/80 group-hover/info:text-white transition-colors">{{ $match->metadata['commissioner'] }}</span>
+                                    <div class="flex items-center gap-5 group/info">
+                                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl">
+                                            <i class="fa-light fa-user-tie text-2xl"></i>
+                                        </div>
+                                        <div class="flex flex-col leading-tight">
+                                            <span class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">{{ __('matches.commissioner') }}</span>
+                                            <span class="text-lg md:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['commissioner'] }}</span>
                                         </div>
                                     </div>
                                 @endif
                                 @if(!empty($match->metadata['attendance']))
-                                    <div class="flex items-center gap-3 group/info">
-                                        <i class="fa-light fa-users text-white/50 group-hover/info:text-white transition-colors"></i>
-                                        <div class="flex flex-col leading-none">
-                                            <span class="text-[7px] font-black text-white/40 uppercase tracking-widest mb-0.5">{{ __('matches.attendance') }}</span>
-                                            <span class="text-xs font-bold text-white/80 group-hover/info:text-white transition-colors">{{ $match->metadata['attendance'] }}</span>
+                                    <div class="flex items-center gap-5 group/info">
+                                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl">
+                                            <i class="fa-light fa-users text-2xl"></i>
+                                        </div>
+                                        <div class="flex flex-col leading-tight">
+                                            <span class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">{{ __('matches.attendance') }}</span>
+                                            <span class="text-lg md:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['attendance'] }}</span>
                                         </div>
                                     </div>
                                 @endif
@@ -511,36 +521,56 @@
                     @php
                         $statusColor = 'success';
                         $statusText = 'Výsledky a statistiky po zápase';
+                        $statusGradient = 'from-emerald-500 to-emerald-600';
+                        $statusShadow = 'shadow-emerald-500/20';
+                        $statusPulse = 'bg-emerald-500/5';
+                        $statusTextAccent = 'text-emerald-500';
 
                         if ($hasScore) {
                             if ($isVictory) {
                                 $statusColor = 'success';
                                 $statusText = 'Vítězná jízda potvrzena statistikami';
+                                $statusGradient = 'from-emerald-500 to-emerald-600';
+                                $statusShadow = 'shadow-emerald-500/20';
+                                $statusPulse = 'bg-emerald-500/5';
+                                $statusTextAccent = 'text-emerald-500';
                             } elseif ($isDraw) {
                                 $statusColor = 'slate';
                                 $statusText = 'Nerozhodný souboj v číslech';
+                                $statusGradient = 'from-slate-500 to-slate-600';
+                                $statusShadow = 'shadow-slate-500/20';
+                                $statusPulse = 'bg-slate-500/5';
+                                $statusTextAccent = 'text-slate-500';
                             } else {
                                 $statusColor = 'danger';
                                 $statusText = 'Analýza náročného utkání';
+                                $statusGradient = 'from-rose-500 to-rose-600';
+                                $statusShadow = 'shadow-rose-500/20';
+                                $statusPulse = 'bg-rose-500/5';
+                                $statusTextAccent = 'text-rose-500';
                             }
                         } else {
                             $statusColor = 'brand';
                             $statusText = 'Připraveni na ostrý start';
+                            $statusGradient = 'from-brand-500 to-brand-600';
+                            $statusShadow = 'shadow-brand-500/20';
+                            $statusPulse = 'bg-brand-500/5';
+                            $statusTextAccent = 'text-brand-500';
                         }
                     @endphp
 
                     {{-- Section Header --}}
                     <div class="relative overflow-hidden bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 group">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
+                        <div class="absolute top-0 right-0 w-32 h-32 {{ $statusPulse }} rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
                         <div class="relative flex items-center gap-5">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500 to-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-600 flex items-center justify-center text-white shadow-lg shadow-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500/20 shrink-0">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br {{ $statusGradient }} flex items-center justify-center text-white shadow-lg {{ $statusShadow }} shrink-0">
                                 <i class="fa-light fa-chart-simple text-2xl"></i>
                             </div>
                             <div class="min-w-0">
                                 <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight leading-none mb-1 truncate">
                                     {{ __('matches.match_stats') }}
                                 </h2>
-                                <p class="text-[9px] font-black text-{{ $statusColor === 'danger' ? 'rose' : ($statusColor === 'success' ? 'emerald' : $statusColor) }}-500 uppercase tracking-widest truncate">{{ $statusText }}</p>
+                                <p class="text-[9px] font-black {{ $statusTextAccent }} uppercase tracking-widest truncate">{{ $statusText }}</p>
                             </div>
                         </div>
                     </div>

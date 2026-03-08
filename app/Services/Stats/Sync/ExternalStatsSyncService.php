@@ -642,6 +642,7 @@ class ExternalStatsSyncService
 
             // Předběžná příprava metadat z hlavičky pro detekci týmů v tabulkách
             $header = $mainData->metadata['header'] ?? [];
+            Log::info("DEBUG SYNC: Header found", ['header_keys' => array_keys($header)]);
             $matchMetadata = $match->metadata ?? [];
             $matchMetadata['last_synced_at'] = now()->toDateTimeString();
 
@@ -716,6 +717,7 @@ class ExternalStatsSyncService
             }
 
             $updateData = ['metadata' => $matchMetadata];
+            Log::info("DEBUG SYNC: Match metadata before update", ['metadata_keys' => array_keys($matchMetadata)]);
 
             if (!empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {
                 $scoreHome = (int) $scoreMatches[1];
