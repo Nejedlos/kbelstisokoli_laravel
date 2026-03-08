@@ -213,6 +213,27 @@ class UsersTable
                                 ->success()
                                 ->send();
                         }),
+                    Action::make('syncExternal')
+                        ->label('Synchronizovat z cz.basketball')
+                        ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                        ->color('info')
+                        ->visible(fn ($record) => $record->externalMappings()->where('source_key', 'czbasketball')->exists())
+                        ->action(function ($record, \App\Services\Stats\Sync\PlayerSyncService $service) {
+                            $result = $service->syncPlayer($record);
+
+                            if ($result) {
+                                FilamentNotification::make()
+                                    ->title('Synchronizace úspěšně dokončena')
+                                    ->success()
+                                    ->send();
+                            } else {
+                                FilamentNotification::make()
+                                    ->title('Synchronizace selhala')
+                                    ->body('Zkontrolujte logy pro více informací.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
                     EditAction::make(),
                 ]),
             ])
@@ -286,6 +307,25 @@ class UsersTable
                             FilamentNotification::make()
                                 ->title('Hromadné sloučení dokončeno')
                                 ->body("Úspěšně sloučeno: {$mergedCount}, Přeskočeno: {$skippedCount}")
+                                ->success()
+                                ->send();
+                        }),
+                    BulkAction::make('syncExternalBulk')
+                        ->label('Synchronizovat z cz.basketball')
+                        ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records, \App\Services\Stats\Sync\PlayerSyncService $service) {
+                            $successCount = 0;
+                            foreach ($records as $record) {
+                                if ($service->syncPlayer($record)) {
+                                    $successCount++;
+                                }
+                            }
+
+                            FilamentNotification::make()
+                                ->title('Hromadná synchronizace dokončena')
+                                ->body("Úspěšně synchronizováno: {$successCount}, Celkem vybráno: " . $records->count())
                                 ->success()
                                 ->send();
                         }),

@@ -18,7 +18,7 @@
                         </span>
                         <span class="flex items-center gap-2 px-4 py-1.5 bg-gray-100 rounded-full">
                             <i class="fa-light fa-trophy"></i>
-                            {{ $match->match_type ? __('matches.types.' . $match->match_type) : 'Mistrovské' }}
+                            {{ $match->match_type ? (__('matches.type_' . strtolower($match->match_type)) !== 'matches.type_' . strtolower($match->match_type) ? __('matches.type_' . strtolower($match->match_type)) : $match->match_type) : __('matches.type_mi') }}
                         </span>
                         @if($match->metadata['venue'] ?? $match->location)
                             <span class="flex items-center gap-2 px-4 py-1.5 bg-gray-100 rounded-full">

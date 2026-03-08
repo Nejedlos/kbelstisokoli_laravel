@@ -97,7 +97,12 @@ class PlayerSyncService
             });
 
             if (!$alreadyHas) {
+                // Musíme ošetřit název souboru, protože cz.basketball používá min.php?...,
+                // což MediaLibrary odmítá jako PHP soubor.
+                $fileName = 'player_' . $user->id . '_' . md5($photoUrl) . '.jpg';
+
                 $user->addMediaFromUrl($photoUrl)
+                    ->usingFileName($fileName)
                     ->withCustomProperties([
                         'source_url' => $photoUrl,
                         'added_from' => 'player_detail_sync',
