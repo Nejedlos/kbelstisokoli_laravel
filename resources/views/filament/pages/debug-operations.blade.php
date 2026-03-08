@@ -53,6 +53,9 @@
                                     <x-filament::button size="xs" color="info" wire:click="runTeamSyncAiFresh({{ $team['team_id'] }})" wire:loading.attr="disabled" title="AI Fresh Sync (přepsat data pomocí AI!)">
                                         <i class="fa-light fa-sparkles mr-1"></i> AI
                                     </x-filament::button>
+                                    <x-filament::button size="xs" color="danger" variant="outline" wire:click="clearTeamErrors({{ $team['team_id'] }})" wire:loading.attr="disabled" title="Smazat historii chyb (vyčistit Last Error)">
+                                        <i class="fa-light fa-trash"></i>
+                                    </x-filament::button>
                                 </div>
                             </div>
 

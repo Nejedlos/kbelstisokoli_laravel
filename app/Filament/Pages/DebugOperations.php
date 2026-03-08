@@ -597,6 +597,19 @@ class DebugOperations extends Page
         $this->executeTeamSync($teamId, ['force' => true, 'fresh' => true, 'ai' => true]);
     }
 
+    public function clearTeamErrors(int $teamId): void
+    {
+        $deletedCount = ExternalImportRun::where('team_id', $teamId)
+            ->whereIn('status', ['failed', 'partial_failed'])
+            ->delete();
+
+        Notification::make()
+            ->title("Historie chyb pro tým smazána")
+            ->body("Bylo odstraněno {$deletedCount} neúspěšných záznamů z databáze.")
+            ->success()
+            ->send();
+    }
+
     protected function executeTeamSync(int $teamId, array $options = []): void
     {
         $activeSeason = Season::where('is_active', true)->first();
