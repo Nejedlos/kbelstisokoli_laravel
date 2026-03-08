@@ -44,7 +44,7 @@
                     {{-- Teams and Score --}}
                     <div class="w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4 max-w-5xl">
                         <div class="flex-1 text-center md:text-right group/team">
-                            <h2 class="text-2xl md:text-3xl font-black text-gray-900 mb-2 tracking-tight group-hover/team:text-brand-600 transition-colors">
+                            <h2 class="text-xl md:text-2xl font-black text-gray-900 mb-2 tracking-tight group-hover/team:text-brand-600 transition-colors">
                                 {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                             </h2>
                             <span class="px-4 py-1.5 bg-brand-100 text-brand-700 text-[10px] font-black rounded-full uppercase tracking-[0.2em] shadow-sm border border-brand-200/50">{{ __('matches.is_home') }}</span>
@@ -52,18 +52,18 @@
 
                         <div class="flex flex-col items-center group/score">
                             <div class="flex items-center gap-4 md:gap-8">
-                                <div class="text-5xl md:text-7xl font-black tabular-nums tracking-tighter text-gray-900 drop-shadow-sm group-hover/score:scale-105 transition-transform duration-500">
+                                <div class="text-4xl md:text-6xl font-black tabular-nums tracking-tighter text-gray-900 drop-shadow-sm group-hover/score:scale-105 transition-transform duration-500">
                                     {{ $match->score_home ?? 0 }}
                                 </div>
-                                <div class="text-3xl md:text-5xl font-black text-brand-500/30 select-none">:</div>
-                                <div class="text-5xl md:text-7xl font-black tabular-nums tracking-tighter text-gray-900 drop-shadow-sm group-hover/score:scale-105 transition-transform duration-500">
+                                <div class="text-2xl md:text-4xl font-black text-brand-500 select-none">:</div>
+                                <div class="text-4xl md:text-6xl font-black tabular-nums tracking-tighter text-gray-900 drop-shadow-sm group-hover/score:scale-105 transition-transform duration-500">
                                     {{ $match->score_away ?? 0 }}
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex-1 text-center md:text-left group/team">
-                            <h2 class="text-2xl md:text-3xl font-black text-gray-900 mb-2 tracking-tight group-hover/team:text-brand-600 transition-colors">
+                            <h2 class="text-xl md:text-2xl font-black text-gray-900 mb-2 tracking-tight group-hover/team:text-brand-600 transition-colors">
                                 {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                             </h2>
                             <span class="px-4 py-1.5 bg-gray-100 text-gray-600 text-[10px] font-black rounded-full uppercase tracking-[0.2em] shadow-sm border border-gray-200/50">{{ __('matches.is_away') }}</span>
@@ -114,9 +114,9 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {{-- Left Column: Pre-match / Analysis --}}
-            <div class="md:col-span-5 space-y-8 order-1">
+            <div class="lg:col-span-5 space-y-8 order-2 lg:order-1">
                 <div class="flex flex-col gap-2 px-4 py-6 bg-gradient-to-r from-gray-50 to-transparent rounded-2xl border-l-4 border-brand-500 mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600 shadow-sm">
@@ -157,7 +157,7 @@
                                             <div class="h-px flex-1 bg-gray-100"></div>
                                         </div>
 
-                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
+                                        <div class="grid grid-cols-1 gap-4">
                                             @foreach(['home', 'away'] as $side)
                                                 @if(!empty($players[$side]))
                                                     <div class="group relative flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 transition-all hover:shadow-xl hover:bg-white hover:border-brand-200 hover:-translate-y-1">
@@ -332,7 +332,7 @@
             </div>
 
             {{-- Right Column: Stats / Boxscore --}}
-            <div class="md:col-span-7 space-y-8 order-2">
+            <div class="lg:col-span-7 space-y-8 order-3 lg:order-2">
                 <div class="flex flex-col gap-2 px-4 py-6 bg-gradient-to-r from-emerald-50/50 to-transparent rounded-2xl border-l-4 border-emerald-500 mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
@@ -369,8 +369,8 @@
                                     <h4 class="text-4xl font-black uppercase tracking-tighter mb-1">{{ __('matches.victory') }}</h4>
                                     <p class="text-emerald-50/80 font-medium text-sm md:text-base max-w-xs">Skvělý výkon! Tento zápas skončil vítězně.</p>
                                     <div class="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
-                                        <span class="px-3 py-1.5 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/10 w-full sm:w-auto">Dominance</span>
-                                        <span class="px-3 py-1.5 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/10 w-full sm:w-auto">Týmová práce</span>
+                                        <span class="px-3 py-1.5 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/10">Dominance</span>
+                                        <span class="px-3 py-1.5 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/10">Týmová práce</span>
                                     </div>
                                 </div>
                             @elseif($isDraw)
@@ -389,8 +389,8 @@
                                     <h4 class="text-4xl font-black uppercase tracking-tighter mb-1">{{ __('matches.loss') }}</h4>
                                     <p class="text-rose-50/80 font-medium text-sm md:text-base max-w-xs">Tentokrát to nevyšlo, ale příště budeme silnější!</p>
                                     <div class="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
-                                        <span class="px-3 py-1.5 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/5 w-full sm:w-auto">Zkušenost</span>
-                                        <span class="px-3 py-1.5 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/5 w-full sm:w-auto">Příště lépe</span>
+                                        <span class="px-3 py-1.5 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/5">Zkušenost</span>
+                                        <span class="px-3 py-1.5 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-white/5">Příště lépe</span>
                                     </div>
                                 </div>
                             @endif
@@ -575,7 +575,7 @@
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
                                     <thead>
-                                        <tr class="bg-gray-50/80">
+                                        <tr class="bg-gray-50/90 sticky top-0 z-10 backdrop-blur-md">
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">#</th>
                                             <th @click="sortBy('name')" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 cursor-pointer hover:text-brand-500 transition-colors">
                                                 Hráč
@@ -688,7 +688,7 @@
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
                                     <thead>
-                                        <tr class="bg-gray-50/80">
+                                        <tr class="bg-gray-50/90 sticky top-0 z-10 backdrop-blur-md">
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">#</th>
                                             <th @click="sortBy('name')" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 cursor-pointer hover:text-brand-500 transition-colors">
                                                 {{ $match->opponent?->name ?? 'Soupeř' }}
