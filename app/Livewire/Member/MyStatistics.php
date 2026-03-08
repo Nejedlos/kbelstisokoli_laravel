@@ -17,6 +17,9 @@ class MyStatistics extends Component
 
     public $view = 'personal'; // 'personal', 'team', or 'matches'
 
+    public $sortField = 'pts_total';
+    public $sortDirection = 'desc';
+
     public $matches = [];
 
     public $summary = [];
@@ -38,8 +41,19 @@ class MyStatistics extends Component
 
     public $recentForm = [];
 
-    public function mount($teamId = null, $seasonId = null)
+    public function mount($teamId = null, $seasonId = null, $view = null)
     {
+        if ($view) {
+            $this->view = $view;
+        }
+
+        $this->sortField = match($this->view) {
+            'team' => 'pts_total',
+            'personal' => 'pts',
+            'matches' => 'date',
+            default => 'pts_total'
+        };
+
         $this->seasonId = $seasonId ?? Season::where('is_active', true)->first()?->id ?? Season::latest()->first()?->id;
 
         // Pokud je teamId null, zkusíme MemberContext
@@ -62,12 +76,24 @@ class MyStatistics extends Component
 
     public function updated($propertyName)
     {
-        if (in_array($propertyName, ['seasonId', 'teamId'])) {
+        if (in_array($propertyName, ['seasonId', 'teamId', 'sortField', 'sortDirection'])) {
             if ($propertyName === 'teamId') {
                 app(\App\Services\Member\MemberContext::class)->setActiveTeamId((int)$this->teamId);
             }
             $this->loadStats();
         }
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'desc';
+        }
+
+        $this->loadStats();
     }
 
     public function loadStats()
@@ -90,14 +116,30 @@ class MyStatistics extends Component
                 $userId = Auth::id();
 
                 $this->summary = $service->getSeasonSummary($userId, $this->seasonId, $this->teamId);
-                $this->perGameSeries = $service->getPerGameSeries($userId, $this->seasonId, $this->teamId)->toArray();
+
+                $series = $service->getPerGameSeries($userId, $this->seasonId, $this->teamId);
+
+                // Řazení pro osobní zápisy
+                $this->perGameSeries = $series->sortBy(function($item) {
+                    if ($this->sortField === 'date') return $item['date'];
+                    if ($this->sortField === 'opponent') return $item['opponent'];
+                    return $item['values'][$this->sortField] ?? 0;
+                }, SORT_REGULAR, $this->sortDirection === 'desc')->values()->toArray();
+
                 $this->rankings = $service->getRankings($userId, $this->seasonId, $this->teamId);
                 $this->insights = $service->getInsights($userId, $this->seasonId, $this->teamId);
                 $this->teamAverages = $service->getTeamAverages($this->seasonId, $this->teamId);
             } elseif ($this->view === 'team') {
                 $service = app(TeamStatsService::class);
                 $this->teamSummary = $service->getSeasonSummary($this->teamId, $this->seasonId);
-                $this->topScorers = $service->getTopScorers($this->teamId, $this->seasonId)->toArray();
+
+                $allPlayers = $service->getAllPlayersStats($this->teamId, $this->seasonId);
+
+                // Řazení
+                $this->topScorers = $allPlayers->sortBy(function($item) {
+                    return $item[$this->sortField];
+                }, SORT_REGULAR, $this->sortDirection === 'desc')->values()->toArray();
+
                 $this->pointsSeries = $service->getPointsSeries($this->teamId, $this->seasonId)->toArray();
                 $this->recentForm = $service->getRecentForm($this->teamId, $this->seasonId)->toArray();
             } elseif ($this->view === 'matches') {

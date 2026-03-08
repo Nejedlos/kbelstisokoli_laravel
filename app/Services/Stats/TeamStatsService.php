@@ -32,6 +32,70 @@ class TeamStatsService
     }
 
     /**
+     * Získá seznam všech hráčů týmu v sezóně s jejich statistikami.
+     */
+    public function getAllPlayersStats(int $teamId, int $seasonId): Collection
+    {
+        // Zkusíme vzít předpočítané summary pro hráče
+        $summaries = StatisticRow::with('player')
+            ->where('team_id', $teamId)
+            ->where('season_id', $seasonId)
+            ->whereNotNull('player_id')
+            ->whereNull('basketball_match_id')
+            ->whereHas('set', function ($q) {
+                $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
+            })
+            ->get();
+
+        if ($summaries->isNotEmpty()) {
+            return $summaries->map(function ($row) {
+                return [
+                    'player_id' => $row->player_id,
+                    'name' => $row->player?->name ?? 'Neznámý hráč',
+                    'gp' => (int) ($row->values['gp'] ?? 0),
+                    'pts_total' => (int) ($row->values['pts_total'] ?? 0),
+                    'ppg' => (float) ($row->values['ppg'] ?? 0),
+                    'minutes_avg' => (float) ($row->values['minutes_avg'] ?? 0),
+                    'fg2_pct' => (float) ($row->values['fg2_pct'] ?? 0),
+                    'fg3_pct' => (float) ($row->values['fg3_pct'] ?? 0),
+                    'ft_pct' => (float) ($row->values['ft_pct'] ?? 0),
+                ];
+            });
+        }
+
+        // Pokud nemáme summaries, agregujeme z boxscoru
+        return StatisticRow::with('player')
+            ->where('team_id', $teamId)
+            ->where('season_id', $seasonId)
+            ->whereNotNull('player_id')
+            ->whereNotNull('basketball_match_id')
+            ->whereHas('set', function ($q) {
+                $q->where('slug', StatisticSetService::MATCH_BOXSCORE_SET);
+            })
+            ->get()
+            ->groupBy('player_id')
+            ->map(function ($playerRows, $playerId) {
+                $ptsTotal = $playerRows->sum(function ($row) {
+                    return (int) ($row->values['pts'] ?? 0);
+                });
+                $gp = $playerRows->count();
+                $player = $playerRows->first()?->player;
+
+                return [
+                    'player_id' => $playerId,
+                    'name' => $player?->name ?? 'Neznámý hráč',
+                    'gp' => $gp,
+                    'pts_total' => $ptsTotal,
+                    'ppg' => $gp > 0 ? round($ptsTotal / $gp, 1) : 0,
+                    'minutes_avg' => round($playerRows->avg(fn($r) => (float) ($r->values['minutes'] ?? 0)), 1),
+                    'fg2_pct' => 0, // Pro on-the-fly výpočet by to bylo složitější, necháme fallback na 0
+                    'fg3_pct' => 0,
+                    'ft_pct' => 0,
+                ];
+            })->values();
+    }
+
+    /**
      * Získá seznam nejlepších střelců týmu v sezóně.
      */
     public function getTopScorers(int $teamId, int $seasonId, int $limit = 10): Collection

@@ -707,6 +707,14 @@ class ExternalStatsSyncService
                 $this->processBestPlayerPhotos($bestPlayers, $run);
             }
 
+            // Uložení srovnání týmů a posledních zápasů
+            if (!empty($mainData->metadata['team_comparison'])) {
+                $matchMetadata['team_comparison'] = $mainData->metadata['team_comparison'];
+            }
+            if (!empty($mainData->metadata['last_matches'])) {
+                $matchMetadata['last_matches'] = $mainData->metadata['last_matches'];
+            }
+
             $updateData = ['metadata' => $matchMetadata];
 
             if (!empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {

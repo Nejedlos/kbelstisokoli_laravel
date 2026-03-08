@@ -228,13 +228,49 @@
                     <table class="w-full text-left">
                         <thead class="bg-gray-50 dark:bg-gray-900/30">
                             <tr>
-                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Zápas</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Body</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">2B</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">3B</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">TH</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">F</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">EF</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">#</th>
+                                <th wire:click="sortBy('date')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest cursor-pointer hover:text-primary-500 transition-colors">
+                                    Zápas
+                                    @if($sortField === 'date')
+                                        <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                    @endif
+                                </th>
+                                <th wire:click="sortBy('pts')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                    Body
+                                    @if($sortField === 'pts')
+                                        <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                    @endif
+                                </th>
+                                <th wire:click="sortBy('fg2_made')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                    2B
+                                    @if($sortField === 'fg2_made')
+                                        <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                    @endif
+                                </th>
+                                <th wire:click="sortBy('fg3_made')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                    3B
+                                    @if($sortField === 'fg3_made')
+                                        <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                    @endif
+                                </th>
+                                <th wire:click="sortBy('ft_made')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                    TH
+                                    @if($sortField === 'ft_made')
+                                        <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                    @endif
+                                </th>
+                                <th wire:click="sortBy('fouls')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                    F
+                                    @if($sortField === 'fouls')
+                                        <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                    @endif
+                                </th>
+                                <th wire:click="sortBy('efficiency')" class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                    EF
+                                    @if($sortField === 'efficiency')
+                                        <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                    @endif
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -261,6 +297,9 @@
                                     'border-transparent' => !$isWin && !$isLoss && !$isDraw,
                                 ])
                             >
+                                <td class="px-6 py-5 text-center text-[10px] font-black text-gray-300">
+                                    {{ $loop->iteration }}.
+                                </td>
                                 <td class="px-6 py-5">
                                     <div class="flex items-center gap-4">
                                         <div @class([
@@ -399,35 +438,87 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {{-- Top Scorers --}}
+                {{-- Player Statistics --}}
                 <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 overflow-hidden group">
                     <div class="p-8 border-b border-gray-50 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/50">
-                        <h3 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-[0.2em]">Tahouni týmu <span class="text-primary-500">(Body)</span></h3>
+                        <h3 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-[0.2em]">Hráčské statistiky <span class="text-primary-500">(Sezóna)</span></h3>
                         <div class="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-500">
-                            <i class="fa-light fa-fire-flame-curved animate-pulse"></i>
+                            <i class="fa-light fa-users-viewfinder"></i>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-gray-50/50 dark:bg-gray-900/30">
                                 <tr>
-                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Hráč</th>
-                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Z</th>
-                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">B celkem</th>
-                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">B/Z</th>
+                                    <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">#</th>
+                                    <th wire:click="sortBy('name')" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:text-primary-500 transition-colors">
+                                        Hráč
+                                        @if($sortField === 'name')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
+                                    <th wire:click="sortBy('gp')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                        Z
+                                        @if($sortField === 'gp')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
+                                    <th wire:click="sortBy('pts_total')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                        B celkem
+                                        @if($sortField === 'pts_total')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
+                                    <th wire:click="sortBy('ppg')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                        B/Z
+                                        @if($sortField === 'ppg')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
+                                    <th wire:click="sortBy('minutes_avg')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                        Min Ø
+                                        @if($sortField === 'minutes_avg')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
+                                    <th wire:click="sortBy('fg2_pct')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                        2B%
+                                        @if($sortField === 'fg2_pct')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
+                                    <th wire:click="sortBy('fg3_pct')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                        3B%
+                                        @if($sortField === 'fg3_pct')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
+                                    <th wire:click="sortBy('ft_pct')" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-500 transition-colors">
+                                        TH%
+                                        @if($sortField === 'ft_pct')
+                                            <i class="fa-light fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ml-1"></i>
+                                        @endif
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-700 text-sm">
                                 @foreach($topScorers as $scorer)
                                 <tr wire:key="scorer-{{ $loop->index }}" class="hover:bg-primary-50/30 dark:hover:bg-primary-900/10 transition-colors group/row">
-                                    <td class="px-8 py-4 font-black text-gray-800 dark:text-gray-200 group-hover/row:text-primary-600 transition-colors">{{ $scorer['name'] }}</td>
-                                    <td class="px-8 py-4 text-center text-gray-500 font-bold">{{ $scorer['gp'] }}</td>
-                                    <td class="px-8 py-4 text-center font-black text-lg">{{ $scorer['pts_total'] }}</td>
-                                    <td class="px-8 py-4 text-center">
+                                    <td class="px-6 py-4 text-center text-[10px] font-black text-gray-300">
+                                        {{ $loop->iteration }}.
+                                    </td>
+                                    <td class="px-6 py-4 font-black text-gray-800 dark:text-gray-200 group-hover/row:text-primary-600 transition-colors">{{ $scorer['name'] }}</td>
+                                    <td class="px-4 py-4 text-center text-gray-500 font-bold">{{ $scorer['gp'] }}</td>
+                                    <td class="px-4 py-4 text-center font-black text-lg">{{ $scorer['pts_total'] }}</td>
+                                    <td class="px-4 py-4 text-center">
                                         <span class="bg-primary-600 text-white px-3 py-1 rounded-lg text-xs font-black shadow-sm group-hover/row:scale-110 transition-transform inline-block">
                                             {{ $scorer['ppg'] }}
                                         </span>
                                     </td>
+                                    <td class="px-4 py-4 text-center text-gray-500 font-bold">{{ $scorer['minutes_avg'] }}</td>
+                                    <td class="px-4 py-4 text-center text-gray-500 font-bold">{{ $scorer['fg2_pct'] }}%</td>
+                                    <td class="px-4 py-4 text-center text-gray-500 font-bold">{{ $scorer['fg3_pct'] }}%</td>
+                                    <td class="px-4 py-4 text-center text-gray-500 font-bold">{{ $scorer['ft_pct'] }}%</td>
                                 </tr>
                                 @endforeach
                             </tbody>

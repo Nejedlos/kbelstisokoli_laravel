@@ -62,13 +62,16 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         // 3. Srovnání týmů
         $teamComparison = $this->extractTeamComparison($crawler);
 
-        // 4. Tabulky statistik
+        // 4. Poslední zápasy
+        $lastMatches = $this->extractLastMatches($crawler);
+
+        // 5. Tabulky statistik
         $tables = $crawler->filter('table.table-condensed');
 
         $allTablesData = [];
         $allFragmentHtml = '';
 
-        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison) {
+        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison, $lastMatches) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
             if ($table->filter('thead th')->count() < 5) {
                 return;
@@ -104,6 +107,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 'header' => $matchHeader,
                 'best_players' => $bestPlayers,
                 'team_comparison' => $teamComparison,
+                'last_matches' => $lastMatches,
             ]);
 
             $allTablesData[] = $tableDto;
@@ -132,7 +136,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $header = [];
 
         // Najdeme hlavní kontejner zápasu
-        $mainContainer = $crawler->filter('.match-detail-header, .match-teams, .match-summary, .match_box, .match-header')->first();
+        $mainContainer = $crawler->filter('.match-detail-header, .match-teams, .match-summary, .match_box, .match-header, .wrapper.bg-white.box-shadow')->first();
         $searchIn = $mainContainer->count() > 0 ? $mainContainer : $crawler;
 
         // Týmy
@@ -260,6 +264,17 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $refereeNode = $searchIn->filter('.referees, .match-referees')->first();
         if ($refereeNode->count() > 0) {
             $header['referees'] = trim(str_replace('Rozhodčí:', '', $refereeNode->text()));
+        } else {
+            // Fallback pro strukturu, kde je "Rozhodčí:" v textu divu (časté na cz.basketball)
+            $searchIn->filter('div, p, span')->each(function (Crawler $node) use (&$header) {
+                $text = trim($node->text());
+                if (str_contains($text, 'Rozhodčí:')) {
+                    $clean = trim(str_replace('Rozhodčí:', '', $text));
+                    if (!empty($clean)) {
+                        $header['referees'] = $clean;
+                    }
+                }
+            });
         }
 
         // Diváci (Attendance)
@@ -273,9 +288,15 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             }
         }
 
-        // Komisař / Technical Delegate
-        if (preg_match('/Komisař:\s*([^<>\n]+)/u', $searchIn->text(), $m)) {
-            $header['commissioner'] = trim($m[1]);
+        // Komisař (Commissioner)
+        $commissionerNode = $searchIn->filter('.commissioner, .match-commissioner')->first();
+        if ($commissionerNode->count() > 0) {
+            $header['commissioner'] = trim(str_replace('Komisař:', '', $commissionerNode->text()));
+        } else {
+            // Regex fallback
+            if (preg_match('/Komisař:\s*([^<>\n]+)/u', $searchIn->text(), $m)) {
+                $header['commissioner'] = trim($m[1]);
+            }
         }
 
         return $header;
@@ -391,21 +412,19 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             'Průměrný věk' => 'average_age',
             'Počet národností' => 'nationality_count',
             'Prům. zápasová zkušenost' => 'average_match_experience',
+            'Průměrná výška' => 'average_height',
         ];
 
-        // Iterujeme přes všechny řádky a hledáme ty, které odpovídají našim štítkům
-        $crawler->filter('.row')->each(function (Crawler $row) use (&$comparison, $labelMapping) {
+        // Iterujeme přes všechny řádky v sekci srovnání
+        // Na cz.basketball jsou to řádky s h4 jako titulkem uprostřed
+        $crawler->filter('.row.no-gutters.justify-content-md-center')->each(function (Crawler $row) use (&$comparison, $labelMapping) {
             $labelNode = $row->filter('h4')->first();
             if ($labelNode->count() === 0) {
                 return;
             }
 
             $originalLabel = trim($labelNode->text());
-            $label = $labelMapping[$originalLabel] ?? null;
-
-            if (!$label) {
-                return;
-            }
+            $label = $labelMapping[$originalLabel] ?? strtolower(str_replace(' ', '_', $originalLabel));
 
             $homeValNode = $row->filter('.order-md-1 .delta, .order-1 .delta')->first();
             $awayValNode = $row->filter('.order-md-3 .delta, .order-3 .delta')->first();
@@ -420,6 +439,68 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         });
 
         return $comparison;
+    }
+
+    protected function extractLastMatches(Crawler $crawler): array
+    {
+        $lastMatches = [
+            'home' => [],
+            'away' => [],
+        ];
+
+        $sections = $crawler->filter('.row.mb-10');
+        if ($sections->count() >= 1) {
+            // První sekce .row.mb-10 po "Poslední zápasy"
+            $sections->each(function (Crawler $section, $i) use (&$lastMatches) {
+                // Obvykle jsou tam dva sloupce (home team last matches, away team last matches)
+                $columns = $section->filter('.col-12.col-md-6');
+
+                $columns->each(function (Crawler $column, $colIdx) use (&$lastMatches) {
+                    $side = $colIdx === 0 ? 'home' : 'away';
+
+                    $column->filter('.d-flex.rounded')->each(function (Crawler $matchRow) use (&$lastMatches, $side) {
+                        $dateNode = $matchRow->filter('.col-12.col-md-2')->first();
+                        $teamsNode = $matchRow->filter('.col-auto.col-md-6')->first();
+                        $scoreNode = $matchRow->filter('.col-2.text-center')->first();
+
+                        if ($dateNode->count() > 0 && $teamsNode->count() > 0 && $scoreNode->count() > 0) {
+                            $date = trim(str_replace("\n", " ", $dateNode->text()));
+                            $date = preg_replace('/\s+/', ' ', $date);
+
+                            $linkNode = $teamsNode->filter('a')->first();
+                            $teamHtml = $linkNode->count() > 0 ? $linkNode->html() : $teamsNode->html();
+                            $teamLines = array_values(array_filter(array_map('trim', explode("\n", strip_tags(str_replace(['</div>', '<div>', '<br>', '<br/>'], "\n", $teamHtml))))));
+
+                            $team1 = $teamLines[0] ?? '';
+                            $team2 = $teamLines[1] ?? '';
+
+                            $scoreHtml = $scoreNode->html();
+                            $scoreLines = array_values(array_filter(array_map('trim', explode("\n", strip_tags(str_replace(['</div>', '<div>', '<br>', '<br/>'], "\n", $scoreHtml))))));
+
+                            $score1 = $scoreLines[0] ?? '';
+                            $score2 = $scoreLines[1] ?? '';
+
+                            $link = $teamsNode->filter('a')->attr('href');
+                            $matchId = null;
+                            if (preg_match('/\/zapas\/(\d+)/', $link, $m)) {
+                                $matchId = $m[1];
+                            }
+
+                            $lastMatches[$side][] = [
+                                'date' => $date,
+                                'team_home' => $team1,
+                                'team_away' => $team2,
+                                'score_home' => $score1,
+                                'score_away' => $score2,
+                                'external_id' => $matchId,
+                            ];
+                        }
+                    });
+                });
+            });
+        }
+
+        return $lastMatches;
     }
 
     protected function processBoxscoreTable(Crawler $table, string $tableName, array &$warnings): NormalizedTableDTO
