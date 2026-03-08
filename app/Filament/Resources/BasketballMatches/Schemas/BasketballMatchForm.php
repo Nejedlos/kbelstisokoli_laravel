@@ -91,7 +91,7 @@ class BasketballMatchForm
                                     ->numeric()
                                     ->default(null),
                             ])
-                            ->visible(fn ($get) => in_array($get('status'), ['finished', 'completed', 'played'])),
+                            ->visible(fn ($get) => $get('status') === 'finished'),
                     ]),
 
                 Section::make('Poznámky')

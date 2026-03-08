@@ -65,7 +65,7 @@ class CzBasketballMatchesListDomExtractor
                 if (str_contains($label, 'Hosté')) $rowData['away_team'] = $val;
                 if (str_contains($label, 'Skóre')) {
                     $rowData['score'] = $val;
-                    $rowData['status'] = (str_contains($val, ':') && preg_match('/\d+/', $val)) ? 'completed' : 'planned';
+                    $rowData['status'] = (str_contains($val, ':') && preg_match('/\d+/', $val)) ? 'finished' : 'planned';
                 }
                 if (str_contains($label, 'Soutěž')) $rowData['competition'] = $val;
                 if (str_contains($label, 'Kolo')) $rowData['round'] = $val;

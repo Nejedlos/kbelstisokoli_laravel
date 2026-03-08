@@ -42,10 +42,10 @@ class MatchController extends Controller
         }
 
         if ($type === 'latest') {
-            $query->whereIn('status', ['completed', 'played'])
+            $query->whereIn('status', ['finished'])
                 ->orderBy('scheduled_at', 'desc');
         } else {
-            $query->whereNotIn('status', ['completed', 'played'])
+            $query->whereNotIn('status', ['finished'])
                 ->where('scheduled_at', '>=', now()->subHours(3)) // Zobrazit i probíhající
                 ->orderBy('scheduled_at', 'asc');
         }

@@ -153,7 +153,7 @@ class StatsHealthCommand extends Command
                 ->filter(fn($m) => isset($m->metadata['external_id']) || isset($m->metadata['season_external_match_id']))
                 ->count();
 
-            $boxscoreSet = StatisticSet::where('slug', 'match-boxscore')->first();
+            $boxscoreSet = StatisticSet::where('slug', 'match-boxscore-external')->first();
             $statRowsCount = $boxscoreSet ? StatisticRow::where('statistic_set_id', $boxscoreSet->id)
                 ->where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)

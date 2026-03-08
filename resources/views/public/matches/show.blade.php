@@ -6,8 +6,6 @@
             'planned' => 'bg-accent text-white',
             'scheduled' => 'bg-accent text-white',
             'finished' => 'bg-success text-white',
-            'completed' => 'bg-success text-white',
-            'played' => 'bg-success text-white',
             'cancelled' => 'bg-danger text-white',
             'postponed' => 'bg-warning text-black',
         ];
@@ -15,8 +13,6 @@
             'planned' => __('matches.planned'),
             'scheduled' => __('matches.planned'),
             'finished' => __('matches.finished'),
-            'completed' => __('matches.finished'),
-            'played' => __('matches.finished'),
             'cancelled' => __('matches.cancelled'),
             'postponed' => __('matches.postponed'),
         ];
@@ -76,7 +72,7 @@
                         </div>
 
                         <div class="flex flex-col items-center min-w-[150px]">
-                            @if(in_array($match->status, ['completed', 'played', 'finished']) && ($match->score_home !== null || $match->score_away !== null))
+                            @if($match->status === 'finished' && ($match->score_home !== null || $match->score_away !== null))
                                 <div class="text-6xl md:text-8xl font-black tabular-nums tracking-tighter leading-none mb-4">
                                     {{ $match->score_home ?? 0 }}<span class="text-primary">:</span>{{ $match->score_away ?? 0 }}
                                 </div>
@@ -86,7 +82,7 @@
                             <span class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-700' }}">
                                 {{ $statusLabels[$match->status] ?? $match->status }}
                             </span>
-                            @if(in_array($match->status, ['completed', 'played', 'finished']) && $match->score_home === null && $match->score_away === null)
+                            @if($match->status === 'finished' && $match->score_home === null && $match->score_away === null)
                                 <div class="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
                                     {{ __('matches.result_missing') }}
                                 </div>

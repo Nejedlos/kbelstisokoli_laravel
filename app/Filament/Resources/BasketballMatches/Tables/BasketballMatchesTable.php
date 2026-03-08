@@ -51,9 +51,9 @@ class BasketballMatchesTable
                     ->sortable(),
                 TextColumn::make('score')
                     ->label('Skóre')
-                    ->state(fn ($record) => in_array($record->status, ['completed', 'played']) ? "{$record->score_home} : {$record->score_away}" : '-')
+                    ->state(fn ($record) => in_array($record->status, ['finished', 'completed', 'played']) ? "{$record->score_home} : {$record->score_away}" : '-')
                     ->badge()
-                    ->color(fn ($record) => in_array($record->status, ['completed', 'played']) ? ($record->score_home > $record->score_away ? 'success' : 'danger') : 'gray'),
+                    ->color(fn ($record) => in_array($record->status, ['finished', 'completed', 'played']) ? ($record->score_home > $record->score_away ? 'success' : 'danger') : 'gray'),
                 TextColumn::make('status')
                     ->label('Stav')
                     ->badge()
@@ -62,6 +62,7 @@ class BasketballMatchesTable
                         'scheduled' => 'info',
                         'played' => 'success',
                         'completed' => 'success',
+                        'finished' => 'success',
                         'cancelled' => 'danger',
                         'postponed' => 'warning',
                         default => 'gray',
@@ -71,6 +72,7 @@ class BasketballMatchesTable
                         'scheduled' => 'Naplánováno',
                         'played' => 'Odehráno',
                         'completed' => 'Odehráno',
+                        'finished' => 'Odehráno',
                         'cancelled' => 'Zrušeno',
                         'postponed' => 'Odloženo',
                         default => $state,
@@ -97,7 +99,8 @@ class BasketballMatchesTable
                     ->options([
                         'planned' => 'Plánováno',
                         'scheduled' => 'Naplánováno',
-                        'played' => 'Odehráno',
+                        'finished' => 'Odehráno',
+                        'played' => 'Odehráno (staré)',
                         'completed' => 'Odehráno (ručně)',
                         'cancelled' => 'Zrušeno',
                         'postponed' => 'Odloženo',

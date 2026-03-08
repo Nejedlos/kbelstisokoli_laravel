@@ -258,7 +258,7 @@ class CzBasketballTeamPageDomExtractor
                         if (is_numeric($s1) && is_numeric($s2)) {
                             $rowData['score_home'] = $s1;
                             $rowData['score_away'] = $s2;
-                            $rowData['status'] = 'completed';
+                            $rowData['status'] = 'finished';
                         } else {
                             $rowData['status'] = 'planned';
                         }

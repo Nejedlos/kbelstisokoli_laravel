@@ -94,7 +94,7 @@ class TeamStatsService
     {
         $matches = BasketballMatch::where('team_id', $teamId)
             ->where('season_id', $seasonId)
-            ->where('status', 'completed')
+            ->where('status', 'finished')
             ->get();
 
         $wins = 0;
@@ -138,7 +138,7 @@ class TeamStatsService
     {
         return BasketballMatch::where('team_id', $teamId)
             ->where('season_id', $seasonId)
-            ->where('status', 'completed')
+            ->where('status', 'finished')
             ->orderBy('scheduled_at', 'asc')
             ->get()
             ->map(function ($match) {
@@ -171,7 +171,7 @@ class TeamStatsService
 
         $matches = BasketballMatch::where('team_id', $teamId)
             ->where('season_id', $seasonId)
-            ->where('status', 'completed')
+            ->where('status', 'finished')
             ->get();
 
         $ptsFor = 0;

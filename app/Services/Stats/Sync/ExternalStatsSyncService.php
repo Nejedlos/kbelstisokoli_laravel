@@ -455,7 +455,7 @@ class ExternalStatsSyncService
 
         $query = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
-            ->where('status', 'completed')
+            ->where('status', 'finished')
             ->where('metadata', 'LIKE', '%"external_id":%');
 
         if ($recentOnly) {
