@@ -41,6 +41,13 @@ class CronTaskSeeder extends Seeder
                 'priority' => 25,
             ],
             [
+                'name' => 'Přepočet sezónních statistik',
+                'command' => 'stats:recompute',
+                'expression' => '45 */2 * * *', // Každé 2 hodiny (vždy 30min po synchronizaci)
+                'description' => 'Přepočítá vypočtené ukazatele (průměry, součty) pro hráče a týmy v aktivní sezóně.',
+                'priority' => 15,
+            ],
+            [
                 'name' => 'Synchronizace statistik (Muži C)',
                 'command' => 'stats:sync-team-season muzi-c active --recent-days=3',
                 'expression' => '0 */2 * * *', // Každé 2 hodiny
