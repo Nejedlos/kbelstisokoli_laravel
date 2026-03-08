@@ -376,6 +376,8 @@ class StatisticSyncService
     public function linkPlayerAndRecompute(ExternalEntityMapping $mapping, int $userId): void
     {
         DB::transaction(function () use ($mapping, $userId) {
+            $oldInternalId = $mapping->internal_id;
+
             $mapping->update([
                 'internal_id' => $userId,
                 'internal_type' => User::class,
@@ -383,9 +385,9 @@ class StatisticSyncService
 
             // Aktualizace řádků statistik pro tento externí ID a sezónu (pokud je sezónní)
             // nebo globálně (pokud je hráč stabilní).
-            $query = StatisticRow::where(function($q) use ($mapping) {
+            $query = StatisticRow::where(function ($q) use ($mapping) {
                 $q->where('source_metadata', 'LIKE', '%"player_external_id":"' . $mapping->external_id . '"%')
-                  ->orWhere('source_metadata', 'LIKE', '%"player_external_id":' . $mapping->external_id . '%');
+                    ->orWhere('source_metadata', 'LIKE', '%"player_external_id":' . $mapping->external_id . '%');
             });
 
             if ($mapping->season_id) {
@@ -396,6 +398,25 @@ class StatisticSyncService
                 'player_id' => $userId,
                 'row_label' => null,
             ]);
+
+            // Čištění: Pokud byl původně přiřazen "Ghost" uživatel a nyní ho nahrazujeme reálným,
+            // smažeme osiřelého ghosta, aby v systému nezůstávaly duplikáty.
+            if ($oldInternalId && (int) $oldInternalId !== (int) $userId) {
+                $oldUser = User::find($oldInternalId);
+                if ($oldUser && ($oldUser->metadata['is_ghost'] ?? false)) {
+                    // Zkontrolujeme, zda na tohoto ghosta už neukazuje žádný jiný mapping
+                    $otherMappingsCount = ExternalEntityMapping::where('internal_id', $oldInternalId)
+                        ->where('id', '!=', $mapping->id)
+                        ->count();
+
+                    if ($otherMappingsCount === 0) {
+                        // Smažeme ghosta (včetně jeho profilu a vztahů s týmy)
+                        $oldUser->playerProfile?->teams()->detach();
+                        $oldUser->playerProfile?->delete();
+                        $oldUser->delete();
+                    }
+                }
+            }
         });
 
         // Přepočet souhrnů

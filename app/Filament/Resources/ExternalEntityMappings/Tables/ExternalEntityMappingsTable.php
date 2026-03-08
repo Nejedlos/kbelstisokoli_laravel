@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ExternalEntityMappings\Tables;
 use App\Models\User;
 use App\Services\Stats\Sync\StatisticSyncService;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -56,10 +57,10 @@ class ExternalEntityMappingsTable
                     ->label('Sezóna')
                     ->relationship('season', 'name'),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('linkUser')
                     ->label('Spárovat')
-                    ->icon('fas-link')
+                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-link"></i>'))
                     ->color('primary')
                     ->form([
                         Select::make('user_id')
@@ -79,7 +80,7 @@ class ExternalEntityMappingsTable
                     ->visible(fn ($record) => ! $record->internal_id),
                 Action::make('recompute')
                     ->label('Přepočítat')
-                    ->icon('fas-arrows-rotate')
+                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                     ->color('info')
                     ->action(function ($record, StatisticSyncService $service) {
                         if ($record->internal_id) {
@@ -91,11 +92,49 @@ class ExternalEntityMappingsTable
                         }
                     })
                     ->visible(fn ($record) => (bool) $record->internal_id),
-                EditAction::make(),
+                EditAction::make()
+                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-pen-to-square"></i>')),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    BulkAction::make('batchLinkUser')
+                        ->label('Hromadně spárovat')
+                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-users"></i>'))
+                        ->form([
+                            Select::make('user_id')
+                                ->label('Přiřadit k uživateli')
+                                ->options(User::all()->pluck('name', 'id'))
+                                ->searchable()
+                                ->required(),
+                        ])
+                        ->action(function (\Illuminate\Support\Collection $records, array $data, StatisticSyncService $service) {
+                            $records->each(function ($record) use ($data, $service) {
+                                $service->linkPlayerAndRecompute($record, $data['user_id']);
+                            });
+
+                            Notification::make()
+                                ->title('Hráči byli hromadně spárováni')
+                                ->success()
+                                ->send();
+                        }),
+                    BulkAction::make('batchRecompute')
+                        ->label('Hromadně přepočítat')
+                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                        ->color('info')
+                        ->action(function (\Illuminate\Support\Collection $records, StatisticSyncService $service) {
+                            $records->each(function ($record) use ($service) {
+                                if ($record->internal_id) {
+                                    $service->linkPlayerAndRecompute($record, $record->internal_id);
+                                }
+                            });
+
+                            Notification::make()
+                                ->title('Statistiky byly hromadně přepočteny')
+                                ->success()
+                                ->send();
+                        }),
+                    DeleteBulkAction::make()
+                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-trash"></i>')),
                 ]),
             ]);
     }

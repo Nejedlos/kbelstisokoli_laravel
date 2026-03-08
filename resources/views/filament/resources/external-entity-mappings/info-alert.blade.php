@@ -11,13 +11,13 @@
                 <p>
                     Tato stránka slouží k propojení <strong>externích identit</strong> (hráči nalezení na webu cz.basketball) s <strong>reálnými uživateli</strong> v naší databázi.
                 </p>
-                <div class="grid lg:grid-cols-2 gap-6 mt-4">
+                <div class="grid lg:grid-cols-3 gap-6 mt-4">
                     <div class="bg-white/50 dark:bg-gray-900/30 p-4 rounded-xl border border-info-200/50 dark:border-info-500/20 shadow-sm">
                         <h3 class="font-bold text-gray-900 dark:text-white mb-2 flex items-center text-base">
                             <i class="fa-light fa-ghost mr-3 text-primary-500 text-lg"></i> Co je "Unmatched"?
                         </h3>
                         <p class="text-[13px] leading-relaxed opacity-90">
-                            Záznamy, které systém nedokázal automaticky přiřadit. Pro tyto hráče byly vytvořeny dočasné profily ("Ghosts"), aby se o statistiky nepřišlo.
+                            Záznamy, které systém nedokázal automaticky přiřadit k reálnému uživateli. Pro tyto identity byly vytvořeny dočasné profily ("Ghosts").
                         </p>
                     </div>
                     <div class="bg-white/50 dark:bg-gray-900/30 p-4 rounded-xl border border-info-200/50 dark:border-info-500/20 shadow-sm">
@@ -25,7 +25,15 @@
                             <i class="fa-light fa-link mr-3 text-success-500 text-lg"></i> Jak to napravit?
                         </h3>
                         <p class="text-[13px] leading-relaxed opacity-90">
-                            Klikněte na akci <strong>Spárovat</strong> (ikona řetězu) a vyberte reálného uživatele. Statistiky se následně automaticky "přelijí" k vybranému hráči.
+                            Klikněte na <strong>Spárovat</strong> a vyberte reálného uživatele. Můžete také použít <strong>hromadné akce</strong> pro přiřazení více řádků najednou.
+                        </p>
+                    </div>
+                    <div class="bg-white/50 dark:bg-gray-900/30 p-4 rounded-xl border border-info-200/50 dark:border-info-500/20 shadow-sm">
+                        <h3 class="font-bold text-gray-900 dark:text-white mb-2 flex items-center text-base">
+                            <i class="fa-light fa-network-wired mr-3 text-info-500 text-lg"></i> Propojení
+                        </h3>
+                        <p class="text-[13px] leading-relaxed opacity-90">
+                            Systém automaticky spojuje data podle jména. Pokud hráče nezná, vytvoří dočasný <strong>'Ghost' profil</strong>. Spárováním zde Ghosta nahradíte reálným uživatelem a data se mu okamžitě připíší.
                         </p>
                     </div>
                 </div>

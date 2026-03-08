@@ -108,7 +108,7 @@ class RosterSyncService
 
     protected function findOrCreateUserForExternalPlayer(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
     {
-        // A. Hledat přes ExternalEntityMapping
+        // A. Hledat přes ExternalEntityMapping (již dříve spárovaní hráči v libovolné sezóně)
         $mapping = ExternalEntityMapping::where([
             'source_key' => $config->source_key,
             'entity_type' => 'player',
@@ -120,8 +120,6 @@ class RosterSyncService
         }
 
         // B. Hledat přes license_number (pokud ho známe z jiného zdroje/ručně)
-        // Předpokládáme, že externalId z cz.basketball MŮŽE být license_number, ale nemusí.
-        // V audit.md jsme zjistili, že externalId je ID z URL.
         $profile = PlayerProfile::where('license_number', $externalId)->first();
         if ($profile) {
             $user = $profile->user;
@@ -130,8 +128,56 @@ class RosterSyncService
             return $user;
         }
 
-        // C. Vytvořit "Ghost" uživatele
+        // C. Hledat uživatele podle jména (NAME MATCH)
+        // Zkusíme najít reálného uživatele se stejným jménem, abychom předešli duplicitám (ghostům)
+        $userByName = $this->findUserByName($name);
+        if ($userByName) {
+            $this->createMapping($userByName, $externalId, $config);
+
+            return $userByName;
+        }
+
+        // D. Vytvořit "Ghost" uživatele
         return $this->createGhostUser($externalId, $name, $config);
+    }
+
+    /**
+     * Pokusí se najít uživatele podle jména (zkouší různé kombinace).
+     * Vrací uživatele pouze pokud je nalezen právě jeden reálný kandidát.
+     */
+    protected function findUserByName(string $externalName): ?User
+    {
+        $parts = explode(' ', trim($externalName));
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $p1 = $parts[0];
+        $p2 = implode(' ', array_slice($parts, 1));
+
+        // Hledáme pouze mezi reálnými uživateli (ne ghosty)
+        $query = User::where(function ($q) {
+            $q->whereNull('metadata->is_ghost')
+                ->orWhere('metadata->is_ghost', false);
+        });
+
+        $candidates = $query->where(function ($q) use ($externalName, $p1, $p2) {
+            $q->where('name', $externalName)
+                ->orWhere('name', "{$p2} {$p1}")
+                ->orWhere(function ($q2) use ($p1, $p2) {
+                    $q2->where('first_name', $p1)->where('last_name', $p2);
+                })
+                ->orWhere(function ($q2) use ($p1, $p2) {
+                    $q2->where('first_name', $p2)->where('last_name', $p1);
+                });
+        })->get();
+
+        // Pokud najdeme právě jednoho kandidáta, považujeme to za shodu
+        if ($candidates->count() === 1) {
+            return $candidates->first();
+        }
+
+        return null;
     }
 
     protected function createGhostUser(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
