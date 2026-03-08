@@ -700,7 +700,7 @@ class ExternalStatsSyncService
                 if (($options['force'] ?? false) || ($options['fresh'] ?? false) || ($match->score_home === null && $match->score_away === null)) {
                     $updateData['score_home'] = $scoreHome;
                     $updateData['score_away'] = $scoreAway;
-                    $updateData['status'] = 'completed';
+                    $updateData['status'] = 'played';
                 }
             }
 

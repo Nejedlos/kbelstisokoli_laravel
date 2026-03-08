@@ -14,6 +14,7 @@ use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\Team;
 use App\Services\Support\ConsoleService;
+use App\Services\Stats\Sync\MatchCleanupService;
 use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -304,6 +305,25 @@ class DebugOperations extends Page
 
                         ConsoleService::log("=== Kompletní zpracování sezóny {$season->name} dokončeno / iniciováno ===", 'success');
                         Notification::make()->title('Full season process initiated')->success()->send();
+                    }),
+
+                Action::make('cleanupMatchDuplicates')
+                    ->label('Vyčistit duplicity zápasů')
+                    ->tooltip('Vyhledá a sloučí duplicitní zápasy (pravidlo: jeden tým v jeden čas).')
+                    ->icon(IconHelper::render(IconHelper::DELETE))
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Vyčistit duplicity zápasů?')
+                    ->modalDescription('Tato akce prohledá celou databázi a sloučí zápasy stejného týmu, které se časově překrývají (tolerance 120 min). Data (docházka, statistiky) budou sloučena do jednoho záznamu.')
+                    ->action(function (MatchCleanupService $service) {
+                        ConsoleService::log("Spouštím hromadné čištění duplicitních zápasů...");
+                        $stats = $service->cleanupDuplicates(false);
+                        ConsoleService::log("Čištění dokončeno. Nalezeno skupin: {$stats['groups_found']}, Sloučeno zápasů: {$stats['matches_merged']}");
+                        Notification::make()
+                            ->title('Čištění duplicit dokončeno')
+                            ->body("Sloučeno {$stats['matches_merged']} zápasů v {$stats['groups_found']} skupinách.")
+                            ->success()
+                            ->send();
                     }),
 
                 Action::make('discoverSeasons')

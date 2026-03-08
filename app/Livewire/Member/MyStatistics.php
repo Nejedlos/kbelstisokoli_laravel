@@ -63,6 +63,9 @@ class MyStatistics extends Component
     public function updated($propertyName)
     {
         if (in_array($propertyName, ['seasonId', 'teamId'])) {
+            if ($propertyName === 'teamId') {
+                app(\App\Services\Member\MemberContext::class)->setActiveTeamId((int)$this->teamId);
+            }
             $this->loadStats();
         }
     }
@@ -122,11 +125,6 @@ class MyStatistics extends Component
         $this->dispatch('statsLoaded');
     }
 
-    public function setView($view)
-    {
-        $this->view = $view;
-        $this->loadStats();
-    }
 
     public function render()
     {

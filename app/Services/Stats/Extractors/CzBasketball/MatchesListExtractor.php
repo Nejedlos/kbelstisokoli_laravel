@@ -152,9 +152,9 @@ class MatchesListExtractor implements StatExtractorInterface
                 }
             }
 
-            $status = 'planned';
+            $status = 'scheduled';
             if ($score && preg_match('/\d+\s*:\s*\d+/', $score)) {
-                $status = 'completed';
+                $status = 'played';
             }
 
             $rows[] = new NormalizedRowDTO(
