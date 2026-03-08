@@ -24,7 +24,7 @@ class TestMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.test-mail',
+            view: 'emails.test-mail',
         );
     }
 }

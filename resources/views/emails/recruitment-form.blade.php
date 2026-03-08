@@ -1,27 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-</head>
-<body style="font-family: sans-serif; line-height: 1.6; color: #333;">
-    <h2 style="color: #c41e3a;">{{ __('recruitment.email.title', ['team' => $teamName]) }}</h2>
+@extends('emails.layouts.base')
 
-    <p><strong>{{ __('recruitment.email.from') }}:</strong> {{ $senderName }} (<a href="mailto:{{ $senderEmail }}">{{ $senderEmail }}</a>)</p>
-    <p><strong>{{ __('recruitment.email.team') }}:</strong> {{ $teamName }}</p>
+@section('title', __('recruitment.email.title', ['team' => $teamName]))
 
-    <h3 style="color: #333; margin-top: 20px;">{{ __('recruitment.email.basic_info') }}:</h3>
-    <ul>
-        <li><strong>{{ __('recruitment.email.age') }}:</strong> {{ $extraData['age'] ?? __('recruitment.email.not_provided') }}</li>
-        <li><strong>{{ __('recruitment.email.height') }}:</strong> {{ $extraData['height'] ? $extraData['height'] . ' cm' : __('recruitment.email.not_provided') }}</li>
-        <li><strong>{{ __('recruitment.email.position') }}:</strong> {{ $extraData['position'] ?? __('recruitment.email.not_provided') }}</li>
-        <li><strong>{{ __('recruitment.email.level') }}:</strong> {{ $extraData['level'] ?? __('recruitment.email.not_provided') }}</li>
-    </ul>
+@section('content')
+    <h1 style="margin-top: 0; color: {{ config('email_branding.colors.secondary') }}; font-size: 22px; font-weight: bold; text-align: left;">
+        {{ __('recruitment.email.title', ['team' => $teamName]) }}
+    </h1>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    @include('emails.partials.key-value-table', [
+        'items' => [
+            __('recruitment.email.from') => $senderName . " - " . $senderEmail,
+            __('recruitment.email.team') => $teamName,
+            __('recruitment.email.age') => $extraData['age'] ?? __('recruitment.email.not_provided'),
+            __('recruitment.email.height') => (isset($extraData['height']) && $extraData['height']) ? $extraData['height'] . ' cm' : __('recruitment.email.not_provided'),
+            __('recruitment.email.position') => $extraData['position'] ?? __('recruitment.email.not_provided'),
+            __('recruitment.email.level') => $extraData['level'] ?? __('recruitment.email.not_provided'),
+        ]
+    ])
 
-    <div style="white-space: pre-wrap;">{{ $messageBody }}</div>
+    @include('emails.partials.divider')
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-    <p style="font-size: 0.85em; color: #777;">{{ __('recruitment.email.footer') }}</p>
-</body>
-</html>
+    <div style="white-space: pre-wrap; margin-top: 20px;">{!! nl2br(e($messageBody)) !!}</div>
+
+    @include('emails.partials.small-text', [
+        'text' => __('recruitment.email.footer')
+    ])
+@endsection

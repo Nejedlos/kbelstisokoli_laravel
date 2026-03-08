@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('route_name')->nullable();
             $table->string('locale')->nullable();
             $table->text('user_agent');
-            $table->json('viewport')->nullable();
-            $table->json('screen')->nullable();
+            $table->longText('viewport')->nullable();
+            $table->longText('screen')->nullable();
             $table->string('timezone')->nullable();
             $table->string('source_area'); // public|member|admin
             $table->string('app_version')->nullable();
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('logs_path')->nullable();
             $table->string('network_path')->nullable();
             $table->string('clicks_path')->nullable();
-            $table->json('meta')->nullable();
+            $table->longText('meta')->nullable();
             $table->timestamps();
         });
     }

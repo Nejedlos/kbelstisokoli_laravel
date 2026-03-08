@@ -1,30 +1,43 @@
-<x-mail::message>
-# Nový feedback od {{ $report->user->name }}
+@extends('emails.layouts.base')
 
-**Typ:** {{ ucfirst($report->type) }}
-**Závažnost:** {{ ucfirst($report->severity ?? 'N/A') }}
-**Oblast:** {{ ucfirst($report->source_area) }}
+@section('title', 'Nový feedback od ' . $report->user->name)
 
-## {{ $report->title }}
+@section('content')
+    <h1 style="margin-top: 0; color: {{ config('email_branding.colors.secondary') }}; font-size: 22px; font-weight: bold; text-align: left;">
+        Nový feedback od {{ $report->user->name }}
+    </h1>
 
-{{ $report->description }}
+    @include('emails.partials.key-value-table', [
+        'items' => [
+            'Typ' => ucfirst($report->type),
+            'Závažnost' => ucfirst($report->severity ?? 'N/A'),
+            'Oblast' => ucfirst($report->source_area),
+        ]
+    ])
 
-@if($report->steps)
-### Kroky k reprodukci
-{{ $report->steps }}
-@endif
+    <h2 style="font-size: 18px; color: {{ config('email_branding.colors.text') }}; margin-top: 25px;">{{ $report->title }}</h2>
+    <p>{{ $report->description }}</p>
 
----
+    @if($report->steps)
+        <h3 style="font-size: 16px; color: {{ config('email_branding.colors.text') }}; margin-top: 20px;">Kroky k reprodukci</h3>
+        <p>{{ $report->steps }}</p>
+    @endif
 
-**URL:** {{ $report->url }}
-**Uživatel:** {{ $report->user->email }} (ID: {{ $report->user_id }})
-**App Version:** {{ $report->app_version }}
-**Browser:** {{ $report->user_agent }}
+    @include('emails.partials.divider')
 
-<x-mail::button :url="config('app.url') . '/admin/feedback-reports/' . $report->id">
-Zobrazit v administraci
-</x-mail::button>
+    @include('emails.partials.panel', [
+        'text' => "
+            <strong>URL:</strong> {$report->url}<br>
+            <strong>Uživatel:</strong> {$report->user->email} (ID: {$report->user_id})<br>
+            <strong>App Version:</strong> {$report->app_version}<br>
+            <strong>Browser:</strong> " . e($report->user_agent) . "
+        "
+    ])
 
-Díky,<br>
-{{ config('app.name') }}
-</x-mail::message>
+    @include('emails.partials.button', [
+        'url' => config('app.url') . '/admin/feedback-reports/' . $report->id,
+        'text' => 'Zobrazit v administraci'
+    ])
+
+    <p>Díky,<br>{{ config('app.name') }}</p>
+@endsection

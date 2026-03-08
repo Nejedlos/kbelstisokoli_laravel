@@ -11,6 +11,8 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Schema;
+use App\Support\Icons\AppIcon;
+use App\Support\FilamentIcon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
@@ -23,7 +25,7 @@ class FeedbackReportForm
                 Tabs::make('Feedback Details')
                     ->tabs([
                         Tabs\Tab::make('Souhrn')
-                            ->icon('fa-light-list')
+                            ->icon(FilamentIcon::get(AppIcon::LIST))
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
@@ -98,7 +100,7 @@ class FeedbackReportForm
                             ]),
 
                         Tabs\Tab::make('Screenshot')
-                            ->icon('fa-light-image')
+                            ->icon(FilamentIcon::get(AppIcon::MEDIA_LIBRARY))
                             ->schema([
                                 Placeholder::make('screenshot')
                                     ->label('')
@@ -108,7 +110,7 @@ class FeedbackReportForm
                             ]),
 
                         Tabs\Tab::make('DOM Snapshot')
-                            ->icon('fa-light-file-code')
+                            ->icon(FilamentIcon::get(AppIcon::CODE))
                             ->schema([
                                 Placeholder::make('dom_snapshot')
                                     ->label('')
@@ -118,7 +120,7 @@ class FeedbackReportForm
                             ]),
 
                         Tabs\Tab::make('Logy Konzole')
-                            ->icon('fa-light-terminal')
+                            ->icon(FilamentIcon::get(AppIcon::TERMINAL))
                             ->schema([
                                 ViewField::make('logs_content')
                                     ->label('')
@@ -132,7 +134,7 @@ class FeedbackReportForm
                             ]),
 
                         Tabs\Tab::make('Breadcrumbs')
-                            ->icon('fa-light-shoe-prints')
+                            ->icon(FilamentIcon::get(AppIcon::SHOE_PRINTS))
                             ->schema([
                                 ViewField::make('breadcrumbs_content')
                                     ->label('')
@@ -156,7 +158,7 @@ class FeedbackReportForm
                             ]),
 
                         Tabs\Tab::make('Síť a Kliky')
-                            ->icon('fa-light-network-wired')
+                            ->icon(FilamentIcon::get(AppIcon::NETWORK))
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
@@ -198,7 +200,7 @@ class FeedbackReportForm
                             ]),
 
                         Tabs\Tab::make('Výkon')
-                            ->icon('fa-light-gauge-high')
+                            ->icon(FilamentIcon::get(AppIcon::GAUGE))
                             ->schema([
                                 Placeholder::make('performance_data')
                                     ->label('')
@@ -210,7 +212,7 @@ class FeedbackReportForm
                             ]),
 
                         Tabs\Tab::make('Meta')
-                            ->icon('fa-light-code')
+                            ->icon(FilamentIcon::get(AppIcon::CODE))
                             ->schema([
                                 Placeholder::make('meta_raw')
                                     ->label('')

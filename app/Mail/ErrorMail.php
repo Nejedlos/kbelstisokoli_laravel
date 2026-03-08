@@ -52,7 +52,7 @@ class ErrorMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.error-report',
+            view: 'emails.error-report',
             with: [
                 'report' => $this->report,
             ],

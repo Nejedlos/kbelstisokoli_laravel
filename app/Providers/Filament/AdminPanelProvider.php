@@ -258,10 +258,10 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
-                Authenticate::class,
                 '2fa.required',
                 '2fa.timeout',
+                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
+                Authenticate::class,
             ]);
     }
 }

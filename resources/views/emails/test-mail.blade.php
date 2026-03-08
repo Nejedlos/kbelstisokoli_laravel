@@ -1,16 +1,27 @@
-<x-mail::message>
-# Zkušební e-mail
+@extends('emails.layouts.base')
 
-Toto je automaticky generovaný e-mail z administrace projektu **{{ config('app.name') }}** pro ověření funkčnosti SMTP spojení.
+@section('title', 'Zkušební e-mail')
 
-**Zpráva:**
-{{ $messageContent }}
+@section('content')
+    <h1 style="margin-top: 0; color: {{ config('email_branding.colors.secondary') }}; font-size: 22px; font-weight: bold; text-align: left;">
+        Zkušební e-mail
+    </h1>
 
-**Technické detaily:**
-- Čas odeslání: {{ now()->toDateTimeString() }}
-- Prostředí: {{ app()->environment() }}
-- Mailer: {{ config('mail.default') }}
+    <p>Toto je automaticky generovaný e-mail z administrace projektu <strong>{{ config('app.name') }}</strong> pro ověření funkčnosti SMTP spojení.</p>
 
-Díky,<br>
-{{ config('app.name') }}
-</x-mail::message>
+    <div style="margin: 20px 0;">
+        <p><strong>Zpráva:</strong></p>
+        <p>{{ $messageContent }}</p>
+    </div>
+
+    @include('emails.partials.panel', [
+        'text' => "
+            <strong>Technické detaily:</strong><br>
+            - Čas odeslání: " . now()->toDateTimeString() . "<br>
+            - Prostředí: " . app()->environment() . "<br>
+            - Mailer: " . config('mail.default') . "
+        "
+    ])
+
+    <p>Díky,<br>{{ config('app.name') }}</p>
+@endsection

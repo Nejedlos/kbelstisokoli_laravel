@@ -41,7 +41,7 @@ class FeedbackReportNotification extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.feedback-report',
+            view: 'emails.feedback-report',
         );
     }
 

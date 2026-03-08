@@ -1,16 +1,26 @@
-<div style="font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, 'Apple Color Emoji','Segoe UI Emoji';">
-    <h2 style="margin:0 0 10px 0; font-size:18px;">{{ $type === 'coach' ? __('mail.feedback.confirm_coach_title') : __('mail.feedback.confirm_admin_title') }}</h2>
+@extends('emails.layouts.base')
+
+@section('title', $type === 'coach' ? __('mail.feedback.confirm_coach_title') : __('mail.feedback.confirm_admin_title'))
+
+@section('content')
+    <h1 style="margin-top: 0; color: {{ config('email_branding.colors.secondary') }}; font-size: 20px; font-weight: bold; text-align: left;">
+        {{ $type === 'coach' ? __('mail.feedback.confirm_coach_title') : __('mail.feedback.confirm_admin_title') }}
+    </h1>
 
     @if($team)
-        <p style="margin:0 0 8px 0; font-size:14px; color:#334155;">
+        <p style="margin-bottom: 8px; color: {{ config('email_branding.colors.muted') }};">
             {{ __('mail.feedback.team') }}: <strong>{{ $team->name }}</strong>
         </p>
     @endif
 
-    <p style="margin:0 0 8px 0; font-size:14px; color:#334155; white-space:pre-line;">{{ __('mail.feedback.confirm_body') }}</p>
+    <p style="white-space: pre-line;">{{ __('mail.feedback.confirm_body') }}</p>
 
-    <div style="margin-top:12px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
-        <div style="font-size:12px; color:#64748b;">{{ __('mail.feedback.your_message') }}:</div>
-        <div style="font-size:14px; color:#334155; white-space:pre-line;">{{ $bodyMessage }}</div>
-    </div>
-</div>
+    @include('emails.partials.panel', [
+        'text' => '
+            <div style="font-size: 12px; color: ' . config('email_branding.colors.muted') . ';">' . __('mail.feedback.your_message') . ':</div>
+            <div style="white-space: pre-line; margin-top: 5px;">' . e($bodyMessage) . '</div>
+        '
+    ])
+
+    <p>Díky,<br>{{ config('email_branding.brand_name') }}</p>
+@endsection

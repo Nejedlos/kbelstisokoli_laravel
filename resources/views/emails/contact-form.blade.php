@@ -1,17 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-</head>
-<body style="font-family: sans-serif; line-height: 1.6; color: #333;">
-    <h2 style="color: #c41e3a;">Zpráva z kontaktního formuláře</h2>
+@extends('emails.layouts.base')
 
-    <p><strong>Od:</strong> {{ $senderName }} (<a href="mailto:{{ $senderEmail }}">{{ $senderEmail }}</a>)</p>
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+@section('title', $subjectText ?? 'Zpráva z kontaktního formuláře')
 
-    <div style="white-space: pre-wrap;">{{ $messageBody }}</div>
+@section('content')
+    <h1 style="margin-top: 0; color: {{ config('email_branding.colors.secondary') }}; font-size: 22px; font-weight: bold; text-align: left;">
+        Zpráva z kontaktního formuláře
+    </h1>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-    <p style="font-size: 0.85em; color: #777;">Tato zpráva byla odeslána z webu Kbelští sokoli.</p>
-</body>
-</html>
+    @include('emails.partials.key-value-table', [
+        'items' => [
+            'Odesílatel' => $senderName,
+            'E-mail' => $senderEmail,
+        ]
+    ])
+
+    @include('emails.partials.divider')
+
+    <div style="white-space: pre-wrap; margin-top: 20px;">{!! nl2br(e($messageBody)) !!}</div>
+
+    @include('emails.partials.small-text', [
+        'text' => 'Tato zpráva byla odeslána automaticky z kontaktního formuláře na webu ' . config('email_branding.brand_name') . '.'
+    ])
+@endsection

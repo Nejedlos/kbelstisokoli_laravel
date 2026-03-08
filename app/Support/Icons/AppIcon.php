@@ -84,6 +84,8 @@ enum AppIcon: string
     case USER_SECRET = 'user-secret';
     case PARTNERS = 'handshake';
     case DOCUMENTATION = 'book';
+    case SHOE_PRINTS = 'shoe-prints';
+    case NETWORK = 'network-wired';
 
     /**
      * Získá výchozí styl pro danou ikonu.
