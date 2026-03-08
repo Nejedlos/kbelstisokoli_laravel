@@ -25,7 +25,7 @@ class RsvpReminderJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info('RSVP Reminder Job started.');
+        Log::info('Attendance Reminder Job started.');
 
         $now = now();
         $in24Hours = $now->copy()->addHours(24);
@@ -59,7 +59,7 @@ class RsvpReminderJob implements ShouldQueue
             $this->remindUsers($event);
         }
 
-        Log::info('RSVP Reminder Job finished.');
+        Log::info('Attendance Reminder Job finished.');
     }
 
     protected function remindUsers($event): void

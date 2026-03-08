@@ -50,7 +50,7 @@ U každé úlohy lze nastavit:
 
 Mezi tyto úlohy patří:
 - **Synchronizace statistik**: Globální i pro konkrétní týmy.
-- **RSVP Upomínky**: Rozesílání notifikací členům.
+- **Docházka Upomínky**: Rozesílání notifikací členům.
 - **Finance**: Kontrola splatnosti předpisů.
 - **Systémový úklid**: Promazávání starých logů a cache.
 

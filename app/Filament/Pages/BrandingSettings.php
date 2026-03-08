@@ -316,17 +316,23 @@ class BrandingSettings extends Page implements HasForms
                                     ->label(__('admin/branding-settings.fields.logo_velke'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding')
+                                    ->helperText(__('admin/branding-settings.fields.logo_velke_help', ['format' => 'WebP / PNG']))
+                                    ->extraAttributes(['class' => 'partner-logo-preview']),
                                 FileUpload::make('team_logo_male')
                                     ->label(__('admin/branding-settings.fields.logo_male'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding')
+                                    ->helperText(__('admin/branding-settings.fields.logo_male_help', ['format' => 'WebP / PNG']))
+                                    ->extraAttributes(['class' => 'partner-logo-preview']),
                                 FileUpload::make('team_logo_mini')
                                     ->label(__('admin/branding-settings.fields.logo_mini'))
                                     ->image()
                                     ->disk(config('filesystems.uploads.disk'))
-                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding'),
+                                    ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/branding')
+                                    ->helperText(__('admin/branding-settings.fields.logo_mini_help', ['format' => 'WebP / PNG']))
+                                    ->extraAttributes(['class' => 'partner-logo-preview']),
                             ]),
                     ]),
 

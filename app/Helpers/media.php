@@ -44,7 +44,7 @@ if (! function_exists('web_asset')) {
      * - Nejprve zkoušíme public_path($path), pokud neexistuje, zkusíme public_path('storage/'.$path)
      *   pro zpětnou kompatibilitu se staršími nahrávkami do storage/ s linkem.
      */
-    function web_asset(?string $path): ?string
+    function web_asset(?string $path, bool $tryWebp = true): ?string
     {
         if (! $path) {
             return null;
@@ -57,17 +57,45 @@ if (! function_exists('web_asset')) {
 
         $normalized = ltrim($path, '/');
 
-        // 1) Nový režim: soubory přímo v public/
-        if (file_exists(public_path($normalized))) {
-            return asset($normalized);
+        // Funkce pro kontrolu existence a vrácení asset URL
+        $checkAndReturn = function($p) use ($tryWebp) {
+            // 1) Zkusíme WebP variantu, pokud je to zapnuté
+            if ($tryWebp) {
+                $info = pathinfo($p);
+                $webpPath = ($info['dirname'] !== '.' ? $info['dirname'] . '/' : '') . $info['filename'] . '.webp';
+                if (file_exists(public_path($webpPath))) {
+                    return asset($webpPath);
+                }
+            }
+
+            // 2) Zkusíme původní cestu
+            if (file_exists(public_path($p))) {
+                return asset($p);
+            }
+
+            return null;
+        };
+
+        // Postupně zkoušíme různé lokace:
+
+        // A) Přímá cesta (včetně uploads/ pokud je v path)
+        if ($res = $checkAndReturn($normalized)) return $res;
+
+        // B) V uploads/ (pokud tam není)
+        if (!str_starts_with($normalized, 'uploads/')) {
+            if ($res = $checkAndReturn('uploads/' . $normalized)) return $res;
         }
 
-        // 2) Zpětná kompatibilita: staré soubory ve storage/ (symlink)
-        if (file_exists(public_path('storage/'.$normalized))) {
-            return asset('storage/'.$normalized);
+        // C) V storage/ (symlink)
+        if ($res = $checkAndReturn('storage/' . $normalized)) return $res;
+
+        // D) Fallback na assets/img/loga/ (pro loga)
+        if (str_contains($normalized, 'logo')) {
+            $filename = basename($normalized);
+            if ($res = $checkAndReturn('assets/img/loga/' . $filename)) return $res;
         }
 
-        // 3) Fallback – vrať asset s původní cestou
+        // E) Poslední záchrana – vrať asset s původní cestou (i když neexistuje)
         return asset($normalized);
     }
 }

@@ -1,4 +1,4 @@
-# Rafinace logiky docházky a RSVP
+# Rafinace logiky docházky a Docházka
 
 Datum: 2026-02-26
 Autor: Junie
@@ -26,7 +26,7 @@ Zpřesnění výpočtu statistik docházky a vylepšení uživatelského rozhran
     - **Přijdou:** Všichni s potvrzenou účastí.
     - **Omluvení:** Všichni s odmítnutou účastí (včetně zobrazení důvodu).
     - **Zatím neví:** Pouze "očekávaní" hráči, kteří se dosud nevyjádřili.
-- Použit Alpine.js pro interaktivní RSVP formulář (dynamické zobrazení důvodu omluvy).
+- Použit Alpine.js pro interaktivní Docházka formulář (dynamické zobrazení důvodu omluvy).
 
 ### 4. Responzivita a UI
 - Úprava `event-card` komponenty pro lepší zobrazení statistik na mobilních zařízeních.

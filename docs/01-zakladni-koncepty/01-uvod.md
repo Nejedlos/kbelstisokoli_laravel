@@ -5,7 +5,7 @@ Vítejte v technické dokumentaci projektu Kbelští sokoli. Tato sekce poskytuj
 ## Účel systému
 Systém slouží pro komplexní správu klubu Kbelští sokoli, zahrnující:
 - Členskou základnu a profily sportovců.
-- Sportovní plánování, tréninky a docházku (RSVP).
+- Sportovní plánování, tréninky a docházku (Docházka).
 - Ekonomickou agendu, členské příspěvky a fakturaci.
 - Komunikaci s členy a veřejnou prezentaci klubu.
 

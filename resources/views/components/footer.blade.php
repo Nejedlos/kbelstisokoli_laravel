@@ -44,8 +44,8 @@
                     <a href="{{ url('/') }}" class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl shadow-lg shadow-black/20">
                             <picture>
-                                <source srcset="{{ asset($teamLogo['paths']['mini_webp'] ?? '') }}" type="image/webp">
-                                <img src="{{ asset($teamLogo['paths']['mini'] ?? '') }}"
+                                <source srcset="{{ web_asset($teamLogo['paths']['mini'] ?? '', true) }}" type="image/webp">
+                                <img src="{{ web_asset($teamLogo['paths']['mini'] ?? '', false) }}"
                                      alt="Kbelští sokoli C & E logo"
                                      class="object-contain transition-transform group-hover:scale-105"
                                      style="height: {{ $teamLogo['sizes']['footer'] ?? 56 }}px; width: auto;">

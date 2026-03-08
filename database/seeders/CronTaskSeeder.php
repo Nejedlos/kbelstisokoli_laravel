@@ -13,7 +13,7 @@ class CronTaskSeeder extends Seeder
     {
         $tasks = [
             [
-                'name' => 'RSVP Upomínky',
+                'name' => 'Upomínky docházky',
                 'command' => 'rsvp:reminders',
                 'expression' => '0 9 * * *', // Každý den v 9:00
                 'description' => 'Odešle upomínky členům, kteří ještě nepotvrdili účast na akcích v příštích 24h.',

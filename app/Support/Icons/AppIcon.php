@@ -82,6 +82,7 @@ enum AppIcon: string
     case BANKNOTES = 'money-bill';
     case USER_SECRET = 'user-secret';
     case PARTNERS = 'handshake';
+    case DOCUMENTATION = 'book';
 
     /**
      * Získá výchozí styl pro danou ikonu.

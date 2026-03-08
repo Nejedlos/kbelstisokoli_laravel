@@ -58,7 +58,7 @@ class AttendanceMigrationSeeder extends Seeder
                 ->get()
                 ->pluck('r_id', 'id');
 
-            // 3. Migrace RSVP (tabulka dochazka)
+            // 3. Migrace docházky (tabulka dochazka)
             $this->migrateRsvp($oldDb, $usersById, $matches, $trainings);
 
             // 4. Migrace reality (tabulka web_realna_dochazka)
@@ -74,7 +74,7 @@ class AttendanceMigrationSeeder extends Seeder
 
     protected function migrateRsvp($oldDb, $usersById, $matches, $trainings)
     {
-        $this->command->info('Migruji RSVP (plánovanou docházku)...');
+        $this->command->info('Migruji docházku (plánovanou)...');
         $query = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.dochazka');
         $total = $query->count();
 
@@ -167,7 +167,7 @@ class AttendanceMigrationSeeder extends Seeder
             }
 
             // A2. Přítomní (pokud jsou ve staré DB uloženi jako 1 v poli ucast nebo podobně - ošetření různých formátů)
-            // Poznámka: Zadání zmiňuje ucast -> 1. Pokud je to v jiné tabulce, je to už ošetřeno v RSVP výše.
+            // Poznámka: Zadání zmiňuje ucast -> 1. Pokud je to v jiné tabulce, je to už ošetřeno v docházce výše.
             // Zde v realné docházce jsou ID plátců v pomlčkovém seznamu.
 
             // B. Nepřítomní bez omluvy (podle jména)

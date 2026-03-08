@@ -5,6 +5,7 @@
         title="Napište nám"
         subtitle="Váš vzkaz doručíme správné osobě"
         :breadcrumbs="['Kontakt' => route('public.contact.index'), 'Napište nám' => null]"
+        image="assets/img/hero/hero-contact.webp"
     />
 
     <div class="section-padding bg-bg relative overflow-hidden">

@@ -82,7 +82,7 @@
 
         <!-- Stats & Actions Container -->
         <div class="flex items-center justify-between lg:justify-end gap-4 sm:gap-6 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-            <!-- RSVP Stats -->
+            <!-- Attendance Stats -->
             <div class="flex items-center gap-3 sm:gap-4 bg-slate-50/50 px-3 sm:px-4 py-2 rounded-2xl border border-slate-100/50">
                 <div class="flex flex-col items-center" title="{{ __('member.attendance.status.confirmed') }}">
                     <span class="text-[10px] sm:text-[11px] font-black text-emerald-600 leading-none mb-1 sm:mb-1.5">{{ $confirmedCount }}</span>

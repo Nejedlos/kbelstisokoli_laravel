@@ -21,7 +21,7 @@ class RsvpChangedNotification extends BaseNotification
      */
     public function via(object $notifiable): array
     {
-        // Pro RSVP změny používáme pouze databázový kanál (in-app dropdown).
+        // Pro změny docházky používáme pouze databázový kanál (in-app dropdown).
         // E-maily pro každou změnu docházky jsou příliš frekventované (spamující)
         // a způsobují technické problémy s limity SMTP serveru při odesílání více notifikací najednou.
         return ['database'];

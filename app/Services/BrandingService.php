@@ -42,8 +42,8 @@ class BrandingService
             'club_name' => $dbSettings['club_name'] ?? $cfg['club_name'] ?? 'Kbelští sokoli',
             'club_short_name' => $dbSettings['club_short_name'] ?? $cfg['club_short_name'] ?? 'Sokoli',
             'slogan' => $dbSettings['slogan'] ?? $cfg['slogan'] ?? null,
-            'logo_path' => $dbSettings['team_logo_velke'] ?? $dbSettings['logo_path'] ?? $cfg['logo_path'] ?? $cfg['team_logos']['velke'] ?? null,
-            'alt_logo_path' => $dbSettings['team_logo_male'] ?? $dbSettings['alt_logo_path'] ?? $cfg['alt_logo_path'] ?? $cfg['team_logos']['male'] ?? null,
+            'logo_path' => $dbSettings['team_logo_velke'] ?? $dbSettings['logo_path'] ?? $cfg['logo_path'] ?? $cfg['team_logos']['velke'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.png',
+            'alt_logo_path' => $dbSettings['team_logo_male'] ?? $dbSettings['alt_logo_path'] ?? $cfg['alt_logo_path'] ?? $cfg['team_logos']['male'] ?? '/assets/img/loga/logo_kbelsti_sokoli_male.png',
             'theme_preset' => $activeTheme,
             'colors' => $themeConfig['colors'] ?? [],
             'contact' => [
@@ -131,11 +131,11 @@ class BrandingService
                 'border_radius' => $dbSettings['team_logo_border_radius'] ?? 'none',
                 'shadow_enabled' => filter_var($dbSettings['team_logo_shadow_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'paths' => [
-                    'velke' => $dbSettings['team_logo_velke'] ?? $cfg['team_logos']['velke'] ?? null,
-                    'male' => $dbSettings['team_logo_male'] ?? $cfg['team_logos']['male'] ?? null,
-                    'mini' => $dbSettings['team_logo_mini'] ?? $cfg['team_logos']['mini'] ?? null,
-                    'velke_webp' => $cfg['team_logos']['velke_webp'] ?? null,
-                    'mini_webp' => $cfg['team_logos']['mini_webp'] ?? null,
+                    'velke' => $dbSettings['team_logo_velke'] ?? $cfg['team_logos']['velke'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.png',
+                    'male' => $dbSettings['team_logo_male'] ?? $cfg['team_logos']['male'] ?? '/assets/img/loga/logo_kbelsti_sokoli_male.png',
+                    'mini' => $dbSettings['team_logo_mini'] ?? $cfg['team_logos']['mini'] ?? '/assets/img/loga/logo_kbelsti_sokoli_mini.png',
+                    'velke_webp' => $cfg['team_logos']['velke_webp'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.webp',
+                    'mini_webp' => $cfg['team_logos']['mini_webp'] ?? '/assets/img/loga/logo_kbelsti_sokoli_mini.webp',
                 ],
             ],
             'parent_logo' => [

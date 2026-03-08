@@ -19,7 +19,10 @@
 
     @if($logoPath)
         <div class="auth-logo-wrapper mb-6">
-            <img src="{{ web_asset($logoPath) }}" class="auth-logo-img" alt="{{ $clubName }}">
+            <picture class="auth-logo-img">
+                <source srcset="{{ web_asset($logoPath, true) }}" type="image/webp">
+                <img src="{{ web_asset($logoPath, false) }}" alt="{{ $clubName }}" class="auth-logo-img">
+            </picture>
         </div>
     @endif
 

@@ -53,7 +53,7 @@ class ClubEventsTable
                     ->label('Veřejné')
                     ->boolean(),
                 IconColumn::make('rsvp_enabled')
-                    ->label('RSVP')
+                    ->label('Docházka')
                     ->boolean(),
             ])
             ->filters([

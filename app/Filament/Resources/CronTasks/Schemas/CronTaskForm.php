@@ -24,7 +24,7 @@ class CronTaskForm
                                 TextInput::make('name')
                                     ->label('Název úlohy')
                                     ->required()
-                                    ->placeholder('např. Upomínky RSVP'),
+                                    ->placeholder('např. Upomínky docházky'),
                                 TextInput::make('command')
                                     ->label('Artisan příkaz')
                                     ->required()

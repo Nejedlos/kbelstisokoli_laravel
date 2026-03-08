@@ -96,8 +96,8 @@ return [
                 'regenerate' => 'Regenerovat i existující',
             ],
         ],
-        'rsvp_reminders' => [
-            'label' => 'RSVP: Upomínky',
+        'attendance_reminders' => [
+            'label' => 'Docházka: Upomínky',
             'desc' => 'Odešle upomínky na nepotvrzenou docházku.',
         ],
         'migrate' => [

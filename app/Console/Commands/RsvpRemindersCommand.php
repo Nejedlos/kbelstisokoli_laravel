@@ -18,14 +18,14 @@ class RsvpRemindersCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Odešle upomínky na nepotvrzenou docházku (RSVP).';
+    protected $description = 'Odešle upomínky na nepotvrzenou docházku.';
 
     /**
      * Execute the console command.
      */
     public function handle(): void
     {
-        $this->info('Dispatching RSVP reminders job...');
+        $this->info('Dispatching attendance reminders job...');
         \App\Jobs\RsvpReminderJob::dispatch();
         $this->info('Job dispatched successfully.');
     }

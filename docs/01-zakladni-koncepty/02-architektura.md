@@ -145,7 +145,7 @@ Aplikace je rozdělena do tří hlavních oblastí:
 - `Team` má mnoho `BasketballMatch` a `Training`.
 - `Attendance` (Docházka) má polymorfní vazbu na `Training`, `BasketballMatch` a `ClubEvent`.
 
-## 9. Docházka a RSVP (RSVP Modul)
+## 9. Docházka a Docházka (Docházkový systém)
 Účel: Univerzální systém pro potvrzování účasti a evidenci docházky na všech typech klubových akcí.
 
 ### Datový návrh
@@ -158,12 +158,12 @@ Aplikace je rozdělena do tří hlavních oblastí:
    - Pomocí rychlých akcí (mobile-first) potvrdí nebo omluví svou účast.
    - U omluvenky může uvést důvod (uloží se do pole `note`).
 2. **Trenér / Admin:**
-   - V administraci u konkrétní události vidí tabulku `Docházka / RSVP`.
+   - V administraci u konkrétní události vidí tabulku `Docházka / Docházka`.
    - Má okamžitý přehled o počtech potvrzených hráčů.
    - Může doplňovat interní poznámky (např. "Hráč se omluvil telefonicky").
    - Má právo editovat nebo mazat záznamy všech členů.
 
-### Jak přidat nový typ RSVP události
+### Jak přidat nový typ Docházka události
 1. V modelu nové události přidejte vztah:
    ```php
    public function attendances(): \Illuminate\Database\Eloquent\Relations\MorphMany {
@@ -268,7 +268,7 @@ Tato sekce popisuje implementaci správy uživatelů, rolí/oprávnění a hrá�
 - deaktivovaný user: nepřihlásí se (login blokován) a middleware zamezí přístupu.
 
 ### 11.9 Napojení na další moduly
-- Docházka/RSVP: vazba přes `users` (uživatel) a týmové členství přes `player_profiles ↔ teams`.
+- Docházka/Docházka: vazba přes `users` (uživatel) a týmové členství přes `player_profiles ↔ teams`.
 - Statistiky/Soutěže: použití `player_profiles` a `teams` pro identifikaci účastníků/řádků.
 - Redirecty: Modul pro správu přesměrování (301/302) a legacy URL migraci.
 
@@ -318,7 +318,7 @@ php artisan optimize:clear
 ### 17.2 Funkcionality
 1. **Dashboard:** Role-aware rozcestník. Zobrazuje nejbližší program, stav docházky (pending) a týmy. Trenéři vidí navíc rychlé odkazy na své týmy.
 2. **Můj program:** Sjednocený chronologický přehled tréninků, zápasů a akcí.
-3. **RSVP / Docházka:** Rychlé potvrzení účasti (Ano/Ne/Možná) přímo z přehledu. Historie odpovědí je dostupná v samostatné sekci.
+3. **Docházka / Docházka:** Rychlé potvrzení účasti (Ano/Ne/Možná) přímo z přehledu. Historie odpovědí je dostupná v samostatné sekci.
 4. **Můj profil:** Možnost editace jména, telefonu, veřejného bio a změna hesla. Citlivé údaje (role, týmy) jsou pouze pro čtení.
 5. **Ekonomika (Shell):** Připravený modul pro přehled plateb a členských příspěvků s informacemi o bankovním spojení.
 6. **Týmové přehledy (Trenér):** Přehled docházky celého týmu na blížící se akce (vyžaduje oprávnění `manage_teams`).
@@ -329,7 +329,7 @@ php artisan optimize:clear
 
 ### 17.4 UI Komponenty
 - `x-member.kpi-card`: Karty pro číselné přehledy na dashboardu.
-- `x-member.event-card`: Komponenta pro událost s integrovanými RSVP formuláři.
+- `x-member.event-card`: Komponenta pro událost s integrovanými Docházka formuláři.
 
 ### 17.5 CLI a vývoj
 ```bash
@@ -419,7 +419,7 @@ php artisan optimize:clear
 ### 19.6 Doporučené commity
 1) feat(comm): add Announcement model and Filament admin resource
 2) feat(notifications): implement member notification center and unread badge
-3) feat(logic): add event-driven RSVP notifications and BaseNotification branding
+3) feat(logic): add event-driven Docházka notifications and BaseNotification branding
 
 
 ## 20. Scheduler a provozní automatizace (Cron Modul)
@@ -437,7 +437,7 @@ Pro prostředí, kde není možné nastavit systémový cronjob, je připraven w
 - **Bezpečnost:** Vyžaduje `CRON_TOKEN` definovaný v `.env`. Bez platného tokenu není spuštění scheduleru povoleno.
 
 ### 20.3 Implementované úlohy (Skeletony)
-1.  **RSVP Upomínky (`rsvp:reminders`):** Vyhledává členy, kteří nepotvrdili účast na akcích začínajících v příštích 24 hodinách.
+1.  **Docházka Upomínky (`rsvp:reminders`):** Vyhledává členy, kteří nepotvrdili účast na akcích začínajících v příštích 24 hodinách.
 2.  **Sync oznámení (`announcements:sync`):** Automaticky deaktivuje (přepne `is_active` na `false`) oznámení, kterým vypršel čas platnosti.
 3.  **Import statistik (`stats:import`):** Vstupní bod pro budoucí automatizovanou pipeline stahování dat z externích webů.
 4.  **Systémový úklid (`system:cleanup`):** Pravidelné promazávání starých logů (standardně starší než 30 dní) pro úsporu místa v DB.

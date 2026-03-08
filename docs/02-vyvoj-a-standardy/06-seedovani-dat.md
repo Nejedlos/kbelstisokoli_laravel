@@ -10,7 +10,7 @@ Projekt využívá hierarchický systém seederů s hlavním bodem v `GlobalSeed
 - **`GlobalSeeder`**: Centrální seeder, který definuje seznam ostatních seederů (`SEEDERS`) a tabulek pro promazání (`TABLES_TO_WIPE`).
 - **`RoleSeeder`**: Definice rolí (`admin`, `editor`, `member`, `guest`) a jejich oprávnění.
 - **`UserSeeder`**: Vytváří výchozí uživatele (administrátora a testovacího editora).
-- **`CronTaskSeeder`**: Registruje systémové úlohy pro plánovač (RSVP upomínky, synchronizace statistik atd.).
+- **`CronTaskSeeder`**: Registruje systémové úlohy pro plánovač (Upomínky docházky, synchronizace statistik atd.).
 - **`SportSeeder`**: Základní data pro sportovní část (sezóny, týmy).
 - **`TeamCoachSeeder`**: Naseedování konkrétních týmů (Muži C, Muži E) včetně přiřazení trenérů a jejich kontaktů.
 - **`PostSeeder`**: Kategorie novinek a úvodní uvítací článek.

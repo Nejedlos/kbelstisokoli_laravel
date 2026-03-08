@@ -14,7 +14,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        <!-- Main Column: Details & RSVP Form -->
+        <!-- Main Column: Details & Attendance Form -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Event Card (Detail) -->
             <div class="card overflow-hidden">
@@ -85,7 +85,7 @@
                     @endif
                 </div>
 
-                <!-- RSVP Form -->
+                <!-- Attendance Form -->
                 <div class="p-6 sm:p-8 bg-slate-50/50 border-t border-slate-100">
                     <h3 class="text-xs sm:text-sm font-black uppercase tracking-tight text-secondary mb-5 flex items-center gap-2">
                         <i class="fa-light fa-pen-to-square text-primary"></i>

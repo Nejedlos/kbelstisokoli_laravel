@@ -23,7 +23,7 @@ class AttendancesRelationManager extends RelationManager
 {
     protected static string $relationship = 'attendances';
 
-    protected static ?string $title = 'Docházka / RSVP';
+    protected static ?string $title = 'Docházka';
 
     protected static ?string $modelLabel = 'Záznam docházky';
 
@@ -40,7 +40,7 @@ class AttendancesRelationManager extends RelationManager
                     ->preload()
                     ->required(),
                 Select::make('planned_status')
-                    ->label('RSVP (Plánováno)')
+                    ->label('Plánovaná docházka')
                     ->options([
                         'pending' => 'Čeká na vyjádření',
                         'confirmed' => 'Potvrzeno (Přijde)',
@@ -85,7 +85,7 @@ class AttendancesRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('planned_status')
-                    ->label('RSVP')
+                    ->label('Plánováno')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
@@ -142,7 +142,7 @@ class AttendancesRelationManager extends RelationManager
             ])
             ->filters([
                 SelectFilter::make('planned_status')
-                    ->label('Stav RSVP')
+                    ->label('Stav docházky (plán)')
                     ->options([
                         'pending' => 'Čeká',
                         'confirmed' => 'Přijde',

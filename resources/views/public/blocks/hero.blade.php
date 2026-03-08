@@ -117,8 +117,8 @@
     @if($teamLogo['enabled_hero_watermark'] ?? false)
         <div class="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
             <picture class="opacity-[var(--watermark-opacity)] transition-opacity duration-1000" style="--watermark-opacity: {{ $teamLogo['watermark_opacity'] ?? 0.08 }}">
-                <source srcset="{{ asset($teamLogo['paths']['velke_webp']) }}" type="image/webp">
-                <img src="{{ asset($teamLogo['paths']['velke']) }}" alt="" class="w-[120%] h-[120%] object-contain max-w-none grayscale brightness-200">
+                <source srcset="{{ web_asset($teamLogo['paths']['velke'] ?? '', true) }}" type="image/webp">
+                <img src="{{ web_asset($teamLogo['paths']['velke'] ?? '', false) }}" alt="" class="w-[120%] h-[120%] object-contain max-w-none grayscale brightness-200">
             </picture>
         </div>
     @endif
@@ -155,8 +155,8 @@
                     @if($teamLogo['enabled_hero'] ?? true)
                         <picture class="mr-3 sm:mr-5 shrink-0 transition-transform duration-500 group-hover/badge:rotate-3"
                                  style="opacity: {{ $teamLogo['hero_opacity'] ?? 1.0 }};">
-                            <source srcset="{{ asset($teamLogo['paths']['mini_webp']) }}" type="image/webp">
-                            <img src="{{ asset($teamLogo['paths']['mini']) }}"
+                            <source srcset="{{ web_asset($teamLogo['paths']['mini'] ?? '', true) }}" type="image/webp">
+                            <img src="{{ web_asset($teamLogo['paths']['mini'] ?? '', false) }}"
                                  alt="Kbelští sokoli"
                                  class="object-contain {{ $teamLogo['shadow_enabled'] ? 'drop-shadow-xl' : '' }}"
                                  style="height: clamp(56px, 10vw, {{ $teamLogo['sizes']['hero'] }}px); width: auto; border-radius: {{ $teamLogo['border_radius'] === 'full' ? '9999px' : ($teamLogo['border_radius'] === 'lg' ? '1rem' : ($teamLogo['border_radius'] === 'md' ? '0.5rem' : ($teamLogo['border_radius'] === 'sm' ? '0.25rem' : '0'))) }};"

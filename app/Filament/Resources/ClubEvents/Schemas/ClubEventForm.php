@@ -70,7 +70,7 @@ class ClubEventForm
                                     ->default(true)
                                     ->required(),
                                 Toggle::make('rsvp_enabled')
-                                    ->label('Povolit RSVP (Docházku)?')
+                                    ->label('Povolit přihlašování (Docházku)?')
                                     ->helperText('Umožní členům potvrdit svou účast.')
                                     ->default(true)
                                     ->required(),

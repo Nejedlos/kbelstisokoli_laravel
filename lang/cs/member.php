@@ -263,19 +263,11 @@ return [
         'marked_read' => 'Oznámení bylo označeno jako přečtené.',
         'marked_all_read' => 'Všechna oznámení byla označena jako přečtená.',
 
-        'rsvp_changed_title' => 'Změna účasti na akci',
+        'attendance_changed_title' => 'Změna docházky na akci',
         'view_program' => 'Zobrazit program',
-        'rsvp_message_user' => 'Změna účasti na :label ":title" na: :status.',
-        'rsvp_message_self' => 'Tvoje účast na :label ":title" byla :status.',
-
-        'event_labels' => [
-            'training' => 'trénink',
-            'match' => 'zápas',
-            'club_event' => 'klubovou akci',
-            'event' => 'akci',
-        ],
-
-        'rsvp_statuses' => [
+        'attendance_message_user' => 'Změna docházky na :label ":title" na: :status.',
+        'attendance_message_self' => 'Tvoje docházka na :label ":title" byla :status.',
+        'attendance_statuses' => [
             'confirmed' => 'potvrzena',
             'declined' => 'zrušena (omluveno)',
             'maybe' => 'změněna na Možná',

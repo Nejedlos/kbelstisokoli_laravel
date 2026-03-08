@@ -4,7 +4,7 @@
     <x-page-header
         :title="__('recruitment.join.title')"
         :subtitle="__('recruitment.join.subtitle')"
-        image="assets/img/hero/hero-trainings.webp"
+        image="assets/img/hero/hero-join.webp"
     />
 
     <section class="section-padding bg-slate-50 min-h-[40vh] flex items-center">

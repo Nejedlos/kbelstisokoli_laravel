@@ -206,6 +206,7 @@ class DefaultAvatarsSyncCommand extends Command
         imagesavealpha($dst, true);
         $transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
         imagefilledrectangle($dst, 0, 0, $width, $height, $transparent);
+        imagealphablending($dst, true);
 
         imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $width, $height, $minSize, $minSize);
 

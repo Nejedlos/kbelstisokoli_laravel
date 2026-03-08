@@ -31,8 +31,8 @@
             <div class="mb-6 flex justify-{{ $alignment === 'center' ? 'center' : ($alignment === 'right' ? 'end' : 'start') }}">
                 <div class="bg-white p-2 rounded-full shadow-2xl border border-white/20 transition-all hover:scale-105 group/logo">
                     <picture class="transition-transform duration-500 group-hover/logo:rotate-3">
-                        <source srcset="{{ asset($teamLogo['paths']['mini_webp']) }}" type="image/webp">
-                        <img src="{{ asset($teamLogo['paths']['mini']) }}"
+                        <source srcset="{{ web_asset($teamLogo['paths']['mini'] ?? '', true) }}" type="image/webp">
+                        <img src="{{ web_asset($teamLogo['paths']['mini'] ?? '', false) }}"
                              alt="Kbelští sokoli C & E"
                              class="object-contain"
                              style="height: {{ $teamLogo['sizes']['page_header'] ?? 40 }}px; width: auto;">

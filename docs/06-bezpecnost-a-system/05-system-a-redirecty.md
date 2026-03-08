@@ -11,7 +11,7 @@
 - **Webový trigger:** Pro prostředí bez systémového cronu je připravena URL `/system/cron/run?token=...`.
 
 ### Implementované úlohy
-1. **RSVP Upomínky:** Upomínky pro nepotvrzené akce.
+1. **Docházka Upomínky:** Upomínky pro nepotvrzené akce.
 2. **Sync oznámení:** Automatická deaktivace prošlých bannerů.
 3. **Import statistik:** Pipeline pro stahování dat.
 4. **Systémový úklid:** Promazávání starých logů.

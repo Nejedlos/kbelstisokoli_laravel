@@ -43,10 +43,10 @@ class TeamBrandingResolver
         if ($isInternal) {
             return [
                 'type' => 'primary',
-                'logo_url' => web_asset($branding['team_logo']['paths']['mini']),
-                'logo_url_webp' => web_asset($branding['team_logo']['paths']['mini_webp']),
-                'logo_url_large' => web_asset($branding['team_logo']['paths']['velke']),
-                'logo_url_large_webp' => web_asset($branding['team_logo']['paths']['velke_webp']),
+                'logo_url' => web_asset($branding['team_logo']['paths']['mini'] ?? '', false),
+                'logo_url_webp' => web_asset($branding['team_logo']['paths']['mini'] ?? '', true),
+                'logo_url_large' => web_asset($branding['team_logo']['paths']['velke'] ?? '', false),
+                'logo_url_large_webp' => web_asset($branding['team_logo']['paths']['velke'] ?? '', true),
                 'alt' => 'Kbelští sokoli C & E logo',
                 'is_internal' => true,
             ];
@@ -54,10 +54,10 @@ class TeamBrandingResolver
 
         return [
             'type' => 'parent',
-            'logo_url' => web_asset($branding['parent_logo']['paths']['mini']),
-            'logo_url_webp' => web_asset($branding['parent_logo']['paths']['mini_webp']),
-            'logo_url_large' => web_asset($branding['parent_logo']['paths']['velke']),
-            'logo_url_large_webp' => web_asset($branding['parent_logo']['paths']['velke_webp']),
+            'logo_url' => web_asset($branding['parent_logo']['paths']['mini'] ?? '', false),
+            'logo_url_webp' => web_asset($branding['parent_logo']['paths']['mini'] ?? '', true),
+            'logo_url_large' => web_asset($branding['parent_logo']['paths']['velke'] ?? '', false),
+            'logo_url_large_webp' => web_asset($branding['parent_logo']['paths']['velke'] ?? '', true),
             'alt' => 'TJ Sokol Kbely Basketball logo',
             'is_internal' => false,
         ];

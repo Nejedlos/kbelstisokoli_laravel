@@ -12,7 +12,7 @@ Cílem bylo zpřehlednit detail události (trénink, zápas) v členské sekci t
 - **Statistiky:**
     - Karty se statistikami v horní části postranního panelu byly designově vylepšeny o jemné barevné tóny (success, danger, warning) a lepší typografii.
     - Přidán celkový počet pozvaných osob do hlavičky seznamu.
-- **RSVP Formulář:**
+- **Docházka Formulář:**
     - Možnosti potvrzení/omluvy byly doplněny o jemné podbarvení při najetí myší (hover) a po výběru, což usnadňuje interakci.
 - **Seznam omluvených:**
     - Nyní se přímo u jména zobrazuje i vybraný důvod omluvy (např. "Nemoc", "Práce"), pokud byl zadán.

@@ -93,7 +93,7 @@ return [
         'trainings_total' => 'Tréninky',
         'trainings_upcoming' => 'Nadcházející tréninky',
         'trainings_upcoming_desc' => 'Nadcházející: :count',
-        'attendance_total' => 'RSVP/Docházka',
+        'attendance_total' => 'Docházka',
         'attendance_desc' => 'Počet záznamů',
         'leads_total' => 'Zájemci / Kontakty',
         'leads_pending_desc' => 'K vyřízení: :count',

@@ -156,8 +156,8 @@ class PostSeeder extends Seeder
             [
                 'date' => '2026-02-06',
                 'title' => [
-                    'cs' => 'Docházka a RSVP: účast na akce',
-                    'en' => 'Attendance and RSVP: Event Participation',
+                    'cs' => 'Docházkový systém a účast na akcích',
+                    'en' => 'Attendance system and participation',
                 ],
                 'excerpt' => [
                     'cs' => 'Přidali jsme systém potvrzování účasti na tréninky, zápasy i klubové akce.',

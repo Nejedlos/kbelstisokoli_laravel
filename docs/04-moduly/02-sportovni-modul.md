@@ -1,6 +1,6 @@
-# Sportovní modul a RSVP
+# Sportovní modul a Docházka
 
-Účel: Správa sportovních dat oddílu (týmy, zápasy, tréninky, sezóny) a univerzální systém pro potvrzování účasti (RSVP).
+Účel: Správa sportovních dat oddílu (týmy, zápasy, tréninky, sezóny) a univerzální systém pro potvrzování účasti (Docházka).
 
 ## 1. Sportovní modul (Core)
 
@@ -34,7 +34,7 @@ Při změně týmu nebo čísla dresu se doporučuje použít akci **Transfer** 
 2. Vytvoří se nový profil s novými údaji, platný od daného data.
 3. Tím je zachována integrita historických statistik a soupisek.
 
-## 3. Docházka a RSVP (RSVP Modul)
+## 3. Docházka a Docházka (Docházkový systém)
 Účel: Univerzální systém pro potvrzování účasti a evidenci docházky na všech typech klubových akcí.
 
 ### Datový návrh
@@ -47,12 +47,12 @@ Při změně týmu nebo čísla dresu se doporučuje použít akci **Transfer** 
    - Pomocí rychlých akcí (mobile-first) potvrdí nebo omluví svou účast.
    - U omluvenky může uvést důvod (uloží se do pole `note`).
 2. **Trenér / Admin:**
-   - V administraci u konkrétní události vidí tabulku `Docházka / RSVP`.
+   - V administraci u konkrétní události vidí tabulku `Docházka / Docházka`.
    - Má okamžitý přehled o počtech potvrzených hráčů.
    - Může doplňovat interní poznámky (např. "Hráč se omluvil telefonicky").
    - Má právo editovat nebo mazat záznamy všech členů.
 
-### Jak přidat nový typ RSVP události
+### Jak přidat nový typ Docházka události
 1. V modelu nové události přidejte vztah:
    ```php
    public function attendances(): \Illuminate\Database\Eloquent\Relations\MorphMany {

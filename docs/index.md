@@ -41,7 +41,7 @@ Vše o administrativním rozhraní postaveném na Filament PHP.
 ### 04. [Moduly](./04-moduly)
 Popis jednotlivých funkčních modulů aplikace.
 1. [Uživatelé a profily](./04-moduly/01-uzivatele.md)
-2. [Sportovní modul a RSVP](./04-moduly/02-sportovni-modul.md)
+2. [Sportovní modul a Docházka](./04-moduly/02-sportovni-modul.md)
 3. [Statistiky a soutěže](./04-moduly/03-statistiky.md)
 4. [Ekonomický modul](./04-moduly/04-ekonomicky-modul.md)
 5. [Média a Galerie](./04-moduly/05-media.md)

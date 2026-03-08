@@ -418,7 +418,7 @@ class CmsContentSeeder extends Seeder
                             ],
                             [
                                 'title' => 'Členská sekce',
-                                'description' => 'Přihlášení hráčů a členů pro docházku, RSVP a interní přehledy (chráněná část).',
+                                'description' => 'Přihlášení hráčů a členů pro docházku a interní přehledy (chráněná část).',
                                 'icon' => 'lock',
                                 'link' => '/login',
                             ],
@@ -586,7 +586,7 @@ class CmsContentSeeder extends Seeder
                             ],
                             [
                                 'title' => 'Member section',
-                                'description' => 'Login for players for attendance and RSVP.',
+                                'description' => 'Login for players for attendance system.',
                                 'icon' => 'lock',
                                 'link' => '/login',
                             ],

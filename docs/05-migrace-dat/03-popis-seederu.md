@@ -9,7 +9,7 @@ Z důvodu datových závislostí (cizí klíče) je nutné dodržet následujíc
 1. `LegacyUserMigrationSeeder` – základní uživatelská data (včetně adres).
 2. `SeasonMigrationSeeder` – identifikace a sjednocení sezón.
 3. `EventMigrationSeeder` – zápasy, tréninky a klubové akce.
-4. `AttendanceMigrationSeeder` – docházka, RSVP a metadata o zápisu.
+4. `AttendanceMigrationSeeder` – docházka, Docházka a metadata o zápisu.
 5. `FinanceMigrationSeeder` – tarify, konfigurace, platby a pokuty (včetně šablon).
 6. `TrophyMigrationSeeder` – migrace klubových trofejí a úspěchů.
 
@@ -54,13 +54,13 @@ Z důvodu datových závislostí (cizí klíče) je nutné dodržet následujíc
     - **Metadata:** Ukládání původního ID (`id` z tabulky `zapasy`) do `metadata->legacy_z_id` pro prevenci duplicit při opakovaném spuštění.
 
 ## 4. AttendanceMigrationSeeder
-**Účel:** Přenos historie docházky a RSVP odpovědí.
+**Účel:** Přenos historie docházky a Docházka odpovědí.
 
 - **Zdrojové tabulky:** `web_zapasy_rsvp`, `web_realna_dochazka`, `dochazka`
 - **Cílové tabulky:** `attendances`
 - **Klíčová logika:**
     - Propojení uživatelů přes `legacy_r_id` a událostí přes `legacy_z_id`.
-    - Migrace RSVP (předpokládaná účast): `ano` -> `attending`, `ne` -> `not_attending`, `nevim` -> `maybe`.
+    - Migrace Docházka (předpokládaná účast): `ano` -> `attending`, `ne` -> `not_attending`, `nevim` -> `maybe`.
     - Migrace reálné docházky: Mapování statusů (přítomen, omluven, neomluven).
     - **Metadata:** Ukládání času zápisu docházky (`web_realna_dochazka.datum`) do `metadata->legacy_recorded_at`.
     - Zvláštní ošetření pro různé formáty zápisů ve staré DB (např. `dochazka` vs `web_realna_dochazka`).
