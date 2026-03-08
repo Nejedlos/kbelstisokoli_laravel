@@ -117,11 +117,13 @@ class ExternalStatsSyncService
 
             $run->updateMetadata(['url' => $config->team_season_url]);
             $html = $this->fetcher->fetch($config->team_season_url, $run);
+            ConsoleService::log("    - Staženo " . number_format(strlen($html) / 1024, 1) . " KB HTML.", 'debug');
 
             $aiOnly = config('external_sources.czbasketball.ai_only', env('CZBASKETBALL_AI_ONLY', false)) || ($options['ai'] ?? false);
 
             $clipper = app(CzBasketballTeamPageClipper::class);
             $clips = $clipper->clip($html, $config->team_season_url);
+            ConsoleService::log("    - Extrahováno " . count($clips) . " fragmentů (clips) z HTML.", 'debug');
 
             // CNH a JSON Linky
             $cnh = $clipper->buildCnh($clips);
@@ -207,6 +209,7 @@ class ExternalStatsSyncService
             $hash = hash('sha256', $fragmentHtml);
 
             if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
+                ConsoleService::log("    - Obsah soupisky se nezměnil (hash match), přeskakuji import.", 'info');
                 $run->skip();
 
                 return;
@@ -229,6 +232,7 @@ class ExternalStatsSyncService
             }
 
             $this->rosterSyncService->syncWithData($config, $data);
+            ConsoleService::log("    - Synchronizováno " . count($data->rows) . " hráčů do databáze.", 'success');
 
             // Link following: Hráči
             if (!empty($rosterClip->links) && ($options['follow_players'] ?? false)) {
@@ -273,6 +277,7 @@ class ExternalStatsSyncService
         try {
             $run->updateMetadata(['url' => $config->matches_list_url]);
             $html = $this->fetcher->fetch($config->matches_list_url, $run);
+            ConsoleService::log("    - Staženo " . number_format(strlen($html) / 1024, 1) . " KB HTML.", 'debug');
 
             $aiOnly = config('external_sources.czbasketball.ai_only', env('CZBASKETBALL_AI_ONLY', false)) || ($options['ai'] ?? false);
 
@@ -360,6 +365,7 @@ class ExternalStatsSyncService
             $hash = hash('sha256', $fragmentHtml);
 
             if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
+                ConsoleService::log("    - Obsah seznamu zápasů se nezměnil (hash match).", 'info');
                 $run->skip();
             } else {
                 $run->update([
@@ -455,6 +461,9 @@ class ExternalStatsSyncService
 
         // Načteme dostatečný počet zápasů pro filtraci v PHP (abychom se vyhnuli JSON query v SQL)
         $matches = $query->limit(100)->get();
+        $totalMatches = $matches->count();
+
+        ConsoleService::log("    - Nalezeno $totalMatches zápasů splňujících kritéria pro detailní synchronizaci.", 'info');
 
         $dispatchedCount = 0;
         foreach ($matches as $match) {
@@ -487,6 +496,8 @@ class ExternalStatsSyncService
             ConsoleService::log("    -> Naplánován detail zápasu: ID {$match->id} ({$match->metadata['external_id']})", 'debug');
             $dispatchedCount++;
         }
+
+        ConsoleService::log("    - Celkem naplánováno $dispatchedCount detailních synchronizací.", 'success');
     }
 
     /**
@@ -582,6 +593,7 @@ class ExternalStatsSyncService
 
             $hash = hash('sha256', $fragmentHtml);
             if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
+                ConsoleService::log("    - Obsah detailu zápasu se nezměnil (hash match).", 'info');
                 $run->skip();
 
                 return;

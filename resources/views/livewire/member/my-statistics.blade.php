@@ -252,7 +252,7 @@
             {{-- Empty State --}}
             <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
                 <i class="fa-light fa-chart-user text-6xl text-gray-100 dark:text-gray-700"></i>
-                <div class="text-gray-400 font-medium italic">Zatím nemáme nahrané žádné tvé osobní statistiky v této sezóně.</div>
+                <div class="text-gray-400 font-medium italic">Zatím nemáme nahrané žádné tvé osobní statistiky pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }}.</div>
             </div>
         @endif
     @elseif($view === 'team')
@@ -357,7 +357,7 @@
             {{-- Empty State --}}
             <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
                 <i class="fa-light fa-users-slash text-6xl text-gray-100 dark:text-gray-700"></i>
-                <div class="text-gray-400 font-medium italic">Tento tým v dané sezóně zatím nemá synchronizované týmové statistiky.</div>
+                <div class="text-gray-400 font-medium italic">Tým {{ $activeTeamName }} v sezóně {{ $activeSeasonName }} zatím nemá synchronizované týmové statistiky.</div>
             </div>
         @endif
     @elseif($view === 'matches')
@@ -431,7 +431,7 @@
                         @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">
-                                Žádné zápasy pro tento tým v této sezóně nebyly nalezeny.
+                                Žádné zápasy pro tým {{ $activeTeamName }} v sezóně {{ $activeSeasonName }} nebyly nalezeny.
                             </td>
                         </tr>
                         @endforelse

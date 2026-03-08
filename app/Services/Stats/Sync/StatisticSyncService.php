@@ -9,6 +9,7 @@ use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\User;
 use App\Services\Stats\DTO\NormalizedTableDTO;
+use App\Services\Support\ConsoleService;
 use Illuminate\Support\Facades\DB;
 
 class StatisticSyncService
@@ -220,6 +221,7 @@ class StatisticSyncService
         $summarySet = StatisticSet::where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET)->first();
 
         if (! $boxscoreSet || ! $summarySet) {
+            ConsoleService::log("Přepočet hráčů zrušen: Chybí definice statistik (boxscore nebo summary).", 'warning');
             return;
         }
 
@@ -229,6 +231,14 @@ class StatisticSyncService
             ->whereNotNull('player_id')
             ->distinct()
             ->pluck('player_id');
+
+        $count = $playerIds->count();
+        if ($count === 0) {
+            ConsoleService::log("  - Žádní spárovaní hráči se statistikami pro sezónu ID $seasonId nenalezeni.", 'info');
+            return;
+        }
+
+        ConsoleService::log("  - Přepočítávám sezónní souhrny pro $count hráčů...", 'info');
 
         foreach ($playerIds as $playerId) {
             $rows = StatisticRow::where('statistic_set_id', $boxscoreSet->id)
@@ -253,6 +263,7 @@ class StatisticSyncService
                 ]
             );
         }
+        ConsoleService::log("    - Hotovo ($count hráčů).", 'success');
     }
 
     /**
@@ -263,6 +274,7 @@ class StatisticSyncService
         $teamSummarySet = StatisticSet::where('slug', StatisticSetService::TEAM_SEASON_SUMMARY_SET)->first();
 
         if (! $teamSummarySet) {
+            ConsoleService::log("Přepočet týmu zrušen: Chybí definice TEAM_SEASON_SUMMARY_SET.", 'warning');
             return;
         }
 
@@ -273,6 +285,11 @@ class StatisticSyncService
             ->get();
 
         $gp = $matches->count();
+
+        if ($gp === 0) {
+            ConsoleService::log("    - Žádné dokončené zápasy pro tým ID $teamId v sezóně ID $seasonId.", 'info');
+        }
+
         $wins = 0;
         $losses = 0;
         $ptsFor = 0;
@@ -313,6 +330,10 @@ class StatisticSyncService
                 ],
             ]
         );
+
+        if ($gp > 0) {
+            ConsoleService::log("    - Přepočítán tým (GP: $gp, W: $wins, L: $losses).", 'success');
+        }
     }
 
     /**

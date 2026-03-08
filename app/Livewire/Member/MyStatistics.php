@@ -145,6 +145,8 @@ class MyStatistics extends Component
             'seasons' => Season::orderBy('name', 'desc')->get(),
             'allTeams' => Team::orderBy('name')->get(),
             'userTeams' => $userTeams,
+            'activeSeasonName' => Season::find($this->seasonId)?->name ?? '?',
+            'activeTeamName' => Team::find($this->teamId)?->name ?? '?',
         ]);
     }
 }
