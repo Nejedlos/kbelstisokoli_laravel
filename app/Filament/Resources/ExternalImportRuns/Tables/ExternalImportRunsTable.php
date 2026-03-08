@@ -103,8 +103,7 @@ class ExternalImportRunsTable
                     ->relationship('season', 'name'),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->url(fn ($record) => "/admin/external-import-runs/{$record->id}"),
+                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
