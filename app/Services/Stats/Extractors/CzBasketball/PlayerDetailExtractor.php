@@ -80,7 +80,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
     {
         $history = [];
         // Hledáme tabulku kariéry (v tabu statistiky)
-        $table = $crawler->filter('h3:contains("Kariéra")')->nextAll()->filter('table')->first();
+        $table = $crawler->filterXPath("//h3[contains(., 'Kariéra')]")->nextAll()->filter('table')->first();
 
         if ($table->count() === 0) {
             // Zkusíme najít jakoukoli tabulku s historií, pokud h3 není přítomno

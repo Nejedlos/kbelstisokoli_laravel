@@ -173,26 +173,73 @@ class PredictionService
     private function generateExplanation(BasketballMatch $match, float $eloProb, array $formResult, array $rosterResult, array $previewResult): array
     {
         $points = [];
+
+        // 1. Vzájemné zápasy
+        $mutualMatches = $match->metadata['mutual_matches'] ?? [];
+        if (!empty($mutualMatches)) {
+            $wins = 0;
+            $count = count($mutualMatches);
+            $teamName = $match->team->name;
+            foreach ($mutualMatches as $m) {
+                $isWin = (int)$m['score_home'] > (int)$m['score_away'];
+                if (str_contains(strtolower($m['team_home']), strtolower($teamName)) === false) {
+                    $isWin = (int)$m['score_away'] > (int)$m['score_home'];
+                }
+                if ($isWin) {
+                    $wins++;
+                }
+            }
+            if ($count > 0) {
+                $points[] = "Historie: z posledních {$count} vzájemných zápasů jsme vyhráli {$wins}x.";
+            }
+        }
+
+        // 2. Domácí prostředí
         if ($match->is_home) {
             $points[] = "Výhodu nám dává domácí prostředí (+{$this->eloCalculator->getHomeAdvantage()} Elo).";
         }
 
+        // 3. Forma týmu (z interních dat)
         if ($formResult['count'] >= 3) {
             $winText = "{$formResult['wins']}–" . ($formResult['count'] - $formResult['wins']);
             $diffPrefix = $formResult['avg_diff'] > 0 ? '+' : '';
             $points[] = "Naše forma: posledních {$formResult['count']} zápasů {$winText}, průměrný rozdíl skóre {$diffPrefix}" . round($formResult['avg_diff'], 1) . ".";
         }
 
-        if ($rosterResult['team']['count'] >= 3) {
-             $points[] = "Naše soupiska: top 5 hráčů drží průměrně " . round($rosterResult['team']['total'] / 5, 1) . " bodů na zápas (dle interních dat).";
+        // 4. Forma soupeře (pokud je v preview_data)
+        $lastMatches = $match->metadata['last_matches'] ?? [];
+        if (!empty($lastMatches['away'])) {
+            $awayMatches = array_slice($lastMatches['away'], 0, 5);
+            $oppWins = 0;
+            $oppCount = count($awayMatches);
+            $oppName = $match->opponent?->name ?? 'Soupeř';
+            foreach ($awayMatches as $m) {
+                $isWin = (int)$m['score_home'] > (int)$m['score_away'];
+                if (str_contains(strtolower($m['team_home']), strtolower($oppName)) === false) {
+                    $isWin = (int)$m['score_away'] > (int)$m['score_home'];
+                }
+                if ($isWin) {
+                    $oppWins++;
+                }
+            }
+            if ($oppCount >= 3) {
+                $points[] = "Forma soupeře: z posledních {$oppCount} zápasů vyhráli {$oppWins}x.";
+            }
         }
 
+        // 5. Soupiska
+        if ($rosterResult['team']['count'] >= 3) {
+            $points[] = "Naše soupiska: top 5 hráčů drží průměrně " . round($rosterResult['team']['total'] / 5, 1) . " bodů na zápas (dle interních dat).";
+        }
+
+        // 6. Rozvaha (externí srovnání)
         if (!empty($previewResult['factors']['pts'])) {
             $diff = $previewResult['factors']['pts'];
             $diffPrefix = $diff > 0 ? '+' : '';
             $points[] = "Statistika (rozvaha): rozdíl v průměru vstřelených bodů obou týmů je {$diffPrefix}" . round($diff, 1) . ".";
         }
 
+        // 7. Varování
         if ($rosterResult['opponent']['count'] === 0 && empty($previewResult['factors'])) {
             $points[] = "Pozor: o soupeři máme málo dat → predikce má nižší jistotu.";
         }

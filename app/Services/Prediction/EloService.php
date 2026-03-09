@@ -17,7 +17,7 @@ class EloService
      */
     public function updateFromMatch(BasketballMatch $match): void
     {
-        if (!$match->score_home || !$match->score_away) {
+        if (!$match->score_home || !$match->score_away || !$match->opponent_id) {
             return;
         }
 

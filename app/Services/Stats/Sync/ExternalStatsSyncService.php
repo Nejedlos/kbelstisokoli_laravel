@@ -603,6 +603,10 @@ class ExternalStatsSyncService
                     Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: ".$e->getMessage());
 
                     if ($boxscoreClips->isEmpty()) {
+                        // Pokud je zápas v budoucnu, není to chyba (nemá boxscore, ale metadata jsou OK)
+                        if ($match->scheduled_at && $match->scheduled_at->isFuture()) {
+                             return;
+                        }
                         throw new \Exception('DOM extractor failed and no boxscore clips found for AI fallback.');
                     }
 

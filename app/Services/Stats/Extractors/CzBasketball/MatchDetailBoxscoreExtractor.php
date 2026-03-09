@@ -72,7 +72,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $tables = $crawler->filter('table.table-condensed');
 
         $allTablesData = [];
-        $allFragmentHtml = '';
+        $allFragmentHtml = "<!-- Match Header -->\n" . json_encode($matchHeader) . "\n";
+        $allFragmentHtml .= "<!-- Leaders -->\n" . json_encode($bestPlayers) . "\n";
+        $allFragmentHtml .= "<!-- Comparison -->\n" . json_encode($teamComparison) . "\n";
+        $allFragmentHtml .= "<!-- Mutual -->\n" . json_encode($mutualMatches) . "\n";
 
         $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison, $lastMatches, $mutualMatches) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
@@ -192,8 +195,17 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
         if (empty($periods)) {
             // Hledáme tabulku s průběhem skóre po čtvrtinách (často v detailu zápasu)
-            $scoreByQuartersTable = $crawler->filter('.table-quarters, .score-quarters-table, table:contains("1.č"), table:contains("1. č")')->first();
-            if ($scoreByQuartersTable->count() > 0) {
+            $scoreByQuartersTable = $crawler->filter('.table-quarters, .score-quarters-table')->first();
+            if ($scoreByQuartersTable->count() === 0) {
+                // XPath fallback pro tabulku obsahující text čtvrtin
+                try {
+                    $scoreByQuartersTable = $crawler->filterXPath("//table[contains(., '1.č') or contains(., '1. č')]")->first();
+                } catch (\Exception $e) {
+                    // Ignorujeme chyby v XPath
+                }
+            }
+
+            if ($scoreByQuartersTable && $scoreByQuartersTable->count() > 0) {
                 $qRows = $scoreByQuartersTable->filter('tr');
                 if ($qRows->count() >= 2) {
                     $homeRow = $qRows->eq(0)->filter('td, th');
@@ -565,7 +577,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                         $awayTeam = $teamNames->count() > 1 ? trim($teamNames->eq(1)->text()) : '';
 
                         $scoreNode = $tds->eq(3);
-                        $scoreDivs = $scoreNode->filter('div, text()'); // Skóre může být v divu s font-weight-bold
+                        $scoreDivs = $scoreNode->filter('div'); // Skóre může být v divu s font-weight-bold
                         // Jednodušší přístup: vyčistit text od čtvrtin
                         $scoreText = trim($scoreNode->text());
                         // Skóre je obvykle první dvě čísla

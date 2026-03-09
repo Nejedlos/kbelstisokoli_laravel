@@ -198,6 +198,8 @@ return [
         'win_chance_short' => 'VÝHRA',
         'why_title' => 'Proč si to myslíme',
         'confidence_label' => 'Důvěra',
+        'form_title' => 'Předzápasová bilance (forma)',
+        'mutual_matches_title' => 'Vzájemné zápasy',
         'methodology' => 'Metodika',
         'methodology_desc' => 'Predikce je založena na kombinaci Elo ratingu (dlouhodobá síla), aktuální formy (posledních 5 zápasů) a síly kádru. Výpočet se zpřesňuje s rostoucím množstvím dat.',
         'disclaimer' => 'Jde o matematický model, nikoliv záruku výsledku. Basketbal je nevyzpytatelný!',
