@@ -87,6 +87,7 @@
     @endforeach
 
     <meta name="theme-color" content="{{ $branding['colors']['red'] ?? '#e11d48' }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>{!! $branding_css !!}</style>
     <style>
         /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */

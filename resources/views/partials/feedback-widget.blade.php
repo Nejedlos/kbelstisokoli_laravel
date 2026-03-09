@@ -13,7 +13,7 @@
     <!-- Floating Action Button -->
     <button @click="$dispatch('ks-feedback-open')"
             type="button"
-            class="ks-fab-trigger fixed left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
+            class="ks-fab-trigger fixed left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
             style="z-index: 2147483647 !important; background-color: #e11d48 !important; display: flex !important; pointer-events: auto !important; visibility: visible !important; opacity: 1 !important;"
             :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'"
             aria-label="Odeslat zpětnou vazbu">
@@ -50,7 +50,7 @@
             <!-- Header -->
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center">
                         <i class="fa-light fa-comment-dots text-xl"></i>
                     </div>
                     <div>
@@ -72,19 +72,19 @@
                             <label class="text-sm font-semibold text-slate-700">Typ hlášení <span class="text-red-500">*</span></label>
                             <div class="grid grid-cols-3 gap-2">
                                 <label class="relative flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all"
-                                       :class="form.type === 'bug' ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'">
+                                       :class="form.type === 'bug' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'">
                                     <input type="radio" x-model="form.type" value="bug" class="sr-only">
                                     <i class="fa-light fa-bug mb-1"></i>
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Bug</span>
                                 </label>
                                 <label class="relative flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all"
-                                       :class="form.type === 'idea' ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'">
+                                       :class="form.type === 'idea' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'">
                                     <input type="radio" x-model="form.type" value="idea" class="sr-only">
                                     <i class="fa-light fa-lightbulb mb-1"></i>
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Nápad</span>
                                 </label>
                                 <label class="relative flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all"
-                                       :class="form.type === 'feedback' ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'">
+                                       :class="form.type === 'feedback' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'">
                                     <input type="radio" x-model="form.type" value="feedback" class="sr-only">
                                     <i class="fa-light fa-message-smile mb-1"></i>
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Ostatní</span>
@@ -95,7 +95,7 @@
                         <!-- Severity -->
                         <div class="space-y-1.5">
                             <label class="text-sm font-semibold text-slate-700">Závažnost</label>
-                            <select x-model="form.severity" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all">
+                            <select x-model="form.severity" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-rose-500 focus:border-rose-500 bg-white shadow-sm transition-all">
                                 <option value="low">Nízká</option>
                                 <option value="medium">Střední</option>
                                 <option value="high">Vysoká / Kritická</option>
@@ -107,14 +107,14 @@
                     <div class="space-y-1.5 mb-4">
                         <label class="text-sm font-semibold text-slate-700">Nadpis <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.title" required maxlength="120" placeholder="Stručně popište problém..."
-                               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all">
+                               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-rose-500 focus:border-rose-500 bg-white shadow-sm transition-all">
                     </div>
 
                     <!-- Description -->
                     <div class="space-y-1.5 mb-4">
                         <label class="text-sm font-semibold text-slate-700">Popis <span class="text-red-500">*</span></label>
                         <textarea x-model="form.description" required rows="4" maxlength="5000" placeholder="Detailnější popis..."
-                                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all"></textarea>
+                                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-rose-500 focus:border-rose-500 bg-white shadow-sm transition-all"></textarea>
                     </div>
 
                     <!-- Steps (Conditional for bugs) -->
@@ -125,7 +125,7 @@
                          class="space-y-1.5 mb-4">
                         <label class="text-sm font-semibold text-slate-700">Kroky k reprodukci</label>
                         <textarea x-model="form.steps" rows="3" maxlength="10000" placeholder="1. Klikněte na... 2. Pak udělejte..."
-                                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white shadow-sm transition-all"></textarea>
+                                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-rose-500 focus:border-rose-500 bg-white shadow-sm transition-all"></textarea>
                     </div>
 
                     <!-- Options -->
@@ -133,27 +133,27 @@
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Přiložit k hlášení</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" x-model="options.screenshot" class="rounded text-primary-600 focus:ring-primary-500">
+                                <input type="checkbox" x-model="options.screenshot" class="rounded text-rose-600 focus:ring-rose-500">
                                 <span class="text-sm text-slate-600 group-hover:text-slate-900">Aktuální screenshot</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" x-model="options.logs" class="rounded text-primary-600 focus:ring-primary-500">
+                                <input type="checkbox" x-model="options.logs" class="rounded text-rose-600 focus:ring-rose-500">
                                 <span class="text-sm text-slate-600 group-hover:text-slate-900">Logy konzole (<span x-text="logs ? logs.length : 0"></span>)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" x-model="options.network" class="rounded text-primary-600 focus:ring-primary-500">
+                                <input type="checkbox" x-model="options.network" class="rounded text-rose-600 focus:ring-rose-500">
                                 <span class="text-sm text-slate-600 group-hover:text-slate-900">Chyby sítě (<span x-text="networkFailures ? networkFailures.length : 0"></span>)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" x-model="options.performance" class="rounded text-primary-600 focus:ring-primary-500">
+                                <input type="checkbox" x-model="options.performance" class="rounded text-rose-600 focus:ring-rose-500">
                                 <span class="text-sm text-slate-600 group-hover:text-slate-900">Výkonnostní data</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" x-model="options.clicks" class="rounded text-primary-600 focus:ring-primary-500">
+                                <input type="checkbox" x-model="options.clicks" class="rounded text-rose-600 focus:ring-rose-500">
                                 <span class="text-sm text-slate-600 group-hover:text-slate-900">Kliky (aktivovat)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" x-model="options.dom" class="rounded text-primary-600 focus:ring-primary-500">
+                                <input type="checkbox" x-model="options.dom" class="rounded text-rose-600 focus:ring-rose-500">
                                 <span class="text-sm text-slate-600 group-hover:text-slate-900">DOM Snapshot (struktura)</span>
                             </label>
                         </div>
@@ -173,7 +173,7 @@
                         Zrušit
                     </button>
                     <button @click="submitFeedback()" :disabled="submitting" type="button"
-                            class="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-500/30 transition-all flex items-center gap-2">
+                            class="px-6 py-2 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 text-white text-sm font-bold rounded-xl shadow-lg shadow-rose-500/30 transition-all flex items-center gap-2">
                         <template x-if="submitting">
                             <i class="fa-light fa-spinner fa-spin"></i>
                         </template>
@@ -663,16 +663,27 @@
                             body: JSON.stringify(payload)
                         });
 
-                        const result = await response.json();
+                        const contentType = response.headers.get('content-type');
+                        let result;
+
+                        if (contentType && contentType.includes('application/json')) {
+                            result = await response.json();
+                        } else {
+                            // Non-JSON response (likely a redirect or server error page)
+                            const text = await response.text();
+                            console.error('Server returned non-JSON response:', text.substring(0, 500));
+                            throw new Error(`Server returned status ${response.status} with non-JSON content.`);
+                        }
+
                         if (response.ok) {
-                            this.showStatus(result.message, 'success');
+                            this.showStatus(result.message || 'Feedback byl úspěšně odeslán.', 'success');
                             this.resetForm();
                             this.closeModal();
                         } else {
-                            this.showStatus(result.message || 'Chyba při odesílání.', 'error');
+                            this.showStatus(result.message || result.error || 'Chyba při odesílání.', 'error');
                         }
                     } catch (e) {
-                        this.showStatus('Došlo k neočekávané chybě.', 'error');
+                        this.showStatus('Došlo k neočekávané chybě: ' + (e.message || 'Neznámá chyba'), 'error');
                         console.error(e);
                     } finally {
                         this.submitting = false;
