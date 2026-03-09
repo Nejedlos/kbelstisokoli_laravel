@@ -4,17 +4,12 @@ return [
     // Veřejná navigace (hlavní menu)
     'public' => [
         ['title' => 'nav.home', 'route' => 'public.home'],
-        [
-            'title' => 'nav.club',
-            'children' => [
-                ['title' => 'nav.history', 'route' => 'public.history.index'],
-                ['title' => 'nav.contact', 'route' => 'public.contact.index'],
-                ['title' => 'nav.recruitment', 'route' => 'public.recruitment.index'],
-            ],
-        ],
+        ['title' => 'nav.history', 'route' => 'public.history.index'],
+        ['title' => 'nav.contact', 'route' => 'public.contact.index'],
+        ['title' => 'nav.recruitment', 'route' => 'public.recruitment.index'],
         ['title' => 'nav.teams', 'route' => 'public.teams.index'],
         [
-            'title' => 'nav.actions',
+            'title' => 'nav.program',
             'children' => [
                 ['title' => 'nav.matches', 'route' => 'public.matches.index'],
                 ['title' => 'nav.trainings', 'route' => 'public.trainings.index'],

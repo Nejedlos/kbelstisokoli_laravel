@@ -105,12 +105,14 @@
                     @empty
                         {{-- Fallback na statickou navigaci z configu, pokud menu v DB není --}}
                         @foreach(config('navigation.public', []) as $item)
-                            <li>
-                                <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ Route::has($item['route']) && request()->routeIs($item['route']) ? 'text-primary' : '' }}">
-                                    <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
-                                    <span class="font-medium">{{ __($item['title']) }}</span>
-                                </a>
-                            </li>
+                            @if(isset($item['route']))
+                                <li>
+                                    <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ Route::has($item['route']) && request()->routeIs($item['route']) ? 'text-primary' : '' }}">
+                                        <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                                        <span class="font-medium">{{ __($item['title']) }}</span>
+                                    </a>
+                                </li>
+                            @endif
                         @endforeach
                     @endforelse
                     <li>
