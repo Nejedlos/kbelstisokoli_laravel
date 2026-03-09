@@ -130,6 +130,10 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Tréninky
     Route::get('/treninky', [TrainingController::class, 'index'])->name('trainings.index');
 
+    // Akce (Turnaje, Soustředění)
+    Route::get('/akce', [\App\Http\Controllers\Public\ClubEventController::class, 'index'])->name('events.index');
+    Route::get('/akce/{id}', [\App\Http\Controllers\Public\ClubEventController::class, 'show'])->name('events.show');
+
     // Historie
     Route::get('/historie', [HistoryController::class, 'index'])->name('history.index');
 

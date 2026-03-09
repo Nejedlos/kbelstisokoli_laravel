@@ -4,14 +4,25 @@ return [
     // Veřejná navigace (hlavní menu)
     'public' => [
         ['title' => 'nav.home', 'route' => 'public.home'],
+        [
+            'title' => 'nav.club',
+            'children' => [
+                ['title' => 'nav.history', 'route' => 'public.history.index'],
+                ['title' => 'nav.contact', 'route' => 'public.contact.index'],
+                ['title' => 'nav.recruitment', 'route' => 'public.recruitment.index'],
+            ],
+        ],
+        ['title' => 'nav.teams', 'route' => 'public.teams.index'],
+        [
+            'title' => 'nav.actions',
+            'children' => [
+                ['title' => 'nav.matches', 'route' => 'public.matches.index'],
+                ['title' => 'nav.trainings', 'route' => 'public.trainings.index'],
+                ['title' => 'nav.club_events', 'route' => 'public.events.index'],
+            ],
+        ],
         ['title' => 'nav.news', 'route' => 'public.news.index'],
-        ['title' => 'nav.team', 'route' => 'public.teams.index'],
-        ['title' => 'nav.matches', 'route' => 'public.matches.index'],
-        ['title' => 'nav.trainings', 'route' => 'public.trainings.index'],
-        ['title' => 'nav.recruitment', 'route' => 'public.recruitment.index'],
         ['title' => 'nav.gallery', 'route' => 'public.galleries.index'],
-        ['title' => 'nav.history', 'route' => 'public.history.index'],
-        ['title' => 'nav.contact', 'route' => 'public.contact.index'],
     ],
 
     // Členská sekce: kompletní struktura pro portál

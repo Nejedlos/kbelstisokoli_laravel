@@ -50,14 +50,41 @@
 
         <!-- Desktop Navigation -->
         @if(!($branding['maintenance_mode'] ?? false))
-        <nav class="hidden lg:grid lg:grid-flow-col lg:grid-rows-5 xl:flex items-center gap-x-12 gap-y-1 xl:gap-8">
+        <nav class="hidden lg:flex items-center gap-x-8 xl:gap-10">
             @foreach($navigation as $item)
-                @if(Route::has($item['route']))
-                <a href="{{ route($item['route']) }}"
-                   @wireNavigate
-                   class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition {{ request()->routeIs($item['route']) ? 'text-primary border-b-2 border-primary' : '' }}">
-                    {{ __($item['title']) }}
-                </a>
+                @if(isset($item['children']))
+                    <div x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false" class="relative group py-2">
+                        <button class="flex items-center gap-1.5 font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 group-hover:text-primary transition focus:outline-none">
+                            {{ __($item['title']) }}
+                            <i class="fa-light fa-chevron-down text-[10px] transition-transform duration-300 group-hover:rotate-180"></i>
+                        </button>
+                        <div x-show="open"
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                             class="absolute left-0 mt-1 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden"
+                             @click="open = false">
+                            @foreach($item['children'] as $child)
+                                @if(Route::has($child['route']))
+                                    <a href="{{ route($child['route']) }}"
+                                       @wireNavigate
+                                       class="flex items-center px-5 py-2.5 text-[10px] xl:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-primary transition-all duration-200 {{ request()->routeIs($child['route']) ? 'text-primary bg-primary/5' : '' }}">
+                                        {{ __($child['title']) }}
+                                    </a>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @elseif(isset($item['route']) && Route::has($item['route']))
+                    <a href="{{ route($item['route']) }}"
+                       @wireNavigate
+                       class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition py-2 {{ request()->routeIs($item['route']) ? 'text-primary border-b-2 border-primary' : '' }}">
+                        {{ __($item['title']) }}
+                    </a>
                 @endif
             @endforeach
         </nav>
@@ -184,25 +211,45 @@
     @if(!($branding['maintenance_mode'] ?? false))
     <div x-show="mobileMenuOpen"
          x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-10"
          x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-4"
-         class="lg:hidden bg-white border-t border-slate-100 py-4 absolute w-full shadow-xl">
-         <div class="container py-6">
-            <div class="grid grid-cols-2 gap-2">
+         x-transition:leave-end="opacity-0 -translate-y-10"
+         class="lg:hidden bg-white border-t border-slate-100 py-6 absolute w-full shadow-2xl z-40 max-h-[85vh] overflow-y-auto">
+         <div class="container pb-8">
+            <div class="flex flex-col gap-1">
                 @foreach($navigation as $item)
-                    @if(Route::has($item['route']))
-                    <a href="{{ route($item['route']) }}"
-                       class="font-bold uppercase text-[11px] tracking-wide py-3 px-4 rounded-xl border-b border-slate-50 hover:bg-slate-50 {{ request()->routeIs($item['route']) ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
-                        {{ __($item['title']) }}
-                    </a>
+                    @if(isset($item['children']))
+                        <div x-data="{ open: false }" class="border-b border-slate-50">
+                            <button @click="open = !open" class="flex items-center justify-between w-full font-black uppercase text-xs tracking-widest py-4 px-4 hover:bg-slate-50 text-slate-700 transition-colors focus:outline-none">
+                                <span>{{ __($item['title']) }}</span>
+                                <i class="fa-light fa-chevron-down text-[10px] transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
+                            </button>
+                            <div x-show="open" x-collapse x-cloak class="bg-slate-50/50 rounded-2xl mx-2 mb-2 overflow-hidden">
+                                <div class="grid grid-cols-1 gap-0.5 p-1">
+                                    @foreach($item['children'] as $child)
+                                        @if(Route::has($child['route']))
+                                            <a href="{{ route($child['route']) }}"
+                                               class="flex items-center font-bold uppercase text-[10px] tracking-widest py-3 px-6 rounded-xl hover:bg-white hover:text-primary transition-all {{ request()->routeIs($child['route']) ? 'text-primary bg-white' : 'text-slate-500' }}">
+                                                {{ __($child['title']) }}
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @elseif(isset($item['route']) && Route::has($item['route']))
+                        <a href="{{ route($item['route']) }}"
+                           class="block font-black uppercase text-xs tracking-widest py-4 px-4 border-b border-slate-50 hover:bg-slate-50 transition-colors {{ request()->routeIs($item['route']) ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
+                            {{ __($item['title']) }}
+                        </a>
                     @endif
                 @endforeach
             </div>
-            <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="btn btn-primary mt-6 py-4 w-full">
+            <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="btn btn-primary mt-8 py-4 w-full shadow-lg shadow-primary/20">
+                <i class="fa-light fa-user-lock mr-2"></i>
                 {{ __('nav.login_member') }}
             </a>
         </div>
