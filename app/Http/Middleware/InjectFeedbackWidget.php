@@ -64,10 +64,25 @@ class InjectFeedbackWidget
 
         try {
             $widgetUrl = route('feedback.widget');
-        } catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
-            \Illuminate\Support\Facades\Log::warning('Feedback widget route not found, skipping injection.');
+            $manifestPath = public_path('build/manifest.json');
+            $jsUrl = '';
+
+            if (file_exists($manifestPath)) {
+                $manifest = json_decode(file_get_contents($manifestPath), true);
+                if (isset($manifest['resources/js/feedback-widget.js']['file'])) {
+                    $jsUrl = asset('build/' . $manifest['resources/js/feedback-widget.js']['file']);
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Feedback widget route or asset not found, skipping injection.');
             return;
         }
+
+        if (empty($jsUrl)) {
+            \Illuminate\Support\Facades\Log::warning('Feedback widget JS not found in manifest, skipping injection.');
+            return;
+        }
+
         $loader = <<<HTML
 <script id="ks-fb-loader" data-navigate-once>
     (function() {
@@ -79,6 +94,15 @@ class InjectFeedbackWidget
             }
             isFeedbackLoading = true;
 
+            // 1. Load the script first (if not already loaded)
+            if (!window.registerKsFeedbackWidget && !document.querySelector('script[src*="feedback-widget"]')) {
+                const script = document.createElement('script');
+                script.src = '{$jsUrl}';
+                script.async = true;
+                document.head.appendChild(script);
+            }
+
+            // 2. Fetch the widget HTML
             fetch('{$widgetUrl}')
                 .then(response => response.text())
                 .then(html => {
@@ -86,49 +110,17 @@ class InjectFeedbackWidget
                     const temp = document.createElement('div');
                     temp.innerHTML = html.trim();
 
-                    // 1. Nejprve najdeme a vložíme všechny skripty, aby byly funkce v globálním scope před inicializací Alpine
-                    const scripts = Array.from(temp.querySelectorAll('script'));
-                    let loadedScriptsCount = 0;
-                    const externalScripts = scripts.filter(s => s.src);
-                    const inlineScripts = scripts.filter(s => !s.src);
-
-                    const runInlineScripts = () => {
-                        inlineScripts.forEach(oldScript => {
-                            const newScript = document.createElement('script');
-                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                            newScript.textContent = oldScript.textContent;
-                            document.body.appendChild(newScript);
-                            oldScript.remove();
-                        });
+                    // Wait for Alpine to be ready and component to be registered
+                    const inject = () => {
+                        if (window.Alpine && window.Alpine.data('ksFeedbackWidget')) {
+                             while (temp.firstChild) {
+                                document.body.appendChild(temp.firstChild);
+                            }
+                        } else {
+                            setTimeout(inject, 50);
+                        }
                     };
-
-                    if (externalScripts.length > 0) {
-                        externalScripts.forEach(oldScript => {
-                            const newScript = document.createElement('script');
-                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                            newScript.onload = () => {
-                                loadedScriptsCount++;
-                                if (loadedScriptsCount === externalScripts.length) {
-                                    runInlineScripts();
-                                }
-                            };
-                            newScript.onerror = () => {
-                                console.error('Failed to load feedback script:', newScript.src);
-                                loadedScriptsCount++;
-                                if (loadedScriptsCount === externalScripts.length) {
-                                    runInlineScripts();
-                                }
-                            };
-                            document.body.appendChild(newScript);
-                        });
-                    } else {
-                        runInlineScripts();
-                    }
-
-                    // 2. Poté vložíme zbytek (Strukturu widgetu)
-                    while (temp.firstChild) {
-                        document.body.appendChild(temp.firstChild);
-                    }
+                    inject();
                 })
                 .finally(() => {
                     isFeedbackLoading = false;
