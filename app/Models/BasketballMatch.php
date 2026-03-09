@@ -88,22 +88,23 @@ class BasketballMatch extends Model
     }
 
     /**
-     * Vrátí náhodnou pozitivní hlášku k odehranému zápasu.
+     * Vrátí náhodnou motivační hlášku k odehranému zápasu na základě výsledku.
      */
     public function getPostMatchVibeAttribute(): string
     {
-        $quotes = [
-            'Sokoli na hřišti, radost v srdci. Skvělý výkon celého týmu!',
-            'Bojovnost, nasazení a týmový duch – to jsou naši kluci.',
-            'Statistiky mluví jasně: naši borci do toho dali srdce.',
-            'Každý bod se počítá, každý hráč je hrdina. Skvělá práce!',
-            'Basketbal je o emocích a dnes jsme jich rozdali na rozdávání.',
-            'Hrdost na naše barvy! Dnes jsme na hřišti nechali všechno.',
-            'Týmová chemie, která funguje. Radost pohledět na naši hru.',
-            'Sokolí křídla dnes nesla naše barvy vysoko. Skvělý zápas!',
-        ];
+        if (!$this->has_score) {
+            return __('motivational.post_match.fallback');
+        }
 
-        return $quotes[array_rand($quotes)];
+        if ($this->is_win) {
+            $quotes = __('motivational.post_match.win');
+        } elseif ($this->is_loss) {
+            $quotes = __('motivational.post_match.loss');
+        } else {
+            $quotes = __('motivational.post_match.draw');
+        }
+
+        return is_array($quotes) ? $quotes[array_rand($quotes)] : $quotes;
     }
 
     /**
@@ -114,52 +115,15 @@ class BasketballMatch extends Model
         $winProb = $this->prediction?->probability_win ?? 0.5;
         $winChance = round($winProb * 100);
 
-        $lowQuotes = [
-            "Pamatuj, že David taky porazil Goliáše. Basket se hraje na hřišti, ne v tabulkách!",
-            "Statistiky jsou jen čísla. Srdce a bojovnost v datech nenajdeš.",
-            "Čím těžší bitva, tím sladší vítězství. Pojďme jim ukázat sílu sokolů!",
-            "Každý favorit jednou padne. Proč ne dneska proti nám?",
-            "Máme rádi roli outsidera. Můžeme jen překvapit!",
-            "Vítězství není o tom, kdo má víc bodů v Elo ratingu, ale kdo nechá na palubovce víc sil.",
-            "Sázkové kanceláře nám nevěří, ale my víme, co v nás je!",
-            "V basketu stačí jedna dobrá šňůra a všechno je jinak. Pojďme do toho!",
-            "Tlak je na nich, my můžeme jenom šokovat svět!",
-            "Papír snese všechno, ale palubovka nelže. Ukažme jim to!"
-        ];
-
-        $mediumQuotes = [
-            "Tady se bude lámat chleba. Každý koš, každý doskok se počítá!",
-            "Šance jsou vyrovnané, o vítězi rozhodne hlava a týmový duch.",
-            "Jsme na dobré cestě. Stačí udržet koncentraci a věřit si.",
-            "Dneska je to naše. Pojďme si pro tu výhru společně!",
-            "Všechno máme ve vlastních rukou. Dneska to tam padne!",
-            "Klíčem bude obrana. Když je zastavíme, vítězství nás nemine.",
-            "Bude to boj o každý metr, ale my jsme připraveni!",
-            "Soustředění na 100 % od první do poslední minuty.",
-            "Týmový výkon dneska rozhodne. Jeden za všechny, všichni za Sokoly!",
-            "Věřit si je polovina úspěchu. Tou druhou je dřina na hřišti."
-        ];
-
-        $highQuotes = [
-            "Papírově jsme silnější, ale nesmíme nic podcenit. Pokora a nasazení!",
-            "Máme na to je přejet. Pojďme od začátku diktovat tempo hry.",
-            "Dneska musíme potvrdit roli favorita. Žádné výmluvy, jen výhra.",
-            "Ukažme jim, proč jsme v tabulce tam, kde jsme.",
-            "Sebevědomí je základ, ale bez dřiny to nepůjde. Pojďme do nich!",
-            "Dneska hrajeme náš basket. Pokud udržíme kvalitu, nemají šanci.",
-            "Dominance pod košem i na perimetru. To je náš dnešní cíl.",
-            "Nedovolme jim ani na chvíli pomyslet na úspěch.",
-            "Jsme rozjetí a nic nás nezastaví!",
-            "Fanoušci čekají vítězství, pojďme jim ho doručit v plné parádě."
-        ];
-
         if ($winChance < 35) {
-            return $lowQuotes[array_rand($lowQuotes)];
+            $quotes = __('motivational.pre_match.low');
         } elseif ($winChance > 65) {
-            return $highQuotes[array_rand($highQuotes)];
+            $quotes = __('motivational.pre_match.high');
         } else {
-            return $mediumQuotes[array_rand($mediumQuotes)];
+            $quotes = __('motivational.pre_match.medium');
         }
+
+        return is_array($quotes) ? $quotes[array_rand($quotes)] : $quotes;
     }
 
     /**

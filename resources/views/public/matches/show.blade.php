@@ -238,15 +238,31 @@
                         @if(!$isPlayed && $prediction)
                             <div class="space-y-10">
                                 <!-- Motivational Quote -->
-                                <div class="relative p-8 md:p-14 bg-secondary rounded-[3rem] overflow-hidden text-center shadow-2xl shadow-secondary/20 group">
+                                <div @class([
+                                    'relative p-8 md:p-14 rounded-[3rem] overflow-hidden text-center shadow-2xl group transition-all duration-500',
+                                    'bg-secondary shadow-secondary/20' => $winChance >= 35 && $winChance <= 65,
+                                    'bg-success/90 shadow-success/20' => $winChance > 65,
+                                    'bg-rose-900/90 shadow-rose-900/20' => $winChance < 35,
+                                ])>
                                     <!-- Dynamic Background Elements -->
-                                    <div class="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full -mr-40 -mt-40 blur-[100px] animate-pulse"></div>
+                                    <div class="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-40 -mt-40 blur-[100px] animate-pulse"></div>
                                     <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mb-32 blur-[80px]"></div>
-                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br from-secondary via-secondary to-slate-900/50 opacity-50"></div>
+                                    <div @class([
+                                        'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-50',
+                                        'bg-gradient-to-br from-secondary via-secondary to-slate-900/50' => $winChance >= 35 && $winChance <= 65,
+                                        'bg-gradient-to-br from-success via-success to-emerald-900/50' => $winChance > 65,
+                                        'bg-gradient-to-br from-rose-900 via-rose-900 to-slate-950/50' => $winChance < 35,
+                                    ])></div>
 
                                     <div class="relative z-10">
-                                        <div class="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                            <i class="fa-light fa-quote-left text-primary text-3xl"></i>
+                                        <div class="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                            @if($winChance > 65)
+                                                <i class="fa-light fa-fire text-white text-3xl"></i>
+                                            @elseif($winChance < 35)
+                                                <i class="fa-light fa-shield text-white text-3xl"></i>
+                                            @else
+                                                <i class="fa-light fa-quote-left text-primary text-3xl"></i>
+                                            @endif
                                         </div>
 
                                         <blockquote class="text-2xl md:text-4xl font-black text-white leading-[1.1] mb-8 tracking-tight drop-shadow-sm italic">
@@ -254,16 +270,22 @@
                                         </blockquote>
 
                                         <div class="flex items-center justify-center gap-4">
-                                            <div class="h-px w-8 bg-gradient-to-r from-transparent to-primary/50"></div>
-                                            <div class="text-primary font-black uppercase tracking-[0.3em] text-[11px] py-1 px-3 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md">
-                                                Týmový duch Sokola
+                                            <div class="h-px w-8 bg-gradient-to-r from-transparent to-white/50"></div>
+                                            <div class="text-white font-black uppercase tracking-[0.3em] text-[11px] py-1 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
+                                                @if($winChance > 65)
+                                                    {{ __('motivational.pre_match.labels.high') }}
+                                                @elseif($winChance < 35)
+                                                    {{ __('motivational.pre_match.labels.low') }}
+                                                @else
+                                                    {{ __('motivational.pre_match.labels.medium') }}
+                                                @endif
                                             </div>
-                                            <div class="h-px w-8 bg-gradient-to-l from-transparent to-primary/50"></div>
+                                            <div class="h-px w-8 bg-gradient-to-l from-transparent to-white/50"></div>
                                         </div>
                                     </div>
 
                                     <!-- Decorative Basketball Icon -->
-                                    <div class="absolute -bottom-6 -right-6 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-transform duration-1000">
+                                    <div class="absolute -bottom-6 -right-6 opacity-[0.05] rotate-12 group-hover:rotate-0 transition-transform duration-1000">
                                         <i class="fa-light fa-basketball text-9xl text-white"></i>
                                     </div>
                                 </div>
@@ -306,14 +328,43 @@
                             @endphp
                             <div class="space-y-10">
                                 <!-- Post-Match Vibe -->
-                                <div class="relative p-6 md:p-10 bg-success/10 rounded-[2rem] overflow-hidden text-center border border-success/20">
-                                    <div class="absolute top-0 right-0 w-64 h-64 bg-success/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-                                    <i class="fa-light fa-star text-success/30 text-4xl mb-6 block"></i>
-                                    <blockquote class="text-xl md:text-2xl font-black text-secondary leading-tight mb-4 relative z-10">
+                                <div @class([
+                                    'relative p-6 md:p-10 rounded-[2rem] overflow-hidden text-center border',
+                                    'bg-success/10 border-success/20' => $match->is_win,
+                                    'bg-rose-50 border-rose-100' => $match->is_loss,
+                                    'bg-slate-50 border-slate-200' => !$match->is_win && !$match->is_loss,
+                                ])>
+                                    @if($match->is_win)
+                                        <div class="absolute top-0 right-0 w-64 h-64 bg-success/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                                        <i class="fa-light fa-star text-success/30 text-4xl mb-6 block"></i>
+                                    @elseif($match->is_loss)
+                                        <div class="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                                        <i class="fa-light fa-shield-heart text-rose-300 text-4xl mb-6 block"></i>
+                                    @else
+                                        <div class="absolute top-0 right-0 w-64 h-64 bg-slate-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                                        <i class="fa-light fa-handshake text-slate-300 text-4xl mb-6 block"></i>
+                                    @endif
+
+                                    <blockquote @class([
+                                        'text-xl md:text-2xl font-black leading-tight mb-4 relative z-10',
+                                        'text-secondary' => $match->is_win,
+                                        'text-slate-800' => !$match->is_win,
+                                    ])>
                                         "{{ $match->post_match_vibe }}"
                                     </blockquote>
-                                    <div class="text-success font-black uppercase tracking-widest text-[10px]">
-                                        Sokolí hrdost
+                                    <div @class([
+                                        'font-black uppercase tracking-widest text-[10px]',
+                                        'text-success' => $match->is_win,
+                                        'text-rose-500' => $match->is_loss,
+                                        'text-slate-500' => $match->is_draw,
+                                    ])>
+                                        @if($match->is_win)
+                                            {{ __('motivational.post_match.labels.win') }}
+                                        @elseif($match->is_loss)
+                                            {{ __('motivational.post_match.labels.loss') }}
+                                        @else
+                                            {{ __('motivational.post_match.labels.draw') }}
+                                        @endif
                                     </div>
                                 </div>
 
