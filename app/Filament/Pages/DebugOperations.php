@@ -489,6 +489,52 @@ class DebugOperations extends Page
                         ConsoleService::log($seasonId ? "Přepočet sezóny $seasonName dokončen." : 'Hromadný přepočet dokončen.', 'success');
                         Notification::make()->title($seasonId ? "Aggregations recomputed for season: $seasonName" : 'Aggregations recomputed for ALL seasons')->success()->send();
                     }),
+
+                Action::make('recomputePredictions')
+                    ->label('Přepočítat predikce')
+                    ->tooltip('Přepočítá (naplánuje do fronty) předzápasové predikce pro vybranou sezónu (nebo všechny).')
+                    ->icon(IconHelper::render(IconHelper::GAUGE))
+                    ->color('warning')
+                    ->form([
+                        \Filament\Forms\Components\Select::make('season_id')
+                            ->label('Sezóna')
+                            ->helperText('Ponechte prázdné pro VŠECHNY sezóny.')
+                            ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
+                            ->nullable(),
+                        \Filament\Forms\Components\Toggle::make('all_matches')
+                            ->label('Všechny zápasy')
+                            ->helperText('Pokud je zapnuto, přepočítá i již odehrané zápasy. Jinak jen budoucí.')
+                            ->default(false),
+                    ])
+                    ->requiresConfirmation()
+                    ->action(function (array $data) {
+                        $seasonId = $data['season_id'] ?? null;
+                        $allMatches = $data['all_matches'] ?? false;
+
+                        $query = BasketballMatch::query();
+                        if ($seasonId) {
+                            $query->where('season_id', $seasonId);
+                        }
+                        if (! $allMatches) {
+                            $query->whereIn('status', ['planned', 'scheduled']);
+                        }
+
+                        $matches = $query->get();
+                        $seasonName = $seasonId ? Season::find($seasonId)?->name : 'všech sezónách';
+
+                        ConsoleService::log("Spouštím hromadný přepočet predikcí pro " . ($allMatches ? 'VŠECHNY' : 'BUDOUCÍ') . " zápasy v {$seasonName} (celkem: " . $matches->count() . " zápasů).");
+
+                        foreach ($matches as $match) {
+                            \App\Jobs\ComputeMatchPredictionJob::dispatch($match->id);
+                        }
+
+                        ConsoleService::log("Přepočet predikcí byl naplánován do fronty pro {$matches->count()} zápasů.", 'success');
+                        Notification::make()
+                            ->title('Predictions recompute dispatched')
+                            ->body("Scheduled {$matches->count()} matches for prediction recompute.")
+                            ->success()
+                            ->send();
+                    }),
             ])
                 ->label('Přepočty statistik')
                 ->icon(IconHelper::render(IconHelper::GAUGE))

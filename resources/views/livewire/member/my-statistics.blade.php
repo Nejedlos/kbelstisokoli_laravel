@@ -605,7 +605,7 @@
                             $isDraw = $res['isDraw'] && $isOdehrano;
                             $isLoss = $res['isLoss'] && $isOdehrano;
 
-                            $scheduledAt = $m['scheduled_at'] ? \Carbon\Carbon::parse($m['scheduled_at']) : null;
+                            $scheduledAt = $m['scheduled_at'] ? \Carbon\Carbon::parse($m['scheduled_at'])->timezone(config('app.timezone')) : null;
                             $isPast = $scheduledAt ? $scheduledAt->isPast() : ($m['season_id'] < 3);
                             $isActionTookPlace = ($isOdehrano && !$hasScore) || (!$isOdehrano && $isPast);
 

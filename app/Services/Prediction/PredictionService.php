@@ -12,19 +12,26 @@ class PredictionService
     private EloCalculator $eloCalculator;
     private FormCalculator $formCalculator;
     private RosterStrengthCalculator $rosterStrengthCalculator;
+    private MutualMatchesCalculator $mutualMatchesCalculator;
 
     public function __construct(
         EloCalculator $eloCalculator,
         FormCalculator $formCalculator,
-        RosterStrengthCalculator $rosterStrengthCalculator
+        RosterStrengthCalculator $rosterStrengthCalculator,
+        MutualMatchesCalculator $mutualMatchesCalculator
     ) {
         $this->eloCalculator = $eloCalculator;
         $this->formCalculator = $formCalculator;
         $this->rosterStrengthCalculator = $rosterStrengthCalculator;
+        $this->mutualMatchesCalculator = $mutualMatchesCalculator;
     }
 
-    public function predict(BasketballMatch $match): MatchPrediction
+    public function predict(BasketballMatch $match): ?MatchPrediction
     {
+        if (!$match->opponent_id) {
+            return null;
+        }
+
         $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
         $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);
 
@@ -49,31 +56,61 @@ class PredictionService
         $previewDelta = $previewResult['delta'];
         $previewProb = $this->sigmoid(($teamElo + $previewDelta) - $oppElo);
 
+        // 5. Mutual Matches Prob (H2H)
+        $mutualResult = $this->mutualMatchesCalculator->calculateMutualMatchesDelta($match);
+        $mutualDelta = $mutualResult['delta'];
+        $mutualProb = $this->sigmoid(($teamElo + $mutualDelta) - $oppElo);
+
         // Mix probabilities
-        $w1 = 0.50; // Elo
-        $w2 = 0.20; // Form
+        $w1 = 0.40; // Elo (reduced from 0.50)
+        $w2 = 0.15; // Form (reduced from 0.20)
         $w3 = 0.15; // Roster
         $w4 = 0.15; // Preview
+        $w5 = 0.15; // Mutual Matches (H2H)
 
         if ($rosterResult['opponent']['count'] === 0) {
             $w3 = 0;
-            $w1 += 0.05;
-            $w2 += 0.05;
-            $w4 += 0.05;
-        }
-
-        if ($previewDelta === 0) {
-            $w4 = 0;
-            // Přerozdělíme w4 mezi ostatní
-            $totalRemaining = $w1 + $w2 + $w3;
+            // Přerozdělíme w3 mezi ostatní
+            $totalRemaining = $w1 + $w2 + $w4 + $w5;
             if ($totalRemaining > 0) {
                 $w1 += (0.15 * ($w1 / $totalRemaining));
                 $w2 += (0.15 * ($w2 / $totalRemaining));
-                $w3 += (0.15 * ($w3 / $totalRemaining));
+                $w4 += (0.15 * ($w4 / $totalRemaining));
+                $w5 += (0.15 * ($w5 / $totalRemaining));
             }
         }
 
-        $logitMix = $w1 * $this->logit($eloProb) + $w2 * $this->logit($formProb) + $w3 * $this->logit($rosterProb) + $w4 * $this->logit($previewProb);
+        if ($previewDelta === 0) {
+            $prevW4 = $w4;
+            $w4 = 0;
+            // Přerozdělíme w4 mezi ostatní
+            $totalRemaining = $w1 + $w2 + $w3 + $w5;
+            if ($totalRemaining > 0) {
+                $w1 += ($prevW4 * ($w1 / $totalRemaining));
+                $w2 += ($prevW4 * ($w2 / $totalRemaining));
+                $w3 += ($prevW4 * ($w3 / $totalRemaining));
+                $w5 += ($prevW4 * ($w5 / $totalRemaining));
+            }
+        }
+
+        if ($mutualResult['count'] === 0) {
+            $prevW5 = $w5;
+            $w5 = 0;
+            // Přerozdělíme w5 mezi ostatní
+            $totalRemaining = $w1 + $w2 + $w3 + $w4;
+            if ($totalRemaining > 0) {
+                $w1 += ($prevW5 * ($w1 / $totalRemaining));
+                $w2 += ($prevW5 * ($w2 / $totalRemaining));
+                $w3 += ($prevW5 * ($w3 / $totalRemaining));
+                $w4 += ($prevW5 * ($w4 / $totalRemaining));
+            }
+        }
+
+        $logitMix = $w1 * $this->logit($eloProb) +
+                    $w2 * $this->logit($formProb) +
+                    $w3 * $this->logit($rosterProb) +
+                    $w4 * $this->logit($previewProb) +
+                    $w5 * $this->logit($mutualProb);
         $finalProb = $this->invLogit($logitMix);
 
         // Confidence
@@ -86,7 +123,7 @@ class PredictionService
         }
 
         // Explanation
-        $explanation = $this->generateExplanation($match, $eloProb, $formResult, $rosterResult, $previewResult);
+        $explanation = $this->generateExplanation($match, $eloProb, $formResult, $rosterResult, $previewResult, $mutualResult);
 
         return MatchPrediction::updateOrCreate(
             ['basketball_match_id' => $match->id],
@@ -109,6 +146,8 @@ class PredictionService
                     'roster_delta' => $rosterDelta,
                     'preview_data' => $previewResult,
                     'preview_delta' => $previewDelta,
+                    'mutual_data' => $mutualResult,
+                    'mutual_delta' => $mutualDelta,
                     'home_adv_applied' => $match->is_home,
                 ],
                 'explanation_points' => $explanation,
@@ -170,28 +209,23 @@ class PredictionService
         return 1 / (1 + 10 ** (-$x / 400));
     }
 
-    private function generateExplanation(BasketballMatch $match, float $eloProb, array $formResult, array $rosterResult, array $previewResult): array
+    private function generateExplanation(BasketballMatch $match, float $eloProb, array $formResult, array $rosterResult, array $previewResult, array $mutualResult): array
     {
         $points = [];
 
         // 1. Vzájemné zápasy
-        $mutualMatches = $match->metadata['mutual_matches'] ?? [];
-        if (!empty($mutualMatches)) {
-            $wins = 0;
-            $count = count($mutualMatches);
-            $teamName = $match->team->name;
-            foreach ($mutualMatches as $m) {
-                $isWin = (int)$m['score_home'] > (int)$m['score_away'];
-                if (str_contains(strtolower($m['team_home']), strtolower($teamName)) === false) {
-                    $isWin = (int)$m['score_away'] > (int)$m['score_home'];
-                }
-                if ($isWin) {
-                    $wins++;
-                }
+        if ($mutualResult['count'] > 0) {
+            $wins = $mutualResult['wins'];
+            $count = $mutualResult['count'];
+            $delta = $mutualResult['delta'];
+
+            $text = "Historie: z posledních {$count} vzájemných zápasů jsme vyhráli {$wins}x.";
+            if ($delta < -50) {
+                $text .= " Tato bilance výrazně snižuje naši šanci na výhru.";
+            } elseif ($delta > 50) {
+                $text .= " Tato historie nám dává psychickou výhodu.";
             }
-            if ($count > 0) {
-                $points[] = "Historie: z posledních {$count} vzájemných zápasů jsme vyhráli {$wins}x.";
-            }
+            $points[] = $text;
         }
 
         // 2. Domácí prostředí
