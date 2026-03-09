@@ -331,17 +331,7 @@
 
             <!-- Bottom Action / Help -->
             <div class="p-6 border-t border-slate-100 bg-slate-50/30">
-                <a href="{{ route('public.contact.index') }}" class="group block p-5 rounded-2xl bg-white border border-slate-200/60 shadow-sm hover:shadow-md hover:border-primary/20 transition-all">
-                    <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <i class="fa-light fa-headset text-sm"></i>
-                        </div>
-                        <span class="font-black text-secondary text-[11px] uppercase tracking-wider">{{ __('nav.need_help') }}</span>
-                    </div>
-                    <p class="text-[10px] text-slate-500 leading-relaxed font-medium">
-                        {{ __('nav.help_text') }}
-                    </p>
-                </a>
+                <x-member.contact-box type="sidebar" />
             </div>
         </aside>
 
@@ -406,6 +396,11 @@
                     @endforeach
                 @endif
             </nav>
+
+            <!-- Bottom Action / Help (Mobile) -->
+            <div class="p-6 border-t border-slate-50 bg-slate-50/50">
+                <x-member.contact-box type="sidebar" />
+            </div>
         </div>
 
         <!-- Main Content -->

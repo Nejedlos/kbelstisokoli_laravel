@@ -437,6 +437,7 @@ return [
         'sent_success' => 'Zpráva byla úspěšně odeslána. Děkujeme za zpětnou vazbu!',
         'hints' => [
             'economy' => 'S platbami vám nejlépe poradí trenér vašeho týmu. Napište mu prosím nejprve přes tento formulář. Administrátora kontaktujte až pokud trenér neodpoví.',
+            'profile' => 'Pokud potřebujete změnit citlivé údaje (jako je role v klubu nebo přiřazení k týmu), obraťte se prosím na své trenéry nebo vedení klubu.',
         ],
         'contact_card' => [
             'admin_title' => 'Kontakt na administrátora',

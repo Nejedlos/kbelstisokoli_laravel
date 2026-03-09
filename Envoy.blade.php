@@ -244,6 +244,7 @@
     {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
 
     {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan livewire:publish --assets --force
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
 
@@ -296,6 +297,7 @@
     {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
 
     {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan livewire:publish --assets --force
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan optimize
@@ -422,6 +424,7 @@
     {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
 
     {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan livewire:publish --assets --force
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
 

@@ -6,6 +6,7 @@ use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -123,6 +124,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Schema::defaultStringLength(191);
+
+        // Livewire Asset URL Fix (Důležité pro subdomény a produkční prostředí)
+        if (config('app.env') === 'production') {
+            Livewire::setAssetUrl(config('app.url') . '/vendor/livewire');
+        }
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch->visible(false);

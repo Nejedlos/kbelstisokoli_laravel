@@ -89,7 +89,20 @@ Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na se
    ```
 
 #### B) Pouze sestavení a nahrání assetů (Rychlá volba)
-Pokud měníte pouze CSS/JS a nechcete provádět celou synchronizaci, můžete použít specializovaný příkaz:
+
+**Přes SSH (SCP) - Doporučeno:**
+Pokud máte nastaven SSH přístup, použijte tento moderní a rychlý příkaz:
+```bash
+php artisan assets:deploy
+```
+Tento příkaz:
+1. Lokálně spustí `npm run build`.
+2. Smaže staré assety na produkci.
+3. Nahraje novou složku `public/build` (a volitelně `public/assets` s přepínačem `--with-assets`) přes SCP.
+4. Automaticky vymaže cache pohledů na produkci.
+
+**Přes FTP (Zastaralé):**
+Pokud měníte pouze CSS/JS a nemůžete použít SCP, můžete použít:
 ```bash
 php artisan app:deploy:local-assets
 ```

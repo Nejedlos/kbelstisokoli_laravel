@@ -139,17 +139,7 @@
             @endif
 
             <!-- Help box -->
-            <div class="bg-white/50 backdrop-blur-sm rounded-[2.5rem] p-6 sm:p-8 border border-slate-200/60 shadow-sm group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <i class="fa-light fa-circle-question text-lg"></i>
-                    </div>
-                    <h4 class="text-xs font-black uppercase tracking-widest text-secondary">{{ __('member.profile.help.title') }}</h4>
-                </div>
-                <p class="text-xs text-slate-500 leading-relaxed font-bold italic opacity-80">
-                    {{ __('member.profile.help.text') }}
-                </p>
-            </div>
+            <x-member.contact-box type="profile" />
         </div>
 
         <!-- Main Edit Form -->

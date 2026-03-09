@@ -437,6 +437,7 @@ return [
         'sent_success' => 'Your message has been sent successfully. Thank you for the feedback!',
         'hints' => [
             'economy' => 'For payments, your team coach is the best first contact. Please write to them using this form. Contact the administrator only if the coach does not respond.',
+            'profile' => 'If you need to change sensitive data (such as club role or team assignment), please contact your coaches or club management.',
         ],
         'contact_card' => [
             'admin_title' => 'Administrator Contact',

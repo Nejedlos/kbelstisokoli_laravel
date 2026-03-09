@@ -248,42 +248,7 @@
                     </div>
                     <a href="{{ route('member.economy.index') }}" class="btn btn-outline w-full py-2 text-xs">{{ __('member.dashboard.economy.cta') }}</a>
 
-                    <div class="relative group rounded-[2.5rem]">
-                        <!-- Background with shadow -->
-                        <div class="absolute inset-0 bg-gradient-to-br from-white to-slate-50/50 rounded-[2.5rem] border border-slate-200/60 shadow-sm transition-all duration-500 group-hover:shadow-md group-hover:border-primary/10"></div>
-
-                        <!-- Decorative background icon clipped -->
-                        <div class="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
-                            <div class="absolute -right-4 -top-4 opacity-[0.03] group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700">
-                                <i class="fa-light fa-whistle text-8xl text-secondary"></i>
-                            </div>
-                        </div>
-
-                        <div class="relative p-6 z-10 space-y-6">
-                            <!-- Icon and Text -->
-                            <div class="flex items-start gap-4">
-                                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm shadow-primary/5 group-hover:scale-110 group-hover:rotate-3 transition-transform">
-                                    <i class="fa-light fa-whistle text-xl"></i>
-                                </div>
-                                <div class="space-y-1.5 flex-1">
-                                    <h4 class="text-sm font-black uppercase tracking-tight text-secondary leading-tight">{{ __('member.feedback.contact_coach_title') }}</h4>
-                                    <p class="text-[11px] text-slate-500 font-medium leading-relaxed italic opacity-80">{{ __('member.feedback.hints.economy') }}</p>
-                                </div>
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
-                                <a href="{{ route('member.contact.coach.form') }}" class="btn btn-outline py-2.5 px-4 text-[10px] bg-white hover:border-primary/30 hover:text-primary transition-all flex items-center justify-center gap-2">
-                                    <i class="fa-light fa-comment-dots text-xs"></i>
-                                    {{ __('member.feedback.contact_coach_title') }}
-                                </a>
-                                <a href="{{ route('member.contact.admin.form') }}" class="btn py-2.5 px-4 text-[10px] bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border-none shadow-none flex items-center justify-center gap-2">
-                                    <i class="fa-light fa-user-gear text-xs"></i>
-                                    {{ __('member.feedback.contact_admin_title') }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <x-member.contact-box type="economy" />
                 </section>
 
 

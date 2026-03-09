@@ -132,6 +132,13 @@
         </div>
 
         <!-- Bank Info (Livewire Widget) -->
-        <livewire:member.payment-widget />
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="lg:col-span-2">
+                <livewire:member.payment-widget />
+            </div>
+            <div class="lg:col-span-1">
+                <x-member.contact-box type="economy" />
+            </div>
+        </div>
     </div>
 @endsection

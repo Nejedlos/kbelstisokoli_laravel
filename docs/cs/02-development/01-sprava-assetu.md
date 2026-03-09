@@ -61,7 +61,10 @@ Když přidáte nový soubor do `vite.config.js`, **vždy** musíte spustit buil
 npm run build
 ```
 
-> **Kritické pro produkci (Webglobe):** Pokud `npm run build` na serveru selže (např. kvůli verzi Node.js), můžete assety sestavit lokálně ve svém počítači a nahrát složku `public/build/` přes FTP. Následně spusťte `php artisan app:sync`. Viz [Hybridní nasazení v dokumentaci](17-nasazeni-na-produkci.md#3-nasazeni-pres-ftp-sync-alternativa).
+> **Kritické pro produkci (Webglobe):** Pokud `npm run build` na serveru selže (např. kvůli verzi Node.js), můžete assety sestavit lokálně ve svém počítači a nahrát složku `public/build/` přes SSH (SCP) nebo FTP.
+> - **Doporučeno (SSH):** `php artisan assets:deploy` (automatizuje build, promazání starých assetů, nahrání přes SCP a pročištění cache).
+> - **Alternativa (FTP):** `php artisan app:deploy:local-assets`.
+> Viz [Deployment v dokumentaci](../06-ops/01-nasazeni.md).
 
 ### 4.1 Rychlý checklist po změně vzhledu
 - [ ] Uložil/a jsem změny v CSS/JS (včetně `filament-auth.css`)?
