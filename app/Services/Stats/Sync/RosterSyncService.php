@@ -94,7 +94,7 @@ class RosterSyncService
                 $user = $this->findOrCreateUserForExternalPlayer($externalPlayerId, $playerName, $config);
 
                 // 2. Zajistit existenci a aktualizaci PlayerProfile
-                $profile = $user->playerProfile;
+                $profile = $user->playerProfiles()->first();
                 if (! $profile) {
                     $profile = $this->createPlayerProfile($user, $row->values);
                 } else {
@@ -244,6 +244,12 @@ class RosterSyncService
     protected function updatePlayerProfile(PlayerProfile $profile, array $values): void
     {
         $data = $this->prepareProfileData($values);
+
+        // Zajistíme, aby profil byl aktivní, pokud synchronizujeme soupisku
+        if (! $profile->is_active) {
+            $profile->is_active = true;
+            $profile->save();
+        }
 
         // Aktualizujeme jen pokud jsou hodnoty nové a nejsou v profilu
         $toUpdate = [];

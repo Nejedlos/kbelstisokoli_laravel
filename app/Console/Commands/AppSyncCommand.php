@@ -23,7 +23,9 @@ class AppSyncCommand extends Command
                             {--ai : Vynutit reindexaci AI (standardně se v app:sync přeskakuje)}
                             {--ai-test : Testovací režim pro AI (přeskočí interakce)}
                             {--finance-fresh : Smaže všechna finanční data před synchronizací}
-                            {--freshseed : Smaže a znovu nahraje data na produkci pomocí seederů}';
+                            {--freshseed : Smaže a znovu nahraje data na produkci pomocí seederů}
+                            {--stats : Synchronizovat soupisky, hráče, zápasy a statistiky}
+                            {--stats-fresh : Smaže stávající data statistik před novým importem}';
 
     /**
      * The console command description.
@@ -73,12 +75,25 @@ class AppSyncCommand extends Command
         $this->info('--- Running Environment Data Sync ---');
 
         $usersync = $this->option('usersync') || $this->option('syncusers') || $this->option('syncuser');
+        $freshseed = $this->option('freshseed');
+        $stats = $this->option('stats') || $freshseed; // Pokud je freshseed, tak chceme i statistiky, protože byly smazány
+        $statsFresh = $this->option('stats-fresh') || $freshseed;
 
         // Globální seeder aplikace (nastavení, branding, role, sporty, apod.)
-        $this->info('Spouštím GlobalSeeder (branding a nastavení)...');
-        // Předáme informaci o uživatelích do seederu (podle příznaku --usersync)
-        config(['app.seed_users' => $usersync]);
-        $this->call('db:seed', ['--class' => 'GlobalSeeder', '--force' => true]);
+        if ($freshseed) {
+            $this->info('Spouštím GlobalSeeder (FRESH režim - data v tabulkách budou smazána)...');
+            $this->call('app:seed', [
+                '--fresh' => true,
+                '--force' => true,
+                '--users' => $usersync,
+                '--no-interaction' => true,
+            ]);
+        } else {
+            $this->info('Spouštím GlobalSeeder (idempotentní režim - branding a nastavení)...');
+            // Předáme informaci o uživatelích do seederu (podle příznaku --usersync)
+            config(['app.seed_users' => $usersync]);
+            $this->call('db:seed', ['--class' => 'GlobalSeeder', '--force' => true]);
+        }
 
         // Ikony
         if (class_exists(\App\Console\Commands\IconsSyncCommand::class)) {
@@ -101,6 +116,44 @@ class AppSyncCommand extends Command
                 }
             }
             $this->call('finance:sync', $financeFlags);
+        }
+
+        // Statistiky a externí data (soupisky, hráči, zápasy)
+        if ($stats) {
+            $this->info('Spouštím synchronizaci statistik a externích dat...');
+
+            // 1. Synchronizace hráčů (fotky, apod.)
+            if (class_exists(\App\Console\Commands\StatsSyncPlayersCommand::class)) {
+                $this->call('stats:sync-players', [
+                    '--force' => $this->option('force') || $statsFresh,
+                ]);
+            }
+
+            // 2. Synchronizace aktivních týmů a sezón
+            if (class_exists(\App\Models\ExternalTeamSeasonConfig::class)) {
+                $configs = \App\Models\ExternalTeamSeasonConfig::where('is_enabled', true)->get();
+
+                if ($configs->isEmpty()) {
+                    $this->warn('Nebyly nalezeny žádné aktivní konfigurace pro synchronizaci statistik.');
+                }
+
+                foreach ($configs as $config) {
+                    if (! $config->team || ! $config->season) {
+                        $this->warn("Přeskakuji neúplnou konfiguraci ID: {$config->id}");
+
+                        continue;
+                    }
+
+                    $this->info("Synchronizuji tým: {$config->team->name} ({$config->season->name})...");
+                    $this->call('stats:sync-team-season', [
+                        'teamSlug' => $config->team->slug,
+                        'seasonNameOrId' => $config->season->id,
+                        '--sync' => true,
+                        '--force' => $this->option('force') || $statsFresh,
+                        '--fresh' => $statsFresh,
+                    ]);
+                }
+            }
         }
 
         // Avatary se synchronizují pouze přes FTP (viz handleProductionSync),
@@ -431,6 +484,10 @@ class AppSyncCommand extends Command
 
             if ($this->option('freshseed')) {
                 $params[] = '--freshseed=1';
+            }
+
+            if ($this->option('stats')) {
+                $params[] = '--stats=1';
             }
 
             if ($usersync) {

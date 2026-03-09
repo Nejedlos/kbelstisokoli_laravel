@@ -57,7 +57,22 @@ Tento příkaz automaticky:
 6. Nainstaluje NPM balíčky a sestaví assety (`npm run build`).
 7. Synchronizuje ikony a optimalizuje cache aplikace.
 
-### 3. Nasazení přes FTP Sync (Alternativa)
+### 3. Synchronizace dat (Sync)
+Příkaz `app:sync` slouží k agregované synchronizaci všech datových zdrojů. Je součástí automatizovaného nasazení, ale lze jej spustit i samostatně.
+
+```bash
+php artisan app:sync [--freshseed] [--stats] [--usersync]
+```
+
+**Hlavní přepínače:**
+- `--stats`: Synchronizuje soupisky, hráče, zápasy a statistiky z externích zdrojů (cz.basketball). **Automaticky se zapíná při použití `--freshseed`**, aby se po promazání tabulek data znovu načetla.
+- `--freshseed`: Smaže data v definovaných tabulkách a nahraje je znovu ze seederů (včetně následné synchronizace statistik).
+- `--usersync`: Synchronizuje uživatele a jejich avatary.
+- `--force`: Vynutí synchronizaci i bez zjištěných změn.
+
+---
+
+### 4. Nasazení přes FTP Sync (Alternativa)
 Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na serveru** (např. při potížích s verzemi) nebo pokud preferujete nahrávání souborů přes FTP.
 
 #### A) Kompletní synchronizace (Doporučeno)

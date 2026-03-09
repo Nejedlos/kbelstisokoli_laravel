@@ -514,9 +514,11 @@ class StatisticSyncService
                         ->count();
 
                     if ($otherMappingsCount === 0) {
-                        // Smažeme ghosta (včetně jeho profilu a vztahů s týmy)
-                        $oldUser->playerProfile?->teams()->detach();
-                        $oldUser->playerProfile?->delete();
+                        // Smažeme ghosta (včetně jeho profilů a vztahů s týmy)
+                        foreach ($oldUser->playerProfiles as $oldProfile) {
+                            $oldProfile->teams()->detach();
+                            $oldProfile->delete();
+                        }
                         $oldUser->delete();
                     }
                 }

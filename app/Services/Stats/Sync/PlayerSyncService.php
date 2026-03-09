@@ -49,7 +49,7 @@ class PlayerSyncService
             $data = $result['data'];
 
             // 1. Aktualizace PlayerProfile
-            $profile = $user->playerProfile ?: new PlayerProfile(['user_id' => $user->id]);
+            $profile = $user->playerProfiles()->first() ?: new PlayerProfile(['user_id' => $user->id]);
 
             // Mapování pozice na Enum pokud je to možné
             $position = $this->normalizePosition($data['position'] ?? null);
