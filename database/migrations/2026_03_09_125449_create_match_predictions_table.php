@@ -21,8 +21,8 @@ return new class extends Migration
             $table->float('probability_win');
             $table->float('probability_loss');
             $table->enum('confidence', ['low', 'medium', 'high']);
-            $table->json('factors');
-            $table->json('explanation_points');
+            $table->longText('factors');
+            $table->longText('explanation_points');
             $table->dateTime('expires_at');
             $table->timestamps();
         });

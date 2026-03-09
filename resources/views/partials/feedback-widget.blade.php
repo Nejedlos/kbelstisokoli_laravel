@@ -257,8 +257,11 @@
             }
         }
 
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('ksFeedbackWidget', () => ({
+        function registerKsFeedbackWidget() {
+            if (!window.Alpine) return;
+            if (window.Alpine.data('ksFeedbackWidget')) return;
+
+            window.Alpine.data('ksFeedbackWidget', () => ({
                 isOpen: false,
                 submitting: false,
                 // Ring Buffery inicializované v init()
@@ -770,6 +773,12 @@
                     };
                 }
             }));
-        });
+        }
+
+        if (window.Alpine) {
+            registerKsFeedbackWidget();
+        } else {
+            document.addEventListener('alpine:init', registerKsFeedbackWidget);
+        }
     </script>
 </div>

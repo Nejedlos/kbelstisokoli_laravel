@@ -319,6 +319,8 @@ class AppSyncCommand extends Command
             'android-chrome-512x512.png',
             'favicon-16x16.png',
             'favicon-32x32.png',
+            'llms.txt',
+            'sitemap.xml',
         ];
 
         foreach ($rootPublicFiles as $file) {
@@ -349,7 +351,8 @@ class AppSyncCommand extends Command
 
                 foreach ($remoteDirs as $remoteDir) {
                     // Zajistíme, že cílový adresář na serveru existuje (pro soubory vytvoříme rodičovský adresář)
-                    $remoteParentDir = is_dir($localDir) ? $remoteDir : dirname($remoteDir);
+                    $isLocalDir = is_dir($localDir);
+                    $remoteParentDir = $isLocalDir ? $remoteDir : dirname($remoteDir);
                     Process::run("ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no {$user}@{$host} 'mkdir -p ".escapeshellarg($remoteParentDir)."'");
 
                     // 1. Rsync
@@ -359,7 +362,11 @@ class AppSyncCommand extends Command
                         // abychom zachovali soubory, které existují pouze na produkci.
                         $deleteFlag = str_contains($dir, 'uploads/') ? '' : '--delete';
 
-                        $rsyncCmd = "rsync -avz {$deleteFlag} -e 'ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no' ".escapeshellarg($localDir)." {$user}@{$host}:".escapeshellarg($remoteDir);
+                        // Pro soubory (jako favicon.ico) rsync potřebuje jinou syntaxi, aby nevytvářel adresář
+                        $rsyncSource = $isLocalDir ? escapeshellarg($localDir).'/' : escapeshellarg($localDir);
+                        $rsyncTarget = $isLocalDir ? "{$user}@{$host}:".escapeshellarg($remoteDir) : "{$user}@{$host}:".escapeshellarg($remoteParentDir).'/';
+
+                        $rsyncCmd = "rsync -avz {$deleteFlag} -e 'ssh -p {$port} -o BatchMode=yes -o StrictHostKeyChecking=no' {$rsyncSource} {$rsyncTarget}";
                         $result = Process::forever()->run($rsyncCmd, function (string $type, string $output) {
                             if ($type === 'out' && strlen(trim($output)) > 0) {
                                 $this->line('  '.trim($output));
