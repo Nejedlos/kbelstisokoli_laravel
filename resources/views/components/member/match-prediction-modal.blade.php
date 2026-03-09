@@ -3,6 +3,8 @@
 @php
     $prediction = $match->prediction;
     $teamComparison = $match->metadata['team_comparison'] ?? [];
+    $lastMatches = $match->metadata['last_matches'] ?? [];
+    $mutualMatches = $match->metadata['mutual_matches'] ?? [];
     $hasScore = !is_null($match->score_home) && !is_null($match->score_away);
 @endphp
 
@@ -158,6 +160,97 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+                </div>
+            @endif
+
+            @if(!empty($lastMatches['home']) || !empty($lastMatches['away']))
+                <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
+                        <i class="fa-light fa-chart-line text-brand-500"></i>
+                        {{ __('matches.form_title') ?? 'Předzápasová bilance (forma)' }}
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach(['home', 'away'] as $side)
+                            @php
+                                $sideMatches = array_slice($lastMatches[$side] ?? [], 0, 5);
+                                $teamName = $side === 'home' ? $match->team->name : ($match->opponent?->name ?? 'Soupeř');
+                            @endphp
+                            <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $teamName }}</span>
+                                    <div class="flex gap-1.5">
+                                        @foreach($sideMatches as $m)
+                                            @php
+                                                $isWin = (int)$m['score_home'] > (int)$m['score_away'];
+                                                if (str_contains(strtolower($m['team_home']), strtolower($teamName)) === false) {
+                                                    $isWin = (int)$m['score_away'] > (int)$m['score_home'];
+                                                }
+                                            @endphp
+                                            <div
+                                                class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-sm {{ $isWin ? 'bg-emerald-500' : 'bg-rose-500' }}"
+                                                title="{{ $m['team_home'] }} vs {{ $m['team_away'] }} ({{ $m['score_home'] }}:{{ $m['score_away'] }})"
+                                            >
+                                                {{ $isWin ? 'V' : 'P' }}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    @foreach($sideMatches as $m)
+                                        <div class="flex items-center justify-between text-[11px] py-1 border-b border-slate-50 last:border-0">
+                                            <span class="text-slate-500 font-bold truncate pr-4 max-w-[140px]">{{ str_contains(strtolower($m['team_home']), strtolower($teamName)) ? $m['team_away'] : $m['team_home'] }}</span>
+                                            <span class="font-black tabular-nums {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-emerald-600' : 'text-rose-600' }}">
+                                                {{ $m['score_home'] }}:{{ $m['score_away'] }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            @if(!empty($mutualMatches))
+                <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
+                        <i class="fa-light fa-swords text-brand-500"></i>
+                        {{ __('matches.mutual_matches_title') ?? 'Vzájemné zápasy' }}
+                    </h4>
+
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-[11px]">
+                                <thead class="bg-slate-50 text-slate-400 font-black uppercase tracking-widest border-b border-slate-100">
+                                    <tr>
+                                        <th class="px-5 py-3">{{ __('Date') }}</th>
+                                        <th class="px-5 py-3">{{ __('Match') }}</th>
+                                        <th class="px-5 py-3 text-center">{{ __('Score') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    @foreach($mutualMatches as $m)
+                                        <tr class="hover:bg-slate-50 transition-colors">
+                                            <td class="px-5 py-4 whitespace-nowrap text-slate-500 font-bold italic">{{ $m['date'] }}</td>
+                                            <td class="px-5 py-4">
+                                                <div class="flex flex-col gap-0.5">
+                                                    <span class="font-black text-slate-900">{{ $m['team_home'] }}</span>
+                                                    <span class="font-black text-slate-900">{{ $m['team_away'] }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-4 text-center">
+                                                <div class="inline-flex items-center justify-center px-3 py-1 bg-slate-100 rounded-lg font-black tabular-nums text-slate-700">
+                                                    {{ $m['score_home'] }}:{{ $m['score_away'] }}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             @endif
