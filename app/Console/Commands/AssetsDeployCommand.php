@@ -19,6 +19,7 @@ class AssetsDeployCommand extends Command
      */
     protected $signature = 'assets:deploy
                             {--with-assets : Nahraje i statické obrázky z public/assets}
+                            {--with-livewire : Publikuje a nahraje i Livewire assety}
                             {--build-only : Pouze provede build bez nahrání}
                             {--no-build : Přeskočí build a pouze nahraje stávající soubory}';
 
@@ -39,7 +40,7 @@ class AssetsDeployCommand extends Command
             info('🚀 Spouštím lokální build assetů (npm run build)...');
 
             $buildResult = spin(
-                fn () => Process::run('npm run build'),
+                fn () => Process::timeout(300)->run('npm run build'),
                 'Sestavuji produkční assety...'
             );
 
@@ -57,6 +58,14 @@ class AssetsDeployCommand extends Command
                 fn () => $this->call('app:icons:sync'),
                 'Synchronizuji ikony...'
             );
+
+            // Volitelně Livewire
+            if ($this->option('with-livewire')) {
+                spin(
+                    fn () => $this->call('livewire:publish', ['--assets' => true, '--no-interaction' => true]),
+                    'Publikuji Livewire assety...'
+                );
+            }
         }
 
         if ($this->option('build-only')) {
@@ -88,6 +97,11 @@ class AssetsDeployCommand extends Command
         $dirsToUpload = ['build'];
         if ($this->option('with-assets')) {
             $dirsToUpload[] = 'assets';
+        }
+
+        if ($this->option('with-livewire')) {
+            // Livewire 3 publikuje do vendor/livewire
+            $dirsToUpload[] = 'vendor/livewire';
         }
 
         foreach ($dirsToUpload as $dir) {
@@ -124,7 +138,7 @@ class AssetsDeployCommand extends Command
             );
 
             $uploadResult = spin(
-                fn () => Process::run($scpCommand),
+                fn () => Process::timeout(600)->run($scpCommand),
                 "Synchronizuji {$dir} přes SCP..."
             );
 
@@ -153,13 +167,16 @@ class AssetsDeployCommand extends Command
     {
         if (!$prodPath) return;
 
-        info('🧹 Čistím cache na produkci...');
+        info('🧹 Čistím cache na produkci (route, view, config)...');
 
         $phpBinary = env('PROD_PHP_BINARY', 'php');
 
         $commands = [
             "cd {$prodPath} && {$phpBinary} artisan view:clear",
             "cd {$prodPath} && {$phpBinary} artisan cache:clear",
+            "cd {$prodPath} && {$phpBinary} artisan route:clear",
+            "cd {$prodPath} && {$phpBinary} artisan config:clear",
+            "cd {$prodPath} && {$phpBinary} artisan filament:clear-cached-components",
         ];
 
         foreach ($commands as $cmd) {
@@ -171,7 +188,7 @@ class AssetsDeployCommand extends Command
                 escapeshellarg($cmd)
             );
 
-            Process::run($sshCmd);
+            Process::timeout(120)->run($sshCmd);
         }
 
         info('✅ Produkční cache vyčištěna.');

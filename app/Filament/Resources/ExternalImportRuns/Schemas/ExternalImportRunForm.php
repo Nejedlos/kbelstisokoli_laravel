@@ -194,7 +194,10 @@ class ExternalImportRunForm
                                 KeyValue::make('new_values')
                                     ->label('Nová/Změněná data')
                                     ->columnSpanFull()
-                                    ->readOnly()
+                                    ->disableAddingRows()
+                                    ->disableDeletingRows()
+                                    ->disableEditingKeys()
+                                    ->disableEditingValues()
                                     ->hidden(fn ($state) => empty($state)),
                             ])
                             ->columns(3)

@@ -8,5 +8,5 @@
 <a href="{{ $url }}"
    data-protected-email="{{ $encoded }}"
    {{ $attributes->merge(['class' => $class]) }}>
-    {{ $slot->isEmpty() ? '[email]' : $slot }}
+    {{ $slot->isEmpty() ? $email : $slot }}
 </a>

@@ -96,10 +96,10 @@ Pokud máte nastaven SSH přístup, použijte tento moderní a rychlý příkaz:
 php artisan assets:deploy
 ```
 Tento příkaz:
-1. Lokálně spustí `npm run build`.
-2. Smaže staré assety na produkci.
-3. Nahraje novou složku `public/build` (a volitelně `public/assets` s přepínačem `--with-assets`) přes SCP.
-4. Automaticky vymaže cache pohledů na produkci.
+1. Lokálně spustí `npm run build` a synchronizuje ikony (`app:icons:sync`).
+2. Smaže staré assety na produkci, aby nedocházelo ke kolizím verzí.
+3. Bezpečně nahraje složku `public/build` (a volitelně `public/assets` s přepínačem `--with-assets`) přes SCP. Příkaz je optimalizován pro velké objemy dat (vysoký timeout).
+4. Automaticky vymaže cache pohledů a systémovou cache na produkci přes SSH.
 
 **Přes FTP (Zastaralé):**
 Pokud měníte pouze CSS/JS a nemůžete použít SCP, můžete použít:

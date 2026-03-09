@@ -125,10 +125,6 @@ class AppServiceProvider extends ServiceProvider
 
         Schema::defaultStringLength(191);
 
-        // Livewire Asset URL Fix (Důležité pro subdomény a produkční prostředí)
-        if (config('app.env') === 'production') {
-            Livewire::setAssetUrl(config('app.url') . '/vendor/livewire');
-        }
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch->visible(false);
