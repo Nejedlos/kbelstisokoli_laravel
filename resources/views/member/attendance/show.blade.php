@@ -124,7 +124,15 @@
                                 <i class="fa-light fa-align-left text-primary"></i>
                                 {{ __('member.attendance.notes_label') ?? 'Poznámky k události' }}
                             </div>
-                            {!! nl2br(e($item->notes ?? ($item->notes_public ?? ($item->description ?? '')))) !!}
+                            @php
+                                $content = $item->notes ?? ($item->notes_public ?? ($item->description ?? ''));
+                                if ($type === 'event' && ($item->description ?? false) && !($item->notes ?? false) && !($item->notes_public ?? false)) {
+                                    $content = \App\Support\TextProcessor::enhanceDescription($item->getTranslation('description', app()->getLocale()), $item->id);
+                                }
+                            @endphp
+                            <div class="prose prose-slate max-w-none">
+                                {!! $content !!}
+                            </div>
                         </div>
                     @endif
                 </div>

@@ -74,7 +74,7 @@ class CheckTwoFactorTimeout
         // Musíme ale zneplatnit Fortify 2FA příznak, pokud vypršel náš timeout
 
         // Uložíme zamýšlenou URL pro návrat po úspěšném 2FA
-        session()->put('url.intended', $request->fullUrl());
+        \App\Support\AuthRedirect::storeIntendedUrl($request->fullUrl());
 
         // DŮLEŽITÉ: Fortify challenge potřebuje 'login.id' v session pro identifikaci uživatele,
         // jinak přesměruje zpět na login (což vytvoří redirect loop u přihlášeného uživatele).

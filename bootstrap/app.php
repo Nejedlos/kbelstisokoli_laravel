@@ -134,6 +134,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
             if ($request->is('admin*') || $request->is('clenska-sekce*')) {
+                // Před zobrazením 401 chybové stránky uložíme současnou URL,
+                // aby se sem uživatel mohl po přihlášení vrátit.
+                \App\Support\AuthRedirect::storeIntendedUrl($request->fullUrl());
+
                 return response()->view('errors.shot-clock', [], 401);
             }
         });

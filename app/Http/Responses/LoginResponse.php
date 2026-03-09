@@ -36,7 +36,7 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
 
             if (! $hasSecret || ($needsConfirmation && ! $isConfirmed)) {
                 if (! session()->has('url.intended')) {
-                    session()->put('url.intended', url(config('filament.panels.admin.path', 'admin')));
+                    AuthRedirect::storeIntendedUrl(url()->previous());
                 }
 
                 \Illuminate\Support\Facades\Log::info('LoginResponse.redirect_to_2fa_setup', [
@@ -72,7 +72,7 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
                 session()->put('login.id', $user->id);
 
                 if (! session()->has('url.intended')) {
-                    session()->put('url.intended', url(config('filament.panels.admin.path', 'admin')));
+                    AuthRedirect::storeIntendedUrl(url()->previous());
                 }
 
                 return redirect()->route('two-factor.login');

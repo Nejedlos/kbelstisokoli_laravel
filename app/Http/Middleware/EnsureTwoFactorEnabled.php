@@ -50,6 +50,8 @@ class EnsureTwoFactorEnabled
                         'target' => $request->fullUrl(),
                     ]);
 
+                    \App\Support\AuthRedirect::storeIntendedUrl($request->fullUrl());
+
                     return redirect()->route('auth.two-factor-setup');
                 }
             }
