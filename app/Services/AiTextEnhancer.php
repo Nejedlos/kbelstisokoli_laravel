@@ -327,4 +327,120 @@ class AiTextEnhancer
             'description' => Str::ucfirst(Str::of($description)->squish()),
         ];
     }
+
+    /**
+     * Navrhne bilingvní popis pro klubovou akci (CS i EN) v basketbalovém stylu.
+     */
+    public function suggestClubEventDescriptionBilingual(
+        string $title,
+        string $type,
+        string $description,
+        ?string $location = null,
+        ?string $startsAt = null,
+        ?string $endsAt = null
+    ): array
+    {
+        $title = trim($title);
+        $description = trim($description);
+        $type = trim($type);
+        $location = $location ? trim($location) : null;
+
+        $settings = $this->settingsService->getSettings();
+        $enabled = (bool) ($settings['enabled'] ?? false);
+        $apiKey = $settings['openai_api_key'] ?? null;
+        $baseUrl = rtrim($settings['openai_base_url'] ?? 'https://api.openai.com', '/');
+        $model = $settings['fast_model'] ?? ($settings['default_chat_model'] ?? 'gpt-4o-mini');
+
+        if (! $enabled || ! $apiKey) {
+            return $this->fallbackClubEventBilingual($description);
+        }
+
+        try {
+            $client = new Client([
+                'base_uri' => $baseUrl,
+                'timeout' => (int) ($settings['openai_timeout_seconds'] ?? 30),
+            ]);
+
+            $prompt = $this->buildClubEventBilingualPrompt($title, $type, $description, $location, $startsAt, $endsAt);
+
+            $response = $client->post('/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer '.$apiKey,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'model' => $model,
+                    'temperature' => 0.7, // Mírně vyšší pro kreativitu
+                    'messages' => $prompt,
+                    'response_format' => ['type' => 'json_object'],
+                ],
+            ]);
+
+            $data = json_decode((string) $response->getBody(), true);
+            $content = Arr::get($data, 'choices.0.message.content');
+            $parsed = json_decode($content, true);
+
+            if (! is_array($parsed) || ! isset($parsed['cs'], $parsed['en'])) {
+                return $this->fallbackClubEventBilingual($description);
+            }
+
+            return [
+                'cs' => $this->ensureString($parsed['cs'] ?? $description, 5000, $description),
+                'en' => $this->ensureString($parsed['en'] ?? $description, 5000, $description),
+            ];
+        } catch (\Throwable $e) {
+            \Log::error('AI Club Event Suggestion Error: '.$e->getMessage());
+
+            return $this->fallbackClubEventBilingual($description);
+        }
+    }
+
+    protected function buildClubEventBilingualPrompt(
+        string $title,
+        string $type,
+        string $description,
+        ?string $location = null,
+        ?string $startsAt = null,
+        ?string $endsAt = null
+    ): array
+    {
+        $system = "Jsi zkušený basketbalový copywriter pro klub 'Kbelští sokoli'.
+Tvým úkolem je vytvořit atraktivní a dynamický popis pro klubovou akci.
+
+POŽADAVKY:
+1. Styl musí být sportovní, energický a motivující.
+2. Používej basketbalovou terminologii (smeč, trojka, doskok, týmový duch, palubovka atd.).
+3. Vytvoř text v češtině (klíč 'cs') a v angličtině (klíč 'en').
+4. Formátuj text pomocí HTML tagů (např. <p>, <strong>, <ul>), pokud je to vhodné pro delší popis.
+5. Výstupem musí být POUZE validní JSON objekt s klíči 'cs' a 'en'.
+6. KRITICKÉ: Nikdy nepoužívej zástupné symboly jako '[vložte datum]', '[vložte místo]', '[doplňte]' atd. Pokud máš k dispozici datum a místo v parametrech, použij je přirozeně v textu. Pokud ne, piš text tak, aby tyto konkrétní detaily nevyžadoval (nebo je zmiň obecně).";
+
+        $user = [
+            'role' => 'user',
+            'content' => json_encode([
+                'action' => [
+                    'title' => $title,
+                    'type' => $type,
+                    'location' => $location,
+                    'starts_at' => $startsAt,
+                    'ends_at' => $endsAt,
+                    'current_description' => $description,
+                ],
+                'instruction' => 'Vytvoř atraktivní popis akce na základě těchto parametrů. Pokud je už něco v popisu, rozpracuj to. Pokud je popis prázdný, vymysli ho na základě názvu a typu akce. V textu nepoužívej žádné hranaté závorky ani výzvy k doplnění údajů.',
+            ], JSON_UNESCAPED_UNICODE),
+        ];
+
+        return [
+            ['role' => 'system', 'content' => $system],
+            $user,
+        ];
+    }
+
+    protected function fallbackClubEventBilingual(string $description): array
+    {
+        return [
+            'cs' => $description,
+            'en' => $description,
+        ];
+    }
 }

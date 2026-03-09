@@ -34,4 +34,10 @@ return [
     'visit_website' => 'Web oddílu',
     'quick_facts_title' => 'Základní informace',
     'quick_facts_subtitle' => 'Vše důležité o našem fungování na jednom místě',
+    'details' => 'Podrobnosti',
+    'date' => 'Datum',
+    'time' => 'Čas',
+    'location' => 'Místo konání',
+    'teams' => 'Týmy',
+    'all_teams' => 'Všechny týmy',
 ];

@@ -15,7 +15,7 @@
                 <div class="lg:col-span-2 space-y-8">
                     <div class="bg-white rounded-3xl p-8 md:p-12 border border-slate-100 shadow-sm">
                         <div class="prose prose-slate max-w-none">
-                            {!! $event->getTranslation('description', app()->getLocale()) !!}
+                            {!! \App\Support\TextProcessor::enhanceDescription($event->getTranslation('description', app()->getLocale()), $event->id) !!}
                         </div>
                     </div>
                 </div>
@@ -91,13 +91,15 @@
 
                         @if($event->rsvp_enabled)
                         <div class="mt-8 pt-8 border-t border-slate-50">
-                            <a href="{{ route('login') }}" class="btn btn-primary w-full py-4 shadow-lg shadow-primary/20">
+                            <a href="{{ route('member.attendance.show', ['type' => 'event', 'id' => $event->id]) }}" class="btn btn-primary w-full py-4 shadow-lg shadow-primary/20">
                                 <i class="fa-light fa-user-check mr-2"></i>
-                                {{ __('events.rsvp_login') }}
+                                {{ auth()->check() ? __('events.rsvp_go_to_attendance') : __('events.rsvp_login') }}
                             </a>
+                            @guest
                             <p class="text-[10px] text-center text-slate-400 mt-3 font-medium uppercase tracking-wide">
                                 {{ __('events.rsvp_notice') }}
                             </p>
+                            @endguest
                         </div>
                         @endif
                     </div>

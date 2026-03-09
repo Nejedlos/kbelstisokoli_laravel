@@ -1,6 +1,6 @@
 @props(['branding', 'navigation'])
 
-@cacheFragment('header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl().serialize($branding)), 3600)
+@cacheFragment('header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl().serialize($branding).serialize($navigation)), 3600)
 <header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container py-4 flex items-center justify-between gap-4">
         <!-- Logo -->

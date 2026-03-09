@@ -1,6 +1,6 @@
 @props(['branding'])
 
-@cacheFragment('footer_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl().serialize($branding)), 86400)
+@cacheFragment('footer_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl().serialize($branding).serialize(config('navigation.public', []))), 86400)
 @php
     $footerNav = $footerMenu ?? [];
     $clubNav = $footerClubMenu ?? [];

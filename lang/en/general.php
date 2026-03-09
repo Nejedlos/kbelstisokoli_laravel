@@ -34,4 +34,10 @@ return [
     'visit_website' => 'Club website',
     'quick_facts_title' => 'Quick Facts',
     'quick_facts_subtitle' => 'Everything you need to know about how we work',
+    'details' => 'Details',
+    'date' => 'Date',
+    'time' => 'Time',
+    'location' => 'Location',
+    'teams' => 'Teams',
+    'all_teams' => 'All teams',
 ];

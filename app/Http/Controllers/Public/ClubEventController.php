@@ -40,11 +40,12 @@ class ClubEventController extends Controller
         $page = \App\Models\Page::where('slug', 'akce')->first();
 
         $eventTypes = [
-            'camp' => 'Soustředění',
-            'social' => 'Společenské akce',
-            'meeting' => 'Schůzky',
-            'volunteer' => 'Dobrovolnictví',
-            'other' => 'Ostatní',
+            'camp' => __('events.filter_type_camp'),
+            'tournament' => __('events.filter_type_tournament'),
+            'social' => __('events.filter_type_social'),
+            'meeting' => __('events.filter_type_meeting'),
+            'volunteer' => __('events.filter_type_volunteer'),
+            'other' => __('events.filter_type_other'),
         ];
 
         $teams = \App\Models\Team::orderBy('name')->get();

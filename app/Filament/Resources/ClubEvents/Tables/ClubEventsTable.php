@@ -23,7 +23,8 @@ class ClubEventsTable
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
                         return $query->where('title', 'LIKE', "%{$search}%");
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => is_array($state) ? ($state['cs'] ?? $state['en'] ?? '') : $state),
                 TextColumn::make('event_type')
                     ->label('Typ')
                     ->badge()
