@@ -691,7 +691,7 @@
                                         'text-blue-600/80 dark:text-blue-400/80' => $m['is_home'],
                                         'text-orange-600/80 dark:text-orange-400/80' => !$m['is_home'],
                                     ])>
-                                        {{ $m['is_home'] ? 'DOMA' : 'VENKU' }}
+                                        {{ $m['is_home'] ? __('matches.home_upper') : __('matches.away_upper') }}
                                     </span>
                                 </div>
                             </td>
@@ -707,7 +707,7 @@
                                         @elseif($isDraw) <i class="fa-light fa-equals text-xs"></i>
                                         @else <i class="fa-light fa-circle-xmark text-xs"></i>
                                         @endif
-                                        {{ $isWin ? 'VÝHRA' : ($isDraw ? 'REMIZA' : 'PROHRA') }}
+                                        {{ $isWin ? __('matches.result_v') : ($isDraw ? __('matches.result_r') : __('matches.result_p')) }}
                                     </div>
                                 @elseif($isActionTookPlace)
                                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-500 border border-blue-100 text-[10px] font-black uppercase shadow-sm">

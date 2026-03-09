@@ -134,6 +134,11 @@
                     'declined' => __('member.attendance.status.declined'),
                     'maybe' => __('member.attendance.status.maybe'),
                 ];
+                $modelToType = [
+                    'App\Models\BasketballMatch' => 'match',
+                    'App\Models\Training' => 'training',
+                    'App\Models\Event' => 'event',
+                ];
             @endphp
 
             <!-- Desktop Table -->
@@ -159,11 +164,11 @@
                                         @elseif($attendance->attendable_type === 'App\Models\Training')
                                             {{ __('member.attendance.event_types.training') }} - {{ $item?->teams?->first()?->name }}
                                         @else
-                                            {{ $item?->title ?? __('member.attendance.event_types.unknown') }}
+                                            {{ $item?->getTranslation('title', app()->getLocale()) ?? __('member.attendance.event_types.unknown') }}
                                         @endif
                                     </div>
                                     <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-0.5">
-                                        {{ str_replace('App\Models\\', '', $attendance->attendable_type) }}
+                                        {{ __('member.attendance.event_types.' . ($modelToType[$attendance->attendable_type] ?? 'unknown')) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-600 font-medium">
@@ -213,11 +218,11 @@
                                     @elseif($attendance->attendable_type === 'App\Models\Training')
                                         {{ __('member.attendance.event_types.training') }} - {{ $item?->teams?->first()?->name }}
                                     @else
-                                        {{ $item?->title ?? __('member.attendance.event_types.unknown') }}
+                                        {{ $item?->getTranslation('title', app()->getLocale()) ?? __('member.attendance.event_types.unknown') }}
                                     @endif
                                 </div>
                                 <div class="text-[9px] font-black uppercase text-slate-400 tracking-widest mt-1">
-                                    {{ str_replace('App\Models\\', '', $attendance->attendable_type) }}
+                                    {{ __('member.attendance.event_types.' . ($modelToType[$attendance->attendable_type] ?? 'unknown')) }}
                                 </div>
                             </div>
                             <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 {{ $statusColors[$attendance->status] ?? 'bg-slate-100' }}">

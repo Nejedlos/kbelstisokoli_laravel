@@ -22,9 +22,9 @@
     ];
 
     $typeLabels = [
-        'training' => 'Trénink',
-        'match' => 'Zápas',
-        'event' => 'Akce',
+        'training' => __('member.attendance.event_types.training'),
+        'match' => __('member.attendance.event_types.match'),
+        'event' => __('member.attendance.event_types.event'),
     ];
 
     $statusColors = [
@@ -149,7 +149,7 @@
                             {{ $data->our_score }} : {{ $data->opponent_score }}
                         </span>
                         <span class="text-[7px] font-black text-white/70 uppercase tracking-[0.2em] leading-tight mt-1">
-                            {{ $data->result_letter === 'V' ? 'VÝHRA' : ($data->result_letter === 'P' ? 'PROHRA' : 'REMÍZA') }}
+                            {{ __('matches.result_' . strtolower($data->result_letter)) }}
                         </span>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 @extends('layouts.member', [
     'title' => __('member.attendance.detail_title') ?? 'Detail události',
-    'subtitle' => $item->title ?? ($type === 'match' ? ($item->team?->name . ' vs ' . $item->opponent?->name) : 'Trénink')
+    'subtitle' => $item->title ?? ($type === 'match' ? ($item->team?->name . ' vs ' . $item->opponent?->name) : __('member.attendance.event_types.training'))
 ])
 
 @section('content')

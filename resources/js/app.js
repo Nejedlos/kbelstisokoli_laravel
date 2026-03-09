@@ -17,18 +17,32 @@ window.initFloatingUI = (Alpine) => {
 
         let cleanup;
 
+        // Initialize element styles to prevent jumpy layout and ensure size calculation is clean
+        Object.assign(el.style, {
+            position: modifiers.includes('fixed') ? 'fixed' : 'absolute',
+            left: '0px',
+            top: '0px',
+            visibility: 'hidden', // Hide until first calculation
+        });
+
         const updatePosition = () => {
+            if (!reference.isConnected || !el.isConnected) return;
+
             computePosition(reference, el, {
                 placement: modifiers.includes('top') ? 'top' : (modifiers.includes('bottom') ? 'bottom' : 'top-end'),
                 strategy: modifiers.includes('fixed') ? 'fixed' : 'absolute',
                 middleware: [
                     offset(12),
-                    flip(),
+                    flip({
+                        fallbackPlacements: ['bottom', 'top'],
+                        boundary: 'clippingAncestors'
+                    }),
                     shift({ padding: 10 }),
                     size({
-                        apply({ availableHeight }) {
+                        apply({ availableHeight, rects }) {
                             Object.assign(el.style, {
                                 maxHeight: `${Math.max(100, availableHeight - 20)}px`,
+                                width: modifiers.includes('fixed') ? `${Math.max(256, rects.reference.width)}px` : '',
                             });
                         },
                     }),
@@ -37,7 +51,7 @@ window.initFloatingUI = (Alpine) => {
                 Object.assign(el.style, {
                     left: `${x}px`,
                     top: `${y}px`,
-                    position: modifiers.includes('fixed') ? 'fixed' : 'absolute',
+                    visibility: 'visible',
                 });
             });
         };
@@ -51,14 +65,24 @@ window.initFloatingUI = (Alpine) => {
                 cleanup();
                 cleanup = undefined;
             }
+            el.style.visibility = 'hidden';
         };
 
-        // Handle visibility
+        // Initial check and observe display property
         Alpine.effect(() => {
-            if (el.style.display !== 'none') {
-                start();
+            const isVisible = el.style.display !== 'none';
+            if (isVisible) {
+                // Small delay to ensure browser has rendered the reference and the target
+                setTimeout(start, 10);
             } else {
                 stop();
+            }
+        });
+
+        // Listen for manual reposition requests
+        el.addEventListener('reposition', () => {
+            if (el.style.display !== 'none') {
+                updatePosition();
             }
         });
     });

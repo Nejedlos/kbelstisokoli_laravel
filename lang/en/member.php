@@ -87,8 +87,9 @@ return [
             'maybe' => 'Maybe',
         ],
         'event_types' => [
-            'match' => 'Match',
+            'match' => 'Basketball match',
             'training' => 'Training',
+            'event' => 'Event',
             'unknown' => 'Unknown event',
         ],
         'detail_title' => 'Event Detail',
@@ -282,20 +283,20 @@ return [
 
         'rsvp_changed_title' => 'RSVP Change',
         'view_program' => 'View program',
-        'rsvp_message_user' => 'RSVP change for :label ":title":datetime to: :status.',
-        'rsvp_message_self' => 'Your RSVP for :label ":title":datetime was :status.',
+        'rsvp_message_user' => ':label ":title":datetime: :status',
+        'rsvp_message_self' => ':label ":title":datetime: :status',
 
         'event_labels' => [
-            'training' => 'training',
-            'match' => 'match',
-            'club_event' => 'club event',
-            'event' => 'event',
+            'training' => 'Training',
+            'match' => 'Match',
+            'club_event' => 'Club event',
+            'event' => 'Event',
         ],
 
         'rsvp_statuses' => [
-            'confirmed' => 'confirmed',
-            'declined' => 'canceled (excused)',
-            'maybe' => 'changed to Maybe',
+            'confirmed' => 'attending',
+            'declined' => 'excused',
+            'maybe' => 'maybe',
             'changed' => 'changed',
         ],
 

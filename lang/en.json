@@ -160,7 +160,7 @@
     "nav.help_text": "Having issues with access or your profile? Contact us.",
     "dashboard.title": "Dashboard",
     "dashboard.subtitle": "Welcome to the member section of the ###TEAM_NAME### club.",
-    "dashboard.kpi.pending": "Pending confirmation",
+    "dashboard.kpi.pending": "Pending attendance confirmation",
     "dashboard.kpi.my_teams": "My teams",
     "dashboard.kpi.my_payments": "My payments",
     "dashboard.upcoming_program": "Upcoming program",

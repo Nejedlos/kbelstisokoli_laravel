@@ -63,7 +63,7 @@
             @if($program->isNotEmpty())
                 <div class="flex items-center gap-2">
                     <button @click="selectAll()" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-primary/10 hover:text-primary transition-all">
-                        <i class="fa-light fa-check-double"></i> {{ __('member.attendance.bulk_actions.title') }} - Vše
+                        <i class="fa-light fa-check-double"></i> {{ __('member.attendance.bulk_actions.title') }} - {{ __('member.attendance.filter.all') }}
                     </button>
                     <button x-show="selectedEvents.length > 0" @click="selectedEvents = []" class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-rose-400 hover:text-rose-600 transition-colors">
                          {{ __('member.attendance.bulk_actions.clear') }}
@@ -287,16 +287,19 @@
 
                             <!-- Decline Reasons Dropdown (Teleported for visibility) -->
                             <template x-teleport="body">
-                                <div x-show="openDecline"
+                                <div id="bulk-excuse-dropdown"
+                                     x-show="openDecline"
                                      x-floating.top.fixed="'#decline-bulk-btn'"
+                                     x-effect="if (openDecline) { $nextTick(() => { const el = document.getElementById('bulk-excuse-dropdown'); if (el) el.dispatchEvent(new CustomEvent('reposition')); }) }"
                                      @click.away="openDecline = false"
+                                     @reposition.window="if (openDecline) { /* logic is in autoUpdate, but this forces Alpine to keep it alive */ }"
                                      x-transition:enter="transition ease-out duration-200"
                                      x-transition:enter-start="opacity-0 translate-y-4 scale-95"
                                      x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                                      x-transition:leave="transition ease-in duration-150"
                                      x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                                      x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-                                     class="w-[calc(100%-2rem)] sm:w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-[10001]"
+                                     class="w-max bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-[10001]"
                                      x-cloak>
                                     <div class="p-2 overflow-y-auto ks-scrollbar" style="max-height: inherit;">
                                         <div class="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 mb-1">

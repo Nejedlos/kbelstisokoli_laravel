@@ -87,8 +87,9 @@ return [
             'maybe' => 'Možná',
         ],
         'event_types' => [
-            'match' => 'Zápas',
+            'match' => 'Basketbalový zápas',
             'training' => 'Trénink',
+            'event' => 'Akce',
             'unknown' => 'Neznámá akce',
         ],
         'detail_title' => 'Detail události',
@@ -282,20 +283,20 @@ return [
 
         'rsvp_changed_title' => 'Změna potvrzení účasti (RSVP)',
         'view_program' => 'Zobrazit program',
-        'rsvp_message_user' => 'Změna potvrzení účasti :label ":title":datetime na: :status.',
-        'rsvp_message_self' => 'Tvoje potvrzení účasti na :label ":title":datetime bylo :status.',
+        'rsvp_message_user' => ':label ":title":datetime: :status',
+        'rsvp_message_self' => ':label ":title":datetime: :status',
 
         'event_labels' => [
-            'training' => 'trénink',
-            'match' => 'zápas',
-            'club_event' => 'klubovou akci',
-            'event' => 'událost',
+            'training' => 'Trénink',
+            'match' => 'Zápas',
+            'club_event' => 'Klubová akce',
+            'event' => 'Událost',
         ],
 
         'rsvp_statuses' => [
-            'confirmed' => 'potvrzeno',
-            'declined' => 'zrušeno (omluveno)',
-            'maybe' => 'změněno na Možná',
+            'confirmed' => 'účast',
+            'declined' => 'omluva',
+            'maybe' => 'možná',
             'changed' => 'změněno',
         ],
 
