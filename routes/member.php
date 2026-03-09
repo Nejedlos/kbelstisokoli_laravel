@@ -31,6 +31,7 @@ Route::middleware(['member'])
         Route::get('/program/{type}/{id}', [AttendanceController::class, 'show'])->name('attendance.show');
         Route::get('/dochazka/historie', [AttendanceController::class, 'history'])->name('attendance.history');
         Route::post('/program/{type}/{id}/respond', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::post('/program/bulk-respond', [AttendanceController::class, 'bulkStore'])->name('attendance.bulk-store');
 
         // Profil
         Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');

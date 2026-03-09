@@ -76,7 +76,7 @@
                                 @endif
                             </div>
                             <p class="text-[11px] text-slate-500 leading-snug line-clamp-2">
-                                {{ $notification->data['message'] ?? '' }}
+                                {{ !empty($notification->data['message']) ? __($notification->data['message']) : '' }}
                             </p>
                             <div class="mt-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">
                                 {{ $notification->created_at->diffForHumans() }}

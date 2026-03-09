@@ -25,20 +25,26 @@ return [
     ],
     'attendance' => [
         'title' => 'My Program',
+        'my_status' => 'My attendance',
         'subtitle' => 'Overview of upcoming trainings, matches, and club events.',
         'no_events' => 'No upcoming events',
         'no_events_text' => 'You have no trainings or matches scheduled in the near future.',
+        'no_events_past' => 'No past events found.',
         'no_events_filter' => 'No events found for the selected filters.',
         'view_history' => 'View my attendance history',
         'history_title' => 'Attendance History',
         'history_subtitle' => 'Overview of all your past responses and participations.',
         'no_history' => 'You have no attendance history yet.',
+        'deadline_reached' => 'Attendance deadline has passed (90 mins before event).',
         'filter' => [
             'title' => 'Program Filter',
             'type' => 'Event Type',
             'year' => 'Year',
             'month' => 'Month',
             'attendance' => 'My Attendance',
+            'period' => 'Period',
+            'upcoming' => 'Upcoming',
+            'past' => 'Past',
             'all' => 'All',
             'confirmed' => 'Attending',
             'declined' => 'Excused',
@@ -102,6 +108,16 @@ return [
         ],
         'save_response' => 'Save Response',
         'save_success' => 'Your response has been successfully saved.',
+        'bulk_save_success' => 'Successfully bulk updated :count events.',
+        'cannot_change_past' => 'Attendance for past events cannot be changed.',
+        'bulk_actions' => [
+            'title' => 'Bulk Actions',
+            'confirm' => 'Mark as: Attending',
+            'decline' => 'Excuse...',
+            'decline_no_reason' => 'Decline without reason',
+            'selected' => ':count events selected',
+            'clear' => 'Clear Selection',
+        ],
         'who_comes_title' => 'Who is Coming?',
         'who_not_comes_title' => 'Excused',
         'who_pending_title' => 'Not responded yet',
@@ -250,6 +266,7 @@ return [
         ],
     ],
     'notifications' => [
+        // Translation keys for in-app notifications
         'title' => 'Notifications',
         'subtitle' => 'Overview of your alerts and messages.',
         'mark_all_read' => 'Mark all as read',
@@ -265,8 +282,8 @@ return [
 
         'rsvp_changed_title' => 'RSVP Change',
         'view_program' => 'View program',
-        'rsvp_message_user' => 'RSVP change for :label ":title" to: :status.',
-        'rsvp_message_self' => 'Your RSVP for :label ":title" was :status.',
+        'rsvp_message_user' => 'RSVP change for :label ":title":datetime to: :status.',
+        'rsvp_message_self' => 'Your RSVP for :label ":title":datetime was :status.',
 
         'event_labels' => [
             'training' => 'training',

@@ -51,12 +51,19 @@ class RsvpChangedHandler implements ShouldQueue
             $eventTitle = 'událost';
         }
 
-        // --- URL ---
+        // --- URL a Datum ---
         $type = match (true) {
             $eventModel instanceof \App\Models\Training => 'training',
             $eventModel instanceof \App\Models\BasketballMatch => 'match',
             $eventModel instanceof \App\Models\ClubEvent => 'event',
             default => strtolower(class_basename($eventModel)),
+        };
+
+        $eventDate = match (true) {
+            $eventModel instanceof \App\Models\Training => $eventModel->starts_at,
+            $eventModel instanceof \App\Models\BasketballMatch => $eventModel->scheduled_at,
+            $eventModel instanceof \App\Models\ClubEvent => $eventModel->starts_at,
+            default => $eventModel->starts_at ?? $eventModel->scheduled_at ?? null,
         };
 
         $actionUrl = route('member.attendance.show', [
@@ -119,7 +126,8 @@ class RsvpChangedHandler implements ShouldQueue
                 $attendance->status,
                 $concernedUser,
                 $actionUrl,
-                $eventLabelKey
+                $eventLabelKey,
+                $eventDate
             ));
         }
     }

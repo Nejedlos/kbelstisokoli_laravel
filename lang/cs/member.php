@@ -25,20 +25,26 @@ return [
     ],
     'attendance' => [
         'title' => 'Můj program',
+        'my_status' => 'Moje účast',
         'subtitle' => 'Přehled nadcházejících tréninků, zápasů a klubových akcí.',
         'no_events' => 'Žádné nadcházející akce',
         'no_events_text' => 'V nejbližší době nemáte naplánované žádné tréninky ani zápasy.',
+        'no_events_past' => 'Nebyly nalezeny žádné proběhlé akce.',
         'no_events_filter' => 'Pro vybrané filtry nebyly nalezeny žádné akce.',
         'view_history' => 'Zobrazit historii mé docházky',
         'history_title' => 'Historie docházky',
         'history_subtitle' => 'Přehled všech vašich dosavadních odpovědí a účastí.',
         'no_history' => 'Zatím nemáte žádnou historii docházky.',
+        'deadline_reached' => 'Uzávěrka docházky vypršela (90 min před akcí).',
         'filter' => [
             'title' => 'Filtr programu',
             'type' => 'Typ akce',
             'year' => 'Rok',
             'month' => 'Měsíc',
             'attendance' => 'Moje docházka',
+            'period' => 'Období',
+            'upcoming' => 'Nadcházející',
+            'past' => 'Proběhlé',
             'all' => 'Vše',
             'confirmed' => 'Účast',
             'declined' => 'Omluva',
@@ -102,6 +108,16 @@ return [
         ],
         'save_response' => 'Uložit odpověď',
         'save_success' => 'Vaše odpověď byla úspěšně uložena.',
+        'bulk_save_success' => 'Úspěšně hromadně upraveno :count událostí.',
+        'cannot_change_past' => 'Docházku u proběhlých akcí již nelze měnit.',
+        'bulk_actions' => [
+            'title' => 'Hromadné akce',
+            'confirm' => 'Označit jako: Účast',
+            'decline' => 'Omluvit...',
+            'decline_no_reason' => 'Omluvit bez důvodu',
+            'selected' => 'Vybráno :count událostí',
+            'clear' => 'Zrušit výběr',
+        ],
         'who_comes_title' => 'Kdo přijde?',
         'who_not_comes_title' => 'Kdo se omluvil?',
         'who_pending_title' => 'Zatím neví (otazník)',
@@ -250,6 +266,7 @@ return [
         ],
     ],
     'notifications' => [
+        // Translation keys for in-app notifications
         'title' => 'Oznámení',
         'subtitle' => 'Přehled vašich upozornění a zpráv.',
         'mark_all_read' => 'Označit vše jako přečtené',
@@ -263,15 +280,23 @@ return [
         'marked_read' => 'Oznámení bylo označeno jako přečtené.',
         'marked_all_read' => 'Všechna oznámení byla označena jako přečtená.',
 
-        'attendance_changed_title' => 'Změna docházky na akci',
+        'rsvp_changed_title' => 'Změna potvrzení účasti (RSVP)',
         'view_program' => 'Zobrazit program',
-        'attendance_message_user' => 'Změna docházky na :label ":title" na: :status.',
-        'attendance_message_self' => 'Tvoje docházka na :label ":title" byla :status.',
-        'attendance_statuses' => [
-            'confirmed' => 'potvrzena',
-            'declined' => 'zrušena (omluveno)',
-            'maybe' => 'změněna na Možná',
-            'changed' => 'změněna',
+        'rsvp_message_user' => 'Změna potvrzení účasti :label ":title":datetime na: :status.',
+        'rsvp_message_self' => 'Tvoje potvrzení účasti na :label ":title":datetime bylo :status.',
+
+        'event_labels' => [
+            'training' => 'trénink',
+            'match' => 'zápas',
+            'club_event' => 'klubovou akci',
+            'event' => 'událost',
+        ],
+
+        'rsvp_statuses' => [
+            'confirmed' => 'potvrzeno',
+            'declined' => 'zrušeno (omluveno)',
+            'maybe' => 'změněno na Možná',
+            'changed' => 'změněno',
         ],
 
         'new_charge_title' => 'Nový platební předpis',

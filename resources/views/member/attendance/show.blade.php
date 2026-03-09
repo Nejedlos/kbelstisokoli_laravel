@@ -130,6 +130,7 @@
                 </div>
 
                 <!-- Attendance Form -->
+                @if($time->isAfter(now()->addMinutes(90)))
                 <div class="p-6 sm:p-8 bg-slate-50/50 border-t border-slate-100">
                     <h3 class="text-xs sm:text-sm font-black uppercase tracking-tight text-secondary mb-5 flex items-center gap-2">
                         <i class="fa-light fa-pen-to-square text-primary"></i>
@@ -203,6 +204,16 @@
                         </div>
                     </form>
                 </div>
+                @else
+                <div class="p-6 sm:p-8 bg-slate-50/50 border-t border-slate-100 flex items-center gap-4 text-slate-400 font-bold italic text-sm">
+                    <i class="fa-light fa-lock text-xl text-slate-300"></i>
+                    @if($time->isPast())
+                        {{ __('member.attendance.cannot_change_past') }}
+                    @else
+                        {{ __('member.attendance.deadline_reached') }}
+                    @endif
+                </div>
+                @endif
             </div>
         </div>
 

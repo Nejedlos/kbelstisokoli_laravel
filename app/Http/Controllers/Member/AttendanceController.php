@@ -28,6 +28,7 @@ class AttendanceController extends Controller
         $filterYear = $request->get('year');
         $filterMonth = $request->get('month');
         $filterAttendance = $request->get('attendance', 'all');
+        $filterPeriod = $request->get('period', 'upcoming');
 
         // Načteme ID uživatelů, kterým se hlídá docházka v této sezóně
         $trackedUserIds = $currentSeasonId
@@ -44,8 +45,7 @@ class AttendanceController extends Controller
                 'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
-            ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)))
-            ->orderBy('starts_at');
+            ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)));
 
         $matchesQuery = BasketballMatch::with([
             'team.activePlayers',
@@ -58,8 +58,7 @@ class AttendanceController extends Controller
                 'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
-            ->when($activeTeamId, fn ($q) => $q->where('team_id', $activeTeamId))
-            ->orderBy('scheduled_at');
+            ->when($activeTeamId, fn ($q) => $q->where('team_id', $activeTeamId));
 
         $eventsQuery = ClubEvent::with([
             'teams.activePlayers',
@@ -71,8 +70,7 @@ class AttendanceController extends Controller
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('rsvp_enabled', true)
-            ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)))
-            ->orderBy('starts_at');
+            ->when($activeTeamId, fn ($q) => $q->whereHas('teams', fn ($sq) => $sq->where('teams.id', $activeTeamId)));
 
         // Aplikace filtrů na datum
         if ($filterYear || $filterMonth) {
@@ -86,11 +84,21 @@ class AttendanceController extends Controller
                 $matchesQuery->whereMonth('scheduled_at', $filterMonth);
                 $eventsQuery->whereMonth('starts_at', $filterMonth);
             }
+
+            $trainingsQuery->orderBy('starts_at', 'desc');
+            $matchesQuery->orderBy('scheduled_at', 'desc');
+            $eventsQuery->orderBy('starts_at', 'desc');
         } else {
-            // Defaultně budoucí akce
-            $trainingsQuery->where('starts_at', '>=', $now);
-            $matchesQuery->where('scheduled_at', '>=', $now);
-            $eventsQuery->where('starts_at', '>=', $now);
+            // Defaultně budoucí nebo minulé akce
+            if ($filterPeriod === 'past') {
+                $trainingsQuery->where('starts_at', '<', $now)->orderBy('starts_at', 'desc');
+                $matchesQuery->where('scheduled_at', '<', $now)->orderBy('scheduled_at', 'desc');
+                $eventsQuery->where('starts_at', '<', $now)->orderBy('starts_at', 'desc');
+            } else {
+                $trainingsQuery->where('starts_at', '>=', $now)->orderBy('starts_at', 'asc');
+                $matchesQuery->where('scheduled_at', '>=', $now)->orderBy('scheduled_at', 'asc');
+                $eventsQuery->where('starts_at', '>=', $now)->orderBy('starts_at', 'asc');
+            }
         }
 
         // Aplikace filtrů na typ
@@ -172,13 +180,19 @@ class AttendanceController extends Controller
                 return ['type' => 'event', 'data' => $item, 'time' => $item->starts_at];
             });
 
-        $program = $trainings->concat($matches)->concat($events)->sortBy('time');
+        $program = $trainings->concat($matches)->concat($events);
+
+        if ($filterYear || $filterMonth || $filterPeriod === 'past') {
+            $program = $program->sortByDesc('time');
+        } else {
+            $program = $program->sortBy('time');
+        }
 
         // Seznam roků pro filtr (unikátní roky z dostupných dat)
         $trainingYears = Training::selectRaw('YEAR(starts_at) as year')->distinct()->pluck('year');
         $matchYears = BasketballMatch::selectRaw('YEAR(scheduled_at) as year')->distinct()->pluck('year');
         $eventYears = ClubEvent::selectRaw('YEAR(starts_at) as year')->distinct()->pluck('year');
-        $years = $trainingYears->concat($matchYears)->concat($eventYears)->unique()->sort()->values();
+        $years = $trainingYears->concat($matchYears)->concat($eventYears)->unique()->sortDesc()->values();
 
         if ($years->isEmpty()) {
             $years->push(now()->year);
@@ -192,6 +206,7 @@ class AttendanceController extends Controller
                 'year' => $filterYear,
                 'month' => $filterMonth,
                 'attendance' => $filterAttendance,
+                'period' => $filterPeriod,
             ],
         ]);
     }
@@ -403,6 +418,15 @@ class AttendanceController extends Controller
 
         $item = $modelClass::findOrFail($id);
 
+        $eventDate = match ($type) {
+            'match' => $item->scheduled_at,
+            default => $item->starts_at,
+        };
+
+        if ($eventDate->isBefore(now()->addMinutes(90))) {
+            return back()->with('error', __('member.attendance.deadline_reached'));
+        }
+
         $attendance = Attendance::updateOrCreate(
             [
                 'user_id' => auth()->id(),
@@ -420,5 +444,58 @@ class AttendanceController extends Controller
         event(new \App\Events\RsvpChanged($attendance));
 
         return back()->with('status', __('member.attendance.save_success'));
+    }
+
+    public function bulkStore(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'events' => 'required|array',
+            'events.*' => 'string', // format "type:id"
+            'status' => 'required|in:confirmed,declined',
+            'excuse_reason' => 'nullable|string',
+        ]);
+
+        $updatedCount = 0;
+
+        foreach ($request->events as $eventStr) {
+            [$type, $id] = explode(':', $eventStr);
+
+            $modelClass = match ($type) {
+                'training' => Training::class,
+                'match' => BasketballMatch::class,
+                'event' => ClubEvent::class,
+                default => null,
+            };
+
+            if (!$modelClass) continue;
+
+            $item = $modelClass::find($id);
+            if (!$item) continue;
+
+            $eventDate = match ($type) {
+                'match' => $item->scheduled_at,
+                default => $item->starts_at,
+            };
+
+            if ($eventDate->isBefore(now()->addMinutes(90))) continue;
+
+            $attendance = Attendance::updateOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'attendable_id' => $item->id,
+                    'attendable_type' => $modelClass,
+                ],
+                [
+                    'planned_status' => $request->status,
+                    'excuse_reason' => $request->status === 'declined' ? $request->excuse_reason : null,
+                    'responded_at' => now(),
+                ]
+            );
+
+            event(new \App\Events\RsvpChanged($attendance));
+            $updatedCount++;
+        }
+
+        return back()->with('status', __('member.attendance.bulk_save_success', ['count' => $updatedCount]));
     }
 }

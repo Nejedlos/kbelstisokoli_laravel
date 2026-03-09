@@ -37,7 +37,7 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+    class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
     x-cloak
 >
     <!-- Backdrop -->
@@ -49,17 +49,18 @@
     <!-- Modal Content -->
     <div
         x-show="predictionOpen"
-        x-transition:enter="transition ease-out duration-300 transform"
-        x-transition:enter-start="opacity-0 translate-y-8 sm:scale-95"
+        x-transition:enter="transition ease-out duration-500 transform"
+        x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-8 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave="transition ease-in duration-300 transform"
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-        x-transition:leave-end="opacity-0 translate-y-8 sm:scale-95"
-        class="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 flex flex-col max-h-[90vh]"
+        x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-8 sm:scale-95"
+        class="relative w-full max-w-[740px] bg-white/98 backdrop-blur-3xl rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border border-white/40 flex flex-col max-h-[92vh] sm:max-h-[90vh]"
     >
         <!-- Header -->
-        <div class="relative px-8 py-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shrink-0">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+        <div class="relative px-6 sm:px-8 py-6 bg-secondary text-white shrink-0 overflow-hidden">
+            <div class="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full -mr-24 -mt-24 blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
 
             <div class="relative flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -83,12 +84,12 @@
             </div>
         </div>
 
-        <div class="overflow-y-auto custom-scrollbar p-8 space-y-8 bg-slate-50/50">
+        <div class="overflow-y-auto custom-scrollbar p-6 sm:p-8 space-y-8 bg-slate-50/30">
             @if($prediction)
                 <div class="space-y-8">
                     <!-- Probability Section -->
-                    <div class="relative p-8 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden group">
-                        <div class="absolute top-0 right-0 w-24 h-24 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-150 duration-700" style="background-color: {{ $bgHsl }};"></div>
+                    <div class="relative p-6 sm:p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700 opacity-50" style="background-color: {{ $bgHsl }};"></div>
 
                         <div class="flex flex-col items-center gap-6 relative">
                             <div class="text-center">
@@ -101,10 +102,10 @@
                             </div>
 
                             <div class="w-full">
-                                <div class="overflow-hidden h-4 flex rounded-full bg-slate-100 shadow-inner p-1">
+                                <div class="overflow-hidden h-5 flex rounded-full bg-slate-100 shadow-inner p-1">
                                     <div
-                                        style="width:{{ $prediction->probability_win * 100 }}%; background-color: {{ $colorHsl }};"
-                                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center rounded-full transition-all duration-1000"
+                                        style="width:{{ $prediction->probability_win * 100 }}%; background-color: {{ $colorHsl }}; box-shadow: 0 0 15px {{ $glowHsl }};"
+                                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center rounded-full transition-all duration-1000 animate-pulse"
                                     ></div>
                                 </div>
                                 <div class="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3 px-1">

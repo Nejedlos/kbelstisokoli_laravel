@@ -540,6 +540,16 @@
     </script>
     @stack('scripts')
     <script>
+        // Resetujeme atributy na body při navigaci, aby nezůstaly viset (např. batch-active pro feedback widget)
+        document.addEventListener('livewire:navigating', () => {
+            document.body.removeAttribute('data-batch-active');
+            document.body.removeAttribute('data-prediction-open');
+            const fab = document.querySelector('.ks-fab-trigger');
+            if (fab) {
+                fab.style.setProperty('display', 'flex', 'important');
+            }
+        });
+
         // Detekce uživatelské interakce pro odlišení od automatických Livewire requestů (polling, Echo)
         let lastUserInteraction = 0;
         ['mousedown', 'keydown', 'submit', 'change', 'click', 'touchstart'].forEach(type => {

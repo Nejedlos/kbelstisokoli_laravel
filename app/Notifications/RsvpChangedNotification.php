@@ -11,7 +11,8 @@ class RsvpChangedNotification extends BaseNotification
         protected string $status,
         protected ?\App\Models\User $user = null,
         protected ?string $actionUrl = null,
-        protected string $eventLabelKey = 'event'
+        protected string $eventLabelKey = 'event',
+        protected ?\Carbon\Carbon $eventDate = null
     ) {}
 
     /**
@@ -37,18 +38,21 @@ class RsvpChangedNotification extends BaseNotification
         };
 
         $label = __("member.notifications.event_labels.{$this->eventLabelKey}");
+        $datetime = $this->eventDate ? " (" . $this->eventDate->translatedFormat('j. n. H:i') . ")" : '';
 
         if ($this->user) {
             $message = __('member.notifications.rsvp_message_user', [
                 'label' => $label,
                 'title' => $this->eventTitle,
                 'status' => $statusLabel,
+                'datetime' => $datetime,
             ]);
         } else {
             $message = __('member.notifications.rsvp_message_self', [
                 'label' => $label,
                 'title' => $this->eventTitle,
                 'status' => $statusLabel,
+                'datetime' => $datetime,
             ]);
         }
 

@@ -76,7 +76,7 @@
                                 @endif
                             </div>
                             <p class="text-sm text-slate-500 font-medium leading-relaxed max-w-3xl">
-                                {{ $notification->data['message'] ?? '' }}
+                                {{ !empty($notification->data['message']) ? __($notification->data['message']) : '' }}
                             </p>
                             <div class="mt-2 flex items-center gap-3">
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center">
