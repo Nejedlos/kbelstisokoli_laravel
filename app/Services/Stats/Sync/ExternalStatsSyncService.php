@@ -722,6 +722,9 @@ class ExternalStatsSyncService
             if (!empty($mainData->metadata['last_matches'])) {
                 $matchMetadata['last_matches'] = $mainData->metadata['last_matches'];
             }
+            if (!empty($mainData->metadata['mutual_matches'])) {
+                $matchMetadata['mutual_matches'] = $mainData->metadata['mutual_matches'];
+            }
 
             $updateData = ['metadata' => $matchMetadata];
             Log::info("DEBUG SYNC: Match metadata before update", ['metadata_keys' => array_keys($matchMetadata)]);

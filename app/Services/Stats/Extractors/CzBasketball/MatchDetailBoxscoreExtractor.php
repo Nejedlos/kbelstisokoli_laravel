@@ -65,13 +65,16 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         // 4. Poslední zápasy
         $lastMatches = $this->extractLastMatches($crawler);
 
+        // 4a. Vzájemné zápasy
+        $mutualMatches = $this->extractMutualMatches($crawler);
+
         // 5. Tabulky statistik
         $tables = $crawler->filter('table.table-condensed');
 
         $allTablesData = [];
         $allFragmentHtml = '';
 
-        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison, $lastMatches) {
+        $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison, $lastMatches, $mutualMatches) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
             if ($table->filter('thead th')->count() < 5) {
                 return;
@@ -108,6 +111,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 'best_players' => $bestPlayers,
                 'team_comparison' => $teamComparison,
                 'last_matches' => $lastMatches,
+                'mutual_matches' => $mutualMatches,
             ]);
 
             $allTablesData[] = $tableDto;
@@ -120,6 +124,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             'header' => $matchHeader,
             'best_players' => $bestPlayers,
             'team_comparison' => $teamComparison,
+            'last_matches' => $lastMatches,
+            'mutual_matches' => $mutualMatches,
             'all_tables' => array_map(fn ($t) => $t->toArray(), $allTablesData),
             'warnings' => $warnings,
         ]);
@@ -531,6 +537,63 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         }
 
         return $lastMatches;
+    }
+
+    protected function extractMutualMatches(Crawler $crawler): array
+    {
+        $mutualMatches = [];
+
+        // Hledáme nadpis "Vzájemné zápasy"
+        $header = $crawler->filter('h3')->reduce(function (Crawler $node) {
+            return str_contains($node->text(), 'Vzájemné zápasy');
+        })->first();
+
+        if ($header->count() > 0) {
+            // Tabulka by měla být hned pod nadpisem v divu overflow-auto
+            $table = $header->nextAll()->filter('table')->first();
+            if ($table->count() > 0) {
+                $table->filter('tbody tr')->each(function (Crawler $tr) use (&$mutualMatches) {
+                    $tds = $tr->filter('td');
+                    if ($tds->count() >= 4) {
+                        $kolo = trim($tds->eq(0)->text());
+                        $dateText = trim($tds->eq(1)->text());
+                        $date = preg_replace('/\s+/', ' ', $dateText);
+
+                        $teamsNode = $tds->eq(2);
+                        $teamNames = $teamsNode->filter('.text-nowrap');
+                        $homeTeam = $teamNames->count() > 0 ? trim($teamNames->eq(0)->text()) : '';
+                        $awayTeam = $teamNames->count() > 1 ? trim($teamNames->eq(1)->text()) : '';
+
+                        $scoreNode = $tds->eq(3);
+                        $scoreDivs = $scoreNode->filter('div, text()'); // Skóre může být v divu s font-weight-bold
+                        // Jednodušší přístup: vyčistit text od čtvrtin
+                        $scoreText = trim($scoreNode->text());
+                        // Skóre je obvykle první dvě čísla
+                        $scoreLines = array_values(array_filter(array_map('trim', explode("\n", strip_tags(str_replace(['</div>', '<div>', '<br>', '<br/>'], "\n", $scoreNode->html()))))));
+                        $scoreHome = $scoreLines[0] ?? '';
+                        $scoreAway = $scoreLines[1] ?? '';
+
+                        $link = $tds->filter('a[href*="/zapas/"]')->first();
+                        $matchId = null;
+                        if ($link->count() > 0 && preg_match('/\/zapas\/(\d+)/', $link->attr('href'), $m)) {
+                            $matchId = $m[1];
+                        }
+
+                        $mutualMatches[] = [
+                            'round' => $kolo,
+                            'date' => $date,
+                            'team_home' => $homeTeam,
+                            'team_away' => $awayTeam,
+                            'score_home' => $scoreHome,
+                            'score_away' => $scoreAway,
+                            'external_id' => $matchId,
+                        ];
+                    }
+                });
+            }
+        }
+
+        return $mutualMatches;
     }
 
     protected function processBoxscoreTable(Crawler $table, string $tableName, array &$warnings): NormalizedTableDTO
