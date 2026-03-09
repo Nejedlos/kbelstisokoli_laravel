@@ -40,7 +40,7 @@
     ];
 @endphp
 
-<div class="relative group">
+<div class="relative group" x-data="{ predictionOpen: false }">
     <div class="absolute inset-0 bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/20 group-hover:shadow-xl group-hover:shadow-primary/5 group-hover:border-primary/20 transition-all duration-500 overflow-hidden">
         <div class="absolute top-0 left-0 w-1 h-full bg-{{ $status === 'confirmed' ? 'emerald-500' : ($status === 'declined' ? 'rose-500' : 'slate-200') }}"></div>
     </div>
@@ -98,6 +98,45 @@
                 </div>
             </div>
 
+            <!-- Prediction Widget -->
+            @if($type === 'match' && $data->prediction)
+                @php
+                    $winChance = round($data->prediction->probability_win * 100);
+                    // Dynamický výpočet barvy (0% = červená, 50% = oranžová, 100% = zelená)
+                    if ($winChance <= 50) {
+                        $hue = ($winChance / 50) * 35; // 0-35 (red to orange-ish)
+                    } else {
+                        $hue = 35 + (($winChance - 50) / 50) * (105); // 35-140 (orange to success green)
+                    }
+                    $colorHsl = "hsl({$hue}, 75%, 45%)";
+                    $bgHsl = "hsla({$hue}, 75%, 45%, 0.05)";
+                    $glowHsl = "hsla({$hue}, 75%, 45%, 0.2)";
+                    $borderHsl = "hsla({$hue}, 75%, 45%, 0.15)";
+                @endphp
+                <div @click.stop="predictionOpen = true"
+                     class="cursor-pointer group/pred flex items-center gap-3 px-3 py-2 rounded-2xl border transition-all duration-300 shrink-0 relative overflow-hidden"
+                     style="background: linear-gradient(135deg, {{ $bgHsl }}, white); border-color: {{ $borderHsl }};"
+                     onmouseover="this.style.borderColor='hsla({{ $hue }}, 75%, 45%, 0.4)'; this.style.boxShadow='0 10px 15px -3px hsla({{ $hue }}, 75%, 45%, 0.1)';"
+                     onmouseout="this.style.borderColor='{{ $borderHsl }}'; this.style.boxShadow='none';">
+
+                    <div class="absolute inset-0 bg-white/40 translate-y-full group-hover/pred:translate-y-0 transition-transform duration-500"></div>
+                    <div class="relative">
+                        <div class="absolute inset-0 rounded-full blur-md group-hover/pred:blur-lg transition-all animate-pulse" style="background-color: {{ $glowHsl }};"></div>
+                        <div class="relative w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm border group-hover/pred:scale-110 transition-transform" style="color: {{ $colorHsl }}; border-color: {{ $borderHsl }};">
+                            <i class="fa-light fa-crystal-ball text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col relative">
+                        <span class="text-[15px] font-black leading-none tabular-nums" style="color: {{ $colorHsl }};">
+                            {{ $winChance }}%
+                        </span>
+                        <span class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] leading-tight mt-1">
+                            {{ __('matches.prediction.win_chance_short') ?? 'VÝHRA' }}
+                        </span>
+                    </div>
+                </div>
+            @endif
+
             <!-- Quick Actions -->
             @if($showActions)
                 <div class="flex items-center gap-2 sm:gap-2.5">
@@ -122,4 +161,7 @@
             @endif
         </div>
     </div>
+    @if($type === 'match' && $data->prediction)
+        <x-member.match-prediction-modal :match="$data" />
+    @endif
 </div>

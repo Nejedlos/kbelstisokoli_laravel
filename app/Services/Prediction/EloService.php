@@ -69,7 +69,7 @@ class EloService
     {
         $futureMatches = BasketballMatch::where('team_id', $teamId)
             ->where('season_id', $seasonId)
-            ->where('status', 'planned')
+            ->whereIn('status', ['planned', 'scheduled'])
             ->get();
 
         foreach ($futureMatches as $futureMatch) {
@@ -81,7 +81,7 @@ class EloService
     {
         $futureMatches = BasketballMatch::where('opponent_id', $opponentId)
             ->where('season_id', $seasonId)
-            ->where('status', 'planned')
+            ->whereIn('status', ['planned', 'scheduled'])
             ->get();
 
         foreach ($futureMatches as $futureMatch) {

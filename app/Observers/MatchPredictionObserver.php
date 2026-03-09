@@ -17,12 +17,12 @@ class MatchPredictionObserver
     {
         if ($model instanceof BasketballMatch) {
             // Jen pro budoucí nebo čerstvě odehrané zápasy
-            if ($model->status === 'planned') {
+            if (in_array($model->status, ['planned', 'scheduled'])) {
                 ComputeMatchPredictionJob::dispatch($model->id);
             }
 
             // Pokud se změnil výsledek u odehraného zápasu, přepočítáme Elo
-            if ($model->status === 'finished' && $model->wasChanged(['score_home', 'score_away', 'status'])) {
+            if (in_array($model->status, ['finished', 'played', 'completed']) && $model->wasChanged(['score_home', 'score_away', 'status'])) {
                 $this->eloService->updateFromMatch($model);
             }
         }

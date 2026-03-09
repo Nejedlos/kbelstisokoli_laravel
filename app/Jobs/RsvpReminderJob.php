@@ -33,7 +33,7 @@ class RsvpReminderJob implements ShouldQueue
         // 1. Zápasy
         $matches = BasketballMatch::where('scheduled_at', '>', $now)
             ->where('scheduled_at', '<=', $in24Hours)
-            ->where('status', 'planned')
+            ->whereIn('status', ['planned', 'scheduled'])
             ->get();
 
         foreach ($matches as $match) {

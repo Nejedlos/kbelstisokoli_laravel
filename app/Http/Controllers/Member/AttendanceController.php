@@ -51,6 +51,7 @@ class AttendanceController extends Controller
             'team.activePlayers',
             'opponent',
             'attendances' => fn ($q) => $q->where('user_id', $user->id),
+            'prediction',
         ])
             ->withCount([
                 'attendances as confirmed_count' => fn ($q) => $q->where('planned_status', 'confirmed'),
@@ -213,7 +214,7 @@ class AttendanceController extends Controller
         if ($type === 'training') {
             $query->with(['teams.activePlayers.user']);
         } elseif ($type === 'match') {
-            $query->with(['team.activePlayers.user', 'opponent', 'season']);
+            $query->with(['team.activePlayers.user', 'opponent', 'season', 'prediction']);
         } elseif ($type === 'event') {
             $query->with(['teams.activePlayers.user']);
         }

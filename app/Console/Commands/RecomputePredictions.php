@@ -16,7 +16,7 @@ class RecomputePredictions extends Command
         $query = BasketballMatch::query();
 
         if (!$this->option('all')) {
-            $query->where('status', 'planned');
+            $query->whereIn('status', ['planned', 'scheduled']);
         }
 
         $matches = $query->get();

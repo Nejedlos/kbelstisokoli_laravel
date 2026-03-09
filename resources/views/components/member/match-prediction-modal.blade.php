@@ -1,0 +1,184 @@
+@props(['match'])
+
+@php
+    $prediction = $match->prediction;
+    $teamComparison = $match->metadata['team_comparison'] ?? [];
+    $hasScore = !is_null($match->score_home) && !is_null($match->score_away);
+@endphp
+
+<div
+    x-show="predictionOpen"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+    x-cloak
+>
+    <!-- Backdrop -->
+    <div
+        class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        @click="predictionOpen = false"
+    ></div>
+
+    <!-- Modal Content -->
+    <div
+        x-show="predictionOpen"
+        x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="opacity-0 translate-y-8 sm:scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+        x-transition:leave-end="opacity-0 translate-y-8 sm:scale-95"
+        class="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 flex flex-col max-h-[90vh]"
+    >
+        <!-- Header -->
+        <div class="relative px-8 py-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shrink-0">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+
+            <div class="relative flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-brand-400 border border-white/20 shadow-xl backdrop-blur-md">
+                        <i class="fa-light fa-crystal-ball text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black uppercase tracking-tight leading-none mb-1">
+                            {{ $hasScore ? (__('matches.prediction.title_past') ?? 'Předzápasová predikce') : (__('matches.prediction.title') ?? 'Předzápasová predikce') }}
+                        </h3>
+                        <p class="text-[10px] font-black text-brand-400 uppercase tracking-widest">{{ $match->team->name }} vs {{ $match->opponent?->name }}</p>
+                    </div>
+                </div>
+
+                <button @click="predictionOpen = false" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all text-white/70 hover:text-white">
+                    <i class="fa-light fa-xmark text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="overflow-y-auto custom-scrollbar p-8 space-y-8 bg-slate-50/50">
+            @if($prediction)
+                <div class="space-y-8">
+                    <!-- Probability Section -->
+                    <div class="relative p-8 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-150 duration-700"></div>
+
+                        <div class="flex flex-col items-center gap-6 relative">
+                            <div class="text-center">
+                                <div class="text-6xl font-black text-brand-600 mb-2 tabular-nums drop-shadow-sm">
+                                    {{ round($prediction->probability_win * 100) }}%
+                                </div>
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                    {{ __('matches.prediction.win_chance') ?? 'Šance na výhru' }}
+                                </div>
+                            </div>
+
+                            <div class="w-full">
+                                <div class="overflow-hidden h-4 flex rounded-full bg-slate-100 shadow-inner p-1">
+                                    <div
+                                        style="width:{{ $prediction->probability_win * 100 }}%"
+                                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-1000"
+                                    ></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3 px-1">
+                                    <span>{{ $match->team->name }}</span>
+                                    <span>{{ $match->opponent?->name }}</span>
+                                </div>
+                            </div>
+
+                            @php
+                                $confColor = match($prediction->confidence) {
+                                    'high' => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                                    'medium' => 'bg-amber-50 text-amber-700 border-amber-100',
+                                    default => 'bg-slate-100 text-slate-700 border-slate-200',
+                                };
+                            @endphp
+                            <div class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border {{ $confColor }} shadow-sm">
+                                {{ __('matches.prediction.confidence_label') ?? 'Důvěra' }}: {{ __('matches.prediction.confidence_' . $prediction->confidence) ?? $prediction->confidence }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Why section -->
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
+                            <i class="fa-light fa-magnifying-glass-chart text-brand-500"></i>
+                            {{ __('matches.prediction.why_title') ?? 'Proč si to myslíme' }}
+                        </h4>
+                        <ul class="grid grid-cols-1 gap-3">
+                            @foreach($prediction->explanation_points as $point)
+                                <li class="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-100 text-sm text-slate-600 leading-relaxed shadow-sm hover:shadow-md transition-shadow">
+                                    <i class="fa-light fa-circle-check text-brand-500 mt-0.5 shrink-0"></i>
+                                    <span>{{ $point }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            @if(!empty($teamComparison))
+                <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
+                        <i class="fa-light fa-scale-balanced text-brand-500"></i>
+                        {{ __('matches.team_comparison') ?? 'Srovnání kádrů' }}
+                    </h4>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        @foreach($teamComparison as $key => $data)
+                            <div class="bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm group hover:border-brand-100 transition-all relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-20 h-20 bg-brand-500/5 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700"></div>
+
+                                <div class="text-center relative mb-4">
+                                    <span class="inline-block px-4 py-1.5 bg-slate-50 border border-slate-100 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] group-hover:text-brand-500 transition-colors leading-tight">
+                                        {{ $data['label'] ?? $key }}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-4 relative px-4">
+                                    <div class="text-center flex-1 min-w-0">
+                                        <span class="text-xl sm:text-2xl font-black text-brand-600 tabular-nums block break-words">
+                                            {{ $data['home'] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex flex-col items-center gap-1 shrink-0 px-1 opacity-20">
+                                        <div class="h-4 w-px bg-slate-400"></div>
+                                        <div class="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+                                        <div class="h-4 w-px bg-slate-400"></div>
+                                    </div>
+
+                                    <div class="text-center flex-1 min-w-0">
+                                        <span class="text-xl sm:text-2xl font-black text-slate-900 tabular-nums block break-words">
+                                            {{ $data['away'] }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            <!-- Methodology Footer -->
+            <div class="pt-4 border-t border-slate-100">
+                <div class="p-5 bg-white/50 rounded-2xl border border-slate-100/50 text-[11px] text-slate-500 leading-relaxed space-y-2 italic">
+                    <p>{{ __('matches.prediction.methodology_desc') ?? 'Predikce je založena na kombinaci Elo ratingu (dlouhodobá síla), aktuální formy (posledních 5 zápasů) a síly kádru. Výpočet se zpřesňuje s rostoucím množstvím dat.' }}</p>
+                    <p class="text-[10px] font-bold text-brand-500/70">{{ __('matches.prediction.disclaimer') ?? 'Jde o matematický model, nikoliv záruku výsledku. Basketbal je nevyzpytatelný!' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Footer CTA -->
+        <div class="p-6 bg-white border-t border-slate-100 shrink-0 flex justify-center">
+            <button
+                @click="predictionOpen = false"
+                class="btn btn-secondary w-full sm:w-auto px-12 py-3 text-xs uppercase tracking-widest font-black shadow-lg shadow-slate-200"
+            >
+                {{ __('Close') }}
+            </button>
+        </div>
+    </div>
+</div>

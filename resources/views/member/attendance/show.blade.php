@@ -72,6 +72,50 @@
                         <div class="px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest {{ $statusColors[$myStatus] }} border border-current opacity-80 self-start md:self-center text-center">
                             {{ __('member.attendance.status.' . $myStatus) }}
                         </div>
+
+                        @if($type === 'match' && $item->prediction)
+                            @php
+                                $winChance = round($item->prediction->probability_win * 100);
+                                // Dynamický výpočet barvy (0% = červená, 50% = oranžová, 100% = zelená)
+                                if ($winChance <= 50) {
+                                    $hue = ($winChance / 50) * 35; // 0-35 (red to orange-ish)
+                                } else {
+                                    $hue = 35 + (($winChance - 50) / 50) * (105); // 35-140 (orange to success green)
+                                }
+                                $colorHsl = "hsl({$hue}, 75%, 45%)";
+                                $bgHsl = "hsla({$hue}, 75%, 45%, 0.05)";
+                                $glowHsl = "hsla({$hue}, 75%, 45%, 0.2)";
+                                $borderHsl = "hsla({$hue}, 75%, 45%, 0.15)";
+                            @endphp
+                            <div x-data="{ predictionOpen: false }">
+                                <div @click="predictionOpen = true"
+                                     class="cursor-pointer group/pred flex items-center gap-4 px-5 py-3 rounded-3xl border transition-all duration-300 relative overflow-hidden animate-fade-in"
+                                     style="background: linear-gradient(135deg, {{ $bgHsl }}, white); border-color: {{ $borderHsl }};"
+                                     onmouseover="this.style.borderColor='hsla({{ $hue }}, 75%, 45%, 0.4)'; this.style.boxShadow='0 15px 30px -5px hsla({{ $hue }}, 75%, 45%, 0.15)';"
+                                     onmouseout="this.style.borderColor='{{ $borderHsl }}'; this.style.boxShadow='none';">
+
+                                    <div class="absolute inset-0 bg-white/40 translate-y-full group-hover/pred:translate-y-0 transition-transform duration-500"></div>
+                                    <div class="relative">
+                                        <div class="absolute inset-0 rounded-full blur-md group-hover/pred:blur-lg transition-all animate-pulse" style="background-color: {{ $glowHsl }};"></div>
+                                        <div class="relative w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border group-hover/pred:scale-110 transition-transform" style="color: {{ $colorHsl }}; border-color: {{ $borderHsl }};">
+                                            <i class="fa-light fa-crystal-ball text-2xl"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col relative">
+                                        <span class="text-2xl font-black leading-none tabular-nums" style="color: {{ $colorHsl }};">
+                                            {{ $winChance }}%
+                                        </span>
+                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-tight mt-1.5">
+                                            {{ __('matches.prediction.win_chance') ?? 'ŠANCE NA VÝHRU' }}
+                                        </span>
+                                    </div>
+                                    <div class="ml-4 w-8 h-8 rounded-full flex items-center justify-center group-hover/pred:translate-x-1 transition-transform relative" style="background-color: {{ $bgHsl }}; color: {{ $colorHsl }};">
+                                        <i class="fa-light fa-chevron-right text-xs"></i>
+                                    </div>
+                                </div>
+                                <x-member.match-prediction-modal :match="$item" />
+                            </div>
+                        @endif
                     </div>
 
                     @if($item->notes || $item->notes_public || $item->description)
