@@ -3,8 +3,8 @@
 @section('content')
     @php
         $statusColors = [
-            'planned' => 'bg-accent text-white',
-            'scheduled' => 'bg-accent text-white',
+            'planned' => 'bg-white text-secondary',
+            'scheduled' => 'bg-white text-secondary',
             'finished' => 'bg-success text-white',
             'cancelled' => 'bg-danger text-white',
             'postponed' => 'bg-warning text-black',
@@ -19,10 +19,10 @@
 
         $hasKlub = $match->teams->contains('slug', 'klub');
         $teamNames = $match->teams->pluck('name')->join(' & ');
-        $mainTeamName = ($hasKlub || $match->teams->count() > 1) ? ($hasKlub ? 'Sokoli (Celý klub)' : $teamNames) : ($match->teams->first()?->name ?? $match->team?->name);
+        $mainTeamName = ($hasKlub || $match->teams->count() > 1) ? ($hasKlub ? 'Sokoli (Celý klub)' : $teamNames) : $match->official_team_name;
     @endphp
     <x-page-header
-        :title="$mainTeamName . ' ' . __('matches.vs') . ' ' . $match->opponent->name"
+        :title="$mainTeamName . ' ' . __('matches.vs') . ' ' . $match->official_opponent_name"
         :subtitle="$match->scheduled_at->format('d. m. Y H:i') . ' | ' . ($match->location ?? __('matches.location_not_specified'))"
         :breadcrumbs="[__('matches.breadcrumbs') => route('public.matches.index'), __('matches.view_detail') => null]"
         image="assets/img/hero/hero-match-detail.webp"
@@ -43,7 +43,11 @@
                                 $teamLogoSettings = $branding['team_logo'] ?? null;
                                 $isMatchDetailLogoEnabled = $teamLogoSettings['enabled_match_detail'] ?? true;
                             @endphp
-                            <div class="w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20 overflow-hidden p-4">
+                            <div @class([
+                                "w-24 h-24 md:w-32 md:h-32 rounded-club flex items-center justify-center mb-6 border overflow-hidden p-4",
+                                "bg-white border-white" => $match->is_home,
+                                "bg-white/10 border-white/20" => !$match->is_home,
+                            ])>
                                 @if($match->is_home)
                                     @if($isMatchDetailLogoEnabled && $homeBranding)
                                         <picture>
@@ -67,14 +71,35 @@
                                 @endif
                             </div>
                             <h3 class="text-2xl md:text-3xl font-black uppercase tracking-tight">
-                                {{ $match->is_home ? ($branding['club_name'] ?? 'Sokoli') : $match->opponent->name }}
+                                {{ $match->is_home ? $match->official_team_name : $match->official_opponent_name }}
                             </h3>
                         </div>
 
                         <div class="flex flex-col items-center min-w-[150px]">
                             @if($match->status === 'finished' && ($match->score_home !== null || $match->score_away !== null))
-                                <div class="text-6xl md:text-8xl font-black tabular-nums tracking-tighter leading-none mb-4">
-                                    {{ $match->score_home ?? 0 }}<span class="text-primary">:</span>{{ $match->score_away ?? 0 }}
+                                <div @class([
+                                    "text-6xl md:text-8xl font-black tabular-nums tracking-tighter leading-none mb-4",
+                                    "text-emerald-400" => $match->is_win,
+                                    "text-rose-400" => $match->is_loss,
+                                    "text-white" => !$match->is_win && !$match->is_loss,
+                                ])>
+                                    {{ $match->score_home ?? 0 }}<span>:</span>{{ $match->score_away ?? 0 }}
+                                </div>
+                                @if($match->is_win)
+                                    <div class="mb-4 px-4 py-1 rounded-full bg-emerald-500 text-white text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-900/20 ring-4 ring-emerald-500/20">
+                                        <i class="fa-light fa-trophy-star mr-1.5"></i> {{ __('matches.result_v') }}
+                                    </div>
+                                @elseif($match->is_loss)
+                                    <div class="mb-4 px-4 py-1 rounded-full bg-rose-500 text-white text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-rose-900/20 ring-4 ring-rose-500/20">
+                                        <i class="fa-light fa-face-frown mr-1.5"></i> {{ __('matches.result_p') }}
+                                    </div>
+                                @elseif($match->is_draw)
+                                    <div class="mb-4 px-4 py-1 rounded-full bg-slate-500 text-white text-xs font-black uppercase tracking-[0.2em]">
+                                        <i class="fa-light fa-handshake mr-1.5"></i> {{ __('matches.result_r') }}
+                                    </div>
+                                @endif
+                                <div class="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-6">
+                                    {{ __('matches.match_result') }}
                                 </div>
                             @else
                                 <div class="text-4xl md:text-5xl font-black opacity-30 mb-4 uppercase tracking-widest italic">VS</div>
@@ -104,7 +129,11 @@
 
                         <!-- Away Team -->
                         <div class="flex-1 flex flex-col items-center text-center">
-                            <div class="w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-club flex items-center justify-center mb-6 border border-white/20 overflow-hidden p-4">
+                            <div @class([
+                                "w-24 h-24 md:w-32 md:h-32 rounded-club flex items-center justify-center mb-6 border overflow-hidden p-4",
+                                "bg-white border-white" => !$match->is_home,
+                                "bg-white/10 border-white/20" => $match->is_home,
+                            ])>
                                 @if(!$match->is_home)
                                     @if($isMatchDetailLogoEnabled && $awayBranding)
                                         <picture>
@@ -128,7 +157,7 @@
                                 @endif
                             </div>
                             <h3 class="text-2xl md:text-3xl font-black uppercase tracking-tight">
-                                {{ $match->is_home ? $match->opponent->name : ($branding['club_name'] ?? 'Sokoli') }}
+                                {{ $match->is_home ? $match->official_opponent_name : $match->official_team_name }}
                             </h3>
                         </div>
                     </div>
@@ -159,6 +188,12 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
+                        {{ $match->match_type_label }}
+                    </div>
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
                         {{ $match->season->name }}
                     </div>
                 </div>
@@ -179,33 +214,191 @@
                         </section>
                     @endif
 
+                    @php
+                        $prediction = $match->prediction;
+                        $isPlayed = $match->status === 'finished';
+                        $winChance = $prediction ? round($prediction->probability_win * 100) : null;
+
+                        $colorHsl = null;
+                        if ($winChance !== null) {
+                            if ($winChance <= 50) {
+                                $hue = ($winChance / 50) * 35;
+                            } else {
+                                $hue = 35 + (($winChance - 50) / 50) * 105;
+                            }
+                            $colorHsl = "hsl({$hue}, 75%, 45%)";
+                        }
+                    @endphp
+
                     <section class="card p-8">
                         <h2 class="text-2xl font-black uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
-                            {{ app()->getLocale() === 'cs' ? 'Reportáž ze zápasu' : 'Match report' }}
+                            {{ $isPlayed ? (app()->getLocale() === 'cs' ? 'Reportáž ze zápasu' : 'Match report') : (app()->getLocale() === 'cs' ? 'Předzápasová analýza' : 'Pre-match analysis') }}
                         </h2>
-                        <x-empty-state
-                            :title="app()->getLocale() === 'cs' ? 'Reportáž připravujeme' : 'Report in preparation'"
-                            :subtitle="app()->getLocale() === 'cs' ? 'Podrobné statistiky a komentář k zápasu budou doplněny co nejdříve po jeho skončení.' : 'Detailed statistics and match commentary will be added as soon as possible after the game.'"
-                        />
+
+                        @if(!$isPlayed && $prediction)
+                            <div class="space-y-10">
+                                <!-- Motivational Quote -->
+                                <div class="relative p-8 md:p-14 bg-secondary rounded-[3rem] overflow-hidden text-center shadow-2xl shadow-secondary/20 group">
+                                    <!-- Dynamic Background Elements -->
+                                    <div class="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full -mr-40 -mt-40 blur-[100px] animate-pulse"></div>
+                                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mb-32 blur-[80px]"></div>
+                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br from-secondary via-secondary to-slate-900/50 opacity-50"></div>
+
+                                    <div class="relative z-10">
+                                        <div class="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                            <i class="fa-light fa-quote-left text-primary text-3xl"></i>
+                                        </div>
+
+                                        <blockquote class="text-2xl md:text-4xl font-black text-white leading-[1.1] mb-8 tracking-tight drop-shadow-sm italic">
+                                            "{{ $match->motivational_quote }}"
+                                        </blockquote>
+
+                                        <div class="flex items-center justify-center gap-4">
+                                            <div class="h-px w-8 bg-gradient-to-r from-transparent to-primary/50"></div>
+                                            <div class="text-primary font-black uppercase tracking-[0.3em] text-[11px] py-1 px-3 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md">
+                                                Týmový duch Sokola
+                                            </div>
+                                            <div class="h-px w-8 bg-gradient-to-l from-transparent to-primary/50"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Decorative Basketball Icon -->
+                                    <div class="absolute -bottom-6 -right-6 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-transform duration-1000">
+                                        <i class="fa-light fa-basketball text-9xl text-white"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Prediction Stats -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center">
+                                        <div class="text-5xl font-black mb-2 tabular-nums" style="color: {{ $colorHsl }}">
+                                            {{ $winChance }}%
+                                        </div>
+                                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">
+                                            Šance na výhru
+                                        </div>
+                                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                            <div class="h-full transition-all duration-1000" style="width: {{ $winChance }}%; background-color: {{ $colorHsl }}"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-4">
+                                        <h4 class="text-xs font-black uppercase tracking-widest text-secondary flex items-center gap-2">
+                                            <i class="fa-light fa-list-check text-primary"></i>
+                                            Klíčové faktory
+                                        </h4>
+                                        <ul class="space-y-3">
+                                            @foreach($prediction->explanation_points as $point)
+                                                <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                                                    <i class="fa-light fa-circle-check mt-0.5 text-primary shrink-0"></i>
+                                                    {{ $point }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($isPlayed && $match->statisticRows->count() > 0)
+                            @php
+                                $sortedRows = $match->statisticRows->sortByDesc(function($row) {
+                                    return (int) ($row->values['pts'] ?? 0);
+                                });
+                            @endphp
+                            <div class="space-y-10">
+                                <!-- Post-Match Vibe -->
+                                <div class="relative p-6 md:p-10 bg-success/10 rounded-[2rem] overflow-hidden text-center border border-success/20">
+                                    <div class="absolute top-0 right-0 w-64 h-64 bg-success/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                                    <i class="fa-light fa-star text-success/30 text-4xl mb-6 block"></i>
+                                    <blockquote class="text-xl md:text-2xl font-black text-secondary leading-tight mb-4 relative z-10">
+                                        "{{ $match->post_match_vibe }}"
+                                    </blockquote>
+                                    <div class="text-success font-black uppercase tracking-widest text-[10px]">
+                                        Sokolí hrdost
+                                    </div>
+                                </div>
+
+                                <!-- TOP Players -->
+                                <div class="space-y-6">
+                                    <h4 class="text-xs font-black uppercase tracking-widest text-secondary flex items-center gap-2">
+                                        <i class="fa-light fa-trophy text-primary"></i>
+                                        Nejlepší střelci zápasu
+                                    </h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        @foreach($sortedRows->take(3) as $row)
+                                            <div class="p-6 bg-white rounded-[2rem] border border-slate-100 flex flex-col items-center text-center group hover:border-primary/30 transition-colors shadow-sm">
+                                                <div class="relative mb-4">
+                                                    <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-100 border-2 border-white shadow-sm">
+                                                        @if($row->player?->getAvatarUrl())
+                                                            <img src="{{ $row->player->getAvatarUrl() }}" alt="{{ $row->row_label }}" class="w-full h-full object-cover">
+                                                        @else
+                                                            <div class="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
+                                                                <i class="fa-light fa-user text-2xl"></i>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white">
+                                                        {{ $loop->iteration }}
+                                                    </div>
+                                                </div>
+                                                <div class="font-black text-secondary text-sm mb-1 line-clamp-1">
+                                                    {{ $row->row_label }}
+                                                </div>
+                                                <div class="text-primary font-black text-lg">
+                                                    {{ $row->values['pts'] ?? 0 }} <span class="text-[10px] uppercase tracking-tighter">bodů</span>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- Quick Stats -->
+                                @php
+                                    $totalPoints = $match->statisticRows->sum(fn($r) => (int)($r->values['pts'] ?? 0));
+                                    $totalThrees = $match->statisticRows->sum(fn($r) => (int)($r->values['fg3_made'] ?? 0));
+                                    $scorersCount = $match->statisticRows->filter(fn($r) => ($r->values['pts'] ?? 0) > 0)->count();
+                                @endphp
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                                        <div class="text-2xl font-black text-secondary">{{ $totalPoints }}</div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Týmové body</div>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                                        <div class="text-2xl font-black text-secondary">{{ $totalThrees }}</div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Trojky týmu</div>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center col-span-2 sm:col-span-1">
+                                        <div class="text-2xl font-black text-secondary">{{ $scorersCount }}</div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Hráčů skórovalo</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <x-empty-state
+                                :title="$isPlayed ? (app()->getLocale() === 'cs' ? 'Reportáž připravujeme' : 'Report in preparation') : (app()->getLocale() === 'cs' ? 'Analýza se připravuje' : 'Analysis in preparation')"
+                                :subtitle="$isPlayed ? (app()->getLocale() === 'cs' ? 'Podrobné statistiky a komentář k zápasu budou doplněny co nejdříve po jeho skončení.' : 'Detailed statistics and match commentary will be added as soon as possible after the game.') : (app()->getLocale() === 'cs' ? 'Předzápasová predikce a motivační hlášky budou k dispozici brzy.' : 'Pre-match prediction and motivational quotes will be available soon.')"
+                            />
+                        @endif
                     </section>
                 </div>
 
                 <!-- Sidebar -->
                 <div class="space-y-8">
-                    <!-- Additional Info Widget -->
-                    <aside class="card p-6 bg-secondary text-white">
-                        <h3 class="text-lg font-black uppercase tracking-tight mb-4 text-primary">{{ app()->getLocale() === 'cs' ? 'Důležité info' : 'Important info' }}</h3>
-                        <ul class="space-y-4 text-sm font-medium">
-                            <li class="flex justify-between border-b border-white/10 pb-2">
-                                <span class="opacity-60">{{ app()->getLocale() === 'cs' ? 'Sraz týmu:' : 'Team meeting:' }}</span>
-                                <span>{{ $match->scheduled_at->subMinutes(60)->format('H:i') }}</span>
-                            </li>
-                            <li class="flex justify-between border-b border-white/10 pb-2">
-                                <span class="opacity-60">{{ app()->getLocale() === 'cs' ? 'Dresy:' : 'Jerseys:' }}</span>
-                                <span>{{ $match->is_home ? (app()->getLocale() === 'cs' ? 'Bílá (Světlá)' : 'White (Light)') : (app()->getLocale() === 'cs' ? 'Tmavá' : 'Dark') }}</span>
-                            </li>
-                        </ul>
-                    </aside>
+                    @if(!$isPlayed)
+                        <!-- Additional Info Widget -->
+                        <aside class="card p-6 bg-secondary text-white">
+                            <h3 class="text-lg font-black uppercase tracking-tight mb-4 text-primary">{{ __('matches.important_info') }}</h3>
+                            <ul class="space-y-4 text-sm font-medium">
+                                <li class="flex justify-between border-b border-white/10 pb-2">
+                                    <span class="opacity-60">{{ __('matches.meeting_time') }}</span>
+                                    <span>{{ $match->meeting_at->format('H:i') }}</span>
+                                </li>
+                                <li class="flex justify-between border-b border-white/10 pb-2">
+                                    <span class="opacity-60">{{ __('matches.jerseys') }}</span>
+                                    <span>{{ $match->jerseys_info }}</span>
+                                </li>
+                            </ul>
+                        </aside>
+                    @endif
 
                     <!-- Partner Badge -->
                     @php

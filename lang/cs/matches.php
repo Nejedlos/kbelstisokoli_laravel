@@ -39,6 +39,7 @@ return [
     'victory' => 'Vítězství',
     'loss' => 'Prohra',
     'draw' => 'Remíza',
+    'match_result' => 'Výsledek utkání',
     'result_v' => 'VÝHRA',
     'result_p' => 'PROHRA',
     'result_r' => 'REMÍZA',
@@ -213,4 +214,7 @@ return [
         'disclaimer' => 'Jde o matematický model, nikoliv záruku výsledku. Basketbal je nevyzpytatelný!',
         'close' => 'Zavřít',
     ],
+    'important_info' => 'Důležité info',
+    'meeting_time' => 'Sraz týmu:',
+    'jerseys' => 'Dresy:',
 ];

@@ -77,7 +77,7 @@ class MatchController extends Controller
 
     public function show(int $id): View
     {
-        $match = BasketballMatch::with(['teams', 'opponent', 'season'])
+        $match = BasketballMatch::with(['teams', 'opponent', 'season', 'prediction', 'statisticRows.player'])
             ->findOrFail($id);
 
         $hasKlub = $match->teams->contains('slug', 'klub');

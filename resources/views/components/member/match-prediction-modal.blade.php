@@ -127,6 +127,15 @@
                         </div>
                     </div>
 
+                    <!-- Motivational Quote -->
+                    <div class="p-6 bg-secondary rounded-[2rem] text-center relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                        <i class="fa-light fa-quote-left text-primary/20 text-2xl mb-3 block"></i>
+                        <p class="text-white font-black italic relative z-10 leading-snug">
+                            "{{ $match->motivational_quote }}"
+                        </p>
+                    </div>
+
                     <!-- Why section -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">

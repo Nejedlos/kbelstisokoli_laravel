@@ -18,22 +18,22 @@
         'postponed' => __('matches.postponed') ?? 'Odloženo',
     ];
     $typeLabels = [
-        'MI' => __('matches.type_mi'),
-        'PO' => __('matches.type_po'),
-        'TUR' => __('matches.type_tur'),
-        'PRATEL' => __('matches.type_pratel'),
+        'mistrovske' => 'mistrák',
+        'poharove' => 'pohár',
+        'pratelske' => 'přátelák',
+        'TUR' => 'turnaj',
     ];
     $typeColors = [
-        'MI' => 'bg-blue-50 text-blue-600 border-blue-200',
-        'PO' => 'bg-purple-50 text-purple-600 border-purple-200',
+        'mistrovske' => 'bg-blue-50 text-blue-600 border-blue-200',
+        'poharove' => 'bg-purple-50 text-purple-600 border-purple-200',
         'TUR' => 'bg-emerald-50 text-emerald-600 border-emerald-200',
-        'PRATEL' => 'bg-slate-50 text-slate-400 border-slate-200',
+        'pratelske' => 'bg-slate-50 text-slate-400 border-slate-200',
     ];
     $typeIcons = [
-        'MI' => 'fa-trophy',
-        'PO' => 'fa-medal',
+        'mistrovske' => 'fa-trophy',
+        'poharove' => 'fa-medal',
         'TUR' => 'fa-flag-checkered',
-        'PRATEL' => 'fa-handshake',
+        'pratelske' => 'fa-handshake',
     ];
 
     $isPlayed = $match->status === 'finished';
@@ -98,9 +98,6 @@
                             <i class="fa-light fa-users-crown mr-1"></i>
                             {{ $hasKlub ? 'CELÝ KLUB' : $teamNames }}
                         </span>
-                    @else
-                        @php $singleTeam = $match->teams->first() ?? $match->team; @endphp
-                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{{ $singleTeam?->name }}</span>
                     @endif
 
                     <span class="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest {{ $match->is_home ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-amber-50 text-amber-600 border border-amber-100' }}">
@@ -130,11 +127,11 @@
                     @endif
 
                     <span class="{{ $match->is_home ? 'text-primary' : '' }}">
-                        {{ $match->is_home ? ($branding['club_short_name'] ?? 'Sokoli') : $match->opponent->name }}
+                        {{ $match->is_home ? $match->official_team_name : $match->official_opponent_name }}
                     </span>
                     <span class="text-slate-300 mx-1">vs</span>
                     <span class="{{ !$match->is_home ? 'text-primary' : '' }}">
-                        {{ $match->is_home ? $match->opponent->name : ($branding['club_short_name'] ?? 'Sokoli') }}
+                        {{ $match->is_home ? $match->official_opponent_name : $match->official_team_name }}
                     </span>
 
                     @if($isMatchLogoEnabled && $awayBranding)
