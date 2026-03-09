@@ -33,9 +33,8 @@ class ErrorMail extends Mailable
         $app = $this->report['app'] ?? [];
         $exception = $this->report['exception'] ?? [];
         $subject = sprintf(
-            '[%s][%s] %s (%s:%s)',
-            $app['name'] ?? 'App',
-            $app['env'] ?? 'env',
+            'Chyba aplikace | %s | %s (%s:%s)',
+            strtoupper($app['env'] ?? 'env'),
             $exception['class'] ?? 'Exception',
             $exception['file'] ?? 'file',
             $exception['line'] ?? 'line'

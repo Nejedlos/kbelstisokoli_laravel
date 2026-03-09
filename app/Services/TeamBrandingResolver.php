@@ -58,7 +58,7 @@ class TeamBrandingResolver
             'logo_url_webp' => web_asset($branding['parent_logo']['paths']['mini'] ?? '', true),
             'logo_url_large' => web_asset($branding['parent_logo']['paths']['velke'] ?? '', false),
             'logo_url_large_webp' => web_asset($branding['parent_logo']['paths']['velke'] ?? '', true),
-            'alt' => 'TJ Sokol Kbely Basketball logo',
+            'alt' => 'TJ Sokol Kbely C & E logo',
             'is_internal' => false,
         ];
     }

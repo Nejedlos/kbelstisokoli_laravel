@@ -24,8 +24,7 @@
     <title>{{ $title ?? ($branding['club_name'] ?? 'Kbelští sokoli') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    @include('partials.favicons')
 
     <meta name="theme-color" content="{{ $colors['red'] ?? '#e11d48' }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">

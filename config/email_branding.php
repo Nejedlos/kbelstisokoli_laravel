@@ -32,5 +32,5 @@ return [
     ],
 
     'footer_note' => 'Tento e-mail byl odeslán automaticky z informačního systému TJ Sokol Kbely C & E.',
-    'copyright' => '© 2026 TJ Sokol Kbely Basketball. Všechna práva vyhrazena.',
+    'copyright' => '© 2026 TJ Sokol Kbely C & E. Všechna práva vyhrazena.',
 ];

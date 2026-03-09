@@ -183,7 +183,7 @@
                         <picture>
                             <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp']) }}" type="image/webp">
                             <img src="{{ asset($branding['parent_logo']['paths']['mini']) }}"
-                                 alt="TJ Sokol Kbely Basketball"
+                                 alt="TJ Sokol Kbely C & E"
                                  class="w-9 h-9 object-contain drop-shadow-sm">
                         </picture>
                     </div>

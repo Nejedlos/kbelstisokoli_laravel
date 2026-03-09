@@ -67,7 +67,7 @@ class CmsContentSeeder extends Seeder
             'contact_fax' => '',
             'contact_email' => 'spanily@pro-nemo.cz',
             'footer_text' => [
-                'cs' => '© '.date('Y').' TJ Sokol Kbely Basketball. Všechna práva vyhrazena.',
+                'cs' => '© '.date('Y').' TJ Sokol Kbely C & E. Všechna práva vyhrazena.',
                 'en' => '© '.date('Y').' Basketball club Kbely Falcons. All rights reserved.',
             ],
             'seo_description' => [

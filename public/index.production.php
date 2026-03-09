@@ -110,7 +110,7 @@ require $APP_BASE.'/vendor/autoload.php';
             'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
             'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ];
-        $subject = sprintf('[PreBoot][%s] %s (%s:%s)', $_ENV['APP_ENV'] ?? 'production', get_class($e), $e->getFile(), $e->getLine());
+        $subject = sprintf('Chyba spuštění | %s | %s (%s:%s)', strtoupper($_ENV['APP_ENV'] ?? 'production'), get_class($e), $e->getFile(), $e->getLine());
         $body = "Message: {$e->getMessage()}\n\nTrace:\n".$e->getTraceAsString()."\n\nServer:\n".print_r($server, true);
         $send($subject, $body);
     });
@@ -130,7 +130,7 @@ require $APP_BASE.'/vendor/autoload.php';
                 'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
                 'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'] ?? null,
             ];
-            $subject = sprintf('[PreBoot][FATAL] %s (%s:%s)', $error['message'] ?? 'Fatal error', $error['file'] ?? 'unknown', $error['line'] ?? '');
+            $subject = sprintf('Kritická chyba spuštění | %s (%s:%s)', $error['message'] ?? 'Fatal error', $error['file'] ?? 'unknown', $error['line'] ?? '');
             $body = "Error:\n".print_r($error, true)."\n\nServer:\n".print_r($server, true);
             $send($subject, $body);
         }

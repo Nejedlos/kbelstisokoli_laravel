@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title') | {{ config('app.name', 'Kbelští sokoli') }}</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    @include('partials.favicons')
 
     @php
         // Získání brandingu z BrandingService

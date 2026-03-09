@@ -1948,21 +1948,43 @@ pro týmy Sokol Kbely C &amp; E
                             }
                         };
 
+                        // First try: dom-to-image
                         if (typeof domtoimage !== 'undefined') {
-                            dataUrl = await domtoimage.toJpeg(document.body, options);
+                            try {
+                                console.log('Attempting screenshot with dom-to-image-more...');
+                                dataUrl = await domtoimage.toJpeg(document.body, options);
+                                console.log('Screenshot successful (dom-to-image)');
+                            } catch (domErr) {
+                                console.warn('dom-to-image-more failed, trying html2canvas fallback...', domErr);
+                                if (typeof html2canvas !== 'undefined') {
+                                    const canvas = await html2canvas(document.body, {
+                                        useCORS: true,
+                                        allowTaint: true,
+                                        scale: Math.min(window.devicePixelRatio, 2),
+                                        ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true'
+                                    });
+                                    dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                    console.log('Screenshot successful (html2canvas fallback)');
+                                } else {
+                                    throw domErr;
+                                }
+                            }
                         } else if (typeof html2canvas !== 'undefined') {
+                            console.log('Attempting screenshot with html2canvas (standalone)...');
                             const canvas = await html2canvas(document.body, {
                                 useCORS: true,
+                                allowTaint: true,
                                 scale: Math.min(window.devicePixelRatio, 2),
                                 ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true'
                             });
                             dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                            console.log('Screenshot successful (html2canvas)');
                         }
 
                         widgetEl.style.display = originalDisplay;
                         return dataUrl;
                     } catch (e) {
-                        console.error('Screenshot failed', e);
+                        console.error('Screenshot failed completely', e);
                         widgetEl.style.display = originalDisplay;
                         return null;
                     }

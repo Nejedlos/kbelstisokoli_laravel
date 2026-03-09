@@ -151,6 +151,9 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
+        \App\Models\BasketballMatch::observe(\App\Observers\MatchPredictionObserver::class);
+        \App\Models\StatisticRow::observe(\App\Observers\MatchPredictionObserver::class);
+
         \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
             static $cachedData = null;

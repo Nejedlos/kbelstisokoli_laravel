@@ -133,7 +133,7 @@
                         <picture>
                             <source srcset="{{ asset($branding['parent_logo']['paths']['mini_webp'] ?? '') }}" type="image/webp">
                             <img src="{{ asset($branding['parent_logo']['paths']['mini'] ?? '') }}"
-                                 alt="TJ Sokol Kbely Basketball"
+                                 alt="TJ Sokol Kbely C & E"
                                  class="object-contain"
                                  style="height: {{ $branding['parent_logo']['sizes']['footer'] ?? 28 }}px; width: auto;">
                         </picture>

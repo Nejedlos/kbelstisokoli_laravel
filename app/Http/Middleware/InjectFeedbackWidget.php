@@ -88,13 +88,42 @@ class InjectFeedbackWidget
 
                     // 1. Nejprve najdeme a vložíme všechny skripty, aby byly funkce v globálním scope před inicializací Alpine
                     const scripts = Array.from(temp.querySelectorAll('script'));
-                    scripts.forEach(oldScript => {
-                        const newScript = document.createElement('script');
-                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                        newScript.textContent = oldScript.textContent;
-                        document.body.appendChild(newScript);
-                        oldScript.remove();
-                    });
+                    let loadedScriptsCount = 0;
+                    const externalScripts = scripts.filter(s => s.src);
+                    const inlineScripts = scripts.filter(s => !s.src);
+
+                    const runInlineScripts = () => {
+                        inlineScripts.forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                            newScript.textContent = oldScript.textContent;
+                            document.body.appendChild(newScript);
+                            oldScript.remove();
+                        });
+                    };
+
+                    if (externalScripts.length > 0) {
+                        externalScripts.forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                            newScript.onload = () => {
+                                loadedScriptsCount++;
+                                if (loadedScriptsCount === externalScripts.length) {
+                                    runInlineScripts();
+                                }
+                            };
+                            newScript.onerror = () => {
+                                console.error('Failed to load feedback script:', newScript.src);
+                                loadedScriptsCount++;
+                                if (loadedScriptsCount === externalScripts.length) {
+                                    runInlineScripts();
+                                }
+                            };
+                            document.body.appendChild(newScript);
+                        });
+                    } else {
+                        runInlineScripts();
+                    }
 
                     // 2. Poté vložíme zbytek (Strukturu widgetu)
                     while (temp.firstChild) {

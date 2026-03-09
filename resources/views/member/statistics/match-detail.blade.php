@@ -248,6 +248,84 @@
             {{-- Left Column: Pre-match / Analysis --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div class="lg:col-span-5 min-w-0 space-y-4">
+                {{-- Predikce --}}
+                @if($prediction && !$hasScore)
+                    <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
+
+                        <h3 class="text-xl font-black text-gray-900 mb-6 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50 shadow-sm">
+                                    <i class="fa-light fa-crystal-ball text-brand-500 text-xl"></i>
+                                </div>
+                                {{ __('matches.prediction.title') ?? 'Předzápasová predikce' }}
+                            </div>
+
+                            @php
+                                $confColor = match($prediction->confidence) {
+                                    'high' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                    'medium' => 'bg-amber-100 text-amber-700 border-amber-200',
+                                    default => 'bg-slate-100 text-slate-700 border-slate-200',
+                                };
+                            @endphp
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border {{ $confColor }}">
+                                {{ __('matches.prediction.confidence_' . $prediction->confidence) ?? $prediction->confidence }}
+                            </span>
+                        </h3>
+
+                        <div class="space-y-8">
+                            {{-- Win Probability --}}
+                            <div class="text-center">
+                                <div class="text-5xl font-black text-brand-600 mb-2 drop-shadow-sm tabular-nums">
+                                    {{ round($prediction->probability_win * 100) }}%
+                                </div>
+                                <div class="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
+                                    {{ __('matches.prediction.win_chance') ?? 'Šance na výhru' }}
+                                </div>
+                            </div>
+
+                            {{-- Progress Bar --}}
+                            <div class="relative pt-1">
+                                <div class="overflow-hidden h-4 text-xs flex rounded-full bg-gray-100 shadow-inner p-1">
+                                    <div style="width:{{ $prediction->probability_win * 100 }}%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-1000"></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest mt-3">
+                                    <span>{{ $match->team->name }}</span>
+                                    <span>{{ $match->opponent?->name }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Why we think so --}}
+                            <div class="space-y-4 pt-4 border-t border-gray-50">
+                                <h4 class="text-[11px] font-black text-gray-950 uppercase tracking-[0.2em]">
+                                    {{ __('matches.prediction.why_title') ?? 'Proč si to myslíme' }}
+                                </h4>
+                                <ul class="space-y-3">
+                                    @foreach($prediction->explanation_points as $point)
+                                        <li class="flex items-start gap-3 text-sm text-gray-600 leading-relaxed">
+                                            <i class="fa-light fa-check-circle text-brand-500 mt-1 shrink-0"></i>
+                                            <span>{{ $point }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+
+                            {{-- Methodology --}}
+                            <div x-data="{ open: false }" class="pt-2">
+                                <button @click="open = !open" class="text-[10px] font-black text-brand-500 uppercase tracking-widest flex items-center gap-2 hover:text-brand-600 transition-colors">
+                                    <i class="fa-light fa-circle-info"></i>
+                                    {{ __('matches.prediction.methodology') ?? 'Metodika' }}
+                                    <i class="fa-light" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                </button>
+                                <div x-show="open" x-cloak class="mt-4 p-4 bg-gray-50 rounded-2xl text-[11px] text-gray-500 leading-relaxed space-y-2">
+                                    <p>{{ __('matches.prediction.methodology_desc') ?? 'Predikce je založena na kombinaci Elo ratingu (dlouhodobá síla), aktuální formy (posledních 5 zápasů) a síly kádru. Výpočet se zpřesňuje s rostoucím množstvím dat.' }}</p>
+                                    <p class="italic text-[10px]">{{ __('matches.prediction.disclaimer') ?? 'Jde o matematický model, nikoliv záruku výsledku. Basketbal je nevyzpytatelný!' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Section Header --}}
                 <div class="relative overflow-hidden bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 group">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>

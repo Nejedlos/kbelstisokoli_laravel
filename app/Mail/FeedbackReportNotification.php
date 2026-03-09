@@ -31,7 +31,7 @@ class FeedbackReportNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "[KS FEEDBACK #{$this->report->id}] {$this->report->title}",
+            subject: "Zpětná vazba č. {$this->report->id} | {$this->report->title}",
         );
     }
 

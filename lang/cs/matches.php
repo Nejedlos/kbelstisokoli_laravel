@@ -188,4 +188,15 @@ return [
         'Zkušenost', 'Bojovnost', 'Příště lépe', 'Lekce', 'Motivace',
         'Nezlomní', 'Hlava vzhůru', 'Budeme silnější', 'Cenná škola', 'Týmová práce',
     ],
+    'prediction' => [
+        'title' => 'Předzápasová predikce',
+        'confidence_high' => 'Vysoká důvěra',
+        'confidence_medium' => 'Střední důvěra',
+        'confidence_low' => 'Nízká důvěra',
+        'win_chance' => 'Šance na výhru',
+        'why_title' => 'Proč si to myslíme',
+        'methodology' => 'Metodika',
+        'methodology_desc' => 'Predikce je založena na kombinaci Elo ratingu (dlouhodobá síla), aktuální formy (posledních 5 zápasů) a síly kádru. Výpočet se zpřesňuje s rostoucím množstvím dat.',
+        'disclaimer' => 'Jde o matematický model, nikoliv záruku výsledku. Basketbal je nevyzpytatelný!',
+    ],
 ];

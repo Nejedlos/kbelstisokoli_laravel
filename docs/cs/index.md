@@ -8,9 +8,9 @@ Vítejte v centrálním uzlu technické a uživatelské dokumentace. Pro snazš�
 Filozofie projektu, architektura, standardy a prvotní nastavení.
 > *Klíčová témata: Architektura, Názvosloví, Lokalizace.*
 
-### 💻 [02. Vývoj a standardy](./02-development)
-Technické manuály pro vývojáře, standardy kódu, UI prvky a ikony.
-> *Klíčová témata: Font Awesome 7, Vite, Assety, UI standardy.*
+- [🛠️ UI, Ikony a Assety](./02-development)
+- [📧 Standardy e-mailů](./02-development/16-standardy-emailu.md)
+> *Klíčová témata: Font Awesome 7, Vite, Assety, UI standardy, E-mail design.*
 
 ### 🛡️ [03. Administrace a Systém](./03-administration)
 Správa celého systému přes rozhraní Filament, oprávnění a bezpečnost.

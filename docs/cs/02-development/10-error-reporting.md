@@ -53,7 +53,7 @@ php artisan cache:clear
 ## Jak otestovat
 
 1. Na produkci vyvolejte řízenou chybu (např. dočasnou trasu, nebo navštivte URL, které 500 způsobuje).
-2. Zkontrolujte, že dorazil e‑mail s předmětem `"[APP][env] ExceptionClass (file:line)"`.
+2. Zkontrolujte, že dorazil e‑mail s předmětem `"Chyba aplikace | ENV | ExceptionClass (file:line)"`.
 3. Na chybové stránce klikněte na „Zkopírovat technickou zprávu“ a vložte do chatu pro rychlou diagnostiku.
 
 ## Poznámky k bezpečnosti

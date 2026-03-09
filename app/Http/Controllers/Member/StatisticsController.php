@@ -67,10 +67,12 @@ class StatisticsController extends Controller
     public function matchDetail(int $matchId): View
     {
         $match = \App\Models\BasketballMatch::with(['team', 'opponent', 'season'])->findOrFail($matchId);
+        $prediction = \App\Models\MatchPrediction::where('basketball_match_id', $matchId)->first();
 
         return view('member.statistics.match-detail', [
             'title' => __('matches.match_detail'),
             'match' => $match,
+            'prediction' => $prediction,
         ]);
     }
 }

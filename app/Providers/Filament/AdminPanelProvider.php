@@ -113,6 +113,7 @@ class AdminPanelProvider extends PanelProvider
 
                 return Blade::render(
                     "
+                    @include('partials.favicons', ['includeMain' => false])
                     <link rel='preconnect' href='https://fonts.googleapis.com'>
                     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
                     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap'>

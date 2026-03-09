@@ -1,5 +1,5 @@
     <div id="ks-fb-root"
-         x-data="ksFeedbackWidget()"
+         x-data="ksFeedbackWidget"
          x-init="init()"
          @ks-feedback-open.window="openModal()"
          class="ks-feedback-system"
@@ -257,8 +257,8 @@
             }
         }
 
-        function ksFeedbackWidget() {
-            return {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('ksFeedbackWidget', () => ({
                 isOpen: false,
                 submitting: false,
                 // Ring Buffery inicializované v init()
@@ -354,13 +354,15 @@
                     ['log', 'warn', 'error', 'info', 'debug'].forEach(level => {
                         console[level] = (...args) => {
                             try {
-                                this.logs.push({
-                                    level,
-                                    timestamp: new Date().toISOString(),
-                                    message: args.map(arg => typeof arg === 'string' ? arg : this.safeStringify(arg)).join(' ')
-                                });
-                                // Force Alpine update
-                                this.logs = this.logs;
+                                if (this.logs) {
+                                    this.logs.push({
+                                        level,
+                                        timestamp: new Date().toISOString(),
+                                        message: args.map(arg => typeof arg === 'string' ? arg : this.safeStringify(arg)).join(' ')
+                                    });
+                                    // Force Alpine update
+                                    this.logs = this.logs;
+                                }
                             } catch (e) {}
                             originalConsole[level].apply(console, args);
                         };
@@ -369,22 +371,26 @@
 
                 setupErrorTracking() {
                     window.addEventListener('error', (e) => {
-                        this.errors.push({
-                            message: e.message,
-                            filename: e.filename,
-                            lineno: e.lineno,
-                            colno: e.colno,
-                            stack: e.error?.stack?.substring(0, 2000),
-                            timestamp: new Date().toISOString()
-                        });
+                        if (this.errors) {
+                            this.errors.push({
+                                message: e.message,
+                                filename: e.filename,
+                                lineno: e.lineno,
+                                colno: e.colno,
+                                stack: e.error?.stack?.substring(0, 2000),
+                                timestamp: new Date().toISOString()
+                            });
+                        }
                     });
 
                     window.addEventListener('unhandledrejection', (e) => {
-                        this.errors.push({
-                            type: 'promise-rejection',
-                            reason: this.safeStringify(e.reason),
-                            timestamp: new Date().toISOString()
-                        });
+                        if (this.errors) {
+                            this.errors.push({
+                                type: 'promise-rejection',
+                                reason: this.safeStringify(e.reason),
+                                timestamp: new Date().toISOString()
+                            });
+                        }
                     });
                 },
 
@@ -439,6 +445,8 @@
 
                 logNetworkFailure(url, method, status, duration, error = null) {
                     try {
+                        if (!this.networkFailures) return;
+
                         const parsedUrl = new URL(url, window.location.origin);
                         // Redact query values
                         parsedUrl.searchParams.forEach((val, key) => parsedUrl.searchParams.set(key, '[redacted]'));
@@ -455,14 +463,20 @@
                         this.networkFailures = this.networkFailures;
                     } catch (e) {
                         // Fallback if URL is invalid
-                        this.networkFailures.push({ method, url: String(url).substring(0, 200), status, duration_ms: duration, timestamp: new Date().toISOString() });
-                        this.networkFailures = this.networkFailures;
+                        if (this.networkFailures) {
+                            this.networkFailures.push({ method, url: String(url).substring(0, 200), status, duration_ms: duration, timestamp: new Date().toISOString() });
+                            this.networkFailures = this.networkFailures;
+                        }
                     }
                 },
 
                 setupBreadcrumbs() {
                     // Navigation
-                    window.addEventListener('popstate', () => this.breadcrumbs.push({ type: 'nav', to: window.location.pathname, timestamp: new Date().toISOString() }));
+                    window.addEventListener('popstate', () => {
+                        if (this.breadcrumbs) {
+                            this.breadcrumbs.push({ type: 'nav', to: window.location.pathname, timestamp: new Date().toISOString() });
+                        }
+                    });
 
                     // Scroll milestones
                     let milestones = [25, 50, 75, 100];
@@ -472,21 +486,25 @@
                         milestones.forEach(m => {
                             if (scrollPct >= m && !reached.has(m)) {
                                 reached.add(m);
-                                this.breadcrumbs.push({ type: 'scroll', depth: m + '%', timestamp: new Date().toISOString() });
+                                if (this.breadcrumbs) {
+                                    this.breadcrumbs.push({ type: 'scroll', depth: m + '%', timestamp: new Date().toISOString() });
+                                }
                             }
                         });
                     }, { passive: true });
 
                     // Interactions (delegated)
                     document.addEventListener('submit', (e) => {
-                        this.breadcrumbs.push({ type: 'submit', form: e.target.id || e.target.className || 'unknown', timestamp: new Date().toISOString() });
+                        if (this.breadcrumbs) {
+                            this.breadcrumbs.push({ type: 'submit', form: e.target.id || e.target.className || 'unknown', timestamp: new Date().toISOString() });
+                        }
                     }, true);
                 },
 
                 setupClickTracking() {
                     document.addEventListener('click', (e) => {
                         // Breadcrumb interaction (vždy)
-                        if (this.breadcrumbs.length < 50) {
+                        if (this.breadcrumbs && this.breadcrumbs.length < 50) {
                             const el = e.target.closest('button, a, input[type="submit"], [data-track]');
                             if (el) {
                                 this.breadcrumbs.push({
@@ -499,7 +517,7 @@
                         }
 
                         // Detailed click tracking (pokud zapnuto)
-                        if (!this.options.clicks) return;
+                        if (!this.options.clicks || !this.clicks) return;
 
                         const el = e.target;
                         const descriptor = `${el.tagName.toLowerCase()}${el.id ? '#'+el.id : ''}${el.className ? '.'+el.className.split(' ').join('.') : ''}`;
@@ -576,21 +594,46 @@
                             }
                         };
 
+                        // First try: dom-to-image
                         if (typeof domtoimage !== 'undefined') {
-                            dataUrl = await domtoimage.toJpeg(document.body, options);
+                            try {
+                                console.log('Attempting screenshot with dom-to-image-more...');
+                                dataUrl = await domtoimage.toJpeg(document.body, options);
+                                console.log('Screenshot successful (dom-to-image)');
+                            } catch (domErr) {
+                                console.warn('dom-to-image-more failed, trying html2canvas...', domErr);
+                                if (typeof html2canvas !== 'undefined') {
+                                    const canvas = await html2canvas(document.body, {
+                                        useCORS: true,
+                                        allowTaint: true,
+                                        scale: Math.min(window.devicePixelRatio, 2),
+                                        ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true'
+                                    });
+                                    dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                    console.log('Screenshot successful (html2canvas fallback)');
+                                } else {
+                                    throw domErr; // Rethrow if no fallback available
+                                }
+                            }
                         } else if (typeof html2canvas !== 'undefined') {
+                            // Only html2canvas available
+                            console.log('Attempting screenshot with html2canvas (standalone)...');
                             const canvas = await html2canvas(document.body, {
                                 useCORS: true,
+                                allowTaint: true,
                                 scale: Math.min(window.devicePixelRatio, 2),
                                 ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true'
                             });
                             dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                            console.log('Screenshot successful (html2canvas)');
+                        } else {
+                            console.error('No screenshot library (domtoimage or html2canvas) found!');
                         }
 
                         widgetEl.style.display = originalDisplay;
                         return dataUrl;
                     } catch (e) {
-                        console.error('Screenshot failed', e);
+                        console.error('Screenshot failed completely', e);
                         widgetEl.style.display = originalDisplay;
                         return null;
                     }
@@ -645,10 +688,10 @@
                                 domLight: domSnapshot
                             },
                             logs: {
-                                console: this.logs.toArray(),
-                                errors: this.errors.toArray(),
-                                network: this.networkFailures.toArray(),
-                                breadcrumbs: this.breadcrumbs.toArray()
+                                console: this.logs ? this.logs.toArray() : [],
+                                errors: this.errors ? this.errors.toArray() : [],
+                                network: this.networkFailures ? this.networkFailures.toArray() : [],
+                                breadcrumbs: this.breadcrumbs ? this.breadcrumbs.toArray() : []
                             },
                             performance: perf
                         };
@@ -726,7 +769,7 @@
                         steps: "1) Šel jsem na ...\n2) Klikl jsem na ...\n3) Očekával jsem ...\n4) Stalo se ..."
                     };
                 }
-            }
-        }
+            }));
+        });
     </script>
 </div>
