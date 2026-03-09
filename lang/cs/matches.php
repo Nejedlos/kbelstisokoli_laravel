@@ -66,6 +66,8 @@ return [
     'nationality_count' => 'Počet národností',
     'average_match_experience' => 'Zápasová zkušenost',
     'empty_best_players' => 'Data o nejlepších hráčích nejsou k dispozici.',
+    'empty_opponent_stats' => 'Statistiky soupeře nejsou k dispozici.',
+    'empty_stats' => 'Statistiky nejsou k dispozici.',
     'points' => 'Body',
     'rebounds' => 'Doskoky',
     'assists' => 'Asistence',

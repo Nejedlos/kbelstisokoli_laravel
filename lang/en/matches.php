@@ -66,6 +66,8 @@ return [
     'nationality_count' => 'Number of nationalities',
     'average_match_experience' => 'Match experience',
     'empty_best_players' => 'Best players data is not available.',
+    'empty_opponent_stats' => 'Opponent statistics are not available.',
+    'empty_stats' => 'Statistics are not available.',
     'points' => 'Points',
     'rebounds' => 'Rebounds',
     'assists' => 'Assists',

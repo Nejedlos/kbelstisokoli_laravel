@@ -99,17 +99,17 @@
 
                             {{-- Tým 1 --}}
                             <div class="flex-1 flex flex-col items-center lg:items-end text-center lg:text-right group/team w-full min-w-0">
-                                <div class="w-16 h-16 md:w-32 md:h-32 mb-3 md:mb-4 rounded-2xl md:rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:rotate-3 group-hover/team:scale-110 overflow-hidden p-2 md:p-3 border-4 border-white/20 relative shrink-0">
+                                <div class="w-16 h-16 md:w-24 md:h-24 mb-3 md:mb-4 rounded-2xl md:rounded-[1.5rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:rotate-3 group-hover/team:scale-110 overflow-hidden p-2 md:p-3 border-4 border-white/20 relative shrink-0">
                                     @if($logoHome)
                                         <img src="{{ $logoHome }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light {{ $fallbackHome }} text-2xl md:text-4xl"></i>
+                                            <i class="fa-light {{ $fallbackHome }} text-2xl md:text-3xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light {{ $fallbackHome }} text-3xl md:text-6xl text-gray-200 relative"></i>
+                                        <i class="fa-light {{ $fallbackHome }} text-3xl md:text-5xl text-gray-200 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-xl md:text-4xl font-black text-white mb-1 md:mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
+                                <h2 class="text-xl md:text-3xl font-black text-white mb-1 md:mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
                                     {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
                                 </h2>
                                 <span class="px-2 py-0.5 md:px-3 md:py-1 bg-black/40 text-white text-[8px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
@@ -119,12 +119,12 @@
 
                             {{-- Skóre (Centrální prvek) --}}
                             <div class="flex flex-col items-center group/score shrink-0 z-10 mx-2 md:mx-4">
-                                <div class="relative px-6 py-4 md:px-12 md:py-8 bg-white/10 rounded-[2rem] md:rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex items-center gap-4 md:gap-10 transition-all duration-700 group-hover:bg-white/20 backdrop-blur-2xl group-hover:scale-105">
-                                    <div class="relative text-5xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
+                                <div class="relative px-6 py-4 md:px-10 md:py-6 bg-white/10 rounded-[2rem] md:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex items-center gap-4 md:gap-8 transition-all duration-700 group-hover:bg-white/20 backdrop-blur-2xl group-hover:scale-105">
+                                    <div class="relative text-5xl md:text-7xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_home ?? 0 }}
                                     </div>
-                                    <div class="relative text-2xl md:text-6xl font-black text-white/30 select-none animate-pulse">:</div>
-                                    <div class="relative text-5xl md:text-9xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
+                                    <div class="relative text-2xl md:text-4xl font-black text-white/40 select-none animate-pulse">:</div>
+                                    <div class="relative text-5xl md:text-7xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_away ?? 0 }}
                                     </div>
                                 </div>
@@ -137,17 +137,17 @@
 
                             {{-- Tým 2 --}}
                             <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left group/team w-full min-w-0">
-                                <div class="w-16 h-16 md:w-32 md:h-32 mb-3 md:mb-4 rounded-2xl md:rounded-[2rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:-rotate-3 group-hover/team:scale-110 overflow-hidden p-2 md:p-3 border-4 border-white/20 relative shrink-0">
+                                <div class="w-16 h-16 md:w-24 md:h-24 mb-3 md:mb-4 rounded-2xl md:rounded-[1.5rem] bg-white shadow-2xl flex items-center justify-center transition-all duration-700 group-hover/team:-rotate-3 group-hover/team:scale-110 overflow-hidden p-2 md:p-3 border-4 border-white/20 relative shrink-0">
                                     @if($logoAway)
                                         <img src="{{ $logoAway }}" class="relative max-w-full max-h-full object-contain" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hidden w-full h-full items-center justify-center text-gray-300">
-                                            <i class="fa-light {{ $fallbackAway }} text-2xl md:text-4xl"></i>
+                                            <i class="fa-light {{ $fallbackAway }} text-2xl md:text-3xl"></i>
                                         </div>
                                     @else
-                                        <i class="fa-light {{ $fallbackAway }} text-3xl md:text-6xl text-gray-200 relative"></i>
+                                        <i class="fa-light {{ $fallbackAway }} text-3xl md:text-5xl text-gray-200 relative"></i>
                                     @endif
                                 </div>
-                                <h2 class="text-xl md:text-4xl font-black text-white mb-1 md:mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
+                                <h2 class="text-xl md:text-3xl font-black text-white mb-1 md:mb-2 tracking-tighter group-hover/team:text-white transition-colors leading-none break-words w-full drop-shadow-2xl">
                                     {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
                                 </h2>
                                 <span class="px-2 py-0.5 md:px-3 md:py-1 {{ !$match->is_home ? 'bg-brand-500' : 'bg-black/40' }} text-white text-[8px] md:text-xs font-black rounded-lg uppercase tracking-[0.2em] border border-white/10 shadow-2xl backdrop-blur-md">
@@ -163,23 +163,23 @@
                                 <div class="flex flex-col items-center gap-4 w-full">
                                     <div class="flex items-center gap-3 md:gap-4">
                                         @if($isVictory)
-                                            <div class="w-10 h-10 md:w-16 md:h-16 bg-yellow-400/20 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-yellow-400/30 shadow-2xl shadow-yellow-400/20 animate-bounce-subtle">
-                                                <i class="fa-light fa-trophy text-2xl md:text-4xl text-yellow-300 drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]"></i>
+                                            <div class="w-10 h-10 md:w-14 md:h-14 bg-yellow-400/20 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-yellow-400/30 shadow-2xl shadow-yellow-400/20 animate-bounce-subtle">
+                                                <i class="fa-light fa-trophy text-2xl md:text-3xl text-yellow-300 drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]"></i>
                                             </div>
                                         @elseif($isDraw)
-                                            <div class="w-10 h-10 md:w-16 md:h-16 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
-                                                <i class="fa-light fa-equals text-2xl md:text-4xl text-white"></i>
+                                            <div class="w-10 h-10 md:w-14 md:h-14 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                                                <i class="fa-light fa-equals text-2xl md:text-3xl text-white"></i>
                                             </div>
                                         @else
-                                            <div class="w-10 h-10 md:w-16 md:h-16 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
-                                                <i class="fa-light fa-basketball text-2xl md:text-4xl text-white/80"></i>
+                                            <div class="w-10 h-10 md:w-14 md:h-14 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                                                <i class="fa-light fa-basketball text-2xl md:text-3xl text-white/80"></i>
                                             </div>
                                         @endif
-                                        <h4 class="text-3xl md:text-6xl font-black uppercase tracking-tighter text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.3)]">{{ $resultText }}</h4>
+                                        <h4 class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.3)]">{{ $resultText }}</h4>
                                     </div>
 
                                     @if($motivationalMessage)
-                                        <p class="text-lg md:text-3xl font-bold text-white leading-tight italic text-center max-w-3xl px-6 drop-shadow-lg">
+                                        <p class="text-lg md:text-2xl font-bold text-white leading-tight italic text-center max-w-3xl px-6 drop-shadow-lg">
                                             "{{ $motivationalMessage }}"
                                         </p>
                                     @endif
@@ -206,34 +206,34 @@
                                 <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-20">
                                 @if(!empty($match->metadata['referees']))
                                     <div class="w-full md:w-auto flex items-center justify-center md:justify-start gap-4 md:gap-5 group/info">
-                                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
+                                        <div class="w-12 h-12 md:w-13 md:h-13 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
                                             <i class="fa-light fa-whistle text-xl md:text-2xl"></i>
                                         </div>
                                         <div class="flex flex-col leading-tight">
-                                            <span class="text-[8px] md:text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.referees') }}</span>
-                                            <span class="text-base md:text-lg lg:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['referees'] }}</span>
+                                            <span class="text-[8px] md:text-[9px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.referees') }}</span>
+                                            <span class="text-base md:text-lg font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['referees'] }}</span>
                                         </div>
                                     </div>
                                 @endif
                                 @if(!empty($match->metadata['commissioner']))
                                     <div class="w-full md:w-auto flex items-center justify-center md:justify-start gap-4 md:gap-5 group/info">
-                                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
+                                        <div class="w-12 h-12 md:w-13 md:h-13 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
                                             <i class="fa-light fa-user-tie text-xl md:text-2xl"></i>
                                         </div>
                                         <div class="flex flex-col leading-tight">
-                                            <span class="text-[8px] md:text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.commissioner') }}</span>
-                                            <span class="text-base md:text-lg lg:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['commissioner'] }}</span>
+                                            <span class="text-[8px] md:text-[9px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.commissioner') }}</span>
+                                            <span class="text-base md:text-lg font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['commissioner'] }}</span>
                                         </div>
                                     </div>
                                 @endif
                                 @if(!empty($match->metadata['attendance']))
                                     <div class="w-full md:w-auto flex items-center justify-center md:justify-start gap-4 md:gap-5 group/info">
-                                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
+                                        <div class="w-12 h-12 md:w-13 md:h-13 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20 group-hover/info:bg-white/20 transition-all shadow-2xl shrink-0">
                                             <i class="fa-light fa-users text-xl md:text-2xl"></i>
                                         </div>
                                         <div class="flex flex-col leading-tight">
-                                            <span class="text-[8px] md:text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.attendance') }}</span>
-                                            <span class="text-base md:text-lg lg:text-xl font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['attendance'] }}</span>
+                                            <span class="text-[8px] md:text-[9px] font-black text-white/50 uppercase tracking-[0.3em] mb-1 md:mb-1.5">{{ __('matches.attendance') }}</span>
+                                            <span class="text-base md:text-lg font-black text-white group-hover/info:text-brand-200 transition-colors">{{ $match->metadata['attendance'] }}</span>
                                         </div>
                                     </div>
                                 @endif
@@ -782,7 +782,7 @@
 
                             {{-- Our Team Tab --}}
                             <div x-show="activeTab === 'ours'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                                <div class="overflow-x-auto custom-scrollbar">
+                                <div x-show="ourStats.length > 0" class="overflow-x-auto custom-scrollbar">
                                     <table class="w-full text-left border-collapse min-w-[800px]">
                                         <thead>
                                             <tr class="bg-gray-900 text-white sticky top-0 z-10">
@@ -876,11 +876,15 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div x-show="ourStats.length === 0" class="py-12 text-center bg-gray-50 border-t border-gray-100">
+                                    <i class="fa-light fa-chart-simple-slash text-5xl text-gray-200 mb-4 block"></i>
+                                    <p class="text-sm font-bold text-gray-400 italic px-8">{{ __('matches.empty_stats') }}</p>
+                                </div>
                             </div>
 
                             {{-- Opponent Tab --}}
                             <div x-show="activeTab === 'opponent'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                                <div class="overflow-x-auto custom-scrollbar">
+                                <div x-show="opponentStats.length > 0" class="overflow-x-auto custom-scrollbar">
                                     <table class="w-full text-left border-collapse min-w-[800px]">
                                         <thead>
                                             <tr class="bg-gray-900 text-white sticky top-0 z-10">
@@ -952,9 +956,11 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div x-show="opponentStats.length === 0" class="py-12 text-center bg-gray-50 border-t border-gray-100">
+                                    <i class="fa-light fa-chart-simple-slash text-5xl text-gray-200 mb-4 block"></i>
+                                    <p class="text-sm font-bold text-gray-400 italic px-8">{{ __('matches.empty_opponent_stats') }}</p>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
                 </div>
             </div>
