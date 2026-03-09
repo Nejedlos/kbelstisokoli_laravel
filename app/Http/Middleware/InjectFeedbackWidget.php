@@ -41,7 +41,7 @@ class InjectFeedbackWidget
             return false;
         }
 
-        if (!Auth::check() && app()->environment() !== 'local') {
+        if (!Auth::check() && app()->environment() !== 'local' && app()->environment() !== 'staging' && !str_contains(config('app.url'), 'new.')) {
             return false;
         }
 
@@ -109,13 +109,14 @@ class InjectFeedbackWidget
                     if (!html || document.getElementById('ks-fb-root')) return;
                     const temp = document.createElement('div');
                     temp.innerHTML = html.trim();
+                    const widgetRoot = temp.querySelector('#ks-fb-root');
 
                     // Wait for Alpine to be ready and component to be registered
                     const inject = () => {
                         if (window.Alpine && window.Alpine.data('ksFeedbackWidget')) {
-                             while (temp.firstChild) {
-                                document.body.appendChild(temp.firstChild);
-                            }
+                             if (!document.getElementById('ks-fb-root')) {
+                                document.body.appendChild(widgetRoot);
+                             }
                         } else {
                             setTimeout(inject, 50);
                         }
@@ -127,13 +128,14 @@ class InjectFeedbackWidget
                 });
         }
 
+        setTimeout(loadFeedback, 100);
         if (document.readyState === 'complete') {
-            setTimeout(loadFeedback, 500);
+            loadFeedback();
         } else {
-            window.addEventListener('load', () => setTimeout(loadFeedback, 500));
+            window.addEventListener('load', loadFeedback);
         }
 
-        document.addEventListener('livewire:navigated', () => setTimeout(loadFeedback, 500));
+        document.addEventListener('livewire:navigated', () => setTimeout(loadFeedback, 100));
     })();
 </script>
 HTML;
