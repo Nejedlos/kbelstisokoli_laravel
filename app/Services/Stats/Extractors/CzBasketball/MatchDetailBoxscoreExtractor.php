@@ -121,7 +121,14 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         });
 
         // Pro zjednodušení vracíme první tabulku jako hlavní data, ale v metadatech máme vše
-        $mainTable = $allTablesData[0] ?? new NormalizedTableDTO('Boxscore', [], [], ['warnings' => ['No tables found']]);
+        $mainTable = $allTablesData[0] ?? new NormalizedTableDTO('Boxscore', [], [
+            'header' => $matchHeader,
+            'best_players' => $bestPlayers,
+            'team_comparison' => $teamComparison,
+            'last_matches' => $lastMatches,
+            'mutual_matches' => $mutualMatches,
+            'warnings' => ['No tables found'],
+        ]);
 
         $mainTable->metadata = array_merge($mainTable->metadata, [
             'header' => $matchHeader,

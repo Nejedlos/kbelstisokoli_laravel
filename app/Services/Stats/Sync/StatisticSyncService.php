@@ -115,15 +115,15 @@ class StatisticSyncService
             $metaChanged = false;
 
             if (isset($data->metadata['header'])) {
-                $matchMetadata['match_header_external'] = $data->metadata['header'];
+                $matchMetadata['match_header'] = $data->metadata['header'];
                 $metaChanged = true;
             }
             if (isset($data->metadata['best_players'])) {
-                $matchMetadata['best_players_external'] = $data->metadata['best_players'];
+                $matchMetadata['best_players'] = $data->metadata['best_players'];
                 $metaChanged = true;
             }
             if (isset($data->metadata['team_comparison'])) {
-                $matchMetadata['team_comparison_external'] = $data->metadata['team_comparison'];
+                $matchMetadata['team_comparison'] = $data->metadata['team_comparison'];
                 $metaChanged = true;
             }
 

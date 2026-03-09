@@ -5,6 +5,7 @@
     $teamComparison = $match->metadata['team_comparison'] ?? [];
     $lastMatches = $match->metadata['last_matches'] ?? [];
     $mutualMatches = $match->metadata['mutual_matches'] ?? [];
+    $bestPlayers = $match->metadata['best_players'] ?? [];
     $hasScore = !is_null($match->score_home) && !is_null($match->score_away);
 @endphp
 
@@ -121,6 +122,72 @@
                 </div>
             @endif
 
+            @if(!empty($bestPlayers))
+                <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
+                        <i class="fa-light fa-star text-brand-500"></i>
+                        {{ __('matches.prediction.best_players_title') ?? 'Nejlepší hráči' }}
+                    </h4>
+
+                    <div class="space-y-6">
+                        @foreach($bestPlayers as $categoryKey => $categoryData)
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-4">
+                                    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] px-4">{{ $categoryData['label'] ?? $categoryKey }}</span>
+                                    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    @foreach(['home', 'away'] as $side)
+                                        @php
+                                            $player = $categoryData[$side] ?? null;
+                                            $isHome = $side === 'home';
+                                        @endphp
+                                        @if($player)
+                                            <div class="group relative flex items-center gap-4 p-3 rounded-[2rem] {{ $isHome ? 'bg-brand-50/50 border-brand-100' : 'bg-slate-50 border-slate-100' }} border-2 transition-all hover:shadow-xl hover:bg-white hover:-translate-y-1 overflow-hidden">
+                                                @if($isHome)
+                                                    <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full -mr-8 -mt-8"></div>
+                                                @endif
+
+                                                <div class="relative flex-shrink-0">
+                                                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-white shadow-md group-hover:scale-110 transition-transform duration-500 border border-white">
+                                                        @if(!empty($player['photo_url']))
+                                                            <img src="{{ $player['photo_url'] }}" alt="{{ $player['name'] }}" class="w-full h-full object-cover">
+                                                        @else
+                                                            <div class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
+                                                                <i class="fa-light fa-user text-xl"></i>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="absolute -top-2 -right-2 w-7 h-7 rounded-full {{ $isHome ? 'bg-brand-500' : 'bg-slate-400' }} text-white flex items-center justify-center text-[10px] shadow-lg border-2 border-white">
+                                                        <i class="fa-solid fa-crown"></i>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex-grow min-w-0 relative">
+                                                    <span class="px-2 py-0.5 {{ $isHome ? 'bg-brand-500 text-white' : 'bg-slate-200 text-slate-600' }} text-[8px] font-black rounded uppercase tracking-widest mb-1 inline-block whitespace-nowrap">
+                                                        {{ $isHome ? ($match->team->name) : ($match->opponent?->name ?? 'Soupeř') }}
+                                                    </span>
+                                                    <span class="text-sm font-black text-slate-900 leading-tight block group-hover:text-brand-600 transition-colors truncate">{{ $player['name'] }}</span>
+                                                </div>
+
+                                                <div class="flex-shrink-0 text-right relative">
+                                                    <div class="flex flex-col items-end">
+                                                        <span class="text-xl font-black text-brand-600 tabular-nums leading-none mb-1">{{ $player['value'] }}</span>
+                                                        <span class="text-[7px] font-black text-slate-400 uppercase tracking-widest">HODNOTA</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             @if(!empty($teamComparison))
                 <div class="space-y-4">
                     <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
@@ -168,7 +235,7 @@
                 <div class="space-y-4">
                     <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
                         <i class="fa-light fa-chart-line text-brand-500"></i>
-                        {{ __('matches.form_title') ?? 'Předzápasová bilance (forma)' }}
+                        {{ __('matches.prediction.form_title') ?? 'Předzápasová bilance (forma)' }}
                     </h4>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,7 +285,7 @@
                 <div class="space-y-4">
                     <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
                         <i class="fa-light fa-swords text-brand-500"></i>
-                        {{ __('matches.mutual_matches_title') ?? 'Vzájemné zápasy' }}
+                        {{ __('matches.prediction.mutual_matches_title') ?? 'Vzájemné zápasy' }}
                     </h4>
 
                     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -226,9 +293,9 @@
                             <table class="w-full text-left text-[11px]">
                                 <thead class="bg-slate-50 text-slate-400 font-black uppercase tracking-widest border-b border-slate-100">
                                     <tr>
-                                        <th class="px-5 py-3">{{ __('Date') }}</th>
-                                        <th class="px-5 py-3">{{ __('Match') }}</th>
-                                        <th class="px-5 py-3 text-center">{{ __('Score') }}</th>
+                                        <th class="px-5 py-3">{{ __('matches.date_time') }}</th>
+                                        <th class="px-5 py-3">{{ __('matches.prediction.h2h_match') }}</th>
+                                        <th class="px-5 py-3 text-center">{{ __('matches.score') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50">
@@ -270,7 +337,7 @@
                 @click="predictionOpen = false"
                 class="btn btn-secondary w-full sm:w-auto px-12 py-3 text-xs uppercase tracking-widest font-black shadow-lg shadow-slate-200"
             >
-                {{ __('Close') }}
+                {{ __('matches.prediction.close') }}
             </button>
         </div>
     </div>

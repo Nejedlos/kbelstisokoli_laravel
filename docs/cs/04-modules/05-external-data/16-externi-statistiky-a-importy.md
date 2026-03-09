@@ -164,6 +164,11 @@ Systém je navržen pro automatizované stahování a normalizaci dat pomocí AI
     - **Force mode**: Ignoruje kontrolu hashů obsahu a vždy provede stažení a zpracování dat. Vhodné při změně extraktoru nebo opravě chyb v normalizaci.
     - **Fresh mode**: Nejenže vynutí synchronizaci, ale před importem nových statistik (boxscoru) smaže všechna stávající data pro daný zápas v databázi. Tím se zajistí, že v DB nezůstane nic "starého", co už v externím zdroji není.
     - **AI mode**: Prioritně používá `OpenAiNormalizer` pro extrakci dat přímo z HTML místo standardních DOM extraktorů. Toto je nejpřesnější způsob synchronizace, pokud se změní struktura webu, ale spotřebovává API tokeny. AI mode je v administraci dostupný jako volba "AI Fresh".
+6. **Metadata a předzápasové informace**:
+    - Synchronizace automaticky extrahuje metadata i pro budoucí (neodehrané) zápasy. 
+    - Tato metadata zahrnují: týmové lídry (`best_players`), srovnání kádrů (`team_comparison`), poslední zápasy (`last_matches`) a vzájemné zápasy (`mutual_matches`).
+    - Pokud zápas nemá boxscore tabulky (je v budoucnu), synchronizace se nepřeruší, ale uloží tato metadata do pole `metadata` v modelu `BasketballMatch`.
+    - Po úspěšné synchronizaci metadat budoucího zápasu je automaticky vyvolán job `ComputeMatchPredictionJob` pro aktualizaci ELO predikce výsledku.
 
 ---
 

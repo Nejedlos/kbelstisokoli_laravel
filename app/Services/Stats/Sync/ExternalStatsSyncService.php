@@ -600,26 +600,29 @@ class ExternalStatsSyncService
                     $fragmentHtml = $result['fragment_html'];
                     $tables = $result['tables'] ?? [$mainData];
                 } catch (\Exception $e) {
-                    Log::warning("DOM extractor selhal pro zápas $externalMatchId, zkouším AI fallback. Chyba: ".$e->getMessage());
+                    Log::warning("DOM extractor selhal pro zápas $externalMatchId. Chyba: ".$e->getMessage());
 
-                    if ($boxscoreClips->isEmpty()) {
-                        // Pokud je zápas v budoucnu, není to chyba (nemá boxscore, ale metadata jsou OK)
-                        if ($match->scheduled_at && $match->scheduled_at->isFuture()) {
-                             return;
+                    if ($boxscoreClips->isNotEmpty()) {
+                        Log::info("Zkouším AI fallback pro zápas $externalMatchId.");
+                        foreach ($boxscoreClips as $clip) {
+                            $data = $this->normalizer->normalize($clip->htmlFragment, [
+                                'type' => 'match_boxscore',
+                                'strict_schema' => $this->getBoxscoreSchema(),
+                            ]);
+                            $tables[] = $data;
+                            $fragmentHtml .= $clip->htmlFragment;
                         }
+                        $usedAi = true;
+                        $mainData = $tables[0] ?? null;
+                    } elseif ($match->scheduled_at && $match->scheduled_at->isFuture()) {
+                        // Pokud je zápas v budoucnu a nemáme klipy pro AI, je to v pořádku,
+                        // pokud se aspoň podaří extrahovat metadata (hlavička, srovnání atd.)
+                        // Ale extractor už selhal, tak zkusíme jestli aspoň něco nevrátil (neměl by vyhazovat výjimku pokud jen chybí tabulky)
+                        // V MatchDetailBoxscoreExtractor jsem to upravil aby nevyhazoval výjimku při chybějících tabulkách
+                        Log::info("Budoucí zápas $externalMatchId bez boxscore, pokračuji s prázdnými tabulkami.");
+                    } else {
                         throw new \Exception('DOM extractor failed and no boxscore clips found for AI fallback.');
                     }
-
-                    foreach ($boxscoreClips as $clip) {
-                        $data = $this->normalizer->normalize($clip->htmlFragment, [
-                            'type' => 'match_boxscore',
-                            'strict_schema' => $this->getBoxscoreSchema(),
-                        ]);
-                        $tables[] = $data;
-                        $fragmentHtml .= $clip->htmlFragment;
-                    }
-                    $usedAi = true;
-                    $mainData = $tables[0] ?? null;
                 }
             }
 
