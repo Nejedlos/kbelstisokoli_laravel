@@ -89,7 +89,7 @@
                             </div>
                         </div>
 
-                        @if($event->rsvp_enabled)
+                        @if($event->rsvp_enabled && ($event->ends_at ?? $event->starts_at)->isFuture())
                         <div class="mt-8 pt-8 border-t border-slate-50">
                             <a href="{{ route('member.attendance.show', ['type' => 'event', 'id' => $event->id]) }}" class="btn btn-primary w-full py-4 shadow-lg shadow-primary/20">
                                 <i class="fa-light fa-user-check mr-2"></i>
