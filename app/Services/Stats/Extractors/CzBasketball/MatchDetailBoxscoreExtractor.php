@@ -5,6 +5,7 @@ namespace App\Services\Stats\Extractors\CzBasketball;
 use App\Services\Stats\Contracts\StatExtractorInterface;
 use App\Services\Stats\DTO\NormalizedRowDTO;
 use App\Services\Stats\DTO\NormalizedTableDTO;
+use Carbon\Carbon;
 use Symfony\Component\DomCrawler\Crawler;
 
 class MatchDetailBoxscoreExtractor implements StatExtractorInterface
@@ -281,9 +282,32 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         }
         $header['periods'] = $periods;
 
-        $dateNode = $searchIn->filter('.match-date, .date-time, .datetime')->first();
+        $dateNode = $searchIn->filter('.match-date, .date-time, .datetime, .font-size-smaller.font-size-md-normal.ml-md-4.mr-4.mb-2.mb-md-4')->first();
         if ($dateNode->count() > 0) {
-            $header['date'] = trim($dateNode->text());
+            $dateStr = trim($dateNode->text());
+            $header['date'] = $dateStr;
+
+            // Pokus o parsování na Carbon
+            try {
+                // Formát: 7. 1. 2026 - 19:15
+                // Odstraníme pomlčku a dny v týdnu
+                $cleanDateStr = preg_replace('/(Po|Út|St|Čt|Pá|So|Ne)\s*/', '', $dateStr);
+                $cleanDateStr = str_replace('-', '', $cleanDateStr);
+                $cleanDateStr = preg_replace('/\s+/', ' ', trim($cleanDateStr));
+
+                // Formát: 7. 1. 2026 19:15
+                $header['scheduled_at'] = Carbon::createFromFormat('j. n. Y H:i', $cleanDateStr, 'Europe/Prague')->toDateTimeString();
+            } catch (\Exception $e) {
+                // Pokud selže, zkusíme najít datum v textu obecněji
+                if (preg_match('/(\d+\.\s*\d+\.\s*\d{4})\s*[\-\s]*(\d{1,2}:\d{2})/', $dateStr, $m)) {
+                    $cleanDateStr = preg_replace('/\s+/', ' ', trim($m[1] . ' ' . $m[2]));
+                    try {
+                        $header['scheduled_at'] = Carbon::createFromFormat('j. n. Y G:i', $cleanDateStr, 'Europe/Prague')->toDateTimeString();
+                    } catch (\Exception $e2) {
+                        // Ignorujeme
+                    }
+                }
+            }
         }
 
         // Hala / Venue

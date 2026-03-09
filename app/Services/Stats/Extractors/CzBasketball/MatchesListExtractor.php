@@ -91,13 +91,14 @@ class MatchesListExtractor implements StatExtractorInterface
 
                 try {
                     // Formát: 6. 3. 2026 19:15
-                    $scheduledAt = Carbon::createFromFormat('j. n. Y H:i', $cleanDateStr);
+                    // Explicitně používáme Europe/Prague časovou zónu, aby se předešlo posunu o hodinu při uložení do DB
+                    $scheduledAt = Carbon::createFromFormat('j. n. Y H:i', $cleanDateStr, 'Europe/Prague');
                 } catch (\Exception $e) {
                     try {
                         // Zkusíme bez času - rozdělíme podle mezer a vezmeme první 3 části (např. 6., 3., 2026)
                         $parts = array_filter(explode(' ', $cleanDateStr));
                         $dateOnly = implode(' ', array_slice($parts, 0, 3));
-                        $scheduledAt = Carbon::createFromFormat('j. n. Y', $dateOnly);
+                        $scheduledAt = Carbon::createFromFormat('j. n. Y', $dateOnly, 'Europe/Prague');
                     } catch (\Exception $e2) {
                         $warnings[] = "Could not parse date: $dateStr";
                     }

@@ -714,6 +714,10 @@ class ExternalStatsSyncService
             if (!empty($header['commissioner'])) {
                 $matchMetadata['commissioner'] = $header['commissioner'];
             }
+            if (!empty($header['scheduled_at'])) {
+                // Aktualizujeme čas zápasu, pokud je v detailu nalezen (bývá přesnější než v seznamu)
+                $match->scheduled_at = $header['scheduled_at'];
+            }
 
             // Uložení nejlepších hráčů
             $bestPlayers = $mainData->metadata['best_players'] ?? [];
