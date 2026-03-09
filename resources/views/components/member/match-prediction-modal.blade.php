@@ -7,6 +7,26 @@
     $mutualMatches = $match->metadata['mutual_matches'] ?? [];
     $bestPlayers = $match->metadata['best_players'] ?? [];
     $hasScore = !is_null($match->score_home) && !is_null($match->score_away);
+
+    $colorHsl = null;
+    $bgHsl = null;
+    $glowHsl = null;
+    $borderHsl = null;
+    $winChance = null;
+
+    if ($prediction) {
+        $winChance = round($prediction->probability_win * 100);
+        // Dynamický výpočet barvy (0% = červená, 50% = oranžová, 100% = zelená)
+        if ($winChance <= 50) {
+            $hue = ($winChance / 50) * 35; // 0-35 (red to orange-ish)
+        } else {
+            $hue = 35 + (($winChance - 50) / 50) * (105); // 35-140 (orange to success green)
+        }
+        $colorHsl = "hsl({$hue}, 75%, 45%)";
+        $bgHsl = "hsla({$hue}, 75%, 45%, 0.05)";
+        $glowHsl = "hsla({$hue}, 75%, 45%, 0.2)";
+        $borderHsl = "hsla({$hue}, 75%, 45%, 0.15)";
+    }
 @endphp
 
 <div
@@ -43,14 +63,17 @@
 
             <div class="relative flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-brand-400 border border-white/20 shadow-xl backdrop-blur-md">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 shadow-xl backdrop-blur-md transition-colors {{ !$colorHsl ? 'text-brand-400' : '' }}"
+                        @if($colorHsl) style="color: {{ $colorHsl }};" @endif
+                    >
                         <i class="fa-light fa-crystal-ball text-xl"></i>
                     </div>
                     <div>
                         <h3 class="text-xl font-black uppercase tracking-tight leading-none mb-1">
                             {{ $hasScore ? (__('matches.prediction.title_past') ?? 'Předzápasová predikce') : (__('matches.prediction.title') ?? 'Předzápasová predikce') }}
                         </h3>
-                        <p class="text-[10px] font-black text-brand-400 uppercase tracking-widest">{{ $match->team->name }} vs {{ $match->opponent?->name }}</p>
+                        <p class="text-[10px] font-black uppercase tracking-widest {{ !$colorHsl ? 'text-brand-400' : '' }}" @if($colorHsl) style="color: {{ $colorHsl }}; opacity: 0.8;" @endif>{{ $match->team->name }} vs {{ $match->opponent?->name }}</p>
                     </div>
                 </div>
 
@@ -60,18 +83,17 @@
             </div>
         </div>
 
-        <!-- Scrollable Content -->
         <div class="overflow-y-auto custom-scrollbar p-8 space-y-8 bg-slate-50/50">
             @if($prediction)
                 <div class="space-y-8">
                     <!-- Probability Section -->
                     <div class="relative p-8 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden group">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-150 duration-700"></div>
+                        <div class="absolute top-0 right-0 w-24 h-24 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-150 duration-700" style="background-color: {{ $bgHsl }};"></div>
 
                         <div class="flex flex-col items-center gap-6 relative">
                             <div class="text-center">
-                                <div class="text-6xl font-black text-brand-600 mb-2 tabular-nums drop-shadow-sm">
-                                    {{ round($prediction->probability_win * 100) }}%
+                                <div class="text-6xl font-black mb-2 tabular-nums drop-shadow-sm" style="color: {{ $colorHsl }};">
+                                    {{ $winChance }}%
                                 </div>
                                 <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                                     {{ __('matches.prediction.win_chance') ?? 'Šance na výhru' }}
@@ -81,8 +103,8 @@
                             <div class="w-full">
                                 <div class="overflow-hidden h-4 flex rounded-full bg-slate-100 shadow-inner p-1">
                                     <div
-                                        style="width:{{ $prediction->probability_win * 100 }}%"
-                                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-1000"
+                                        style="width:{{ $prediction->probability_win * 100 }}%; background-color: {{ $colorHsl }};"
+                                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center rounded-full transition-all duration-1000"
                                     ></div>
                                 </div>
                                 <div class="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3 px-1">
@@ -107,13 +129,13 @@
                     <!-- Why section -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2 px-1">
-                            <i class="fa-light fa-magnifying-glass-chart text-brand-500"></i>
+                            <i class="fa-light fa-magnifying-glass-chart" style="color: {{ $colorHsl }};"></i>
                             {{ __('matches.prediction.why_title') ?? 'Proč si to myslíme' }}
                         </h4>
                         <ul class="grid grid-cols-1 gap-3">
                             @foreach($prediction->explanation_points as $point)
                                 <li class="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-100 text-sm text-slate-600 leading-relaxed shadow-sm hover:shadow-md transition-shadow">
-                                    <i class="fa-light fa-circle-check text-brand-500 mt-0.5 shrink-0"></i>
+                                    <i class="fa-light fa-circle-check mt-0.5 shrink-0" style="color: {{ $colorHsl }};"></i>
                                     <span>{{ $point }}</span>
                                 </li>
                             @endforeach
@@ -250,16 +272,13 @@
                                     <div class="flex gap-1.5">
                                         @foreach($sideMatches as $m)
                                             @php
-                                                $isWin = (int)$m['score_home'] > (int)$m['score_away'];
-                                                if (str_contains(strtolower($m['team_home']), strtolower($teamName)) === false) {
-                                                    $isWin = (int)$m['score_away'] > (int)$m['score_home'];
-                                                }
+                                                $res = \App\Support\MatchResultHelper::for($m, $teamName);
                                             @endphp
                                             <div
-                                                class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-sm {{ $isWin ? 'bg-emerald-500' : 'bg-rose-500' }}"
+                                                class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-sm {{ $res['bgColor'] }}"
                                                 title="{{ $m['team_home'] }} vs {{ $m['team_away'] }} ({{ $m['score_home'] }}:{{ $m['score_away'] }})"
                                             >
-                                                {{ $isWin ? 'V' : 'P' }}
+                                                {{ $res['resultLetter'] }}
                                             </div>
                                         @endforeach
                                     </div>
@@ -267,9 +286,12 @@
 
                                 <div class="space-y-2">
                                     @foreach($sideMatches as $m)
+                                        @php
+                                            $res = \App\Support\MatchResultHelper::for($m, $teamName);
+                                        @endphp
                                         <div class="flex items-center justify-between text-[11px] py-1 border-b border-slate-50 last:border-0">
-                                            <span class="text-slate-500 font-bold truncate pr-4 max-w-[140px]">{{ str_contains(strtolower($m['team_home']), strtolower($teamName)) ? $m['team_away'] : $m['team_home'] }}</span>
-                                            <span class="font-black tabular-nums {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-emerald-600' : 'text-rose-600' }}">
+                                            <span class="text-slate-500 font-bold truncate pr-4 max-w-[140px]">{{ str_contains(mb_strtolower($m['team_home']), mb_strtolower($teamName)) ? $m['team_away'] : $m['team_home'] }}</span>
+                                            <span class="font-black tabular-nums {{ $res['textColor'] }}">
                                                 {{ $m['score_home'] }}:{{ $m['score_away'] }}
                                             </span>
                                         </div>

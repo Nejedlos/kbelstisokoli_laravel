@@ -85,6 +85,25 @@
 
     @if($view === 'personal')
         {{-- PERSONAL VIEW --}}
+        @if($selectedUserId && $selectedUserId != Auth::id())
+            @php $viewedUser = \App\Models\User::find($selectedUserId); @endphp
+            <div class="flex items-center gap-4 mb-10 bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                <div class="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 text-2xl font-black overflow-hidden border-4 border-white dark:border-gray-700">
+                    @if($viewedUser?->getFilamentAvatarUrl())
+                        <img src="{{ $viewedUser->getFilamentAvatarUrl() }}" class="w-full h-full object-cover">
+                    @else
+                        {{ substr($viewedUser?->name ?? '?', 0, 1) }}
+                    @endif
+                </div>
+                <div>
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">PROFIL SPOLUHRÁČE</div>
+                    <div class="text-2xl font-black text-gray-800 dark:text-white">{{ $viewedUser?->name ?? '?' }}</div>
+                </div>
+                <button wire:click="showPlayerStats({{ Auth::id() }})" class="ml-auto bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700 px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border border-gray-100 dark:border-gray-800">
+                    <i class="fa-light fa-arrow-left"></i> Zpět na můj profil
+                </button>
+            </div>
+        @endif
         @if($summary)
             {{-- Summary Cards --}}
             <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-6">
@@ -276,23 +295,17 @@
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                             @foreach($perGameSeries as $m)
                             @php
-                                $hasScore = isset($m['score_home']) && isset($m['score_away']);
-                                $isWin = false;
-                                $isDraw = false;
-                                $isLoss = false;
-
-                                if ($hasScore) {
-                                    $isWin = $m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home']);
-                                    $isDraw = $m['score_home'] == $m['score_away'];
-                                    $isLoss = !$isWin && !$isDraw;
-                                }
+                                $res = \App\Support\MatchResultHelper::getResult($m['is_home'], $m['score_home'] ?? null, $m['score_away'] ?? null);
+                                $isWin = $res['isWin'];
+                                $isDraw = $res['isDraw'];
+                                $isLoss = $res['isLoss'];
                             @endphp
                             <tr
                                 wire:key="row-{{ $loop->index }}"
                                 @class([
                                     'hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-all border-l-[6px] relative group',
-                                    'border-green-500 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-900/10' => $isWin,
-                                    'border-red-400/30' => $isLoss,
+                                    'border-emerald-500 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10' => $isWin,
+                                    'border-rose-400/30' => $isLoss,
                                     'border-gray-300' => $isDraw,
                                     'border-transparent' => !$isWin && !$isLoss && !$isDraw,
                                 ])
@@ -304,7 +317,7 @@
                                     <div class="flex items-center gap-4">
                                         <div @class([
                                             'flex flex-col items-center justify-center w-10 h-10 rounded-xl shadow-sm border transition-transform group-hover:scale-110',
-                                            'bg-green-50 border-green-100 dark:bg-green-900/20 dark:border-green-800' => $isWin,
+                                            'bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800' => $isWin,
                                             'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700' => !$isWin,
                                         ])>
                                             <i @class([
@@ -316,7 +329,7 @@
                                         <div>
                                             <div @class([
                                                 'text-sm font-black transition-colors',
-                                                'text-green-700 dark:text-green-400' => $isWin,
+                                                'text-emerald-700 dark:text-emerald-400' => $isWin,
                                                 'text-gray-800 dark:text-gray-200' => !$isWin,
                                             ])>
                                                 {{ $m['opponent'] }}
@@ -337,7 +350,7 @@
                                 <td class="px-6 py-5 text-center">
                                     <div @class([
                                         'text-2xl font-black transition-transform group-hover:scale-110',
-                                        'text-green-600 dark:text-green-400 drop-shadow-sm' => $isWin,
+                                        'text-emerald-600 dark:text-emerald-400 drop-shadow-sm' => $isWin,
                                         'text-primary-600' => !$isWin,
                                     ])>
                                         {{ $m['values']['pts'] ?? 0 }}
@@ -372,6 +385,13 @@
             <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
                 <i class="fa-light fa-chart-user text-6xl text-gray-100 dark:text-gray-700"></i>
                 <div class="text-gray-400 font-medium italic">Zatím nemáme nahrané žádné tvé osobní statistiky pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }}.</div>
+            </div>
+        @endif
+
+        {{-- EXTERNAL STATS --}}
+        @if(!empty($externalStats) || !empty($externalMatches))
+            <div class="mt-16">
+                @include('member.statistics.partials.external-stats-view')
             </div>
         @endif
     @elseif($view === 'team')
@@ -507,7 +527,15 @@
                                     <td class="px-6 py-4 text-center text-[10px] font-black text-gray-300">
                                         {{ $loop->iteration }}.
                                     </td>
-                                    <td class="px-6 py-4 font-black text-gray-800 dark:text-gray-200 group-hover/row:text-primary-600 transition-colors">{{ $scorer['name'] }}</td>
+                                    <td class="px-6 py-4 font-black text-gray-800 dark:text-gray-200 group-hover/row:text-primary-600 transition-colors">
+                                        @if(isset($scorer['user_id']))
+                                            <button wire:click="showPlayerStats({{ $scorer['user_id'] }})" class="hover:underline text-left">
+                                                {{ $scorer['name'] }}
+                                            </button>
+                                        @else
+                                            {{ $scorer['name'] }}
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-4 text-center text-gray-500 font-bold">{{ $scorer['gp'] }}</td>
                                     <td class="px-4 py-4 text-center font-black text-lg">{{ $scorer['pts_total'] }}</td>
                                     <td class="px-4 py-4 text-center">
@@ -570,18 +598,12 @@
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                         @forelse($matches as $m)
                         @php
-                            $hasScore = isset($m['score_home']) && isset($m['score_away']);
                             $isOdehrano = in_array($m['status'], ['finished', 'completed', 'played']);
-
-                            $isWin = false;
-                            $isDraw = false;
-                            $isLoss = false;
-
-                            if ($hasScore && $isOdehrano) {
-                                $isWin = $m['is_home'] ? ($m['score_home'] > $m['score_away']) : ($m['score_away'] > $m['score_home']);
-                                $isDraw = $m['score_home'] == $m['score_away'];
-                                $isLoss = !$isWin && !$isDraw;
-                            }
+                            $res = \App\Support\MatchResultHelper::getResult($m['is_home'], $m['score_home'] ?? null, $m['score_away'] ?? null);
+                            $hasScore = isset($m['score_home']) && isset($m['score_away']);
+                            $isWin = $res['isWin'] && $isOdehrano;
+                            $isDraw = $res['isDraw'] && $isOdehrano;
+                            $isLoss = $res['isLoss'] && $isOdehrano;
 
                             $scheduledAt = $m['scheduled_at'] ? \Carbon\Carbon::parse($m['scheduled_at']) : null;
                             $isPast = $scheduledAt ? $scheduledAt->isPast() : ($m['season_id'] < 3);
@@ -609,8 +631,8 @@
                             wire:key="match-{{ $m['id'] ?? $loop->index }}"
                             @class([
                                 'hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-all border-l-[6px] group relative',
-                                'border-green-500 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-900/10' => $isWin,
-                                'border-red-400/30' => $isLoss,
+                                'border-emerald-500 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10' => $isWin,
+                                'border-rose-400/30' => $isLoss,
                                 'border-gray-300' => $isDraw,
                                 'border-blue-400/30 bg-blue-50/10 dark:bg-blue-900/5' => $isActionTookPlace,
                                 'border-transparent' => !$isWin && !$isLoss && !$isDraw && !$isActionTookPlace,
@@ -635,7 +657,7 @@
                                 <div class="flex items-center gap-4">
                                     <div @class([
                                         'w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm border transition-transform group-hover:scale-110',
-                                        'border-green-100 dark:border-green-900' => $isWin,
+                                        'border-emerald-100 dark:border-emerald-900' => $isWin,
                                         'border-gray-100 dark:border-gray-700' => !$isWin,
                                     ])>
                                         <i class="fa-light {{ $typeIcon }} text-base"></i>
@@ -643,7 +665,7 @@
                                     <div>
                                         <div @class([
                                             'text-sm font-black transition-colors',
-                                            'text-green-700 dark:text-green-400' => $isWin,
+                                            'text-emerald-700 dark:text-emerald-400' => $isWin,
                                             'text-gray-800 dark:text-gray-200' => !$isWin,
                                         ])>
                                             {{ $m['opponent']['name'] ?? 'Neznámý soupeř' }}

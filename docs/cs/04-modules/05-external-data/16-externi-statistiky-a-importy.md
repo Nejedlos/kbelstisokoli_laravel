@@ -168,6 +168,7 @@ Systém je navržen pro automatizované stahování a normalizaci dat pomocí AI
     - Synchronizace automaticky extrahuje metadata i pro budoucí (neodehrané) zápasy. 
     - Tato metadata zahrnují: týmové lídry (`best_players`), srovnání kádrů (`team_comparison`), poslední zápasy (`last_matches`) a vzájemné zápasy (`mutual_matches`).
     - Pokud zápas nemá boxscore tabulky (je v budoucnu), synchronizace se nepřeruší, ale uloží tato metadata do pole `metadata` v modelu `BasketballMatch`.
+    - **Budoucí zápasy**: U zápasů v budoucnosti se při synchronizaci automaticky vynuluje skóre (`score_home`, `score_away`), nastaví se status `scheduled` a vymažou se případné statistiky hráčů (`boxscore`). Tím se předchází situacím, kdy je čas utkání (např. 19:15) chybně interpretován jako výsledek.
     - Po úspěšné synchronizaci metadat budoucího zápasu je automaticky vyvolán job `ComputeMatchPredictionJob` pro aktualizaci ELO predikce výsledku.
 
 ---

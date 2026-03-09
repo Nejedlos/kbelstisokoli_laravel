@@ -120,6 +120,13 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $allTablesData[] = $tableDto;
         });
 
+        // Pokud nejsou žádné tabulky a zápas nemá žádné detaily o čtvrtinách, pravděpodobně jde o budoucí zápas.
+        // V takovém případě skóre v hlavičce může být ve skutečnosti čas utkání.
+        if (empty($allTablesData) && empty($matchHeader['periods']) && isset($matchHeader['score'])) {
+            // Kontrola, zda skóre vypadá jako čas a nejsou přítomny čtvrtiny
+            unset($matchHeader['score']);
+        }
+
         // Pro zjednodušení vracíme první tabulku jako hlavní data, ale v metadatech máme vše
         $mainTable = $allTablesData[0] ?? new NormalizedTableDTO('Boxscore', [], [
             'header' => $matchHeader,

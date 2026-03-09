@@ -153,10 +153,18 @@ class MatchesListExtractor implements StatExtractorInterface
             }
 
             $status = 'scheduled';
-            if ($score && preg_match('/\d+\s*:\s*\d+/', $score)) {
+            // Pokud je zápas v budoucnu, ignorujeme skóre (může to být čas utkání)
+            $isFuture = $scheduledAt && $scheduledAt->isGreaterThan(now()->addMinutes(30));
+
+            if (! $isFuture && $score && preg_match('/\d+\s*:\s*\d+/', $score)) {
                 $status = 'finished';
             } elseif ($scheduledAt && $scheduledAt->isPast()) {
+                // Pokud je v minulosti, považujeme ho za odehraný, i když skóre chybí (bude staženo z detailu)
                 $status = 'finished';
+            }
+
+            if ($status === 'scheduled') {
+                $score = null;
             }
 
             $rows[] = new NormalizedRowDTO(

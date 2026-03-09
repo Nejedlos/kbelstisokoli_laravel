@@ -55,15 +55,17 @@ class BasketballMatchesTable
                     ->badge()
                     ->color(fn ($record): string => match (true) {
                         ! in_array($record->status, ['finished', 'completed', 'played']) => 'gray',
-                        $record->score_home === $record->score_away => 'gray',
-                        $record->is_home ? ($record->score_home > $record->score_away) : ($record->score_away > $record->score_home) => 'success',
-                        default => 'danger',
+                        $record->is_draw => 'gray',
+                        $record->is_win => 'success',
+                        $record->is_loss => 'danger',
+                        default => 'gray',
                     })
                     ->description(fn ($record): ?string => match (true) {
                         ! in_array($record->status, ['finished', 'completed', 'played']) => null,
-                        $record->score_home === $record->score_away => __('matches.draw'),
-                        $record->is_home ? ($record->score_home > $record->score_away) : ($record->score_away > $record->score_home) => __('matches.victory'),
-                        default => __('matches.loss'),
+                        $record->is_draw => __('matches.draw'),
+                        $record->is_win => __('matches.victory'),
+                        $record->is_loss => __('matches.loss'),
+                        default => null,
                     }),
                 TextColumn::make('status')
                     ->label('Stav')

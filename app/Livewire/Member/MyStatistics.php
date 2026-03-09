@@ -17,6 +17,8 @@ class MyStatistics extends Component
 
     public $view = 'personal'; // 'personal', 'team', or 'matches'
 
+    public $selectedUserId;
+
     public $sortField = 'pts_total';
     public $sortDirection = 'desc';
 
@@ -32,6 +34,10 @@ class MyStatistics extends Component
 
     public $teamAverages = [];
 
+    public $externalStats = [];
+
+    public $externalMatches = [];
+
     // Pro týmový pohled (pokud přepnuto na tým)
     public $teamSummary = [];
 
@@ -41,8 +47,10 @@ class MyStatistics extends Component
 
     public $recentForm = [];
 
-    public function mount($teamId = null, $seasonId = null, $view = null)
+    public function mount($teamId = null, $seasonId = null, $view = null, $userId = null)
     {
+        $this->selectedUserId = $userId ?? Auth::id();
+
         if ($view) {
             $this->view = $view;
         }
@@ -96,10 +104,19 @@ class MyStatistics extends Component
         $this->loadStats();
     }
 
+    public function showPlayerStats($userId)
+    {
+        $this->selectedUserId = $userId;
+        $this->view = 'personal';
+        $this->loadStats();
+    }
+
     public function loadStats()
     {
+        $userId = $this->selectedUserId ?? Auth::id();
+
         \Log::debug('MyStatistics::loadStats starting', [
-            'userId' => Auth::id(),
+            'userId' => $userId,
             'seasonId' => $this->seasonId,
             'teamId' => $this->teamId,
             'view' => $this->view
@@ -113,7 +130,6 @@ class MyStatistics extends Component
         try {
             if ($this->view === 'personal') {
                 $service = app(PlayerStatsService::class);
-                $userId = Auth::id();
 
                 $this->summary = $service->getSeasonSummary($userId, $this->seasonId, $this->teamId);
 
@@ -129,6 +145,18 @@ class MyStatistics extends Component
                 $this->rankings = $service->getRankings($userId, $this->seasonId, $this->teamId);
                 $this->insights = $service->getInsights($userId, $this->seasonId, $this->teamId);
                 $this->teamAverages = $service->getTeamAverages($this->seasonId, $this->teamId);
+
+                // Načtení externích statistik z cz.basketball
+                $this->externalStats = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+                    ->orderBy('is_career_total', 'asc')
+                    ->orderBy('season_label', 'desc')
+                    ->get()
+                    ->toArray();
+
+                $this->externalMatches = \App\Models\ExternalPlayerMatch::where('user_id', $userId)
+                    ->orderBy('match_date', 'desc')
+                    ->get()
+                    ->toArray();
             } elseif ($this->view === 'team') {
                 $service = app(TeamStatsService::class);
                 $this->teamSummary = $service->getSeasonSummary($this->teamId, $this->seasonId);
@@ -175,8 +203,8 @@ class MyStatistics extends Component
 
     public function render()
     {
-        $user = Auth::user();
-        $playerProfile = $user->playerProfile;
+        $user = $this->selectedUserId ? \App\Models\User::find($this->selectedUserId) : Auth::user();
+        $playerProfile = $user?->playerProfile;
 
         // Získání týmů uživatele v aktuálně vybrané sezóně
         $userTeams = collect();

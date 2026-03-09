@@ -242,6 +242,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
     }
 
     /**
+     * Externí statistiky hráče (z cz.basketball atd.).
+     */
+    public function externalPlayerStats(): HasMany
+    {
+        return $this->hasMany(ExternalPlayerStat::class);
+    }
+
+    /**
+     * Externí zápasy hráče (z cz.basketball atd.).
+     */
+    public function externalPlayerMatches(): HasMany
+    {
+        return $this->hasMany(ExternalPlayerMatch::class);
+    }
+
+    /**
      * Externí mapování uživatele.
      */
     public function externalMappings(): \Illuminate\Database\Eloquent\Relations\MorphMany

@@ -647,8 +647,9 @@ class ExternalStatsSyncService
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed or AI-only used, used AI.']);
             }
 
-            // Fresh mode: smazání starých statistik zápasu před importem nových
-            if ($options['fresh'] ?? false) {
+            // Fresh mode nebo budoucí zápas: smazání starých statistik zápasu před importem nových.
+            // U budoucích zápasů chceme zajistit, aby v DB nebyly žádné dočasné statistiky (pokud by se náhodou synchronizovaly chybně dříve).
+            if (($options['fresh'] ?? false) || ($match->scheduled_at && $match->scheduled_at->isFuture())) {
                 $this->statisticSyncService->clearMatchBoxscore($match, $run);
             }
 
@@ -746,6 +747,11 @@ class ExternalStatsSyncService
                     $updateData['score_away'] = $scoreAway;
                     $updateData['status'] = 'finished'; // Sjednoceno na 'finished' dle předchozích úkolů
                 }
+            } elseif ($match->scheduled_at && $match->scheduled_at->isFuture()) {
+                // Pro budoucí zápasy bez skóre v hlavičce zajistíme, aby skóre bylo null
+                $updateData['score_home'] = null;
+                $updateData['score_away'] = null;
+                $updateData['status'] = 'scheduled';
             }
 
             $match->update($updateData);

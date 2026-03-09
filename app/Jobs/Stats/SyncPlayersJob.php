@@ -63,7 +63,7 @@ class SyncPlayersJob implements ShouldQueue
 
         $successCount = 0;
         foreach ($users as $user) {
-            if (ConsoleService::isStopRequested()) {
+            if (ConsoleService::isStopped()) {
                 ConsoleService::log("Synchronizace přerušena (stop flag).", 'warning');
                 break;
             }

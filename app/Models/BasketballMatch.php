@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use App\Traits\HasMatchResult;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Translatable\HasTranslations;
 
 class BasketballMatch extends Model
 {
-    use Auditable, HasTranslations;
+    use Auditable, HasTranslations, HasMatchResult;
 
     protected $table = 'matches';
 

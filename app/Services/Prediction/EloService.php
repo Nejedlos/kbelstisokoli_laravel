@@ -28,19 +28,14 @@ class EloService
         $eloTeam = TeamEloRating::where('season_id', $seasonId)->where('team_key', $teamKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
         $eloOpp = TeamEloRating::where('season_id', $seasonId)->where('team_key', $oppKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
 
-        $outcome = 0;
-        $scoreDiff = 0;
-        if ($match->is_home) {
-            if ($match->score_home > $match->score_away) $outcome = 1;
-            elseif ($match->score_home < $match->score_away) $outcome = 0;
-            else $outcome = 0.5;
-            $scoreDiff = $match->score_home - $match->score_away;
-        } else {
-            if ($match->score_away > $match->score_home) $outcome = 1;
-            elseif ($match->score_away < $match->score_home) $outcome = 0;
-            else $outcome = 0.5;
-            $scoreDiff = $match->score_away - $match->score_home;
+        $outcome = 0.5;
+        if ($match->is_win) {
+            $outcome = 1;
+        } elseif ($match->is_loss) {
+            $outcome = 0;
         }
+
+        $scoreDiff = ($match->our_score ?? 0) - ($match->opponent_score ?? 0);
 
         $newRatings = $this->eloCalculator->calculateNewRatings(
             $eloTeam,

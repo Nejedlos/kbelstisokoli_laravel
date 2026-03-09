@@ -5,9 +5,9 @@
 @section('content')
     <div class="space-y-4 pb-12">
         @php
-            $isVictory = ($match->is_home && $match->score_home > $match->score_away) || (!$match->is_home && $match->score_away > $match->score_home);
-            $isDraw = $match->score_home == $match->score_away;
-            $hasScore = !is_null($match->score_home) && !is_null($match->score_away);
+            $isVictory = $match->is_win;
+            $isDraw = $match->is_draw;
+            $hasScore = $match->has_score;
 
             if ($hasScore) {
                 $bgClass = $isVictory
@@ -528,15 +528,21 @@
                             <div class="space-y-6">
                                 {{-- Home Team Last Matches --}}
                                 @if(!empty($lastMatches['home']))
+                                    @php
+                                        $homeTeamName = $match->is_home ? $match->team->name : ($match->opponent?->name ?? 'Soupeř');
+                                    @endphp
                                     <div class="space-y-6">
                                         <div class="flex items-center gap-4">
                                             <div class="w-3 h-3 rounded-full bg-brand-500 shadow-lg shadow-brand-500/30"></div>
                                             <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest">
-                                                {{ $match->is_home ? $match->team->name : $match->opponent?->name }}
+                                                {{ $homeTeamName }}
                                             </h4>
                                         </div>
                                         <div class="space-y-3">
                                             @foreach($lastMatches['home'] as $m)
+                                                @php
+                                                    $res = \App\Support\MatchResultHelper::for($m, $homeTeamName);
+                                                @endphp
                                                 <div class="group relative flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-2.5 bg-gray-50 rounded-3xl sm:rounded-[2rem] border-2 border-gray-50 transition-all hover:bg-white hover:border-brand-200 hover:shadow-xl hover:-translate-y-0.5 gap-3 sm:gap-4 overflow-hidden">
                                                     {{-- Decorative background element --}}
                                                     <div class="absolute top-0 right-0 w-16 h-16 bg-brand-500/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-700"></div>
@@ -550,7 +556,7 @@
 
                                                     <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto relative z-10">
                                                         <div class="bg-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl shadow-inner border border-gray-100 shrink-0 flex-1 sm:flex-none text-center">
-                                                            <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-brand-600' : 'text-gray-900' }}">
+                                                            <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ $res['textColor'] }}">
                                                                 {{ $m['score_home'] }}<span class="mx-0.5 opacity-30">:</span>{{ $m['score_away'] }}
                                                             </span>
                                                         </div>
@@ -568,15 +574,21 @@
 
                                 {{-- Away Team Last Matches --}}
                                 @if(!empty($lastMatches['away']))
+                                    @php
+                                        $awayTeamName = $match->is_home ? ($match->opponent?->name ?? 'Soupeř') : $match->team->name;
+                                    @endphp
                                     <div class="space-y-6">
                                         <div class="flex items-center gap-4">
                                             <div class="w-3 h-3 rounded-full bg-gray-400 shadow-lg shadow-gray-400/30"></div>
                                             <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest">
-                                                {{ $match->is_home ? $match->opponent?->name : $match->team->name }}
+                                                {{ $awayTeamName }}
                                             </h4>
                                         </div>
                                         <div class="space-y-3">
                                             @foreach($lastMatches['away'] as $m)
+                                                @php
+                                                    $res = \App\Support\MatchResultHelper::for($m, $awayTeamName);
+                                                @endphp
                                                 <div class="group relative flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-2.5 bg-gray-50 rounded-3xl sm:rounded-[2rem] border-2 border-gray-50 transition-all hover:bg-white hover:border-brand-200 hover:shadow-xl hover:-translate-y-0.5 gap-3 sm:gap-4 overflow-hidden">
                                                     {{-- Decorative background element --}}
                                                     <div class="absolute top-0 right-0 w-16 h-16 bg-brand-500/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-700"></div>
@@ -590,7 +602,7 @@
 
                                                     <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto relative z-10">
                                                         <div class="bg-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl shadow-inner border border-gray-100 shrink-0 flex-1 sm:flex-none text-center">
-                                                            <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ (int)$m['score_home'] > (int)$m['score_away'] ? 'text-brand-600' : 'text-gray-900' }}">
+                                                            <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ $res['textColor'] }}">
                                                                 {{ $m['score_home'] }}<span class="mx-0.5 opacity-30">:</span>{{ $m['score_away'] }}
                                                             </span>
                                                         </div>

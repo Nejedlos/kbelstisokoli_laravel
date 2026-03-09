@@ -37,7 +37,7 @@ class PlayerSyncService
 
         // Vytvoříme běh importu pro logování
         $seasonId = \App\Models\Season::where('is_active', true)->first()?->id ?? 0;
-        $run = ExternalImportRun::start('czbasketball', $seasonId, null, 'player_detail', $extId);
+        $run = \App\Models\ExternalImportRun::start('czbasketball', $seasonId, null, 'player_detail', $extId);
 
         try {
             if (method_exists($this->fetcher, 'setCurrentRun')) {
@@ -48,10 +48,9 @@ class PlayerSyncService
             $result = $this->extractor->extract($html);
             $data = $result['data'];
 
-            // 1. Aktualizace PlayerProfile
-            $profile = $user->playerProfiles()->first() ?: new PlayerProfile(['user_id' => $user->id]);
+            // 1. Aktualizace PlayerProfile (Základní info)
+            $profile = $user->playerProfiles()->first() ?: new \App\Models\PlayerProfile(['user_id' => $user->id]);
 
-            // Mapování pozice na Enum pokud je to možné
             $position = $this->normalizePosition($data['position'] ?? null);
             if ($position) {
                 $profile->position = $position;
@@ -61,7 +60,7 @@ class PlayerSyncService
                 $profile->height_cm = $data['height'];
             }
 
-            // Metadata - uložení celé historie a extrahovaných dat
+            // Metadata - uložení celé historie a extrahovaných dat (zůstává jako backup)
             $metadata = $profile->metadata ?? [];
             $metadata['external_data'] = $data;
             $metadata['last_sync_at'] = now()->toDateTimeString();
@@ -74,8 +73,48 @@ class PlayerSyncService
                 $this->syncPhoto($user, $data['photo_url']);
             }
 
-            $run->finish(['imported_count' => 1]);
-            Log::info("PlayerSyncService: Successfully synced player {$user->display_name} (ExtID: {$extId})");
+            // 3. Detailní statistiky do nové tabulky external_player_stats
+            if (!empty($data['stats'])) {
+                foreach ($data['stats'] as $statData) {
+                    \App\Models\ExternalPlayerStat::updateOrCreate(
+                        [
+                            'user_id' => $user->id,
+                            'source_key' => 'czbasketball',
+                            'season_label' => $statData['season_label'] ?? null,
+                            'competition_label' => $statData['competition_label'] ?? null,
+                            'team_name' => $statData['team_name'] ?? null,
+                            'is_career_total' => $statData['is_career_total'] ?? false,
+                        ],
+                        array_merge($statData, [
+                            'external_id' => $extId,
+                        ])
+                    );
+                }
+            }
+
+            // 4. Historie zápasů do nové tabulky external_player_matches
+            if (!empty($data['matches'])) {
+                foreach ($data['matches'] as $matchData) {
+                    \App\Models\ExternalPlayerMatch::updateOrCreate(
+                        [
+                            'user_id' => $user->id,
+                            'source_key' => 'czbasketball',
+                            'external_match_id' => $matchData['external_match_id'] ?? null,
+                            'match_date' => $matchData['match_date'],
+                            'opponent_name' => $matchData['opponent_name'] ?? null,
+                        ],
+                        array_merge($matchData, [
+                            'external_id' => $extId,
+                        ])
+                    );
+                }
+            }
+
+            $run->finish([
+                'imported_count' => count($data['stats'] ?? []),
+                'matches_count' => count($data['matches'] ?? [])
+            ]);
+            Log::info("PlayerSyncService: Successfully synced player {$user->display_name} (ExtID: {$extId}), " . count($data['stats'] ?? []) . " stat rows and " . count($data['matches'] ?? []) . " matches.");
 
             return true;
         } catch (\Exception $e) {
