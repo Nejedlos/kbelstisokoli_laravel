@@ -106,10 +106,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'not_found_logger' => \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
 
-        $middleware->appendToGroup('web', [
+        $middleware->web(append: [
             \App\Http\Middleware\AddRequestIdToResponse::class,
             \App\Http\Middleware\MinifyHtmlMiddleware::class,
             \App\Http\Middleware\InjectFeedbackWidget::class,
+            \App\Http\Middleware\PerformanceProfilingMiddleware::class,
+            \App\Http\Middleware\FullPageCacheMiddleware::class,
+            \App\Http\Middleware\SetLocaleMiddleware::class,
+            \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
 
         $middleware->group('member', [
@@ -125,13 +129,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
             '2fa.required',
             '2fa.timeout',
             'permission:access_admin',
-        ]);
-
-        $middleware->web(append: [
-            \App\Http\Middleware\PerformanceProfilingMiddleware::class,
-            \App\Http\Middleware\FullPageCacheMiddleware::class,
-            \App\Http\Middleware\SetLocaleMiddleware::class,
-            \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

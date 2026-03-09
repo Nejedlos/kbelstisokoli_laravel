@@ -249,7 +249,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div class="lg:col-span-5 min-w-0 space-y-4">
                 {{-- Predikce --}}
-                @if($prediction && !$hasScore)
+                @if($prediction)
                     <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
 
@@ -258,7 +258,7 @@
                                 <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center shrink-0 border border-brand-100/50 shadow-sm">
                                     <i class="fa-light fa-crystal-ball text-brand-500 text-xl"></i>
                                 </div>
-                                {{ __('matches.prediction.title') ?? 'Předzápasová predikce' }}
+                                {{ $hasScore ? (__('matches.prediction.title_past') ?? 'Předzápasová predikce') : (__('matches.prediction.title') ?? 'Předzápasová predikce') }}
                             </div>
 
                             @php

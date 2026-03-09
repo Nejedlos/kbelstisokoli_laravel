@@ -27,6 +27,7 @@ function registerKsFeedbackWidget() {
     if (!window.Alpine) return;
     if (window.Alpine.data('ksFeedbackWidget')) return;
 
+    window.ksFeedbackWidgetRegistered = true;
     window.Alpine.data('ksFeedbackWidget', () => ({
         isOpen: false,
         submitting: false,

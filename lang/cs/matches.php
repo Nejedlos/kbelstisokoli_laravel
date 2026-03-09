@@ -190,6 +190,7 @@ return [
     ],
     'prediction' => [
         'title' => 'Předzápasová predikce',
+        'title_past' => 'Historická predikce',
         'confidence_high' => 'Vysoká důvěra',
         'confidence_medium' => 'Střední důvěra',
         'confidence_low' => 'Nízká důvěra',

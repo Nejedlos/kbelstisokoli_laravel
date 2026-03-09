@@ -33,21 +33,34 @@ class InjectFeedbackWidget
             return false;
         }
 
-        if (!in_array(app()->environment(), config('feedback.environments', ['production', 'local']))) {
+        // 1. MUST be HTML response
+        $contentType = $response->headers->get('Content-Type');
+        if (!str_contains((string)$contentType, 'text/html')) {
             return false;
         }
 
+        // 2. Skip AJAX/JSON/Widget requests
         if ($request->isXmlHttpRequest() || $request->expectsJson() || $request->routeIs('feedback.widget')) {
             return false;
         }
 
-        if (!Auth::check() && app()->environment() !== 'local' && app()->environment() !== 'staging' && !str_contains(config('app.url'), 'new.')) {
+        // 3. Skip redirects and special responses
+        if ($response instanceof \Symfony\Component\HttpFoundation\RedirectResponse ||
+            $response instanceof \Symfony\Component\HttpFoundation\StreamedResponse ||
+            $response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse) {
             return false;
         }
 
-        // Only inject in HTML responses
-        $contentType = $response->headers->get('Content-Type');
-        if (!str_contains((string)$contentType, 'text/html')) {
+        // 4. Always inject in Debug mode (except in tests to avoid noisy output)
+        if (config('app.debug') && !app()->environment('testing')) {
+            return true;
+        }
+
+        // 5. Host-based logic (for guests)
+        $host = $request->getHost();
+        $isTestHost = str_starts_with($host, 'new.') || str_contains($host, '.new.') || str_contains($host, 'staging.') || str_contains($host, 'dev.') || str_contains($host, '.test');
+
+        if (!Auth::check() && !app()->environment('local', 'staging') && !$isTestHost) {
             return false;
         }
 
@@ -74,12 +87,12 @@ class InjectFeedbackWidget
                 }
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Feedback widget route or asset not found, skipping injection.');
+            \Illuminate\Support\Facades\Log::warning('Feedback widget route or asset not found, skipping injection: ' . $e->getMessage());
             return;
         }
 
         if (empty($jsUrl)) {
-            \Illuminate\Support\Facades\Log::warning('Feedback widget JS not found in manifest, skipping injection.');
+            \Illuminate\Support\Facades\Log::warning('Feedback widget JS not found in manifest at ' . $manifestPath . ', skipping injection.');
             return;
         }
 
@@ -95,7 +108,7 @@ class InjectFeedbackWidget
             isFeedbackLoading = true;
 
             // 1. Load the script first (if not already loaded)
-            if (!window.registerKsFeedbackWidget && !document.querySelector('script[src*="feedback-widget"]')) {
+            if (!window.ksFeedbackWidgetRegistered && !document.querySelector('script[src*="feedback-widget"]')) {
                 const script = document.createElement('script');
                 script.src = '{$jsUrl}';
                 script.async = true;
@@ -111,14 +124,27 @@ class InjectFeedbackWidget
                     temp.innerHTML = html.trim();
                     const widgetRoot = temp.querySelector('#ks-fb-root');
 
+                    if (!widgetRoot) {
+                        console.error('Feedback widget: Root element not found in response');
+                        return;
+                    }
+
                     // Wait for Alpine to be ready and component to be registered
+                    let attempts = 0;
                     const inject = () => {
-                        if (window.Alpine && window.Alpine.data('ksFeedbackWidget')) {
+                        attempts++;
+                        if (window.Alpine && window.ksFeedbackWidgetRegistered) {
                              if (!document.getElementById('ks-fb-root')) {
                                 document.body.appendChild(widgetRoot);
+                                console.log('Feedback widget: Injected into DOM after ' + attempts + ' attempts');
+                                if (window.Alpine.initTree) {
+                                    window.Alpine.initTree(widgetRoot);
+                                }
                              }
-                        } else {
+                        } else if (attempts < 100) {
                             setTimeout(inject, 50);
+                        } else {
+                            console.warn('Feedback widget: Alpine or component not ready after 5s, giving up injection');
                         }
                     };
                     inject();
@@ -128,14 +154,15 @@ class InjectFeedbackWidget
                 });
         }
 
-        setTimeout(loadFeedback, 100);
-        if (document.readyState === 'complete') {
+        if (document.readyState !== 'loading') {
             loadFeedback();
         } else {
-            window.addEventListener('load', loadFeedback);
+            document.addEventListener('DOMContentLoaded', loadFeedback);
         }
 
-        document.addEventListener('livewire:navigated', () => setTimeout(loadFeedback, 100));
+        // Pro jistotu i na load a Livewire navigaci
+        window.addEventListener('load', loadFeedback);
+        document.addEventListener('livewire:navigated', () => setTimeout(loadFeedback, 200));
     })();
 </script>
 HTML;

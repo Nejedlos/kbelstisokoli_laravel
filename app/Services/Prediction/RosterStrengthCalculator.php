@@ -12,6 +12,14 @@ class RosterStrengthCalculator
      */
     public function calculateRosterStrength(BasketballMatch $match): array
     {
+        if (!$match->scheduled_at) {
+            return [
+                'team' => ['total' => 0, 'count' => 0, 'players' => []],
+                'opponent' => ['total' => 0, 'count' => 0, 'players' => []],
+                'delta' => 0,
+            ];
+        }
+
         $teamStrength = $this->calculateTeamStrength($match->team_id, $match->season_id, $match->scheduled_at);
         $opponentStrength = $this->calculateOpponentStrength($match->opponent_id, $match->season_id, $match->scheduled_at);
 

@@ -17,26 +17,47 @@ class CzBasketballMatchDetailDomExtractor
         // 3.2 BOXscore sekce
         $teamBlocks = $this->extractBoxscore($crawler);
 
-        // 6. VALIDACE
-        if (empty($teamBlocks)) {
-            $warnings[] = "Boxscore section not found or contains no teams.";
-        }
+        // 3.3 PREVIEW (ROZVAHA)
+        $preview = $this->extractPreview($crawler);
 
-        $validTeamCount = 0;
-        foreach ($teamBlocks as $block) {
-            if (count($block['rows']) >= 5) {
-                $validTeamCount++;
-            }
-        }
-        if ($validTeamCount === 0) {
-            $warnings[] = "No team block with at least 5 players found.";
+        // 6. VALIDACE
+        if (empty($teamBlocks) && empty($preview)) {
+            $warnings[] = "Neither boxscore nor preview section found.";
         }
 
         return [
             'header' => $header,
             'team_blocks' => $teamBlocks,
+            'preview' => $preview,
             'warnings' => $warnings,
         ];
+    }
+
+    protected function extractPreview(Crawler $crawler): array
+    {
+        $preview = [];
+
+        // Tabulka s rozvahou obsahuje porovnání
+        // 3 sloupce: home_value, label, away_value
+        $table = $crawler->filter('table')->reduce(function (Crawler $node) {
+            $text = $node->text();
+            return str_contains($text, 'Body na zápas') || str_contains($text, 'Doskoky');
+        })->first();
+
+        if ($table->count() > 0) {
+            $table->filter('tr')->each(function (Crawler $tr) use (&$preview) {
+                $tds = $tr->filter('td');
+                if ($tds->count() === 3) {
+                    $label = trim($tds->eq(1)->text());
+                    $preview[$label] = [
+                        'home' => trim($tds->eq(0)->text()),
+                        'away' => trim($tds->eq(2)->text()),
+                    ];
+                }
+            });
+        }
+
+        return $preview;
     }
 
     protected function extractHeader(Crawler $crawler): array

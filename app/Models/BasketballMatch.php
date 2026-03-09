@@ -74,4 +74,9 @@ class BasketballMatch extends Model
     {
         return $this->belongsTo(Opponent::class);
     }
+
+    public function prediction(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(MatchPrediction::class, 'basketball_match_id');
+    }
 }

@@ -456,8 +456,8 @@ class ExternalStatsSyncService
 
         $query = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
-            ->where('status', 'finished')
-            ->where('metadata', 'LIKE', '%"external_id":%');
+            ->whereIn('status', ['finished', 'planned', 'scheduled', 'played'])
+            ->where('metadata', 'like', '%"external_id":%');
 
         if ($recentOnly) {
             $days = config('external_sources.czbasketball.limits.recent_match_days', 3);
@@ -465,16 +465,21 @@ class ExternalStatsSyncService
         }
 
         if (! $force) {
-            $boxscoreSetId = DB::table('statistic_sets')->where('slug', 'match-boxscore')->value('id');
+            $boxscoreSet = DB::table('statistic_sets')->where('slug', 'match-boxscore')->first();
+            $boxscoreSetId = $boxscoreSet?->id;
 
             // Zápasy bez statistik nebo ty, které byly synchronizovány před více než 24 hodinami
             $query->where(function ($q) use ($boxscoreSetId) {
-                $q->whereNotExists(function ($sub) use ($boxscoreSetId) {
-                    $sub->select(DB::raw(1))
-                        ->from('statistic_rows')
-                        ->whereColumn('statistic_rows.basketball_match_id', 'matches.id')
-                        ->where('statistic_rows.statistic_set_id', $boxscoreSetId);
-                })->orWhereNotNull('metadata'); // Dočasně vybereme s metadaty, profiltrujeme v PHP
+                if ($boxscoreSetId) {
+                    $q->whereNotExists(function ($sub) use ($boxscoreSetId) {
+                        $sub->select(DB::raw(1))
+                            ->from('statistic_rows')
+                            ->whereColumn('statistic_rows.basketball_match_id', 'matches.id')
+                            ->where('statistic_rows.statistic_set_id', $boxscoreSetId);
+                    })->orWhereNotNull('metadata'); // Dočasně vybereme s metadaty, profiltrujeme v PHP
+                } else {
+                    $q->whereNotNull('metadata');
+                }
             });
         }
 
@@ -735,6 +740,12 @@ class ExternalStatsSyncService
 
             $match->update($updateData);
 
+            // Po úspěšné synchronizaci detailu (i pro budoucí zápasy) vyvoláme přepočet predikce
+            if (class_exists(\App\Jobs\ComputeMatchPredictionJob::class)) {
+                \App\Jobs\ComputeMatchPredictionJob::dispatch($match->id);
+                Log::info("Dispatched ComputeMatchPredictionJob for match {$match->id} after detail sync.");
+            }
+
             $run->finish([
                 'extracted_count' => count($mainData?->rows ?? []),
                 'imported_count' => count($mainData?->rows ?? []),
@@ -773,10 +784,10 @@ class ExternalStatsSyncService
             if (!$user) {
                 // Zkusíme najít podle jména, pokud je to náš tým (Kbely)
                 if (str_contains(mb_strtolower($playerData['team'] ?? ''), 'kbely')) {
-                    $nameParts = explode(' ', $playerData['name'] ?? '');
+                    $nameParts = explode(' ', (string) ($playerData['name'] ?? ''));
                     if (count($nameParts) >= 2) {
-                        $user = \App\Models\User::where('last_name', 'like', $nameParts[count($nameParts)-1])
-                            ->where('first_name', 'like', $nameParts[0])
+                        $user = \App\Models\User::where('last_name', 'like', (string) $nameParts[count($nameParts)-1])
+                            ->where('first_name', 'like', (string) $nameParts[0])
                             ->first();
                     }
                 }

@@ -18,14 +18,14 @@ class OpponentSyncService
 
         // 1. Zkusíme hledat podle external_id v metadatech (LIKE pro kompatibilitu se staršími DB bez JSON funkcí)
         if ($externalId) {
-            $opponent = Opponent::where('metadata', 'LIKE', '%"external_id":"' . $externalId . '"%')->first();
+            $opponent = Opponent::where('metadata', 'like', '%"external_id":"' . (string) $externalId . '"%')->first();
         }
 
         // 2. Pokud nemáme external_id nebo jsme nenašli, hledáme podle jména nebo variant v metadatech
         if (! $opponent) {
-            $opponent = Opponent::where('name', $name)
-                ->orWhere('metadata', 'LIKE', '%"external_name_variants":%["' . $name . '"%')
-                ->orWhere('metadata', 'LIKE', '%"' . $name . '"%')
+            $opponent = Opponent::where('name', (string) $name)
+                ->orWhere('metadata', 'like', '%"external_name_variants":%["' . (string) $name . '"%')
+                ->orWhere('metadata', 'like', '%"' . (string) $name . '"%')
                 ->first();
         }
 

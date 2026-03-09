@@ -413,10 +413,17 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             'Počet národností' => 'nationality_count',
             'Prům. zápasová zkušenost' => 'average_match_experience',
             'Průměrná výška' => 'average_height',
+            'Body na zápas' => 'pts_per_game',
+            'Doskoky' => 'rebounds_per_game',
+            'Asistence' => 'assists_per_game',
+            'Ztráty' => 'turnovers_per_game',
+            'Zisky' => 'steals_per_game',
+            'Uspěšnost trestných hodů' => 'ft_pct',
+            'Uspěšnost 2b' => 'fg2_pct',
+            'Uspěšnost 3b' => 'fg3_pct',
         ];
 
-        // Iterujeme přes všechny řádky v sekci srovnání
-        // Na cz.basketball jsou to řádky s h4 jako titulkem uprostřed
+        // Varianta 1: Flexibilní řádky s h4 (současná implementace)
         $crawler->filter('.row.no-gutters.justify-content-md-center')->each(function (Crawler $row) use (&$comparison, $labelMapping) {
             $labelNode = $row->filter('h4')->first();
             if ($labelNode->count() === 0) {
@@ -437,6 +444,29 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 ];
             }
         });
+
+        // Varianta 2: Tabulka s "Rozvahou" (časté u neodehraných zápasů)
+        if (empty($comparison)) {
+            $previewTable = $crawler->filter('table')->reduce(function (Crawler $node) {
+                $text = $node->text();
+                return str_contains($text, 'Body na zápas') || str_contains($text, 'Doskoky') || str_contains($text, 'Průměrný věk');
+            })->first();
+
+            if ($previewTable->count() > 0) {
+                $previewTable->filter('tr')->each(function (Crawler $tr) use (&$comparison, $labelMapping) {
+                    $tds = $tr->filter('td');
+                    if ($tds->count() === 3) {
+                        $originalLabel = trim($tds->eq(1)->text());
+                        $label = $labelMapping[$originalLabel] ?? strtolower(str_replace(' ', '_', $originalLabel));
+                        $comparison[$label] = [
+                            'label' => $originalLabel,
+                            'home' => trim($tds->eq(0)->text()),
+                            'away' => trim($tds->eq(2)->text()),
+                        ];
+                    }
+                });
+            }
+        }
 
         return $comparison;
     }

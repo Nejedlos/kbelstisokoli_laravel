@@ -23,7 +23,36 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
         $boxscoreClips = $this->extractBoxscoreTables($crawler);
         $clips = array_merge($clips, $boxscoreClips);
 
+        // 3. PREVIEW (ROZVAHA) CLIP
+        $previewClip = $this->extractPreviewTable($crawler);
+        if ($previewClip) {
+            $clips[] = $previewClip;
+        }
+
         return array_filter($clips);
+    }
+
+    protected function extractPreviewTable(Crawler $crawler): ?ClipDTO
+    {
+        // Hledáme tabulku, která obsahuje text "Rozvaha" nebo je v kontejneru s tímto ID/třídou
+        // Často je to tabulka s porovnáním (3 sloupce: home, label, away)
+        $previewTable = $crawler->filter('table.table-condensed, table')->reduce(function (Crawler $node) {
+            $text = $node->text();
+            return str_contains($text, 'Body na zápas') || str_contains($text, 'Doskoky') || str_contains($text, 'Asistence');
+        })->first();
+
+        if ($previewTable->count() === 0) {
+            return null;
+        }
+
+        return new ClipDTO(
+            id: 'match_preview',
+            htmlFragment: $previewTable->outerHtml(),
+            textHint: 'Match preview / Rozvaha (statistical comparison)',
+            evidence: [
+                'preview_text' => trim($previewTable->text()),
+            ]
+        );
     }
 
     protected function extractMatchHeader(Crawler $crawler): ?ClipDTO

@@ -11,6 +11,15 @@ class FormCalculator
      */
     public function calculateFormDelta(BasketballMatch $match, int $limit = 5): array
     {
+        if (!$match->scheduled_at) {
+            return [
+                'delta' => 0,
+                'wins' => 0,
+                'count' => 0,
+                'avg_diff' => 0,
+            ];
+        }
+
         $lastMatches = BasketballMatch::where('team_id', $match->team_id)
             ->where('season_id', $match->season_id)
             ->where('scheduled_at', '<', $match->scheduled_at)

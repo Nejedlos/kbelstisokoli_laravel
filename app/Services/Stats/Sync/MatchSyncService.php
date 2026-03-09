@@ -71,7 +71,7 @@ class MatchSyncService
         // 1. Přednost má external_id (hledáme v rámci sezóny napříč týmy pro případ overlapu)
         if ($externalMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
-                ->where('metadata', 'LIKE', '%"external_id":"' . $externalMatchId . '"%')
+                ->where('metadata', 'like', '%"external_id":"' . (string) $externalMatchId . '"%')
                 ->first();
         }
 
@@ -79,7 +79,7 @@ class MatchSyncService
         if (! $match) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'LIKE', '%"match_identity_key":"' . $matchIdentityKey . '"%')
+                ->where('metadata', 'like', '%"match_identity_key":"' . (string) $matchIdentityKey . '"%')
                 ->first();
         }
 
@@ -103,8 +103,8 @@ class MatchSyncService
         // Pokud existuje jakýkoliv zápas našeho týmu v tento čas (tolerance 120 min), je to on, bez ohledu na jméno soupeře.
         if (! $match && $scheduledAt) {
             $match = BasketballMatch::where('team_id', $team->id)
-                ->where('scheduled_at', '>=', $scheduledAt->copy()->subMinutes(120))
-                ->where('scheduled_at', '<=', $scheduledAt->copy()->addMinutes(120))
+                ->where('scheduled_at', '>=', $scheduledAt->copy()->subMinutes(120)->toDateTimeString())
+                ->where('scheduled_at', '<=', $scheduledAt->copy()->addMinutes(120)->toDateTimeString())
                 ->first();
 
             if ($match) {

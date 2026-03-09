@@ -51,7 +51,7 @@ class StatisticSyncService
 
         if ($contentHash) {
             // LIKE pro kompatibilitu se staršími DB bez JSON funkcí
-            $query->where('source_metadata', 'LIKE', '%"content_hash":"' . $contentHash . '"%');
+            $query->where('source_metadata', 'like', '%"content_hash":"' . (string) $contentHash . '"%');
         }
 
         $statRow = $query->first();
@@ -183,10 +183,10 @@ class StatisticSyncService
 
                 // Smažeme případné existující řádky statistik soupeře, pokud tam nějaké zůstaly
                 StatisticRow::where('statistic_set_id', $set->id)
-                    ->where('basketball_match_id', $match->id)
+                    ->where('basketball_match_id', (int) $match->id)
                     ->where(function($query) use ($match) {
                         $query->whereNotNull('opponent_id')
-                              ->orWhere('team_id', '!=', $match->team_id)
+                              ->orWhere('team_id', '!=', (int) $match->team_id)
                               ->orWhere(function($q) {
                                   $q->whereNull('team_id')->whereNull('player_id');
                               });
@@ -490,8 +490,8 @@ class StatisticSyncService
             // Aktualizace řádků statistik pro tento externí ID a sezónu (pokud je sezónní)
             // nebo globálně (pokud je hráč stabilní).
             $query = StatisticRow::where(function ($q) use ($mapping) {
-                $q->where('source_metadata', 'LIKE', '%"player_external_id":"' . $mapping->external_id . '"%')
-                    ->orWhere('source_metadata', 'LIKE', '%"player_external_id":' . $mapping->external_id . '%');
+                $q->where('source_metadata', 'like', '%"player_external_id":"' . (string) $mapping->external_id . '"%')
+                    ->orWhere('source_metadata', 'like', '%"player_external_id":' . (string) $mapping->external_id . '%');
             });
 
             if ($mapping->season_id) {
@@ -510,7 +510,7 @@ class StatisticSyncService
                 if ($oldUser && ($oldUser->metadata['is_ghost'] ?? false)) {
                     // Zkontrolujeme, zda na tohoto ghosta už neukazuje žádný jiný mapping
                     $otherMappingsCount = ExternalEntityMapping::where('internal_id', $oldInternalId)
-                        ->where('id', '!=', $mapping->id)
+                        ->where('id', '!=', (int) $mapping->id)
                         ->count();
 
                     if ($otherMappingsCount === 0) {
