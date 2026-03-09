@@ -275,61 +275,67 @@
                         </form>
 
                         <div class="flex-1 sm:flex-none relative">
-                            <button @click="openDecline = !openDecline" type="button" class="group/btn w-full sm:w-auto h-11 px-3.5 sm:px-5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all hover:shadow-xl hover:shadow-rose-500/30 flex items-center justify-center gap-2 active:scale-95">
+                            <button @click="openDecline = !openDecline"
+                                    id="decline-bulk-btn"
+                                    type="button"
+                                    class="group/btn w-full sm:w-auto h-11 px-3.5 sm:px-5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all hover:shadow-xl hover:shadow-rose-500/30 flex items-center justify-center gap-2 active:scale-95">
                                 <i class="fa-light fa-times-circle text-base group-hover/btn:scale-110 transition-transform"></i>
                                 <span class="hidden xs:inline">{{ __('member.attendance.bulk_actions.decline') }}</span>
                                 <span class="xs:hidden">{{ __('member.attendance.status.declined') }}</span>
                                 <i class="fa-light fa-chevron-up text-[10px] ml-1 transition-transform" :class="openDecline ? 'rotate-180' : ''"></i>
                             </button>
 
-                            <!-- Decline Reasons Dropdown -->
-                            <div x-show="openDecline"
-                                 @click.away="openDecline = false"
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-                                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                                 x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-                                 class="absolute bottom-full mb-3 left-0 sm:left-auto sm:right-0 w-full sm:w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-[10000]"
-                                 x-cloak>
-                                <div class="p-2 max-h-64 overflow-y-auto ks-scrollbar">
-                                    <div class="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 mb-1">
-                                        {{ __('member.attendance.excuse_reason') }}
-                                    </div>
-                                    @foreach(\App\Enums\ExcuseReason::cases() as $reason)
-                                        <form action="{{ route('member.attendance.bulk-store') }}" method="POST">
-                                            @csrf
-                                            <template x-for="id in selectedEvents" :key="id">
-                                                <input type="hidden" name="events[]" :value="id">
-                                            </template>
-                                            <input type="hidden" name="status" value="declined">
-                                            <input type="hidden" name="excuse_reason" value="{{ $reason->value }}">
-                                            <button type="submit" @click="$dispatch('loading-start')" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-rose-50 rounded-xl transition-colors group/item text-left">
-                                                <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 group-hover/item:bg-rose-100 group-hover/item:text-rose-600 transition-colors">
-                                                    <i class="{{ $reason->getIcon() }} text-sm"></i>
-                                                </div>
-                                                <span class="text-xs font-bold text-secondary group-hover/item:text-rose-700 transition-colors">{{ $reason->getLabel() }}</span>
-                                            </button>
-                                        </form>
-                                    @endforeach
-                                    <div class="mt-1 pt-1 border-t border-slate-100">
-                                        <form action="{{ route('member.attendance.bulk-store') }}" method="POST">
-                                            @csrf
-                                            <template x-for="id in selectedEvents" :key="id">
-                                                <input type="hidden" name="events[]" :value="id">
-                                            </template>
-                                            <input type="hidden" name="status" value="declined">
-                                            <button type="submit" @click="$dispatch('loading-start')" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl transition-colors group/item text-left">
-                                                 <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover/item:bg-slate-100 transition-colors">
-                                                    <i class="fa-light fa-minus text-sm"></i>
-                                                </div>
-                                                <span class="text-xs font-bold text-slate-500">{{ __('member.attendance.bulk_actions.decline_no_reason') }}</span>
-                                            </button>
-                                        </form>
+                            <!-- Decline Reasons Dropdown (Teleported for visibility) -->
+                            <template x-teleport="body">
+                                <div x-show="openDecline"
+                                     x-floating.top.fixed="'#decline-bulk-btn'"
+                                     @click.away="openDecline = false"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                                     class="w-[calc(100%-2rem)] sm:w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-[10001]"
+                                     x-cloak>
+                                    <div class="p-2 overflow-y-auto ks-scrollbar" style="max-height: inherit;">
+                                        <div class="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 mb-1">
+                                            {{ __('member.attendance.excuse_reason') }}
+                                        </div>
+                                        @foreach(\App\Enums\ExcuseReason::cases() as $reason)
+                                            <form action="{{ route('member.attendance.bulk-store') }}" method="POST">
+                                                @csrf
+                                                <template x-for="id in selectedEvents" :key="id">
+                                                    <input type="hidden" name="events[]" :value="id">
+                                                </template>
+                                                <input type="hidden" name="status" value="declined">
+                                                <input type="hidden" name="excuse_reason" value="{{ $reason->value }}">
+                                                <button type="submit" @click="$dispatch('loading-start')" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-rose-50 rounded-xl transition-colors group/item text-left">
+                                                    <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 group-hover/item:bg-rose-100 group-hover/item:text-rose-600 transition-colors">
+                                                        <i class="{{ $reason->getIcon() }} text-sm"></i>
+                                                    </div>
+                                                    <span class="text-xs font-bold text-secondary group-hover/item:text-rose-700 transition-colors">{{ $reason->getLabel() }}</span>
+                                                </button>
+                                            </form>
+                                        @endforeach
+                                        <div class="mt-1 pt-1 border-t border-slate-100">
+                                            <form action="{{ route('member.attendance.bulk-store') }}" method="POST">
+                                                @csrf
+                                                <template x-for="id in selectedEvents" :key="id">
+                                                    <input type="hidden" name="events[]" :value="id">
+                                                </template>
+                                                <input type="hidden" name="status" value="declined">
+                                                <button type="submit" @click="$dispatch('loading-start')" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl transition-colors group/item text-left">
+                                                     <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover/item:bg-slate-100 transition-colors">
+                                                        <i class="fa-light fa-minus text-sm"></i>
+                                                    </div>
+                                                    <span class="text-xs font-bold text-slate-500">{{ __('member.attendance.bulk_actions.decline_no_reason') }}</span>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
                         </div>
 
                         <button @click="selectedEvents = []" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all shrink-0 border border-slate-200/50" title="{{ __('member.attendance.bulk_actions.clear') }}">

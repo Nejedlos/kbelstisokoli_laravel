@@ -6,18 +6,78 @@ import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 import { Spinner } from 'spin.js';
 import 'spin.js/spin.css';
+import { computePosition, flip, shift, offset, size, autoUpdate } from '@floating-ui/dom';
+
+// Floating UI for Alpine.js
+window.initFloatingUI = (Alpine) => {
+    Alpine.directive('floating', (el, { expression, modifiers }, { evaluate }) => {
+        const referenceSelector = evaluate(expression);
+        const reference = document.querySelector(referenceSelector);
+        if (!reference) return;
+
+        let cleanup;
+
+        const updatePosition = () => {
+            computePosition(reference, el, {
+                placement: modifiers.includes('top') ? 'top' : (modifiers.includes('bottom') ? 'bottom' : 'top-end'),
+                strategy: modifiers.includes('fixed') ? 'fixed' : 'absolute',
+                middleware: [
+                    offset(12),
+                    flip(),
+                    shift({ padding: 10 }),
+                    size({
+                        apply({ availableHeight }) {
+                            Object.assign(el.style, {
+                                maxHeight: `${Math.max(100, availableHeight - 20)}px`,
+                            });
+                        },
+                    }),
+                ],
+            }).then(({ x, y }) => {
+                Object.assign(el.style, {
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    position: modifiers.includes('fixed') ? 'fixed' : 'absolute',
+                });
+            });
+        };
+
+        const start = () => {
+            cleanup = autoUpdate(reference, el, updatePosition);
+        };
+
+        const stop = () => {
+            if (cleanup) {
+                cleanup();
+                cleanup = undefined;
+            }
+        };
+
+        // Handle visibility
+        Alpine.effect(() => {
+            if (el.style.display !== 'none') {
+                start();
+            } else {
+                stop();
+            }
+        });
+    });
+};
 
 // Alpine.js fallback: On public/member pages without Livewire, ensure Alpine is available.
 if (!window.Alpine) {
     import('alpinejs')
         .then(({ default: Alpine }) => {
             window.Alpine = Alpine;
+            window.initFloatingUI(Alpine);
             Alpine.start();
             if (import.meta.env.DEV) {
                 console.log('[Alpine] Fallback instance started');
             }
         })
         .catch((e) => console.error('[Alpine] Fallback load failed', e));
+} else {
+    window.initFloatingUI(window.Alpine);
 }
 
 // Initialize AOS (Animate On Scroll)
