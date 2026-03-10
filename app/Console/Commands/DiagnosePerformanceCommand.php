@@ -74,8 +74,15 @@ class DiagnosePerformanceCommand extends Command
 
         // 6. Branding / Settings Check
         $this->info("\n[BRANDING & SETTINGS]");
-        $this->measure('Branding Settings Load', function () {
+
+        // 6.1 Cold Load (vynucené smazání cache)
+        $this->measure('Branding Cold Load (Cache Clear)', function () {
             app(\App\Services\BrandingService::class)->clearCache();
+            app(\App\Services\BrandingService::class)->getSettings();
+        });
+
+        // 6.2 Cached Load (načtení z cache)
+        $this->measure('Branding Cached Load (Hit)', function () {
             app(\App\Services\BrandingService::class)->getSettings();
         });
 
