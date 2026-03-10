@@ -23,7 +23,30 @@ class EditPhotoPool extends EditRecord
 
     protected function getFormActions(): array
     {
-        return parent::getFormActions();
+        return [
+            $this->getSaveFormAction()
+                ->label(new \Illuminate\Support\HtmlString('
+                    <span x-data="{ uploadingCount: 0 }"
+                          x-on:file-upload-started.window="uploadingCount++"
+                          x-on:file-upload-finished.window="uploadingCount = Math.max(0, uploadingCount - 1)">
+                        <span x-show="uploadingCount === 0">
+                            <i class="fa-light fa-floppy-disk mr-1.5"></i> ' . $this->getSaveFormAction()->getLabel() . '
+                        </span>
+                        <span x-show="uploadingCount > 0" x-cloak class="flex items-center gap-2">
+                            <i class="fa-light fa-arrows-rotate fa-spin"></i>
+                            Počkej na nahrání všech fotografií... (<span x-text="uploadingCount"></span>)
+                        </span>
+                    </span>
+                '))
+                ->extraAttributes([
+                    'x-data' => '{ uploadingCount: 0 }',
+                    'x-on:file-upload-started.window' => 'uploadingCount++',
+                    'x-on:file-upload-finished.window' => 'uploadingCount = Math.max(0, uploadingCount - 1)',
+                    'x-bind:disabled' => 'uploadingCount > 0',
+                    'x-bind:class' => "{ 'opacity-70 cursor-not-allowed': uploadingCount > 0 }",
+                ]),
+            $this->getCancelFormAction(),
+        ];
     }
 
     public function render(): \Illuminate\Contracts\View\View
