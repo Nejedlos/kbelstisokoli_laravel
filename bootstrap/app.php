@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
 $app = Application::configure(basePath: dirname(__DIR__))
-    ->booting(function ($app) {
+    /*->booting(function ($app) {
         // 1. Nastavení cest (Environment a Public) co nejdříve
         $envPath = file_exists(base_path('.env')) ? base_path() : base_path('public');
         $app->useEnvironmentPath($envPath);
@@ -70,7 +70,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
             return false;
         });
-    })
+    })*/
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
