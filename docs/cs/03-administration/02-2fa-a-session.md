@@ -8,9 +8,9 @@ Zajištění, aby administrátoři museli periodicky potvrzovat svou identitu po
 ## Technický popis
 
 ### 1. 2FA Timeout
-V administraci je zaveden povinný timeout pro 2FA potvrzení. Výchozí hodnota je **24 hodin**.
+V administraci je zaveden povinný timeout pro 2FA potvrzení. Výchozí hodnota je **30 dní** (dle požadavku).
 - Pokud uplyne tento limit od posledního 2FA ověření, bude při pokusu o přístup do administrace znovu vyzván k zadání 2FA kódu.
-- Samotná relace (1. faktor) má nastavený timeout na **3 hodiny** (180 minut).
+- Samotná relace (1. faktor) má nastavený timeout na **2 hodiny** (120 minut).
 - Toto chování zajišťuje middleware `CheckTwoFactorTimeout`.
 
 ### 2. Zapamatování zařízení (Remember Device)
@@ -22,8 +22,8 @@ Na stránce 2FA ověření je k dispozici volba **"Zapamatovat si toto zařízen
 Při kliknutí na "Odhlásit se" (Logout) dojde k:
 - Zneplatnění session.
 - Vygenerování nového CSRF tokenu.
-- **Odstranění 2FA zapamatování** (vymazání cookie `2fa_remember`).
-- Tím je zajištěno, že po logoutu je pro příští přihlášení na stejném zařízení 2FA opět vyžadováno (pokud nebylo zvoleno zapamatování při novém loginu).
+- **Ponechání 2FA zapamatování** (cookie `2fa_remember` zůstává v prohlížeči 30 dní).
+- Tím je zajištěno, že i po logoutu a příštím přihlášení (pouze heslem) na stejném zařízení už nebude 2FA vyžadováno, dokud je cookie platná.
 
 Nově je také k dispozici globální odhlašovací URL **/admin/logout**, která podporuje i metodu **GET** (pro snadný přístup přímým odkazem) a vyvolává stejnou logiku bezpečného odhlášení.
 

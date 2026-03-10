@@ -18,10 +18,8 @@ class LogoutResponse implements FilamentLogoutResponseContract, LogoutResponseCo
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Vymažeme 2FA remember cookie
-        $cookie = Cookie::forget('2fa_remember');
+        // Poznámka: 2FA remember cookie NEMAZAT, aby vydržela 30 dní i po logoutu (dle požadavku uživatele)
 
-        return redirect()->route('logout.success')
-            ->withCookie($cookie);
+        return redirect()->route('logout.success');
     }
 }

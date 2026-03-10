@@ -106,11 +106,11 @@ return [
     |
     | This value defines the number of seconds before a two-factor authentication
     | window expires and users are asked to re-enter their 2FA code via the
-    | confirmation screen. By default, the timeout lasts for 24 hours.
+    | confirmation screen. By default, the timeout lasts for 30 days.
     |
     */
 
-    '2fa_timeout' => env('AUTH_2FA_TIMEOUT', 86400),
+    '2fa_timeout' => env('AUTH_2FA_TIMEOUT', 2592000),
 
     /*
     |--------------------------------------------------------------------------
