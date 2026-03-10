@@ -16,8 +16,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $app->useEnvironmentPath($envPath);
 
         // Pokud již máme načtený .env v této fázi (což by měl být), nastavíme public_path
-        $publicPath = env('PROD_PUBLIC_PATH');
-        if (env('PUBLIC_PATH_MODE') !== 'external') {
+        $publicPath = config('app.prod_public_path') ?: env('PROD_PUBLIC_PATH');
+        if ((config('app.public_path_mode') ?: env('PUBLIC_PATH_MODE')) !== 'external') {
             $publicPath = null;
         }
 
@@ -26,7 +26,15 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         if (! $publicPath) {
-            $publicPath = env('APP_PUBLIC_PATH');
+            $publicPath = config('app.public_path') ?: env('APP_PUBLIC_PATH');
+        }
+
+        // Pokud stále nemáme publicPath a jsme na produkci, zkusíme relativní cestu
+        if (! $publicPath && $app->isProduction()) {
+            $subdomainPath = base_path('../subdomains/new');
+            if (is_dir($subdomainPath)) {
+                $publicPath = realpath($subdomainPath);
+            }
         }
 
         if ($publicPath) {
