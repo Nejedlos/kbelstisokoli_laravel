@@ -230,16 +230,23 @@ class LegacyPhotoImportCommand extends Command
 
             try {
                 DB::transaction(function() use ($pool, $file, $filename) {
-                    $asset = new MediaAsset([
+                    $asset = MediaAsset::create([
                         'title' => pathinfo($filename, PATHINFO_FILENAME),
                         'type' => 'image',
                         'access_level' => 'public',
                         'is_public' => true,
                         'uploaded_by_id' => $this->uploadedById,
                     ]);
-                    $asset->save();
+
+                    if (!$asset || !$asset->exists) {
+                        throw new \Exception("Nepodařilo se vytvořit MediaAsset pro {$filename}");
+                    }
 
                     $lastSort = $pool->mediaAssets()->max('sort_order') ?? 0;
+
+                    // Pokus o uložení mimo hlavní transakci nebo aspoň refresh
+                    $asset->refresh();
+
                     $pool->mediaAssets()->attach($asset->id, [
                         'sort_order' => $lastSort + 1,
                         'is_visible' => true,

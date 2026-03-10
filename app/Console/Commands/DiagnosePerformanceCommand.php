@@ -44,9 +44,21 @@ class DiagnosePerformanceCommand extends Command
 
         // 3. Framework Status
         $this->info("\n[FRAMEWORK STATUS]");
-        $this->check('Config Cache', config()->has('app.name')); // Vždy true, ale config:cache zrychluje načítání
+        $configCached = app()->configurationIsCached();
+        $this->check('Config Cache', $configCached);
         $this->check('Route Cache', app()->routesAreCached());
         $this->check('View Cache', ! empty(glob(storage_path('framework/views/*.php'))));
+
+        if ($configCached) {
+            $viewCompiled = config('view.compiled');
+            $realPath = storage_path('framework/views');
+            if ($viewCompiled !== $realPath) {
+                $this->error("ALARM: Config Cache obsahuje nekonzistentní cesty!");
+                $this->line("Cachovaná cesta: $viewCompiled");
+                $this->line("Reálná cesta:    $realPath");
+                $this->warn("Doporučení: Spusťte 'php artisan config:clear'");
+            }
+        }
 
         // 4. Cache Status
         $this->info("\n[CACHE STATUS]");

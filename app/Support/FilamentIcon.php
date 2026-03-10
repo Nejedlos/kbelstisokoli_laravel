@@ -25,13 +25,14 @@ class FilamentIcon
         // během bootování aplikací v testovacím prostředí.
         // Avoid container calls during early config bootstrap.
         // Detect tests in a container-agnostic way (without app()).
-        if ((PHP_SAPI === 'cli' && (getenv('APP_ENV') === 'testing' || getenv('RUNNING_PHPUNIT') === '1'))) {
+        $appEnv = getenv('APP_ENV') ?: 'production';
+        if ((PHP_SAPI === 'cli' && ($appEnv === 'testing' || getenv('RUNNING_PHPUNIT') === '1'))) {
             return 'heroicon-o-stop';
         }
 
         // Avoid container calls during early config bootstrap.
         // Use getenv instead of app()->environment() if possible.
-        if (getenv('APP_ENV') === 'testing') {
+        if ($appEnv === 'testing') {
             return 'heroicon-o-stop';
         }
 
@@ -62,10 +63,19 @@ class FilamentIcon
         // Pouze pokud už je aplikace nabootovaná a Factory dostupná.
         // Vyhýbáme se volání app() během raného LoadConfiguration bootstrapu (Target class [env] not found).
         try {
-            $app = \Illuminate\Container\Container::getInstance();
-            if ($app instanceof \Illuminate\Contracts\Foundation\Application && $app->isBooted() && $app->bound(\BladeUI\Icons\Factory::class)) {
-                // Rychlý test existence v cache/setech
-                app(\BladeUI\Icons\Factory::class)->svg($fullIconName);
+            // Použijeme static pro kontrolu, abychom se vyhnuli opakovaným kontrolám v configu
+            static $isBootstrapping = null;
+            if ($isBootstrapping === null) {
+                // Pokud nemůžeme získat instanci Containeru bez vyvolání chyby, jsme v bootstrapu
+                $isBootstrapping = ! \Illuminate\Container\Container::getInstance()->bound('env');
+            }
+
+            if (!$isBootstrapping) {
+                $app = \Illuminate\Container\Container::getInstance();
+                if ($app instanceof \Illuminate\Contracts\Foundation\Application && $app->isBooted() && $app->bound(\BladeUI\Icons\Factory::class)) {
+                    // Rychlý test existence v cache/setech
+                    $app->make(\BladeUI\Icons\Factory::class)->svg($fullIconName);
+                }
             }
         } catch (\Throwable $e) {
             // Tichý fail - pokud nemůžeme ověřit existenci, vrátíme sestavený název a spolehneme se na runtime
