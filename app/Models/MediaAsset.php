@@ -26,6 +26,11 @@ class MediaAsset extends Model implements HasMedia
         'is_public' => 'boolean',
     ];
 
+    /**
+     * Flag pro přeskočení konverzí (např. při hromadném importu)
+     */
+    public static bool $skipConversions = false;
+
     protected static function booted()
     {
         // Automatické přejmenování fyzického souboru při změně názvu
@@ -79,6 +84,10 @@ class MediaAsset extends Model implements HasMedia
      */
     public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
     {
+        if (static::$skipConversions || config('app.importing_legacy_photos', false)) {
+            return;
+        }
+
         $this->addMediaConversion('thumb')
             ->width(400)
             ->height(400)
