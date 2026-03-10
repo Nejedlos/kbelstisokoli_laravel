@@ -4,7 +4,19 @@
 ])
 
 @section('content')
-    <div class="space-y-10">
+    <div class="space-y-10" x-data="{ selectedEvents: [] }" x-effect="
+        const isActive = selectedEvents.length > 0;
+        isActive ? document.body.setAttribute('data-batch-active', 'true') : document.body.removeAttribute('data-batch-active');
+        const fab = document.querySelector('.ks-fab-trigger');
+        if (fab) {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile && (isActive || document.body.hasAttribute('data-prediction-open'))) {
+                fab.style.setProperty('display', 'none', 'important');
+            } else {
+                fab.style.setProperty('display', 'flex', 'important');
+            }
+        }
+    ">
         @if(!empty($nudges) && count($nudges) > 0)
             @php
                 // Pokud je jich více, vybereme jeden náhodně pro střídání (při každém načtení)
@@ -267,5 +279,7 @@
 
         <!-- Bank Info & QR Payment -->
         <livewire:member.payment-widget />
+
+        <x-member.bulk-attendance-panel />
     </div>
 @endsection

@@ -42,7 +42,7 @@
     ];
 @endphp
 
-<div class="relative group" x-data="{ predictionOpen: false }" x-effect="
+<div class="relative group" id="event-card-{{ $type }}-{{ $data->id }}" x-data="{ predictionOpen: false }" x-effect="
     predictionOpen ? document.body.setAttribute('data-prediction-open', 'true') : document.body.removeAttribute('data-prediction-open');
     const fab = document.querySelector('.ks-fab-trigger');
     if (fab) {
@@ -56,7 +56,7 @@
 ">
     <div class="absolute inset-0 bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/20 group-hover:shadow-xl group-hover:shadow-primary/5 group-hover:border-primary/20 transition-all duration-500 overflow-hidden"
          :class="selectedEvents.includes('{{ $type . ':' . $data->id }}') ? 'ring-2 ring-primary ring-offset-2 border-primary bg-primary/[0.02] shadow-primary/10' : ''">
-        <div class="absolute top-0 left-0 w-1 h-full bg-{{ $status === 'confirmed' ? 'emerald-500' : ($status === 'declined' ? 'rose-500' : 'slate-200') }}"
+        <div class="absolute top-0 left-0 w-1 h-full js-event-status-strip bg-{{ $status === 'confirmed' ? 'emerald-500' : ($status === 'declined' ? 'rose-500' : 'slate-200') }}"
              :class="selectedEvents.includes('{{ $type . ':' . $data->id }}') ? 'w-2 bg-primary' : ''"></div>
     </div>
 
@@ -90,7 +90,7 @@
                     </span>
                     <div class="flex items-center gap-1.5">
                         <span class="text-[7px] font-black uppercase tracking-widest text-slate-400/80">{{ __('member.attendance.my_status') }}:</span>
-                        <span class="px-2 py-0.5 sm:px-2.5 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm {{ $statusColors[$status] }} flex items-center gap-1">
+                        <span class="js-event-status-badge px-2 py-0.5 sm:px-2.5 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm {{ $statusColors[$status] }} flex items-center gap-1">
                             @if($status === 'confirmed')
                                 <i class="fa-light fa-circle-check text-[10px]"></i>
                             @elseif($status === 'declined')
@@ -100,7 +100,7 @@
                             @else
                                 <i class="fa-light fa-clock text-[10px]"></i>
                             @endif
-                            {{ $statusLabels[$status] }}
+                            <span class="js-event-status-label">{{ $statusLabels[$status] }}</span>
                         </span>
                     </div>
                 </div>

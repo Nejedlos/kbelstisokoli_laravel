@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Member;
 
+use App\Enums\ExcuseReason;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\BasketballMatch;
@@ -435,7 +436,7 @@ class AttendanceController extends Controller
             ],
             [
                 'planned_status' => $request->status,
-                'excuse_reason' => $request->status === 'declined' ? $request->excuse_reason : null,
+                'excuse_reason' => $request->status === 'declined' && $request->excuse_reason ? ExcuseReason::from($request->excuse_reason) : null,
                 'note' => $request->note,
                 'responded_at' => now(),
             ]
@@ -446,54 +447,97 @@ class AttendanceController extends Controller
         return back()->with('status', __('member.attendance.save_success'));
     }
 
-    public function bulkStore(Request $request): RedirectResponse
+    public function bulkStore(Request $request)
     {
-        $request->validate([
-            'events' => 'required|array',
-            'events.*' => 'string', // format "type:id"
-            'status' => 'required|in:confirmed,declined',
-            'excuse_reason' => 'nullable|string',
-        ]);
+        try {
+            $request->validate([
+                'events' => 'required|array',
+                'events.*' => 'string', // format "type:id"
+                'status' => 'required|in:confirmed,declined',
+                'excuse_reason' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        }
 
         $updatedCount = 0;
+        $user = auth()->user();
 
         foreach ($request->events as $eventStr) {
-            [$type, $id] = explode(':', $eventStr);
+            try {
+                [$type, $id] = explode(':', $eventStr);
 
-            $modelClass = match ($type) {
-                'training' => Training::class,
-                'match' => BasketballMatch::class,
-                'event' => ClubEvent::class,
-                default => null,
-            };
+                $modelClass = match ($type) {
+                    'training' => Training::class,
+                    'match' => BasketballMatch::class,
+                    'event' => ClubEvent::class,
+                    default => null,
+                };
 
-            if (!$modelClass) continue;
+                if (!$modelClass) continue;
 
-            $item = $modelClass::find($id);
-            if (!$item) continue;
+                $item = $modelClass::find($id);
+                if (!$item) continue;
 
-            $eventDate = match ($type) {
-                'match' => $item->scheduled_at,
-                default => $item->starts_at,
-            };
+                $eventDate = match ($type) {
+                    'match' => $item->scheduled_at,
+                    default => $item->starts_at,
+                };
 
-            if ($eventDate->isBefore(now()->addMinutes(90))) continue;
+                if ($eventDate->isBefore(now()->addMinutes(90))) continue;
 
-            $attendance = Attendance::updateOrCreate(
-                [
-                    'user_id' => auth()->id(),
-                    'attendable_id' => $item->id,
-                    'attendable_type' => $modelClass,
-                ],
-                [
-                    'planned_status' => $request->status,
-                    'excuse_reason' => $request->status === 'declined' ? $request->excuse_reason : null,
-                    'responded_at' => now(),
-                ]
-            );
+                $attendance = Attendance::updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'attendable_id' => $item->id,
+                        'attendable_type' => $modelClass,
+                    ],
+                    [
+                        'planned_status' => $request->status,
+                        'excuse_reason' => $request->status === 'declined' && $request->excuse_reason ? ExcuseReason::from($request->excuse_reason) : null,
+                        'responded_at' => now(),
+                    ]
+                );
 
-            event(new \App\Events\RsvpChanged($attendance));
-            $updatedCount++;
+                event(new \App\Events\RsvpChanged($attendance));
+                $updatedCount++;
+            } catch (\Exception $e) {
+                \Log::error("Error processing bulk attendance for {$eventStr}: " . $e->getMessage());
+                continue;
+            }
+        }
+
+        // Vymazat cache dashboardu pro uživatele (všechny možné jazyky a týmy)
+        try {
+            // Protože neznáme všechny kombinace locale a activeTeamId,
+            // je lepší promazat ty nejčastější nebo použít tagy (pokud je cache podporuje).
+            // Dashboard používá: "member_dashboard_{$user->id}_{$locale}_{$activeTeamId}_v2"
+            $locales = ['cs', 'en'];
+            $activeTeamId = app(\App\Services\Member\MemberContext::class)->getActiveTeamId();
+
+            foreach ($locales as $l) {
+                \Illuminate\Support\Facades\Cache::forget("member_dashboard_{$user->id}_{$l}_{$activeTeamId}_v2");
+                // Také promazat pro "všechny týmy" (null)
+                \Illuminate\Support\Facades\Cache::forget("member_dashboard_{$user->id}_{$l}__v2");
+            }
+        } catch (\Exception $e) {
+            \Log::warning("Failed to clear dashboard cache: " . $e->getMessage());
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'updated_count' => $updatedCount,
+                'status' => $request->status,
+                'events' => $request->events,
+            ]);
         }
 
         return back()->with('status', __('member.attendance.bulk_save_success', ['count' => $updatedCount]));

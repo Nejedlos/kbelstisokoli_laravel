@@ -118,7 +118,7 @@
 
     echo "Running composer install..."
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
-    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
+    rm -f bootstrap/cache/*.php
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
@@ -235,7 +235,7 @@
     chmod -R 775 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
-    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
+    rm -f bootstrap/cache/*.php
 
     echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
@@ -285,7 +285,7 @@
     chmod -R 775 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
-    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
+    rm -f bootstrap/cache/*.php
 
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
@@ -380,7 +380,7 @@
     chmod -R 775 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
-    rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php bootstrap/cache/packages.php
+    rm -f bootstrap/cache/*.php
 
     # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
