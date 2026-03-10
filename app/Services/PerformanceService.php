@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class PerformanceService
 {
@@ -18,8 +19,15 @@ class PerformanceService
         $scenario = $settings['perf_scenario'] ?? 'standard';
 
         // Povolení vynucení scénáře pro admina (užitečné pro testy)
-        if (request()->has('perf_scenario') && auth()->check() && auth()->user()->can('access_admin')) {
-            $scenario = request('perf_scenario');
+        // Optimalizováno: Kontrola auth pouze pokud jsme v HTTP requestu a auth je k dispozici
+        if (! app()->runningInConsole() && request()->has('perf_scenario')) {
+            try {
+                if (auth()->check() && auth()->user()->can('access_admin')) {
+                    $scenario = request('perf_scenario');
+                }
+            } catch (\Throwable $e) {
+                // Tichý fail pokud auth ještě není připraven (např. v rané fázi bootu)
+            }
         }
 
         config([
@@ -54,12 +62,27 @@ class PerformanceService
 
     /**
      * Načte nastavení přímo z databáze.
+     * Optimalizováno: Používá Query Builder pro bypass Eloquent overheadu.
      */
     protected function fetchSettingsFromDb(): array
     {
         try {
-            return Setting::where('key', 'like', 'perf_%')
-                ->get()
+            // Rychlá kontrola existence tabulky
+            $tableExists = Cache::rememberForever('schema_has_settings_table', function () {
+                try {
+                    return Schema::hasTable('settings');
+                } catch (\Throwable $e) {
+                    return false;
+                }
+            });
+
+            if (! $tableExists) {
+                return [];
+            }
+
+            return DB::table('settings')
+                ->where('key', 'like', 'perf_%')
+                ->get(['key', 'value'])
                 ->pluck('value', 'key')
                 ->toArray();
         } catch (\Throwable $e) {

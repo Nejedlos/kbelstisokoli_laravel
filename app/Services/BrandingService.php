@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class BrandingService
@@ -223,6 +223,7 @@ class BrandingService
 
     /**
      * Načte všechna nastavení z DB a nacachuje je.
+     * Optimalizováno: Používá přímý DB dotaz pro bypass Eloquent overheadu a Spatie Translatable logic.
      */
     protected function getDbSettings(): array
     {
@@ -231,7 +232,7 @@ class BrandingService
         }
 
         try {
-            // Rychlá kontrola existence DB v konzoli (např. při package:discover)
+            // Rychlá kontrola existence DB v konzoli
             if (app()->runningInConsole()) {
                 $dbConnection = config('database.default');
                 $dbConfig = config("database.connections.{$dbConnection}");
@@ -246,45 +247,58 @@ class BrandingService
 
             $locale = app()->getLocale();
 
-            return $this->dbSettings = Cache::remember("global_branding_settings_{$locale}", 3600, function () {
-                // Optimalizované zjištění existence tabulky přes cache (Schema::hasTable je drahé v každém requestu)
+            return $this->dbSettings = Cache::remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {
+                // Optimalizované zjištění existence tabulky
                 $tableExists = Cache::rememberForever('schema_has_settings_table', function () {
-                    return Schema::hasTable('settings');
+                    try {
+                        return Schema::hasTable('settings');
+                    } catch (\Throwable $e) {
+                        return false;
+                    }
                 });
 
                 if (! $tableExists) {
                     return [];
                 }
 
-                // Načteme jen klíče, které BrandingService reálně používá
-                $settings = Setting::where('key', 'like', 'branding_%')
-                    ->orWhere('key', 'like', 'social_%')
-                    ->orWhere('key', 'like', 'contact_%')
-                    ->orWhere('key', 'like', 'cta_%')
-                    ->orWhere('key', 'like', 'seo_%')
-                    ->orWhere('key', 'like', 'maintenance_%')
-                    ->orWhere('key', 'like', 'venue_%')
-                    ->orWhere('key', 'like', 'club_%')
-                    ->orWhere('key', 'like', 'team_logo_%')
-                    ->orWhere('key', 'like', 'admin_contact_%')
-                    ->orWhere('key', 'like', 'partners_%')
-                    ->orWhere('key', 'like', 'partner_%')
-                    ->orWhereIn('key', [
-                        'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
-                        'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset',
-                        'bank_account', 'bank_name',
-                    ])
+                // Načteme klíče přes Query Builder (mnohem rychlejší než Eloquent pro mnoho malých řádků)
+                $settings = DB::table('settings')
+                    ->where(function ($query) {
+                        $query->where('key', 'like', 'branding_%')
+                            ->orWhere('key', 'like', 'social_%')
+                            ->orWhere('key', 'like', 'contact_%')
+                            ->orWhere('key', 'like', 'cta_%')
+                            ->orWhere('key', 'like', 'seo_%')
+                            ->orWhere('key', 'like', 'maintenance_%')
+                            ->orWhere('key', 'like', 'venue_%')
+                            ->orWhere('key', 'like', 'club_%')
+                            ->orWhere('key', 'like', 'team_logo_%')
+                            ->orWhere('key', 'like', 'admin_contact_%')
+                            ->orWhere('key', 'like', 'partners_%')
+                            ->orWhere('key', 'like', 'partner_%')
+                            ->orWhereIn('key', [
+                                'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
+                                'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset',
+                                'bank_account', 'bank_name',
+                            ]);
+                    })
                     ->get(['key', 'value']);
 
                 $mapped = [];
                 foreach ($settings as $setting) {
-                    $mapped[$setting->key] = $setting->value;
+                    // Ruční dekódování Spatie translatable JSONu (bypass traitu)
+                    $value = json_decode($setting->value, true);
+
+                    if (is_array($value)) {
+                        $mapped[$setting->key] = $setting->value = $value[$locale] ?? $value['cs'] ?? reset($value);
+                    } else {
+                        $mapped[$setting->key] = $setting->value;
+                    }
                 }
 
                 return $mapped;
             });
         } catch (\Throwable $e) {
-            // Bezpečný fallback v případě jakékoliv chyby
             return $this->dbSettings = [];
         }
     }
