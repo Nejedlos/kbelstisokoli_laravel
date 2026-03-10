@@ -10,8 +10,31 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
 $app = Application::configure(basePath: dirname(__DIR__))
-    ->booting(function () {
-        // Fix pro Webglobe a jiné hostingy se specifickým nastavením temp složek
+    ->booting(function ($app) {
+        // 1. Nastavení cest (Environment a Public) co nejdříve
+        $envPath = file_exists(base_path('.env')) ? base_path() : base_path('public');
+        $app->useEnvironmentPath($envPath);
+
+        // Pokud již máme načtený .env v této fázi (což by měl být), nastavíme public_path
+        $publicPath = env('PROD_PUBLIC_PATH');
+        if (env('PUBLIC_PATH_MODE') !== 'external') {
+            $publicPath = null;
+        }
+
+        if (! $publicPath && isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
+            $publicPath = dirname($_SERVER['SCRIPT_FILENAME']);
+        }
+
+        if (! $publicPath) {
+            $publicPath = env('APP_PUBLIC_PATH');
+        }
+
+        if ($publicPath) {
+            $app->usePublicPath($publicPath);
+            $app->instance('path.public', $publicPath);
+        }
+
+        // 2. Fix pro Webglobe a jiné hostingy se specifickým nastavením temp složek
         // Automatické vytvoření storage podadresářů pro zamezení chyb při kompilaci Blade (tempnam fallback)
         $storagePaths = [
             storage_path('framework/cache'),
@@ -330,34 +353,5 @@ $app = Application::configure(basePath: dirname(__DIR__))
             return response()->view('errors.500', ['report' => $report], 500);
         });
     })->create();
-
-// Na lokále preferujeme .env v kořeni, na produkci (dle Envoy/Sync) může být v public/
-$app->useEnvironmentPath(file_exists(base_path('.env')) ? base_path() : base_path('public'));
-
-// Nastavení public_path pro subdomény a specifické hostingy (Webglobe)
-// PUBLIC_PATH_MODE: 'default' (použije project/public) nebo 'external' (použije PROD_PUBLIC_PATH)
-$publicPathMode = env('PUBLIC_PATH_MODE', 'default');
-$finalPublicPath = null;
-
-if ($publicPathMode === 'external') {
-    $finalPublicPath = env('PROD_PUBLIC_PATH');
-}
-
-// Fallback na detekci z aktuálního skriptu (index.php) pokud běží přes web
-if (! $finalPublicPath && isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
-    $finalPublicPath = dirname($_SERVER['SCRIPT_FILENAME']);
-}
-
-// Pokud nic nebylo nalezeno a máme APP_PUBLIC_PATH (starý pattern), použijeme ho jako fallback
-if (! $finalPublicPath) {
-    $finalPublicPath = env('APP_PUBLIC_PATH');
-}
-
-if ($finalPublicPath) {
-    // Pro Laravel 12 nastavíme public path pomocí kontejneru a metody usePublicPath
-    // Toto zajistí, že public_path() v celém frameworku (včetně Vite a Storage) bude mířit správně
-    $app->usePublicPath($finalPublicPath);
-    $app->instance('path.public', $finalPublicPath);
-}
 
 return $app;

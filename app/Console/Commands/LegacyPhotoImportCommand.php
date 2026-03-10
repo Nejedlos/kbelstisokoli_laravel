@@ -41,12 +41,33 @@ class LegacyPhotoImportCommand extends Command
     protected $poolsCache = null;
 
     /**
+     * Seznam složek k ignorování (již jsou správně v systému).
+     */
+    protected array $ignoreFolders = [
+        '2008_9_Pirelli',
+        'all_2014',
+        '2006_VIKTORIN_CUP',
+    ];
+
+    /**
+     * ID uživatele, který bude nastaven jako nahrávající (Michal Nejedlý).
+     */
+    protected int $uploadedById = 3;
+
+    /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        // Přednačteme pooly (protože MySQL 5.5 nepodporuje JSON unquote v Eloquentu)
-        $this->poolsCache = PhotoPool::all();
+        // Fix pro public_path na produkci v CLI prostředí
+        if (app()->environment('production')) {
+            $prodPublicPath = env('PROD_PUBLIC_PATH');
+            if ($prodPublicPath && is_dir($prodPublicPath)) {
+                $this->info("Fixuji public_path na: {$prodPublicPath}");
+                app()->usePublicPath($prodPublicPath);
+                app()->instance('path.public', $prodPublicPath);
+            }
+        }
 
         if (!File::exists($this->oldFotoPath) && !app()->environment('local')) {
             $this->error("Složka s fotografiemi neexistuje: {$this->oldFotoPath}");
@@ -107,6 +128,12 @@ class LegacyPhotoImportCommand extends Command
         }
 
         $folderName = $photoEntry->slozka;
+
+        if (in_array($folderName, $this->ignoreFolders)) {
+            $this->line(" - Ignoruji složku {$folderName} (již je v systému)");
+            return;
+        }
+
         $folderPath = $this->oldFotoPath . '/' . $folderName;
 
         if (!File::isDirectory($folderPath)) {
@@ -136,13 +163,11 @@ class LegacyPhotoImportCommand extends Command
     {
         $slug = Str::slug($title);
 
-        // Zkusíme najít v cache
-        $pool = $this->poolsCache->filter(function($p) use ($slug, $title) {
-            return $p->slug === $slug || $p->getTranslation('title', 'cs') === $title;
-        })->first();
+        // Zkusíme najít podle slug (nejstabilnější identifikátor)
+        $pool = PhotoPool::where('slug', $slug)->first();
 
         if ($pool) {
-            $this->line(" - Nalezen existující pool: {$pool->id}");
+            $this->line(" - Nalezen existující pool: {$pool->id} (slug: {$slug})");
             return $pool;
         }
 
@@ -161,9 +186,6 @@ class LegacyPhotoImportCommand extends Command
         $pool->is_public = true;
         $pool->is_visible = true;
         $pool->save();
-
-        // Přidáme do cache, aby další cykly o něm věděly (např. při root importu)
-        $this->poolsCache->push($pool);
 
         $this->info(" - Vytvořen nový pool: {$pool->id}");
 
@@ -213,6 +235,7 @@ class LegacyPhotoImportCommand extends Command
                         'type' => 'image',
                         'access_level' => 'public',
                         'is_public' => true,
+                        'uploaded_by_id' => $this->uploadedById,
                     ]);
                     $asset->save();
 
