@@ -230,38 +230,78 @@
                         }
                     @endphp
 
-                    <section class="card p-8">
+                    <section class="card p-8 border-t-4 transition-colors duration-1000" style="border-top-color: {{ $colorHsl ?? '#f1f5f9' }}">
                         <h2 class="text-2xl font-black uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
                             {{ $isPlayed ? (app()->getLocale() === 'cs' ? 'Reportáž ze zápasu' : 'Match report') : (app()->getLocale() === 'cs' ? 'Předzápasová analýza' : 'Pre-match analysis') }}
                         </h2>
 
-                        @if(!$isPlayed && $prediction)
+                        @if($prediction)
                             <div class="space-y-10">
+                                <!-- Prediction Stats -->
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+                                    <div class="md:col-span-5 p-8 rounded-[2rem] border flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden group/pc transition-all duration-1000" style="background-color: {{ $colorHsl ? str_replace(')', ', 0.08)', str_replace('hsl', 'hsla', $colorHsl)) : '#f8fafc' }}; border-color: {{ $colorHsl ? str_replace(')', ', 0.2)', str_replace('hsl', 'hsla', $colorHsl)) : '#e2e8f0' }}; box-shadow: inset 0 2px 4px 0 {{ $colorHsl ? str_replace(')', ', 0.05)', str_replace('hsl', 'hsla', $colorHsl)) : 'rgba(0,0,0,0.05)' }}">
+                                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-20 rounded-full -mr-16 -mt-16 group-hover/pc:scale-150 transition-transform duration-700"></div>
+                                        <div class="relative z-10">
+                                            <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 mx-auto border" style="border-color: {{ $colorHsl ? str_replace(')', ', 0.2)', str_replace('hsl', 'hsla', $colorHsl)) : '#e2e8f0' }}">
+                                                <i class="fa-light fa-crystal-ball text-xl animate-pulse" style="color: {{ $colorHsl }}"></i>
+                                            </div>
+                                            <div class="text-6xl font-black mb-1 tabular-nums tracking-tighter" style="color: {{ $colorHsl }}">
+                                                {{ $winChance }}%
+                                            </div>
+                                            <div class="text-[10px] font-black uppercase tracking-widest mb-6" style="color: {{ $colorHsl }}; opacity: 0.6">
+                                                {{ __('matches.prediction.win_chance') ?? 'Šance na výhru' }}
+                                            </div>
+
+                                            @php
+                                                $confColor = match($prediction->confidence) {
+                                                    'high' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                                    'medium' => 'bg-amber-100 text-amber-700 border-amber-200',
+                                                    default => 'bg-slate-100 text-slate-700 border-slate-200',
+                                                };
+                                            @endphp
+                                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm {{ $confColor }}">
+                                                {{ __('matches.prediction.confidence_' . $prediction->confidence) ?? $prediction->confidence }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="md:col-span-7 flex flex-col justify-center space-y-6">
+                                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden shadow-inner p-0.5">
+                                            <div class="h-full rounded-full shadow-lg transition-all duration-1000" style="width: {{ $winChance }}%; background-color: {{ $colorHsl }}"></div>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <h4 class="text-[11px] font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-2">
+                                                <i class="fa-light fa-list-check text-primary"></i>
+                                                {{ __('matches.prediction.why_title') ?? 'Proč si to myslíme' }}
+                                            </h4>
+                                            <ul class="space-y-3">
+                                                @foreach($prediction->explanation_points as $point)
+                                                    <li class="flex items-start gap-3 text-sm text-slate-600 font-medium leading-relaxed group/li">
+                                                        <i class="fa-light fa-circle-check mt-1 text-primary shrink-0 group-hover/li:scale-110 transition-transform"></i>
+                                                        {{ $point }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Motivational Quote -->
-                                <div @class([
-                                    'relative p-8 md:p-14 rounded-[3rem] overflow-hidden text-center shadow-2xl group transition-all duration-500',
-                                    'bg-secondary shadow-secondary/20' => $winChance >= 35 && $winChance <= 65,
-                                    'bg-success/90 shadow-success/20' => $winChance > 65,
-                                    'bg-rose-900/90 shadow-rose-900/20' => $winChance < 35,
-                                ])>
+                                <div class="relative p-8 md:p-14 rounded-[3rem] overflow-hidden text-center shadow-2xl group transition-all duration-1000 bg-secondary" style="box-shadow: 0 25px 50px -12px {{ $colorHsl ? str_replace(')', ', 0.2)', str_replace('hsl', 'hsla', $colorHsl)) : 'rgba(0,0,0,0.1)' }}">
                                     <!-- Dynamic Background Elements -->
-                                    <div class="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-40 -mt-40 blur-[100px] animate-pulse"></div>
-                                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mb-32 blur-[80px]"></div>
-                                    <div @class([
-                                        'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-50',
-                                        'bg-gradient-to-br from-secondary via-secondary to-slate-900/50' => $winChance >= 35 && $winChance <= 65,
-                                        'bg-gradient-to-br from-success via-success to-emerald-900/50' => $winChance > 65,
-                                        'bg-gradient-to-br from-rose-900 via-rose-900 to-slate-950/50' => $winChance < 35,
-                                    ])></div>
+                                    <div class="absolute top-0 right-0 w-80 h-80 rounded-full -mr-40 -mt-40 blur-[100px] animate-pulse opacity-20" style="background-color: {{ $colorHsl ?? 'white' }}"></div>
+                                    <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full -ml-32 -mb-32 blur-[80px] opacity-10" style="background-color: {{ $colorHsl ?? 'white' }}"></div>
+                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-40 bg-gradient-to-br from-secondary via-secondary to-slate-900/80"></div>
 
                                     <div class="relative z-10">
                                         <div class="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm shadow-inner group-hover:scale-110 transition-transform duration-500">
                                             @if($winChance > 65)
-                                                <i class="fa-light fa-fire text-white text-3xl"></i>
+                                                <i class="fa-light fa-fire text-white text-3xl animate-bounce" style="animation-duration: 3s;"></i>
                                             @elseif($winChance < 35)
                                                 <i class="fa-light fa-shield text-white text-3xl"></i>
                                             @else
-                                                <i class="fa-light fa-quote-left text-primary text-3xl"></i>
+                                                <i class="fa-light fa-quote-left text-3xl" style="color: {{ $colorHsl }}"></i>
                                             @endif
                                         </div>
 
@@ -271,7 +311,7 @@
 
                                         <div class="flex items-center justify-center gap-4">
                                             <div class="h-px w-8 bg-gradient-to-r from-transparent to-white/50"></div>
-                                            <div class="text-white font-black uppercase tracking-[0.3em] text-[11px] py-1 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
+                                            <div class="text-white font-black uppercase tracking-[0.3em] text-[11px] py-1 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur-md" style="border-color: {{ $colorHsl ? str_replace(')', ', 0.4)', str_replace('hsl', 'hsla', $colorHsl)) : 'rgba(255,255,255,0.2)' }}">
                                                 @if($winChance > 65)
                                                     {{ __('motivational.pre_match.labels.high') }}
                                                 @elseif($winChance < 35)
@@ -287,36 +327,6 @@
                                     <!-- Decorative Basketball Icon -->
                                     <div class="absolute -bottom-6 -right-6 opacity-[0.05] rotate-12 group-hover:rotate-0 transition-transform duration-1000">
                                         <i class="fa-light fa-basketball text-9xl text-white"></i>
-                                    </div>
-                                </div>
-
-                                <!-- Prediction Stats -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center">
-                                        <div class="text-5xl font-black mb-2 tabular-nums" style="color: {{ $colorHsl }}">
-                                            {{ $winChance }}%
-                                        </div>
-                                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">
-                                            Šance na výhru
-                                        </div>
-                                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                            <div class="h-full transition-all duration-1000" style="width: {{ $winChance }}%; background-color: {{ $colorHsl }}"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="space-y-4">
-                                        <h4 class="text-xs font-black uppercase tracking-widest text-secondary flex items-center gap-2">
-                                            <i class="fa-light fa-list-check text-primary"></i>
-                                            Klíčové faktory
-                                        </h4>
-                                        <ul class="space-y-3">
-                                            @foreach($prediction->explanation_points as $point)
-                                                <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                                                    <i class="fa-light fa-circle-check mt-0.5 text-primary shrink-0"></i>
-                                                    {{ $point }}
-                                                </li>
-                                            @endforeach
-                                        </ul>
                                     </div>
                                 </div>
                             </div>

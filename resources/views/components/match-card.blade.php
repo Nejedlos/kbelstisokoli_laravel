@@ -44,6 +44,7 @@
     $isWin = $isPlayed && $hasScore && (($match->is_home && $homeScore > $awayScore) || (!$match->is_home && $awayScore > $homeScore));
     $isLoss = $isPlayed && $hasScore && (($match->is_home && $homeScore < $awayScore) || (!$match->is_home && $awayScore < $homeScore));
     $isDraw = $isPlayed && $hasScore && ($homeScore === $awayScore);
+    $prediction = $match->prediction;
 
     $resultColor = 'border-l-primary';
     if ($isPlayed && $hasScore) {
@@ -150,43 +151,79 @@
                 </div>
             </div>
 
-            <div class="flex flex-col items-center sm:items-end min-w-[100px]">
+            <div class="flex flex-row flex-wrap items-center justify-center sm:justify-end min-w-[120px] gap-2">
                 @if($isPlayed && $hasScore)
-                    <div class="flex items-center gap-2">
-                        <div class="text-3xl md:text-4xl font-black tabular-nums tracking-tighter {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-secondary') }}">
-                            {{ $match->score_home ?? 0 }} : {{ $match->score_away ?? 0 }}
+                    <div class="flex flex-col items-center sm:items-end">
+                        <div class="flex items-center gap-2">
+                            <div class="text-3xl md:text-4xl font-black tabular-nums tracking-tighter {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-secondary') }}">
+                                {{ $match->score_home ?? 0 }} : {{ $match->score_away ?? 0 }}
+                            </div>
                         </div>
+                        <span class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest mt-1 {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-slate-400') }}">
+                            @if($isWin)
+                                <i class="fa-light fa-trophy-star text-xs"></i>
+                            @elseif($isLoss)
+                                <i class="fa-light fa-face-frown text-xs"></i>
+                            @else
+                                <i class="fa-light fa-handshake text-xs"></i>
+                            @endif
+                            {{ $isWin ? __('matches.victory') : ($isLoss ? __('matches.loss') : __('matches.draw')) }}
+                        </span>
                     </div>
-                    <span class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest mt-1 {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-slate-400') }}">
-                        @if($isWin)
-                            <i class="fa-light fa-trophy-star text-xs"></i>
-                        @elseif($isLoss)
-                            <i class="fa-light fa-face-frown text-xs"></i>
-                        @else
-                            <i class="fa-light fa-handshake text-xs"></i>
-                        @endif
-                        {{ $isWin ? __('matches.victory') : ($isLoss ? __('matches.loss') : __('matches.draw')) }}
-                    </span>
                 @elseif($isPlayed)
-                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
-                        {{ __('matches.action_took_place') }}
-                    </span>
-                    <span class="text-[9px] font-bold text-slate-400 mt-1 italic uppercase tracking-tighter">
-                        {{ __('matches.result_missing') }}
-                    </span>
+                    <div class="flex flex-col items-center sm:items-end">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
+                            {{ __('matches.action_took_place') }}
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-400 mt-1 italic uppercase tracking-tighter">
+                            {{ __('matches.result_missing') }}
+                        </span>
+                    </div>
                 @else
                     @php
                         $isPast = $match->scheduled_at ? $match->scheduled_at->isPast() : ($match->season_id < 3);
                     @endphp
                     @if($isPast)
-                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
                             {{ __('matches.action_took_place') }}
                         </span>
                     @else
-                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest {{ $statusColors[$match->status] ?? 'bg-slate-100' }}">
                             {{ $statusLabels[$match->status] ?? $match->status }}
                         </span>
                     @endif
+                @endif
+
+                @if(!$isPlayed && $prediction)
+                    @php
+                        $winChance = round($prediction->probability_win * 100);
+                        if ($winChance <= 50) {
+                            $hue = ($winChance / 50) * 35;
+                        } else {
+                            $hue = 35 + (($winChance - 50) / 50) * (105);
+                        }
+                        $colorHsl = "hsl({$hue}, 75%, 45%)";
+                        $bgHsl = "hsla({$hue}, 75%, 45%, 0.05)";
+                        $borderHsl = "hsla({$hue}, 75%, 45%, 0.15)";
+                    @endphp
+                    <div class="flex items-center gap-2 px-2 py-1 rounded-2xl border shadow-sm transition-all group/pred"
+                         style="background: linear-gradient(135deg, {{ $bgHsl }}, white); border-color: {{ $borderHsl }};">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fa-light fa-crystal-ball text-[10px] animate-pulse" style="color: {{ $colorHsl }};"></i>
+                            <span class="text-[9px] font-black uppercase tracking-widest" style="color: {{ $colorHsl }};">{{ $winChance }}%</span>
+                        </div>
+                        <div class="h-2 w-px opacity-30" style="background-color: {{ $colorHsl }};"></div>
+                        <div class="flex -space-x-1">
+                            @php
+                                $confColor = match($prediction->confidence) {
+                                    'high' => 'text-emerald-500',
+                                    'medium' => 'text-amber-500',
+                                    default => 'text-slate-400',
+                                };
+                            @endphp
+                            <i class="fa-solid fa-circle text-[5px] {{ $confColor }}"></i>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>
