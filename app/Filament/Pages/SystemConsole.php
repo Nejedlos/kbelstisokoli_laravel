@@ -304,6 +304,13 @@ class SystemConsole extends Page
 
         // 6. Optimalizace & Cache (Vždy)
         $groups[__('admin/system-console.groups.optimization')] = [
+            'optimize' => [
+                'label' => __('admin/system-console.commands.optimize.label'),
+                'desc' => __('admin/system-console.commands.optimize.desc'),
+                'type' => 'internal',
+                'color' => 'success',
+                'icon' => FilamentIcon::get('bolt'),
+            ],
             'optimize:clear' => [
                 'label' => __('admin/system-console.commands.optimize_clear.label'),
                 'desc' => __('admin/system-console.commands.optimize_clear.desc'),

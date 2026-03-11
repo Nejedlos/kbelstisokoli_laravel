@@ -131,6 +131,10 @@ return [
                 'fresh' => 'Fresh mode',
             ],
         ],
+        'optimize' => [
+            'label' => 'Optimize: Cache',
+            'desc' => 'Creates cache files for configuration and routes (for production).',
+        ],
         'optimize_clear' => [
             'label' => 'Optimize: Clear',
             'desc' => 'Clears all cached files (config, routes, views).',

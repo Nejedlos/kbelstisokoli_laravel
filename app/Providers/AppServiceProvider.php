@@ -83,8 +83,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $t1 = microtime(true);
         // Načtení a aplikace výkonnostních nastavení z DB
         app(\App\Services\PerformanceService::class)->bootSettings();
+        $t2 = microtime(true);
+        if (($t2 - $t1) > 0.001) {
+             \Illuminate\Support\Facades\Log::info("PerformanceService::bootSettings took " . round(($t2 - $t1) * 1000, 2) . " ms");
+        }
 
         // Vlastní Blade direktiva pro fragment caching
         \Illuminate\Support\Facades\Blade::directive('cacheFragment', function ($expression) {

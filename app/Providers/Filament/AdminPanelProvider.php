@@ -57,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
                     ";
                 }
 
-                // Branding service vrací --color-brand-* tokens
+                // Branding service vrací --color-brand-* tokens a RGB varianty
                 $brandingService = app(\App\Services\BrandingService::class);
                 $brandingVariables = $brandingService->getCssVariables();
 
@@ -66,35 +66,16 @@ class AdminPanelProvider extends PanelProvider
                 if ($isAuth) {
                     $settings = $brandingService->getSettings();
                     $colors = $settings['colors'];
-                    $hexToRgb = function ($hex) {
-                        $hex = str_replace('#', '', (string) $hex);
-
-                        return \App\Support\ColorHelper::hexToRgb($hex); // Použijeme helper pokud existuje, nebo inline
-                    };
-                    // Rychlý inline hexToRgb pro spolehlivost v provideru
-                    $inlineHexToRgb = function ($hex) {
-                        $hex = str_replace('#', '', (string) $hex);
-                        if (strlen($hex) === 3) {
-                            $r = hexdec(substr($hex, 0, 1).substr($hex, 0, 1));
-                            $g = hexdec(substr($hex, 1, 1).substr($hex, 1, 1));
-                            $b = hexdec(substr($hex, 2, 1).substr($hex, 2, 1));
-                        } else {
-                            $r = hexdec(substr($hex, 0, 2));
-                            $g = hexdec(substr($hex, 2, 2));
-                            $b = hexdec(substr($hex, 4, 2));
-                        }
-
-                        return "{$r}, {$g}, {$b}";
-                    };
+                    $colorsRgb = $settings['colors_rgb'];
 
                     $authAliases = '
                         :root {
                             --brand-navy: '.($colors['navy'] ?? '#0b1f3a').';
-                            --brand-navy-rgb: '.$inlineHexToRgb($colors['navy'] ?? '#0b1f3a').';
+                            --brand-navy-rgb: '.($colorsRgb['navy'] ?? '11, 31, 58').';
                             --brand-blue: '.($colors['blue'] ?? '#2563eb').';
-                            --brand-blue-rgb: '.$inlineHexToRgb($colors['blue'] ?? '#2563eb').';
+                            --brand-blue-rgb: '.($colorsRgb['blue'] ?? '37, 99, 235').';
                             --brand-red: '.($colors['red'] ?? '#e11d48').';
-                            --brand-red-rgb: '.$inlineHexToRgb($colors['red'] ?? '#e11d48').';
+                            --brand-red-rgb: '.($colorsRgb['red'] ?? '225, 29, 72').';
                             --brand-red-hover: '.($colors['red_hover'] ?? '#be123c').';
                             --brand-white: #ffffff;
 
@@ -111,15 +92,28 @@ class AdminPanelProvider extends PanelProvider
                     ';
                 }
 
-                return Blade::render(
-                    "
-                    @include('partials.favicons', ['includeMain' => false])
+                // Optimalizovaný výstup bez Blade::render pro zrychlení requestu
+                $viteAssets = app(\Illuminate\Foundation\Vite::class)->__invoke($entrypoints)->toHtml();
+                if ($isAuth) {
+                    $viteAssets .= app(\Illuminate\Foundation\Vite::class)->__invoke(['resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])->toHtml();
+                }
+
+                $favicons = '';
+                try {
+                    $favicons = view('partials.favicons', ['includeMain' => false])->render();
+                } catch (\Throwable $e) {}
+
+                return "
+                    {$favicons}
                     <link rel='preconnect' href='https://fonts.googleapis.com'>
                     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-                    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap'>
+                    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap' media='print' onload=\"this.media='all'\">
                     <style>
-                        {!! \$brandingVariables !!}
-                        {!! \$authAliases !!}
+                        {$brandingVariables}
+                        {$authAliases}
+                        :root {
+                            --font-family: 'Instrument Sans', sans-serif;
+                        }
                         /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
                         .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
                             display: inline-block;
@@ -130,14 +124,10 @@ class AdminPanelProvider extends PanelProvider
                             overflow: hidden;
                             opacity: 0;
                         }
-                     </style>
-                     @vite(\$entrypoints)
-                     @if (\$isAuth)
-                        @vite(['resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
-                     @endif
-                     {!! \$cropper !!}",
-                    ['entrypoints' => $entrypoints, 'authAliases' => $authAliases, 'brandingVariables' => $brandingVariables, 'cropper' => $cropper, 'isAuth' => $isAuth]
-                );
+                    </style>
+                    {$cropper}
+                    {$viteAssets}
+                ";
             })
             ->renderHook('panels::body.start', function (): string {
                 if (! auth()->check() || request()->routeIs('filament.admin.auth.*')) {
@@ -203,7 +193,6 @@ class AdminPanelProvider extends PanelProvider
                 ');
             })
             ->favicon(web_asset($branding['team_logo']['paths']['mini'] ?? '/favicon.ico', false))
-            ->font('Instrument Sans')
             ->userMenuItems([
                 'member_section' => MenuItem::make()
                     ->label(fn () => __('admin.navigation.pages.member_section'))

@@ -59,6 +59,8 @@ class PerformanceProfilingMiddleware
 
         $memoryPeak = memory_get_peak_usage(true) / 1024 / 1024; // v MB
 
+        $opcacheEnabled = function_exists('opcache_get_status') && opcache_get_status(false);
+
         $logData = [
             'url' => $request->fullUrl(),
             'method' => $request->method(),
@@ -69,6 +71,7 @@ class PerformanceProfilingMiddleware
             'query_time_ms' => round($queryTime, 2),
             'memory_mb' => round($memoryPeak, 2),
             'route' => $request->route() ? $request->route()->getName() : 'n/a',
+            'opcache' => $opcacheEnabled ? 'on' : 'off',
         ];
 
         // Pokud je to pomalý request (např. > 500ms) nebo hodně queries (např. > 50), logujeme to výrazněji

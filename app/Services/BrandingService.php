@@ -38,6 +38,12 @@ class BrandingService
         $activeTheme = $dbSettings['theme_preset'] ?? $cfg['default_theme'] ?? 'club-default';
         $themeConfig = $cfg['themes'][$activeTheme] ?? $cfg['themes'][$cfg['default_theme'] ?? 'club-default'] ?? ['colors' => []];
 
+        $colors = $themeConfig['colors'] ?? [];
+        $colorsRgb = [];
+        foreach ($colors as $key => $hex) {
+            $colorsRgb[$key] = $this->hexToRgb($hex);
+        }
+
         $this->settings = [
             'club_name' => $dbSettings['club_name'] ?? $cfg['club_name'] ?? 'Kbelští sokoli',
             'club_short_name' => $dbSettings['club_short_name'] ?? $cfg['club_short_name'] ?? 'Sokoli',
@@ -45,7 +51,8 @@ class BrandingService
             'logo_path' => $dbSettings['team_logo_velke'] ?? $dbSettings['logo_path'] ?? $cfg['logo_path'] ?? $cfg['team_logos']['velke'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.png',
             'alt_logo_path' => $dbSettings['team_logo_male'] ?? $dbSettings['alt_logo_path'] ?? $cfg['alt_logo_path'] ?? $cfg['team_logos']['male'] ?? '/assets/img/loga/logo_kbelsti_sokoli_male.png',
             'theme_preset' => $activeTheme,
-            'colors' => $themeConfig['colors'] ?? [],
+            'colors' => $colors,
+            'colors_rgb' => $colorsRgb,
             'contact' => [
                 'email' => $dbSettings['contact_email'] ?? $cfg['contact']['email'] ?? null,
                 'phone' => $dbSettings['contact_phone'] ?? $cfg['contact']['phone'] ?? null,
@@ -248,55 +255,46 @@ class BrandingService
             $locale = app()->getLocale();
 
             return $this->dbSettings = Cache::remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {
-                // Optimalizované zjištění existence tabulky
-                $tableExists = Cache::rememberForever('schema_has_settings_table', function () {
-                    try {
-                        return Schema::hasTable('settings');
-                    } catch (\Throwable $e) {
-                        return false;
-                    }
-                });
+                try {
+                    // Načteme klíče přes Query Builder (mnohem rychlejší než Eloquent pro mnoho malých řádků)
+                    $settings = DB::table('settings')
+                        ->where(function ($query) {
+                            $query->where('key', 'like', 'branding_%')
+                                ->orWhere('key', 'like', 'social_%')
+                                ->orWhere('key', 'like', 'contact_%')
+                                ->orWhere('key', 'like', 'cta_%')
+                                ->orWhere('key', 'like', 'seo_%')
+                                ->orWhere('key', 'like', 'maintenance_%')
+                                ->orWhere('key', 'like', 'venue_%')
+                                ->orWhere('key', 'like', 'club_%')
+                                ->orWhere('key', 'like', 'team_logo_%')
+                                ->orWhere('key', 'like', 'admin_contact_%')
+                                ->orWhere('key', 'like', 'partners_%')
+                                ->orWhere('key', 'like', 'partner_%')
+                                ->orWhereIn('key', [
+                                    'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
+                                    'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset',
+                                    'bank_account', 'bank_name',
+                                ]);
+                        })
+                        ->get(['key', 'value']);
 
-                if (! $tableExists) {
+                    $mapped = [];
+                    foreach ($settings as $setting) {
+                        // Ruční dekódování Spatie translatable JSONu (bypass traitu)
+                        $value = json_decode($setting->value, true);
+
+                        if (is_array($value)) {
+                            $mapped[$setting->key] = $value[$locale] ?? $value['cs'] ?? reset($value);
+                        } else {
+                            $mapped[$setting->key] = $setting->value;
+                        }
+                    }
+
+                    return $mapped;
+                } catch (\Throwable $e) {
                     return [];
                 }
-
-                // Načteme klíče přes Query Builder (mnohem rychlejší než Eloquent pro mnoho malých řádků)
-                $settings = DB::table('settings')
-                    ->where(function ($query) {
-                        $query->where('key', 'like', 'branding_%')
-                            ->orWhere('key', 'like', 'social_%')
-                            ->orWhere('key', 'like', 'contact_%')
-                            ->orWhere('key', 'like', 'cta_%')
-                            ->orWhere('key', 'like', 'seo_%')
-                            ->orWhere('key', 'like', 'maintenance_%')
-                            ->orWhere('key', 'like', 'venue_%')
-                            ->orWhere('key', 'like', 'club_%')
-                            ->orWhere('key', 'like', 'team_logo_%')
-                            ->orWhere('key', 'like', 'admin_contact_%')
-                            ->orWhere('key', 'like', 'partners_%')
-                            ->orWhere('key', 'like', 'partner_%')
-                            ->orWhereIn('key', [
-                                'slogan', 'logo_path', 'alt_logo_path', 'main_club_url', 'recruitment_url',
-                                'match_day', 'header_variant', 'footer_variant', 'button_radius', 'footer_text', 'theme_preset',
-                                'bank_account', 'bank_name',
-                            ]);
-                    })
-                    ->get(['key', 'value']);
-
-                $mapped = [];
-                foreach ($settings as $setting) {
-                    // Ruční dekódování Spatie translatable JSONu (bypass traitu)
-                    $value = json_decode($setting->value, true);
-
-                    if (is_array($value)) {
-                        $mapped[$setting->key] = $setting->value = $value[$locale] ?? $value['cs'] ?? reset($value);
-                    } else {
-                        $mapped[$setting->key] = $setting->value;
-                    }
-                }
-
-                return $mapped;
             });
         } catch (\Throwable $e) {
             return $this->dbSettings = [];

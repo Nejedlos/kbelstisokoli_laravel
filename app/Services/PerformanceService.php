@@ -62,30 +62,18 @@ class PerformanceService
 
     /**
      * Načte nastavení přímo z databáze.
-     * Optimalizováno: Používá Query Builder pro bypass Eloquent overheadu.
+     * Optimalizováno: Používá Query Builder pro bypass Eloquent overheadu a try-catch místo Schema::hasTable.
      */
     protected function fetchSettingsFromDb(): array
     {
         try {
-            // Rychlá kontrola existence tabulky
-            $tableExists = Cache::rememberForever('schema_has_settings_table', function () {
-                try {
-                    return Schema::hasTable('settings');
-                } catch (\Throwable $e) {
-                    return false;
-                }
-            });
-
-            if (! $tableExists) {
-                return [];
-            }
-
             return DB::table('settings')
                 ->where('key', 'like', 'perf_%')
                 ->get(['key', 'value'])
                 ->pluck('value', 'key')
                 ->toArray();
         } catch (\Throwable $e) {
+            // Pokud tabulka neexistuje nebo je jiný problém, vrátíme prázdné pole
             return [];
         }
     }

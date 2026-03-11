@@ -131,6 +131,10 @@ return [
                 'fresh' => 'Fresh mode',
             ],
         ],
+        'optimize' => [
+            'label' => 'Optimize: Cache',
+            'desc' => 'Vytvoří cache soubory pro konfiguraci a routy (pro produkci).',
+        ],
         'optimize_clear' => [
             'label' => 'Optimize: Clear',
             'desc' => 'Vymaže veškeré zakešované soubory (config, routes, views).',
