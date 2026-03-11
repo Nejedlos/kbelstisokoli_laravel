@@ -3,33 +3,24 @@
 namespace App\Filament\Pages;
 
 use App\Services\Help\HelpService;
-use App\Support\FilamentIcon;
-use App\Support\Icons\AppIcon;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
+use Illuminate\Support\Facades\Log;
 
 use function Filament\Support\original_request;
-use Illuminate\Support\Facades\Log;
 
 class Help extends Page
 {
     public function getView(): string
     {
-        $version = config('help.version', 'v2');
-        return "filament.pages.help-{$version}";
+        return 'filament.pages.help';
     }
 
     public function mount(): void
     {
-        $version = config('help.version', 'v2');
-
-        // Pokud je v1, musíme se ujistit, že service má nastavenou locale
-        if ($version === 'v1') {
-            app(\App\Services\HelpService::class)->setPathByLocale(app()->getLocale());
-        }
     }
 
     protected static ?string $title = 'Nápověda';
@@ -55,20 +46,19 @@ class Help extends Page
     public static function getNavigationItems(): array
     {
         $icon = static::getNavigationIcon();
-        $iconHtml = ($icon instanceof HtmlString) ? $icon->toHtml() : $icon;
         $label = __('admin.navigation.pages.help');
 
         return [
             NavigationItem::make('help')
-                ->label(new HtmlString('<div class="flex items-center gap-1.5">' . $iconHtml . ' <span>' . $label . '</span></div>'))
+                ->label($label)
                 ->extraAttributes([
                     'class' => 'fi-help-nav-item',
                     'data-help-nav-item' => 'true',
                 ])
                 ->group(static::getNavigationGroup())
                 ->parentItem(static::getNavigationParentItem())
-                ->icon(null)
-                ->activeIcon(null)
+                ->icon($icon)
+                ->activeIcon($icon)
                 ->isActiveWhen(fn (): bool => original_request()->routeIs(static::getNavigationItemActiveRoutePattern()))
                 ->sort(static::getNavigationSort())
                 ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor())
@@ -97,10 +87,6 @@ class Help extends Page
 
     public function getTree(): Collection
     {
-        $version = config('help.version', 'v2');
-        if ($version === 'v1') {
-            return $this->getHelpService()->getTree();
-        }
         return $this->getHelpService()->getNavigationTree();
     }
 
@@ -109,6 +95,14 @@ class Help extends Page
         return $this->getHelpService()->getHomeData();
     }
 
+    public function getSearchResults(): Collection
+    {
+        return $this->getHelpService()->search($this->searchQuery);
+    }
+
+    /**
+     * @return array|null
+     */
     public function getCategoryData(): ?array
     {
         if (!$this->currentCategory) {
@@ -118,6 +112,9 @@ class Help extends Page
         return $this->getHelpService()->getCategoryData($this->currentCategory);
     }
 
+    /**
+     * @return array|null
+     */
     public function getArticleData(): ?array
     {
         if (!$this->currentFile) {
@@ -127,62 +124,22 @@ class Help extends Page
         return $this->getHelpService()->getArticleData($this->currentFile);
     }
 
-    public function getSearchResults(): Collection
+    protected ?HelpService $helpService = null;
+
+    protected function getHelpService(): HelpService
     {
-        return $this->getHelpService()->search($this->searchQuery);
+        if ($this->helpService === null) {
+            $this->helpService = app(HelpService::class)->forAudience(auth()->user()->getRoleNames()->toArray());
+        }
+
+        return $this->helpService;
     }
 
     /**
-     * Legacy v1: Vrací info o aktuální kategorii
-     */
-    public function getCategoryInfo(): ?array
-    {
-        if (config('help.version', 'v2') !== 'v1' || !$this->currentCategory) {
-            return null;
-        }
-
-        $tree = $this->getTree();
-        return $tree->firstWhere('path', $this->currentCategory);
-    }
-
-    /**
-     * Legacy v1: Vrací obsah aktuálního souboru
-     */
-    public function getFile(): ?array
-    {
-        if (config('help.version', 'v2') !== 'v1' || !$this->currentFile) {
-            return null;
-        }
-
-        return $this->getHelpService()->getFileContent($this->currentFile);
-    }
-
-    protected ?\App\Services\Help\HelpService $helpServiceV2 = null;
-
-    protected function getHelpService()
-    {
-        $version = config('help.version', 'v2');
-
-        if ($version === 'v1') {
-            return app(\App\Services\HelpService::class);
-        }
-
-        if ($this->helpServiceV2 === null) {
-            $this->helpServiceV2 = app(\App\Services\Help\HelpService::class)->forAudience(auth()->user()->getRoleNames()->toArray());
-        }
-
-        return $this->helpServiceV2;
-    }
-
-    /**
-     * Vrací data pro v1 systém (legacy markdown browser)
+     * Vrací data pro nápovědu
      */
     public function getHelpData(): ?array
     {
-        if (config('help.version', 'v2') !== 'v1') {
-            return null;
-        }
-
         if ($this->searchQuery) {
             return [
                 'type' => 'search',
@@ -192,18 +149,15 @@ class Help extends Page
         }
 
         if ($this->currentFile) {
-            $content = $this->getHelpService()->getFileContent($this->currentFile);
-            if ($content) {
-                return [
-                    'type' => 'file',
-                    'content' => $content,
-                ];
-            }
+            return [
+                'type' => 'file',
+                'file' => $this->getHelpService()->getArticleData($this->currentFile),
+            ];
         }
 
         return [
-            'type' => 'tree',
-            'tree' => $this->getHelpService()->getTree(),
+            'type' => 'home',
+            'home' => $this->getHelpService()->getHomeData(),
         ];
     }
 

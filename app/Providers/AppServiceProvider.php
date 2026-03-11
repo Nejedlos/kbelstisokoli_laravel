@@ -150,6 +150,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\MediaAsset::class,
             \App\Models\Gallery::class,
             \App\Models\PhotoPool::class,
+            \App\Models\HelpCategory::class,
+            \App\Models\HelpArticle::class,
+            \App\Models\HelpFaq::class,
+            \App\Models\HelpQuickAction::class,
         ];
 
         foreach ($models as $model) {

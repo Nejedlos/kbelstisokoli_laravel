@@ -22,7 +22,7 @@ Navržená struktura eliminuje duplicity a logicky rozděluje systém do oblast�
 
 ### A. Úvod a Onboarding (`uvod`)
 - **Popis**: Základní informace pro nové uživatele, jak se v systému zorientovat a nastavit si účet.
-- **Ikona**: `fa-light fa-house-sparkles`
+- **Ikona**: `fa-light fa-rocket-launch`
 - **Barva**: `blue` (Tailwind `sky`)
 - **Cílové role**: Všichni
 - **Články**:
@@ -155,7 +155,8 @@ Každý článek v databázi musí následovat tuto strukturu pro zajištění m
 ### Jazyk a styl
 - **Tón**: Profesionální, přátelský, ale věcný.
 - **Pojmenování prvků**: Vždy používáme přesné názvy z UI (např. tlačítko "Uložit změny", nikoliv "to potvrďte").
-- **Dvojjazyčnost**: Každý článek existuje v `cs` a `en` verzi.
+- **Dvojjazyčnost**: Každý článek existuje v `cs` and `en` verzi.
+- **Bez nadpisů H1**: Markdown soubory **nesmí** obsahovat nadpis `#` (H1). Titulek článku se vykresluje automaticky ze seederu.
 
 ### Vizuály
 - **Ikony**: Používáme výhradně Font Awesome 7 Pro (`fa-light`).

@@ -34,6 +34,7 @@ class GlobalSeeder extends Seeder
         BrandingSeeder::class,
         SeoOptimizationSeeder::class,
         PerformanceSettingsSeeder::class,
+        HelpSeeder::class,
     ];
 
     /**
@@ -79,6 +80,11 @@ class GlobalSeeder extends Seeder
         'external_team_mappings',
         'external_team_season_configs',
         'external_stat_sources',
+        'help_categories',
+        'help_articles',
+        'help_quick_actions',
+        'help_faqs',
+        'help_article_related',
     ];
 
     /**

@@ -56,7 +56,11 @@ Tato pole jsou povinná nebo doporučená pro správné fungování UI a navigac
 
 ## 3. Struktura Markdownu (v souboru)
 
-Markdown soubor nesmí obsahovat H1 (název se bere z DB). Obsah musí být logicky členěn pomocí H2 a H3.
+> [!IMPORTANT]
+> **Markdown soubor NESMÍ obsahovat nadpis první úrovně (H1 / #).**
+> Název článku se automaticky bere z databáze a vykresluje se v šabloně stránky. Vložení H1 v Markdownu způsobí duplicitu nadpisu v UI.
+
+Obsah musí být logicky členěn pomocí H2 a H3.
 
 ### Povinné sekce (H2)
 1.  **## Přehled obrazovky**

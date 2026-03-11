@@ -18,47 +18,54 @@ class HelpNavigationService
      */
     public function getBreadcrumbs(object|null $item = null): Collection
     {
-        $breadcrumbs = collect([
-            [
-                'label' => __('admin.navigation.pages.help'),
-                'slug' => null,
-                'url' => \App\Filament\Pages\Help::getUrl(),
-                'is_active' => $item === null,
-            ]
-        ]);
+        $locale = app()->getLocale();
+        $itemId = $item->id ?? 'root';
+        $itemType = $item ? get_class($item) : 'none';
+        $cacheKey = "help_breadcrumbs_{$itemType}_{$itemId}_{$locale}";
 
-        if ($item === null) {
-            return $breadcrumbs;
-        }
-
-        // Podpora pro stdClass i Eloquent modely
-        $isArticle = isset($item->category_id) || $item instanceof HelpArticle;
-
-        if ($isArticle) {
-            $category = null;
-            if (isset($item->category) && $item->category) {
-                $category = $item->category;
-            } elseif (isset($item->category_id)) {
-                $category = HelpCategory::find($item->category_id);
-            }
-
-            if ($category) {
-                $this->addCategoryBreadcrumbs($category, $breadcrumbs);
-            }
-
-            $label = $item->title_str ?? (method_exists($item, 'getTranslation') ? $item->getTranslation('title', app()->getLocale(), false) : ($item->title ?? 'Untitled'));
-
-            $breadcrumbs->push([
-                'label' => $label,
-                'slug' => $item->slug,
-                'url' => \App\Filament\Pages\Help::getUrl(['file' => $item->slug]),
-                'is_active' => true,
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHours(24), function () use ($item) {
+            $breadcrumbs = collect([
+                [
+                    'label' => __('admin.navigation.pages.help'),
+                    'slug' => null,
+                    'url' => \App\Filament\Pages\Help::getUrl(),
+                    'is_active' => $item === null,
+                ]
             ]);
-        } else {
-            $this->addCategoryBreadcrumbs($item, $breadcrumbs, true);
-        }
 
-        return $breadcrumbs;
+            if ($item === null) {
+                return $breadcrumbs;
+            }
+
+            // Podpora pro stdClass i Eloquent modely
+            $isArticle = isset($item->category_id) || $item instanceof HelpArticle;
+
+            if ($isArticle) {
+                $category = null;
+                if (isset($item->category) && $item->category) {
+                    $category = $item->category;
+                } elseif (isset($item->category_id)) {
+                    $category = HelpCategory::find($item->category_id);
+                }
+
+                if ($category) {
+                    $this->addCategoryBreadcrumbs($category, $breadcrumbs);
+                }
+
+                $label = $item->title_str ?? (method_exists($item, 'getTranslation') ? $item->getTranslation('title', app()->getLocale(), false) : ($item->title ?? 'Untitled'));
+
+                $breadcrumbs->push([
+                    'label' => $label,
+                    'slug' => $item->slug,
+                    'url' => \App\Filament\Pages\Help::getUrl(['file' => $item->slug]),
+                    'is_active' => true,
+                ]);
+            } else {
+                $this->addCategoryBreadcrumbs($item, $breadcrumbs, true);
+            }
+
+            return $breadcrumbs;
+        });
     }
 
     /**
@@ -83,13 +90,21 @@ class HelpNavigationService
             $depth++;
 
             if ($depth > self::MAX_BREADCRUMB_DEPTH) {
-                pre_log('Help breadcrumbs depth limit reached', ['category_id' => $category->id ?? 'unknown', 'depth' => $depth]);
+                if (function_exists('pre_log')) {
+                    pre_log('Help breadcrumbs depth limit reached', ['category_id' => $category->id ?? 'unknown', 'depth' => $depth]);
+                } else {
+                    \Log::error('Help breadcrumbs depth limit reached', ['category_id' => $category->id ?? 'unknown', 'depth' => $depth]);
+                }
                 break;
             }
 
             $id = $current->id ?? null;
             if ($id && in_array($id, $visitedIds, true)) {
-                pre_log('Help breadcrumbs cycle detected', ['category_id' => $id, 'visited_ids' => $visitedIds]);
+                if (function_exists('pre_log')) {
+                    pre_log('Help breadcrumbs cycle detected', ['category_id' => $id, 'visited_ids' => $visitedIds]);
+                } else {
+                    \Log::error('Help breadcrumbs cycle detected', ['category_id' => $id, 'visited_ids' => $visitedIds]);
+                }
                 break;
             }
 

@@ -50,8 +50,8 @@
         <i class="{{ $config['icon'] }} text-xl"></i>
     </div>
     <div class="flex-1">
-        <h5 class="text-sm font-black uppercase tracking-widest mb-2 opacity-80">{{ $config['title'] }}</h5>
-        <div class="prose-sm prose-slate max-w-none opacity-90 leading-relaxed font-medium">
+        <h5 class="text-sm font-black uppercase tracking-widest mb-2 text-slate-800">{{ $config['title'] }}</h5>
+        <div class="prose-sm prose-slate max-w-none leading-relaxed font-medium">
             {{ $slot }}
         </div>
     </div>

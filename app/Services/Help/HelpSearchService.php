@@ -56,55 +56,65 @@ class HelpSearchService
         $locale = app()->getLocale();
         $filteringRoles = $this->getFilteringRoles();
 
-        // Jednoduchý relevance ranking pomocí SQL (funguje v SQLite i MySQL)
-        // Váhy: Title (10), Keywords (8), Purpose (5), Content (3)
-        return \DB::table('help_articles')
-            ->select(['id', 'slug', 'title', 'excerpt', 'metadata', 'audience_roles', 'is_featured', 'content'])
-            ->selectRaw("
-                (CASE WHEN JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ? THEN 10 ELSE 0 END +
-                 CASE WHEN JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ? THEN 8 ELSE 0 END +
-                 CASE WHEN JSON_EXTRACT(metadata, '$.\"{$locale}\".purpose') LIKE ? THEN 5 ELSE 0 END +
-                 CASE WHEN JSON_EXTRACT(content, '$.\"{$locale}\"') LIKE ? THEN 3 ELSE 0 END)
-                AS relevance
-            ", [
-                "%" . mb_strtolower($query) . "%",
-                "%" . mb_strtolower($query) . "%",
-                "%" . mb_strtolower($query) . "%",
-                "%" . mb_strtolower($query) . "%",
-            ])
-            ->where('is_published', true)
-            ->where(function ($q) {
-                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
-            })
-            ->where(function ($q) use ($query, $locale) {
-                $term = "%" . mb_strtolower($query) . "%";
-                $q->whereRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ?", [$term])
-                    ->orWhereRaw("JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ?", [$term])
-                    ->orWhereRaw("JSON_EXTRACT(metadata, '$.\"{$locale}\".purpose') LIKE ?", [$term])
-                    ->orWhereRaw("JSON_EXTRACT(content, '$.\"{$locale}\"') LIKE ?", [$term]);
-            })
-            ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
-                $q->where(function ($inner) use ($filteringRoles) {
-                    $inner->whereNull('audience_roles');
-                    foreach ($filteringRoles as $role) {
-                        $inner->orWhereJsonContains('audience_roles', $role);
-                    }
+        $rolesHash = md5(json_encode($this->roles));
+        $cacheKey = "help_search_{$rolesHash}_{$locale}_" . md5($query) . "_{$limit}";
+
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($query, $limit, $locale, $filteringRoles) {
+            // Jednoduchý relevance ranking pomocí SQL (funguje v SQLite i MySQL)
+            // Váhy: Title (10), Keywords (8), Purpose (5), Content (3)
+            return \DB::table('help_articles')
+                ->select(['id', 'slug', 'title', 'excerpt', 'metadata', 'audience_roles', 'is_featured', 'content', 'search_keywords'])
+                ->selectRaw("
+                    (CASE WHEN JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ? THEN 10 ELSE 0 END +
+                     CASE WHEN JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ? THEN 8 ELSE 0 END +
+                     CASE WHEN JSON_EXTRACT(metadata, '$.\"{$locale}\".purpose') LIKE ? THEN 5 ELSE 0 END +
+                     CASE WHEN JSON_EXTRACT(content, '$.\"{$locale}\"') LIKE ? THEN 3 ELSE 0 END)
+                    AS relevance
+                ", [
+                    "%" . mb_strtolower($query) . "%",
+                    "%" . mb_strtolower($query) . "%",
+                    "%" . mb_strtolower($query) . "%",
+                    "%" . mb_strtolower($query) . "%",
+                ])
+                ->where('is_published', true)
+                ->where(function ($q) {
+                    $q->whereNull('published_at')->orWhere('published_at', '<=', now());
+                })
+                ->where(function ($q) use ($query, $locale) {
+                    $term = "%" . mb_strtolower($query) . "%";
+                    $q->whereRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ?", [$term])
+                        ->orWhereRaw("JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ?", [$term])
+                        ->orWhereRaw("JSON_EXTRACT(metadata, '$.\"{$locale}\".purpose') LIKE ?", [$term])
+                        ->orWhereRaw("JSON_EXTRACT(content, '$.\"{$locale}\"') LIKE ?", [$term]);
+                })
+                ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
+                    $q->where(function ($inner) use ($filteringRoles) {
+                        $inner->whereNull('audience_roles');
+                        foreach ($filteringRoles as $role) {
+                            // SQLite v testech má problém s whereJsonContains v subquery
+                            if (config('database.default') === 'sqlite') {
+                                $inner->orWhere('audience_roles', 'LIKE', '%"' . $role . '"%');
+                            } else {
+                                $inner->orWhereJsonContains('audience_roles', $role);
+                            }
+                        }
+                    });
+                })
+                ->orderByDesc('relevance')
+                ->orderByRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') ASC")
+                ->limit($limit)
+                ->get()
+                ->map(function ($article) use ($query, $locale) {
+                    $title = json_decode($article->title, true) ?: [];
+                    $article->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
+
+                    $article->search_excerpt = $this->generateExcerpt($article, $query, $locale);
+                    $article->audience_roles = json_decode($article->audience_roles, true) ?: [];
+                    $article->is_featured = (bool) $article->is_featured;
+
+                    return $article;
                 });
-            })
-            ->orderByDesc('relevance')
-            ->orderByRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') ASC")
-            ->limit($limit)
-            ->get()
-            ->map(function ($article) use ($query, $locale) {
-                $title = json_decode($article->title, true) ?: [];
-                $article->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
-
-                $article->search_excerpt = $this->generateExcerpt($article, $query, $locale);
-                $article->audience_roles = json_decode($article->audience_roles, true) ?: [];
-                $article->is_featured = (bool) $article->is_featured;
-
-                return $article;
-            });
+        });
     }
 
     /**

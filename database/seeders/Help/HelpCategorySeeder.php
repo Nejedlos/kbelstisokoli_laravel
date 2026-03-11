@@ -21,7 +21,7 @@ class HelpCategorySeeder extends Seeder
             [
                 'data' => [
                     'slug' => 'uvod',
-                    'icon' => 'fa-light fa-house-sparkles',
+                    'icon' => 'fa-light fa-rocket-launch',
                     'color' => 'sky',
                     'sort_order' => 10,
                     'is_active' => true,
@@ -78,6 +78,69 @@ class HelpCategorySeeder extends Seeder
                     'description' => [
                         'cs' => 'Správa členských příspěvků, plateb, tarifů a finanční integrity klubu.',
                         'en' => 'Management of membership fees, payments, tariffs and financial integrity of the club.',
+                    ],
+                ],
+            ],
+            [
+                'data' => [
+                    'slug' => 'lide',
+                    'icon' => 'fa-light fa-users',
+                    'color' => 'teal',
+                    'sort_order' => 40,
+                    'is_active' => true,
+                    'is_featured' => false,
+                    'audience_roles' => ['admin', 'editor', 'coach', 'super_admin'],
+                ],
+                'translations' => [
+                    'name' => [
+                        'cs' => 'Členové a komunikace',
+                        'en' => 'Members & Communication',
+                    ],
+                    'description' => [
+                        'cs' => 'Evidence uživatelů, správa rolí, GDPR a vnitřní informační kanály.',
+                        'en' => 'User evidence, role management, GDPR and internal communication channels.',
+                    ],
+                ],
+            ],
+            [
+                'data' => [
+                    'slug' => 'obsah',
+                    'icon' => 'fa-light fa-newspaper',
+                    'color' => 'amber',
+                    'sort_order' => 50,
+                    'is_active' => true,
+                    'is_featured' => false,
+                    'audience_roles' => ['admin', 'editor'],
+                ],
+                'translations' => [
+                    'name' => [
+                        'cs' => 'Obsah a web',
+                        'en' => 'Content & Web',
+                    ],
+                    'description' => [
+                        'cs' => 'Editace veřejného webu, správa článků, fotogalerií a statických informací.',
+                        'en' => 'Editing the public website, managing articles, photo galleries and static information.',
+                    ],
+                ],
+            ],
+            [
+                'data' => [
+                    'slug' => 'system',
+                    'icon' => 'fa-light fa-gear',
+                    'color' => 'slate',
+                    'sort_order' => 60,
+                    'is_active' => true,
+                    'is_featured' => false,
+                    'audience_roles' => ['super_admin'],
+                ],
+                'translations' => [
+                    'name' => [
+                        'cs' => 'Systém a nastavení',
+                        'en' => 'System & Settings',
+                    ],
+                    'description' => [
+                        'cs' => 'Globální konfigurace, technická údržba, logy a integrace.',
+                        'en' => 'Global configuration, technical maintenance, logs and integrations.',
                     ],
                 ],
             ],
