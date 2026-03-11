@@ -139,12 +139,15 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'not_found_logger' => \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
 
+        $middleware->web(prepend: [
+            \App\Http\Middleware\PerformanceProfilingMiddleware::class,
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\SetLocaleMiddleware::class,
             \App\Http\Middleware\AddRequestIdToResponse::class,
             \App\Http\Middleware\MinifyHtmlMiddleware::class,
             \App\Http\Middleware\InjectFeedbackWidget::class,
-            \App\Http\Middleware\PerformanceProfilingMiddleware::class,
             \App\Http\Middleware\FullPageCacheMiddleware::class,
             \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);

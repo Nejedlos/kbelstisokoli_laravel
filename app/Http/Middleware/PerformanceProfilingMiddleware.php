@@ -20,45 +20,30 @@ class PerformanceProfilingMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        Log::debug('PerformanceProfilingMiddleware::handle', ['url' => $request->fullUrl()]);
-        // Bypass autentizace pro performance testy
-        if ($request->header('X-Performance-Test-Key') === config('app.key')) {
-            // Pokud je přítomen platný klíč, "přihlášíme" prvního administrátora pro průchod middlewary
-            // To zabrání deadlocku session (u file driveru) a umožní profilování chráněných stránek
-            try {
-                if (Schema::hasTable('users')) {
-                    $user = User::whereHas('roles', fn ($q) => $q->whereIn('name', ['super_admin', 'admin']))
-                        ->first() ?: User::first();
-                    if ($user) {
-                        Auth::onceUsingId($user->id);
-                    }
-                }
-            } catch (\Throwable $e) {
-                // Tichý fail pro DB chyby během profilingu
-            }
-        }
-
-        if (! $this->shouldProfile($request)) {
-            return $next($request);
-        }
-
         $startTime = microtime(true);
         $bootstrapDuration = defined('LARAVEL_START') ? ($startTime - LARAVEL_START) * 1000 : 0;
 
-        // Zapnutí query logu
-        DB::enableQueryLog();
+        // Zapnutí query logu co nejdříve
+        try {
+            DB::enableQueryLog();
+        } catch (\Throwable $e) {
+            // Ignorujeme, pokud DB není připravena
+        }
 
         $response = $next($request);
 
         $endTime = microtime(true);
         $duration = ($endTime - $startTime) * 1000; // v ms
+        $totalTime = $duration + $bootstrapDuration;
 
-        $queries = DB::getQueryLog();
+        $queries = [];
+        try {
+            $queries = DB::getQueryLog();
+        } catch (\Throwable $e) {}
+
         $queryCount = count($queries);
         $queryTime = array_sum(array_column($queries, 'time'));
-
         $memoryPeak = memory_get_peak_usage(true) / 1024 / 1024; // v MB
-
         $opcacheEnabled = function_exists('opcache_get_status') && opcache_get_status(false);
 
         $logData = [
@@ -67,6 +52,7 @@ class PerformanceProfilingMiddleware
             'status' => $response->getStatusCode(),
             'duration_ms' => round($duration, 2),
             'bootstrap_ms' => round($bootstrapDuration, 2),
+            'total_ms' => round($totalTime, 2),
             'query_count' => $queryCount,
             'query_time_ms' => round($queryTime, 2),
             'memory_mb' => round($memoryPeak, 2),
@@ -74,39 +60,36 @@ class PerformanceProfilingMiddleware
             'opcache' => $opcacheEnabled ? 'on' : 'off',
         ];
 
-        // Pokud je to pomalý request (např. > 500ms) nebo hodně queries (např. > 50), logujeme to výrazněji
-        if ($duration + $bootstrapDuration > 500 || $queryCount > 50) {
-            $duplicatedQueries = $this->getDuplicatedQueries($queries);
-            $logData['duplicated_queries'] = $duplicatedQueries;
-            Log::warning('Slow request detected', $logData);
-        } else {
-            Log::info('Performance profile', $logData);
+        $shouldLog = $this->shouldProfile($request) || $totalTime > 500 || $queryCount > 50;
+
+        if ($shouldLog) {
+            if ($totalTime > 1000 || $queryCount > 50) {
+                $duplicatedQueries = $this->getDuplicatedQueries($queries);
+                if ($duplicatedQueries) {
+                    $logData['duplicated_queries'] = $duplicatedQueries;
+                }
+                Log::warning('Slow request detected', $logData);
+            } else {
+                Log::info('Performance profile', $logData);
+            }
         }
 
-        // Přidání headers pro snadnou diagnostiku v DevTools (pouze pro autorizované uživatele, v local prostředí nebo při performance testu)
-        if (app()->environment('local') || $this->isAuthorized($request) || $request->header('X-Performance-Test-Key') === config('app.key')) {
+        // Přidání headers pro snadnou diagnostiku v DevTools
+        // Vždy přidáme základní časy, pokud je to pomalé nebo jsme v debug módu
+        if ($shouldLog || config('app.debug')) {
             $response->headers->set('X-Perf-Bootstrap-MS', round($bootstrapDuration, 2));
             $response->headers->set('X-Perf-Duration-MS', round($duration, 2));
+            $response->headers->set('X-Perf-Total-MS', round($totalTime, 2));
             $response->headers->set('X-Perf-Query-Count', $queryCount);
-            $response->headers->set('X-Perf-Query-Time-MS', round($queryTime, 2));
-            $response->headers->set('X-Perf-Memory-MB', round($memoryPeak, 2));
-
-            // Diagnostika Opcache
-            $opcacheEnabled = function_exists('opcache_get_status') && opcache_get_status(false);
             $response->headers->set('X-Perf-Opcache', $opcacheEnabled ? 'enabled' : 'disabled');
         }
-
-        Log::debug('PerformanceProfilingMiddleware::handle - headers set', [
-            'url' => $request->fullUrl(),
-            'duration' => $response->headers->get('X-Perf-Duration-MS'),
-        ]);
 
         return $response;
     }
 
     protected function shouldProfile(Request $request): bool
     {
-        // Profilujeme v lokálním prostředí, pro autorizované uživatele nebo pro interní testy
+        // Profilujeme v lokálním prostředí, pro interní testy nebo pokud je to pomalé (ošetřeno v handle)
         if (app()->environment('local')) {
             return true;
         }
@@ -120,15 +103,14 @@ class PerformanceProfilingMiddleware
 
     protected function isAuthorized(Request $request): bool
     {
-        // Kontrola, zda je uživatel admin (používáme Spatie Permission nebo jinou logiku)
-        // V tomto projektu se zdá, že existuje oprávnění 'access_admin'
-        // Pokud je impersonován, považujeme ho za autorizovaného, pokud původní admin byl
+        // Kontrola, zda je uživatel admin.
+        // POZOR: Pokud middleware běží PŘED StartSession, neuvidíme autentizaci.
+        // V tom případě spoléháme na by-time logging v handle().
         try {
             if ($request->hasSession() && $request->session()->has('impersonated_by')) {
                 return true;
             }
         } catch (\Throwable $e) {
-            // Tichý fail pro případy, kdy session není k dispozici (např. v middlewaru běžícím příliš brzy)
         }
 
         try {

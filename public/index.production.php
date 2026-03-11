@@ -21,12 +21,16 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
     /**
      * Jednoduchý logger, který funguje i před startem Laravelu
      */
-    $preLog = function (string $message, array $context = []) use ($preBootLog) {
-        $timestamp = date('Y-m-d H:i:s');
+    $GLOBALS['__PRE_LOGS'] = [];
+    $preLog = function (string $message, array $context = []) {
+        $microtime = microtime(true);
+        $timestamp = date('Y-m-d H:i:s') . '.' . sprintf('%03d', ($microtime - floor($microtime)) * 1000);
         $pid = getmypid();
         $uri = $_SERVER['REQUEST_URI'] ?? 'CLI';
-        $logData = sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : '');
-        @file_put_contents($preBootLog, $logData, FILE_APPEND);
+        $GLOBALS['__PRE_LOGS'][] = [
+            'time' => $microtime,
+            'log' => sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : '')
+        ];
     };
 
     // Breadcrumb systém pro detekci zacyklení
@@ -58,13 +62,14 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
     // Globální helpery (vždy dostupné přes include, aby byly v globálním scope i pro CLI)
     if (!function_exists('pre_log')) {
         function pre_log(string $message, array $context = []) {
-            $base = '/home/html/kbelstisokoli.cz/public_html/secret';
-            $preBootLog = is_writable($base . '/storage/logs') ? $base . '/storage/logs/pre-boot.log' : sys_get_temp_dir() . '/kbelstisokoli-pre-boot.log';
-            $timestamp = date('Y-m-d H:i:s');
+            $microtime = microtime(true);
+            $timestamp = date('Y-m-d H:i:s') . '.' . sprintf('%03d', ($microtime - floor($microtime)) * 1000);
             $pid = getmypid();
             $uri = $_SERVER['REQUEST_URI'] ?? 'CLI';
-            $logData = sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : '');
-            @file_put_contents($preBootLog, $logData, FILE_APPEND);
+            $GLOBALS['__PRE_LOGS'][] = [
+                'time' => $microtime,
+                'log' => sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : '')
+            ];
         }
     }
 
@@ -201,9 +206,23 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
         $send($subject, $body);
     });
 
-    register_shutdown_function(function () use ($send, $env, $debug, $preLog) {
+    register_shutdown_function(function () use ($send, $env, $debug, $preLog, $APP_BASE) {
         $error = error_get_last();
-        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        $isFatal = $error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true);
+
+        $startTime = defined('LARAVEL_START') ? LARAVEL_START : (isset($GLOBALS['__PRE_LOGS'][0]['time']) ? $GLOBALS['__PRE_LOGS'][0]['time'] : microtime(true));
+        $totalTime = (microtime(true) - $startTime) * 1000;
+
+        // Zapíšeme logy pouze pokud: nastala fatální chyba, nebo request trval déle než 500ms
+        if ($isFatal || $totalTime > 500 || $debug) {
+            $preBootLog = is_writable($APP_BASE . '/storage/logs') ? $APP_BASE . '/storage/logs/pre-boot.log' : sys_get_temp_dir() . '/kbelstisokoli-pre-boot.log';
+            $allLogs = array_column($GLOBALS['__PRE_LOGS'] ?? [], 'log');
+            if ($allLogs) {
+                @file_put_contents($preBootLog, implode('', $allLogs), FILE_APPEND);
+            }
+        }
+
+        if ($isFatal) {
 
             $isMemoryIssue = (strpos($error['message'], 'Allowed memory size') !== false);
 
