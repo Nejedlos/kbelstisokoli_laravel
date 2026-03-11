@@ -331,36 +331,52 @@
 
             <!-- Support / Help -->
             @if(!empty(config('navigation.member.support')))
-                <div class="px-6 pb-4">
+                <div class="px-6 py-4">
                     @foreach (config('navigation.member.support', []) as $item)
                         <a href="{{ route($item['route']) }}"
-                           class="group flex items-center gap-4 px-5 py-4 rounded-[1.25rem] transition-all overflow-hidden relative {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-[1.02]' : 'bg-slate-50 text-slate-600 hover:bg-primary/5 hover:text-primary border border-slate-100/50' }}">
+                           class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all relative {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/30' : 'bg-slate-50 text-slate-600 hover:bg-white hover:shadow-sm border border-slate-100/50' }}">
 
-                            {{-- Pulzující tečka pro nápovědu (podobně jako v adminu) --}}
-                            <div class="relative w-10 h-10 flex items-center justify-center rounded-2xl shrink-0 {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-white shadow-sm group-hover:shadow-md transition-all' }}">
-                                <i class="fa-light fa-circle-question text-lg {{ request()->routeIs($item['route']) ? 'text-white' : 'text-primary' }}"></i>
+                            {{-- Pulzující tečka pro nápovědu --}}
+                            <div class="relative w-8 h-8 flex items-center justify-center rounded-xl shrink-0 {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-white shadow-sm' }}">
+                                <i class="fa-light fa-circle-question text-base {{ request()->routeIs($item['route']) ? 'text-white' : 'text-primary' }}"></i>
                                 @if(!request()->routeIs($item['route']))
-                                    <span class="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                                    <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2">
                                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
                                     </span>
                                 @endif
                             </div>
 
-                            <div class="flex flex-col leading-tight">
-                                <span class="text-[13px] font-black uppercase tracking-widest">{{ __($item['title']) }}</span>
-                                <span class="text-[10px] font-bold opacity-60 uppercase tracking-tighter italic">{{ __('member.nav.need_help') }}</span>
-                            </div>
+                            <span class="text-[11px] font-black uppercase tracking-widest">{{ __($item['title']) }}</span>
 
-                            <i class="fa-light fa-arrow-right ml-auto text-xs opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                            <i class="fa-light fa-arrow-right ml-auto text-[10px] opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
                         </a>
                     @endforeach
                 </div>
             @endif
 
-            <!-- Bottom Action / Help -->
-            <div class="p-6 border-t border-slate-100 bg-slate-50/30">
-                <x-member.contact-box type="sidebar" />
+            <!-- Pomoc a kontakt - kompaktní -->
+            <div class="mt-auto p-6 pb-20 border-t border-slate-100 bg-slate-50/10 space-y-3">
+                <a href="{{ route('member.help') }}" class="flex items-center gap-3 text-slate-400 hover:text-primary transition-colors group">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                        <i class="fa-light fa-circle-question text-sm"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest">{{ __('nav.need_help') }}</span>
+                </a>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="{{ route('member.contact.coach.form') }}"
+                       class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white border border-slate-200 text-[10px] font-bold text-slate-600 hover:border-primary/30 hover:text-primary transition-all"
+                       title="{{ __('member.feedback.contact_coach_title') }}">
+                        <i class="fa-light fa-whistle"></i>
+                        <span>Trenér</span>
+                    </a>
+                    <a href="{{ route('member.contact.admin.form') }}"
+                       class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white border border-slate-200 text-[10px] font-bold text-slate-600 hover:border-primary/30 hover:text-primary transition-all"
+                       title="{{ __('member.feedback.contact_admin_title') }}">
+                        <i class="fa-light fa-user-gear"></i>
+                        <span>Admin</span>
+                    </a>
+                </div>
             </div>
         </aside>
 
@@ -428,26 +444,23 @@
 
             <!-- Support / Help (Mobile) -->
             @if(!empty(config('navigation.member.support')))
-                <div class="px-6 pb-4">
+                <div class="px-6 py-4">
                     @foreach (config('navigation.member.support', []) as $item)
                         <a href="{{ route($item['route']) }}"
                            @click="sidebarOpen = false"
-                           class="group flex items-center gap-4 px-5 py-4 rounded-[1.25rem] transition-all overflow-hidden relative {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-[1.02]' : 'bg-slate-50 text-slate-600 hover:bg-primary/5 hover:text-primary border border-slate-100/50' }}">
+                           class="group flex items-center gap-4 px-4 py-3 rounded-2xl transition-all relative {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/30' : 'bg-slate-50 text-slate-600 border border-slate-100/50' }}">
 
-                            <div class="relative w-10 h-10 flex items-center justify-center rounded-2xl shrink-0 {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-white shadow-sm transition-all' }}">
-                                <i class="fa-light fa-circle-question text-lg {{ request()->routeIs($item['route']) ? 'text-white' : 'text-primary' }}"></i>
+                            <div class="relative w-8 h-8 flex items-center justify-center rounded-xl shrink-0 {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-white shadow-sm' }}">
+                                <i class="fa-light fa-circle-question text-base {{ request()->routeIs($item['route']) ? 'text-white' : 'text-primary' }}"></i>
                                 @if(!request()->routeIs($item['route']))
-                                    <span class="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                                    <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2">
                                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
                                     </span>
                                 @endif
                             </div>
 
-                            <div class="flex flex-col leading-tight">
-                                <span class="text-[13px] font-black uppercase tracking-widest">{{ __($item['title']) }}</span>
-                                <span class="text-[10px] font-bold opacity-60 uppercase tracking-tighter italic">{{ __('member.nav.need_help') }}</span>
-                            </div>
+                            <span class="text-[13px] font-black uppercase tracking-widest">{{ __($item['title']) }}</span>
 
                             <i class="fa-light fa-arrow-right ml-auto text-xs opacity-40 transition-all"></i>
                         </a>
@@ -456,8 +469,28 @@
             @endif
 
             <!-- Bottom Action / Help (Mobile) -->
-            <div class="p-6 border-t border-slate-50 bg-slate-50/50">
-                <x-member.contact-box type="sidebar" />
+            <div class="mt-auto p-6 pb-24 border-t border-slate-50 bg-slate-50/30 space-y-4">
+                <a href="{{ route('member.help') }}" @click="sidebarOpen = false" class="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-500">
+                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary shrink-0">
+                        <i class="fa-light fa-circle-question text-lg"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-black uppercase tracking-widest text-secondary">{{ __('nav.need_help') }}</span>
+                        <span class="text-[10px] italic">{{ __('nav.help_text') }}</span>
+                    </div>
+                </a>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{{ route('member.contact.coach.form') }}" @click="sidebarOpen = false"
+                       class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm text-xs font-bold text-slate-600">
+                        <i class="fa-light fa-whistle text-primary"></i>
+                        {{ __('member.feedback.contact_coach_title') }}
+                    </a>
+                    <a href="{{ route('member.contact.admin.form') }}" @click="sidebarOpen = false"
+                       class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm text-xs font-bold text-slate-600">
+                        <i class="fa-light fa-user-gear text-slate-400"></i>
+                        {{ __('member.feedback.contact_admin_title') }}
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -535,6 +568,7 @@
                     @endif
 
                     @yield('content')
+                    {{ $slot ?? '' }}
                 </div>
             </div>
         </main>

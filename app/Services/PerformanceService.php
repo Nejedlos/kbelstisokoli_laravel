@@ -50,7 +50,7 @@ class PerformanceService
         }
 
         try {
-            return $this->settings = Cache::remember('performance_settings', 3600, function () {
+            return $this->settings = Cache::store('database')->remember('performance_settings', 3600, function () {
                 return $this->fetchSettingsFromDb();
             });
         } catch (\Throwable $e) {

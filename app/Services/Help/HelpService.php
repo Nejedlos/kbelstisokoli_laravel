@@ -58,6 +58,8 @@ class HelpService
 
         return [
             'category' => $category,
+            'articles' => $category->articles ?? collect(),
+            'subcategories' => $category->subcategories ?? collect(),
             'breadcrumbs' => $this->navigationService->getBreadcrumbs($category),
         ];
     }

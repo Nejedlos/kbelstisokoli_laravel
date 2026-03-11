@@ -5,6 +5,12 @@ use App\Http\Controllers\Member\DashboardController;
 use App\Http\Controllers\Member\EconomyController;
 use App\Http\Controllers\Member\ProfileController;
 use App\Http\Controllers\Member\TeamController;
+use App\Http\Controllers\Member\SearchController;
+use App\Http\Controllers\Member\AiController;
+use App\Http\Controllers\Member\NotificationController;
+use App\Http\Controllers\Member\StatisticsController;
+use App\Http\Controllers\Member\ContactController;
+use App\Livewire\Member\HelpCenter;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -43,27 +49,27 @@ Route::middleware(['member'])
         Route::get('/platby', [EconomyController::class, 'index'])->name('economy.index');
 
         // Notifikace
-        Route::get('/notifikace', [\App\Http\Controllers\Member\NotificationController::class, 'index'])->name('notifications.index');
-        Route::get('/notifikace/{id}/go', [\App\Http\Controllers\Member\NotificationController::class, 'readAndRedirect'])->name('notifications.redirect');
-        Route::post('/notifikace/mark-all-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
-        Route::post('/notifikace/{id}/mark-read', [\App\Http\Controllers\Member\NotificationController::class, 'markAsRead'])->name('notifications.markRead');
+        Route::get('/notifikace', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifikace/{id}/go', [NotificationController::class, 'readAndRedirect'])->name('notifications.redirect');
+        Route::post('/notifikace/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+        Route::post('/notifikace/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.markRead');
 
         // Vyhledávání (klasické)
-        Route::get('/hledat', \App\Http\Controllers\Member\SearchController::class)->name('search');
+        Route::get('/hledat', SearchController::class)->name('search');
 
         // AI vyhledávání
-        Route::get('/ai', \App\Http\Controllers\Member\AiController::class)->name('ai');
+        Route::get('/ai', AiController::class)->name('ai');
 
         // Nápověda
-        Route::get('/napoveda', \App\Livewire\Member\HelpCenter::class)->name('help');
+        Route::get('/napoveda', HelpCenter::class)->name('help');
 
         // Statistiky
         Route::prefix('statistiky')->name('statistics.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Member\StatisticsController::class, 'index'])->name('index');
-            Route::get('/moje', [\App\Http\Controllers\Member\StatisticsController::class, 'me'])->name('me');
-            Route::get('/hraci', [\App\Http\Controllers\Member\StatisticsController::class, 'players'])->name('players');
-            Route::get('/zapasy', [\App\Http\Controllers\Member\StatisticsController::class, 'matches'])->name('matches');
-            Route::get('/zapasy/{matchId}', [\App\Http\Controllers\Member\StatisticsController::class, 'matchDetail'])->name('matches.show');
+            Route::get('/', [StatisticsController::class, 'index'])->name('index');
+            Route::get('/moje', [StatisticsController::class, 'me'])->name('me');
+            Route::get('/hraci', [StatisticsController::class, 'players'])->name('players');
+            Route::get('/zapasy', [StatisticsController::class, 'matches'])->name('matches');
+            Route::get('/zapasy/{matchId}', [StatisticsController::class, 'matchDetail'])->name('matches.show');
         });
 
         // Týmové přehledy (původní trenérské, ponecháno pro kompatibilitu, odstraněno z menu)
@@ -71,8 +77,8 @@ Route::middleware(['member'])
         Route::get('/tymove-prehledy/{team}', [TeamController::class, 'show'])->name('teams.show');
 
         // Zpětná vazba / Kontakt
-        Route::get('/kontakt-trenera', [\App\Http\Controllers\Member\ContactController::class, 'coachForm'])->name('contact.coach.form');
-        Route::post('/kontakt-trenera', [\App\Http\Controllers\Member\ContactController::class, 'sendCoach'])->name('contact.coach.send');
-        Route::get('/kontakt-admina', [\App\Http\Controllers\Member\ContactController::class, 'adminForm'])->name('contact.admin.form');
-        Route::post('/kontakt-admina', [\App\Http\Controllers\Member\ContactController::class, 'sendAdmin'])->name('contact.admin.send');
+        Route::get('/kontakt-trenera', [ContactController::class, 'coachForm'])->name('contact.coach.form');
+        Route::post('/kontakt-trenera', [ContactController::class, 'sendCoach'])->name('contact.coach.send');
+        Route::get('/kontakt-admina', [ContactController::class, 'adminForm'])->name('contact.admin.form');
+        Route::post('/kontakt-admina', [ContactController::class, 'sendAdmin'])->name('contact.admin.send');
     });

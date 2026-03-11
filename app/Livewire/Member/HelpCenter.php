@@ -20,14 +20,20 @@ class HelpCenter extends Component
 
     public function render()
     {
+        $homeData = $this->getHomeData();
+        $userRoles = auth()->user()->getRoleNames()->toArray();
+
         return view('livewire.member.help-center', [
             'tree' => $this->getTree(),
-            'homeData' => $this->getHomeData(),
+            'homeData' => $homeData,
             'categoryData' => $this->getCategoryData(),
             'articleData' => $this->getArticleData(),
             'searchResults' => $this->searchQuery ? $this->getSearchResults() : collect(),
-            'userRoles' => auth()->user()->getRoleNames()->toArray(),
-        ])->layout('layouts.member');
+            'userRoles' => $userRoles,
+        ])->layout('layouts.member', [
+            'title' => __('admin.navigation.pages.help'),
+            'subtitle' => __('admin.navigation.pages.help_subtitle')
+        ]);
     }
 
     public function getTree(): Collection

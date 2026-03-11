@@ -4,6 +4,14 @@
     @endphp
 
     <div class="mx-auto w-full space-y-8 py-8 max-w-7xl px-4 sm:px-6 lg:px-8">
+        @if(auth()->id() === 8) {{-- Jen pro testovacího uživatele --}}
+            <div class="p-4 bg-slate-800 text-white rounded-xl mb-4 font-mono text-xs">
+                Roles: {{ implode(', ', $userRoles) }}<br>
+                Landing: {{ $isLanding ? 'Yes' : 'No' }}<br>
+                Cat count: {{ count($homeData['categories'] ?? []) }}<br>
+                Article count: {{ count($homeData['featured_articles'] ?? []) }}
+            </div>
+        @endif
         {{-- Search & Hero Header --}}
         <div class="relative overflow-hidden rounded-3xl bg-slate-900 shadow-xl p-6 sm:p-10 border border-white/5">
             {{-- Pozadí s efektem --}}
@@ -185,6 +193,8 @@
             @if($categoryData)
                 @php
                     $category = $categoryData['category'];
+                    $articles = $categoryData['articles'] ?? collect();
+                    $subcategories = $categoryData['subcategories'] ?? collect();
                 @endphp
                 <div class="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <x-help.breadcrumbs :breadcrumbs="$categoryData['breadcrumbs']" />
@@ -197,6 +207,15 @@
                             />
                         </div>
                         <div class="lg:w-2/3 space-y-10">
+                            {{-- Podkategorie --}}
+                            @if($subcategories->isNotEmpty())
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    @foreach($subcategories as $sub)
+                                        <x-help.category-card :category="$sub" />
+                                    @endforeach
+                                </div>
+                            @endif
+
                             <div class="bg-white p-10 sm:p-14 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
                                 <div @class([
                                     'absolute top-0 right-0 w-80 h-80 rounded-full blur-[100px] opacity-10 -mr-32 -mt-32',
@@ -235,7 +254,7 @@
                             </div>
 
                             <div class="grid grid-cols-1 gap-6">
-                                @foreach($categoryData['articles'] as $article)
+                                @foreach($articles as $article)
                                     <x-help.article-card
                                         :article="$article"
                                         :user-roles="$userRoles"
@@ -247,8 +266,31 @@
                 </div>
             @endif
         @else
-            {{-- Landing Page - Kategorie --}}
+            {{-- Landing Page - Úvod --}}
             <div class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {{-- Rychlá volba kontaktu --}}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden relative">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                    <div class="lg:col-span-2 relative z-10">
+                        <h3 class="text-3xl font-black text-slate-900 tracking-tight mb-3">Nenašli jste, co jste hledali?</h3>
+                        <p class="text-slate-500 text-lg font-medium">Náš tým je připraven vám pomoci. Kontaktujte svého trenéra nebo klubovou podporu přímo zde.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 relative z-10">
+                        <a href="{{ route('member.contact.coach.form') }}" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition-all group text-center gap-2">
+                            <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                <i class="fa-light fa-whistle text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-secondary">{{ __('member.feedback.contact_coach_title') }}</span>
+                        </a>
+                        <a href="{{ route('member.contact.admin.form') }}" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition-all group text-center gap-2">
+                            <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:scale-110 transition-transform">
+                                <i class="fa-light fa-user-gear text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-secondary">{{ __('member.feedback.contact_admin_title') }}</span>
+                        </a>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     @foreach($homeData['categories'] as $category)
                         <x-help.category-card :category="$category" />

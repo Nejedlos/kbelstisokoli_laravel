@@ -262,18 +262,14 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
 
 // Register the Composer autoloader...
 require $APP_BASE.'/vendor/autoload.php';
-pre_log("Autoload finished", ['memory' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB']);
 
 define('LARAVEL_PUBLIC_PATH', __DIR__);
 
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
 $app = require_once $APP_BASE.'/bootstrap/app.php';
-pre_log("App bootstrap finished", ['memory' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB']);
 
 // Nastavíme public path na adresář, kde se nachází tento index.php (pro jistotu i explicitně)
 $app->usePublicPath(__DIR__);
 
-pre_log("About to handle request", ['memory' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB']);
 $app->handleRequest(Request::capture());
-pre_log("Request handled successfully", ['memory' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB']);

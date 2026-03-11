@@ -254,7 +254,7 @@ class BrandingService
 
             $locale = app()->getLocale();
 
-            return $this->dbSettings = Cache::remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {
+            return $this->dbSettings = Cache::store('database')->remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {
                 try {
                     // Načteme klíče přes Query Builder (mnohem rychlejší než Eloquent pro mnoho malých řádků)
                     $settings = DB::table('settings')

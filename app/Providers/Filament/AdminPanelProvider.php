@@ -33,13 +33,11 @@ class AdminPanelProvider extends PanelProvider
 
     public function panel(Panel $panel): Panel
     {
-        $branding = app(BrandingService::class)->getSettings();
-        $colors = $branding['colors'];
-
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
+            ->colors(fn () => app(BrandingService::class)->getSettings()['colors'])
             ->darkMode(false)
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
             ->renderHook('panels::head.end', function (): string {
@@ -176,8 +174,9 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
-            ->brandName($branding['club_name'])
-            ->brandLogo(function() use ($branding) {
+            ->brandName(fn() => app(BrandingService::class)->getSettings()['club_name'])
+            ->brandLogo(function() {
+                $branding = app(BrandingService::class)->getSettings();
                 $logoUrl = web_asset($branding['team_logo']['paths']['velke'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.png', false);
 
                 return new HtmlString('
@@ -192,7 +191,7 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 ');
             })
-            ->favicon(web_asset($branding['team_logo']['paths']['mini'] ?? '/favicon.ico', false))
+            ->favicon(fn() => web_asset(app(BrandingService::class)->getSettings()['team_logo']['paths']['mini'] ?? '/favicon.ico', false))
             ->userMenuItems([
                 'member_section' => MenuItem::make()
                     ->label(fn () => __('admin.navigation.pages.member_section'))
@@ -203,8 +202,8 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn () => route('public.home'))
                     ->icon(new HtmlString('<i class="fa-light fa-globe fa-fw"></i>')),
             ])
-            ->colors([
-                'primary' => Color::hex($colors['red']),
+            ->colors(fn() => [
+                'primary' => Color::hex(app(BrandingService::class)->getSettings()['colors']['red'] ?? '#e11d48'),
                 'gray' => Color::Slate,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
