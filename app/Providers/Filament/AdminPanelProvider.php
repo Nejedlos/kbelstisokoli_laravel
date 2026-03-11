@@ -225,11 +225,13 @@ class AdminPanelProvider extends PanelProvider
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.web_settings')),
                 \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.statistics_and_data')),
+                    ->label(fn (): string => __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data'))
+                    ->collapsed(),
                 \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.external_data')),
+                    ->label(fn (): string => __('admin.navigation.groups.system'))
+                    ->collapsed(),
                 \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.system')),
+                    ->label(fn (): string => __('admin.navigation.groups.documentation')),
             ])
             ->widgets([
                 // Widgets are now integrated into the custom Dashboard page view

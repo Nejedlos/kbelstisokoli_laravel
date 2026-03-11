@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Actions\Season\RenewSeasonAction;
 use App\Models\FinancialTariff;
 use App\Models\Season;
 use App\Models\User;
@@ -37,7 +38,12 @@ class SeasonRenewal extends Page implements HasForms
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Finance';
+        return __('admin.navigation.groups.system');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 100;
     }
 
     public function getTitle(): string
@@ -229,53 +235,18 @@ class SeasonRenewal extends Page implements HasForms
         }
     }
 
-    public function create(): void
+    public function create(RenewSeasonAction $renewSeasonAction): void
     {
         $formData = $this->form->getState();
         $seasonId = $formData['season_id'];
-        $configs = $formData['configs'];
-
-        if (empty($configs)) {
-            Notification::make()
-                ->title('Chyba')
-                ->body('Seznam konfigurací je prázdný.')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        DB::beginTransaction();
+        $sourceSeasonId = $this->data['source_season_id'] ?? null;
 
         try {
-            $created = 0;
-            $updated = 0;
-
-            foreach ($configs as $configData) {
-                $record = UserSeasonConfig::updateOrCreate(
-                    [
-                        'user_id' => $configData['user_id'],
-                        'season_id' => $seasonId,
-                    ],
-                    [
-                        'financial_tariff_id' => $configData['financial_tariff_id'],
-                        'opening_balance' => $configData['opening_balance'] ?? 0,
-                        'track_attendance' => $configData['track_attendance'],
-                    ]
-                );
-
-                if ($record->wasRecentlyCreated) {
-                    $created++;
-                } else {
-                    $updated++;
-                }
-            }
-
-            DB::commit();
+            $result = $renewSeasonAction->execute($seasonId, $sourceSeasonId);
 
             Notification::make()
                 ->title('Uloženo')
-                ->body("Vytvořeno {$created} a aktualizováno {$updated} konfigurací.")
+                ->body("Vytvořeno {$result['created']} a aktualizováno {$result['updated']} konfigurací.")
                 ->success()
                 ->persistent()
                 ->send();
@@ -283,7 +254,6 @@ class SeasonRenewal extends Page implements HasForms
             $this->redirect(Dashboard::getUrl());
 
         } catch (\Exception $e) {
-            DB::rollBack();
             Notification::make()
                 ->title('Chyba při ukládání')
                 ->body($e->getMessage())

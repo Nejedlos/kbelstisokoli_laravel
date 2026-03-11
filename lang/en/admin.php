@@ -11,6 +11,7 @@ return [
             'system' => 'System & Maintenance',
             'statistics_and_data' => 'Statistics & Data',
             'external_data' => 'External Statistics',
+            'documentation' => 'Documentation',
         ],
         'pages' => [
             'dashboard' => 'Dashboard',
@@ -19,6 +20,7 @@ return [
             'member_section' => 'Member Section',
             'public_web' => 'Public Website',
             'system_console' => 'System Console',
+            'documentation' => 'Documentation',
         ],
         'resources' => [
             'announcement' => [

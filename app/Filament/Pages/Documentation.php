@@ -18,14 +18,28 @@ class Documentation extends Page
 
     protected static ?string $navigationLabel = 'Dokumentace';
 
-    protected static ?int $navigationSort = 100;
+    protected static ?int $navigationSort = 1;
 
     #[Url(as: 'file')]
-    public ?string $currentFile = 'index.md';
+    public ?string $currentFile = 'README.md';
 
     #[Url(as: 'q')]
     public string $searchQuery = '';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.documentation');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.navigation.pages.documentation');
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.navigation.pages.documentation');
+    }
     public function getTree(): Collection
     {
         return app(DocumentationService::class)->getTree();

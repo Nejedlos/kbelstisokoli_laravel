@@ -23,7 +23,7 @@ class ClubCompetitionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.statistics_and_data');
+        return __('admin.navigation.groups.sports_agenda');
     }
 
     public static function getModelLabel(): string
@@ -38,7 +38,7 @@ class ClubCompetitionResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 10;
+        return 40;
     }
 
     public static function form(Schema $schema): Schema

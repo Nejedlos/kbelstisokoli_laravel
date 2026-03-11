@@ -11,6 +11,7 @@ return [
             'system' => 'Systém a údržba',
             'statistics_and_data' => 'Statistiky a data',
             'external_data' => 'Externí statistiky',
+            'documentation' => 'Dokumentace',
         ],
         'pages' => [
             'dashboard' => 'Nástěnka',
@@ -19,6 +20,7 @@ return [
             'member_section' => 'Členská sekce',
             'public_web' => 'Veřejný web',
             'system_console' => 'Systémová konzole',
+            'documentation' => 'Dokumentace',
         ],
         'resources' => [
             'announcement' => [

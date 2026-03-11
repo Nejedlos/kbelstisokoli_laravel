@@ -37,15 +37,26 @@ class DocumentationService
      */
     public function getTree(): Collection
     {
+        $tree = collect();
+
+        // README z kořene jako úvodní přehled
+        $tree->push([
+            'type' => 'file',
+            'name' => '🚀 Přehled systému',
+            'slug' => 'README.md',
+            'path' => 'README.md',
+            'is_root' => true,
+        ]);
+
         if (!File::exists($this->docsPath)) {
             // Pokud ani cs neexistuje, zkusíme kořen jako nouzovku (pro zpětnou kompatibilitu)
             if (!File::exists($this->baseDocsPath)) {
-                return collect();
+                return $tree;
             }
-            return $this->scanDirectory($this->baseDocsPath);
+            return $tree->concat($this->scanDirectory($this->baseDocsPath));
         }
 
-        return $this->scanDirectory($this->docsPath);
+        return $tree->concat($this->scanDirectory($this->docsPath));
     }
 
     protected function scanDirectory(string $path): Collection
@@ -90,20 +101,52 @@ class DocumentationService
      */
     public function getFileContent(string $relativePath): ?array
     {
-        $fullPath = $this->docsPath . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
+        if ($relativePath === 'README.md') {
+            $fullPath = base_path('README.md');
+        } elseif (Str::startsWith($relativePath, 'docs/')) {
+            $fullPath = base_path($relativePath);
+        } else {
+            $fullPath = $this->docsPath . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
+        }
 
         if (!File::exists($fullPath) || !File::isFile($fullPath)) {
             return null;
         }
 
         $content = File::get($fullPath);
+
+        // Oprava relativních linků v markdownu pro README.md a ostatní
+        $content = preg_replace_callback('/\[([^\]]+)\]\(([^)]+\.md)\)/', function($matches) use ($relativePath) {
+            $text = $matches[1];
+            $link = $matches[2];
+
+            if (!Str::startsWith($link, 'http') && !Str::startsWith($link, '/')) {
+                // Pokud jsme v README, linky jsou už pravděpodobně docs/cs/...
+                if ($relativePath === 'README.md') {
+                    return "[{$text}](?file={$link})";
+                }
+
+                // Pokud jsme v docs/cs/..., musíme zajistit, aby linky byly relativní ke kořenu docs
+                $currentDir = dirname($relativePath);
+                if ($currentDir === '.') {
+                    return "[{$text}](?file={$link})";
+                }
+
+                $newLink = $currentDir . '/' . $link;
+                // Zjednodušení cesty (např. odstranění /./)
+                $newLink = str_replace(['/./', './'], '', $newLink);
+                return "[{$text}](?file={$newLink})";
+            }
+            return $matches[0];
+        }, $content);
+
         $converter = new GithubFlavoredMarkdownConverter([
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
         ]);
 
         return [
-            'title' => $this->formatName(basename($fullPath, '.md')),
+            'title' => $relativePath === 'README.md' ? 'Přehled systému' : $this->formatName(basename($fullPath, '.md')),
             'content' => $converter->convert($content)->getContent(),
             'raw' => $content,
         ];

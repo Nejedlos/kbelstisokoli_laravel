@@ -22,105 +22,105 @@ class FeedbackReportForm
     {
         return $schema
             ->components([
-                Tabs::make(__('admin.resources.feedback_report.fields.summary'))
+                Tabs::make(__('admin.navigation.resources.feedback_report.fields.summary'))
                     ->tabs([
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.summary'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.summary'))
                             ->icon(FilamentIcon::get(AppIcon::LIST))
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        Section::make(__('admin.resources.feedback_report.fields.basic_info'))
+                                        Section::make(__('admin.navigation.resources.feedback_report.fields.basic_info'))
                                             ->schema([
                                                 TextInput::make('title')
-                                                    ->label(__('admin.resources.feedback_report.fields.title'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.title'))
                                                     ->disabled(),
                                                 Grid::make(2)
                                                     ->schema([
                                                         TextInput::make('type')
-                                                            ->label(__('admin.resources.feedback_report.fields.type'))
-                                                            ->formatStateUsing(fn (string $state): string => __("admin.resources.feedback_report.type.{$state}"))
+                                                            ->label(__('admin.navigation.resources.feedback_report.fields.type'))
+                                                            ->formatStateUsing(fn (string $state): string => __("admin.navigation.resources.feedback_report.type.{$state}"))
                                                             ->disabled(),
                                                         TextInput::make('severity')
-                                                            ->label(__('admin.resources.feedback_report.fields.severity'))
-                                                            ->formatStateUsing(fn (?string $state): string => $state ? __("admin.resources.feedback_report.severity.{$state}") : '-')
+                                                            ->label(__('admin.navigation.resources.feedback_report.fields.severity'))
+                                                            ->formatStateUsing(fn (?string $state): string => $state ? __("admin.navigation.resources.feedback_report.severity.{$state}") : '-')
                                                             ->disabled(),
                                                     ]),
                                                 Textarea::make('description')
-                                                    ->label(__('admin.resources.feedback_report.fields.description'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.description'))
                                                     ->rows(5)
                                                     ->disabled(),
                                                 Textarea::make('steps')
-                                                    ->label(__('admin.resources.feedback_report.fields.steps'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.steps'))
                                                     ->rows(3)
                                                     ->disabled()
                                                     ->visible(fn ($record) => !empty($record?->steps)),
                                             ])->columnSpan(1),
 
-                                        Section::make(__('admin.resources.feedback_report.fields.status_and_notes'))
+                                        Section::make(__('admin.navigation.resources.feedback_report.fields.status_and_notes'))
                                             ->schema([
                                                 Select::make('status')
-                                                    ->label(__('admin.resources.feedback_report.fields.status'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.status'))
                                                     ->options([
-                                                        'new' => __('admin.resources.feedback_report.status.new'),
-                                                        'triaging' => __('admin.resources.feedback_report.status.triaging'),
-                                                        'in_progress' => __('admin.resources.feedback_report.status.in_progress'),
-                                                        'resolved' => __('admin.resources.feedback_report.status.resolved'),
-                                                        'wont_fix' => __('admin.resources.feedback_report.status.wont_fix'),
+                                                        'new' => __('admin.navigation.resources.feedback_report.status.new'),
+                                                        'triaging' => __('admin.navigation.resources.feedback_report.status.triaging'),
+                                                        'in_progress' => __('admin.navigation.resources.feedback_report.status.in_progress'),
+                                                        'resolved' => __('admin.navigation.resources.feedback_report.status.resolved'),
+                                                        'wont_fix' => __('admin.navigation.resources.feedback_report.status.wont_fix'),
                                                     ])
                                                     ->required(),
                                                 Textarea::make('admin_notes')
-                                                    ->label(__('admin.resources.feedback_report.fields.admin_notes'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.admin_notes'))
                                                     ->rows(8)
-                                                    ->placeholder(__('admin.resources.feedback_report.fields.admin_notes')),
+                                                    ->placeholder(__('admin.navigation.resources.feedback_report.fields.admin_notes')),
                                             ])->columnSpan(1),
                                     ]),
 
-                                Section::make(__('admin.resources.feedback_report.fields.context'))
+                                Section::make(__('admin.navigation.resources.feedback_report.fields.context'))
                                     ->schema([
                                         Grid::make(3)
                                             ->schema([
                                                 Placeholder::make('user_name')
-                                                    ->label(__('admin.resources.feedback_report.fields.user'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.user'))
                                                     ->content(fn ($record) => $record?->user?->name),
                                                 Placeholder::make('source_area')
-                                                    ->label(__('admin.resources.feedback_report.fields.source_area'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.source_area'))
                                                     ->content(fn ($record) => $record ? ucfirst($record->source_area) : null),
                                                 Placeholder::make('app_version')
-                                                    ->label(__('admin.resources.feedback_report.fields.app_version'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.app_version'))
                                                     ->content(fn ($record) => $record?->app_version),
                                                 Placeholder::make('url')
-                                                    ->label(__('admin.resources.feedback_report.fields.url'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.url'))
                                                     ->content(fn ($record) => $record ? new HtmlString("<a href='{$record->url}' target='_blank' class='text-primary-600 underline'>{$record->url}</a>") : null),
                                                 Placeholder::make('ip')
-                                                    ->label(__('admin.resources.feedback_report.fields.ip'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.ip'))
                                                     ->content(fn ($record) => $record?->ip),
                                                 Placeholder::make('created_at')
-                                                    ->label(__('admin.resources.feedback_report.fields.created_at'))
+                                                    ->label(__('admin.navigation.resources.feedback_report.fields.created_at'))
                                                     ->content(fn ($record) => $record?->created_at?->format('d.m.Y H:i:s')),
                                             ]),
                                     ]),
                             ]),
 
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.screenshot'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.screenshot'))
                             ->icon(FilamentIcon::get(AppIcon::MEDIA_LIBRARY))
                             ->schema([
                                 Placeholder::make('screenshot')
                                     ->label('')
                                     ->content(fn ($record) => ($record && $record->screenshot_path)
                                         ? new HtmlString("<img src='" . Storage::url($record->screenshot_path) . "' class='max-w-full rounded-xl shadow-lg' />")
-                                        : __('admin.resources.feedback_report.fields.no_screenshot')),
+                                        : __('admin.navigation.resources.feedback_report.fields.no_screenshot')),
                             ]),
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.dom_snapshot'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.dom_snapshot'))
                             ->icon(FilamentIcon::get(AppIcon::CODE))
                             ->schema([
                                 Placeholder::make('dom_snapshot')
                                     ->label('')
                                     ->content(fn ($record) => $record?->dom_path && Storage::exists($record->dom_path)
                                         ? new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs max-h-[600px]'>" . e(Storage::get($record->dom_path)) . "</pre>")
-                                        : __('admin.resources.feedback_report.fields.no_dom_snapshot')),
+                                        : __('admin.navigation.resources.feedback_report.fields.no_dom_snapshot')),
                             ]),
 
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.console_logs'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.console_logs'))
                             ->icon(FilamentIcon::get(AppIcon::TERMINAL))
                             ->schema([
                                 ViewField::make('logs_content')
@@ -134,7 +134,7 @@ class FeedbackReportForm
                                     }),
                             ]),
 
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.breadcrumbs'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.breadcrumbs'))
                             ->icon(FilamentIcon::get(AppIcon::SHOE_PRINTS))
                             ->schema([
                                 ViewField::make('breadcrumbs_content')
@@ -158,12 +158,12 @@ class FeedbackReportForm
                                     }),
                             ]),
 
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.network_and_clicks'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.network_and_clicks'))
                             ->icon(FilamentIcon::get(AppIcon::NETWORK))
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        Section::make(__('admin.resources.feedback_report.fields.network_errors'))
+                                        Section::make(__('admin.navigation.resources.feedback_report.fields.network_errors'))
                                             ->schema([
                                                 ViewField::make('network_logs_view')
                                                     ->label('')
@@ -180,7 +180,7 @@ class FeedbackReportForm
                                                         }
                                                     }),
                                             ]),
-                                        Section::make(__('admin.resources.feedback_report.fields.detailed_clicks'))
+                                        Section::make(__('admin.navigation.resources.feedback_report.fields.detailed_clicks'))
                                             ->schema([
                                                 ViewField::make('click_logs_view')
                                                     ->label('')
@@ -200,19 +200,19 @@ class FeedbackReportForm
                                     ]),
                             ]),
 
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.performance'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.performance'))
                             ->icon(FilamentIcon::get(AppIcon::GAUGE))
                             ->schema([
                                 Placeholder::make('performance_data')
                                     ->label('')
                                     ->content(function ($record) {
-                                        if (!$record?->performance_path || !Storage::exists($record->performance_path)) return __('admin.resources.feedback_report.fields.no_performance_data');
+                                        if (!$record?->performance_path || !Storage::exists($record->performance_path)) return __('admin.navigation.resources.feedback_report.fields.no_performance_data');
                                         $perf = json_decode(Storage::get($record->performance_path), true);
                                         return new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . json_encode($perf, JSON_PRETTY_PRINT) . "</pre>");
                                     }),
                             ]),
 
-                        Tabs\Tab::make(__('admin.resources.feedback_report.fields.meta'))
+                        Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.meta'))
                             ->icon(FilamentIcon::get(AppIcon::CODE))
                             ->schema([
                                 Placeholder::make('meta_raw')

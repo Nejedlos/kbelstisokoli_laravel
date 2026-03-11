@@ -39,7 +39,7 @@ class ClubEventResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 40;
+        return 30;
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder

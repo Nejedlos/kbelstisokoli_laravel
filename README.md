@@ -1,65 +1,45 @@
-# Kbelští sokoli
+# Kbelští sokoli | Informační systém
 
-Projekt moderní webové prezentace a administrativního systému pro klub **Kbelští sokoli**. Systém je postaven na frameworku **Laravel 12** a využívá **Filament PHP 5** pro správu dat a administraci.
+Vítejte v technickém srdci basketbalového klubu **Kbelští sokoli**. Tento repozitář obsahuje kompletní řešení pro moderní webovou prezentaci a robustní administrativní systém.
 
-## Hlavní vlastnosti
-- **Moderní UI:** Postaveno na Blade, Livewire a Tailwind CSS s využitím Laravel Folio pro routing.
-- **Komplexní Administrace:** Správa uživatelů, ekonomický modul a klubové záležitosti přes Filament.
-- **Automatizovaný Deployment:** Podpora pro Laravel Envoy a CI/CD přes GitHub Actions.
-- **Lokalizace:** Celé uživatelské rozhraní i dokumentace jsou v češtině.
+## 🏀 O projektu
+Systém je navržen tak, aby pokrýval veškeré potřeby sportovního klubu: od správy členské základny, přes organizaci tréninků a zápasů, až po ekonomické řízení a automatizaci marketingových výstupů.
 
-## Technický Stack
-- **PHP:** ^8.4
-- **Framework:** Laravel 12.x
-- **Administrace:** Filament PHP 5.x
-- **Databáze:** SQLite (lokálně) / MySQL (produkce)
-- **Deployment:** GitHub + SSH (Webglobe) + Laravel Envoy
+- **Technologie:** Laravel 12 (PHP 8.4+), Filament PHP 5, Livewire, Tailwind CSS v4.
+- **Hlavní pilíře:**
+    - **Sportovní agenda:** Zápasy, tréninky, klubové akce a soutěže.
+    - **Členská sekce:** Dashboardy pro hráče a trenéry, branding člena.
+    - **Ekonomika:** Automatizovaná správa plateb, propojení s bankou (přes externí moduly).
+    - **Obsah a média:** CMS pro web, fotogalerie, automatické generování grafiky.
+    - **AI integrace:** Inteligentní vyhledávání, predikce výsledků, asistent pro trenéry.
 
-## Rychlý start (Lokální vývoj)
+## 🛠️ Architektura systému
+Systém využívá moderní Laravel patterny pro zajištění stability a rozšiřitelnosti:
+- **Folio & Volt:** Pro bleskově rychlý a interaktivní frontend.
+- **Filament PHP:** Nejpokročilejší administrace v PHP ekosystému, plně lokalizovaná (CS/EN).
+- **Spatie MediaLibrary:** Robustní správa fotografií a dokumentů.
+- **Sanctum & Fortify:** Bezpečná autentizace a správa uživatelů včetně 2FA.
 
-1. **Klonování repozitáře:**
-   ```bash
-   git clone https://github.com/Nejedlos/kbelstisokoli_laravel.git
-   cd kbelstisokoli_laravel
-   ```
+## 🚀 Rychlý start pro vývojáře
 
-2. **Instalace závislostí:**
+1. **Prerekvizity:** PHP 8.4, Node.js 22+, SQLite/MySQL.
+2. **Instalace:**
    ```bash
    composer install
    npm install
-   ```
-
-3. **Nastavení prostředí:**
-   ```bash
    cp .env.example .env
    php artisan key:generate
-   ```
-
-4. **Databáze a migrace:**
-   ```bash
    php artisan migrate --seed
-   ```
-
-5. **Spuštění vývojového serveru:**
-   ```bash
    npm run dev
-   # v jiném terminálu
-   php artisan serve
    ```
+3. **Přihlášení:** Výchozí admin je `admin@kbelstisokoli.cz` (pokud byl spuštěn seeder).
 
-## Dokumentace
-Podrobná dokumentace k projektu se nachází v adresáři `docs/`:
+## 📖 Dokumentace
+Veškeré detaily k vývoji, provozu a správě naleznete v adresáři `docs/cs/`. Tato dokumentace je rovněž přístupná přímo v administraci systému v sekci **Dokumentace**.
 
-- [**Index dokumentace**](docs/index.md) - Hlavní rozcestník všech témat.
-- [Základní koncepty](docs/01-zakladni-koncepty/01-uvod.md) - Přehled a architektura.
-- [Nasazení (Deployment)](docs/07-provoz-a-nasazeni/01-nasazeni.md) - Návod pro produkční server.
-- [AI Funkce](docs/05-ai-funkce/01-ai-vyhledavani.md) - Správa a nastavení AI.
-
-## Vývojové pokyny
-- Dodržujeme **PSR-12** a používáme **Laravel Pint** pro formátování.
-- Veškerý kód je v angličtině, ale UI a komentáře/dokumentace jsou v **češtině**.
-- Každá nová funkce musí být zdokumentována v `docs/`.
-- Podrobná pravidla naleznete v [.junie/guidelines.md](.junie/guidelines.md).
+- [**Struktura projektu**](docs/cs/01-general/03-struktura-projektu.md)
+- [**Vývojové standardy**](docs/cs/02-development/01-sprava-assetu.md)
+- [**Nasazení na produkci**](docs/cs/06-ops/01-nasazeni.md)
 
 ---
-© 2026 Kbelští sokoli. Spravováno pomocí [GitHubu](https://github.com/Nejedlos/kbelstisokoli_laravel).
+© 2026 Kbelští sokoli. Vyvinuto s ❤️ pro basketbal.

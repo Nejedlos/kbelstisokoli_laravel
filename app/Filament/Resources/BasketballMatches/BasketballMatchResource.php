@@ -39,7 +39,7 @@ class BasketballMatchResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 20;
+        return 10;
     }
 
     public static function getGloballySearchableAttributes(): array

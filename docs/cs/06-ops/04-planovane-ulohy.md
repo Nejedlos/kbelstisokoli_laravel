@@ -52,6 +52,7 @@ Mezi tyto úlohy patří:
 - **Synchronizace statistik**: Globální i pro konkrétní týmy.
 - **Docházka Upomínky**: Rozesílání notifikací členům.
 - **Finance**: Kontrola splatnosti předpisů.
+- **Obnova sezóny**: Hromadná inicializace nové sezóny (každý 31. srpna ve 23:55).
 - **Systémový úklid**: Promazávání starých logů a cache.
 
 ### 3.2 Statické úlohy (Kód)

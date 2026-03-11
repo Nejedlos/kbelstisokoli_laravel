@@ -41,7 +41,7 @@ class TeamResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 10;
+        return 50;
     }
 
     public static function getGloballySearchableAttributes(): array

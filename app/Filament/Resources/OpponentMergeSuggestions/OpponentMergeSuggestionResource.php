@@ -47,7 +47,7 @@ class OpponentMergeSuggestionResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 51;
+        return 80;
     }
 
     public static function form(Schema $schema): Schema

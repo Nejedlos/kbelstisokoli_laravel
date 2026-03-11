@@ -39,7 +39,7 @@ class TrainingResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 30;
+        return 20;
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder

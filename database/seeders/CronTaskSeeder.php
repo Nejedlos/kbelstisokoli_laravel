@@ -89,6 +89,13 @@ class CronTaskSeeder extends Seeder
                 'description' => 'Kontroluje splatnost předpisů a aktualizuje jejich statusy.',
                 'priority' => 10,
             ],
+            [
+                'name' => 'Obnova sezóny',
+                'command' => 'season:renew',
+                'expression' => '55 23 31 8 *', // 31. srpna ve 23:55
+                'description' => 'Hromadná inicializace nové sezóny na základě dat z předchozí.',
+                'priority' => 50,
+            ],
         ];
 
         foreach ($tasks as $task) {
