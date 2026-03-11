@@ -43,14 +43,14 @@ class HelpSearchService
      *
      * @param string $query
      * @param int $limit
-     * @return Collection<int, HelpArticle>
+     * @return \Illuminate\Support\Collection
      */
-    public function search(string $query, int $limit = 20): Collection
+    public function search(string $query, int $limit = 20): \Illuminate\Support\Collection
     {
         $query = trim($query);
 
         if (empty($query)) {
-            return new Collection();
+            return collect();
         }
 
         $locale = app()->getLocale();
@@ -58,10 +58,8 @@ class HelpSearchService
 
         // Jednoduchý relevance ranking pomocí SQL (funguje v SQLite i MySQL)
         // Váhy: Title (10), Keywords (8), Purpose (5), Content (3)
-        return HelpArticle::query()
-            ->published()
-            ->forAudience($filteringRoles)
-            ->select('*')
+        return \DB::table('help_articles')
+            ->select(['id', 'slug', 'title', 'excerpt', 'metadata', 'audience_roles', 'is_featured', 'content'])
             ->selectRaw("
                 (CASE WHEN JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ? THEN 10 ELSE 0 END +
                  CASE WHEN JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ? THEN 8 ELSE 0 END +
@@ -74,20 +72,37 @@ class HelpSearchService
                 "%" . mb_strtolower($query) . "%",
                 "%" . mb_strtolower($query) . "%",
             ])
-            ->where(function (Builder $q) use ($query, $locale) {
+            ->where('is_published', true)
+            ->where(function ($q) {
+                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
+            })
+            ->where(function ($q) use ($query, $locale) {
                 $term = "%" . mb_strtolower($query) . "%";
                 $q->whereRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ?", [$term])
                     ->orWhereRaw("JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ?", [$term])
                     ->orWhereRaw("JSON_EXTRACT(metadata, '$.\"{$locale}\".purpose') LIKE ?", [$term])
                     ->orWhereRaw("JSON_EXTRACT(content, '$.\"{$locale}\"') LIKE ?", [$term]);
             })
-            ->with('category')
+            ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
+                $q->where(function ($inner) use ($filteringRoles) {
+                    $inner->whereNull('audience_roles');
+                    foreach ($filteringRoles as $role) {
+                        $inner->orWhereJsonContains('audience_roles', $role);
+                    }
+                });
+            })
             ->orderByDesc('relevance')
             ->orderByRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') ASC")
             ->limit($limit)
             ->get()
-            ->map(function (HelpArticle $article) use ($query, $locale) {
+            ->map(function ($article) use ($query, $locale) {
+                $title = json_decode($article->title, true) ?: [];
+                $article->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
+
                 $article->search_excerpt = $this->generateExcerpt($article, $query, $locale);
+                $article->audience_roles = json_decode($article->audience_roles, true) ?: [];
+                $article->is_featured = (bool) $article->is_featured;
+
                 return $article;
             });
     }
@@ -95,10 +110,13 @@ class HelpSearchService
     /**
      * Vygeneruje úryvek textu pro výsledek vyhledávání.
      */
-    protected function generateExcerpt(HelpArticle $article, string $query, string $locale): string
+    protected function generateExcerpt(object $article, string $query, string $locale): string
     {
-        $content = strip_tags($article->getTranslation('content', $locale));
-        $purpose = $article->metadata['purpose'] ?? '';
+        $contentArr = json_decode($article->content, true) ?: [];
+        $content = strip_tags($contentArr[$locale] ?? ($contentArr['cs'] ?? ($contentArr['en'] ?? '')));
+
+        $meta = json_decode($article->metadata, true) ?: [];
+        $purpose = $meta[$locale]['purpose'] ?? ($meta['cs']['purpose'] ?? '');
 
         if (empty($query)) {
             return $purpose ?: mb_substr($content, 0, 160) . '...';

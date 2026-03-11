@@ -6,7 +6,7 @@
         <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary-600 group-hover:text-white transition-all shadow-sm">
             <i class="fa-light {{ $action->icon ?? 'fa-link' }} text-lg"></i>
         </div>
-        <span class="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">{{ $action->getTranslation('label', app()->getLocale(), false) }}</span>
+        <span class="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">{{ $action->label_str ?? (method_exists($action, 'getTranslation') ? $action->getTranslation('label', app()->getLocale(), false) : ($action->label ?? 'Action')) }}</span>
     </div>
     <i class="fa-light fa-arrow-up-right-from-square text-[10px] text-slate-300 group-hover:text-primary-600 transition-colors"></i>
 </a>

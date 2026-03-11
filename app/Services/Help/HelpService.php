@@ -37,7 +37,8 @@ class HelpService
         return [
             'categories' => $this->queryService->getHomeCategories(),
             'featured_articles' => $this->queryService->getFeaturedArticles(),
-            'breadcrumbs' => $this->navigationService->getBreadcrumbs(),
+            // Na landing stránce breadcrumbs negenerujeme, je to fixní kořen bez rekurze
+            'breadcrumbs' => collect(),
         ];
     }
 

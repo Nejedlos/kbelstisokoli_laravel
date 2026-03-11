@@ -72,11 +72,6 @@ class HelpArticle extends Model
         'published_at' => 'datetime',
         'sort_order' => 'integer',
         'audience_roles' => 'json',
-        'title' => 'array',
-        'content' => 'array',
-        'excerpt' => 'array',
-        'search_keywords' => 'array',
-        'metadata' => 'array',
     ];
 
     /**

@@ -37,7 +37,6 @@ class HelpQuickAction extends Model
     ];
 
     protected $casts = [
-        'label' => 'array',
         'sort_order' => 'integer',
     ];
 

@@ -41,181 +41,277 @@ class HelpQueryService
 
     /**
      * Načte kořenové kategorie pro úvodní stránku nápovědy.
+     * Používá Query Builder pro maximální výkon a eliminaci rekurze v Eloquentu.
      *
-     * @return Collection<int, HelpCategory>
+     * @return \Illuminate\Support\Collection
      */
-    public function getHomeCategories(): Collection
+    public function getHomeCategories(): \Illuminate\Support\Collection
     {
         $filteringRoles = $this->getFilteringRoles();
+        $locale = app()->getLocale();
 
-        $categories = HelpCategory::query()
-            ->active()
-            ->root()
-            ->forAudience($filteringRoles)
-            ->withCount(['articles' => function ($query) use ($filteringRoles) {
-                $query->published()->forAudience($filteringRoles);
-            }])
+        $rows = \DB::table('help_categories')
+            ->select(['id', 'slug', 'name', 'description', 'icon', 'color', 'audience_roles', 'is_featured'])
+            ->where('is_active', true)
+            ->whereNull('parent_id')
+            ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
+                $q->where(function ($inner) use ($filteringRoles) {
+                    $inner->whereNull('audience_roles');
+                    foreach ($filteringRoles as $role) {
+                        $inner->orWhereJsonContains('audience_roles', $role);
+                    }
+                });
+            })
             ->orderBy('sort_order')
             ->get();
 
-        if (!empty($this->roles)) {
-            $categories = $categories->sortByDesc(function ($category) {
-                $score = $category->is_featured ? 100 : 0;
-                if (!empty($category->audience_roles)) {
-                    foreach ($this->roles as $role) {
-                        if (in_array($role, $category->audience_roles)) {
-                            $score += 1000;
-                            break;
-                        }
-                    }
-                }
-                return $score;
-            })->values();
-        }
+        return $rows->map(function ($item) use ($locale) {
+            $name = json_decode($item->name, true) ?: [];
+            $item->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
 
-        return $categories;
+            $desc = json_decode($item->description, true) ?: [];
+            $item->description_str = $desc[$locale] ?? ($desc['cs'] ?? ($desc['en'] ?? ''));
+
+            $item->articles_count = \DB::table('help_articles')
+                ->where('category_id', $item->id)
+                ->where('is_published', true)
+                ->count();
+
+            return $item;
+        });
     }
 
     /**
      * Načte doporučené (featured) články.
+     * Používá Query Builder pro eliminaci paměťové náročnosti Eloquent modelů.
      *
      * @param int $limit
-     * @return Collection<int, HelpArticle>
+     * @return \Illuminate\Support\Collection
      */
-    public function getFeaturedArticles(int $limit = 5): Collection
+    public function getFeaturedArticles(int $limit = 5): \Illuminate\Support\Collection
     {
         $filteringRoles = $this->getFilteringRoles();
+        $locale = app()->getLocale();
 
-        $articles = HelpArticle::query()
-            ->published()
-            ->forAudience($filteringRoles)
-            ->with('category')
+        // Ultra-lean výběr jen pro zobrazení karet na homepage
+        $rows = \DB::table('help_articles')
+            ->select(['id', 'slug', 'title', 'is_featured', 'updated_at'])
+            ->where('is_published', true)
+            ->where(function ($q) {
+                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
+            })
             ->orderBy('is_featured', 'desc')
             ->orderBy('sort_order')
+            ->limit($limit)
             ->get();
 
-        if (!empty($this->roles)) {
-            $articles = $articles->sortByDesc(function ($article) {
-                $score = $article->is_featured ? 100 : 0;
-                if (!empty($article->audience_roles)) {
-                    foreach ($this->roles as $role) {
-                        if (in_array($role, $article->audience_roles)) {
-                            $score += 1000;
-                            break;
-                        }
-                    }
-                }
-                return $score;
-            })->values();
-        }
-
-        return $articles->take($limit);
+        return $rows->map(function ($item) use ($locale) {
+            $title = json_decode($item->title, true) ?: [];
+            $item->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
+            $item->is_featured = (bool) $item->is_featured;
+            $item->updated_at = \Illuminate\Support\Carbon::parse($item->updated_at);
+            return $item;
+        });
     }
 
     /**
      * Načte kategorii podle slugu včetně jejích článků a podkategorií.
      *
      * @param string $slug
-     * @return HelpCategory|null
+     * @return object|null
      */
-    public function getCategoryBySlug(string $slug): ?HelpCategory
+    public function getCategoryBySlug(string $slug): ?object
     {
         $filteringRoles = $this->getFilteringRoles();
+        $locale = app()->getLocale();
 
-        return HelpCategory::query()
-            ->active()
-            ->forAudience($filteringRoles)
+        $category = \DB::table('help_categories')
+            ->select(['id', 'slug', 'name', 'description', 'icon', 'color', 'parent_id'])
             ->where('slug', $slug)
-            ->with([
-                'children' => function ($query) use ($filteringRoles) {
-                    $query->active()->forAudience($filteringRoles)->orderBy('sort_order');
-                },
-                'articles' => function ($query) use ($filteringRoles) {
-                    $query->published()->forAudience($filteringRoles)->orderBy('sort_order');
-                }
-            ])
+            ->where('is_active', true)
             ->first();
+
+        if (!$category) {
+            return null;
+        }
+
+        // Dekódování polí kategorie
+        $name = json_decode($category->name, true) ?: [];
+        $category->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
+
+        $desc = json_decode($category->description, true) ?: [];
+        $category->description_str = $desc[$locale] ?? ($desc['cs'] ?? ($desc['en'] ?? ''));
+
+        // Načtení článků kategorie přes Query Builder - ultra lean
+        $category->articles = \DB::table('help_articles')
+            ->select(['id', 'slug', 'title', 'is_featured', 'audience_roles', 'sort_order'])
+            ->where('category_id', $category->id)
+            ->where('is_published', true)
+            ->where(function ($q) {
+                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
+            })
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($article) use ($locale) {
+                $title = json_decode($article->title, true) ?: [];
+                $article->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
+                $article->audience_roles = json_decode($article->audience_roles, true) ?: [];
+                return $article;
+            });
+
+        return $category;
     }
 
     /**
      * Načte článek podle slugu se všemi souvisejícími daty.
      *
      * @param string $slug
-     * @return HelpArticle|null
+     * @return object|null
      */
-    public function getArticleBySlug(string $slug): ?HelpArticle
+    public function getArticleBySlug(string $slug): ?object
     {
         $filteringRoles = $this->getFilteringRoles();
+        $locale = app()->getLocale();
 
-        return HelpArticle::query()
+        // Pro detail článku použijeme Eloquent, ale pouze JEDEN model
+        // a hned mu předpočítáme řetězce, aby Blade nevolal magii.
+        $article = HelpArticle::query()
             ->published()
             ->forAudience($filteringRoles)
             ->where('slug', $slug)
-            ->with([
-                'category.parent',
-                'faqs',
-                'quickActions',
-                'relatedArticles' => function ($query) use ($filteringRoles) {
-                    $query->published()->forAudience($filteringRoles);
-                }
-            ])
+            ->with(['category', 'faqs', 'quickActions'])
             ->first();
+
+        if (!$article) {
+            return null;
+        }
+
+        // Ruční "zhloupnutí" pro Blade
+        $article->title_str = $article->getTranslation('title', $locale, false);
+        $article->content_html = $article->getParsedContent();
+
+        // Předpočítáme i relace pro stabilitu
+        $article->faqs->each(function ($faq) use ($locale) {
+            $faq->question_str = $faq->getTranslation('question', $locale, false);
+            $faq->answer_str = $faq->getTranslation('answer', $locale, false);
+        });
+
+        $article->quickActions->each(function ($action) use ($locale) {
+            $action->label_str = $action->getTranslation('label', $locale, false);
+        });
+
+        // Předpočítáme i související
+        $article->relatedArticles = $article->relatedArticles()
+            ->published()
+            ->forAudience($filteringRoles)
+            ->get()
+            ->map(function ($rel) use ($locale) {
+                $rel->title_str = $rel->getTranslation('title', $locale, false);
+                return $rel;
+            });
+
+        return $article;
     }
 
     /**
      * Načte všechny aktivní kategorie jako strom.
      *
-     * @return Collection<int, HelpCategory>
+     * @return \Illuminate\Support\Collection
      */
-    public function getCategoryTree(): Collection
+    public function getCategoryTree(): \Illuminate\Support\Collection
     {
         $filteringRoles = $this->getFilteringRoles();
+        $locale = app()->getLocale();
 
-        return HelpCategory::query()
-            ->active()
-            ->root()
-            ->forAudience($filteringRoles)
-            ->with([
-                'children' => function ($query) use ($filteringRoles) {
-                    $query->active()
-                        ->forAudience($filteringRoles)
-                        ->orderBy('sort_order')
-                        ->with(['articles' => function ($query) use ($filteringRoles) {
-                            $query->published()->forAudience($filteringRoles)->orderBy('sort_order');
-                        }]);
-                },
-                'articles' => function ($query) use ($filteringRoles) {
-                    $query->published()->forAudience($filteringRoles)->orderBy('sort_order');
-                }
-            ])
+        pre_log('HelpQueryService::getCategoryTree start');
+
+        // Strom uděláme taky přes Query Builder, ať je to neprůstřelné
+        $categories = \DB::table('help_categories')
+            ->select(['id', 'slug', 'name', 'parent_id', 'icon', 'color'])
+            ->where('is_active', true)
+            ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
+                $q->where(function ($inner) use ($filteringRoles) {
+                    $inner->whereNull('audience_roles');
+                    foreach ($filteringRoles as $role) {
+                        $inner->orWhereJsonContains('audience_roles', $role);
+                    }
+                });
+            })
             ->orderBy('sort_order')
-            ->get();
+            ->get()
+            ->map(function ($cat) use ($locale) {
+                $name = json_decode($cat->name, true) ?: [];
+                $cat->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
+                return $cat;
+            });
+
+        // Sestavení stromu v paměti (jednoduché 2 úrovně)
+        $tree = $categories->whereNull('parent_id')->values();
+        foreach ($tree as $root) {
+            $root->children = $categories->where('parent_id', $root->id)->values();
+            foreach ($root->children as $child) {
+                $child->articles = \DB::table('help_articles')
+                    ->select(['id', 'slug', 'title'])
+                    ->where('category_id', $child->id)
+                    ->where('is_published', true)
+                    ->orderBy('sort_order')
+                    ->get()
+                    ->map(function ($art) use ($locale) {
+                        $title = json_decode($art->title, true) ?: [];
+                        $art->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
+                        return $art;
+                    });
+            }
+
+            // Kořenové články
+            $root->articles = \DB::table('help_articles')
+                ->select(['id', 'slug', 'title'])
+                ->where('category_id', $root->id)
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->get()
+                ->map(function ($art) use ($locale) {
+                    $title = json_decode($art->title, true) ?: [];
+                    $art->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
+                    return $art;
+                });
+        }
+
+        return $tree;
     }
     /**
      * Vrátí předchozí a následující článek ve stejné kategorii.
      *
-     * @param HelpArticle $article
-     * @return array{prev: HelpArticle|null, next: HelpArticle|null}
+     * @param object $article
+     * @return array{prev: object|null, next: object|null}
      */
-    public function getArticleNavigation(HelpArticle $article): array
+    public function getArticleNavigation(object $article): array
     {
         $filteringRoles = $this->getFilteringRoles();
+        $locale = app()->getLocale();
 
-        $articles = HelpArticle::query()
-            ->published()
-            ->forAudience($filteringRoles)
+        $articles = \DB::table('help_articles')
+            ->select(['id', 'slug', 'title'])
             ->where('category_id', $article->category_id)
+            ->where('is_published', true)
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
 
         $currentIndex = $articles->search(fn ($a) => $a->id === $article->id);
 
-        return [
-            'prev' => $currentIndex > 0 ? $articles->get($currentIndex - 1) : null,
-            'next' => $currentIndex !== false && $currentIndex < $articles->count() - 1
-                ? $articles->get($currentIndex + 1)
-                : null,
-        ];
+        $prev = $currentIndex > 0 ? $articles->get($currentIndex - 1) : null;
+        $next = $currentIndex !== false && $currentIndex < $articles->count() - 1 ? $articles->get($currentIndex + 1) : null;
+
+        if ($prev) {
+            $t = json_decode($prev->title, true) ?: [];
+            $prev->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
+        }
+        if ($next) {
+            $t = json_decode($next->title, true) ?: [];
+            $next->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
+        }
+
+        return ['prev' => $prev, 'next' => $next];
     }
 }

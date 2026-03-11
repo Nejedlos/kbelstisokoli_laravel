@@ -60,8 +60,6 @@ class HelpCategory extends Model
         'is_customized' => 'boolean',
         'sort_order' => 'integer',
         'audience_roles' => 'json',
-        'name' => 'array',
-        'description' => 'array',
     ];
 
     /**

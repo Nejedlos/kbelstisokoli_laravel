@@ -1,7 +1,6 @@
-@props(['article', 'query' => null])
+@props(['article', 'query' => null, 'userRoles' => []])
 
 @php
-    $userRoles = auth()->user() ? auth()->user()->getRoleNames()->toArray() : [];
     $isMatchingRole = !empty($article->audience_roles) && !empty(array_intersect($userRoles, $article->audience_roles));
     $isFeatured = $article->is_featured;
 @endphp
@@ -40,19 +39,18 @@
             ])></i>
         </div>
         <div>
-            <span class="block text-lg font-bold text-slate-700 group-hover:text-slate-900 transition-colors mb-0.5">{{ $article->getTranslation('title', app()->getLocale(), false) }}</span>
+            <span class="block text-lg font-bold text-slate-700 group-hover:text-slate-900 transition-colors mb-0.5">
+                {{ $article->title_str ?? (method_exists($article, 'getTranslation') ? $article->getTranslation('title', app()->getLocale(), false) : 'Untitled') }}
+            </span>
             @php
-                $articleMetadata = $article->getTranslation('metadata', app()->getLocale(), false);
-                $articleExcerpt = $article->getTranslation('excerpt', app()->getLocale(), false);
+                $excerptStr = $article->excerpt_str ?? (method_exists($article, 'getSafeExcerpt') ? $article->getSafeExcerpt() : '');
             @endphp
             @if(isset($article->search_excerpt))
                 <div class="text-sm text-slate-500 font-medium leading-relaxed mt-1 search-excerpt">
                     {!! $article->search_excerpt !!}
                 </div>
-            @elseif($articleMetadata && isset($articleMetadata['short_intro']))
-                <p class="text-sm text-slate-500 line-clamp-1 font-medium">{{ $articleMetadata['short_intro'] }}</p>
-            @elseif($articleExcerpt)
-                <p class="text-sm text-slate-500 line-clamp-1 font-medium">{{ $articleExcerpt }}</p>
+            @elseif($excerptStr)
+                <p class="text-sm text-slate-500 line-clamp-1 font-medium">{{ $excerptStr }}</p>
             @endif
         </div>
     </div>

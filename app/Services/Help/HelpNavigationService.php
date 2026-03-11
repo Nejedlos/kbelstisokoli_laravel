@@ -8,13 +8,15 @@ use Illuminate\Support\Collection;
 
 class HelpNavigationService
 {
+    private const MAX_BREADCRUMB_DEPTH = 50;
+
     /**
      * Vygeneruje breadcrumbs pro danou položku (kategorii nebo článek).
      *
-     * @param HelpCategory|HelpArticle|null $item
+     * @param object|null $item
      * @return Collection
      */
-    public function getBreadcrumbs($item = null): Collection
+    public function getBreadcrumbs(object|null $item = null): Collection
     {
         $breadcrumbs = collect([
             [
@@ -25,15 +27,34 @@ class HelpNavigationService
             ]
         ]);
 
-        if ($item instanceof HelpArticle) {
-            $this->addCategoryBreadcrumbs($item->category, $breadcrumbs);
+        if ($item === null) {
+            return $breadcrumbs;
+        }
+
+        // Podpora pro stdClass i Eloquent modely
+        $isArticle = isset($item->category_id) || $item instanceof HelpArticle;
+
+        if ($isArticle) {
+            $category = null;
+            if (isset($item->category) && $item->category) {
+                $category = $item->category;
+            } elseif (isset($item->category_id)) {
+                $category = HelpCategory::find($item->category_id);
+            }
+
+            if ($category) {
+                $this->addCategoryBreadcrumbs($category, $breadcrumbs);
+            }
+
+            $label = $item->title_str ?? (method_exists($item, 'getTranslation') ? $item->getTranslation('title', app()->getLocale(), false) : ($item->title ?? 'Untitled'));
+
             $breadcrumbs->push([
-                'label' => $item->getTranslation('title', app()->getLocale(), false),
+                'label' => $label,
                 'slug' => $item->slug,
                 'url' => \App\Filament\Pages\Help::getUrl(['file' => $item->slug]),
                 'is_active' => true,
             ]);
-        } elseif ($item instanceof HelpCategory) {
+        } else {
             $this->addCategoryBreadcrumbs($item, $breadcrumbs, true);
         }
 
@@ -43,11 +64,11 @@ class HelpNavigationService
     /**
      * Rekurzivně přidá kategorie do breadcrumbs.
      *
-     * @param HelpCategory|null $category
+     * @param object|null $category
      * @param Collection $breadcrumbs
      * @param bool $isCurrent
      */
-    protected function addCategoryBreadcrumbs(?HelpCategory $category, Collection $breadcrumbs, bool $isCurrent = false): void
+    protected function addCategoryBreadcrumbs(object|null $category, Collection $breadcrumbs, bool $isCurrent = false): void
     {
         if (!$category) {
             return;
@@ -56,26 +77,45 @@ class HelpNavigationService
         $path = [];
         $current = $category;
         $visitedIds = [];
+        $depth = 0;
 
-        while ($current && !in_array($current->id, $visitedIds)) {
-            $visitedIds[] = $current->id;
-            array_unshift($path, $current);
+        while ($current) {
+            $depth++;
 
-            if (count($visitedIds) > 10) { // Ochrana proti příliš hlubokému nebo nekonečnému cyklu
+            if ($depth > self::MAX_BREADCRUMB_DEPTH) {
+                pre_log('Help breadcrumbs depth limit reached', ['category_id' => $category->id ?? 'unknown', 'depth' => $depth]);
                 break;
             }
 
-            // Místo $current->parent použijeme přímé DB volání, abychom zamezili rekurzi v relacích a magic getterech
-            $currentId = $current->parent_id;
-            $current = $currentId ? HelpCategory::find($currentId) : null;
+            $id = $current->id ?? null;
+            if ($id && in_array($id, $visitedIds, true)) {
+                pre_log('Help breadcrumbs cycle detected', ['category_id' => $id, 'visited_ids' => $visitedIds]);
+                break;
+            }
+
+            if ($id) {
+                $visitedIds[] = $id;
+            }
+
+            array_unshift($path, $current);
+
+            $parentId = $current->parent_id ?? null;
+            if (!$parentId) {
+                break;
+            }
+
+            // Načítáme parenta - zkusíme Query Builder pro rychlost
+            $current = \DB::table('help_categories')->where('id', $parentId)->first();
         }
 
         foreach ($path as $cat) {
+            $label = $cat->name_str ?? (method_exists($cat, 'getTranslation') ? $cat->getTranslation('name', app()->getLocale(), false) : (json_decode($cat->name ?? '{}', true)[app()->getLocale()] ?? 'Untitled'));
+
             $breadcrumbs->push([
-                'label' => $cat->getTranslation('name', app()->getLocale(), false),
+                'label' => $label,
                 'slug' => $cat->slug,
                 'url' => \App\Filament\Pages\Help::getUrl(['cat' => $cat->slug]),
-                'is_active' => $isCurrent && ($cat->id === $category->id),
+                'is_active' => $isCurrent && (isset($cat->id) && isset($category->id) && $cat->id === $category->id),
             ]);
         }
     }

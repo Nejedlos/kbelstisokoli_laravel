@@ -36,8 +36,6 @@ class HelpFaq extends Model
     ];
 
     protected $casts = [
-        'question' => 'array',
-        'answer' => 'array',
         'sort_order' => 'integer',
     ];
 

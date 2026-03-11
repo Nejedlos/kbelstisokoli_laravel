@@ -1,7 +1,7 @@
 @props(['category'])
 
 <a href="{{ \App\Filament\Pages\Help::getUrl(['cat' => $category->slug]) }}"
-   class="group relative bg-white rounded-[2rem] border border-slate-100 p-10 hover:shadow-2xl hover:border-primary-100 hover:-translate-y-1 transition-all duration-500 overflow-hidden flex flex-col h-full">
+   class="group relative bg-white rounded-[2rem] border border-slate-100 p-10 hover:shadow-xl hover:border-primary-200 hover:-translate-y-1 transition-all duration-500 overflow-hidden flex flex-col h-full">
 
     {{-- Card Accent Decor --}}
     <div @class([
@@ -15,7 +15,7 @@
     ])></div>
 
     <div @class([
-        'w-20 h-20 rounded-2xl flex items-center justify-center text-3xl mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm',
+        'relative z-10 w-24 h-24 rounded-3xl flex items-center justify-center text-4xl mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm border border-white/50',
         'bg-orange-50 text-orange-600' => $category->color === 'orange',
         'bg-blue-50 text-blue-600' => $category->color === 'blue',
         'bg-green-50 text-green-600' => $category->color === 'green',
@@ -23,16 +23,18 @@
         'bg-red-50 text-red-600' => $category->color === 'red',
         'bg-slate-50 text-slate-600' => $category->color === 'slate',
     ])>
-        <i class="fa-light {{ $category->icon }}"></i>
+        <i class="fa-light {{ $category->icon }} fa-fw"></i>
     </div>
 
-    <h3 class="text-2xl font-black text-slate-900 mb-4 tracking-tight group-hover:text-primary-600 transition-colors">{{ $category->getTranslation('name', app()->getLocale(), false) }}</h3>
+    <h3 class="text-3xl font-black text-slate-900 mb-3 tracking-tight group-hover:text-primary-600 transition-colors">
+        {{ $category->name_str ?? (method_exists($category, 'getTranslation') ? $category->getTranslation('name', app()->getLocale(), false) : 'Untitled') }}
+    </h3>
 
-    <p class="text-slate-500 leading-relaxed mb-8 font-medium">
-        {{ $category->getTranslation('description', app()->getLocale(), false) }}
+    <p class="text-slate-600 leading-relaxed mb-8 text-base font-medium">
+        {{ $category->description_str ?? (method_exists($category, 'getTranslation') ? $category->getTranslation('description', app()->getLocale(), false) : '') }}
     </p>
 
-    <div class="flex items-center justify-between mt-auto">
+    <div class="flex items-center justify-between mt-auto pt-4">
         <span class="text-xs font-black uppercase tracking-widest text-slate-400 group-hover:text-primary-600 transition-colors">
             {{ trans_choice('admin.navigation.pages.help_articles_count', $category->articles_count ?? 0) }}
         </span>

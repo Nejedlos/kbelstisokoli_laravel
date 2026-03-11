@@ -16,10 +16,10 @@
                 ])
             >
                 <div class="flex items-center gap-3">
-                    <i class="fa-light {{ $category->icon }} text-sm"></i>
-                    <span class="text-sm tracking-tight">{{ $category->getTranslation('name', app()->getLocale(), false) }}</span>
+                    <i class="fa-light {{ $category->icon ?? 'fa-folder' }} text-sm"></i>
+                    <span class="text-sm tracking-tight">{{ $category->name_str ?? (method_exists($category, 'getTranslation') ? $category->getTranslation('name', app()->getLocale(), false) : 'Untitled') }}</span>
                 </div>
-                @if($category->children_count > 0 || $category->articles_count > 0)
+                @if(($category->children_count ?? 0) > 0 || ($category->articles_count ?? 0) > 0 || (isset($category->articles) && count($category->articles) > 0))
                     <i @class([
                         'fa-light fa-chevron-right text-[10px] transition-transform',
                         'rotate-90' => $currentCategory && $currentCategory->id === $category->id,
@@ -47,7 +47,7 @@
                                 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' => !$currentArticle || $currentArticle->id !== $article->id,
                             ])
                         >
-                            {{ $article->getTranslation('title', app()->getLocale(), false) }}
+                            {{ $article->title_str ?? (method_exists($article, 'getTranslation') ? $article->getTranslation('title', app()->getLocale(), false) : 'Untitled') }}
                         </a>
                     @endforeach
                 </div>
