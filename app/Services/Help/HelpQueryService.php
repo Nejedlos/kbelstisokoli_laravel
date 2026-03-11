@@ -125,13 +125,16 @@ class HelpQueryService
         $filteringRoles = $this->getFilteringRoles();
         $locale = app()->getLocale();
 
+        add_breadcrumb('HelpQueryService::getCategoryBySlug start', ['slug' => $slug]);
+
         $category = \DB::table('help_categories')
-            ->select(['id', 'slug', 'name', 'description', 'icon', 'color', 'parent_id'])
+            ->select(['id', 'slug', 'name', 'description', 'icon', 'color', 'parent_id', 'audience_roles'])
             ->where('slug', $slug)
             ->where('is_active', true)
             ->first();
 
         if (!$category) {
+            add_breadcrumb('HelpQueryService::getCategoryBySlug category not found');
             return null;
         }
 
@@ -151,6 +154,7 @@ class HelpQueryService
                 $q->whereNull('published_at')->orWhere('published_at', '<=', now());
             })
             ->orderBy('sort_order')
+            ->limit(10) // DOČASNÝ LIMIT PRO IZOLACI LEAKU
             ->get()
             ->map(function ($article) use ($locale) {
                 $title = json_decode($article->title, true) ?: [];
@@ -158,6 +162,8 @@ class HelpQueryService
                 $article->audience_roles = json_decode($article->audience_roles, true) ?: [];
                 return $article;
             });
+
+        add_breadcrumb('HelpQueryService::getCategoryBySlug end', ['articles_count' => count($category->articles)]);
 
         return $category;
     }

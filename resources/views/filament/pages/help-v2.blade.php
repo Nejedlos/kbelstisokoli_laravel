@@ -133,37 +133,33 @@
             @if($categoryData)
                 @php $category = $categoryData['category'] @endphp
                 <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    {{-- KROK 1: POUZE SKELETON --}}
-                    <div class="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm">
-                         <h3 class="text-4xl font-black text-slate-900 tracking-tight mb-2">{{ $category->name_str ?? 'Untitled' }}</h3>
-                         <p class="text-slate-500 font-medium text-lg">Category detail skeleton (bez komponent)</p>
-                    </div>
-
-                    {{--
                     <x-help.breadcrumbs :breadcrumbs="$categoryData['breadcrumbs']" />
 
-                    <div class="flex flex-col lg:flex-row gap-12">
-                        <main class="flex-1 space-y-8">
-                            <div class="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-                                <div class="flex items-center gap-8 relative z-10">
-                                    <div @class([
-                                        'w-24 h-24 rounded-3xl flex items-center justify-center text-4xl mb-0 shadow-sm border border-white/50',
-                                        'bg-orange-50 text-orange-600' => ($category->color ?? '') === 'orange',
-                                        'bg-blue-50 text-blue-600' => ($category->color ?? '') === 'blue',
-                                        'bg-green-50 text-green-600' => ($category->color ?? '') === 'green',
-                                        'bg-purple-50 text-purple-600' => ($category->color ?? '') === 'purple',
-                                        'bg-red-50 text-red-600' => ($category->color ?? '') === 'red',
-                                        'bg-slate-50 text-slate-600' => ($category->color ?? '') === 'slate',
-                                    ])>
-                                        <i class="fa-light {{ $category->icon ?? 'fa-folder' }} fa-fw"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-4xl font-black text-slate-900 tracking-tight mb-2">{{ $category->name_str ?? 'Untitled' }}</h3>
-                                        <p class="text-slate-500 font-medium text-lg max-w-2xl">{{ $category->description_str ?? '' }}</p>
-                                    </div>
-                                </div>
+                    <div class="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                        <div class="flex items-center gap-8 relative z-10">
+                            <div @class([
+                                'w-24 h-24 rounded-3xl flex items-center justify-center text-4xl mb-0 shadow-sm border border-white/50 relative z-10',
+                                'bg-orange-50 text-orange-600' => ($category->color ?? '') === 'orange',
+                                'bg-blue-50 text-blue-600' => ($category->color ?? '') === 'blue',
+                                'bg-green-50 text-green-600' => ($category->color ?? '') === 'green',
+                                'bg-purple-50 text-purple-600' => ($category->color ?? '') === 'purple',
+                                'bg-red-50 text-red-600' => ($category->color ?? '') === 'red',
+                                'bg-slate-50 text-slate-600' => (($category->color ?? '') === 'slate') || empty($category->color),
+                            ])>
+                                @php
+                                    $iconClass = isset($category->icon) ? preg_replace('/\\bfa-(light|regular|solid)\\b/', '', $category->icon) : 'fa-folder';
+                                @endphp
+                                <i class="fa-light {{ trim($iconClass) }} fa-fw"></i>
                             </div>
+                            <div>
+                                <h3 class="text-4xl font-black text-slate-900 tracking-tight mb-2">{{ $category->name_str ?? 'Untitled' }}</h3>
+                                <p class="text-slate-500 font-medium text-lg max-w-2xl">{{ $category->description_str ?? '' }}</p>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="flex flex-col gap-12">
+                        <main class="flex-1 space-y-8">
                             <div class="grid gap-6">
                                 @foreach($category->articles as $article)
                                     <x-help.article-card
@@ -174,11 +170,12 @@
                             </div>
                         </main>
 
+                        {{--
                         <aside class="w-full lg:w-80 shrink-0">
                             <x-help.sidebar-nav :tree="$page->getTree()" :currentCategory="$category" />
                         </aside>
+                        --}}
                     </div>
-                    --}}
                 </div>
             @endif
             {{-- CATEGORY_DETAIL_SECTION_END --}}

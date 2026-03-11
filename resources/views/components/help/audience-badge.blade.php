@@ -1,11 +1,13 @@
 @props(['role', 'isMatchingRole' => false])
 
 @php
-    static $roleLabels = null;
-    if ($roleLabels === null) {
-        // Načteme role s využitím našeho modelu
-        $roleLabels = \App\Models\Role::all()->pluck('display_name', 'name')->toArray();
-    }
+    static $roleLabels = [
+        'admin' => 'Administrátor',
+        'super_admin' => 'Super Admin',
+        'coach' => 'Trenér',
+        'treasurer' => 'Hospodář',
+        'member' => 'Člen',
+    ];
 
     $label = $roleLabels[strtolower($role)] ?? $role;
 

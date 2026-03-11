@@ -40,10 +40,10 @@
         </div>
         <div>
             <span class="block text-lg font-bold text-slate-700 group-hover:text-slate-900 transition-colors mb-0.5">
-                {{ $article->title_str ?? (method_exists($article, 'getTranslation') ? $article->getTranslation('title', app()->getLocale(), false) : 'Untitled') }}
+                {{ $article->title_str ?? (is_array($article->title ?? null) ? ($article->title[app()->getLocale()] ?? $article->title['cs'] ?? 'Untitled') : ($article->title ?? 'Untitled')) }}
             </span>
             @php
-                $excerptStr = $article->excerpt_str ?? (method_exists($article, 'getSafeExcerpt') ? $article->getSafeExcerpt() : '');
+                $excerptStr = $article->excerpt_str ?? ($article->excerpt ?? '');
             @endphp
             @if(isset($article->search_excerpt))
                 <div class="text-sm text-slate-500 font-medium leading-relaxed mt-1 search-excerpt">

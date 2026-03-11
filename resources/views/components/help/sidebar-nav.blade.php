@@ -17,7 +17,7 @@
             >
                 <div class="flex items-center gap-3">
                     <i class="fa-light {{ $category->icon ?? 'fa-folder' }} text-sm"></i>
-                    <span class="text-sm tracking-tight">{{ $category->name_str ?? (method_exists($category, 'getTranslation') ? $category->getTranslation('name', app()->getLocale(), false) : 'Untitled') }}</span>
+                    <span class="text-sm tracking-tight">{{ $category->name_str ?? (is_array($category->name ?? null) ? ($category->name[app()->getLocale()] ?? $category->name['cs'] ?? 'Untitled') : ($category->name ?? 'Untitled')) }}</span>
                 </div>
                 @if(($category->children_count ?? 0) > 0 || ($category->articles_count ?? 0) > 0 || (isset($category->articles) && count($category->articles) > 0))
                     <i @class([
@@ -47,7 +47,7 @@
                                 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' => !$currentArticle || $currentArticle->id !== $article->id,
                             ])
                         >
-                            {{ $article->title_str ?? (method_exists($article, 'getTranslation') ? $article->getTranslation('title', app()->getLocale(), false) : 'Untitled') }}
+                            {{ $article->title_str ?? (is_array($article->title ?? null) ? ($article->title[app()->getLocale()] ?? $article->title['cs'] ?? 'Untitled') : ($article->title ?? 'Untitled')) }}
                         </a>
                     @endforeach
                 </div>
