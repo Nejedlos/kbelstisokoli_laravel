@@ -19,6 +19,28 @@ class LanguageController extends Controller
             cookie()->queue(cookie()->forever('filament_language_switch_locale', $lang));
         }
 
+        // Robustní redirect: Pokud předchozí URL obsahovala ?lang=..., vyčistíme to,
+        // aby tento parametr nepřepsal nově zvolenou preferenci v SetLocaleMiddleware.
+        $url = url()->previous();
+        if ($url) {
+            $parsed = parse_url($url);
+            if (isset($parsed['query'])) {
+                parse_str($parsed['query'], $query);
+                if (isset($query['lang'])) {
+                    unset($query['lang']);
+                    $newQuery = http_build_query($query);
+                    $url = (isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '')
+                        . (isset($parsed['host']) ? $parsed['host'] : '')
+                        . (isset($parsed['port']) ? ':' . $parsed['port'] : '')
+                        . (isset($parsed['path']) ? $parsed['path'] : '')
+                        . ($newQuery ? '?' . $newQuery : '')
+                        . (isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '');
+
+                    return redirect()->to($url);
+                }
+            }
+        }
+
         return back();
     }
 }

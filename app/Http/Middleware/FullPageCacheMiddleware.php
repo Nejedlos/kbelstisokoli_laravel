@@ -30,6 +30,11 @@ class FullPageCacheMiddleware
             $response->headers->set('Content-Type', $cached['type']);
             $response->headers->set('X-Page-Cache', 'hit');
 
+            // Přidáme i cookies, které mohly být vyfrontovány předchozími middleware (např. SetLocale)
+            foreach (cookie()->getQueuedCookies() as $cookie) {
+                $response->headers->setCookie($cookie);
+            }
+
             return $response;
         }
 

@@ -1,4 +1,5 @@
 import './bootstrap';
+import collapse from '@alpinejs/collapse';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'spotlight.js';
@@ -93,6 +94,7 @@ if (!window.Alpine) {
     import('alpinejs')
         .then(({ default: Alpine }) => {
             window.Alpine = Alpine;
+            Alpine.plugin(collapse);
             window.initFloatingUI(Alpine);
             Alpine.start();
             if (import.meta.env.DEV) {

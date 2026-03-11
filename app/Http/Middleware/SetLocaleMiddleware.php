@@ -15,22 +15,47 @@ class SetLocaleMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $supportedLocales = config('app.supported_locales', ['cs', 'en']);
+        $defaultLocale = config('app.locale', 'cs');
+
+        // 1. Zjistíme locale (Query > Session > Cookie > Config)
         $locale = $request->query('lang');
 
-        if ($locale && in_array($locale, ['cs', 'en'])) {
+        if ($locale && in_array($locale, $supportedLocales)) {
+            // Pokud je v query, nastavíme ho do session i cookie pro příště
             session(['locale' => $locale]);
-            // Synchronizace s cookie, kterou používá Filament i náš middleware jako fallback
-            cookie()->queue('filament_language_switch_locale', $locale, 60 * 24 * 365);
+            cookie()->queue(cookie()->forever('filament_language_switch_locale', $locale));
+
+            // REDIRECT na čistou URL bez lang parametru (proti "traps" při zpětném odkazu a pro SEO)
+            $url = $request->fullUrlWithQuery(['lang' => null]);
+            return redirect($url);
         } else {
-            $locale = session('locale', $request->cookie('filament_language_switch_locale', config('app.locale')));
+            // Jinak zkusíme session
+            $locale = session('locale');
+
+            // Pokud není v session, zkusíme cookie
+            if (! $locale) {
+                $locale = $request->cookie('filament_language_switch_locale');
+            }
+
+            // Fallback na výchozí
+            if (! $locale || ! in_array($locale, $supportedLocales)) {
+                $locale = $defaultLocale;
+            }
         }
 
-        // Validace, aby se tam nedostalo něco nečekaného
-        if (! in_array($locale, ['cs', 'en'])) {
-            $locale = config('app.locale', 'cs');
-        }
-
+        // 2. Aplikujeme locale
         app()->setLocale($locale);
+        config(['app.locale' => $locale]);
+
+        // 3. Synchronizujeme session i cookie (pokud se liší od aktuálně zjištěného locale)
+        if (session()->isStarted() && session('locale') !== $locale) {
+            session(['locale' => $locale]);
+        }
+
+        if ($request->cookie('filament_language_switch_locale') !== $locale) {
+            cookie()->queue(cookie()->forever('filament_language_switch_locale', $locale));
+        }
 
         return $next($request);
     }

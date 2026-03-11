@@ -174,7 +174,8 @@ class AppServiceProvider extends ServiceProvider
                 $branding['slogan'] = $brandingService->replacePlaceholders($branding['slogan'] ?? '');
 
                 try {
-                    $cachedData = \Illuminate\Support\Facades\Cache::remember('view_composer_data', 3600, function () use ($brandingService, $communicationService, $branding) {
+                    $cacheKey = 'view_composer_data_' . app()->getLocale();
+                    $cachedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($brandingService, $communicationService, $branding) {
                         return [
                             'branding' => $branding,
                             'branding_css' => $brandingService->getCssVariables(),

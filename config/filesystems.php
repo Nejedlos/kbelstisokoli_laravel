@@ -50,7 +50,7 @@ return [
         // Disk ukazující přímo na public_path() – pro ukládání souborů dostupných přes asset()
         'public_path' => [
             'driver' => 'local',
-            'root' => env('PROD_PUBLIC_PATH', base_path('../subdomains/new')),
+            'root' => public_path(),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/'),
             'visibility' => 'public',
             'throw' => false,

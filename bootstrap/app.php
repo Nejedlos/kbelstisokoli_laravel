@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
 $app = Application::configure(basePath: dirname(__DIR__))
-    /*->booting(function ($app) {
+    ->booting(function ($app) {
         // 1. Nastavení cest (Environment a Public) co nejdříve
         $envPath = file_exists(base_path('.env')) ? base_path() : base_path('public');
         $app->useEnvironmentPath($envPath);
@@ -31,9 +31,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Pokud stále nemáme publicPath a jsme na produkci, zkusíme relativní cestu
         if (! $publicPath && $app->isProduction()) {
-            $subdomainPath = base_path('../subdomains/new');
-            if (is_dir($subdomainPath)) {
-                $publicPath = realpath($subdomainPath);
+            $subdomainPath = realpath(base_path('../subdomains/new'));
+            if ($subdomainPath && is_dir($subdomainPath)) {
+                $publicPath = $subdomainPath;
             }
         }
 
@@ -70,7 +70,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
             return false;
         });
-    })*/
+    })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -138,12 +138,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            \App\Http\Middleware\SetLocaleMiddleware::class,
             \App\Http\Middleware\AddRequestIdToResponse::class,
             \App\Http\Middleware\MinifyHtmlMiddleware::class,
             \App\Http\Middleware\InjectFeedbackWidget::class,
             \App\Http\Middleware\PerformanceProfilingMiddleware::class,
             \App\Http\Middleware\FullPageCacheMiddleware::class,
-            \App\Http\Middleware\SetLocaleMiddleware::class,
             \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
 
