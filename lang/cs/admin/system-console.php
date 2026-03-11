@@ -78,11 +78,11 @@ return [
         ],
         'system_cleanup' => [
             'label' => 'Systém: Údržba',
-            'desc' => 'Provede systémovou údržbu (promazání logů apod.).',
+            'desc' => 'Maže staré systémové protokoly (cron logy) starší než 30 dní.',
         ],
         'audit_cleanup' => [
             'label' => 'Audit Log: Čištění',
-            'desc' => 'Odstraní staré záznamy z audit logu.',
+            'desc' => 'Odstraní staré záznamy z historie aktivit (audit logu) podle zvoleného počtu dní.',
             'flags' => [
                 '30' => '30 dní',
                 '90' => '90 dní',
@@ -91,14 +91,14 @@ return [
         ],
         'backfill_ids' => [
             'label' => 'Uživatelé: Doplnit ID',
-            'desc' => 'Doplní chybějící club_member_id a payment_vs.',
+            'desc' => 'Vygeneruje chybějící unikátní ID členů a variabilní symboly pro platby u všech uživatelů.',
             'flags' => [
                 'regenerate' => 'Regenerovat i existující',
             ],
         ],
-        'attendance_reminders' => [
+        'rsvp_reminders' => [
             'label' => 'Docházka: Upomínky',
-            'desc' => 'Odešle upomínky na nepotvrzenou docházku.',
+            'desc' => 'Odešle upozornění hráčům a trenérům, kteří nepotvrdili účast na akcích začínajících v příštích 24 hodinách.',
         ],
         'migrate' => [
             'label' => 'Migrace (migrate)',
@@ -152,8 +152,12 @@ return [
             'desc' => 'Vytvoří cache soubor pro Blade šablony.',
         ],
         'storage_link' => [
-            'label' => 'Storage: Link',
-            'desc' => 'Vytvoří symbolický odkaz pro složku storage (nutné pro obrázky).',
+            'label' => 'Storage: Link (Standard)',
+            'desc' => 'Vytvoří symlink ze storage/app/public do veřejného adresáře (standardní Laravel způsob).',
+        ],
+        'storage_repair' => [
+            'label' => 'Storage: Oprava (Webglobe)',
+            'desc' => 'Vynutí vytvoření symlinku v REÁLNÉM veřejném adresáři (pro hosting Webglobe). Také zkontroluje složku uploads.',
         ],
         'npm_install' => [
             'label' => 'NPM: Install',

@@ -217,19 +217,19 @@ class AdminPanelProvider extends PanelProvider
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.sports_agenda')),
                 \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.communication')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.user_management')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.statistics')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.content')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.media')),
+                    ->label(fn (): string => __('admin.navigation.groups.users_and_people')),
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.finance')),
                 \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.admin_tools')),
+                    ->label(fn (): string => __('admin.navigation.groups.content_and_media')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.web_settings')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.statistics_and_data')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.external_data')),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.system')),
             ])
             ->widgets([
                 // Widgets are now integrated into the custom Dashboard page view

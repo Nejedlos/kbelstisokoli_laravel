@@ -34,7 +34,7 @@ class PermissionResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 30;
+        return 50;
     }
 
     public static function table(Table $table): Table

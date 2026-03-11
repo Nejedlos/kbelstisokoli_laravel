@@ -34,7 +34,7 @@ class RoleResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 20;
+        return 40;
     }
 
     public static function table(Table $table): Table

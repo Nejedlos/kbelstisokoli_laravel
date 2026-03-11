@@ -3,13 +3,14 @@
 return [
     'navigation' => [
         'groups' => [
-            'content_and_media' => 'Content & Media',
             'sports_agenda' => 'Sports Agenda',
+            'users_and_people' => 'Members & Users',
+            'finance' => 'Economy',
+            'content_and_media' => 'Content & Media',
+            'web_settings' => 'Web Settings',
+            'system' => 'System & Maintenance',
             'statistics_and_data' => 'Statistics & Data',
             'external_data' => 'External Statistics',
-            'users_and_people' => 'Users & People',
-            'finance' => 'Finance',
-            'admin_tools' => 'Admin Tools',
         ],
         'pages' => [
             'dashboard' => 'Dashboard',

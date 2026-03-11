@@ -3,14 +3,14 @@
 return [
     'navigation' => [
         'groups' => [
-            'content_and_media' => 'Obsah a média',
             'sports_agenda' => 'Sportovní agenda',
+            'users_and_people' => 'Lidé a členové',
+            'finance' => 'Ekonomika',
+            'content_and_media' => 'Obsah a média',
+            'web_settings' => 'Nastavení webu',
+            'system' => 'Systém a údržba',
             'statistics_and_data' => 'Statistiky a data',
             'external_data' => 'Externí statistiky',
-            'users_and_people' => 'Lidé a uživatelé',
-            'finance' => 'Finance',
-            'admin_tools' => 'Admin nástroje',
-            'system' => 'Systém',
         ],
         'pages' => [
             'dashboard' => 'Nástěnka',

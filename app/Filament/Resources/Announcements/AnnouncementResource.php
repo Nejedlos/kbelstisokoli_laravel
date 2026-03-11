@@ -23,7 +23,7 @@ class AnnouncementResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.users_and_people');
+        return __('admin.navigation.groups.content_and_media');
     }
 
     public static function getModelLabel(): string

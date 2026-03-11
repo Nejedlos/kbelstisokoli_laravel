@@ -34,7 +34,7 @@ class SystemConsole extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.admin_tools');
+        return __('admin.navigation.groups.system');
     }
 
     public static function getNavigationLabel(): string
@@ -346,6 +346,13 @@ class SystemConsole extends Page
                 'color' => 'info',
                 'icon' => FilamentIcon::get('link'),
             ],
+            'storage:repair' => [
+                'label' => __('admin/system-console.commands.storage_repair.label'),
+                'desc' => __('admin/system-console.commands.storage_repair.desc'),
+                'type' => 'internal',
+                'color' => 'warning',
+                'icon' => FilamentIcon::get('wrench'),
+            ],
         ];
 
         // 7. Vývojářské nástroje (Filtrované)
@@ -542,7 +549,7 @@ class SystemConsole extends Page
         @ignore_user_abort(true);
         $timestamp = now()->format('H:i:s');
         $this->output .= "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n";
-        $this->stream(to: 'output', content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n", replace: false);
+        $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n", replace: false);
 
         try {
             $parameters = ['--no-interaction' => true];
@@ -559,7 +566,7 @@ class SystemConsole extends Page
             }
 
             // Podpora pro diagnostické interní příkazy (jako v kalkulačce)
-            if ($command === 'php:basic' || $command === 'php:ini') {
+            if ($command === 'php:basic' || $command === 'php:ini' || $command === 'storage:repair') {
                 $output = '';
                 if ($command === 'php:basic') {
                     $output .= 'PHP Version: '.PHP_VERSION."\n";
@@ -575,10 +582,46 @@ class SystemConsole extends Page
                     $output .= 'memory_limit: '.ini_get('memory_limit')."\n";
                     $output .= 'max_execution_time: '.ini_get('max_execution_time')."\n";
                     $output .= 'safe_mode: '.(ini_get('safe_mode') ? 'On' : 'Off')."\n";
+                } elseif ($command === 'storage:repair') {
+                    $publicStorage = public_path('storage');
+                    $target = storage_path('app/public');
+
+                    $output .= "Vynucená oprava symlinků pro Webglobe hosting...\n";
+                    $output .= "Cíl: $target\n";
+                    $output .= "Link: $publicStorage\n";
+
+                    if (file_exists($publicStorage)) {
+                        if (is_link($publicStorage)) {
+                            $output .= "Stávající link nalezen, odstraňuji...\n";
+                            @unlink($publicStorage);
+                        } else {
+                            $output .= "VAROVÁNÍ: Na místě linku existuje skutečný adresář! Přejmenovávám na storage_old...\n";
+                            @rename($publicStorage, $publicStorage.'_old_'.time());
+                        }
+                    }
+
+                    if (@symlink($target, $publicStorage)) {
+                        $output .= "✅ Symlink úspěšně vytvořen v reálném veřejném adresáři.\n";
+                    } else {
+                        $output .= "❌ CHYBA: Symlink se nepodařilo vytvořit. Zkuste to přes SSH nebo zkontrolujte oprávnění.\n";
+                    }
+
+                    // Kontrola uploads
+                    $uploadsPath = public_path('uploads');
+                    $output .= "\nKontrola uploads adresáře: $uploadsPath\n";
+                    if (! is_dir($uploadsPath)) {
+                        if (@mkdir($uploadsPath, 0775, true)) {
+                            $output .= "✅ Adresář uploads vytvořen.\n";
+                        } else {
+                            $output .= "❌ CHYBA: Nepodařilo se vytvořit adresář uploads.\n";
+                        }
+                    } else {
+                        $output .= "✅ Adresář uploads již existuje.\n";
+                    }
                 }
 
                 $this->output .= $output;
-                $this->stream(to: 'output', content: $output, replace: false);
+                $this->safelyStream(content: $output, replace: false);
 
                 Notification::make()
                     ->title(__('admin/system-console.notifications.completed'))
@@ -597,7 +640,7 @@ class SystemConsole extends Page
             $result = $outputBuffer->fetch();
 
             $this->output .= $result;
-            $this->stream(to: 'output', content: $result, replace: false);
+            $this->safelyStream(content: $result, replace: false);
 
             Notification::make()
                 ->title(__('admin/system-console.notifications.completed'))
@@ -630,7 +673,7 @@ class SystemConsole extends Page
     {
         $timestamp = now()->format('H:i:s');
         $this->output .= "\n[$timestamp] > System Check (Detailed Diagnostic)\n";
-        $this->stream(to: 'output', content: "\n[$timestamp] > System Check (Detailed Diagnostic)\n", replace: false);
+        $this->safelyStream(content: "\n[$timestamp] > System Check (Detailed Diagnostic)\n", replace: false);
 
         $out = "\n".str_repeat('=', 60)."\n";
         $out .= "         SYSTÉMOVÁ DIAGNOSTIKA (KBELŠTÍ SOKOLI)\n";
@@ -648,7 +691,11 @@ class SystemConsole extends Page
         $out .= sprintf("%-25s: %s\n", 'PHP Verze (Web)', PHP_VERSION);
         $out .= sprintf("%-25s: %s\n", 'PHP Binary (Web)', PHP_BINARY);
         $out .= sprintf("%-25s: %s\n", 'Adresář aplikace', base_path());
+        $out .= sprintf("%-25s: %s\n", 'Veřejný adresář', public_path());
+        $out .= sprintf("%-25s: %s\n", 'Storage adresář', storage_path());
         $out .= sprintf("%-25s: %s\n", 'PATH', getenv('PATH') ?: '(není v env)');
+        $out .= sprintf("%-25s: %s\n", 'APP_URL', config('app.url'));
+        $out .= sprintf("%-25s: %s (%s)\n", 'Uploads Disk', config('filesystems.uploads.disk'), config('filesystems.uploads.dir'));
         $out .= "\n";
 
         // 2. OMEZENÍ PHP
@@ -668,6 +715,27 @@ class SystemConsole extends Page
 
         // 3. SOUBORY A OPRÁVNĚNÍ
         $out .= "--- [3] SOUBORY A OPRÁVNĚNÍ ---\n";
+
+        // Kontrola linku storage
+        $storageLink = public_path('storage');
+        if (file_exists($storageLink)) {
+            $isLink = is_link($storageLink);
+            $target = $isLink ? readlink($storageLink) : 'Není link (je to adresář)';
+            $out .= sprintf("%-25s: Existuje (%s -> %s)\n", 'Storage link', $isLink ? 'Link' : 'Adresář', $target);
+        } else {
+            $out .= sprintf("%-25s: Neexistuje ❌\n", 'Storage link');
+        }
+
+        // Kontrola uploads složky
+        $uploadsPath = public_path('uploads');
+        if (file_exists($uploadsPath)) {
+            $isLink = is_link($uploadsPath);
+            $target = $isLink ? readlink($uploadsPath) : 'Adresář';
+            $out .= sprintf("%-25s: Existuje (%s)\n", 'Uploads složka', $target);
+        } else {
+            $out .= sprintf("%-25s: Neexistuje ❌ (Vytvoří se při prvním uploadu)\n", 'Uploads složka');
+        }
+
         $artisanPath = base_path('artisan');
         if (file_exists($artisanPath)) {
             $perms = substr(sprintf('%o', fileperms($artisanPath)), -4);
@@ -827,7 +895,7 @@ class SystemConsole extends Page
         $out .= str_repeat('=', 60)."\n";
 
         $this->output .= $out;
-        $this->stream(to: 'output', content: $out, replace: false);
+        $this->safelyStream(content: $out, replace: false);
 
         Notification::make()
             ->title('Diagnostika dokončena')
@@ -860,6 +928,27 @@ class SystemConsole extends Page
         $this->output = '';
     }
 
+    /**
+     * Bezpečné streamování výstupu do Livewire frontend-u.
+     * Předchází Fatal Erroru "Call to a member function stream() on null",
+     * pokud SupportStreaming hook není v danou chvíli dostupný (např. po artisan optimize).
+     */
+    protected function safelyStream(string $content, bool $replace = false): void
+    {
+        try {
+            // Livewire 3 stream() interně volá ComponentHookRegistry::getHook($this, SupportStreaming::class)
+            // Pokud hook není nalezen (např. po vymazání/změně cache), HandlesStreaming trait
+            // vyhodí chybu, protože se snaží volat metodu na null objektu (StreamManager::to()).
+            // Zde voláme stream() s parametry a pokud selže, tiše ignorujeme - výstup je stále v $this->output.
+            $this->stream(to: 'output', content: $content, replace: $replace);
+        } catch (\Throwable $e) {
+            // Ignorujeme chybu streamování, uživatel uvidí výstup po dokončení akce v $this->output.
+            Log::debug('SystemConsole: Streaming failed, likely due to cache change.', [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
     protected function streamDebugInfo(string $binaryPath, string $type): void
     {
         $user = function_exists('posix_getpwuid') ? posix_getpwuid(posix_geteuid())['name'] : get_current_user();
@@ -886,9 +975,8 @@ class SystemConsole extends Page
         $debug .= "[DEBUG] Prostředí: {$env}\n";
         $debug .= '[DEBUG] PHP limit: '.ini_get('max_execution_time')."s\n";
         $debug .= "[DEBUG] ------------------------------------------------------------\n";
-
         $this->output .= $debug;
-        $this->stream(to: 'output', content: $debug, replace: false);
+        $this->safelyStream(content: $debug, replace: false);
     }
 
     protected function getBinaryVersion(string $binary): string
@@ -989,7 +1077,7 @@ class SystemConsole extends Page
         }, $cmd));
 
         $this->output .= "[RUNNING] {$cmdStr}\n\n";
-        $this->stream(to: 'output', content: "[RUNNING] {$cmdStr}\n\n", replace: false);
+        $this->safelyStream(content: "[RUNNING] {$cmdStr}\n\n", replace: false);
 
         $process->setTimeout(null);
 
@@ -1002,18 +1090,18 @@ class SystemConsole extends Page
                 $warn = "\n[!!!] CHYBA: Tato binárka PHP ({$cmd[0]}) nemá aktivní PDO nebo Tokenizer.\n";
                 $warn .= "[!!!] Náprava: Zaškrtněte u příkazu 'Internal Execution' nebo nastavte funkční PHP v .env.\n";
                 $this->output .= $warn;
-                $this->stream(to: 'output', content: $warn, replace: false);
+                $this->safelyStream(content: $warn, replace: false);
             }
 
             // Odeslání aktualizace do frontendu přes Livewire stream (pokud je dostupný)
-            $this->stream(to: 'output', content: $buffer, replace: false);
+            $this->safelyStream(content: $buffer, replace: false);
             $this->dispatch('output-updated');
         });
 
         $exitCode = $process->getExitCode();
         $statusMsg = "\n[FINISHED] Exit code: $exitCode ".($exitCode === 0 ? '(SUCCESS)' : '(FAILED)')."\n";
         $this->output .= $statusMsg;
-        $this->stream(to: 'output', content: $statusMsg, replace: false);
+        $this->safelyStream(content: $statusMsg, replace: false);
     }
 
     protected function parseCommandToArray(string $cmd): array

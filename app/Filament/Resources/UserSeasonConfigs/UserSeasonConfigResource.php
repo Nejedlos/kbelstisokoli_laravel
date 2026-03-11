@@ -16,7 +16,7 @@ class UserSeasonConfigResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.finance');
+        return __('admin.navigation.groups.users_and_people');
     }
 
     public static function getModelLabel(): string

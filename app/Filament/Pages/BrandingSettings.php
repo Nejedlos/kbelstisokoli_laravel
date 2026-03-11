@@ -33,7 +33,7 @@ class BrandingSettings extends Page implements HasForms
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.admin_tools');
+        return __('admin.navigation.groups.web_settings');
     }
 
     public static function getNavigationSort(): ?int

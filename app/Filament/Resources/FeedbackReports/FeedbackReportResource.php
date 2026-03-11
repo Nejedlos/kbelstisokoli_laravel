@@ -24,7 +24,7 @@ class FeedbackReportResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.admin_tools');
+        return __('admin.navigation.groups.system');
     }
 
     public static function getNavigationSort(): ?int

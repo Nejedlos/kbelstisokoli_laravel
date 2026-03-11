@@ -69,7 +69,7 @@ class DebugOperations extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.admin_tools');
+        return __('admin.navigation.groups.system');
     }
 
     protected function getViewData(): array

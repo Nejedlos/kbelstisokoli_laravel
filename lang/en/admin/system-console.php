@@ -78,11 +78,11 @@ return [
         ],
         'system_cleanup' => [
             'label' => 'System: Maintenance',
-            'desc' => 'Performs system maintenance (clearing logs, etc.).',
+            'desc' => 'Clears old system logs (cron logs) older than 30 days.',
         ],
         'audit_cleanup' => [
             'label' => 'Audit Log: Cleanup',
-            'desc' => 'Removes old records from the audit log.',
+            'desc' => 'Removes old records from the activity history (audit log) based on the selected number of days.',
             'flags' => [
                 '30' => '30 days',
                 '90' => '90 days',
@@ -91,14 +91,14 @@ return [
         ],
         'backfill_ids' => [
             'label' => 'Users: Fill IDs',
-            'desc' => 'Fills missing club_member_id and payment_vs.',
+            'desc' => 'Generates missing unique member IDs and variable symbols for payments for all users.',
             'flags' => [
                 'regenerate' => 'Regenerate existing',
             ],
         ],
         'rsvp_reminders' => [
             'label' => 'RSVP: Reminders',
-            'desc' => 'Sends reminders for unconfirmed attendance.',
+            'desc' => 'Sends notifications to players and coaches who haven\'t confirmed attendance for events starting in the next 24 hours.',
         ],
         'migrate' => [
             'label' => 'Migration (migrate)',
@@ -152,8 +152,12 @@ return [
             'desc' => 'Creates cache file for Blade templates.',
         ],
         'storage_link' => [
-            'label' => 'Storage: Link',
-            'desc' => 'Creates symbolic link for storage folder (required for images).',
+            'label' => 'Storage: Link (Standard)',
+            'desc' => 'Creates a symlink from storage/app/public to the public directory (standard Laravel way).',
+        ],
+        'storage_repair' => [
+            'label' => 'Storage: Repair (Webglobe)',
+            'desc' => 'Forces the creation of a symlink in the REAL public directory (for Webglobe hosting). Also checks the uploads folder.',
         ],
         'npm_install' => [
             'label' => 'NPM: Install',

@@ -38,7 +38,7 @@ class PlayerProfileResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 40;
+        return 20;
     }
 
     public static function form(Schema $schema): Schema

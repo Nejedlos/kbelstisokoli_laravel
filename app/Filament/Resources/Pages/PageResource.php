@@ -18,7 +18,7 @@ class PageResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.content_and_media');
+        return __('admin.navigation.groups.web_settings');
     }
 
     public static function getNavigationIcon(): ?string

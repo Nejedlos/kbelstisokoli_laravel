@@ -36,7 +36,7 @@ class MediaAssetResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 40;
+        return 45;
     }
 
     public static function form(Schema $schema): Schema
