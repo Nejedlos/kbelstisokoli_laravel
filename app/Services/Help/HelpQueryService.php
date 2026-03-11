@@ -66,6 +66,10 @@ class HelpQueryService
             ->get();
 
         return $rows->map(function ($item) use ($locale) {
+            // Default barva pokud chybí
+            if (empty($item->color)) {
+                $item->color = 'slate';
+            }
             $name = json_decode($item->name, true) ?: [];
             $item->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
 
@@ -95,7 +99,7 @@ class HelpQueryService
 
         // Ultra-lean výběr jen pro zobrazení karet na homepage
         $rows = \DB::table('help_articles')
-            ->select(['id', 'slug', 'title', 'is_featured', 'updated_at'])
+            ->select(['id', 'slug', 'title', 'is_featured', 'updated_at', 'audience_roles'])
             ->where('is_published', true)
             ->where(function ($q) {
                 $q->whereNull('published_at')->orWhere('published_at', '<=', now());
@@ -109,7 +113,7 @@ class HelpQueryService
             $title = json_decode($item->title, true) ?: [];
             $item->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
             $item->is_featured = (bool) $item->is_featured;
-            $item->updated_at = \Illuminate\Support\Carbon::parse($item->updated_at);
+            $item->audience_roles = json_decode($item->audience_roles, true) ?: [];
             return $item;
         });
     }
@@ -125,8 +129,6 @@ class HelpQueryService
         $filteringRoles = $this->getFilteringRoles();
         $locale = app()->getLocale();
 
-        add_breadcrumb('HelpQueryService::getCategoryBySlug start', ['slug' => $slug]);
-
         $category = \DB::table('help_categories')
             ->select(['id', 'slug', 'name', 'description', 'icon', 'color', 'parent_id', 'audience_roles'])
             ->where('slug', $slug)
@@ -134,16 +136,21 @@ class HelpQueryService
             ->first();
 
         if (!$category) {
-            add_breadcrumb('HelpQueryService::getCategoryBySlug category not found');
             return null;
         }
 
-        // Dekódování polí kategorie
-        $name = json_decode($category->name, true) ?: [];
-        $category->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
+        // Default barva
+        if (empty($category->color)) {
+            $category->color = 'slate';
+        }
 
-        $desc = json_decode($category->description, true) ?: [];
-        $category->description_str = $desc[$locale] ?? ($desc['cs'] ?? ($desc['en'] ?? ''));
+        // Dekódování polí kategorie
+        $category->audience_roles = json_decode($category->audience_roles ?? '[]', true) ?: [];
+        $category->name = json_decode($category->name ?? '[]', true) ?: [];
+        $category->name_str = $category->name[$locale] ?? ($category->name['cs'] ?? ($category->name['en'] ?? 'Untitled'));
+
+        $category->description = json_decode($category->description ?? '[]', true) ?: [];
+        $category->description_str = $category->description[$locale] ?? ($category->description['cs'] ?? ($category->description['en'] ?? ''));
 
         // Načtení článků kategorie přes Query Builder - ultra lean
         $category->articles = \DB::table('help_articles')
@@ -154,16 +161,13 @@ class HelpQueryService
                 $q->whereNull('published_at')->orWhere('published_at', '<=', now());
             })
             ->orderBy('sort_order')
-            ->limit(10) // DOČASNÝ LIMIT PRO IZOLACI LEAKU
             ->get()
             ->map(function ($article) use ($locale) {
-                $title = json_decode($article->title, true) ?: [];
-                $article->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
-                $article->audience_roles = json_decode($article->audience_roles, true) ?: [];
+                $article->audience_roles = json_decode($article->audience_roles ?? '[]', true) ?: [];
+                $article->title = json_decode($article->title ?? '[]', true) ?: [];
+                $article->title_str = $article->title[$locale] ?? ($article->title['cs'] ?? ($article->title['en'] ?? 'Untitled'));
                 return $article;
             });
-
-        add_breadcrumb('HelpQueryService::getCategoryBySlug end', ['articles_count' => count($category->articles)]);
 
         return $category;
     }
@@ -228,8 +232,6 @@ class HelpQueryService
     {
         $filteringRoles = $this->getFilteringRoles();
         $locale = app()->getLocale();
-
-        pre_log('HelpQueryService::getCategoryTree start');
 
         // Strom uděláme taky přes Query Builder, ať je to neprůstřelné
         $categories = \DB::table('help_categories')

@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     @php $page = $page ?? ($this ?? null); @endphp
-    <div class="space-y-12 py-8">
+    <div class="space-y-12 py-8 max-w-7xl mx-auto">
         {{-- Search & Hero Header --}}
         <div class="relative overflow-hidden rounded-3xl bg-slate-900 p-8 sm:p-16 shadow-2xl">
             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary-500/20 rounded-full blur-[100px] animate-pulse"></div>
@@ -41,24 +41,31 @@
         @if($searchQuery)
             {{-- SEARCH_RESULTS_SECTION_START --}}
             <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                        <i class="fa-light fa-list-check text-primary-600 bg-primary-50 p-2 rounded-lg"></i>
+                <div class="flex items-center justify-between px-4">
+                    <h3 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">
+                        <i class="fa-light fa-magnifying-glass text-primary-600 bg-primary-50 p-3 rounded-2xl shadow-sm border border-primary-100"></i>
                         Výsledky vyhledávání pro <span class="text-primary-600">"{{ $searchQuery }}"</span>
                     </h3>
-                    <button wire:click="$set('searchQuery', '')" class="text-sm font-bold text-slate-500 hover:text-primary-600 transition-colors">
+                    <button wire:click="$set('searchQuery', '')" class="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-bold text-sm">
+                        <i class="fa-light fa-xmark group-hover:rotate-90 transition-transform"></i>
                         Zrušit
                     </button>
                 </div>
 
-                <div class="grid gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @forelse($page->getSearchResults() as $result)
-                        <x-help.article-card :article="$result" :query="$searchQuery" />
+                        <x-help.article-card
+                            :article="$result"
+                            :user-roles="$userRoles ?? []"
+                        />
                     @empty
-                        <div class="p-12 text-center bg-white rounded-3xl border border-slate-100 shadow-xl">
-                            <h4 class="text-3xl font-black text-slate-900 mb-4">Žádné výsledky</h4>
-                            <p class="text-slate-500 max-w-md mx-auto text-lg font-medium">
-                                Zkuste zadat jiné klíčové slovo.
+                        <div class="p-20 text-center bg-white rounded-[3rem] border border-slate-100 shadow-2xl col-span-full">
+                            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fa-light fa-face-frown text-4xl text-slate-300"></i>
+                            </div>
+                            <h4 class="text-3xl font-black text-slate-900 mb-4 tracking-tight">Žádné výsledky</h4>
+                            <p class="text-slate-500 max-w-md mx-auto text-lg font-medium leading-relaxed">
+                                Zkuste zadat jiné klíčové slovo nebo prozkoumejte kategorie nápovědy níže.
                             </p>
                         </div>
                     @endforelse
@@ -70,28 +77,35 @@
             @php $articleData = $page?->getArticleData() @endphp
             @if($articleData)
                 @php $article = $articleData['article'] @endphp
-                <div class="space-y-8">
+                <div class="space-y-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <x-help.breadcrumbs :breadcrumbs="$articleData['breadcrumbs']" />
 
                     <div class="flex flex-col lg:flex-row gap-12">
                         <main class="flex-1 min-w-0">
-                            <article class="bg-white rounded-3xl p-8 sm:p-16 shadow-2xl">
-                                <h1 class="text-4xl font-black mb-8">
-                                    {{ $article->title_str ?? ($article->title ?? 'Untitled') }}
-                                </h1>
+                            <article class="bg-white rounded-3xl p-8 sm:p-16 shadow-2xl border border-slate-50 relative overflow-hidden">
+                                {{-- Subtle Background Decor --}}
+                                <div class="absolute top-0 right-0 w-96 h-96 -mr-48 -mt-48 bg-primary-50/50 rounded-full blur-3xl opacity-50"></div>
 
-                                <div class="prose prose-slate max-w-none">
-                                    {!! $article->content_html ?? (method_exists($article, 'getParsedContent') ? $article->getParsedContent() : '') !!}
-                                </div>
+                                <div class="relative z-10">
+                                    <h1 class="text-4xl md:text-5xl font-black mb-12 text-slate-900 tracking-tight leading-[1.1]">
+                                        {{ $article->title_str ?? ($article->title ?? 'Untitled') }}
+                                    </h1>
 
-                                @if(count($article->faqs ?? []) > 0)
-                                    <div class="mt-12 space-y-4">
-                                        <h3 class="text-2xl font-bold mb-6">FAQ</h3>
-                                        @foreach($article->faqs as $faq)
-                                            <x-help.faq-item :faq="$faq" />
-                                        @endforeach
+                                    <div class="prose prose-slate max-w-none prose-h2:text-3xl prose-h2:font-black prose-h2:tracking-tight prose-h2:mt-16 prose-h2:mb-8 prose-h3:text-2xl prose-h3:font-bold prose-h3:mt-12 prose-h3:mb-6 prose-p:text-slate-600 prose-p:leading-relaxed prose-p:text-lg prose-strong:text-slate-900 prose-li:text-slate-600 prose-img:rounded-3xl prose-img:shadow-xl">
+                                        {!! $article->content_html ?? (method_exists($article, 'getParsedContent') ? $article->getParsedContent() : '') !!}
                                     </div>
-                                @endif
+
+                                    @if(count($article->faqs ?? []) > 0)
+                                        <div class="mt-24 pt-12 border-t border-slate-100">
+                                            <h3 class="text-3xl font-black text-slate-900 tracking-tight mb-12">Často kladené dotazy</h3>
+                                            <div class="space-y-4">
+                                                @foreach($article->faqs as $faq)
+                                                    <x-help.faq-item :faq="$faq" />
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             </article>
                         </main>
 
@@ -129,23 +143,26 @@
             {{-- ARTICLE_DETAIL_SECTION_END --}}
         @elseif($currentCategory)
             {{-- CATEGORY_DETAIL_SECTION_START --}}
-            @php $categoryData = $page?->getCategoryData() @endphp
+            @php
+                $categoryData = $page?->getCategoryData();
+                $userRoles = auth()->user() ? auth()->user()->getRoleNames()->toArray() : [];
+            @endphp
             @if($categoryData)
                 @php $category = $categoryData['category'] @endphp
-                <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 py-8">
                     <x-help.breadcrumbs :breadcrumbs="$categoryData['breadcrumbs']" />
 
                     <div class="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
                         <div class="flex items-center gap-8 relative z-10">
                             <div @class([
-                                'w-24 h-24 rounded-3xl flex items-center justify-center text-4xl mb-0 shadow-sm border border-white/50 relative z-10',
-                                'bg-orange-50 text-orange-600' => ($category->color ?? '') === 'orange',
-                                'bg-blue-50 text-blue-600' => ($category->color ?? '') === 'blue',
-                                'bg-green-50 text-green-600' => ($category->color ?? '') === 'green',
-                                'bg-purple-50 text-purple-600' => ($category->color ?? '') === 'purple',
-                                'bg-red-50 text-red-600' => ($category->color ?? '') === 'red',
-                                'bg-slate-50 text-slate-600' => (($category->color ?? '') === 'slate') || empty($category->color),
-                            ])>
+                        'w-24 h-24 rounded-3xl flex items-center justify-center text-4xl mb-0 shadow-sm border border-white/50 relative z-10',
+                        'bg-orange-50 text-orange-600' => ($category->color ?? 'slate') === 'orange',
+                        'bg-blue-50 text-blue-600' => ($category->color ?? 'slate') === 'blue',
+                        'bg-green-50 text-green-600' => ($category->color ?? 'slate') === 'green',
+                        'bg-purple-50 text-purple-600' => ($category->color ?? 'slate') === 'purple',
+                        'bg-red-50 text-red-600' => ($category->color ?? 'slate') === 'red',
+                        'bg-slate-50 text-slate-600' => ($category->color ?? 'slate') === 'slate' || empty($category->color),
+                    ])>
                                 @php
                                     $iconClass = isset($category->icon) ? preg_replace('/\\bfa-(light|regular|solid)\\b/', '', $category->icon) : 'fa-folder';
                                 @endphp
@@ -158,23 +175,21 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-12">
+                    <div class="flex flex-col lg:flex-row gap-12">
                         <main class="flex-1 space-y-8">
                             <div class="grid gap-6">
                                 @foreach($category->articles as $article)
                                     <x-help.article-card
                                         :article="$article"
-                                        :query="$searchQuery"
+                                        :user-roles="$userRoles ?? []"
                                     />
                                 @endforeach
                             </div>
                         </main>
 
-                        {{--
                         <aside class="w-full lg:w-80 shrink-0">
                             <x-help.sidebar-nav :tree="$page->getTree()" :currentCategory="$category" />
                         </aside>
-                        --}}
                     </div>
                 </div>
             @endif
@@ -185,7 +200,7 @@
                 $homeData = $page->getHomeData();
                 $userRoles = auth()->user() ? auth()->user()->getRoleNames()->toArray() : [];
             @endphp
-            <div class="space-y-12">
+            <div class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 py-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($homeData['categories'] as $category)
                         <x-help.category-card :category="$category" />
@@ -198,22 +213,12 @@
                             <h3 class="text-3xl font-black text-slate-900 tracking-tight mb-2">Doporučené články</h3>
                             <p class="text-slate-500 font-medium">To nejdůležitější pro vás na jednom místě.</p>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($homeData['featured_articles'] as $article)
-                                <a href="{{ \App\Filament\Pages\Help::getUrl(['file' => $article->slug]) }}"
-                                   class="group p-6 rounded-2xl border transition-all text-left flex items-center justify-between bg-white border-slate-100 hover:border-primary-200 hover:shadow-xl hover:-translate-y-0.5">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
-                                            <i class="fa-light fa-file-lines"></i>
-                                        </div>
-                                        <div>
-                                            <span class="block text-lg font-bold text-slate-700 group-hover:text-slate-900 transition-colors mb-0.5">
-                                                {{ $article->title_str ?? 'Untitled' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <i class="fa-light fa-arrow-right text-slate-300 group-hover:text-primary-600 transition-colors"></i>
-                                </a>
+                                <x-help.article-card
+                                    :article="$article"
+                                    :user-roles="$userRoles ?? []"
+                                />
                             @endforeach
                         </div>
                     </div>

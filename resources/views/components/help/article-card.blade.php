@@ -55,7 +55,7 @@
         </div>
     </div>
     <div class="flex items-center gap-4 shrink-0">
-        @if($article->audience_roles)
+        @if(!empty($article->audience_roles))
             <div class="hidden sm:flex gap-1">
                 @foreach(array_slice($article->audience_roles, 0, 2) as $role)
                     <x-help.audience-badge :role="$role" :is-matching-role="$isMatchingRole" />
