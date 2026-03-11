@@ -8,7 +8,7 @@
     @foreach($tree as $category)
         <div class="space-y-1">
             <a
-                href="{{ \App\Filament\Pages\Help::getUrl(['cat' => $category->slug]) }}"
+                href="{{ \App\Support\HelpUrlHelper::getUrl(['cat' => $category->slug]) }}"
                 @class([
                     'w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between group/cat focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:outline-none',
                     'bg-primary-50 text-primary-600 font-bold' => $currentCategory && $currentCategory->id === $category->id,
@@ -43,7 +43,7 @@
                 <div class="ml-4 pl-4 border-l border-slate-100 space-y-1 py-1 animate-in fade-in slide-in-from-left-2 duration-300">
                     @foreach($articles as $article)
                         <a
-                            href="{{ \App\Filament\Pages\Help::getUrl(['file' => $article->slug]) }}"
+                            href="{{ \App\Support\HelpUrlHelper::getUrl(['file' => $article->slug]) }}"
                             @class([
                                 'block w-full text-left px-4 py-2 rounded-lg text-sm transition-all focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:outline-none',
                                 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/20 scale-[1.02]' => $currentArticle && $currentArticle->id === $article->id,

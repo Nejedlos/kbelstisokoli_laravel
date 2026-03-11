@@ -4,7 +4,7 @@
     <div class="mt-20 pt-10 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
             @if($prev)
-                <a href="{{ \App\Filament\Pages\Help::getUrl(['file' => $prev->slug]) }}" class="group block p-6 bg-white rounded-3xl border border-slate-100 hover:border-primary-100 hover:shadow-xl transition-all h-full relative overflow-hidden">
+                <a href="{{ \App\Support\HelpUrlHelper::getUrl(['file' => $prev->slug]) }}" class="group block p-6 bg-white rounded-3xl border border-slate-100 hover:border-primary-100 hover:shadow-xl transition-all h-full relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-12 -mt-12 opacity-50 group-hover:scale-110 transition-transform"></div>
 
                     <div class="relative z-10">
@@ -27,7 +27,7 @@
 
         <div class="text-right">
             @if($next)
-                <a href="{{ \App\Filament\Pages\Help::getUrl(['file' => $next->slug]) }}" class="group block p-6 bg-white rounded-3xl border border-slate-100 hover:border-primary-100 hover:shadow-xl transition-all h-full relative overflow-hidden">
+                <a href="{{ \App\Support\HelpUrlHelper::getUrl(['file' => $next->slug]) }}" class="group block p-6 bg-white rounded-3xl border border-slate-100 hover:border-primary-100 hover:shadow-xl transition-all h-full relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-24 h-24 bg-slate-50 rounded-full -ml-12 -mt-12 opacity-50 group-hover:scale-110 transition-transform"></div>
 
                     <div class="relative z-10">

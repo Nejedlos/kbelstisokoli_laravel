@@ -54,6 +54,9 @@ Route::middleware(['member'])
         // AI vyhledávání
         Route::get('/ai', \App\Http\Controllers\Member\AiController::class)->name('ai');
 
+        // Nápověda
+        Route::get('/napoveda', \App\Livewire\Member\HelpCenter::class)->name('help');
+
         // Statistiky
         Route::prefix('statistiky')->name('statistics.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Member\StatisticsController::class, 'index'])->name('index');

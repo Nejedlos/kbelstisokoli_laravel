@@ -34,6 +34,9 @@ return [
             ['title' => 'nav.players_statistics', 'route' => 'member.statistics.players', 'icon' => 'heroicon-o-users'],
             ['title' => 'nav.matches_statistics', 'route' => 'member.statistics.matches', 'icon' => 'heroicon-o-trophy'],
         ],
+        'support' => [
+            ['title' => 'nav.help', 'route' => 'member.help', 'icon' => 'heroicon-o-question-mark-circle'],
+        ],
     ],
 
     // Administrace (vlastní custom stránky mimo Filament)

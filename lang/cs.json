@@ -165,6 +165,8 @@
     "nav.section_menu": "Menu sekce",
     "nav.member_zone": "Členská zóna",
     "nav.help_text": "Máte problém s přístupem nebo profilem? Kontaktujte nás.",
+    "nav.help": "Nápověda",
+    "member.nav.need_help": "Potřebujete poradit?",
     "dashboard.title": "Nástěnka",
     "dashboard.subtitle": "Vítejte v členské sekci klubu ###TEAM_NAME###.",
     "dashboard.kpi.pending": "Čeká na potvrzení docházky",

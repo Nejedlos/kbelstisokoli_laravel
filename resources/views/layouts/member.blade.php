@@ -329,6 +329,35 @@
                 @endif
             </nav>
 
+            <!-- Support / Help -->
+            @if(!empty(config('navigation.member.support')))
+                <div class="px-6 pb-4">
+                    @foreach (config('navigation.member.support', []) as $item)
+                        <a href="{{ route($item['route']) }}"
+                           class="group flex items-center gap-4 px-5 py-4 rounded-[1.25rem] transition-all overflow-hidden relative {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-[1.02]' : 'bg-slate-50 text-slate-600 hover:bg-primary/5 hover:text-primary border border-slate-100/50' }}">
+
+                            {{-- Pulzující tečka pro nápovědu (podobně jako v adminu) --}}
+                            <div class="relative w-10 h-10 flex items-center justify-center rounded-2xl shrink-0 {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-white shadow-sm group-hover:shadow-md transition-all' }}">
+                                <i class="fa-light fa-circle-question text-lg {{ request()->routeIs($item['route']) ? 'text-white' : 'text-primary' }}"></i>
+                                @if(!request()->routeIs($item['route']))
+                                    <span class="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="flex flex-col leading-tight">
+                                <span class="text-[13px] font-black uppercase tracking-widest">{{ __($item['title']) }}</span>
+                                <span class="text-[10px] font-bold opacity-60 uppercase tracking-tighter italic">{{ __('member.nav.need_help') }}</span>
+                            </div>
+
+                            <i class="fa-light fa-arrow-right ml-auto text-xs opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+
             <!-- Bottom Action / Help -->
             <div class="p-6 border-t border-slate-100 bg-slate-50/30">
                 <x-member.contact-box type="sidebar" />
@@ -396,6 +425,35 @@
                     @endforeach
                 @endif
             </nav>
+
+            <!-- Support / Help (Mobile) -->
+            @if(!empty(config('navigation.member.support')))
+                <div class="px-6 pb-4">
+                    @foreach (config('navigation.member.support', []) as $item)
+                        <a href="{{ route($item['route']) }}"
+                           @click="sidebarOpen = false"
+                           class="group flex items-center gap-4 px-5 py-4 rounded-[1.25rem] transition-all overflow-hidden relative {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-[1.02]' : 'bg-slate-50 text-slate-600 hover:bg-primary/5 hover:text-primary border border-slate-100/50' }}">
+
+                            <div class="relative w-10 h-10 flex items-center justify-center rounded-2xl shrink-0 {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-white shadow-sm transition-all' }}">
+                                <i class="fa-light fa-circle-question text-lg {{ request()->routeIs($item['route']) ? 'text-white' : 'text-primary' }}"></i>
+                                @if(!request()->routeIs($item['route']))
+                                    <span class="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="flex flex-col leading-tight">
+                                <span class="text-[13px] font-black uppercase tracking-widest">{{ __($item['title']) }}</span>
+                                <span class="text-[10px] font-bold opacity-60 uppercase tracking-tighter italic">{{ __('member.nav.need_help') }}</span>
+                            </div>
+
+                            <i class="fa-light fa-arrow-right ml-auto text-xs opacity-40 transition-all"></i>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
 
             <!-- Bottom Action / Help (Mobile) -->
             <div class="p-6 border-t border-slate-50 bg-slate-50/50">

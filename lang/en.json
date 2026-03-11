@@ -165,6 +165,8 @@
     "nav.section_menu": "Section Menu",
     "nav.member_zone": "Member Zone",
     "nav.help_text": "Having issues with access or your profile? Contact us.",
+    "nav.help": "Help",
+    "member.nav.need_help": "Need help?",
     "dashboard.title": "Dashboard",
     "dashboard.subtitle": "Welcome to the member section of the ###TEAM_NAME### club.",
     "dashboard.kpi.pending": "Pending attendance confirmation",

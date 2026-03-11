@@ -4,6 +4,7 @@ namespace App\Services\Help;
 
 use App\Models\HelpArticle;
 use App\Models\HelpCategory;
+use App\Support\HelpUrlHelper;
 use Illuminate\Support\Collection;
 
 class HelpNavigationService
@@ -28,7 +29,7 @@ class HelpNavigationService
                 [
                     'label' => __('admin.navigation.pages.help'),
                     'slug' => null,
-                    'url' => \App\Filament\Pages\Help::getUrl(),
+                    'url' => HelpUrlHelper::getUrl(),
                     'is_active' => $item === null,
                 ]
             ]);
@@ -57,7 +58,7 @@ class HelpNavigationService
                 $breadcrumbs->push([
                     'label' => $label,
                     'slug' => $item->slug,
-                    'url' => \App\Filament\Pages\Help::getUrl(['file' => $item->slug]),
+                    'url' => HelpUrlHelper::getUrl(['file' => $item->slug]),
                     'is_active' => true,
                 ]);
             } else {
@@ -129,7 +130,7 @@ class HelpNavigationService
             $breadcrumbs->push([
                 'label' => $label,
                 'slug' => $cat->slug,
-                'url' => \App\Filament\Pages\Help::getUrl(['cat' => $cat->slug]),
+                'url' => HelpUrlHelper::getUrl(['cat' => $cat->slug]),
                 'is_active' => $isCurrent && (isset($cat->id) && isset($category->id) && $cat->id === $category->id),
             ]);
         }

@@ -20,6 +20,27 @@ class HelpCategorySeeder extends Seeder
         $categories = [
             [
                 'data' => [
+                    'slug' => 'clenska-sekce',
+                    'icon' => 'fa-light fa-user-vneck',
+                    'color' => 'sky',
+                    'sort_order' => 5,
+                    'is_active' => true,
+                    'is_featured' => true,
+                    'audience_roles' => ['player', 'parent', 'coach', 'admin'],
+                ],
+                'translations' => [
+                    'name' => [
+                        'cs' => 'Členská sekce (Můj profil)',
+                        'en' => 'Member Section (My Profile)',
+                    ],
+                    'description' => [
+                        'cs' => 'Vše o vašem hráčském profilu, docházce, platbách a nastavení účtu.',
+                        'en' => 'All about your player profile, attendance, payments and account settings.',
+                    ],
+                ],
+            ],
+            [
+                'data' => [
                     'slug' => 'uvod',
                     'icon' => 'fa-light fa-rocket-launch',
                     'color' => 'sky',

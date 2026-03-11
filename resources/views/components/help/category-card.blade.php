@@ -1,6 +1,6 @@
 @props(['category'])
 
-<a href="{{ \App\Filament\Pages\Help::getUrl(['cat' => $category->slug]) }}"
+<a href="{{ \App\Support\HelpUrlHelper::getUrl(['cat' => $category->slug]) }}"
    class="group relative bg-white rounded-[2rem] border border-slate-100 p-10 hover:shadow-xl hover:border-primary-200 hover:-translate-y-1 focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:outline-none transition-all duration-500 overflow-hidden flex flex-col h-full text-left">
 
     {{-- Card Accent Decor --}}

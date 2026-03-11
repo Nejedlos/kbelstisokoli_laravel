@@ -5,7 +5,7 @@
     $isFeatured = $article->is_featured;
 @endphp
 
-<a href="{{ \App\Filament\Pages\Help::getUrl(['file' => $article->slug, 'q' => $query]) }}"
+<a href="{{ \App\Support\HelpUrlHelper::getUrl(['file' => $article->slug, 'q' => $query]) }}"
    @class([
        'group p-6 rounded-2xl border transition-all text-left flex items-center justify-between relative overflow-hidden focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:outline-none',
        'bg-white border-slate-100 hover:border-primary-200 hover:shadow-xl hover:-translate-y-0.5' => !$isMatchingRole && !$isFeatured,

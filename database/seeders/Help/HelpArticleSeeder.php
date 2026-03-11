@@ -241,7 +241,7 @@ class HelpArticleSeeder extends Seeder
                 ],
             ],
             [
-                'category_slug' => 'uvod',
+                'category_slug' => 'clenska-sekce',
                 'data' => [
                     'slug' => 'muj-profil',
                     'sort_order' => 30,
@@ -296,7 +296,7 @@ class HelpArticleSeeder extends Seeder
                 ],
             ],
             [
-                'category_slug' => 'uvod',
+                'category_slug' => 'clenska-sekce',
                 'data' => [
                     'slug' => 'zabezpeceni-uctu',
                     'sort_order' => 40,
@@ -1482,7 +1482,7 @@ class HelpArticleSeeder extends Seeder
                 ],
             ],
             [
-                'category_slug' => 'finance',
+                'category_slug' => 'clenska-sekce',
                 'data' => [
                     'slug' => 'moje-platby',
                     'sort_order' => 60,
@@ -1511,6 +1511,61 @@ class HelpArticleSeeder extends Seeder
                             'audience_summary' => 'Members and parents.',
                             'short_intro' => 'Keep track of your contributions under control.',
                         ],
+                    ],
+                ],
+            ],
+            [
+                'category_slug' => 'clenska-sekce',
+                'data' => [
+                    'slug' => 'moje-dochazka',
+                    'sort_order' => 50,
+                    'is_published' => true,
+                    'is_featured' => true,
+                    'audience_roles' => ['player', 'parent', 'coach'],
+                    'search_keywords' => ['omluva', 'dochazka', 'nepritomnost', 'trenink', 'zapas', 'omluvit'],
+                ],
+                'translations' => [
+                    'title' => [
+                        'cs' => 'Moje docházka a omluvy',
+                        'en' => 'My Attendance and Excuses',
+                    ],
+                    'excerpt' => [
+                        'cs' => 'Jak se omluvit z tréninku nebo zápasu a sledovat svou herní účast.',
+                        'en' => 'How to excuse yourself from a training or a match and track your participation.',
+                    ],
+                    'metadata' => [
+                        'cs' => [
+                            'purpose' => 'Informování trenéra o nepřítomnosti.',
+                            'audience_summary' => 'Hráči a rodiče.',
+                            'short_intro' => 'Včasná omluva je základem týmové spolupráce.',
+                        ],
+                        'en' => [
+                            'purpose' => 'Informing the coach about absence.',
+                            'audience_summary' => 'Players and parents.',
+                            'short_intro' => 'Timely excuse is the foundation of team cooperation.',
+                        ],
+                    ],
+                ],
+                'faqs' => [
+                    [
+                        'question' => [
+                            'cs' => 'Do kdy se musím omluvit?',
+                            'en' => 'When is the deadline to excuse myself?',
+                        ],
+                        'answer' => [
+                            'cs' => 'Zpravidla 24 hodin před akcí, ale záleží na dohodě v týmu.',
+                            'en' => 'Usually 24 hours before the event, but it depends on the team agreement.',
+                        ],
+                    ],
+                ],
+                'quick_actions' => [
+                    [
+                        'label' => [
+                            'cs' => 'Můj program',
+                            'en' => 'My program',
+                        ],
+                        'url' => '/member/attendance',
+                        'icon' => 'fa-light fa-calendar-days',
                     ],
                 ],
             ],

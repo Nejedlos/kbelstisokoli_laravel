@@ -4,7 +4,7 @@
     <nav class="flex items-center mb-8 text-sm sm:text-base" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3 list-none p-0 m-0">
             <li class="inline-flex items-center">
-                <a href="{{ \App\Filament\Pages\Help::getUrl() }}" class="inline-flex items-center font-medium text-slate-600 hover:text-primary-600 focus-visible:text-primary-600 focus-visible:outline-none transition-colors">
+                <a href="{{ \App\Support\HelpUrlHelper::getUrl() }}" class="inline-flex items-center font-medium text-slate-600 hover:text-primary-600 focus-visible:text-primary-600 focus-visible:outline-none transition-colors">
                     <i class="fa-light fa-house mr-2"></i>
                     {{ __('admin.navigation.pages.help') }}
                 </a>
