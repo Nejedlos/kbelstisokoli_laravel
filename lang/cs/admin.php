@@ -15,6 +15,10 @@ return [
         ],
         'pages' => [
             'dashboard' => 'Nástěnka',
+            'help' => 'Nápověda',
+            'help_subtitle' => 'S čím vám můžeme pomoci?',
+            'help_description' => 'Najděte rychlé návody, postupy a odpovědi na své otázky k systému.',
+            'help_search_placeholder' => 'Hledat v nápovědě (např. "zápas", "uživatel")...',
             'branding' => 'Branding a vzhled',
             'ai_settings' => 'AI Nastavení',
             'member_section' => 'Členská sekce',

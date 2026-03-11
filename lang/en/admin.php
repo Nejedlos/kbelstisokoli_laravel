@@ -15,6 +15,10 @@ return [
         ],
         'pages' => [
             'dashboard' => 'Dashboard',
+            'help' => 'Help',
+            'help_subtitle' => 'How can we help you?',
+            'help_description' => 'Find quick guides, procedures, and answers to your questions about the system.',
+            'help_search_placeholder' => 'Search help (e.g., "match", "user")...',
             'branding' => 'Branding & Appearance',
             'ai_settings' => 'AI Settings',
             'member_section' => 'Member Section',

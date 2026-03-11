@@ -82,6 +82,12 @@ class BackendSearchService
                 'permission' => 'view_any_role',
                 'keywords' => ['přístupy', 'práva', 'admini', 'role'],
             ],
+            [
+                'title' => 'Nápověda a návody',
+                'description' => 'Jak používat systém, postupy pro přidávání zápasů, uživatelů a další.',
+                'url' => '/admin/help',
+                'keywords' => ['pomoc', 'návod', 'postup', 'jak na to', 'otázky', 'help'],
+            ],
             // ... další targety lze přidat
         ];
 

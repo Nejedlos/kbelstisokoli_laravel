@@ -68,6 +68,11 @@ class AiIndexService
             $count += $this->indexDocumentation($locale, $onProgress, $force);
         }
 
+        if (! $section || $section === 'help') {
+            Log::info("AI Indexing: Starting help section for locale '{$locale}'");
+            $count += $this->indexHelp($locale, $onProgress, $force);
+        }
+
         // Smažeme dokumenty, které již nejsou aktivní
         $query = AiDocument::query()->where('locale', $locale)->where('is_active', false);
         if ($section) {
@@ -630,6 +635,51 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 'source' => 'docs/'.$locale.'/'.$relativePath,
                 'title' => $title,
                 'url' => route('filament.admin.pages.documentation', ['file' => $relativePath]),
+                'locale' => $locale,
+                'content' => $content,
+                'checksum' => hash('sha256', $content.$relativePath.$locale),
+            ], $force);
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    private function indexHelp(string $locale, ?\Closure $onProgress = null, bool $force = false): int
+    {
+        $count = 0;
+        $helpPath = base_path('docs/help/'.$locale);
+
+        if (! File::exists($helpPath)) {
+            return 0;
+        }
+
+        $files = File::allFiles($helpPath);
+
+        foreach ($files as $file) {
+            if ($file->getExtension() !== 'md') {
+                continue;
+            }
+
+            $relativePath = $file->getRelativePathname();
+            $content = File::get($file->getPathname());
+
+            // Základní extrakce titulku z Markdownu (# Title)
+            $title = $file->getFilenameWithoutExtension();
+            if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
+                $title = trim($matches[1]);
+            }
+
+            if ($onProgress) {
+                $onProgress("Help [{$locale}]: {$title}");
+            }
+
+            $this->updateOrCreateDocument([
+                'type' => 'documentation.resource', // Používáme stejný typ pro vyhledávání
+                'source' => 'help/'.$locale.'/'.$relativePath,
+                'title' => $title,
+                'url' => route('filament.admin.pages.help', ['file' => 'docs/help/'.$locale.'/'.$relativePath]),
                 'locale' => $locale,
                 'content' => $content,
                 'checksum' => hash('sha256', $content.$relativePath.$locale),

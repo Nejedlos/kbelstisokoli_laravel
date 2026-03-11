@@ -88,6 +88,7 @@ enum AppIcon: string
     case DOCUMENTATION = 'book';
     case SHOE_PRINTS = 'shoe-prints';
     case NETWORK = 'network-wired';
+    case HELP = 'circle-question';
 
     /**
      * Získá výchozí styl pro danou ikonu.
