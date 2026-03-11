@@ -25,6 +25,17 @@ return [
             'public_web' => 'Public Website',
             'system_console' => 'System Console',
             'documentation' => 'Documentation',
+            'help_search_results_for' => 'Search results for',
+            'help_search_cancel' => 'Cancel search',
+            'help_no_results' => 'Nothing found',
+            'help_no_results_desc' => 'Try using another keyword or browse the categories below.',
+            'help_browse_categories' => 'Browse by section',
+            'help_browse_categories_desc' => 'Select an area you are interested in.',
+            'help_articles_count' => '{0} 0 articles|{1} 1 article|[2,*] :count articles',
+            'help_articles_in_category' => '{0} 0 articles in this section|{1} 1 article in this section|[2,*] :count articles in this section',
+            'help_back_to_overview' => 'Back to overview',
+            'help_contact_title' => 'Need help?',
+            'help_contact_body' => 'You can contact us directly via the form on the Dashboard.',
         ],
         'resources' => [
             'announcement' => [
@@ -351,6 +362,30 @@ return [
                     'description_en' => 'Description (EN)',
                     'photos' => 'Photos',
                 ],
+            ],
+        ],
+    ],
+    'help' => [
+        'categories' => [
+            'sports-agenda' => [
+                'name' => 'Sports Agenda',
+                'description' => 'Everything about matches, training and club sports events.',
+            ],
+            'users-and-people' => [
+                'name' => 'Users and Members',
+                'description' => 'Management of users, player profiles and membership base.',
+            ],
+            'finance' => [
+                'name' => 'Economy',
+                'description' => 'Guides for managing payments, regulations and financial management.',
+            ],
+            'content' => [
+                'name' => 'Content and Media',
+                'description' => 'How to manage articles, galleries and other website content.',
+            ],
+            'system' => [
+                'name' => 'System and Maintenance',
+                'description' => 'Technical system settings, permissions and maintenance.',
             ],
         ],
     ],

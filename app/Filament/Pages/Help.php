@@ -5,10 +5,13 @@ namespace App\Filament\Pages;
 use App\Services\HelpService;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
+
+use function Filament\Support\original_request;
 
 class Help extends Page
 {
@@ -23,27 +26,36 @@ class Help extends Page
     #[Url(as: 'file')]
     public ?string $currentFile = null;
 
+    #[Url(as: 'cat')]
+    public ?string $currentCategory = null;
+
     #[Url(as: 'q')]
     public string $searchQuery = '';
 
-    public static function getNavigationLabel(): string|HtmlString
+    public static function getNavigationLabel(): string
     {
-        return new HtmlString('
-            <div class="flex items-center justify-between w-full pr-1 group/help-nav">
-                <div class="flex flex-col">
-                    <span class="font-black text-primary-600 dark:text-primary-400 uppercase tracking-tighter text-[0.95rem] leading-none group-hover/help-nav:translate-x-0.5 transition-transform">
-                        ' . __('admin.navigation.pages.help') . '
-                    </span>
-                    <span class="text-[0.55rem] text-gray-500 font-bold uppercase tracking-[0.2em] leading-tight mt-1 opacity-80 group-hover/help-nav:text-primary-500 transition-colors">
-                        SOS / PODPORA
-                    </span>
-                </div>
-                <span class="flex h-2 w-2 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
-                </span>
-            </div>
-        ');
+        return __('admin.navigation.pages.help');
+    }
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            NavigationItem::make('help')
+                ->label(__('admin.navigation.pages.help'))
+                ->extraAttributes([
+                    'class' => 'fi-help-nav-item',
+                    'data-help-nav-item' => 'true',
+                ])
+                ->group(static::getNavigationGroup())
+                ->parentItem(static::getNavigationParentItem())
+                ->icon(static::getNavigationIcon())
+                ->activeIcon(static::getActiveNavigationIcon())
+                ->isActiveWhen(fn (): bool => original_request()->routeIs(static::getNavigationItemActiveRoutePattern()))
+                ->sort(static::getNavigationSort())
+                ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor())
+                ->badgeTooltip(static::getNavigationBadgeTooltip())
+                ->url(static::getNavigationUrl()),
+        ];
     }
 
     public function getTitle(): string
@@ -54,6 +66,28 @@ class Help extends Page
     public function getTree(): Collection
     {
         return app(HelpService::class)->getTree();
+    }
+
+    public function getCategoryContents(): ?Collection
+    {
+        if (!$this->currentCategory) {
+            return null;
+        }
+
+        $tree = $this->getTree();
+        $category = $tree->firstWhere('path', $this->currentCategory);
+
+        return $category ? collect($category['children']) : null;
+    }
+
+    public function getCategoryInfo(): ?array
+    {
+        if (!$this->currentCategory) {
+            return null;
+        }
+
+        $tree = $this->getTree();
+        return $tree->firstWhere('path', $this->currentCategory);
     }
 
     public function getFile(): ?array
@@ -71,7 +105,15 @@ class Help extends Page
 
     public static function getNavigationIcon(): string|HtmlString|null
     {
-        return new HtmlString('<i class="fa-light fa-circle-question fa-fw text-primary-600 scale-125 mr-1"></i>');
+        return new HtmlString('
+            <div class="relative inline-flex items-center justify-center">
+                <i class="fa-light fa-circle-question fa-fw text-primary-600 scale-125 mr-1"></i>
+                <span class="absolute -top-1 -right-0.5 flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-600 shadow-[0_0_8px_rgba(var(--primary-600),0.4)]"></span>
+                </span>
+            </div>
+        ');
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -83,8 +125,8 @@ class Help extends Page
     {
         // Redirect to dashboard where contact form is or just show notification
         \Filament\Notifications\Notification::make()
-            ->title('Potřebujete poradit?')
-            ->body('Můžete nás kontaktovat přímo přes formulář na Nástěnce.')
+            ->title(__('admin.navigation.pages.help_contact_title'))
+            ->body(__('admin.navigation.pages.help_contact_body'))
             ->info()
             ->send();
     }

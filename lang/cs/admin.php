@@ -25,6 +25,17 @@ return [
             'public_web' => 'Veřejný web',
             'system_console' => 'Systémová konzole',
             'documentation' => 'Dokumentace',
+            'help_search_results_for' => 'Výsledky hledání pro',
+            'help_search_cancel' => 'Zrušit vyhledávání',
+            'help_no_results' => 'Nic jsme nenašli',
+            'help_no_results_desc' => 'Zkuste použít jiné klíčové slovo nebo projděte kategorie níže.',
+            'help_browse_categories' => 'Procházet podle sekcí',
+            'help_browse_categories_desc' => 'Vyberte si oblast, která vás zajímá.',
+            'help_articles_count' => '{0} 0 článků|{1} 1 článek|[2,4] :count články|[5,*] :count článků',
+            'help_articles_in_category' => '{0} 0 článků v této sekci|{1} 1 článek v této sekci|[2,4] :count články v této sekci|[5,*] :count článků v této sekci',
+            'help_back_to_overview' => 'Zpět na přehled',
+            'help_contact_title' => 'Potřebujete poradit?',
+            'help_contact_body' => 'Můžete nás kontaktovat přímo přes formulář na Nástěnce.',
         ],
         'resources' => [
             'announcement' => [
@@ -351,6 +362,30 @@ return [
                     'description_en' => 'Description (EN)',
                     'photos' => 'Fotografie',
                 ],
+            ],
+        ],
+    ],
+    'help' => [
+        'categories' => [
+            'sportovni-agenda' => [
+                'name' => 'Sportovní agenda',
+                'description' => 'Vše o zápasech, trénincích a sportovních akcích klubu.',
+            ],
+            'lide-a-clenove' => [
+                'name' => 'Lidé a členové',
+                'description' => 'Správa uživatelů, profilů hráčů a členské základny.',
+            ],
+            'ekonomika' => [
+                'name' => 'Ekonomika',
+                'description' => 'Návody pro správu plateb, předpisů a finančního řízení.',
+            ],
+            'obsah-a-media' => [
+                'name' => 'Obsah a média',
+                'description' => 'Jak spravovat články, galerie a další obsah webu.',
+            ],
+            'system' => [
+                'name' => 'Systém a údržba',
+                'description' => 'Technické nastavení systému, oprávnění a údržba.',
             ],
         ],
     ],

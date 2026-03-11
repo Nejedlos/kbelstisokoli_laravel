@@ -45,7 +45,8 @@ class HelpService
             $dirName = basename($directory);
             $items->push([
                 'type' => 'directory',
-                'name' => $this->formatName($dirName),
+                'name' => $this->getCategoryName($directory),
+                'description' => $this->getCategoryDescription($directory),
                 'slug' => $dirName,
                 'path' => $this->getRelativePath($directory),
                 'icon' => $this->getCategoryIcon($dirName),
@@ -62,13 +63,13 @@ class HelpService
 
             $items->push([
                 'type' => 'file',
-                'name' => $this->formatName($fileName),
+                'name' => $this->getFileName($file->getPathname()),
                 'slug' => $this->getRelativePath($file->getPathname()),
                 'path' => $this->getRelativePath($file->getPathname()),
             ]);
         }
 
-        return $items->sortBy('name');
+        return $items->sortBy('slug');
     }
 
     public function getFileContent(string $relativePath): ?array
@@ -162,6 +163,72 @@ class HelpService
         if ($start + $length < mb_strlen($content)) $excerpt .= '...';
 
         return $excerpt;
+    }
+
+    protected function getCategoryName(string $directory): string
+    {
+        $dirName = basename($directory);
+        $slug = preg_replace('/^\d+-/', '', $dirName);
+
+        $translated = __("admin.help.categories.{$slug}.name");
+        if ($translated !== "admin.help.categories.{$slug}.name") {
+            return $translated;
+        }
+
+        // Try README.md H1
+        $readmePath = $directory . '/README.md';
+        if (File::exists($readmePath)) {
+            $content = File::get($readmePath);
+            if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
+                return trim($matches[1]);
+            }
+        }
+
+        return $this->formatName($dirName);
+    }
+
+    protected function getFileName(string $path): string
+    {
+        if (!File::exists($path)) {
+            return $this->formatName(basename($path));
+        }
+
+        $content = File::get($path);
+        if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return $this->formatName(basename($path));
+    }
+
+    protected function getCategoryDescription(string $directory): string
+    {
+        $dirName = basename($directory);
+        $slug = preg_replace('/^\d+-/', '', $dirName);
+
+        $translated = __("admin.help.categories.{$slug}.description");
+        if ($translated !== "admin.help.categories.{$slug}.description") {
+            return $translated;
+        }
+
+        $readmePath = $directory . '/README.md';
+        if (File::exists($readmePath)) {
+            $content = File::get($readmePath);
+            // Remove H1 title and return first paragraph
+            $content = preg_replace('/^#\s+.+$/m', '', $content);
+            $content = trim($content);
+            return Str::limit(strip_tags(Str::markdown($content)), 120);
+        }
+
+        // Fallback descriptions based on directory name
+        return match (true) {
+            Str::contains($directory, 'sport') => 'Vše o zápasech, trénincích a sportovních akcích klubu.',
+            Str::contains($directory, 'lid') || Str::contains($directory, 'peopl') => 'Správa uživatelů, profilů hráčů a členské základny.',
+            Str::contains($directory, 'ekonom') || Str::contains($directory, 'financ') => 'Návody pro správu plateb, předpisů a finančního řízení.',
+            Str::contains($directory, 'obsah') || Str::contains($directory, 'content') => 'Jak spravovat články, galerie a další obsah webu.',
+            Str::contains($directory, 'system') => 'Technické nastavení systému, oprávnění a údržba.',
+            default => 'Podrobný návod a postupy pro tuto sekci nápovědy.',
+        };
     }
 
     protected function getCategoryIcon(string $dirName): string

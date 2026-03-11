@@ -644,3 +644,49 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-gray-200 dark:bg-gray-800 rounded-full; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { @apply bg-gray-300 dark:bg-gray-700; }
 }
+
+
+/* === Special Help Navigation Item (SOS / PODPORA) === */
+.fi-help-nav-item .fi-sidebar-item-label {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    line-height: 1.1 !important;
+    padding-top: 1px;
+    font-weight: 900 !important;
+    text-transform: none !important;
+    letter-spacing: -0.025em !important;
+    font-size: 0.95rem !important;
+    color: var(--color-primary-600) !important;
+    transition: transform 0.2s ease;
+}
+
+:is(.dark) .fi-help-nav-item .fi-sidebar-item-label {
+    color: var(--color-primary-400) !important;
+}
+
+.fi-help-nav-item:hover .fi-sidebar-item-label {
+    transform: translateX(2px);
+}
+
+.fi-help-nav-item .fi-sidebar-item-label::after {
+    content: "SOS / PODPORA";
+    display: block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--color-gray-500);
+    margin-top: 3px;
+    opacity: 0.8;
+    transition: color 0.2s ease;
+}
+
+.fi-help-nav-item:hover .fi-sidebar-item-label::after {
+    color: var(--color-primary-500);
+    opacity: 1;
+}
+
+/* Zajištění, aby pulsátor v ikoně byl vidět i v collapsed stavu */
+.fi-help-nav-item .fi-sidebar-item-icon {
+    overflow: visible !important;
+}
