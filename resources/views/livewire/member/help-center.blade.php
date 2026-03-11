@@ -4,14 +4,6 @@
     @endphp
 
     <div class="mx-auto w-full space-y-8 py-8 max-w-7xl px-4 sm:px-6 lg:px-8">
-        @if(auth()->id() === 8) {{-- Jen pro testovacího uživatele --}}
-            <div class="p-4 bg-slate-800 text-white rounded-xl mb-4 font-mono text-xs">
-                Roles: {{ implode(', ', $userRoles) }}<br>
-                Landing: {{ $isLanding ? 'Yes' : 'No' }}<br>
-                Cat count: {{ count($homeData['categories'] ?? []) }}<br>
-                Article count: {{ count($homeData['featured_articles'] ?? []) }}
-            </div>
-        @endif
         {{-- Search & Hero Header --}}
         <div class="relative overflow-hidden rounded-3xl bg-slate-900 shadow-xl p-6 sm:p-10 border border-white/5">
             {{-- Pozadí s efektem --}}
