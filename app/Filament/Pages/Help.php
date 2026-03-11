@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Services\HelpService;
+use App\Services\Help\HelpService;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Navigation\NavigationItem;
@@ -12,10 +12,25 @@ use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
 
 use function Filament\Support\original_request;
+use Illuminate\Support\Facades\Log;
 
 class Help extends Page
 {
-    protected string $view = 'filament.pages.help';
+    public function getView(): string
+    {
+        $version = config('help.version', 'v2');
+        return "filament.pages.help-{$version}";
+    }
+
+    public function mount(): void
+    {
+        $version = config('help.version', 'v2');
+
+        // Pokud je v1, musíme se ujistit, že service má nastavenou locale
+        if ($version === 'v1') {
+            app(\App\Services\HelpService::class)->setPathByLocale(app()->getLocale());
+        }
+    }
 
     protected static ?string $title = 'Nápověda';
 
@@ -39,17 +54,21 @@ class Help extends Page
 
     public static function getNavigationItems(): array
     {
+        $icon = static::getNavigationIcon();
+        $iconHtml = ($icon instanceof HtmlString) ? $icon->toHtml() : $icon;
+        $label = __('admin.navigation.pages.help');
+
         return [
             NavigationItem::make('help')
-                ->label(__('admin.navigation.pages.help'))
+                ->label(new HtmlString('<div class="flex items-center gap-1.5">' . $iconHtml . ' <span>' . $label . '</span></div>'))
                 ->extraAttributes([
                     'class' => 'fi-help-nav-item',
                     'data-help-nav-item' => 'true',
                 ])
                 ->group(static::getNavigationGroup())
                 ->parentItem(static::getNavigationParentItem())
-                ->icon(static::getNavigationIcon())
-                ->activeIcon(static::getActiveNavigationIcon())
+                ->icon(null)
+                ->activeIcon(null)
                 ->isActiveWhen(fn (): bool => original_request()->routeIs(static::getNavigationItemActiveRoutePattern()))
                 ->sort(static::getNavigationSort())
                 ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor())
@@ -63,26 +82,62 @@ class Help extends Page
         return __('admin.navigation.pages.help');
     }
 
-    public function getTree(): Collection
+    public function render(): \Illuminate\Contracts\View\View
     {
-        return app(HelpService::class)->getTree();
+        try {
+            return parent::render();
+        } catch (\Throwable $e) {
+            Log::error("Help Page Render Error: " . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
     }
 
-    public function getCategoryContents(): ?Collection
+    public function getTree(): Collection
+    {
+        $version = config('help.version', 'v2');
+        if ($version === 'v1') {
+            return $this->getHelpService()->getTree();
+        }
+        return $this->getHelpService()->getNavigationTree();
+    }
+
+    public function getHomeData(): array
+    {
+        return $this->getHelpService()->getHomeData();
+    }
+
+    public function getCategoryData(): ?array
     {
         if (!$this->currentCategory) {
             return null;
         }
 
-        $tree = $this->getTree();
-        $category = $tree->firstWhere('path', $this->currentCategory);
-
-        return $category ? collect($category['children']) : null;
+        return $this->getHelpService()->getCategoryData($this->currentCategory);
     }
 
+    public function getArticleData(): ?array
+    {
+        if (!$this->currentFile) {
+            return null;
+        }
+
+        return $this->getHelpService()->getArticleData($this->currentFile);
+    }
+
+    public function getSearchResults(): Collection
+    {
+        return $this->getHelpService()->search($this->searchQuery);
+    }
+
+    /**
+     * Legacy v1: Vrací info o aktuální kategorii
+     */
     public function getCategoryInfo(): ?array
     {
-        if (!$this->currentCategory) {
+        if (config('help.version', 'v2') !== 'v1' || !$this->currentCategory) {
             return null;
         }
 
@@ -90,17 +145,66 @@ class Help extends Page
         return $tree->firstWhere('path', $this->currentCategory);
     }
 
+    /**
+     * Legacy v1: Vrací obsah aktuálního souboru
+     */
     public function getFile(): ?array
     {
-        if (!$this->currentFile) {
+        if (config('help.version', 'v2') !== 'v1' || !$this->currentFile) {
             return null;
         }
-        return app(HelpService::class)->getFileContent($this->currentFile);
+
+        return $this->getHelpService()->getFileContent($this->currentFile);
     }
 
-    public function getSearchResults(): Collection
+    protected ?\App\Services\Help\HelpService $helpServiceV2 = null;
+
+    protected function getHelpService()
     {
-        return app(HelpService::class)->search($this->searchQuery);
+        $version = config('help.version', 'v2');
+
+        if ($version === 'v1') {
+            return app(\App\Services\HelpService::class);
+        }
+
+        if ($this->helpServiceV2 === null) {
+            $this->helpServiceV2 = app(\App\Services\Help\HelpService::class)->forAudience(auth()->user()->getRoleNames()->toArray());
+        }
+
+        return $this->helpServiceV2;
+    }
+
+    /**
+     * Vrací data pro v1 systém (legacy markdown browser)
+     */
+    public function getHelpData(): ?array
+    {
+        if (config('help.version', 'v2') !== 'v1') {
+            return null;
+        }
+
+        if ($this->searchQuery) {
+            return [
+                'type' => 'search',
+                'query' => $this->searchQuery,
+                'results' => $this->getHelpService()->search($this->searchQuery),
+            ];
+        }
+
+        if ($this->currentFile) {
+            $content = $this->getHelpService()->getFileContent($this->currentFile);
+            if ($content) {
+                return [
+                    'type' => 'file',
+                    'content' => $content,
+                ];
+            }
+        }
+
+        return [
+            'type' => 'tree',
+            'tree' => $this->getHelpService()->getTree(),
+        ];
     }
 
     public static function getNavigationIcon(): string|HtmlString|null

@@ -644,6 +644,7 @@ class UserForm
                         Select::make('roles')
                             ->label('Role uživatele')
                             ->relationship('roles', 'name')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->display_name)
                             ->multiple()
                             ->preload()
                             ->searchable(),

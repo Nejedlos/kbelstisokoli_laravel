@@ -39,7 +39,7 @@ class UsersTable
                     ->from("{$userTable} as u2")
                     ->selectRaw('COUNT(*)')
                     ->whereColumn('u2.name', "{$userTable}.name")
-                    ->whereColumn('u2.id', '!=', "{$userTable}.id")
+                    ->whereColumn('u2.id', '!=', "{$userTable}.id"),
                 ])
             )
             ->columns([
@@ -56,13 +56,13 @@ class UsersTable
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->duplicates_count > 0
                             ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="Nalezeny další záznamy se stejným jménem ('.$record->duplicates_count.')"></i> '
-                            : '') .
+                            : '').
                         ($record->isGhost()
                             ? '<i class="fa-light fa-ghost fa-fw text-gray-400 mr-1" title="Dočasný Ghost profil"></i> '
-                            : '') .
+                            : '').
                         ($record->externalMappings->isNotEmpty()
                             ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
-                            : '') . e($state) . ($record->duplicates_count > 0 ? ' <span class="text-xs text-warning">('.$record->duplicates_count.' duplicity)</span>' : '')
+                            : '').e($state).($record->duplicates_count > 0 ? ' <span class="text-xs text-warning">('.$record->duplicates_count.' duplicity)</span>' : '')
                     ))
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
                     ->sortable(),
@@ -81,7 +81,7 @@ class UsersTable
                     ->fontFamily('mono')
                     ->color('primary')
                     ->toggleable(),
-                TextColumn::make('roles.name')
+                TextColumn::make('roles.display_name')
                     ->label('Role')
                     ->badge()
                     ->color('info')
@@ -289,8 +289,9 @@ class UsersTable
                             $skippedCount = 0;
 
                             foreach ($records as $record) {
-                                if (!$record->isGhost()) {
+                                if (! $record->isGhost()) {
                                     $skippedCount++;
+
                                     continue;
                                 }
 
@@ -325,7 +326,7 @@ class UsersTable
 
                             FilamentNotification::make()
                                 ->title('Hromadná synchronizace dokončena')
-                                ->body("Úspěšně synchronizováno: {$successCount}, Celkem vybráno: " . $records->count())
+                                ->body("Úspěšně synchronizováno: {$successCount}, Celkem vybráno: ".$records->count())
                                 ->success()
                                 ->send();
                         }),

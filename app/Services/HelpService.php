@@ -64,8 +64,12 @@ class HelpService
             $items->push([
                 'type' => 'file',
                 'name' => $this->getFileName($file->getPathname()),
+                'description' => $this->getFileDescription($file->getPathname()),
                 'slug' => $this->getRelativePath($file->getPathname()),
                 'path' => $this->getRelativePath($file->getPathname()),
+                'icon' => 'fa-file-lines',
+                'color' => 'slate',
+                'children' => collect(),
             ]);
         }
 
@@ -199,6 +203,19 @@ class HelpService
         }
 
         return $this->formatName(basename($path));
+    }
+
+    protected function getFileDescription(string $path): string
+    {
+        if (!File::exists($path)) {
+            return '';
+        }
+
+        $content = File::get($path);
+        // Remove H1 title and return first paragraph
+        $content = preg_replace('/^#\s+.+$/m', '', $content);
+        $content = trim($content);
+        return Str::limit(strip_tags(Str::markdown($content)), 120);
     }
 
     protected function getCategoryDescription(string $directory): string

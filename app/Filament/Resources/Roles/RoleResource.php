@@ -3,10 +3,18 @@
 namespace App\Filament\Resources\Roles;
 
 use App\Filament\Resources\Roles\Pages\ListRoles;
+use App\Models\Role;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Spatie\Permission\Models\Role;
 
 class RoleResource extends Resource
 {
@@ -37,27 +45,73 @@ class RoleResource extends Resource
         return 40;
     }
 
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make('Základní informace')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Slug (systémový název)')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->placeholder('např. super_admin'),
+                        TextInput::make('display_name.cs')
+                            ->label('Název (CZ)')
+                            ->required()
+                            ->placeholder('např. Super administrátor'),
+                        TextInput::make('display_name.en')
+                            ->label('Název (EN)')
+                            ->required()
+                            ->placeholder('např. Super administrator'),
+                        Select::make('permissions')
+                            ->label('Oprávnění')
+                            ->multiple()
+                            ->relationship('permissions', 'name')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->display_name)
+                            ->preload()
+                            ->searchable(),
+                    ])->columns(2),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('display_name')
                     ->label('Název role')
                     ->badge()
                     ->color('info')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->label('Slug')
+                    ->description('Systémový název')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('users_count')
                     ->label('Počet uživatelů')
                     ->counts('users')
                     ->sortable(),
-                TextColumn::make('permissions.name')
+                TextColumn::make('permissions.display_name')
                     ->label('Oprávnění')
                     ->badge()
                     ->color('gray')
-                    ->separator(', '),
+                    ->separator(', ')
+                    ->limitList(3),
             ])
             ->filters([
                 //
+            ])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

@@ -3,10 +3,17 @@
 namespace App\Filament\Resources\Permissions;
 
 use App\Filament\Resources\Permissions\Pages\ListPermissions;
+use App\Models\Permission;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Spatie\Permission\Models\Permission;
 
 class PermissionResource extends Resource
 {
@@ -37,22 +44,61 @@ class PermissionResource extends Resource
         return 50;
     }
 
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make('Základní informace')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Slug (systémový název)')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->placeholder('např. manage_settings'),
+                        TextInput::make('display_name.cs')
+                            ->label('Název (CZ)')
+                            ->required()
+                            ->placeholder('např. Správa nastavení'),
+                        TextInput::make('display_name.en')
+                            ->label('Název (EN)')
+                            ->required()
+                            ->placeholder('např. Manage settings'),
+                    ])->columns(2),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('display_name')
                     ->label('Název oprávnění')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('roles.name')
-                    ->label('Přiřazeno rolím')
                     ->badge()
                     ->color('success')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->label('Slug')
+                    ->description('Systémový název')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('roles.display_name')
+                    ->label('Přiřazeno rolím')
+                    ->badge()
+                    ->color('info')
                     ->separator(', '),
             ])
             ->filters([
                 //
+            ])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

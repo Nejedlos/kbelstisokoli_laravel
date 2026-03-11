@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Models\Role;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 
 class RolePolicy
 {
@@ -45,6 +45,6 @@ class RolePolicy
     public function delete(User $user, Role $role): bool
     {
         // Nemůžeme smazat systémové role
-        return $user->hasRole('admin') && ! in_array($role->name, ['admin', 'player', 'coach', 'editor']);
+        return $user->hasRole('admin') && ! in_array($role->name, ['super_admin', 'admin', 'player', 'coach', 'editor']);
     }
 }

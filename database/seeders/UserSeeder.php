@@ -80,8 +80,8 @@ class UserSeeder extends Seeder
             ]
         );
 
-        if (! $mn->hasRole('admin')) {
-            $mn->assignRole('admin');
+        if (! $mn->hasRole('super_admin')) {
+            $mn->assignRole('super_admin');
         }
     }
 }

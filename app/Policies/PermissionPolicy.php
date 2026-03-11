@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Models\Permission;
 use App\Models\User;
-use Spatie\Permission\Models\Permission;
 
 class PermissionPolicy
 {
@@ -28,7 +28,7 @@ class PermissionPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 
     /**
@@ -36,7 +36,7 @@ class PermissionPolicy
      */
     public function update(User $user, Permission $permission): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 
     /**
@@ -44,6 +44,6 @@ class PermissionPolicy
      */
     public function delete(User $user, Permission $permission): bool
     {
-        return false;
+        return $user->hasRole('admin') && ! in_array($permission->name, ['access_admin', 'manage_users']);
     }
 }
