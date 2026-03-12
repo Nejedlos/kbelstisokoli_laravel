@@ -13,7 +13,7 @@
                             {{ __('admin.navigation.pages.help_prev_article') }}
                         </span>
                         <h4 class="text-lg font-black text-slate-900 leading-tight group-hover:text-primary-600 transition-colors">
-                            {{ $prev->title }}
+                            {{ $prev->title_str }}
                         </h4>
                         @if($prev->metadata && isset($prev->metadata['short_intro']))
                             <p class="mt-2 text-sm text-slate-500 line-clamp-1 font-medium">
@@ -36,7 +36,7 @@
                             <i class="fa-light fa-arrow-right transition-transform group-hover:translate-x-1"></i>
                         </span>
                         <h4 class="text-lg font-black text-slate-900 leading-tight group-hover:text-primary-600 transition-colors">
-                            {{ $next->title }}
+                            {{ $next->title_str }}
                         </h4>
                         @if($next->metadata && isset($next->metadata['short_intro']))
                             <p class="mt-2 text-sm text-slate-500 line-clamp-1 font-medium">

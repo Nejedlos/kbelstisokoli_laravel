@@ -350,7 +350,7 @@ class HelpQueryService
         $locale = app()->getLocale();
 
         $articles = \DB::table('help_articles')
-            ->select(['id', 'slug', 'title'])
+            ->select(['id', 'slug', 'title', 'metadata'])
             ->where('category_id', $article->category_id)
             ->where('is_published', true)
             ->orderBy('sort_order')
@@ -365,10 +365,12 @@ class HelpQueryService
         if ($prev) {
             $t = json_decode($prev->title, true) ?: [];
             $prev->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
+            $prev->metadata = json_decode($prev->metadata, true) ?: [];
         }
         if ($next) {
             $t = json_decode($next->title, true) ?: [];
             $next->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
+            $next->metadata = json_decode($next->metadata, true) ?: [];
         }
 
         return ['prev' => $prev, 'next' => $next];

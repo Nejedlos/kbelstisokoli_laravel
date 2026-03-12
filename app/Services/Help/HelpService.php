@@ -83,8 +83,9 @@ class HelpService
         return [
             'article' => $article,
             'breadcrumbs' => $this->navigationService->getBreadcrumbs($article),
-            'prev' => $navigation['prev'],
-            'next' => $navigation['next'],
+            'prev_article' => $navigation['prev'],
+            'next_article' => $navigation['next'],
+            'faqs' => $article->faqs ?? collect(),
         ];
     }
 
