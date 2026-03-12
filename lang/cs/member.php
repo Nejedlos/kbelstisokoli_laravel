@@ -451,4 +451,14 @@ return [
             'admin_name_default' => 'Administrátor',
         ],
     ],
+    'roles' => [
+        'super_admin' => 'Super Admin',
+        'admin' => 'Administrátor',
+        'coach' => 'Trenér',
+        'editor' => 'Editor',
+        'player' => 'Hráč',
+        'parent' => 'Rodič',
+        'member' => 'Člen',
+        'treasurer' => 'Hospodář',
+    ],
 ];

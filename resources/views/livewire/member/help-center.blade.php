@@ -5,30 +5,30 @@
 
     <div class="mx-auto w-full space-y-8 py-8 max-w-7xl px-4 sm:px-6 lg:px-8">
         {{-- Search & Hero Header --}}
-        <div class="relative overflow-hidden rounded-3xl bg-slate-900 shadow-xl p-6 sm:p-10 border border-white/5">
+        <div class="relative overflow-hidden rounded-[2.5rem] bg-white border border-slate-200/60 shadow-xl shadow-slate-200/40 p-6 sm:p-10">
             {{-- Pozadí s efektem --}}
-            <div class="absolute top-0 right-0 w-96 h-96 bg-primary-500/10 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
-            <div class="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] -ml-20 -mb-20 opacity-30"></div>
+            <div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-[80px] -ml-20 -mb-20 opacity-30"></div>
 
             <div class="relative z-10 mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
                 <div class="flex-1 text-left flex items-center gap-8">
                     @if(!$isLanding)
-                        <button wire:click="goHome" class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary-400 hover:bg-primary-600 hover:text-white transition-all group shadow-2xl backdrop-blur-sm">
+                        <button wire:click="goHome" class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-primary-600 hover:bg-primary hover:text-white transition-all group shadow-sm">
                             <i class="fa-light fa-arrow-left text-xl transition-transform group-hover:-translate-x-1"></i>
                         </button>
                     @else
-                        <div class="w-14 h-14 rounded-2xl bg-primary-600 flex items-center justify-center text-white shadow-xl shadow-primary-600/30">
+                        <div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/30">
                             <i class="fa-light fa-circle-question text-2xl"></i>
                         </div>
                     @endif
                     <div class="space-y-1">
-                        <h2 class="text-3xl font-black text-white tracking-tight flex items-center gap-3 uppercase">
+                        <h2 class="text-3xl font-black text-secondary tracking-tight flex items-center gap-3 uppercase">
                             {{ __('admin.navigation.pages.help') }}
                         </h2>
                         <div class="flex items-center gap-3">
-                            <p class="text-primary-400 text-sm font-black uppercase tracking-[0.2em]">Informační centrum</p>
-                            <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                            <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Členská sekce</p>
+                            <p class="text-primary text-[10px] font-black uppercase tracking-[0.2em]">{{ __('admin.help.info_center') }}</p>
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+                            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{{ __('member.nav.member_section') }}</p>
                         </div>
                     </div>
                 </div>
@@ -36,17 +36,17 @@
                 <div class="relative group max-w-lg w-full">
                     <label for="help-search-input" class="sr-only">{{ __('admin.navigation.pages.help_search_placeholder') }}</label>
                     <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                        <i class="fa-light fa-magnifying-glass text-slate-400 text-xl group-focus-within:text-primary-400 transition-colors"></i>
+                        <i class="fa-light fa-magnifying-glass text-slate-400 text-xl group-focus-within:text-primary transition-colors"></i>
                     </div>
                     <input
                         type="search"
                         id="help-search-input"
                         wire:model.live.debounce.300ms="searchQuery"
                         placeholder="{{ __('admin.navigation.pages.help_search_placeholder') }}"
-                        class="block w-full pl-16 pr-14 py-5 bg-white/5 border border-white/10 rounded-[1.5rem] shadow-2xl backdrop-blur-2xl focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500/50 text-white placeholder-slate-500 transition-all text-lg font-medium border-opacity-50"
+                        class="block w-full pl-16 pr-14 py-5 bg-slate-50 border border-slate-100 rounded-3xl focus:ring-4 focus:ring-primary/20 focus:border-primary/50 text-secondary placeholder-slate-400 transition-all text-lg font-bold shadow-inner"
                     >
                     @if($searchQuery)
-                         <button wire:click="resetSearch" class="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-white transition-colors">
+                         <button wire:click="resetSearch" class="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-300 hover:text-red-500 transition-colors">
                              <i class="fa-light fa-circle-xmark text-xl"></i>
                          </button>
                     @endif
@@ -58,8 +58,8 @@
             {{-- Výsledky vyhledávání --}}
             <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div class="flex items-center justify-between px-2">
-                    <h2 class="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-5">
-                        <span class="bg-primary-50 text-primary-600 p-4 rounded-3xl shadow-sm border border-primary-100 flex items-center justify-center w-16 h-16">
+                    <h2 class="text-4xl font-black text-secondary tracking-tight flex items-center gap-5">
+                        <span class="bg-primary/10 text-primary p-4 rounded-3xl shadow-sm border border-primary/20 flex items-center justify-center w-16 h-16">
                              <i class="fa-light fa-magnifying-glass"></i>
                         </span>
                         <span>Výsledky pro <span class="text-primary-600 italic">"{{ $searchQuery }}"</span></span>
@@ -84,7 +84,7 @@
                                 <div class="w-32 h-32 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-inner rotate-3">
                                     <i class="fa-light fa-face-frown text-6xl text-slate-300"></i>
                                 </div>
-                                <h4 class="text-4xl font-black text-slate-900 mb-6 tracking-tight">Nic jsme nenašli</h4>
+                                <h4 class="text-4xl font-black text-secondary mb-6 tracking-tight">Nic jsme nenašli</h4>
                                 <p class="text-slate-500 max-w-xl mx-auto text-xl font-medium leading-relaxed">
                                     Zkuste zadat jiné klíčové slovo nebo prozkoumejte kategorie nápovědy, které jsou vám k dispozici.
                                 </p>
@@ -103,7 +103,7 @@
                 <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <x-help.breadcrumbs :breadcrumbs="$articleData['breadcrumbs']" />
 
-                    <div class="bg-white p-8 sm:p-14 rounded-[3rem] border border-slate-100 shadow-xl relative overflow-hidden">
+                    <div class="bg-white p-8 sm:p-14 rounded-[2.5rem] border border-slate-200/60 shadow-2xl shadow-slate-200/40 relative overflow-hidden">
                         {{-- Pozadí detailu --}}
                         <div @class([
                             'absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] opacity-10 -mr-64 -mt-64',
@@ -146,7 +146,7 @@
                                         </span>
                                     @endif
                                 </div>
-                                <h1 class="text-4xl sm:text-6xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tight">
+                                <h1 class="text-4xl sm:text-6xl font-black text-secondary leading-[1.1] mb-8 tracking-tight">
                                     {{ $article->title_str }}
                                 </h1>
                                 <p class="text-xl text-slate-500 font-medium leading-relaxed max-w-3xl">
@@ -161,8 +161,8 @@
 
                         @if(isset($articleData['faqs']) && count($articleData['faqs']) > 0)
                             <div class="mt-20 pt-20 border-t border-slate-100">
-                                <h3 class="text-3xl font-black text-slate-900 mb-10 tracking-tight flex items-center gap-4">
-                                    <i class="fa-light fa-comments-question text-primary-600"></i>
+                                <h3 class="text-3xl font-black text-secondary mb-10 tracking-tight flex items-center gap-4">
+                                    <i class="fa-light fa-comments-question text-primary"></i>
                                     Často kladené dotazy
                                 </h3>
                                 <div class="space-y-4 max-w-4xl">
@@ -208,7 +208,7 @@
                                 </div>
                             @endif
 
-                            <div class="bg-white p-10 sm:p-14 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
+                            <div class="bg-white p-10 sm:p-14 rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/40 relative overflow-hidden">
                                 <div @class([
                                     'absolute top-0 right-0 w-80 h-80 rounded-full blur-[100px] opacity-10 -mr-32 -mt-32',
                                     'bg-orange-500' => ($category->color ?? 'slate') === 'orange',
@@ -238,7 +238,7 @@
                                         @endphp
                                         <i class="fa-light {{ trim($iconClass) }} fa-fw"></i>
                                     </div>
-                                    <h1 class="text-5xl font-black text-slate-900 mb-6 tracking-tight">{{ $category->name_str }}</h1>
+                                    <h1 class="text-5xl font-black text-secondary mb-6 tracking-tight">{{ $category->name_str }}</h1>
                                     <p class="text-xl text-slate-500 font-medium leading-relaxed max-w-2xl">
                                         {{ $category->description_str }}
                                     </p>
@@ -261,10 +261,10 @@
             {{-- Landing Page - Úvod --}}
             <div class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {{-- Rychlá volba kontaktu --}}
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden relative">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/40 overflow-hidden relative">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
                     <div class="lg:col-span-2 relative z-10">
-                        <h3 class="text-3xl font-black text-slate-900 tracking-tight mb-3">Nenašli jste, co jste hledali?</h3>
+                        <h3 class="text-3xl font-black text-secondary tracking-tight mb-3">Nenašli jste, co jste hledali?</h3>
                         <p class="text-slate-500 text-lg font-medium">Náš tým je připraven vám pomoci. Kontaktujte svého trenéra nebo klubovou podporu přímo zde.</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4 relative z-10">
@@ -291,7 +291,7 @@
 
                 @if(!empty($homeData['featured_articles']))
                     <div class="pt-16">
-                        <h3 class="text-3xl font-black text-slate-900 mb-10 tracking-tight flex items-center gap-4">
+                        <h3 class="text-3xl font-black text-secondary mb-10 tracking-tight flex items-center gap-4">
                             <span class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shadow-sm border border-amber-100">
                                 <i class="fa-solid fa-star text-sm"></i>
                             </span>

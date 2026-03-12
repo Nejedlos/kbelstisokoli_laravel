@@ -451,4 +451,14 @@ return [
             'admin_name_default' => 'Administrator',
         ],
     ],
+    'roles' => [
+        'super_admin' => 'Super Admin',
+        'admin' => 'Administrator',
+        'coach' => 'Coach',
+        'editor' => 'Editor',
+        'player' => 'Player',
+        'parent' => 'Parent',
+        'member' => 'Member',
+        'treasurer' => 'Treasurer',
+    ],
 ];

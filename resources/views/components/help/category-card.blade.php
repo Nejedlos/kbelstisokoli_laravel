@@ -1,7 +1,7 @@
 @props(['category'])
 
 <a href="{{ \App\Support\HelpUrlHelper::getUrl(['cat' => $category->slug]) }}"
-   class="group relative bg-white rounded-[2rem] border border-slate-100 p-10 hover:shadow-xl hover:border-primary-200 hover:-translate-y-1 focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:outline-none transition-all duration-500 overflow-hidden flex flex-col h-full text-left">
+   class="group relative bg-white rounded-[2rem] border border-slate-200/60 p-10 hover:shadow-2xl hover:border-primary/20 hover:-translate-y-1 focus-visible:ring-4 focus-visible:ring-primary/50 focus-visible:outline-none transition-all duration-500 overflow-hidden flex flex-col h-full text-left">
 
     {{-- Card Accent Decor --}}
     <div @class([
@@ -33,7 +33,7 @@
         <i class="fa-light {{ trim($iconClass) }} fa-fw"></i>
     </div>
 
-    <h3 class="text-3xl font-black text-slate-900 mb-3 tracking-tight group-hover:text-primary-600 transition-colors">
+    <h3 class="text-3xl font-black text-secondary mb-3 tracking-tight group-hover:text-primary transition-colors">
         {{ $category->name_str ?? (method_exists($category, 'getTranslation') ? $category->getTranslation('name', app()->getLocale(), false) : 'Untitled') }}
     </h3>
 

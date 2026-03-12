@@ -1,8 +1,8 @@
 @props(['tree', 'currentCategory' => null, 'currentArticle' => null])
 
-<nav aria-label="Help navigation" class="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-2 overflow-hidden lg:sticky lg:top-24">
-    <div class="px-4 py-2 mb-4 border-b border-slate-50">
-        <h4 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Kategorie</h4>
+<nav aria-label="Help navigation" class="bg-white rounded-[2rem] border border-slate-200/60 p-6 shadow-xl shadow-slate-200/40 space-y-3 overflow-hidden lg:sticky lg:top-24">
+    <div class="px-4 py-2 mb-2 border-b border-slate-50">
+        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Kategorie nápovědy</h4>
     </div>
 
     @foreach($tree as $category)
@@ -10,9 +10,9 @@
             <a
                 href="{{ \App\Support\HelpUrlHelper::getUrl(['cat' => $category->slug]) }}"
                 @class([
-                    'w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between group/cat focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:outline-none',
-                    'bg-primary-50 text-primary-600 font-bold' => $currentCategory && $currentCategory->id === $category->id,
-                    'text-slate-600 hover:bg-slate-50 hover:text-slate-900' => !$currentCategory || $currentCategory->id !== $category->id,
+                    'w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between group/cat focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:outline-none',
+                    'bg-primary/10 text-primary font-black' => $currentCategory && $currentCategory->id === $category->id,
+                    'text-slate-500 hover:bg-slate-50 hover:text-secondary' => !$currentCategory || $currentCategory->id !== $category->id,
                 ])
             >
                 <div class="flex items-center gap-3">
@@ -46,8 +46,8 @@
                             href="{{ \App\Support\HelpUrlHelper::getUrl(['file' => $article->slug]) }}"
                             @class([
                                 'block w-full text-left px-4 py-2 rounded-lg text-sm transition-all focus-visible:ring-4 focus-visible:ring-primary-500/50 focus-visible:outline-none',
-                                'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/20 scale-[1.02]' => $currentArticle && $currentArticle->id === $article->id,
-                                'text-slate-600 hover:text-slate-900 hover:bg-slate-50' => !$currentArticle || $currentArticle->id !== $article->id,
+                                'bg-primary text-white font-black shadow-lg shadow-primary/20 scale-[1.02]' => $currentArticle && $currentArticle->id === $article->id,
+                                'text-slate-500 hover:text-secondary hover:bg-slate-50' => !$currentArticle || $currentArticle->id !== $article->id,
                             ])
                         >
                             {{ $article->title_str ?? (is_array($article->title ?? null) ? ($article->title[app()->getLocale()] ?? $article->title['cs'] ?? 'Untitled') : ($article->title ?? 'Untitled')) }}
