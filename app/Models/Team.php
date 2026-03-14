@@ -14,6 +14,7 @@ class Team extends Model
         'name',
         'slug',
         'category',
+        'primary_venue_id',
         'description',
     ];
 
@@ -37,6 +38,11 @@ class Team extends Model
     public function clubEvents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(ClubEvent::class, 'club_event_team');
+    }
+
+    public function primaryVenue(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Venue::class, 'primary_venue_id');
     }
 
     /**

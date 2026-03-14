@@ -9,6 +9,7 @@ class Opponent extends Model
     protected $fillable = [
         'name',
         'city',
+        'primary_venue_id',
         'logo',
         'metadata',
     ];
@@ -20,5 +21,10 @@ class Opponent extends Model
     public function matches(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'opponent_id');
+    }
+
+    public function primaryVenue(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Venue::class, 'primary_venue_id');
     }
 }

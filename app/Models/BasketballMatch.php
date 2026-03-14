@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\Auditable;
 use App\Traits\HasMatchResult;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Translatable\HasTranslations;
 
@@ -19,6 +20,7 @@ class BasketballMatch extends Model
         'season_id',
         'team_id',
         'opponent_id',
+        'venue_id',
         'scheduled_at',
         'location',
         'is_home',
@@ -76,6 +78,11 @@ class BasketballMatch extends Model
         return $this->belongsTo(Opponent::class);
     }
 
+    public function venue(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Venue::class);
+    }
+
     public function prediction(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(MatchPrediction::class, 'basketball_match_id');
@@ -85,6 +92,11 @@ class BasketballMatch extends Model
     {
         return $this->hasMany(StatisticRow::class, 'basketball_match_id')
             ->whereNotNull('player_id');
+    }
+
+    public function externalPlayerMatches(): HasMany
+    {
+        return $this->hasMany(ExternalPlayerMatch::class, 'basketball_match_id');
     }
 
     /**

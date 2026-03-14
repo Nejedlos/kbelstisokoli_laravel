@@ -14,6 +14,11 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
      * Mapování českých zkratek na kanonické klíče.
      */
     protected array $columnMapping = [
+        'HRÁČ' => 'name',
+        'JMÉNO' => 'name',
+        'HRÁČ-TÝM' => 'name',
+        '#' => 'number',
+        'Č.' => 'number',
         'B' => 'pts',
         'BODY' => 'pts',
         '2B' => 'fg2_made',
@@ -26,19 +31,20 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         'CH' => 'fouls',
         'MIN' => 'minutes',
         '+/-' => 'plus_minus',
-        'DOS' => 'rebounds',
-        'DOS-Ú' => 'rebounds_off',
-        'DOS-O' => 'rebounds_def',
-        'U' => 'rebounds_off',
-        'O' => 'rebounds_def',
+        'DOS' => 'rebounds_total',
+        'DOS-Ú' => 'rebounds_offensive',
+        'DOS-O' => 'rebounds_defensive',
+        'U' => 'rebounds_offensive',
+        'O' => 'rebounds_defensive',
         'AS' => 'assists',
         'A' => 'assists',
+        'ASISTENCE' => 'assists',
         'ZIS' => 'steals',
         'Z' => 'steals',
         'ZTR' => 'turnovers',
         'T' => 'turnovers',
         'BL' => 'blocks',
-        'VAL' => 'efficiency',
+        'VAL' => 'valuation',
         'U%' => 'fg_pct',
         '2B-Ú' => 'fg2_made',
         '2B-P' => 'fg2_att',
@@ -124,8 +130,15 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         // Pokud nejsou žádné tabulky a zápas nemá žádné detaily o čtvrtinách, pravděpodobně jde o budoucí zápas.
         // V takovém případě skóre v hlavičce může být ve skutečnosti čas utkání.
         if (empty($allTablesData) && empty($matchHeader['periods']) && isset($matchHeader['score'])) {
-            // Kontrola, zda skóre vypadá jako čas a nejsou přítomny čtvrtiny
-            unset($matchHeader['score']);
+            // Pokud scheduled_at nemá čas (je tam jen datum), nebo pokud skóre vypadá jako čas
+            if (preg_match('/^\d{1,2}:\d{2}$/', $matchHeader['score'])) {
+                if (isset($matchHeader['scheduled_at']) && str_contains($matchHeader['scheduled_at'], '00:00:00')) {
+                    $datePart = explode(' ', $matchHeader['scheduled_at'])[0];
+                    $matchHeader['scheduled_at'] = $datePart . ' ' . $matchHeader['score'] . ':00';
+                }
+                $matchHeader['is_future'] = true;
+                unset($matchHeader['score']);
+            }
         }
 
         // Pro zjednodušení vracíme první tabulku jako hlavní data, ale v metadatech máme vše
@@ -164,12 +177,12 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $searchIn = $mainContainer->count() > 0 ? $mainContainer : $crawler;
 
         // Týmy
-        $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-name, .team-home h1, .team-home h2, h1, h2, h4.text-center')->first();
+        $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-home h1, .team-home h2, h4.text-center')->first();
         if ($homeNode->count() > 0) {
             $header['home_team'] = trim($homeNode->text());
         }
 
-        $awayNodes = $searchIn->filter('.beta, .score-away-team, .team-name, .team-away h1, .team-away h2, h1, h2, h4.text-center');
+        $awayNodes = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2, h4.text-center');
         if ($awayNodes->count() >= 2) {
             $header['away_team'] = trim($awayNodes->eq(1)->text());
         } elseif ($awayNodes->count() === 1) {
@@ -286,6 +299,20 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         if ($dateNode->count() > 0) {
             $dateStr = trim($dateNode->text());
             $header['date'] = $dateStr;
+
+            // Pokud je tam více divů se stejnou třídou, zkusíme najít soutěž a halu
+            $infoNodes = $searchIn->filter('.font-size-smaller.font-size-md-normal.ml-md-4.mr-4.mb-2.mb-md-4');
+            $infoNodes->each(function (Crawler $node) use (&$header) {
+                $text = trim($node->text());
+                if (str_contains($text, ':') && (str_contains($text, 'kolo') || str_contains($text, 'liga') || str_contains($text, 'přebor'))) {
+                    $header['competition'] = $text;
+                    if (preg_match('/\((.*kolo.*)\)/i', $text, $km)) {
+                        $header['round'] = $km[1];
+                    }
+                } elseif ($node->filter('a')->count() > 0 && str_contains($node->filter('a')->attr('href') ?: '', 'haly')) {
+                    $header['venue'] = $text;
+                }
+            });
 
             // Pokus o parsování na Carbon
             try {
@@ -658,17 +685,15 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             if ($th->attr('colspan') > 1 && $headerRows->count() > 1) {
                 return; // Přeskočíme hlavičku s colspan (např. "2 body")
             }
+
+            $abbr = $th->filter('abbr');
+            $abbrTitle = $abbr->count() > 0 ? trim($abbr->attr('title') ?: '') : '';
+
             $normalizedLabel = mb_strtoupper(str_replace(' ', '', $label));
+            $normalizedAbbrTitle = mb_strtoupper(str_replace(' ', '', $abbrTitle));
 
-            // Pokus o kontext z nadřazené hlavičky, pokud je label "ÚSP", "POK" nebo "%"
-            if ($headerRows->count() > 1 && in_array($normalizedLabel, ['ÚSP', 'POK', '%', 'Ú', 'P'])) {
-                // Najdeme index sloupce v rámci všech TH v tomto řádku (včetně těch s colspan)
-                // Tohle je složitější, ale zkusíme aspoň jednoduchý mapping podle pořadí
-                // Na cz.basketball je to většinou 2b, 3b, TH v tomto pořadí
-            }
-
-            $key = $this->columnMapping[$normalizedLabel] ?? 'col_'.$i;
-            $columns[$key] = $label;
+            $key = $this->columnMapping[$normalizedLabel] ?? $this->columnMapping[$normalizedAbbrTitle] ?? 'col_'.$i;
+            $columns[$key] = $label ?: $abbrTitle;
         });
 
         // Řádky hráčů (včetně případné patičky s týmovými statistikami)

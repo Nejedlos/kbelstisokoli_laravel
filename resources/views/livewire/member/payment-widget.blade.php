@@ -18,8 +18,8 @@
             animation: overlay-slow-pulse 0.3s ease-in-out 2 forwards;
         }
     </style>
-    <div class="absolute duration-1000 group-hover:scale-110 opacity-[0.05] p-6 right-0 top-0 transition-transform">
-        <i class="fa-light fa-bank sm:text-[180px] text-[120px]"></i>
+    <div class="absolute duration-1000 group-hover:scale-110 opacity-[0.05] p-6 right-0 top-0 transition-transform overflow-hidden pointer-events-none">
+        <i class="fa-light fa-bank sm:text-[180px] text-[120px] translate-x-1/4 -translate-y-1/4"></i>
     </div>
     <div class="gap-10 grid grid-cols-1 items-center md:grid-cols-2 relative z-10">
         <div class="space-y-6">

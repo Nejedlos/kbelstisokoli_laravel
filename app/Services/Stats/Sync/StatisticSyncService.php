@@ -266,6 +266,22 @@ class StatisticSyncService
                         $run->addLog('created', $statRow, null, $statRow->only(['values']), "Boxscore create: " . ($playerId ? "Player ID $playerId" : $playerName));
                     }
                 }
+
+                if ($isOurTeam && $playerId) {
+                    $this->updateExternalPlayerMatch(
+                        userId: $playerId,
+                        externalMatchId: (string) ($match->external_id ?: ($match->metadata['external_id'] ?? null)),
+                        externalPlayerId: $externalPlayerId,
+                        rowValues: $row->values,
+                        rowMetadata: $row->metadata ?? [],
+                        matchInfo: [
+                            'match_date' => $match->date,
+                            'competition_label' => $match->metadata['match_header']['competition'] ?? $match->metadata['competition_label'] ?? null,
+                            'opponent_name' => $matchMetadata['match_header']['opponent'] ?? null,
+                            'source_key' => 'czbasketball',
+                        ]
+                    );
+                }
             }
         });
 
@@ -534,7 +550,7 @@ class StatisticSyncService
     /**
      * Normalizuje text pro porovnání (odstraní whitespace, diakritiku, převede na malé).
      */
-    protected function normalizeForComparison(string $text): string
+    public function normalizeForComparison(string $text): string
     {
         $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
         $text = \Illuminate\Support\Str::ascii($text);
@@ -542,5 +558,59 @@ class StatisticSyncService
         $text = preg_replace('/[^a-z0-9]/', '', $text);
 
         return $text;
+    }
+
+    /**
+     * Aktualizuje nebo vytvoří detailní záznam zápasu pro externího hráče.
+     */
+    public function updateExternalPlayerMatch(
+        int $userId,
+        string $externalMatchId,
+        ?string $externalPlayerId,
+        array $rowValues,
+        array $rowMetadata,
+        array $matchInfo = []
+    ): \App\Models\ExternalPlayerMatch {
+        $sourceKey = $matchInfo['source_key'] ?? 'czbasketball';
+
+        return \App\Models\ExternalPlayerMatch::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'source_key' => $sourceKey,
+                'external_match_id' => (string) $externalMatchId,
+            ],
+            [
+                'external_id' => $externalPlayerId,
+                'match_date' => $matchInfo['match_date'] ?? null,
+                'scheduled_at' => $matchInfo['scheduled_at'] ?? null,
+                'competition_label' => $matchInfo['competition_label'] ?? null,
+                'opponent_name' => $matchInfo['opponent_name'] ?? null,
+                'venue' => $matchInfo['venue'] ?? null,
+                'number' => $rowValues['number'] ?? null,
+                'is_starter' => (bool) ($rowMetadata['is_starter'] ?? false),
+                'is_captain' => (bool) ($rowMetadata['is_captain'] ?? false),
+                'points' => (int) ($rowValues['pts'] ?? 0),
+                'two_points_made' => isset($rowValues['fg2_made']) ? (int) $rowValues['fg2_made'] : null,
+                'two_points_attempts' => isset($rowValues['fg2_att']) ? (int) $rowValues['fg2_att'] : null,
+                'three_points_made' => isset($rowValues['fg3_made']) ? (int) $rowValues['fg3_made'] : null,
+                'three_points_attempts' => isset($rowValues['fg3_att']) ? (int) $rowValues['fg3_att'] : null,
+                'free_throws_made' => isset($rowValues['ft_made']) ? (int) $rowValues['ft_made'] : null,
+                'free_throws_attempts' => isset($rowValues['ft_att']) ? (int) $rowValues['ft_att'] : null,
+                'free_throws_pct' => isset($rowValues['ft_pct']) ? (float) $rowValues['ft_pct'] : null,
+                'fouls' => isset($rowValues['fouls']) ? (int) $rowValues['fouls'] : null,
+                'minutes' => isset($rowValues['minutes']) ? (int) $rowValues['minutes'] : null,
+                'valuation' => isset($rowValues['valuation']) ? (int) $rowValues['valuation'] : null,
+                'plus_minus' => isset($rowValues['plus_minus']) ? (int) $rowValues['plus_minus'] : null,
+                'rebounds_offensive' => isset($rowValues['rebounds_offensive']) ? (int) $rowValues['rebounds_offensive'] : null,
+                'rebounds_defensive' => isset($rowValues['rebounds_defensive']) ? (int) $rowValues['rebounds_defensive'] : null,
+                'rebounds_total' => isset($rowValues['rebounds_total']) ? (int) $rowValues['rebounds_total'] : null,
+                'assists' => isset($rowValues['assists']) ? (int) $rowValues['assists'] : null,
+                'steals' => isset($rowValues['steals']) ? (int) $rowValues['steals'] : null,
+                'turnovers' => isset($rowValues['turnovers']) ? (int) $rowValues['turnovers'] : null,
+                'blocks' => isset($rowValues['blocks']) ? (int) $rowValues['blocks'] : null,
+                'fouls_drawn' => isset($rowValues['fouls_drawn']) ? (int) $rowValues['fouls_drawn'] : null,
+                'metadata' => $matchInfo['metadata'] ?? null,
+            ]
+        );
     }
 }

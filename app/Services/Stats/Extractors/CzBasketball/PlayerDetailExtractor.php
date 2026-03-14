@@ -45,6 +45,17 @@ class PlayerDetailExtractor implements StatExtractorInterface
         // Zápasy ze záložky Zápasy
         $matches = $this->extractMatches($crawler);
 
+        // Rekordy ze záložky Křížové
+        $records = $this->extractRecords($crawler);
+
+        // Extrakce dostupných sezón z tabulky kariéry
+        $seasons = [];
+        foreach ($stats as $stat) {
+            if (!empty($stat['season_label']) && !in_array($stat['season_label'], $seasons)) {
+                $seasons[] = $stat['season_label'];
+            }
+        }
+
         $data = [
             'name' => $name,
             'photo_url' => $photoUrl,
@@ -54,6 +65,8 @@ class PlayerDetailExtractor implements StatExtractorInterface
             'current_club' => $details['Aktuální klub'] ?? null,
             'stats' => $stats,
             'matches' => $matches,
+            'records' => $records,
+            'available_seasons' => $seasons,
         ];
 
         return [
@@ -340,5 +353,37 @@ class PlayerDetailExtractor implements StatExtractorInterface
         });
 
         return $rows;
+    }
+
+    protected function extractRecords(Crawler $crawler): array
+    {
+        $records = [];
+        // Tabulka rekordů je obvykle v záložce Křížové (#tab-pane-three) v tabulce rekordů
+        $recordsTable = null;
+        $crawler->filter('#tab-pane-three table')->each(function (Crawler $table) use (&$recordsTable) {
+            $header = trim($table->filter('thead th')->first()->text());
+            if (mb_stripos($header, 'Kategorie') !== false || mb_stripos($header, 'Rekord') !== false) {
+                $recordsTable = $table;
+            }
+        });
+
+        if (!$recordsTable || $recordsTable->count() === 0) {
+            return [];
+        }
+
+        $recordsTable->filter('tbody tr')->each(function (Crawler $tr) use (&$records) {
+            $cells = $tr->filter('td');
+            if ($cells->count() >= 5) {
+                $records[] = [
+                    'label' => trim($cells->eq(0)->text()),
+                    'value' => trim($cells->eq(1)->text()),
+                    'opponent' => trim($cells->eq(2)->text()),
+                    'date' => trim($cells->eq(3)->text()),
+                    'season' => trim($cells->eq(4)->text()),
+                ];
+            }
+        });
+
+        return $records;
     }
 }
