@@ -263,6 +263,7 @@ return [
             'note_placeholder' => 'Jméno člena',
             'ss_placeholder' => 'Nepovinné',
             'amount_placeholder' => '0.00',
+            'any_amount' => 'Libovolná částka',
             'download_qr' => 'Uložit do zařízení',
         ],
     ],

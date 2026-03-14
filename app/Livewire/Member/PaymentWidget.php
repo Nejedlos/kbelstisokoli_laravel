@@ -70,7 +70,7 @@ class PaymentWidget extends Component
             $options = new QROptions([
                 'version' => QRCode::VERSION_AUTO,
                 'outputType' => QRCode::OUTPUT_IMAGE_PNG,
-                'eccLevel' => QRCode::ECC_L,
+                'eccLevel' => QRCode::ECC_M,
                 'scale' => 5,
                 'addQuietzone' => true,
             ]);

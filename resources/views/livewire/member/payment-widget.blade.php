@@ -58,16 +58,34 @@
             </div>
         </div>
         <div class="flex flex-col gap-4 items-center justify-center">
-            <div class="bg-white flex group/qr h-40 items-center justify-center p-4 relative rounded-[2rem] shadow-2xl sm:h-48 sm:w-48 w-40 overflow-hidden">
+            <div class="bg-white flex flex-col group/qr h-52 sm:h-64 w-40 sm:w-48 items-center justify-center p-4 relative rounded-[2rem] shadow-2xl overflow-hidden">
                 @if($qrCodeDataUri)
                     <div x-show="isUpdating" x-cloak class="absolute inset-0 flex items-center justify-center z-20 transition-opacity duration-300">
                         <i class="fa-light fa-arrows-rotate fa-spin text-4xl text-primary"></i>
                     </div>
-                    <img src="{{ $qrCodeDataUri }}" alt="QR Platba"
-                         class="w-full h-full object-contain transition-all duration-300"
-                         id="qr-code-img"
-                         wire:key="{{ md5($qrCodeDataUri) }}"
-                         :class="isUpdating ? 'animate-qr-scale-pulse opacity-40 blur-[2px]' : ''">
+                    <div class="flex-1 w-full flex items-center justify-center min-h-0">
+                        <img src="{{ $qrCodeDataUri }}" alt="QR Platba"
+                             class="w-full h-full object-contain transition-all duration-300"
+                             id="qr-code-img"
+                             wire:key="{{ md5($qrCodeDataUri) }}"
+                             :class="isUpdating ? 'animate-qr-scale-pulse opacity-40 blur-[2px]' : ''">
+                    </div>
+
+                    <div class="mt-2 text-center text-secondary flex flex-col items-center relative z-10 w-full transition-all duration-300"
+                         :class="isUpdating ? 'opacity-20 blur-[1px]' : ''">
+                        <div class="font-black text-xs sm:text-sm tracking-tight leading-none">
+                            @php
+                                $amountValue = $amount ? (float)str_replace(',', '.', $amount) : 0;
+                            @endphp
+                            {{ $amountValue > 0 ? number_format($amountValue, 2, ',', ' ') . ' Kč' : __('member.economy.bank_info.any_amount') }}
+                        </div>
+                        <div class="font-bold text-[9px] opacity-60 uppercase tracking-widest mt-1">
+                            VS: {{ $vs }}
+                        </div>
+                        <div class="font-bold text-[8px] opacity-50 uppercase tracking-tight mt-0.5 truncate max-w-full px-2">
+                            {{ $note ?: $memberName }}
+                        </div>
+                    </div>
                 @else
                     <div class="flex flex-col items-center justify-center text-secondary text-[10px] text-center p-4">
                         <i class="fa-light fa-spinner fa-spin text-xl mb-2"></i>

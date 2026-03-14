@@ -263,6 +263,7 @@ return [
             'note_placeholder' => 'Member name',
             'ss_placeholder' => 'Optional',
             'amount_placeholder' => '0.00',
+            'any_amount' => 'Any amount',
             'download_qr' => 'Save to device',
         ],
     ],
