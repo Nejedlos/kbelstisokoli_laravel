@@ -1,33 +1,3 @@
-<?php
-
-use App\Models\ExternalImportRun;
-use Illuminate\Support\Facades\Auth;
-use function Livewire\Volt\{state};
-
-state([
-    'runs' => function () {
-        if (!Auth::check() || !Auth::user()->can('manage_stats')) {
-            return collect();
-        }
-
-        return ExternalImportRun::where('status', 'running')
-            ->whereIn('run_type', ['player_sync_batch', 'player_sync_excesive', 'player_sync_all', 'team_sync_season'])
-            ->orderByDesc('started_at')
-            ->get();
-    },
-    'isCollapsed' => true
-]);
-
-$refresh = function () {
-    // Tato funkce vynutí přepočítání state 'runs'
-    $this->runs = ExternalImportRun::where('status', 'running')
-        ->whereIn('run_type', ['player_sync_batch', 'player_sync_excesive', 'player_sync_all', 'team_sync_season'])
-        ->orderByDesc('started_at')
-        ->get();
-};
-
-?>
-
 <div wire:poll.3s @sync-started.window="$wire.$refresh()">
     @if($runs->isNotEmpty())
         <div x-data="{
