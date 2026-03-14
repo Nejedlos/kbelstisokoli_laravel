@@ -54,6 +54,7 @@ Mezi tyto úlohy patří:
 - **Finance**: Kontrola splatnosti předpisů.
 - **Obnova sezóny**: Hromadná inicializace nové sezóny (každý 31. srpna ve 23:55).
 - **Systémový úklid**: Promazávání starých logů a cache.
+- **Telescope úklid**: Automatické promazávání starých záznamů (každý den ve 2:00 ráno).
 
 ### 3.2 Statické úlohy (Kód)
 

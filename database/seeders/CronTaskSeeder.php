@@ -96,6 +96,13 @@ class CronTaskSeeder extends Seeder
                 'description' => 'Hromadná inicializace nové sezóny na základě dat z předchozí.',
                 'priority' => 50,
             ],
+            [
+                'name' => 'Úklid Telescope záznamů',
+                'command' => 'telescope:clear',
+                'expression' => '0 2 * * *', // Každý den ve 2:00 ráno
+                'description' => 'Promaže staré záznamy v Laravel Telescope (ponechá posledních 24 hodin).',
+                'priority' => -15,
+            ],
         ];
 
         foreach ($tasks as $task) {

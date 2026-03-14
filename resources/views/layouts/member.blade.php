@@ -596,6 +596,7 @@
     </nav>
 
     <x-back-to-top />
+    <livewire:sync-status-bar />
     <script>
         window.addEventListener('avatarUpdated', (event) => {
             const data = event.detail;

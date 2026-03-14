@@ -22,6 +22,7 @@ class SyncTeamSeasonCommand extends Command
                             {--force : Ignoruje hash a vynutí synchronizaci}
                             {--fresh : Smaže stávající data před novým importem}
                             {--ai : Použije AI pro normalizaci}
+                            {--excesive : Spustí hloubkovou synchronizaci všech detailů zápasů}
                             {--max-matches=20 : Maximální počet detailů zápasů ke stažení}
                             {--recent-days=3 : Počet dní zpět pro prioritní synchronizaci}
                             {--sync : Spustí synchronizaci synchronně (v tomto procesu)}';
@@ -63,6 +64,7 @@ class SyncTeamSeasonCommand extends Command
             'force' => $this->option('force'),
             'fresh' => $this->option('fresh'),
             'ai' => $this->option('ai'),
+            'excesive' => $this->option('excesive'),
             'maxMatchDetails' => (int) $this->option('max-matches'),
             'recentOnly' => (bool) $this->option('recent-days'),
             'recentDays' => (int) $this->option('recent-days'),
@@ -84,7 +86,26 @@ class SyncTeamSeasonCommand extends Command
 
         if ($this->option('sync')) {
             $this->info('Spouštím synchronizaci synchronně...');
-            $syncService->syncTeamSeason($team->id, $season->id, $options);
+
+            // Vytvoření hlavního běhu pro UI/Progress
+            $mainRun = \App\Models\ExternalImportRun::start(
+                'czbasketball',
+                $season->id,
+                $team->id,
+                $this->option('excesive') ? 'team_sync_excesive' : 'team_sync',
+                null
+            );
+            $mainRun->update(['total_count' => 3]); // Roster, Matches, Details
+
+            try {
+                $mainRun->updateProgress(1, 3, 'Synchronizace soupisky');
+                $syncService->syncTeamSeason($team->id, $season->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
+                $mainRun->finish(['status' => 'success']);
+            } catch (\Exception $e) {
+                $mainRun->fail($e);
+                throw $e;
+            }
+
             $this->info('Synchronizace dokončena.');
         } else {
             $this->info('Zařazuji synchronizaci do fronty (SyncTeamSeasonJob)...');

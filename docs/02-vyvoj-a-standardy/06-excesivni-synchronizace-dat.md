@@ -18,8 +18,18 @@ Synchronizace hráče probíhá v několika vlnách:
     - Každý nalezený zápas je uložen do `external_player_matches`.
     - Pro každý zápas je následně stažen jeho detail (boxscore).
 
-### 2.2 Zápas (MatchSyncService / StatisticSyncService)
-Detailní synchronizace zápasu (`syncMatchDetail`) využívá `MatchDetailBoxscoreExtractor` k získání:
+### 2.2 Tým a Zápas (ExternalStatsSyncService)
+Synchronizace týmu/sezóny může probíhat ve dvou režimech:
+1. **Standardní:** Synchronizuje soupisku a seznam zápasů. Detaily zápasů stahuje prioritně jen pro ty, které proběhly nedávno (výchozí 3 dny) nebo u kterých v DB chybí skóre. Má nastaven limit (výchozí 15) na počet detailních synchronizací v jednom běhu.
+2. **Excesivní (`--excesive`):**
+    - Ignoruje veškeré časové a množstevní limity.
+    - Prochází **všechny** zápasy v sezóně, které mají externí ID.
+    - Vynucuje stažení a aktualizaci kompletního boxscoru pro každý zápas.
+    - Stahuje a ukládá kompletní metadata z hlavičky zápasu (rozhodčí, hala, diváci).
+    - Provádí hloubkovou extrakci všech hráčů v zápase a jejich statistik.
+
+### 2.3 Detaily zápasu (MatchDetailBoxscoreExtractor)
+Detailní synchronizace zápasu (`syncMatchDetail`) získává maximum dostupných dat:
 - **Boxscore:** Kompletní tabulka statistik pro všechny hráče obou týmů.
 - **Srovnání týmů:** Týmové statistiky (střelba, doskoky, ztráty).
 - **Nejlepší hráči:** Identifikace leaderů zápasu.
@@ -75,6 +85,13 @@ Služba implementuje mechanismus "sledování odkazů":
 Vzhledem k požadavku na maximální detailnost je synchronizace navržena tak, aby prováděla více HTTP požadavků. 
 - Pro optimální výkon se doporučuje spouštět hloubkovou synchronizaci v pozadí (Queue).
 - Extrakce využívá robustní DOM extraktory, které jsou odolnější než čisté AI parsování u vysoce strukturovaných tabulek.
+
+8. Sledování průběhu (Progress Tracking)
+Vzhledem k časové náročnosti "excesivní" synchronizace (velké množství HTTP požadavků na historii hráče) systém implementuje globální sledování průběhu:
+- **Záznamy o běhu:** Každá synchronizace (dávková i excesivní) vytváří záznam v `external_import_runs`.
+- **Progres v reálném čase:** Služby průběžně aktualizují `progress_percent` a `current_item_label` (např. "Hráč: Ondřej Bartoška", "Sezóna: 2023/24").
+- **UI Komponenta:** Volt komponenta `SyncStatusBar` automaticky detekuje běžící importy a zobrazuje fixní stavovou lištu v horní části obrazovky.
+- **Dostupnost:** Stavová lišta je integrována do všech částí systému (veřejný web, členská sekce, administrace), což umožňuje uživateli pokračovat v práci a zároveň mít přehled o běžící synchronizaci.
 
 ---
 *Poslední aktualizace: 14. 3. 2026*

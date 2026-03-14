@@ -64,10 +64,14 @@ class ExternalStatsSyncService
         Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}");
 
         $errors = [];
+        $parentRun = isset($options['parent_run_id']) ? ExternalImportRun::find($options['parent_run_id']) : null;
 
         // 1. Synchronizace soupisky
         if ($options['sync_roster'] ?? true) {
             try {
+                if ($parentRun) {
+                    $parentRun->updateProgress(1, 3, 'Synchronizace soupisky');
+                }
                 ConsoleService::log('- Synchronizace soupisky...');
                 $this->syncRoster($team, $season, $config, $options);
                 ConsoleService::log('  Soupiska OK.', 'success');
@@ -81,6 +85,9 @@ class ExternalStatsSyncService
         // 2. Synchronizace seznamu zápasů
         if ($options['sync_matches'] ?? true) {
             try {
+                if ($parentRun) {
+                    $parentRun->updateProgress(2, 3, 'Synchronizace seznamu zápasů');
+                }
                 ConsoleService::log('- Synchronizace seznamu zápasů...');
                 $this->syncMatchesList($team, $season, $config, $options);
                 ConsoleService::log('  Seznam zápasů OK.', 'success');
@@ -89,6 +96,10 @@ class ExternalStatsSyncService
                 ConsoleService::log('  Chyba při synchronizaci seznamu zápasů: '.$e->getMessage(), 'error');
                 Log::error('Chyba při synchronizaci seznamu zápasů: '.$e->getMessage());
             }
+        }
+
+        if ($parentRun) {
+            $parentRun->updateProgress(3, 3, 'Synchronizace detailů zápasů');
         }
 
         $config->update(['last_synced_at' => now()]);
@@ -447,12 +458,16 @@ class ExternalStatsSyncService
      */
     protected function dispatchMatchDetailJobs(Team $team, Season $season, array $options): void
     {
-        $force = ($options['force'] ?? false) || ($options['fresh'] ?? false);
+        $excesive = $options['excesive'] ?? false;
+        $force = ($options['force'] ?? false) || ($options['fresh'] ?? false) || $excesive;
         $defaultLimit = $force ? 100 : 15;
+        if ($excesive) {
+            $defaultLimit = 1000; // Prakticky bez limitu pro jednu sezónu
+        }
         $limit = $options['maxMatchDetails'] ?? $options['limit'] ?? $defaultLimit;
-        $recentOnly = $options['recentOnly'] ?? false;
+        $recentOnly = ($options['recentOnly'] ?? false) && !$excesive;
 
-        ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').", recentOnly=".($recentOnly ? 'true' : 'false'), 'debug');
+        ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').", recentOnly=".($recentOnly ? 'true' : 'false').", excesive=".($excesive ? 'true' : 'false'), 'debug');
 
         $query = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)

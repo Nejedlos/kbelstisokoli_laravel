@@ -18,6 +18,9 @@ class ExternalImportRun extends Model
         'extracted_count',
         'imported_count',
         'skipped_count',
+        'total_count',
+        'progress_percent',
+        'current_item_label',
         'content_hash',
         'error_summary',
         'metadata',
@@ -28,6 +31,7 @@ class ExternalImportRun extends Model
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
         'metadata' => 'array',
+        'progress_percent' => 'decimal:2',
     ];
 
     public function season()
@@ -152,6 +156,32 @@ class ExternalImportRun extends Model
             ->get()
             ->takeWhile(fn ($run) => in_array($run->status, ['failed', 'partial_failed']))
             ->count();
+    }
+
+    /**
+     * Aktualizuje progres běhu.
+     */
+    public function updateProgress(int $imported, ?int $total = null, ?string $label = null): void
+    {
+        $data = [
+            'imported_count' => $imported,
+        ];
+
+        if ($total !== null) {
+            $data['total_count'] = $total;
+        } else {
+            $total = $this->total_count;
+        }
+
+        if ($label !== null) {
+            $data['current_item_label'] = $label;
+        }
+
+        if ($total > 0) {
+            $data['progress_percent'] = round(($imported / $total) * 100, 2);
+        }
+
+        $this->update($data);
     }
 
     /**

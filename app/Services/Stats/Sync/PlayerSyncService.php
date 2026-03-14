@@ -219,6 +219,9 @@ class PlayerSyncService
             $year = substr($season, 0, 4);
             $url = "https://cz.basketball/hrac/{$extId}?tab=matches&y=" . $year;
             try {
+                if ($run) {
+                    $run->updateProgress((int) ($run->imported_count ?? 0), null, "Sezóna: $season");
+                }
                 $html = $this->fetcher->fetch($url);
                 $result = $this->extractor->extract($html);
                 $matches = $result['data']['matches'] ?? [];
@@ -250,6 +253,9 @@ class PlayerSyncService
                     $hasPoints = isset($matchData['points']) && $matchData['points'] > 0;
 
                     if (!$hasScheduledAt || ($isPast && !$hasStats)) {
+                        if ($run) {
+                            $run->updateProgress((int) ($run->imported_count ?? 0), null, "Zápas: " . ($matchData['opponent_name'] ?? 'neznámý'));
+                        }
                         $this->syncExternalMatchDetail($user, (string) $extMatchId, $run);
                     }
                 }

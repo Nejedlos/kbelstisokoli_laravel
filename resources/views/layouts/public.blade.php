@@ -124,6 +124,8 @@
 
     <x-back-to-top />
 
+    <livewire:sync-status-bar />
+
     @if(isset($footer_code))
         {!! $footer_code !!}
     @endif

@@ -257,6 +257,9 @@ class SystemConsole extends Page
                 'label' => __('admin/system-console.commands.telescope_clear.label'),
                 'desc' => __('admin/system-console.commands.telescope_clear.desc'),
                 'type' => 'artisan',
+                'flags' => [
+                    '--all' => 'Smazat ÚPLNĚ VŠECHNY záznamy (nejen starší 24h)',
+                ],
                 'color' => 'warning',
                 'icon' => FilamentIcon::get('trash'),
             ],
@@ -556,6 +559,12 @@ class SystemConsole extends Page
         @ignore_user_abort(true);
         $timestamp = now()->format('H:i:s');
         $this->output .= "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n";
+
+        if (config('app.debug')) {
+            $this->output .= "[INTERNAL DEBUG] Memory Limit: " . ini_get('memory_limit') . "\n";
+            $this->output .= "[INTERNAL DEBUG] Time Limit: " . ini_get('max_execution_time') . "\n";
+            $this->output .= "[INTERNAL DEBUG] DB Connection: " . config('database.default') . "\n";
+        }
         $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n", replace: false);
 
         try {

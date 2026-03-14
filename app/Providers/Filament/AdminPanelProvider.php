@@ -145,6 +145,7 @@ class AdminPanelProvider extends PanelProvider
                 return Blade::render('
                     <x-back-to-top />
                     <livewire:member.avatar-modal />
+                    <livewire:sync-status-bar />
                 ');
             })
             ->renderHook('panels::global-search.before', function (): string {
