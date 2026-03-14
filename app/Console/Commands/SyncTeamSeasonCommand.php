@@ -117,6 +117,12 @@ class SyncTeamSeasonCommand extends Command
             try {
                 foreach ($teams as $team) {
                     foreach ($seasons as $season) {
+                        // Kontrola, zda nebyl běh zrušen z UI
+                        if ($mainRun->refresh()->status === 'cancelled') {
+                            $this->warn('Synchronizace byla zrušena uživatelem.');
+                            break 2;
+                        }
+
                         $count++;
                         $this->info("Synchronizuji: {$team->name} | {$season->name} ({$count}/{$totalWork})");
                         $mainRun->updateProgress($count, $totalWork, "Tým: {$team->name} ({$season->name})");

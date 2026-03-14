@@ -34,6 +34,12 @@ class ProcessLegacyImportFileJob implements ShouldQueue
             return;
         }
 
+        // Kontrola, zda nebyl celý batch zrušen
+        if ($batch->status === 'cancelled') {
+            $file->update(['status' => 'cancelled', 'error_summary' => 'Zrušeno uživatelem skrze dávku.']);
+            return;
+        }
+
         $file->update(['status' => 'running']);
 
         // 1. Audit Run

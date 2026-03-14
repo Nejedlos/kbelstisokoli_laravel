@@ -795,6 +795,15 @@ class DebugOperations extends Page
             ->send();
     }
 
+    public function cancelLegacyImport(int $batchId): void
+    {
+        $batch = LegacyImportBatch::find($batchId);
+        if ($batch && $batch->status === 'running') {
+            $batch->cancel();
+            Notification::make()->title('Legacy import byl zrušen.')->warning()->send();
+        }
+    }
+
     protected function executeTeamSync(int $teamId, array $options = []): void
     {
         $activeSeason = Season::where('is_active', true)->first();

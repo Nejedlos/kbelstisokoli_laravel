@@ -194,7 +194,20 @@
                     <h2 class="text-xl font-bold">Legacy Import</h2>
                     @if($legacyImport)
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                            <h3 class="text-lg font-bold mb-2">{{ $legacyImport['title'] }}</h3>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-lg font-bold">{{ $legacyImport['title'] }}</h3>
+                                @if($legacyImport['status'] === 'running')
+                                    <button
+                                        wire:click="cancelLegacyImport({{ $legacyImport['id'] }})"
+                                        wire:confirm="Opravdu chcete přerušit tento import?"
+                                        class="text-danger-600 hover:text-danger-500 transition-colors flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest"
+                                        title="Přerušit import"
+                                    >
+                                        <i class="fa-light fa-circle-xmark"></i>
+                                        Zrušit
+                                    </button>
+                                @endif
+                            </div>
                             <div class="flex items-center space-x-4 mb-4">
                                 <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                     <div class="bg-primary-600 h-2 rounded-full" style="width: {{ $legacyImport['progress'] }}%"></div>

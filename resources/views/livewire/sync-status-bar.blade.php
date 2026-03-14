@@ -61,9 +61,20 @@
                     </div>
 
                     <div class="flex flex-col items-end gap-2 w-36 sm:w-72 ml-4">
-                        <div class="flex justify-between w-full text-[11px] font-black font-mono tracking-tighter">
+                        <div class="flex justify-between w-full text-[11px] font-black font-mono tracking-tighter items-center">
                             <span class="text-white/40">{{ $run->imported_count }}<span class="text-white/20 mx-1">/</span>{{ $run->total_count ?: '?' }}</span>
-                            <span class="text-rose-400">{{ number_format($run->progress_percent, 1) }}%</span>
+                            <div class="flex items-center gap-3">
+                                <button
+                                    wire:click="cancelRun({{ $run->id }})"
+                                    wire:confirm="Opravdu chcete přerušit tento proces?"
+                                    class="text-white/20 hover:text-rose-500 transition-colors flex items-center gap-1 group/btn"
+                                    title="Přerušit proces"
+                                >
+                                    <i class="fa-light fa-circle-xmark text-sm"></i>
+                                    <span class="hidden group-hover/btn:inline text-[9px] uppercase tracking-wider">Zrušit</span>
+                                </button>
+                                <span class="text-rose-400">{{ number_format($run->progress_percent, 1) }}%</span>
+                            </div>
                         </div>
                         <div class="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/10 p-[2px] shadow-inner">
                             <div class="h-full bg-gradient-to-r from-rose-600 via-rose-400 to-rose-600 bg-[length:200%_auto] animate-gradient transition-all duration-1000 ease-out rounded-full shadow-[0_0_15px_rgba(244,63,94,0.4)]"

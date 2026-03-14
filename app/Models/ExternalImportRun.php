@@ -95,6 +95,18 @@ class ExternalImportRun extends Model
     }
 
     /**
+     * Označí běh jako zrušený.
+     */
+    public function cancel(?string $message = 'Zrušeno uživatelem'): void
+    {
+        $this->update([
+            'status' => 'cancelled',
+            'finished_at' => now(),
+            'error_summary' => $message,
+        ]);
+    }
+
+    /**
      * Označí běh jako přeskočený (idempotence).
      */
     public function skip(): void

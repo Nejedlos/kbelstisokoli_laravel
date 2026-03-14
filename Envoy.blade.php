@@ -86,6 +86,8 @@
             $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
             $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
             $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
+            $vars["DB_VERSION"] = "10.3.0";
+            $vars["DB_MARIADB"] = "true";
             if ("{{ $db_prefix_b64 }}") {
                 $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
             }
@@ -236,6 +238,8 @@
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/*.php
+    {{ $php }} artisan config:clear
+    {{ $php }} artisan cache:clear
 
     echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
@@ -286,6 +290,8 @@
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/*.php
+    {{ $php }} artisan config:clear
+    {{ $php }} artisan cache:clear
 
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
@@ -343,6 +349,8 @@
             $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
             $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
             $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
+            $vars["DB_VERSION"] = "10.3.0";
+            $vars["DB_MARIADB"] = "true";
             if ("{{ $db_prefix_b64 }}") {
                 $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
             }
@@ -381,6 +389,8 @@
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/*.php
+    {{ $php }} artisan config:clear
+    {{ $php }} artisan cache:clear
 
     # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then

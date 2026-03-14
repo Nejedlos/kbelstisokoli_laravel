@@ -25,6 +25,18 @@ class LegacyImportBatch extends Model
         'metadata' => 'array',
     ];
 
+    /**
+     * Označí dávku jako zrušenou.
+     */
+    public function cancel(?string $message = 'Zrušeno uživatelem'): void
+    {
+        $this->update([
+            'status' => 'cancelled',
+            'finished_at' => now(),
+            'metadata' => array_merge($this->metadata ?? [], ['cancel_message' => $message]),
+        ]);
+    }
+
     public function createdBy(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by_user_id');

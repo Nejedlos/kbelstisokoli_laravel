@@ -6,6 +6,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -29,6 +31,7 @@ class LegacyImportBatchesTable
                         'success' => 'success',
                         'partial_failed' => 'warning',
                         'failed' => 'danger',
+                        'cancelled' => 'danger',
                         default => 'gray',
                     })
                     ->sortable(),
@@ -55,6 +58,19 @@ class LegacyImportBatchesTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('cancel')
+                    ->label('Zrušit')
+                    ->icon('fa-light fa-circle-xmark')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'running' || $record->status === 'queued')
+                    ->action(function ($record) {
+                        $record->cancel();
+                        Notification::make()
+                            ->title('Import byl zrušen.')
+                            ->warning()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

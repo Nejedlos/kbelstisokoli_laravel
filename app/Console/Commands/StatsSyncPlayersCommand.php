@@ -74,6 +74,12 @@ class StatsSyncPlayersCommand extends Command
         $successCount = 0;
         $currentIndex = 0;
         foreach ($users as $user) {
+            // Kontrola, zda nebyl běh zrušen z UI
+            if ($mainRun->refresh()->status === 'cancelled') {
+                $this->warn('Synchronizace byla zrušena uživatelem.');
+                break;
+            }
+
             $currentIndex++;
             $mainRun->updateProgress($currentIndex, $users->count(), "Hráč: {$user->display_name}");
 
