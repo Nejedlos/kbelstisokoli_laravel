@@ -100,6 +100,10 @@ return [
             'label' => 'RSVP: Reminders',
             'desc' => 'Sends notifications to players and coaches who haven\'t confirmed attendance for events starting in the next 24 hours.',
         ],
+        'telescope_clear' => [
+            'label' => 'Telescope: Clear',
+            'desc' => 'Clears old records from Laravel Telescope (keeps last 24 hours).',
+        ],
         'migrate' => [
             'label' => 'Migration (migrate)',
             'desc' => 'Runs missing database migrations.',

@@ -100,6 +100,10 @@ return [
             'label' => 'Docházka: Upomínky',
             'desc' => 'Odešle upozornění hráčům a trenérům, kteří nepotvrdili účast na akcích začínajících v příštích 24 hodinách.',
         ],
+        'telescope_clear' => [
+            'label' => 'Telescope: Vyčistit',
+            'desc' => 'Smaže staré záznamy z Laravel Telescope (ponechá posledních 24 hodin).',
+        ],
         'migrate' => [
             'label' => 'Migrace (migrate)',
             'desc' => 'Spustí chybějící databázové migrace.',

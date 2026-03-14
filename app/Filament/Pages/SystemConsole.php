@@ -253,6 +253,13 @@ class SystemConsole extends Page
                 'color' => 'info',
                 'icon' => FilamentIcon::get('bell'),
             ],
+            'telescope:clear' => [
+                'label' => __('admin/system-console.commands.telescope_clear.label'),
+                'desc' => __('admin/system-console.commands.telescope_clear.desc'),
+                'type' => 'artisan',
+                'color' => 'warning',
+                'icon' => FilamentIcon::get('trash'),
+            ],
         ];
 
         // 5. Databáze (Vždy)
