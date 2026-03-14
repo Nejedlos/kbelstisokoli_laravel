@@ -19,7 +19,7 @@
                                 x-data="{
                                     flags: [],
                                     selectValue: '',
-                                    inputValue: '',
+                                    inputValues: {},
                                     loading: false,
                                     useInternal: {{ (isset($config['can_be_internal']) && $config['can_be_internal']) ? 'true' : 'false' }}
                                 }"
@@ -88,6 +88,22 @@
                                             </div>
                                         @endif
 
+                                        @if(isset($config['selects']))
+                                            @foreach($config['selects'] as $select)
+                                                <div class="space-y-1.5">
+                                                    <label class="text-[9px] uppercase tracking-wider font-bold text-gray-400">
+                                                        {{ $select['label'] }}
+                                                    </label>
+                                                    <x-filament::input.select x-model="inputValues['{{ $select['name'] }}']" class="w-full text-[11px] py-1 h-8">
+                                                        <option value="">-- vybrat --</option>
+                                                        @foreach($select['options'] as $val => $label)
+                                                            <option value="{{ $val }}">{{ $label }}</option>
+                                                        @endforeach
+                                                    </x-filament::input.select>
+                                                </div>
+                                            @endforeach
+                                        @endif
+
                                         @if(isset($config['input']))
                                             <div class="space-y-1.5">
                                                 <label class="text-[9px] uppercase tracking-wider font-bold text-gray-400">
@@ -96,12 +112,30 @@
                                                 <x-filament::input.wrapper size="sm">
                                                     <x-filament::input
                                                         type="text"
-                                                        x-model="inputValue"
+                                                        x-model="inputValues['{{ $config['input']['name'] }}']"
                                                         placeholder="{{ $config['input']['placeholder'] ?? '' }}"
                                                         class="text-[11px] py-1"
                                                     />
                                                 </x-filament::input.wrapper>
                                             </div>
+                                        @endif
+
+                                        @if(isset($config['inputs']))
+                                            @foreach($config['inputs'] as $input)
+                                                <div class="space-y-1.5">
+                                                    <label class="text-[9px] uppercase tracking-wider font-bold text-gray-400">
+                                                        {{ $input['label'] }}
+                                                    </label>
+                                                    <x-filament::input.wrapper size="sm">
+                                                        <x-filament::input
+                                                            type="text"
+                                                            x-model="inputValues['{{ $input['name'] }}']"
+                                                            placeholder="{{ $input['placeholder'] ?? '' }}"
+                                                            class="text-[11px] py-1"
+                                                        />
+                                                    </x-filament::input.wrapper>
+                                                </div>
+                                            @endforeach
                                         @endif
                                     </div>
                                 @endif
@@ -113,7 +147,7 @@
                                         if (['stats:sync-players', 'stats:sync-team-season', 'stats:import'].includes('{{ $cmdKey }}')) {
                                             setTimeout(() => $dispatch('sync-started'), 500);
                                         }
-                                        $wire.run('{{ $cmdKey }}', '{{ $config['type'] }}', flags, '{{ $config['select']['name'] ?? ($config['input']['name'] ?? '') }}', selectValue || inputValue, useInternal)
+                                        $wire.run('{{ $cmdKey }}', '{{ $config['type'] }}', flags, '{{ $config['select']['name'] ?? ($config['input']['name'] ?? '') }}', selectValue || inputValues, useInternal)
                                             .then(() => {
                                                 const outputEl = document.getElementById('console-output');
                                                 if (outputEl) outputEl.scrollTop = outputEl.scrollHeight;

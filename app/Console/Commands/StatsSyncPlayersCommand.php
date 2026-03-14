@@ -44,7 +44,7 @@ class StatsSyncPlayersCommand extends Command
         }
 
         if ($teamId = $this->option('team_id')) {
-            $query->whereHas('teams', function ($q) use ($teamId) {
+            $query->whereHas('playerProfiles.teams', function ($q) use ($teamId) {
                 $q->where('teams.id', $teamId);
             });
         }
@@ -85,6 +85,11 @@ class StatsSyncPlayersCommand extends Command
                 $successCount++;
             }
             $bar->advance();
+
+            // Mikropauza mezi hráči, aby se ulevilo externímu webu
+            if ($users->count() > 1) {
+                usleep(300000); // 0.3s
+            }
         }
 
         $bar->finish();

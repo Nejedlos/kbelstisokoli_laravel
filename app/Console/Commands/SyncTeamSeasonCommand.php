@@ -39,24 +39,37 @@ class SyncTeamSeasonCommand extends Command
      */
     public function handle(ExternalStatsSyncService $syncService)
     {
-        $teamSlug = $this->argument('teamSlug');
+        $teamSlugInput = $this->argument('teamSlug');
         $seasonInput = $this->argument('seasonNameOrId');
 
-        $team = Team::where('slug', $teamSlug)->first();
-        if (! $team) {
-            $this->error("Tým se slugem '{$teamSlug}' nebyl nalezen.");
-
-            return self::FAILURE;
+        // Rozhodnutí o batchi
+        $teams = [];
+        if ($teamSlugInput === 'all') {
+            $teams = Team::all();
+        } else {
+            $team = Team::where('slug', $teamSlugInput)->first();
+            if ($team) {
+                $teams = [$team];
+            } else {
+                $this->error("Tým se slugem '{$teamSlugInput}' nebyl nalezen.");
+                return self::FAILURE;
+            }
         }
 
-        $season = is_numeric($seasonInput)
-            ? Season::find($seasonInput)
-            : Season::where('name', $seasonInput)->first();
+        $seasons = [];
+        if ($seasonInput === 'all') {
+            $seasons = Season::orderBy('name', 'desc')->get();
+        } else {
+            $season = is_numeric($seasonInput)
+                ? Season::find($seasonInput)
+                : Season::where('name', $seasonInput)->first();
 
-        if (! $season) {
-            $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
-
-            return self::FAILURE;
+            if ($season) {
+                $seasons = [$season];
+            } else {
+                $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
+                return self::FAILURE;
+            }
         }
 
         $options = [
@@ -70,17 +83,20 @@ class SyncTeamSeasonCommand extends Command
             'recentDays' => (int) $this->option('recent-days'),
         ];
 
+        $totalWork = count($teams) * count($seasons);
+        $this->info("Zahajuji synchronizaci pro {$totalWork} kombinací tým/sezóna.");
+
         if ($this->option('dry-run')) {
-            $this->info('Spouštím DRY-RUN náhled synchronizace...');
-            $results = $syncService->previewSync($team->id, $season->id);
-
-            $this->table(['Kategorie', 'Počet / Informace'], [
-                ['Soupiska - počet řádků', count($results['roster']['rows'] ?? [])],
-                ['Zápasy - počet řádků', count($results['matches']['rows'] ?? [])],
-                ['URL soupisky', $results['config']['team_season_url'] ?? 'N/A'],
-                ['URL zápasů', $results['config']['matches_list_url'] ?? 'N/A'],
-            ]);
-
+            $this->info('Spouštím DRY-RUN náhled synchronizace (pouze první kombinace)...');
+            if ($totalWork > 0) {
+                $results = $syncService->previewSync($teams[0]->id, $seasons[0]->id);
+                $this->table(['Kategorie', 'Počet / Informace'], [
+                    ['Soupiska - počet řádků', count($results['roster']['rows'] ?? [])],
+                    ['Zápasy - počet řádků', count($results['matches']['rows'] ?? [])],
+                    ['URL soupisky', $results['config']['team_season_url'] ?? 'N/A'],
+                    ['URL zápasů', $results['config']['matches_list_url'] ?? 'N/A'],
+                ]);
+            }
             return self::SUCCESS;
         }
 
@@ -90,16 +106,31 @@ class SyncTeamSeasonCommand extends Command
             // Vytvoření hlavního běhu pro UI/Progress
             $mainRun = \App\Models\ExternalImportRun::start(
                 'czbasketball',
-                $season->id,
-                $team->id,
+                $seasons[0]->id ?? 0,
+                $teams[0]->id ?? 0,
                 $this->option('excesive') ? 'team_sync_excesive' : 'team_sync',
                 null
             );
-            $mainRun->update(['total_count' => 3]); // Roster, Matches, Details
+            $mainRun->update(['total_count' => $totalWork]);
 
+            $count = 0;
             try {
-                $mainRun->updateProgress(1, 3, 'Synchronizace soupisky');
-                $syncService->syncTeamSeason($team->id, $season->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
+                foreach ($teams as $team) {
+                    foreach ($seasons as $season) {
+                        $count++;
+                        $this->info("Synchronizuji: {$team->name} | {$season->name} ({$count}/{$totalWork})");
+                        $mainRun->updateProgress($count, $totalWork, "Tým: {$team->name} ({$season->name})");
+
+                        $syncService->syncTeamSeason($team->id, $season->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
+                        $mainRun->increment('imported_count');
+
+                        // Mikropauza mezi týmy/sezónami, abychom nehltili externí web
+                        if ($totalWork > 1) {
+                            $delay = $totalWork > 10 ? 1500000 : 500000; // 1.5s pro velké dávky, jinak 0.5s
+                            usleep($delay);
+                        }
+                    }
+                }
                 $mainRun->finish(['status' => 'success']);
             } catch (\Exception $e) {
                 $mainRun->fail($e);
@@ -108,9 +139,13 @@ class SyncTeamSeasonCommand extends Command
 
             $this->info('Synchronizace dokončena.');
         } else {
-            $this->info('Zařazuji synchronizaci do fronty (SyncTeamSeasonJob)...');
-            SyncTeamSeasonJob::dispatch($team->id, $season->id, $options);
-            $this->info('Úloha byla zařazena.');
+            $this->info('Zařazuji synchronizaci do fronty (po jednotlivých úlohách)...');
+            foreach ($teams as $team) {
+                foreach ($seasons as $season) {
+                    SyncTeamSeasonJob::dispatch($team->id, $season->id, $options);
+                }
+            }
+            $this->info('Všechny úlohy byly zařazeny.');
         }
 
         return self::SUCCESS;

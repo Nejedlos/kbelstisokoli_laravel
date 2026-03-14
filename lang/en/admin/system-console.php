@@ -83,6 +83,8 @@ return [
             'label' => 'Statistics: Players (Sync)',
             'desc' => 'Synchronization of a specific player or all club members.',
             'input_label' => 'User ID (optional)',
+            'team_filter_label' => 'Team (filter)',
+            'all_teams' => '--- All Teams ---',
             'flags' => [
                 'excesive' => 'Excesive mode (History)',
                 'force' => 'Force refresh (Ignore cache)',
@@ -91,10 +93,20 @@ return [
         'stats_sync_team' => [
             'label' => 'Statistics: Team (Sync)',
             'desc' => 'Synchronization of the complete roster and matches for a selected team.',
-            'input_label' => 'Team Slug (required)',
             'flags' => [
                 'excesive' => 'Excesive mode (All boxscores)',
-                'sync' => 'Create missing matches in calendar',
+                'sync' => 'Synchronous run (wait for completion)',
+                'force' => 'Force refresh (Ignore cache)',
+            ],
+            'selects' => [
+                'team' => [
+                    'label' => 'Select Team',
+                    'all' => '--- All Teams ---',
+                ],
+                'season' => [
+                    'label' => 'Select Season',
+                    'all' => '--- All Seasons ---',
+                ],
             ],
         ],
         'system_cleanup' => [

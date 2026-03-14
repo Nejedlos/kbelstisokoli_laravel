@@ -83,6 +83,8 @@ return [
             'label' => 'Statistiky: Hráči (Sync)',
             'desc' => 'Synchronizace konkrétního hráče nebo všech členů klubu.',
             'input_label' => 'ID Uživatele (volitelné)',
+            'team_filter_label' => 'Tým (filtr)',
+            'all_teams' => '--- Všechny týmy ---',
             'flags' => [
                 'excesive' => 'Excesivní režim (Historie)',
                 'force' => 'Vynutit refresh (Ignore cache)',
@@ -91,10 +93,20 @@ return [
         'stats_sync_team' => [
             'label' => 'Statistiky: Tým (Sync)',
             'desc' => 'Synchronizace kompletní soupisky a zápasů vybraného týmu.',
-            'input_label' => 'Slug Týmu (povinné)',
             'flags' => [
                 'excesive' => 'Excesivní režim (Všechny boxscory)',
-                'sync' => 'Založit chybějící zápasy v kalendáři',
+                'sync' => 'Synchronní běh (počkejte na dokončení)',
+                'force' => 'Vynutit (ignorovat cache)',
+            ],
+            'selects' => [
+                'team' => [
+                    'label' => 'Výběr týmu',
+                    'all' => '--- Všechny týmy ---',
+                ],
+                'season' => [
+                    'label' => 'Výběr sezóny',
+                    'all' => '--- Všechny sezóny ---',
+                ],
             ],
         ],
         'system_cleanup' => [

@@ -78,6 +78,20 @@ class SystemConsole extends Page
             }
         }
 
+        // Týmy pro select
+        $teams = \App\Models\Team::orderBy('name')->get();
+        $teamOptions = ['all' => __('admin/system-console.commands.stats_sync_team.selects.team.all')];
+        foreach ($teams as $team) {
+            $teamOptions[$team->slug] = $team->name;
+        }
+
+        // Sezóny pro select
+        $seasons = \App\Models\Season::orderBy('name', 'desc')->get();
+        $seasonOptions = ['all' => __('admin/system-console.commands.stats_sync_team.selects.season.all')];
+        foreach ($seasons as $season) {
+            $seasonOptions[$season->name] = $season->name;
+        }
+
         $groups = [];
 
         // 1. AI & Vyhledávání (Vždy)
@@ -191,10 +205,17 @@ class SystemConsole extends Page
                     '--excesive' => __('admin/system-console.commands.stats_sync_players.flags.excesive'),
                     '--force' => __('admin/system-console.commands.stats_sync_players.flags.force'),
                 ],
+                'selects' => [
+                    [
+                        'name' => '--team_id',
+                        'label' => __('admin/system-console.commands.stats_sync_players.team_filter_label'),
+                        'options' => array_merge(['' => __('admin/system-console.commands.stats_sync_players.all_teams')], \App\Models\Team::orderBy('name')->pluck('name', 'id')->toArray()),
+                    ],
+                ],
                 'input' => [
                     'name' => '--user_id',
                     'label' => __('admin/system-console.commands.stats_sync_players.input_label'),
-                    'placeholder' => 'Např. 108',
+                    'placeholder' => 'Např. 108 (pokud prázdné, synchronizuje tým/všechny)',
                 ],
                 'color' => 'primary',
                 'icon' => FilamentIcon::get('users'),
@@ -206,11 +227,19 @@ class SystemConsole extends Page
                 'flags' => [
                     '--excesive' => __('admin/system-console.commands.stats_sync_team.flags.excesive'),
                     '--sync' => __('admin/system-console.commands.stats_sync_team.flags.sync'),
+                    '--force' => __('admin/system-console.commands.stats_sync_team.flags.force'),
                 ],
-                'input' => [
-                    'name' => 'team',
-                    'label' => __('admin/system-console.commands.stats_sync_team.input_label'),
-                    'placeholder' => 'Např. sokol-kbely-c',
+                'selects' => [
+                    [
+                        'name' => 'teamSlug',
+                        'label' => __('admin/system-console.commands.stats_sync_team.selects.team.label'),
+                        'options' => $teamOptions,
+                    ],
+                    [
+                        'name' => 'seasonNameOrId',
+                        'label' => __('admin/system-console.commands.stats_sync_team.selects.season.label'),
+                        'options' => $seasonOptions,
+                    ],
                 ],
                 'color' => 'info',
                 'icon' => FilamentIcon::get('basketball'),
@@ -499,7 +528,7 @@ class SystemConsole extends Page
         return $groups;
     }
 
-    public function run(string $command, string $type, array $selectedFlags = [], ?string $selectName = null, ?string $selectValue = null, bool $useInternal = false): void
+    public function run(string $command, string $type, array $selectedFlags = [], ?string $selectName = null, mixed $selectValue = null, bool $useInternal = false): void
     {
         if ($command === 'system:check') {
             $this->runSystemCheck();
@@ -515,7 +544,17 @@ class SystemConsole extends Page
 
         set_time_limit(0);
         $timestamp = now()->format('H:i:s');
-        $this->output .= "\n[$timestamp] > $command".(empty($selectedFlags) ? '' : ' '.implode(' ', $selectedFlags)).($selectValue ? " $selectValue" : '')."\n";
+
+        $valueStr = '';
+        if ($selectValue) {
+            if (is_array($selectValue)) {
+                $valueStr = ' ' . implode(' ', array_filter($selectValue));
+            } else {
+                $valueStr = " $selectValue";
+            }
+        }
+
+        $this->output .= "\n[$timestamp] > $command".(empty($selectedFlags) ? '' : ' '.implode(' ', $selectedFlags)).$valueStr."\n";
 
         try {
             if ($type === 'artisan') {
@@ -528,8 +567,22 @@ class SystemConsole extends Page
                 foreach ($selectedFlags as $flag) {
                     $commandArray[] = $flag;
                 }
-                if ($selectName && $selectValue) {
-                    $commandArray[] = "$selectName=$selectValue";
+
+                if (is_array($selectValue)) {
+                    foreach ($selectValue as $name => $val) {
+                        if (empty($val)) continue;
+                        if (str_starts_with($name, '--')) {
+                            $commandArray[] = "$name=$val";
+                        } else {
+                            $commandArray[] = $val;
+                        }
+                    }
+                } elseif ($selectName && $selectValue) {
+                    if (str_starts_with($selectName, '--')) {
+                        $commandArray[] = "$selectName=$selectValue";
+                    } else {
+                        $commandArray[] = $selectValue;
+                    }
                 }
 
                 $this->executeRealtime($commandArray);
@@ -587,20 +640,30 @@ class SystemConsole extends Page
         }
     }
 
-    protected function runInternal(string $command, array $flags = [], ?string $selectName = null, ?string $selectValue = null): void
+    protected function runInternal(string $command, array $flags = [], ?string $selectName = null, mixed $selectValue = null): void
     {
         set_time_limit(0);
         @ini_set('memory_limit', '512M');
         @ignore_user_abort(true);
         $timestamp = now()->format('H:i:s');
-        $this->output .= "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n";
+
+        $valueStr = '';
+        if ($selectValue) {
+            if (is_array($selectValue)) {
+                $valueStr = ' ' . implode(' ', array_filter($selectValue));
+            } else {
+                $valueStr = " $selectValue";
+            }
+        }
+
+        $this->output .= "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).$valueStr."\n";
 
         if (config('app.debug')) {
             $this->output .= "[INTERNAL DEBUG] Memory Limit: " . ini_get('memory_limit') . "\n";
             $this->output .= "[INTERNAL DEBUG] Time Limit: " . ini_get('max_execution_time') . "\n";
             $this->output .= "[INTERNAL DEBUG] DB Connection: " . config('database.default') . "\n";
         }
-        $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).($selectValue ? " $selectValue" : '')."\n", replace: false);
+        $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).$valueStr."\n", replace: false);
 
         try {
             $parameters = ['--no-interaction' => true];
@@ -612,7 +675,14 @@ class SystemConsole extends Page
                     $parameters[$flag] = true;
                 }
             }
-            if ($selectName && $selectValue) {
+
+            if (is_array($selectValue)) {
+                foreach ($selectValue as $name => $val) {
+                    if (empty($val)) continue;
+                    // Pro Artisan::call se -- u options dává jako název klíče
+                    $parameters[$name] = $val;
+                }
+            } elseif ($selectName && $selectValue) {
                 $parameters[$selectName] = $selectValue;
             }
 

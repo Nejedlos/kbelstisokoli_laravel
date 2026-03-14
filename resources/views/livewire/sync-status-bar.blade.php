@@ -15,7 +15,7 @@ state([
             ->orderByDesc('started_at')
             ->get();
     },
-    'isCollapsed' => false
+    'isCollapsed' => true
 ]);
 
 $refresh = function () {
@@ -30,13 +30,25 @@ $refresh = function () {
 
 <div wire:poll.3s @sync-started.window="$wire.$refresh()">
     @if($runs->isNotEmpty())
-        <div x-data="{ collapsed: @entangle('isCollapsed') }"
+        <div x-data="{
+                 collapsed: @entangle('isCollapsed'),
+                 init() {
+                     const stored = sessionStorage.getItem('sync_bar_collapsed');
+                     if (stored !== null) {
+                         this.collapsed = stored === 'true';
+                     }
+                 },
+                 toggle() {
+                     this.collapsed = !this.collapsed;
+                     sessionStorage.setItem('sync_bar_collapsed', this.collapsed);
+                 }
+             }"
              class="fixed top-0 left-0 right-0 z-[10000] flex flex-col gap-1 pointer-events-none p-2 transition-all duration-500 ease-in-out origin-top"
              :class="collapsed ? 'translate-y-[-88%] opacity-40 scale-[0.98] hover:translate-y-[-82%] hover:opacity-100 hover:scale-100' : 'translate-y-0 opacity-100 scale-100'">
 
             {{-- Ovládací handle --}}
             <div class="absolute top-full left-1/2 -translate-x-1/2 pointer-events-auto mt-[-4px]">
-                <button @click="collapsed = !collapsed"
+                <button @click="toggle()"
                         class="group bg-slate-900/90 backdrop-blur-xl border border-white/10 text-white/50 hover:text-white px-6 py-1.5 rounded-b-2xl text-[9px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_10px_30px_rgba(0,0,0,0.4)] flex items-center gap-3 ring-1 ring-white/5">
                     <template x-if="!collapsed">
                         <span class="flex items-center gap-2"><i class="fa-light fa-chevron-up text-rose-500 transition-transform group-hover:-translate-y-0.5"></i> SCHOVAT PANEL</span>

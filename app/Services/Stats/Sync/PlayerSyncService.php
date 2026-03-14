@@ -219,12 +219,18 @@ class PlayerSyncService
             $year = substr($season, 0, 4);
             $url = "https://cz.basketball/hrac/{$extId}?tab=matches&y=" . $year;
             try {
+                if (\App\Services\Support\ConsoleService::isStopped()) {
+                    break;
+                }
                 if ($run) {
                     $run->updateProgress((int) ($run->imported_count ?? 0), null, "Sezóna: $season");
                 }
                 $html = $this->fetcher->fetch($url);
                 $result = $this->extractor->extract($html);
                 $matches = $result['data']['matches'] ?? [];
+
+                // Mikropauza mezi sezónami
+                usleep(500000); // 0.5s
 
                 foreach ($matches as $matchData) {
                     $extMatchId = $matchData['external_match_id'] ?? null;
@@ -253,10 +259,16 @@ class PlayerSyncService
                     $hasPoints = isset($matchData['points']) && $matchData['points'] > 0;
 
                     if (!$hasScheduledAt || ($isPast && !$hasStats)) {
+                        if (\App\Services\Support\ConsoleService::isStopped()) {
+                            break 2;
+                        }
                         if ($run) {
                             $run->updateProgress((int) ($run->imported_count ?? 0), null, "Zápas: " . ($matchData['opponent_name'] ?? 'neznámý'));
                         }
                         $this->syncExternalMatchDetail($user, (string) $extMatchId, $run);
+
+                        // Mikropauza mezi detaily zápasů (Throttling)
+                        usleep(800000); // 0.8s (excesivní režim vyžaduje vyšší ohleduplnost k API)
                     }
                 }
             } catch (\Exception $e) {

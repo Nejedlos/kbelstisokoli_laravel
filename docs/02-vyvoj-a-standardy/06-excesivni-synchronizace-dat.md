@@ -115,5 +115,18 @@ Pro manuální spouštění a testování synchronizace slouží **System Consol
 ### 9.2 Rozhraní konzole
 V konzoli jsou k dispozici textová pole pro zadání parametrů (`ID Uživatele`, `Slug Týmu`) a checkboxy pro zapnutí excesivního režimu. Příkazy lze spouštět buď standardně přes shell, nebo jako **Internal Execution** (přímo v PHP procesu), což je užitečné při problémech s CLI binárkou na hostingu.
 
+## 10. Stabilita a ochrana proti zablokování (Throttling)
+
+Vzhledem k "excesivnímu" charakteru synchronizace, která může v jednom běhu vygenerovat stovky HTTP požadavků na externí server `cz.basketball`, systém implementuje několik mechanismů pro zajištění stability a ohleduplnosti:
+
+1.  **Mikropauzy (usleep):**
+    - Mezi požadavky na jednotlivé boxscory zápasů je v excesivním režimu vložena pauza **0.8s**.
+    - Mezi požadavky na seznamy sezón hráče je pauza **0.5s**.
+    - Mezi zpracováním jednotlivých hráčů v hromadné synchronizaci je pauza **0.3s**.
+    - Mezi týmy/sezónami v hromadném importu je pauza **0.5s až 1.5s** (podle velikosti dávky).
+2.  **Inteligentní Skip:** Systém stahuje detail zápasu (boxscore) pouze v případě, že zápas již proběhl (je v minulosti nebo má skóre) a zároveň v naší databázi chybí detailní statistiky (např. asistence). Tím se drasticky snižuje počet opakovaných požadavků při pravidelném běhu.
+3.  **Podpora pro ukončení:** Všechny synchronizační cykly kontrolují stav `ConsoleService::isStopped()`, což umožňuje bezpečné a okamžité zastavení hromadných operací z administrace nebo signálem systému bez rizika poškození dat.
+4.  **Dávkování ve frontě:** Při asynchronním zpracování (Queue) jsou úlohy pro detaily zápasů do fronty vkládány s postupným zpožděním (`delay`), aby se nespustily všechny naráz.
+
 ---
 *Poslední aktualizace: 14. 3. 2026*
