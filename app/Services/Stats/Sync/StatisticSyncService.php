@@ -471,6 +471,9 @@ class StatisticSyncService
             'fg3_att' => 0,
             'ft_made' => 0,
             'ft_att' => 0,
+            'efficiency' => 0,
+            'rebounds_total' => 0,
+            'assists' => 0,
         ];
 
         foreach ($rows as $row) {
@@ -487,6 +490,9 @@ class StatisticSyncService
             'fg2_pct' => $totals['fg2_att'] > 0 ? round(($totals['fg2_made'] / $totals['fg2_att']) * 100, 1) : 0,
             'fg3_pct' => $totals['fg3_att'] > 0 ? round(($totals['fg3_made'] / $totals['fg3_att']) * 100, 1) : 0,
             'ft_pct' => $totals['ft_att'] > 0 ? round(($totals['ft_made'] / $totals['ft_att']) * 100, 1) : 0,
+            'efficiency_avg' => $gp > 0 ? round($totals['efficiency'] / $gp, 1) : 0,
+            'rebounds_avg' => $gp > 0 ? round($totals['rebounds_total'] / $gp, 1) : 0,
+            'assists_avg' => $gp > 0 ? round($totals['assists'] / $gp, 1) : 0,
         ];
     }
 
@@ -599,7 +605,7 @@ class StatisticSyncService
                 'free_throws_pct' => isset($rowValues['ft_pct']) ? (float) $rowValues['ft_pct'] : null,
                 'fouls' => isset($rowValues['fouls']) ? (int) $rowValues['fouls'] : null,
                 'minutes' => isset($rowValues['minutes']) ? (int) $rowValues['minutes'] : null,
-                'valuation' => isset($rowValues['valuation']) ? (int) $rowValues['valuation'] : null,
+                'valuation' => isset($rowValues['efficiency']) ? (int) $rowValues['efficiency'] : (isset($rowValues['valuation']) ? (int) $rowValues['valuation'] : null),
                 'plus_minus' => isset($rowValues['plus_minus']) ? (int) $rowValues['plus_minus'] : null,
                 'rebounds_offensive' => isset($rowValues['rebounds_offensive']) ? (int) $rowValues['rebounds_offensive'] : null,
                 'rebounds_defensive' => isset($rowValues['rebounds_defensive']) ? (int) $rowValues['rebounds_defensive'] : null,

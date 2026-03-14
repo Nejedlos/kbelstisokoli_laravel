@@ -44,3 +44,4 @@ Pro uživatelsky přívětivé zobrazení v administraci byly vytvořeny překla
 - Nelze impersonovat sám sebe.
 - Při ukončení impersonizace je uživatel bezpečně vrácen k původnímu admin účtu.
 - Editorovi jsou v administraci automaticky skryty akce pro úpravu soupisek díky kontrolám oprávnění `manage_rosters`.
+- **Zabezpečení administrace:** I při impersonaci uživatele je zachována kontrola rolí cílového uživatele. Pokud cílový uživatel (např. Jan Polák s rolí Player) nemá přístup do administrace, nebude mu povolen ani v režimu impersonace. Administrátor uvidí pouze členskou sekci tohoto uživatele. (Opraveno březen 2026)

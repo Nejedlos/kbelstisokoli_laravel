@@ -315,11 +315,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
         }
 
         // Povolíme přístup, pokud je uživatel aktivní a má roli/oprávnění
-        // NEBO pokud je uživatel právě impersonován adminem (aby se mohl admin dívat na jeho účet v adminu, pokud je to potřeba)
-        if (session()->has('impersonated_by')) {
-            return $this->cachedCanAccessAdmin = true;
-        }
-
         return $this->cachedCanAccessAdmin = ($this->is_active &&
                ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach'])));
     }

@@ -936,7 +936,7 @@ class ExternalStatsSyncService
       "player_name": "string",
       "values": {
         "pts": "int",
-        "min": "int|null",
+        "minutes": "int|null",
         "fg2_made": "int|null",
         "fg2_att": "int|null",
         "fg3_made": "int|null",
@@ -944,9 +944,9 @@ class ExternalStatsSyncService
         "ft_made": "int|null",
         "ft_att": "int|null",
         "fouls": "int|null",
-        "reb": "int|null",
-        "ast": "int|null",
-        "val": "int|null",
+        "rebounds_total": "int|null",
+        "assists": "int|null",
+        "efficiency": "int|null",
         "plus_minus": "int|null"
       }
     }

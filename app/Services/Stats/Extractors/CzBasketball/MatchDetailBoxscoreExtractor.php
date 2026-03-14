@@ -44,7 +44,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         'ZTR' => 'turnovers',
         'T' => 'turnovers',
         'BL' => 'blocks',
-        'VAL' => 'valuation',
+        'VAL' => 'efficiency',
         'U%' => 'fg_pct',
         '2B-Ú' => 'fg2_made',
         '2B-P' => 'fg2_att',

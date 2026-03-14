@@ -196,12 +196,24 @@ class PlayerStatsService
 
         $totalPts = 0;
         $totalMin = 0;
+        $totalFg2Made = 0;
+        $totalFg2Att = 0;
+        $totalFg3Made = 0;
+        $totalFg3Att = 0;
+        $totalFtMade = 0;
+        $totalFtAtt = 0;
         $gp = $rows->count();
 
         // Jednoduchý výpočet pro fallback
         foreach ($rows as $row) {
-            $totalPts += ($row->values['pts'] ?? 0);
-            $totalMin += ($row->values['minutes'] ?? 0);
+            $totalPts += (float) ($row->values['pts'] ?? 0);
+            $totalMin += (float) ($row->values['minutes'] ?? 0);
+            $totalFg2Made += (float) ($row->values['fg2_made'] ?? 0);
+            $totalFg2Att += (float) ($row->values['fg2_att'] ?? 0);
+            $totalFg3Made += (float) ($row->values['fg3_made'] ?? 0);
+            $totalFg3Att += (float) ($row->values['fg3_att'] ?? 0);
+            $totalFtMade += (float) ($row->values['ft_made'] ?? 0);
+            $totalFtAtt += (float) ($row->values['ft_att'] ?? 0);
         }
 
         return [
@@ -209,6 +221,9 @@ class PlayerStatsService
             'pts_total' => $totalPts,
             'ppg' => $gp > 0 ? round($totalPts / $gp, 1) : 0,
             'minutes_avg' => $gp > 0 ? round($totalMin / $gp, 1) : 0,
+            'fg2_pct' => $totalFg2Att > 0 ? round(($totalFg2Made / $totalFg2Att) * 100, 1) : 0,
+            'fg3_pct' => $totalFg3Att > 0 ? round(($totalFg3Made / $totalFg3Att) * 100, 1) : 0,
+            'ft_pct' => $totalFtAtt > 0 ? round(($totalFtMade / $totalFtAtt) * 100, 1) : 0,
             'is_fallback' => true,
         ];
     }

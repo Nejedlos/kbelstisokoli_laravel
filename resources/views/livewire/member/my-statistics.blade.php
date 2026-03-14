@@ -113,8 +113,11 @@
                         ['label' => 'Body Celkem', 'value' => $summary['pts_total'] ?? 0, 'icon' => 'fa-bullseye', 'color' => 'blue'],
                         ['label' => 'PPG', 'value' => $summary['ppg'] ?? 0, 'icon' => 'fa-chart-scatter', 'color' => 'indigo'],
                         ['label' => 'Minuty Ø', 'value' => $summary['minutes_avg'] ?? 0, 'icon' => 'fa-clock', 'color' => 'emerald'],
+                        ['label' => 'VAL Ø', 'value' => $summary['efficiency_avg'] ?? 0, 'icon' => 'fa-bolt', 'color' => 'orange'],
+                        ['label' => 'Doskoky Ø', 'value' => $summary['rebounds_avg'] ?? 0, 'icon' => 'fa-hand-back-point-up', 'color' => 'blue'],
                     ];
 
+                    if (isset($summary['assists_avg']) && $summary['assists_avg'] > 0) $cards[] = ['label' => 'Asistence Ø', 'value' => $summary['assists_avg'], 'icon' => 'fa-hands-passing', 'color' => 'violet'];
                     if (isset($summary['fg2_pct'])) $cards[] = ['label' => '2B %', 'value' => $summary['fg2_pct'] . '%', 'icon' => 'fa-arrow-progress', 'color' => 'orange'];
                     if (isset($summary['fg3_pct'])) $cards[] = ['label' => '3B %', 'value' => $summary['fg3_pct'] . '%', 'icon' => 'fa-arrow-up-right-dots', 'color' => 'violet'];
                     if (isset($summary['ft_pct'])) $cards[] = ['label' => 'TH %', 'value' => $summary['ft_pct'] . '%', 'icon' => 'fa-bullseye-arrow', 'color' => 'pink'];
