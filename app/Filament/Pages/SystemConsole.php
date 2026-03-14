@@ -183,10 +183,45 @@ class SystemConsole extends Page
                 'color' => 'danger',
                 'icon' => FilamentIcon::get('broom'),
             ],
+            'stats:sync-players' => [
+                'label' => __('admin/system-console.commands.stats_sync_players.label'),
+                'desc' => __('admin/system-console.commands.stats_sync_players.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--excesive' => __('admin/system-console.commands.stats_sync_players.flags.excesive'),
+                    '--force' => __('admin/system-console.commands.stats_sync_players.flags.force'),
+                ],
+                'input' => [
+                    'name' => '--user_id',
+                    'label' => __('admin/system-console.commands.stats_sync_players.input_label'),
+                    'placeholder' => 'Např. 108',
+                ],
+                'color' => 'primary',
+                'icon' => FilamentIcon::get('users'),
+            ],
+            'stats:sync-team-season' => [
+                'label' => __('admin/system-console.commands.stats_sync_team.label'),
+                'desc' => __('admin/system-console.commands.stats_sync_team.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--excesive' => __('admin/system-console.commands.stats_sync_team.flags.excesive'),
+                    '--sync' => __('admin/system-console.commands.stats_sync_team.flags.sync'),
+                ],
+                'input' => [
+                    'name' => 'team',
+                    'label' => __('admin/system-console.commands.stats_sync_team.input_label'),
+                    'placeholder' => 'Např. sokol-kbely-c',
+                ],
+                'color' => 'info',
+                'icon' => FilamentIcon::get('basketball'),
+            ],
             'stats:import' => [
                 'label' => __('admin/system-console.commands.stats_import.label'),
                 'desc' => __('admin/system-console.commands.stats_import.desc'),
                 'type' => 'artisan',
+                'flags' => [
+                    '--recent' => __('admin/system-console.commands.stats_import.flags.recent'),
+                ],
                 'color' => 'gray',
                 'icon' => FilamentIcon::get('chart-line'),
             ],

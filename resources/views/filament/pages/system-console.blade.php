@@ -19,6 +19,7 @@
                                 x-data="{
                                     flags: [],
                                     selectValue: '',
+                                    inputValue: '',
                                     loading: false,
                                     useInternal: {{ (isset($config['can_be_internal']) && $config['can_be_internal']) ? 'true' : 'false' }}
                                 }"
@@ -41,7 +42,7 @@
                                     {{ $config['desc'] ?? '' }}
                                 </p>
 
-                                @if(isset($config['flags']) || isset($config['select']) || (isset($config['can_be_internal']) && $config['can_be_internal']))
+                                @if(isset($config['flags']) || isset($config['select']) || isset($config['input']) || (isset($config['can_be_internal']) && $config['can_be_internal']))
                                     <div class="space-y-4 mb-4 p-3 bg-gray-50/50 dark:bg-white/[0.02] rounded-xl border border-gray-100/50 dark:border-white/5">
                                         @if(isset($config['can_be_internal']) && $config['can_be_internal'])
                                             <div class="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-white/5 mb-2">
@@ -86,6 +87,22 @@
                                                 </x-filament::input.select>
                                             </div>
                                         @endif
+
+                                        @if(isset($config['input']))
+                                            <div class="space-y-1.5">
+                                                <label class="text-[9px] uppercase tracking-wider font-bold text-gray-400">
+                                                    {{ $config['input']['label'] }}
+                                                </label>
+                                                <x-filament::input.wrapper size="sm">
+                                                    <x-filament::input
+                                                        type="text"
+                                                        x-model="inputValue"
+                                                        placeholder="{{ $config['input']['placeholder'] ?? '' }}"
+                                                        class="text-[11px] py-1"
+                                                    />
+                                                </x-filament::input.wrapper>
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
 
@@ -93,7 +110,10 @@
                                     wire:loading.attr="disabled"
                                     x-on:click="
                                         loading = true;
-                                        $wire.run('{{ $cmdKey }}', '{{ $config['type'] }}', flags, '{{ $config['select']['name'] ?? '' }}', selectValue, useInternal)
+                                        if (['stats:sync-players', 'stats:sync-team-season', 'stats:import'].includes('{{ $cmdKey }}')) {
+                                            setTimeout(() => $dispatch('sync-started'), 500);
+                                        }
+                                        $wire.run('{{ $cmdKey }}', '{{ $config['type'] }}', flags, '{{ $config['select']['name'] ?? ($config['input']['name'] ?? '') }}', selectValue || inputValue, useInternal)
                                             .then(() => {
                                                 const outputEl = document.getElementById('console-output');
                                                 if (outputEl) outputEl.scrollTop = outputEl.scrollHeight;

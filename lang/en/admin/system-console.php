@@ -73,8 +73,29 @@ return [
             ],
         ],
         'stats_import' => [
-            'label' => 'Statistics: Import',
-            'desc' => 'Runs import of external match and player statistics.',
+            'label' => 'Statistics: Bulk Import',
+            'desc' => 'Runs bulk synchronization for all teams (automated pipeline).',
+            'flags' => [
+                'recent' => 'Recent only',
+            ],
+        ],
+        'stats_sync_players' => [
+            'label' => 'Statistics: Players (Sync)',
+            'desc' => 'Synchronization of a specific player or all club members.',
+            'input_label' => 'User ID (optional)',
+            'flags' => [
+                'excesive' => 'Excesive mode (History)',
+                'force' => 'Force refresh (Ignore cache)',
+            ],
+        ],
+        'stats_sync_team' => [
+            'label' => 'Statistics: Team (Sync)',
+            'desc' => 'Synchronization of the complete roster and matches for a selected team.',
+            'input_label' => 'Team Slug (required)',
+            'flags' => [
+                'excesive' => 'Excesive mode (All boxscores)',
+                'sync' => 'Create missing matches in calendar',
+            ],
         ],
         'system_cleanup' => [
             'label' => 'System: Maintenance',

@@ -96,5 +96,24 @@ Vzhledem k časové náročnosti "excesivní" synchronizace (velké množství H
     - Zobrazení je omezeno **pouze na přihlášené uživatele s oprávněním `manage_stats`**. Ostatní uživatelé (včetně běžných návštěvníků webu) stavovou lištu nevidí, aby nebyli rušeni technickými procesy na pozadí.
     - Lišta je integrována do všech částí systému (veřejný web, členská sekce, administrace).
 
+## 9. Systémová konzole (System Console)
+Pro manuální spouštění a testování synchronizace slouží **System Console** v administraci.
+
+### 9.1 Dostupné příkazy
+- **Statistiky: Hráči (Sync) (`stats:sync-players`):**
+    - Umožňuje synchronizaci konkrétního hráče zadáním jeho **interního ID uživatele**.
+    - Podporuje přepínač `--excesive` pro stažení kompletní historie a boxscorů.
+    - Podporuje `--force` pro vynucení stažení dat bez ohledu na cache.
+- **Statistiky: Tým (Sync) (`stats:sync-team-season`):**
+    - Vyžaduje zadání **slugu týmu** (např. `sokol-kbely-c`).
+    - Podporuje `--excesive` pro hloubkovou synchronizaci všech zápasů v aktuální sezóně.
+    - Podporuje `--sync` pro automatické založení zápasů v interním kalendáři.
+- **Statistiky: Hromadný Import (`stats:import`):**
+    - Slouží pro automatizovanou pipeline (všechny týmy najednou).
+    - Podporuje `--recent` pro rychlou aktualizaci pouze posledních zápasů.
+
+### 9.2 Rozhraní konzole
+V konzoli jsou k dispozici textová pole pro zadání parametrů (`ID Uživatele`, `Slug Týmu`) a checkboxy pro zapnutí excesivního režimu. Příkazy lze spouštět buď standardně přes shell, nebo jako **Internal Execution** (přímo v PHP procesu), což je užitečné při problémech s CLI binárkou na hostingu.
+
 ---
 *Poslední aktualizace: 14. 3. 2026*

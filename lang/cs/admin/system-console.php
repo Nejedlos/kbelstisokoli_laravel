@@ -73,8 +73,29 @@ return [
             ],
         ],
         'stats_import' => [
-            'label' => 'Statistiky: Import',
-            'desc' => 'Spustí import externích statistik zápasů a hráčů.',
+            'label' => 'Statistiky: Hromadný Import',
+            'desc' => 'Spustí hromadnou synchronizaci všech týmů (automatizovaná pipeline).',
+            'flags' => [
+                'recent' => 'Pouze nedávné (Recent)',
+            ],
+        ],
+        'stats_sync_players' => [
+            'label' => 'Statistiky: Hráči (Sync)',
+            'desc' => 'Synchronizace konkrétního hráče nebo všech členů klubu.',
+            'input_label' => 'ID Uživatele (volitelné)',
+            'flags' => [
+                'excesive' => 'Excesivní režim (Historie)',
+                'force' => 'Vynutit refresh (Ignore cache)',
+            ],
+        ],
+        'stats_sync_team' => [
+            'label' => 'Statistiky: Tým (Sync)',
+            'desc' => 'Synchronizace kompletní soupisky a zápasů vybraného týmu.',
+            'input_label' => 'Slug Týmu (povinné)',
+            'flags' => [
+                'excesive' => 'Excesivní režim (Všechny boxscory)',
+                'sync' => 'Založit chybějící zápasy v kalendáři',
+            ],
         ],
         'system_cleanup' => [
             'label' => 'Systém: Údržba',

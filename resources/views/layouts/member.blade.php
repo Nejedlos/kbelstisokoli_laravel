@@ -73,7 +73,7 @@
     <x-announcement-bar :announcements="$announcements ?? []" />
 
     <!-- Top Bar -->
-    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm h-18">
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm h-18">
         <div class="container-fluid px-4 sm:px-6 md:px-8 h-full flex items-center justify-between">
             <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                 <!-- Mobile Menu Trigger -->
