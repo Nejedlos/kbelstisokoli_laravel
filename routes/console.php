@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\DB;
 Artisan::command('telescope:clear', function () {
     $this->info('Starting telescope entries maintenance...');
 
-    $commands = Artisan::all();
-    if (isset($commands['telescope:prune'])) {
+    if (isset(Artisan::all()['telescope:prune'])) {
         $this->call('telescope:prune');
         $this->info('Telescope entries pruned using artisan command.');
     } else {
