@@ -184,7 +184,7 @@ class HelpQueryService
 
             // Načtení článků kategorie přes Query Builder - ultra lean
             $category->articles = \DB::table('help_articles')
-                ->select(['id', 'slug', 'title', 'is_featured', 'audience_roles', 'sort_order'])
+                ->select(['id', 'slug', 'title', 'is_featured', 'audience_roles', 'sort_order', 'metadata'])
                 ->where('category_id', $category->id)
                 ->where('is_published', true)
                 ->where(function ($q) {
@@ -196,6 +196,15 @@ class HelpQueryService
                     $article->audience_roles = json_decode($article->audience_roles ?? '[]', true) ?: [];
                     $article->title = json_decode($article->title ?? '[]', true) ?: [];
                     $article->title_str = $article->title[$locale] ?? ($article->title['cs'] ?? ($article->title['en'] ?? 'Untitled'));
+
+                    $m = json_decode($article->metadata ?? '[]', true) ?: [];
+                    if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
+                        $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
+                        $article->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
+                    } else {
+                        $article->metadata = $m;
+                    }
+
                     return $article;
                 });
 
@@ -306,7 +315,7 @@ class HelpQueryService
                 });
 
             $allArticles = \DB::table('help_articles')
-                ->select(['id', 'slug', 'title', 'category_id', 'audience_roles', 'sort_order'])
+                ->select(['id', 'slug', 'title', 'category_id', 'audience_roles', 'sort_order', 'metadata'])
                 ->where('is_published', true)
                 ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
                     $q->where(function ($inner) use ($filteringRoles) {
@@ -321,6 +330,15 @@ class HelpQueryService
                 ->map(function ($art) use ($locale) {
                     $title = json_decode($art->title, true) ?: [];
                     $art->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
+
+                    $m = json_decode($art->metadata ?? '[]', true) ?: [];
+                    if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
+                        $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
+                        $art->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
+                    } else {
+                        $art->metadata = $m;
+                    }
+
                     return $art;
                 })
                 ->groupBy('category_id');
@@ -365,12 +383,26 @@ class HelpQueryService
         if ($prev) {
             $t = json_decode($prev->title, true) ?: [];
             $prev->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
-            $prev->metadata = json_decode($prev->metadata, true) ?: [];
+
+            $m = json_decode($prev->metadata, true) ?: [];
+            if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
+                $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
+                $prev->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
+            } else {
+                $prev->metadata = $m;
+            }
         }
         if ($next) {
             $t = json_decode($next->title, true) ?: [];
             $next->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
-            $next->metadata = json_decode($next->metadata, true) ?: [];
+
+            $m = json_decode($next->metadata, true) ?: [];
+            if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
+                $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
+                $next->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
+            } else {
+                $next->metadata = $m;
+            }
         }
 
         return ['prev' => $prev, 'next' => $next];

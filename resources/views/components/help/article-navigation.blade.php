@@ -15,7 +15,7 @@
                         <h4 class="text-lg font-black text-slate-900 leading-tight group-hover:text-primary-600 transition-colors">
                             {{ $prev->title_str }}
                         </h4>
-                        @if($prev->metadata && isset($prev->metadata['short_intro']))
+                        @if(isset($prev->metadata) && is_array($prev->metadata) && isset($prev->metadata['short_intro']))
                             <p class="mt-2 text-sm text-slate-500 line-clamp-1 font-medium">
                                 {{ $prev->metadata['short_intro'] }}
                             </p>
@@ -38,7 +38,7 @@
                         <h4 class="text-lg font-black text-slate-900 leading-tight group-hover:text-primary-600 transition-colors">
                             {{ $next->title_str }}
                         </h4>
-                        @if($next->metadata && isset($next->metadata['short_intro']))
+                        @if(isset($next->metadata) && is_array($next->metadata) && isset($next->metadata['short_intro']))
                             <p class="mt-2 text-sm text-slate-500 line-clamp-1 font-medium">
                                 {{ $next->metadata['short_intro'] }}
                             </p>

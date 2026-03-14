@@ -174,8 +174,8 @@
                         @endif
 
                         <x-help.article-navigation
-                            :prev="$articleData['prev_article']"
-                            :next="$articleData['next_article']"
+                            :prev="$articleData['prev_article'] ?? null"
+                            :next="$articleData['next_article'] ?? null"
                         />
                     </div>
                 </div>

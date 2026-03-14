@@ -68,7 +68,7 @@ class HelpCategorySeeder extends Seeder
                     'sort_order' => 20,
                     'is_active' => true,
                     'is_featured' => true,
-                    'audience_roles' => ['coach', 'admin', 'editor'],
+                    'audience_roles' => ['player', 'parent', 'coach', 'admin', 'editor'],
                 ],
                 'translations' => [
                     'name' => [
@@ -89,7 +89,7 @@ class HelpCategorySeeder extends Seeder
                     'sort_order' => 30,
                     'is_active' => true,
                     'is_featured' => false,
-                    'audience_roles' => ['admin', 'editor', 'coach'],
+                    'audience_roles' => ['player', 'parent', 'admin', 'editor', 'coach'],
                 ],
                 'translations' => [
                     'name' => [
@@ -110,7 +110,7 @@ class HelpCategorySeeder extends Seeder
                     'sort_order' => 40,
                     'is_active' => true,
                     'is_featured' => false,
-                    'audience_roles' => ['admin', 'editor', 'coach', 'super_admin'],
+                    'audience_roles' => ['player', 'parent', 'admin', 'editor', 'coach', 'super_admin'],
                 ],
                 'translations' => [
                     'name' => [
