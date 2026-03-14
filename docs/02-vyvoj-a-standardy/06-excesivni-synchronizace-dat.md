@@ -91,7 +91,10 @@ Vzhledem k časové náročnosti "excesivní" synchronizace (velké množství H
 - **Záznamy o běhu:** Každá synchronizace (dávková i excesivní) vytváří záznam v `external_import_runs`.
 - **Progres v reálném čase:** Služby průběžně aktualizují `progress_percent` a `current_item_label` (např. "Hráč: Ondřej Bartoška", "Sezóna: 2023/24").
 - **UI Komponenta:** Volt komponenta `SyncStatusBar` automaticky detekuje běžící importy a zobrazuje fixní stavovou lištu v horní části obrazovky.
-- **Dostupnost:** Stavová lišta je integrována do všech částí systému (veřejný web, členská sekce, administrace), což umožňuje uživateli pokračovat v práci a zároveň mít přehled o běžící synchronizaci.
+- **Viditelnost a zabezpečení:** 
+    - Stavová lišta je viditelná **pouze pokud existuje aktivní běh** (stav `running`).
+    - Zobrazení je omezeno **pouze na přihlášené uživatele s oprávněním `manage_stats`**. Ostatní uživatelé (včetně běžných návštěvníků webu) stavovou lištu nevidí, aby nebyli rušeni technickými procesy na pozadí.
+    - Lišta je integrována do všech částí systému (veřejný web, členská sekce, administrace).
 
 ---
 *Poslední aktualizace: 14. 3. 2026*

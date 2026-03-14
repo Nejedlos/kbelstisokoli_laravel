@@ -9,7 +9,7 @@ return [
     App\Providers\FortifyServiceProvider::class,
     // App\Providers\HorizonServiceProvider::class,
     App\Providers\TelescopeServiceProvider::class,
-    // App\Providers\VoltServiceProvider::class,
+    App\Providers\VoltServiceProvider::class,
     Filament\Actions\ActionsServiceProvider::class,
     Filament\FilamentServiceProvider::class,
     Filament\Forms\FormsServiceProvider::class,
