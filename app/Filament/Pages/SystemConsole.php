@@ -290,6 +290,16 @@ class SystemConsole extends Page
                 'color' => 'danger',
                 'icon' => FilamentIcon::get('broom'),
             ],
+            'finance:archive-old-charges' => [
+                'label' => __('admin/system-console.commands.finance_archive.label'),
+                'desc' => __('admin/system-console.commands.finance_archive.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--dry-run' => __('admin/system-console.commands.finance_archive.flags.--dry-run'),
+                ],
+                'color' => 'warning',
+                'icon' => new \Illuminate\Support\HtmlString('<i class="fa-light fa-box-archive"></i>'),
+            ],
             'audit:cleanup' => [
                 'label' => __('admin/system-console.commands.audit_cleanup.label'),
                 'desc' => __('admin/system-console.commands.audit_cleanup.desc'),

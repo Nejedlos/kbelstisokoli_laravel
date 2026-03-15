@@ -72,6 +72,13 @@ return [
                 '--force' => 'Force (skip confirmation)',
             ],
         ],
+        'finance_archive' => [
+            'label' => 'Finance: Archive',
+            'desc' => 'Marks old unclosed charges from previous seasons as paid.',
+            'flags' => [
+                '--dry-run' => 'Dry run (no changes)',
+            ],
+        ],
         'stats_import' => [
             'label' => 'Statistics: Bulk Import',
             'desc' => 'Runs bulk synchronization for all teams (automated pipeline).',

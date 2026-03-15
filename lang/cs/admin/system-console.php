@@ -72,6 +72,13 @@ return [
                 '--force' => 'Vynutit (přeskočit potvrzení)',
             ],
         ],
+        'finance_archive' => [
+            'label' => 'Finance: Archivace',
+            'desc' => 'Označí staré neuzavřené předpisy z předchozích sezón jako zaplacené.',
+            'flags' => [
+                '--dry-run' => 'Zkušební běh (bez změn)',
+            ],
+        ],
         'stats_import' => [
             'label' => 'Statistiky: Hromadný Import',
             'desc' => 'Spustí hromadnou synchronizaci všech týmů (automatizovaná pipeline).',
