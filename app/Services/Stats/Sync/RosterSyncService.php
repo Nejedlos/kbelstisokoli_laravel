@@ -104,6 +104,11 @@ class RosterSyncService
                 // 3. Aktualizovat pivot tabulku (is_on_roster = true)
                 $this->updateRosterStatus($profile, $config->team_id, true);
 
+                // Pokud je uživatel bez defaultního týmu a sezóna je aktivní, nastavíme mu ho.
+                if ($config->season && $config->season->is_active && ! $user->member_default_team_id) {
+                    $user->update(['member_default_team_id' => $config->team_id]);
+                }
+
                 $importedCount++;
             }
 

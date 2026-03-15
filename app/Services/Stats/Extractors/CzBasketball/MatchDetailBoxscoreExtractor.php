@@ -29,6 +29,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         'F+' => 'fouls_drawn',
         'F-' => 'fouls',
         'CH' => 'fouls',
+        'FAULY' => 'fouls',
         'MIN' => 'minutes',
         '+/-' => 'plus_minus',
         'DOS' => 'rebounds_total',
@@ -36,15 +37,25 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         'DOS-O' => 'rebounds_defensive',
         'U' => 'rebounds_offensive',
         'O' => 'rebounds_defensive',
+        'DOSKOKY' => 'rebounds_total',
         'AS' => 'assists',
         'A' => 'assists',
         'ASISTENCE' => 'assists',
         'ZIS' => 'steals',
+        'ZÍS' => 'steals',
         'Z' => 'steals',
         'ZTR' => 'turnovers',
         'T' => 'turnovers',
         'BL' => 'blocks',
         'VAL' => 'efficiency',
+        'VALUACE' => 'efficiency',
+        'EF' => 'efficiency',
+        'EFKT' => 'efficiency',
+        'EF-K' => 'efficiency',
+        'VAL-K' => 'efficiency',
+        'VAL-Ú' => 'efficiency',
+        'UŽIT' => 'efficiency',
+        'UŽITNOST' => 'efficiency',
         'U%' => 'fg_pct',
         '2B-Ú' => 'fg2_made',
         '2B-P' => 'fg2_att',
@@ -754,8 +765,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
                     // Pokud hodnota obsahuje lomítko (např. 4/6), zkusíme ji rozdělit na made/att
                     // Odstraníme případná procenta nebo doplňující text za čísly (např. "12/17 70%")
-                    $cleanRatio = preg_replace('/[^\d\/].*$/', '', $val);
-                    if (str_contains($cleanRatio, '/') && preg_match('/(\d+)\s*\/\s*(\d+)/', $cleanRatio, $ratioMatches)) {
+                    if (str_contains($val, '/') && preg_match('/(\d+)\s*\/\s*(\d+)/', $val, $ratioMatches)) {
                         $made = (int) $ratioMatches[1];
                         $att = (int) $ratioMatches[2];
 

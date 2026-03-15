@@ -232,10 +232,16 @@ class StatisticSyncService
                      $attributes['opponent_id'] = $match->opponent_id;
                 }
 
+                $rowValues = $row->values;
+                // Doplnění chybějící efektivity (VAL) z dostupných boxscore metrik
+                if (!isset($rowValues['efficiency']) && !isset($rowValues['valuation'])) {
+                    $rowValues['efficiency'] = $this->calculateEfficiencyFromValues($rowValues);
+                }
+
                 $values = [
                     'season_id' => $match->season_id,
                     'row_label' => $playerName,
-                    'values' => $row->values,
+                    'values' => $rowValues,
                     'source_metadata' => array_merge($row->metadata ?? [], [
                         'source' => 'czbasketball',
                         'match_external_id' => $match->metadata['external_id'] ?? null,
@@ -360,6 +366,7 @@ class StatisticSyncService
 
         ConsoleService::log("  - Přepočítávám sezónní souhrny pro $count hráčů...", 'info');
 
+        // Přepočítáme souhrny per hráč (za celou sezónu napříč týmy)
         foreach ($playerIds as $playerId) {
             $rows = StatisticRow::where('statistic_set_id', $boxscoreSet->id)
                 ->where('season_id', $seasonId)
@@ -373,15 +380,39 @@ class StatisticSyncService
                     'statistic_set_id' => $summarySet->id,
                     'player_id' => $playerId,
                     'season_id' => $seasonId,
+                    'team_id' => null, // Globální souhrn pro sezónu
                 ],
                 [
                     'values' => $summaryData,
                     'source_metadata' => [
                         'last_computed_at' => now()->toDateTimeString(),
-                        'source' => 'aggregation',
+                        'source' => 'aggregation_global',
                     ],
                 ]
             );
+
+            // PŘIDÁNO: Přepočítáme souhrny i pro jednotlivé týmy (kvůli rankingům v rámci týmu)
+            $teamIds = $rows->pluck('team_id')->unique()->filter();
+            foreach ($teamIds as $teamId) {
+                $teamRows = $rows->where('team_id', $teamId);
+                $teamSummaryData = $this->aggregateRows($teamRows);
+
+                StatisticRow::updateOrCreate(
+                    [
+                        'statistic_set_id' => $summarySet->id,
+                        'player_id' => $playerId,
+                        'season_id' => $seasonId,
+                        'team_id' => $teamId,
+                    ],
+                    [
+                        'values' => $teamSummaryData,
+                        'source_metadata' => [
+                            'last_computed_at' => now()->toDateTimeString(),
+                            'source' => 'aggregation_team',
+                        ],
+                    ]
+                );
+            }
         }
         ConsoleService::log("    - Hotovo ($count hráčů).", 'success');
     }
@@ -401,7 +432,8 @@ class StatisticSyncService
         // Agregace zápasů pro tým
         $matches = BasketballMatch::where('season_id', $seasonId)
             ->where('team_id', $teamId)
-            ->where('status', 'completed')
+            ->whereNotNull('score_home')
+            ->whereNotNull('score_away')
             ->get();
 
         $gp = $matches->count();
@@ -443,6 +475,7 @@ class StatisticSyncService
                     'pts_for' => $ptsFor,
                     'pts_against' => $ptsAgainst,
                     'pts_avg' => $gp > 0 ? round($ptsFor / $gp, 1) : 0,
+                    'pts_against_avg' => $gp > 0 ? round($ptsAgainst / $gp, 1) : 0,
                 ],
                 'source_metadata' => [
                     'last_computed_at' => now()->toDateTimeString(),
@@ -474,25 +507,79 @@ class StatisticSyncService
             'efficiency' => 0,
             'rebounds_total' => 0,
             'assists' => 0,
+            'steals' => 0,
+            'turnovers' => 0,
+            'blocks' => 0,
+            'fouls' => 0,
+            'fouls_drawn' => 0,
         ];
 
         foreach ($rows as $row) {
             foreach ($totals as $key => $val) {
-                $totals[$key] += (float) ($row->values[$key] ?? 0);
+                $rawVal = $row->values[$key] ?? 0;
+
+                // Fallback pro efektivitu (valuation vs efficiency) a manuální výpočet
+                if ($key === 'efficiency' && (float)$rawVal === 0.0) {
+                    $rawVal = $row->values['valuation'] ?? $this->calculateEfficiencyFromValues($row->values);
+                }
+
+                // Robustnější parsování (podpora pro lomítka "X/Y")
+                if (is_string($rawVal) && str_contains($rawVal, '/')) {
+                    $parts = explode('/', $rawVal);
+                    $made = (float) trim($parts[0]);
+                    $att = (float) trim($parts[1]);
+
+                    if ($key === 'fg2_made') { $totals['fg2_made'] += $made; $totals['fg2_att'] += $att; }
+                    elseif ($key === 'fg3_made') { $totals['fg3_made'] += $made; $totals['fg3_att'] += $att; }
+                    elseif ($key === 'ft_made') { $totals['ft_made'] += $made; $totals['ft_att'] += $att; }
+                    else { $totals[$key] += $made; }
+                } else {
+                    $totals[$key] += (float) $rawVal;
+                }
             }
         }
 
         return [
             'gp' => $gp,
+
+            // Celkové hodnoty (Totals)
             'pts_total' => $totals['pts'],
+            'minutes_total' => $totals['minutes'],
+            'fg2_total' => $totals['fg2_made'],
+            'fg2_att_total' => $totals['fg2_att'],
+            'fg3_total' => $totals['fg3_made'],
+            'fg3_att_total' => $totals['fg3_att'],
+            'ft_total' => $totals['ft_made'],
+            'ft_att_total' => $totals['ft_att'],
+            'efficiency_total' => $totals['efficiency'],
+            'rebounds_total' => $totals['rebounds_total'],
+            'assists_total' => $totals['assists'],
+            'steals_total' => $totals['steals'],
+            'turnovers_total' => $totals['turnovers'],
+            'blocks_total' => $totals['blocks'],
+            'fouls_total' => $totals['fouls'],
+            'fouls_drawn_total' => $totals['fouls_drawn'],
+
+            // Průměrné hodnoty (Averages)
             'ppg' => $gp > 0 ? round($totals['pts'] / $gp, 1) : 0,
             'minutes_avg' => $gp > 0 ? round($totals['minutes'] / $gp, 1) : 0,
-            'fg2_pct' => $totals['fg2_att'] > 0 ? round(($totals['fg2_made'] / $totals['fg2_att']) * 100, 1) : 0,
-            'fg3_pct' => $totals['fg3_att'] > 0 ? round(($totals['fg3_made'] / $totals['fg3_att']) * 100, 1) : 0,
-            'ft_pct' => $totals['ft_att'] > 0 ? round(($totals['ft_made'] / $totals['ft_att']) * 100, 1) : 0,
+            'fg2_pct' => $totals['fg2_att'] > 0 ? round(($totals['fg2_made'] / $totals['fg2_att']) * 100, 1) : null,
+            'fg3_pct' => $totals['fg3_att'] > 0 ? round(($totals['fg3_made'] / $totals['fg3_att']) * 100, 1) : null,
+            'ft_pct' => $totals['ft_att'] > 0 ? round(($totals['ft_made'] / $totals['ft_att']) * 100, 1) : null,
+
+            // Průměry střelby (pro zobrazení bez pokusů)
+            'fg2_avg' => $gp > 0 ? round($totals['fg2_made'] / $gp, 1) : 0,
+            'fg3_avg' => $gp > 0 ? round($totals['fg3_made'] / $gp, 1) : 0,
+            'ft_avg' => $gp > 0 ? round($totals['ft_made'] / $gp, 1) : 0,
+
             'efficiency_avg' => $gp > 0 ? round($totals['efficiency'] / $gp, 1) : 0,
             'rebounds_avg' => $gp > 0 ? round($totals['rebounds_total'] / $gp, 1) : 0,
             'assists_avg' => $gp > 0 ? round($totals['assists'] / $gp, 1) : 0,
+            'steals_avg' => $gp > 0 ? round($totals['steals'] / $gp, 1) : 0,
+            'turnovers_avg' => $gp > 0 ? round($totals['turnovers'] / $gp, 1) : 0,
+            'blocks_avg' => $gp > 0 ? round($totals['blocks'] / $gp, 1) : 0,
+            'fouls_avg' => $gp > 0 ? round($totals['fouls'] / $gp, 1) : 0,
+            'fouls_drawn_avg' => $gp > 0 ? round($totals['fouls_drawn'] / $gp, 1) : 0,
         ];
     }
 
@@ -618,5 +705,40 @@ class StatisticSyncService
                 'metadata' => $matchInfo['metadata'] ?? null,
             ]
         );
+    }
+
+    /**
+     * Vypočítá index užitečnosti (VAL/efficiency) z dostupných boxscore metrik.
+     * PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TO - PF
+     */
+    protected function calculateEfficiencyFromValues(array $values): float
+    {
+        $pts = (float) ($values['pts'] ?? 0);
+        $reb = (float) ($values['rebounds_total'] ?? 0);
+        $ast = (float) ($values['assists'] ?? 0);
+        $stl = (float) ($values['steals'] ?? 0);
+        $blk = (float) ($values['blocks'] ?? 0);
+
+        $fg2_made = (float) ($values['fg2_made'] ?? 0);
+        $fg2_att = (float) ($values['fg2_att'] ?? 0);
+        $fg3_made = (float) ($values['fg3_made'] ?? 0);
+        $fg3_att = (float) ($values['fg3_att'] ?? 0);
+        $ft_made = (float) ($values['ft_made'] ?? 0);
+        $ft_att = (float) ($values['ft_att'] ?? 0);
+
+        $to = (float) ($values['turnovers'] ?? 0);
+        $fouls = (float) ($values['fouls'] ?? 0);
+
+        // Neproměněné střely (pokud známe pokusy)
+        $missed_fg = 0;
+        if ($fg2_att > 0) $missed_fg += ($fg2_att - $fg2_made);
+        if ($fg3_att > 0) $missed_fg += ($fg3_att - $fg3_made);
+
+        $missed_ft = 0;
+        if ($ft_att > 0) $missed_ft += ($ft_att - $ft_made);
+
+        // Výpočet VAL
+        // Pokud nemáme doskoky, asistence atd. (v nižších ligách), aspoň zohledníme Body - Fauly - Neproměněné hody.
+        return $pts + $reb + $ast + $stl + $blk - $missed_fg - $missed_ft - $to - $fouls;
     }
 }

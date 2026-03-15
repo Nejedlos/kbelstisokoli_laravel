@@ -26,6 +26,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    <!-- Tooltips (Tippy.js) -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/shift-away.css" />
+
+    <!-- Charts (ApexCharts) -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
     @stack('head')
     <style>[x-cloak] { display: none !important; }</style>
     @livewireStyles
@@ -686,5 +695,32 @@
         });
     </script>
     @livewireScripts
+    <script>
+        document.addEventListener('livewire:init', () => {
+            const initTooltips = () => {
+                document.querySelectorAll('[x-tooltip]').forEach(el => {
+                    if (el._tippy) return;
+                    const content = el.getAttribute('x-tooltip');
+                    if (!content) return;
+
+                    // Odstraníme obalující uvozovky, pokud existují (časté v Blade šablonách)
+                    const cleanContent = content.trim().replace(/^['"](.*)['"]$/, '$1');
+
+                    tippy(el, {
+                        content: cleanContent,
+                        allowHTML: true,
+                        animation: 'shift-away',
+                        theme: 'translucent',
+                        arrow: true,
+                        offset: [0, 10]
+                    });
+                });
+            };
+
+            initTooltips();
+            Livewire.hook('morph.updated', initTooltips);
+            window.addEventListener('reinit-tooltips', initTooltips);
+        });
+    </script>
 </body>
 </html>

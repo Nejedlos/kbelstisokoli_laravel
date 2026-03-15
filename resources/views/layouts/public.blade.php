@@ -101,6 +101,9 @@
 
     @stack('head')
     <style>[x-cloak] { display: none !important; }</style>
+
+    <!-- Charts (ApexCharts) -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
     @if($gtmId = env('GTM_CONTAINER_ID'))

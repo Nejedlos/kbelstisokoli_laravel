@@ -14,9 +14,8 @@
                                 <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tým</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Z</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">B Ø</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">2B Ø</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">3B Ø</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">TH Ø</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">EF Ø</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">DOS Ø</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-primary-500">TH %</th>
                             </tr>
                         </thead>
@@ -37,16 +36,8 @@
                                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $stat['team_name'] ?: '-' }}</td>
                                     <td class="px-4 py-4 text-center font-bold text-gray-800 dark:text-white">{{ $stat['games_played'] }}</td>
                                     <td class="px-4 py-4 text-center text-sm font-black text-gray-800 dark:text-white">{{ number_format($stat['points_avg'], 1, ',', ' ') }}</td>
-                                    <td class="px-4 py-4 text-center text-xs text-gray-500">{{ number_format($stat['two_points_made_avg'], 1, ',', ' ') }}</td>
-                                    <td class="px-4 py-4 text-center text-xs text-gray-500">{{ number_format($stat['three_points_made_avg'], 1, ',', ' ') }}</td>
-                                    <td class="px-4 py-4 text-center text-xs text-gray-500">
-                                        @if($stat['free_throws_made_avg'] !== null)
-                                            {{ number_format($stat['free_throws_made_avg'], 1, ',', ' ') }}
-                                            @if($stat['free_throws_attempts_avg']) / {{ number_format($stat['free_throws_attempts_avg'], 1, ',', ' ') }} @endif
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
+                                    <td class="px-4 py-4 text-center text-sm font-bold text-orange-500">{{ number_format($stat['valuation_avg'] ?? 0, 1, ',', ' ') }}</td>
+                                    <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-400">{{ number_format($stat['rebounds_total_avg'] ?? 0, 1, ',', ' ') }}</td>
                                     <td class="px-4 py-4 text-center">
                                         @if($stat['free_throws_pct'])
                                             <span class="px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-black">
@@ -79,9 +70,10 @@
                                 <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Datum / Soutěž</th>
                                 <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Soupeř</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Body</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">2B</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">3B</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">TH</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">EF</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">DOS</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">AS</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-emerald-500">Z</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">F-</th>
                             </tr>
                         </thead>
@@ -107,16 +99,10 @@
                                             {{ $match['points'] }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-4 text-center text-xs text-gray-500 font-bold">{{ $match['two_points_made'] ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center text-xs text-gray-500 font-bold">{{ $match['three_points_made'] ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center text-xs text-gray-500">
-                                        @if($match['free_throws_made'] !== null)
-                                            <span class="font-bold text-gray-700 dark:text-gray-300">{{ $match['free_throws_made'] }}</span>
-                                            @if($match['free_throws_attempts']) <span class="text-[10px] opacity-50">/{{ $match['free_throws_attempts'] }}</span> @endif
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
+                                    <td class="px-4 py-4 text-center text-sm font-bold text-orange-500">{{ $match['valuation'] ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-center text-xs text-gray-500 font-bold">{{ $match['rebounds_total'] ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-center text-xs text-gray-500 font-bold">{{ $match['assists'] ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-center text-xs text-emerald-500 font-black">{{ $match['steals'] ?? '-' }}</td>
                                     <td class="px-4 py-4 text-center">
                                         <span @class([
                                             'px-2 py-0.5 rounded text-[10px] font-black',
