@@ -68,4 +68,46 @@ class PaymentWidgetTest extends TestCase
 
         $this->assertEquals($qrWithComma, $qrWithDot);
     }
+
+    public function test_it_sets_outstanding_balance_as_default_amount(): void
+    {
+        $user = User::factory()->create();
+
+        // Vytvoříme dlužný předpis
+        \App\Models\FinanceCharge::create([
+            'user_id' => $user->id,
+            'title' => 'Členský příspěvek',
+            'amount_total' => 1500.00,
+            'currency' => 'CZK',
+            'status' => 'open',
+            'is_visible_to_member' => true,
+            'due_date' => now()->addDays(14),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(PaymentWidget::class)
+            ->assertSet('amount', '1500');
+    }
+
+    public function test_it_sets_outstanding_balance_with_decimals_as_default_amount(): void
+    {
+        $user = User::factory()->create();
+
+        // Vytvoříme dlužný předpis
+        \App\Models\FinanceCharge::create([
+            'user_id' => $user->id,
+            'title' => 'Doplatek',
+            'amount_total' => 1500.50,
+            'currency' => 'CZK',
+            'status' => 'open',
+            'is_visible_to_member' => true,
+            'due_date' => now()->addDays(14),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(PaymentWidget::class)
+            ->assertSet('amount', '1500.5');
+    }
 }

@@ -44,7 +44,13 @@ class PaymentWidget extends Component
         // Načteme nastavení z databáze
         $dbSettings = Setting::pluck('value', 'key')->toArray();
         $this->bankAccount = $dbSettings['bank_account'] ?? '6022854477/6363';
-        $this->bankName = $dbSettings['bank_name'] ?? 'Air Bank a.s.';
+        $this->bankName = $dbSettings['bank_name'] ?? 'Partners banka a.s.';
+
+        // Nastavíme dlužnou částku jako výchozí hodnotu
+        $summary = app(\App\Services\Finance\FinanceService::class)->getMemberSummary($user);
+        if ($summary['total_to_pay'] > 0) {
+            $this->amount = (string) $summary['total_to_pay'];
+        }
 
         $this->generateQrCode();
     }
