@@ -107,7 +107,7 @@ class FeedbackReportForm
                                 Placeholder::make('screenshot')
                                     ->label('')
                                     ->content(fn ($record) => ($record && $record->screenshot_path)
-                                        ? new HtmlString("<img src='" . Storage::url($record->screenshot_path) . "' class='max-w-full rounded-xl shadow-lg' />")
+                                        ? new HtmlString("<img src='" . route('admin.feedback.screenshot', $record) . "' class='max-w-full rounded-xl shadow-lg' />")
                                         : __('admin.navigation.resources.feedback_report.fields.no_screenshot')),
                             ]),
                         Tabs\Tab::make(__('admin.navigation.resources.feedback_report.fields.dom_snapshot'))
@@ -129,7 +129,7 @@ class FeedbackReportForm
                                     ->afterStateHydrated(function (ViewField $component, $record) {
                                         if ($record && $record->logs_path && Storage::exists($record->logs_path)) {
                                             $logs = json_decode(Storage::get($record->logs_path), true);
-                                            $component->state(['logs' => $logs]);
+                                            $component->state($logs);
                                         }
                                     }),
                             ]),
@@ -144,16 +144,16 @@ class FeedbackReportForm
                                         if ($record && $record->breadcrumbs_path && Storage::exists($record->breadcrumbs_path)) {
                                             $data = json_decode(Storage::get($record->breadcrumbs_path), true);
                                             $logs = array_map(fn($b) => [
-                                                'type' => $b['type'],
-                                                'timestamp' => $b['timestamp'],
+                                                'type' => $b['type'] ?? 'info',
+                                                'timestamp' => $b['timestamp'] ?? now()->toIso8601String(),
                                                 'data' => [
-                                                    ($b['type'] === 'click' ? "Klik na <{$b['tag']}>: {$b['text']}" :
-                                                     ($b['type'] === 'nav' ? "Navigace na: {$b['to']}" :
-                                                      ($b['type'] === 'scroll' ? "Scroll depth: {$b['depth']}" :
-                                                       ($b['type'] === 'submit' ? "Odeslání formuláře: {$b['form']}" : json_encode($b)))))
+                                                    (($b['type'] ?? '') === 'click' ? "Klik na <" . ($b['tag'] ?? '?') . ">: " . ($b['text'] ?? '?') :
+                                                     (($b['type'] ?? '') === 'nav' ? "Navigace na: " . ($b['to'] ?? '?') :
+                                                      (($b['type'] ?? '') === 'scroll' ? "Scroll depth: " . ($b['depth'] ?? '?') :
+                                                       (($b['type'] ?? '') === 'submit' ? "Odeslání formuláře: " . ($b['form'] ?? '?') : json_encode($b)))))
                                                 ]
                                             ], $data);
-                                            $component->state(['logs' => $logs]);
+                                            $component->state($logs);
                                         }
                                     }),
                             ]),
@@ -173,10 +173,13 @@ class FeedbackReportForm
                                                             $data = json_decode(Storage::get($record->network_path), true);
                                                             $logs = array_map(fn($f) => [
                                                                 'type' => 'error',
-                                                                'timestamp' => $f['timestamp'],
-                                                                'data' => ["{$f['method']} {$f['url']} - Status: {$f['status']} ({$f['duration_ms']}ms)", $f['error'] ?? null]
+                                                                'timestamp' => $f['timestamp'] ?? now()->toIso8601String(),
+                                                                'data' => [
+                                                                    ($f['method'] ?? 'GET') . " " . ($f['url'] ?? '?') . " - Status: " . ($f['status'] ?? '?') . " (" . ($f['duration_ms'] ?? '?') . "ms)",
+                                                                    $f['error'] ?? null
+                                                                ]
                                                             ], $data);
-                                                            $component->state(['logs' => $logs]);
+                                                            $component->state($logs);
                                                         }
                                                     }),
                                             ]),
@@ -190,10 +193,10 @@ class FeedbackReportForm
                                                             $data = json_decode(Storage::get($record->clicks_path), true);
                                                             $logs = array_map(fn($c) => [
                                                                 'type' => 'info',
-                                                                'timestamp' => $c['timestamp'],
-                                                                'data' => ["Klik na: {$c['element']} (Text: {$c['text']}) at [{$c['x']}, {$c['y']}]"]
+                                                                'timestamp' => $c['timestamp'] ?? now()->toIso8601String(),
+                                                                'data' => ["Klik na: " . ($c['element'] ?? '?') . " (Text: " . ($c['text'] ?? '?') . ") at [" . ($c['x'] ?? '?') . ", " . ($c['y'] ?? '?') . "]"]
                                                             ], $data);
-                                                            $component->state(['logs' => $logs]);
+                                                            $component->state($logs);
                                                         }
                                                     }),
                                             ]),

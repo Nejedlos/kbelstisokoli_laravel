@@ -66,6 +66,18 @@ class FeedbackReportNotification extends Mailable implements ShouldQueue
                 ->withMime('application/json');
         }
 
+        if ($this->report->network_path && Storage::exists($this->report->network_path)) {
+            $attachments[] = Attachment::fromStorage($this->report->network_path)
+                ->as('network-logs.json')
+                ->withMime('application/json');
+        }
+
+        if ($this->report->dom_path && Storage::exists($this->report->dom_path)) {
+            $attachments[] = Attachment::fromStorage($this->report->dom_path)
+                ->as('dom-snapshot.html')
+                ->withMime('text/html');
+        }
+
         return $attachments;
     }
 }

@@ -173,6 +173,21 @@ class FeedbackController extends Controller
         ]);
     }
 
+    public function screenshot(FeedbackReport $report): \Symfony\Component\HttpFoundation\Response
+    {
+        // Kontrola oprávnění (zjednodušená na to, zda má uživatel přístup do adminu)
+        // V produkci by tu byla kontrola na konkrétní permission spatie
+        if (!auth()->user()->hasRole(['super_admin', 'admin', 'technician'])) {
+             abort(403);
+        }
+
+        if (!$report->screenshot_path || !Storage::exists($report->screenshot_path)) {
+            abort(404);
+        }
+
+        return response()->file(storage_path('app/private/' . $report->screenshot_path));
+    }
+
     protected function redactData(array $data): array
     {
         $redactKeys = config('feedback.redaction.redact_keys', []);

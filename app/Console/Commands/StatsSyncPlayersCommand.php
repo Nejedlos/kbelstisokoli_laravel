@@ -16,7 +16,8 @@ class StatsSyncPlayersCommand extends Command
     protected $signature = 'stats:sync-players {--user_id= : Synchronizovat pouze konkrétního uživatele}
                             {--team_id= : Synchronizovat pouze hráče z daného týmu}
                             {--force : Vynutit synchronizaci i bez změn}
-                            {--excesive : Provést excesivní (hloubkovou) synchronizaci historie}';
+                            {--excesive : Provést excesivní (hloubkovou) synchronizaci historie}
+                            {--limit= : Omezit počet synchronizovaných hráčů (např. 10)}';
 
     /**
      * The console command description.
@@ -47,6 +48,10 @@ class StatsSyncPlayersCommand extends Command
             $query->whereHas('playerProfiles.teams', function ($q) use ($teamId) {
                 $q->where('teams.id', $teamId);
             });
+        }
+
+        if ($limit = $this->option('limit')) {
+            $query->limit($limit);
         }
 
         $users = $query->get();
@@ -86,6 +91,9 @@ class StatsSyncPlayersCommand extends Command
             $result = $syncService->syncPlayer($user, [
                 'force' => $this->option('force'),
                 'excesive' => $this->option('excesive'),
+                'parent_run' => $mainRun,
+                'current_index' => $currentIndex,
+                'total_count' => $users->count(),
             ]);
             if ($result) {
                 $successCount++;

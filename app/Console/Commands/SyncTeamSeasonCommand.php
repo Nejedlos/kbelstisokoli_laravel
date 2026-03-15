@@ -128,7 +128,8 @@ class SyncTeamSeasonCommand extends Command
                         $mainRun->updateProgress($count, $totalWork, "Tým: {$team->name} ({$season->name})");
 
                         $syncService->syncTeamSeason($team->id, $season->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
-                        $mainRun->increment('imported_count');
+                        // increment není potřeba, protože updateProgress ho už nastavil správně před syncem,
+                        // případně ho aktualizoval syncTeamSeason uvnitř.
 
                         // Mikropauza mezi týmy/sezónami, abychom nehltili externí web
                         if ($totalWork > 1) {

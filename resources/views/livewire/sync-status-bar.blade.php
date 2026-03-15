@@ -54,8 +54,14 @@
                                     Synchronizace dat
                                 @endif
                             </div>
-                            <div class="text-sm font-black text-white tracking-tight truncate max-w-[250px] sm:max-w-[400px] leading-tight">
+                            <div class="text-sm font-black text-white tracking-tight truncate max-w-[300px] sm:max-w-[500px] leading-tight" title="{{ $run->current_item_label }}">
                                 {{ $run->current_item_label ?: 'Inicializace procesu...' }}
+                            </div>
+                            <div class="text-[9px] text-white/30 font-mono mt-0.5 flex items-center gap-2">
+                                <span>Aktivita: {{ $run->updated_at->format('H:i:s') }}</span>
+                                @if($run->updated_at->diffInMinutes(now()) > 2)
+                                    <span class="text-rose-500 animate-pulse font-bold">Možná zaseknuto!</span>
+                                @endif
                             </div>
                         </div>
                     </div>

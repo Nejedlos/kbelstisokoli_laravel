@@ -32,6 +32,13 @@ class PlayerSyncService
      */
     public function syncPlayer(User $user, array $options = []): bool
     {
+        $parentRun = $options['parent_run'] ?? null;
+
+        // Kontrola, zda nebyl běh zrušen
+        if ($parentRun && $parentRun->status === 'cancelled') {
+            return false;
+        }
+
         // Najdeme externí ID pro czbasketball
         $mapping = $user->externalMappings()
             ->where('source_key', 'czbasketball')
@@ -55,6 +62,11 @@ class PlayerSyncService
             }
 
             $html = $this->fetcher->fetch($url);
+
+            if ($parentRun) {
+                $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Extrakce dat)");
+            }
+
             $result = $this->extractor->extract($html);
             $data = $result['data'];
 
@@ -86,11 +98,17 @@ class PlayerSyncService
 
             // 2. Fotografie
             if (!empty($data['photo_url'])) {
+                if ($parentRun) {
+                    $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Stahování fotografie)");
+                }
                 $this->syncPhoto($user, $data['photo_url']);
             }
 
             // 3. Detailní statistiky do nové tabulky external_player_stats
             if (!empty($data['stats'])) {
+                if ($parentRun) {
+                    $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Ukládání statistik)");
+                }
                 foreach ($data['stats'] as $statData) {
                     \App\Models\ExternalPlayerStat::updateOrCreate(
                         [
@@ -128,7 +146,7 @@ class PlayerSyncService
 
             // 5. Excesivní synchronizace historie (všechny dostupné sezóny a detaily zápasů)
             if ($options['excesive'] ?? true) {
-                $this->syncExcesiveHistory($user, $data['available_seasons'] ?? [], $run);
+                $this->syncExcesiveHistory($user, $data['available_seasons'] ?? [], $run, $options);
             }
 
             $run->finish([
@@ -208,14 +226,20 @@ class PlayerSyncService
     /**
      * Excesivní synchronizace historie (všechny dostupné sezóny a detaily zápasů).
      */
-    public function syncExcesiveHistory(User $user, array $seasons, ?ExternalImportRun $run): void
+    public function syncExcesiveHistory(User $user, array $seasons, ?ExternalImportRun $run, array $options = []): void
     {
         $mapping = $user->externalMappings()->where('source_key', 'czbasketball')->first();
         if (!$mapping) return;
 
         $extId = $mapping->external_id;
+        $parentRun = $options['parent_run'] ?? null;
 
         foreach ($seasons as $season) {
+            // Kontrola zrušení
+            if ($parentRun && $parentRun->status === 'cancelled') {
+                return;
+            }
+
             $year = substr($season, 0, 4);
             $url = "https://cz.basketball/hrac/{$extId}?tab=matches&y=" . $year;
             try {
@@ -225,6 +249,9 @@ class PlayerSyncService
                 if ($run) {
                     $run->updateProgress((int) ($run->imported_count ?? 0), null, "Sezóna: $season");
                 }
+                if ($parentRun) {
+                    $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Sezóna: $season)");
+                }
                 $html = $this->fetcher->fetch($url);
                 $result = $this->extractor->extract($html);
                 $matches = $result['data']['matches'] ?? [];
@@ -233,6 +260,11 @@ class PlayerSyncService
                 usleep(500000); // 0.5s
 
                 foreach ($matches as $matchData) {
+                    // Kontrola zrušení
+                    if ($parentRun && $parentRun->status === 'cancelled') {
+                        return;
+                    }
+
                     $extMatchId = $matchData['external_match_id'] ?? null;
                     if (!$extMatchId) continue;
 
@@ -265,10 +297,22 @@ class PlayerSyncService
                         if ($run) {
                             $run->updateProgress((int) ($run->imported_count ?? 0), null, "Zápas: " . ($matchData['opponent_name'] ?? 'neznámý'));
                         }
-                        $this->syncExternalMatchDetail($user, (string) $extMatchId, $run);
+                        if ($parentRun) {
+                            $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Zápas: " . ($matchData['opponent_name'] ?? 'neznámý') . ")");
+                        }
 
-                        // Mikropauza mezi detaily zápasů (Throttling)
-                        usleep(800000); // 0.8s (excesivní režim vyžaduje vyšší ohleduplnost k API)
+                        // Skip detailu pokud ho už máme (a nechceme ho force přepsat)
+                        $existingMatch = \App\Models\ExternalPlayerMatch::where('user_id', $user->id)
+                            ->where('external_match_id', $extMatchId)
+                            ->whereNotNull('boxscore_json')
+                            ->first();
+
+                        if (!$existingMatch || ($options['force'] ?? false)) {
+                            $this->syncExternalMatchDetail($user, (string) $extMatchId, $run, $options);
+
+                            // Mikropauza mezi detaily zápasů (Throttling)
+                            usleep(800000); // 0.8s (excesivní režim vyžaduje vyšší ohleduplnost k API)
+                        }
                     }
                 }
             } catch (\Exception $e) {
@@ -280,14 +324,20 @@ class PlayerSyncService
     /**
      * Synchronizuje detail zápasu (boxscore) i pro zápasy, které nejsou v naší DB.
      */
-    public function syncExternalMatchDetail(User $user, string $extMatchId, ?ExternalImportRun $run): void
+    public function syncExternalMatchDetail(User $user, string $extMatchId, ?ExternalImportRun $run, array $options = []): void
     {
         $url = "https://cz.basketball/zapas/{$extMatchId}";
+        $parentRun = $options['parent_run'] ?? null;
         try {
             $html = $this->fetcher->fetch($url);
             $boxscoreData = $this->matchExtractor->extract($html);
 
             $matchHeader = $boxscoreData['data']->metadata['header'] ?? [];
+
+            if ($parentRun && !empty($matchHeader['home_team'])) {
+                $matchLabel = ($matchHeader['home_team'] ?? '') . ' vs ' . ($matchHeader['away_team'] ?? '');
+                $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} ($matchLabel)");
+            }
             $matchDate = $this->parseMatchDate($matchHeader['date'] ?? null);
             $scheduledAt = $matchHeader['scheduled_at'] ?? null;
             $competitionLabel = $matchHeader['competition'] ?? null;

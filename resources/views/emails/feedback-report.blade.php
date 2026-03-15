@@ -23,6 +23,13 @@
         <p>{{ $report->steps }}</p>
     @endif
 
+    @if($report->screenshot_path && \Illuminate\Support\Facades\Storage::exists($report->screenshot_path))
+        <h3 style="font-size: 16px; color: {{ config('email_branding.colors.text') }}; margin-top: 20px;">Screenshot</h3>
+        <div style="margin-top: 10px;">
+            <img src="{{ $message->embed(storage_path('app/private/' . $report->screenshot_path)) }}" alt="Screenshot" style="max-width: 100%; border-radius: 8px; border: 1px solid {{ config('email_branding.colors.border') }};">
+        </div>
+    @endif
+
     @include('emails.partials.divider')
 
     @include('emails.partials.panel', [

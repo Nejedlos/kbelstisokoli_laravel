@@ -70,6 +70,10 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->name('admin.impersonate.start');
     Route::get('/admin/impersonate-stop', [\App\Http\Controllers\Admin\ImpersonateController::class, 'stop'])
         ->name('admin.impersonate.stop');
+
+    // Privátní data z feedbacku (pouze pro adminy)
+    Route::get('/admin/feedback-reports/{report}/screenshot', [\App\Http\Controllers\FeedbackController::class, 'screenshot'])
+        ->name('admin.feedback.screenshot');
 });
 
 // --- Override Fortify two-factor challenge routes to allow authenticated users ---

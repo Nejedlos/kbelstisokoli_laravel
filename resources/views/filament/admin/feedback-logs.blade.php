@@ -1,13 +1,24 @@
 @php
+    $logs = $getState() ?? [];
     $allLogs = [];
     if (!empty($logs['console'])) {
-        foreach($logs['console'] as $l) $allLogs[] = ['type' => $l['level'], 'timestamp' => $l['timestamp'], 'data' => [$l['message']]];
+        foreach($logs['console'] as $l) {
+            $allLogs[] = [
+                'type' => $l['level'] ?? 'log',
+                'timestamp' => $l['timestamp'] ?? now()->toIso8601String(),
+                'data' => [$l['message'] ?? 'No message']
+            ];
+        }
     }
     if (!empty($logs['errors'])) {
         foreach($logs['errors'] as $e) {
-            $msg = ($e['type'] ?? 'Error') . ': ' . $e['message'];
-            if (!empty($e['filename'])) $msg .= " in {$e['filename']}:{$e['lineno']}";
-            $allLogs[] = ['type' => 'error', 'timestamp' => $e['timestamp'], 'data' => [$msg, $e['stack'] ?? null, $e['reason'] ?? null]];
+            $msg = ($e['type'] ?? 'Error') . ': ' . ($e['message'] ?? 'No message');
+            if (!empty($e['filename'])) $msg .= " in {$e['filename']}:" . ($e['lineno'] ?? '?');
+            $allLogs[] = [
+                'type' => 'error',
+                'timestamp' => $e['timestamp'] ?? now()->toIso8601String(),
+                'data' => [$msg, $e['stack'] ?? null, $e['reason'] ?? null]
+            ];
         }
     }
 
@@ -16,8 +27,12 @@
         $allLogs = $logs;
     }
 
-    // Seřadit podle času
-    usort($allLogs, fn($a, $b) => strtotime($a['timestamp']) - strtotime($b['timestamp']));
+    // Seřadit podle času, pokud existuje timestamp
+    usort($allLogs, function($a, $b) {
+        $ta = isset($a['timestamp']) ? strtotime($a['timestamp']) : 0;
+        $tb = isset($b['timestamp']) ? strtotime($b['timestamp']) : 0;
+        return $ta - $tb;
+    });
 @endphp
 
 <div class="space-y-4">
@@ -29,7 +44,7 @@
         <div class="flex flex-col gap-2 font-mono text-xs max-h-[600px] overflow-y-auto custom-scrollbar p-4 bg-slate-900 rounded-xl">
             @foreach($allLogs as $log)
                 <div class="flex gap-3 border-b border-slate-800 pb-2 last:border-0 hover:bg-slate-800/50 transition-colors px-1">
-                    <span class="text-slate-500 shrink-0">[{{ date('H:i:s', strtotime($log['timestamp'])) }}]</span>
+                    <span class="text-slate-500 shrink-0">[{{ date('H:i:s', strtotime($log['timestamp'] ?? 'now')) }}]</span>
                     <span @class([
                         'font-bold shrink-0 w-20 uppercase',
                         'text-blue-400' => in_array($log['type'] ?? '', ['info', 'log']),
