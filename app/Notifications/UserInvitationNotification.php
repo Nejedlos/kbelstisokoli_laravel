@@ -28,7 +28,9 @@ class UserInvitationNotification extends BaseNotification implements ShouldQueue
                 'token' => $this->token,
                 'email' => '', // Email se doplní v reset formuláři nebo přes query
             ], false)),
-            'type' => 'invitation',
+            'type' => 'success',
+            'icon' => 'user-plus',
+            'category' => 'system',
         ];
     }
 

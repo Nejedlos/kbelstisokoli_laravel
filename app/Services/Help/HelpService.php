@@ -28,6 +28,19 @@ class HelpService
     }
 
     /**
+     * Nastaví sekci pro filtrování obsahu.
+     *
+     * @param string|null $section
+     * @return $this
+     */
+    public function forSection(?string $section): self
+    {
+        $this->queryService->forSection($section);
+        $this->searchService->forSection($section);
+        return $this;
+    }
+
+    /**
      * Načte data pro úvodní stránku nápovědy.
      *
      * @return array

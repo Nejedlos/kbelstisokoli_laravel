@@ -30,34 +30,48 @@ class RsvpChangedNotification extends BaseNotification
 
     protected function getNotificationData(): array
     {
-        $statusLabel = match ($this->status) {
-            'confirmed' => __('member.notifications.rsvp_statuses.confirmed'),
-            'declined' => __('member.notifications.rsvp_statuses.declined'),
-            'maybe' => __('member.notifications.rsvp_statuses.maybe'),
-            default => __('member.notifications.rsvp_statuses.changed'),
+        $statusKey = match ($this->status) {
+            'confirmed' => 'confirmed',
+            'declined' => 'declined',
+            'maybe' => 'maybe',
+            default => 'changed',
+        };
+
+        $type = match ($this->status) {
+            'confirmed' => 'success',
+            'declined' => 'danger',
+            'maybe' => 'warning',
+            default => 'info',
+        };
+
+        $icon = match ($this->eventLabelKey) {
+            'training' => 'calendar-star',
+            'match' => 'basketball',
+            'club_event' => 'star',
+            default => 'calendar',
         };
 
         $label = __("member.notifications.event_labels.{$this->eventLabelKey}");
         $datetime = $this->eventDate ? " (" . $this->eventDate->translatedFormat('j. n. H:i') . ")" : '';
 
-        if ($this->user) {
-            $message = __('member.notifications.rsvp_message_user', [
-                'label' => $label,
-                'title' => $this->eventTitle,
-                'status' => $statusLabel,
-                'datetime' => $datetime,
-            ]);
-        } else {
-            $message = __('member.notifications.rsvp_message_self', [
-                'label' => $label,
-                'title' => $this->eventTitle,
-                'status' => $statusLabel,
-                'datetime' => $datetime,
-            ]);
-        }
+        // Akce (sloveso)
+        $actionKey = $this->user ? "member.notifications.rsvp_actions_user.{$statusKey}" : "member.notifications.rsvp_actions_self.{$statusKey}";
+        $action = __($actionKey, [
+            'name' => $this->user?->name,
+        ]);
+
+        // Celá zpráva
+        $message = __('member.notifications.rsvp_message', [
+            'action' => $action,
+            'label' => mb_strtolower($label),
+            'title' => $this->eventTitle,
+            'datetime' => $datetime,
+        ]);
 
         return [
-            'type' => 'info',
+            'type' => $type,
+            'icon' => $icon,
+            'category' => 'attendance',
             'title' => 'member.notifications.rsvp_changed_title',
             'message' => $message,
             'user_id' => $this->user?->id,

@@ -61,7 +61,9 @@ class NewChargeNotification extends BaseNotification
             ]),
             'action_label' => 'member.notifications.view_payments',
             'action_url' => route('member.economy.index'),
-            'type' => 'finance',
+            'type' => 'info',
+            'icon' => 'credit-card',
+            'category' => 'finance',
         ];
     }
 }

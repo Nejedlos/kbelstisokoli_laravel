@@ -291,11 +291,11 @@ class MyStatistics extends Component
                             $q->whereHas('basketballMatch', function ($mq) use ($teamId) {
                                 $mq->where('team_id', $teamId);
                             })
-                            ->orWhere('metadata->team_id', $teamId)
+                            ->orWhere('metadata', 'like', '%"team_id":' . (int)$teamId . '%')
                             ->orWhere(function($oq) use ($baseNames) {
                                 foreach (array_unique($baseNames) as $name) {
-                                    $oq->orWhere('metadata->home_team', 'like', '%'.$name.'%')
-                                       ->orWhere('metadata->away_team', 'like', '%'.$name.'%');
+                                    $oq->orWhere('metadata', 'like', '%"home_team":"%'.$name.'%"%')
+                                       ->orWhere('metadata', 'like', '%"away_team":"%'.$name.'%"%');
                                 }
                             });
                         });

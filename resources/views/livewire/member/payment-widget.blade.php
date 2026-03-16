@@ -82,6 +82,11 @@
                         <div class="font-bold text-[9px] opacity-60 uppercase tracking-widest mt-1">
                             VS: {{ $vs }}
                         </div>
+                        @if(!empty($ss))
+                            <div class="font-bold text-[9px] opacity-60 uppercase tracking-widest mt-0.5">
+                                SS: {{ $ss }}
+                            </div>
+                        @endif
                         <div class="font-bold text-[8px] opacity-50 uppercase tracking-tight mt-0.5 truncate max-w-full px-2">
                             {{ $note ?: $memberName }}
                         </div>

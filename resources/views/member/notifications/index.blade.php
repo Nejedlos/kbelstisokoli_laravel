@@ -31,32 +31,38 @@
                         @endif
 
                         <div class="shrink-0">
+                            @php
+                                $type = $notification->data['type'] ?? 'info';
+                                $iconName = $notification->data['icon'] ?? null;
+
+                                $statusIconClass = match($type) {
+                                    'success' => 'fa-circle-check text-emerald-500',
+                                    'warning' => 'fa-triangle-exclamation text-warning-500',
+                                    'urgent', 'danger', 'error' => 'fa-triangle-exclamation text-red-500',
+                                    'info' => 'fa-circle-info text-blue-500',
+                                    default => 'fa-circle-info text-blue-500',
+                                };
+
+                                $mainIconClass = $iconName ? 'fa-'.$iconName : explode(' ', $statusIconClass)[0];
+                                $mainColorClass = $iconName ? match($type) {
+                                    'success' => 'text-emerald-500',
+                                    'warning' => 'text-warning-500',
+                                    'urgent', 'danger', 'error' => 'text-red-500',
+                                    'info' => 'text-blue-500',
+                                    default => 'text-slate-400',
+                                } : explode(' ', $statusIconClass)[1];
+                            @endphp
+
                             @if(!empty($notification->data['user_avatar']))
                                 <div class="relative">
                                     <img src="{{ $notification->data['user_avatar'] }}" alt="{{ $notification->data['user_name'] ?? '' }}" class="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md ring-1 ring-slate-100">
                                     <div class="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md border border-slate-100">
-                                        @php
-                                            $iconClass = match($notification->data['type'] ?? 'info') {
-                                                'success' => 'fa-circle-check text-emerald-500',
-                                                'warning' => 'fa-triangle-exclamation text-amber-500',
-                                                'urgent' => 'fa-bolt text-red-500',
-                                                default => 'fa-circle-info text-blue-500',
-                                            };
-                                        @endphp
-                                        <i class="fa-light {{ $iconClass }} text-[11px]"></i>
+                                        <i class="fa-light {{ $statusIconClass }} text-[11px]"></i>
                                     </div>
                                 </div>
                             @else
-                                @php
-                                    $iconClass = match($notification->data['type'] ?? 'info') {
-                                        'success' => 'fa-circle-check text-emerald-500',
-                                        'warning' => 'fa-triangle-exclamation text-amber-500',
-                                        'urgent' => 'fa-bolt text-red-500',
-                                        default => 'fa-circle-info text-blue-500',
-                                    };
-                                @endphp
-                                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm text-2xl text-slate-400">
-                                    <i class="fa-light {{ $iconClass }}"></i>
+                                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm text-2xl {{ $mainColorClass }}">
+                                    <i class="fa-light {{ $mainIconClass }}"></i>
                                 </div>
                             @endif
                         </div>

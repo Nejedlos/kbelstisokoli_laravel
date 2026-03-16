@@ -10,23 +10,7 @@ use Illuminate\Support\Facades\Cache;
 class HelpQueryService
 {
     protected array $roles = [];
-
-    /**
-     * Vygeneruje unikátní cache klíč na základě rolí a locale.
-     */
-    protected function getCacheKey(string $base, ?string $identifier = null): string
-    {
-        $roles = $this->roles;
-        sort($roles);
-        $rolesHash = md5(json_encode($roles));
-        $locale = app()->getLocale();
-
-        $key = "help_{$base}_{$rolesHash}_{$locale}";
-        if ($identifier) {
-            $key .= "_{$identifier}";
-        }
-        return $key;
-    }
+    protected ?string $section = null;
 
     /**
      * Nastaví role pro filtrování obsahu.
@@ -38,6 +22,36 @@ class HelpQueryService
     {
         $this->roles = (array) $roles;
         return $this;
+    }
+
+    /**
+     * Nastaví sekci pro filtrování obsahu.
+     *
+     * @param string|null $section
+     * @return $this
+     */
+    public function forSection(?string $section): self
+    {
+        $this->section = $section;
+        return $this;
+    }
+
+    /**
+     * Vygeneruje unikátní cache klíč na základě rolí, sekce a locale.
+     */
+    protected function getCacheKey(string $base, ?string $identifier = null): string
+    {
+        $roles = $this->roles;
+        sort($roles);
+        $rolesHash = md5(json_encode($roles));
+        $locale = app()->getLocale();
+        $section = $this->section ?: 'all';
+
+        $key = "help_{$base}_{$section}_{$rolesHash}_{$locale}";
+        if ($identifier) {
+            $key .= "_{$identifier}";
+        }
+        return $key;
     }
 
     /**
@@ -54,6 +68,74 @@ class HelpQueryService
     protected function getFilteringRoles(): array
     {
         return $this->isAdmin() ? [] : $this->roles;
+    }
+
+    /**
+     * Aplikuje filtrování podle sekce a rolí na dotaz.
+     */
+    protected function applySectionFilterToArticles($query): void
+    {
+        if ($this->section === 'admin') {
+            $query->where(function ($q) {
+                $q->where('metadata', 'LIKE', '%"section":"admin"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%');
+            });
+        } elseif ($this->section === 'member') {
+            $query->where(function ($q) {
+                $q->where('metadata', 'LIKE', '%"section":"member"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%')
+                    ->orWhere('metadata', 'NOT LIKE', '%"section":%'); // Default je member
+            });
+        }
+
+        $filteringRoles = $this->getFilteringRoles();
+        if (!empty($filteringRoles)) {
+            $query->where(function ($q) use ($filteringRoles) {
+                $q->whereNull('audience_roles');
+                foreach ($filteringRoles as $role) {
+                    $q->orWhereJsonContains('audience_roles', $role);
+                }
+            });
+        }
+    }
+
+    protected function applySectionFilterToCategories($query): void
+    {
+        // Pro kategorie nemáme metadata. Filtrovat podle sekce skrze existenci článků v dané sekci.
+        if ($this->section !== null) {
+            $section = $this->section;
+            $query->whereExists(function ($sub) use ($section) {
+                $sub->from('help_articles')
+                    ->selectRaw('1')
+                    ->whereColumn('help_articles.category_id', 'help_categories.id')
+                    ->where('help_articles.is_published', true)
+                    ->where(function ($q) {
+                        $q->whereNull('help_articles.published_at')->orWhere('help_articles.published_at', '<=', now());
+                    })
+                    ->where(function ($q) use ($section) {
+                        if ($section === 'admin') {
+                            $q->where('help_articles.metadata', 'LIKE', '%"section":"admin"%')
+                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%');
+                        } elseif ($section === 'member') {
+                            $q->where('help_articles.metadata', 'LIKE', '%"section":"member"%')
+                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%')
+                              ->orWhere('help_articles.metadata', 'NOT LIKE', '%"section":%');
+                        }
+                    });
+            });
+        }
+
+        // Role-based filtr přímo na kategorii (audience_roles)
+        $filteringRoles = $this->getFilteringRoles();
+        if (!empty($filteringRoles)) {
+            $query->where(function ($q) use ($filteringRoles) {
+                $q->whereNull('audience_roles');
+                foreach ($filteringRoles as $role) {
+                    // Pouze LIKE kvůli kompatibilitě MariaDB na hostingu
+                    $q->orWhere('audience_roles', 'LIKE', '%"' . $role . '"%');
+                }
+            });
+        }
     }
 
     /**
@@ -74,13 +156,8 @@ class HelpQueryService
                 ->select(['id', 'slug', 'name', 'description', 'icon', 'color', 'audience_roles', 'is_featured'])
                 ->where('is_active', true)
                 ->whereNull('parent_id')
-                ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
-                    $q->where(function ($inner) use ($filteringRoles) {
-                        $inner->whereNull('audience_roles');
-                        foreach ($filteringRoles as $role) {
-                            $inner->orWhereJsonContains('audience_roles', $role);
-                        }
-                    });
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
                 })
                 ->orderBy('sort_order')
                 ->get();
@@ -130,6 +207,9 @@ class HelpQueryService
                 ->where(function ($q) {
                     $q->whereNull('published_at')->orWhere('published_at', '<=', now());
                 })
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
+                })
                 ->orderBy('is_featured', 'desc')
                 ->orderBy('sort_order')
                 ->limit($limit)
@@ -163,6 +243,9 @@ class HelpQueryService
                 ->select(['id', 'slug', 'name', 'description', 'icon', 'color', 'parent_id', 'audience_roles'])
                 ->where('slug', $slug)
                 ->where('is_active', true)
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
+                })
                 ->first();
 
             if (!$category) {
@@ -189,6 +272,9 @@ class HelpQueryService
                 ->where('is_published', true)
                 ->where(function ($q) {
                     $q->whereNull('published_at')->orWhere('published_at', '<=', now());
+                })
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
                 })
                 ->orderBy('sort_order')
                 ->get()
@@ -242,7 +328,9 @@ class HelpQueryService
             // a hned mu předpočítáme řetězce, aby Blade nevolal magii.
             $article = HelpArticle::query()
                 ->published()
-                ->forAudience($filteringRoles)
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
+                })
                 ->where('slug', $slug)
                 ->with(['category', 'faqs', 'quickActions'])
                 ->first();
@@ -298,13 +386,8 @@ class HelpQueryService
             $categories = \DB::table('help_categories')
                 ->select(['id', 'slug', 'name', 'parent_id', 'icon', 'color', 'audience_roles'])
                 ->where('is_active', true)
-                ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
-                    $q->where(function ($inner) use ($filteringRoles) {
-                        $inner->whereNull('audience_roles');
-                        foreach ($filteringRoles as $role) {
-                            $inner->orWhereJsonContains('audience_roles', $role);
-                        }
-                    });
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
                 })
                 ->orderBy('sort_order')
                 ->get()
@@ -317,13 +400,8 @@ class HelpQueryService
             $allArticles = \DB::table('help_articles')
                 ->select(['id', 'slug', 'title', 'category_id', 'audience_roles', 'sort_order', 'metadata'])
                 ->where('is_published', true)
-                ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
-                    $q->where(function ($inner) use ($filteringRoles) {
-                        $inner->whereNull('audience_roles');
-                        foreach ($filteringRoles as $role) {
-                            $inner->orWhereJsonContains('audience_roles', $role);
-                        }
-                    });
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
                 })
                 ->orderBy('sort_order')
                 ->get()

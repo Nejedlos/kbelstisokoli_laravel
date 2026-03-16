@@ -287,6 +287,20 @@ return [
         'rsvp_message_user' => ':label ":title":datetime: :status',
         'rsvp_message_self' => ':label ":title":datetime: :status',
 
+        'rsvp_actions_self' => [
+            'confirmed' => 'Potvrdil jsi účast',
+            'declined' => 'Zadal jsi omluvu',
+            'maybe' => 'Změnil jsi účast na "možná"',
+            'changed' => 'Změnil jsi RSVP',
+        ],
+        'rsvp_actions_user' => [
+            'confirmed' => ':name potvrdil účast',
+            'declined' => ':name zadal omluvu',
+            'maybe' => ':name změnil účast na "možná"',
+            'changed' => ':name změnil RSVP',
+        ],
+        'rsvp_message' => ':action na :label :title:datetime',
+
         'event_labels' => [
             'training' => 'Trénink',
             'match' => 'Zápas',

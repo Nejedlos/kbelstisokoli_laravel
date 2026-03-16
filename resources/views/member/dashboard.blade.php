@@ -229,14 +229,33 @@
                     @else
                         <div class="space-y-2">
                             @foreach($notifications as $n)
+                                @php
+                                    $type = data_get($n->data, 'type', 'info');
+                                    $icon = data_get($n->data, 'icon', 'bell');
+                                    $colorClass = match($type) {
+                                        'success' => 'text-emerald-500 bg-emerald-50',
+                                        'danger', 'error' => 'text-red-500 bg-red-50',
+                                        'warning' => 'text-warning-500 bg-warning-50',
+                                        'info' => 'text-blue-500 bg-blue-50',
+                                        default => 'text-slate-400 bg-slate-50',
+                                    };
+                                @endphp
                                 <a href="{{ data_get($n->data, 'action_url', route('member.notifications.index')) }}"
-                                   class="card p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group"
-                                   aria-label="{{ !empty(data_get($n->data, 'title')) ? __(data_get($n->data, 'title')) : __('member.notifications.default_title') }}">
-                                    <div>
-                                        <div class="font-bold text-secondary">{{ !empty(data_get($n->data, 'title')) ? __(data_get($n->data, 'title')) : __('member.notifications.default_title') }}</div>
-                                        <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $n->created_at->diffForHumans() }}</div>
+                                   class="card p-3 sm:p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors group"
+                                   aria-label="{{ data_get($n->data, 'message') ?: (data_get($n->data, 'title') ? __(data_get($n->data, 'title')) : __('member.notifications.default_title')) }}">
+
+                                    <div class="w-10 h-10 rounded-xl {{ $colorClass }} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                        <i class="fa-light fa-{{ $icon }} text-lg"></i>
                                     </div>
-                                    <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-bold text-secondary text-xs sm:text-sm leading-snug line-clamp-2">
+                                            {{ data_get($n->data, 'message') ?: (data_get($n->data, 'title') ? __(data_get($n->data, 'title')) : __('member.notifications.default_title')) }}
+                                        </div>
+                                        <div class="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">{{ $n->created_at->diffForHumans() }}</div>
+                                    </div>
+
+                                    <div class="w-6 h-6 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
                                         <i class="fa-light fa-chevron-right text-[10px]"></i>
                                     </div>
                                 </a>

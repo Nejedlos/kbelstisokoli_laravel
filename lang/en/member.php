@@ -287,6 +287,20 @@ return [
         'rsvp_message_user' => ':label ":title":datetime: :status',
         'rsvp_message_self' => ':label ":title":datetime: :status',
 
+        'rsvp_actions_self' => [
+            'confirmed' => 'You confirmed attendance',
+            'declined' => 'You submitted an excuse',
+            'maybe' => 'You changed attendance to "maybe"',
+            'changed' => 'You changed RSVP',
+        ],
+        'rsvp_actions_user' => [
+            'confirmed' => ':name confirmed attendance',
+            'declined' => ':name submitted an excuse',
+            'maybe' => ':name changed attendance to "maybe"',
+            'changed' => ':name changed RSVP',
+        ],
+        'rsvp_message' => ':action for :label :title:datetime',
+
         'event_labels' => [
             'training' => 'Training',
             'match' => 'Match',

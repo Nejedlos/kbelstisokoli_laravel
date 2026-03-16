@@ -155,7 +155,7 @@ class MatchesListExtractor implements StatExtractorInterface
 
             $status = 'scheduled';
             // Pokud je zápas v budoucnu, ignorujeme skóre (může to být čas utkání)
-            $isFuture = $scheduledAt && $scheduledAt->isGreaterThan(now()->addMinutes(30));
+            $isFuture = $scheduledAt && $scheduledAt->gt(now()->addMinutes(30));
 
             if (! $isFuture && $score && preg_match('/\d+\s*:\s*\d+/', $score)) {
                 $status = 'finished';

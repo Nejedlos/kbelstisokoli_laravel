@@ -492,6 +492,9 @@ class PlayerSyncService
         return $teamA;
     }
 
+    /** @var Collection|null Cache pro haly */
+    protected $venuesCache = null;
+
     /**
      * Zajistí existenci haly (Venue) podle názvu.
      */
@@ -505,18 +508,32 @@ class PlayerSyncService
         $venue = Venue::where('name', $name)->first();
         if ($venue) return $venue;
 
-        // Zkusíme najít v metadatech (původní názvy)
-        $venue = Venue::whereJsonContains('metadata->original_names', $name)->first();
-        if ($venue) return $venue;
+        // Načteme haly do cache jednou za běh synchronizace, aby se šetřila paměť i DB
+        if ($this->venuesCache === null) {
+            $this->venuesCache = Venue::all();
+        }
+
+        // Zkusíme najít v metadatech (původní názvy) - v PHP (pro Webglobe)
+        foreach ($this->venuesCache as $v) {
+            $originalNames = $v->metadata['original_names'] ?? [];
+            if (is_array($originalNames) && in_array($name, $originalNames)) {
+                return $v;
+            }
+        }
 
         // Vytvoříme novou halu
-        return Venue::create([
+        $newVenue = Venue::create([
             'name' => $name,
             'metadata' => [
                 'original_names' => [$name],
                 'source' => 'czbasketball'
             ]
         ]);
+
+        // Přidáme do cache pro další použití
+        $this->venuesCache->push($newVenue);
+
+        return $newVenue;
     }
 
     /**
@@ -569,15 +586,21 @@ class PlayerSyncService
         $venue = $this->ensureVenue($venueName);
 
         // 4. Najdeme nebo vytvoříme BasketballMatch
-        $match = BasketballMatch::where(function($q) use ($extMatch) {
-                $q->where('metadata->external_id', $extMatch->external_match_id)
-                  ->orWhere('metadata->external_match_id', $extMatch->external_match_id);
-            })
-            ->orWhere(function($q) use ($extMatch, $ourTeam) {
-                $q->where('team_id', $ourTeam->id)
-                  ->where('scheduled_at', $extMatch->scheduled_at);
-            })
-            ->first();
+        // Na Webglobe nepodporujeme JSON query, ale LIKE na metadata sloupec funguje jako fallback
+        $match = null;
+        $extMatchId = (string) $extMatch->external_match_id;
+
+        if ($extMatchId) {
+            $match = BasketballMatch::where('metadata', 'LIKE', '%"external_id":"' . $extMatchId . '"%')
+                ->orWhere('metadata', 'LIKE', '%"external_match_id":"' . $extMatchId . '"%')
+                ->first();
+        }
+
+        if (!$match) {
+            $match = BasketballMatch::where('team_id', $ourTeam->id)
+                ->where('scheduled_at', $extMatch->scheduled_at)
+                ->first();
+        }
 
         if (!$match) {
             $match = new BasketballMatch();

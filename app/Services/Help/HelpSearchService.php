@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 class HelpSearchService
 {
     protected array $roles = [];
+    protected ?string $section = null;
 
     /**
      * Nastaví role pro filtrování vyhledávání.
@@ -19,6 +20,18 @@ class HelpSearchService
     public function forAudience(array|string $roles): self
     {
         $this->roles = (array) $roles;
+        return $this;
+    }
+
+    /**
+     * Nastaví sekci pro filtrování vyhledávání.
+     *
+     * @param string|null $section
+     * @return $this
+     */
+    public function forSection(?string $section): self
+    {
+        $this->section = $section;
         return $this;
     }
 
@@ -55,20 +68,22 @@ class HelpSearchService
 
         $locale = app()->getLocale();
         $filteringRoles = $this->getFilteringRoles();
+        $section = $this->section ?: 'all';
 
         $rolesHash = md5(json_encode($this->roles));
-        $cacheKey = "help_search_{$rolesHash}_{$locale}_" . md5($query) . "_{$limit}";
+        $cacheKey = "help_search_{$section}_{$rolesHash}_{$locale}_" . md5($query) . "_{$limit}";
 
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($query, $limit, $locale, $filteringRoles) {
             // Jednoduchý relevance ranking pomocí SQL (funguje v SQLite i MySQL)
             // Váhy: Title (10), Keywords (8), Purpose (5), Content (3)
+            // POZOR: Na produkci (Webglobe) nelze použít JSON_EXTRACT, proto používáme prostý LIKE na celý sloupec.
             return \DB::table('help_articles')
                 ->select(['id', 'slug', 'title', 'excerpt', 'metadata', 'audience_roles', 'is_featured', 'content', 'search_keywords'])
                 ->selectRaw("
-                    (CASE WHEN JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ? THEN 10 ELSE 0 END +
-                     CASE WHEN JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ? THEN 8 ELSE 0 END +
-                     CASE WHEN JSON_EXTRACT(metadata, '$.\"{$locale}\".purpose') LIKE ? THEN 5 ELSE 0 END +
-                     CASE WHEN JSON_EXTRACT(content, '$.\"{$locale}\"') LIKE ? THEN 3 ELSE 0 END)
+                    (CASE WHEN title LIKE ? THEN 10 ELSE 0 END +
+                     CASE WHEN search_keywords LIKE ? THEN 8 ELSE 0 END +
+                     CASE WHEN metadata LIKE ? THEN 5 ELSE 0 END +
+                     CASE WHEN content LIKE ? THEN 3 ELSE 0 END)
                     AS relevance
                 ", [
                     "%" . mb_strtolower($query) . "%",
@@ -80,28 +95,17 @@ class HelpSearchService
                 ->where(function ($q) {
                     $q->whereNull('published_at')->orWhere('published_at', '<=', now());
                 })
-                ->where(function ($q) use ($query, $locale) {
+                ->where(function ($q) use ($query) {
                     $term = "%" . mb_strtolower($query) . "%";
-                    $q->whereRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') LIKE ?", [$term])
-                        ->orWhereRaw("JSON_EXTRACT(search_keywords, '$.\"{$locale}\"') LIKE ?", [$term])
-                        ->orWhereRaw("JSON_EXTRACT(metadata, '$.\"{$locale}\".purpose') LIKE ?", [$term])
-                        ->orWhereRaw("JSON_EXTRACT(content, '$.\"{$locale}\"') LIKE ?", [$term]);
+                    $q->where('title', 'LIKE', $term)
+                        ->orWhere('search_keywords', 'LIKE', $term)
+                        ->orWhere('metadata', 'LIKE', $term)
+                        ->orWhere('content', 'LIKE', $term);
                 })
-                ->when(!empty($filteringRoles), function ($q) use ($filteringRoles) {
-                    $q->where(function ($inner) use ($filteringRoles) {
-                        $inner->whereNull('audience_roles');
-                        foreach ($filteringRoles as $role) {
-                            // SQLite v testech má problém s whereJsonContains v subquery
-                            if (config('database.default') === 'sqlite') {
-                                $inner->orWhere('audience_roles', 'LIKE', '%"' . $role . '"%');
-                            } else {
-                                $inner->orWhereJsonContains('audience_roles', $role);
-                            }
-                        }
-                    });
+                ->where(function ($q) {
+                    $this->applySectionFilter($q);
                 })
                 ->orderByDesc('relevance')
-                ->orderByRaw("JSON_EXTRACT(title, '$.\"{$locale}\"') ASC")
                 ->limit($limit)
                 ->get()
                 ->map(function ($article) use ($query, $locale) {
@@ -164,5 +168,40 @@ class HelpSearchService
             '<mark class="bg-primary-100 text-primary-900 px-1 rounded-sm">$1</mark>',
             $text
         );
+    }
+
+    /**
+     * Aplikuje filtrování podle sekce a rolí na dotaz.
+     */
+    protected function applySectionFilter($query): void
+    {
+        $filteringRoles = $this->getFilteringRoles();
+
+        if ($this->section === 'admin') {
+            $query->where(function ($q) {
+                $q->where('metadata', 'LIKE', '%"section":"admin"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%');
+            });
+        } elseif ($this->section === 'member') {
+            $query->where(function ($q) {
+                $q->where('metadata', 'LIKE', '%"section":"member"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%')
+                    ->orWhere('metadata', 'NOT LIKE', '%"section":%'); // Default je member
+            });
+        }
+
+        if (!empty($filteringRoles)) {
+            $query->where(function ($inner) use ($filteringRoles) {
+                $inner->whereNull('audience_roles');
+                foreach ($filteringRoles as $role) {
+                    // SQLite v testech má problém s whereJsonContains v subquery
+                    if (config('database.default') === 'sqlite') {
+                        $inner->orWhere('audience_roles', 'LIKE', '%"' . $role . '"%');
+                    } else {
+                        $inner->orWhereJsonContains('audience_roles', $role);
+                    }
+                }
+            });
+        }
     }
 }
