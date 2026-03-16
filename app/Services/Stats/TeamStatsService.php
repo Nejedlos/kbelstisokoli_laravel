@@ -348,7 +348,10 @@ class TeamStatsService
 
                 $ptsFor = 0;
                 $ptsAgainst = 0;
-                if (preg_match('/(\d+)\s*[:\-]\s*(\d+)/', (string) $official['score'], $m)) {
+                $scoreRaw = (string) ($official['score'] ?? '');
+                // Odstraníme oddělovače tisíců (tečky, čárky, mezery včetně NBSP a úzké NBSP), ponecháme dvojtečku
+                $scoreClean = str_replace([',', '.', ' ', "\xC2\xA0", "\xE2\x80\xAF"], '', $scoreRaw);
+                if (preg_match('/(\d+)\s*[:\-]\s*(\d+)/', $scoreClean, $m)) {
                     $ptsFor = (int) $m[1];
                     $ptsAgainst = (int) $m[2];
                 }
@@ -489,7 +492,10 @@ class TeamStatsService
 
                 $ptsFor = 0;
                 $ptsAgainst = 0;
-                if (preg_match('/(\d+)\s*[:\-]\s*(\d+)/', (string) $official['score'], $m)) {
+                $scoreRaw = (string) ($official['score'] ?? '');
+                // Odstraníme oddělovače tisíců (tečky, čárky, mezery včetně NBSP a úzké NBSP), ponecháme dvojtečku
+                $scoreClean = str_replace([',', '.', ' ', "\xC2\xA0", "\xE2\x80\xAF"], '', $scoreRaw);
+                if (preg_match('/(\d+)\s*[:\-]\s*(\d+)/', $scoreClean, $m)) {
                     $ptsFor = (int) $m[1];
                     $ptsAgainst = (int) $m[2];
                 }
