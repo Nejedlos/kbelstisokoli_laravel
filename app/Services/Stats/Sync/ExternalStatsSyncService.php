@@ -60,6 +60,13 @@ class ExternalStatsSyncService
         $team = Team::findOrFail($teamId);
         $season = Season::findOrFail($seasonId);
 
+        // Pokud sezóna není aktivní a již byla jednou úspěšně synchronizována, přeskakujeme ji
+        // pokud není vynucen FORCE mode.
+        if (! $season->is_active && $config->last_synced_at && ! ($options['force'] ?? false)) {
+            ConsoleService::log("Přeskakuji neaktivní sezónu {$season->name} pro tým {$team->slug} (již synchronizováno {$config->last_synced_at->format('d.m.Y H:i')}).", 'info');
+            return;
+        }
+
         ConsoleService::log("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}".(($options['force'] ?? false) ? ' (FORCE mode)' : '').(($options['fresh'] ?? false) ? ' (FRESH mode)' : '').(($options['ai'] ?? false) ? ' (AI mode)' : ''), 'info');
         Log::info("Zahajuji synchronizaci týmu {$team->slug} pro sezónu {$season->name}");
 
@@ -560,6 +567,12 @@ class ExternalStatsSyncService
             return;
         }
 
+        // Pokud je zápas v neaktivní sezóně a již máme metadata o boxscore (indikátor úspěšného stažení detailu),
+        // přeskakujeme synchronizaci detailu, pokud není vynucen FORCE mode.
+        if (! $match->season->is_active && isset($match->metadata['boxscore_synced_at']) && ! ($options['force'] ?? false)) {
+            return;
+        }
+
         \Log::info("START: syncMatchDetail for match {$matchId} (ext_id: {$externalMatchId})");
         $url = 'https://cz.basketball/zapas/'.$externalMatchId;
         $run = ExternalImportRun::start('czbasketball', $match->season_id, $match->team_id, 'match_detail', $externalMatchId);
@@ -752,6 +765,9 @@ class ExternalStatsSyncService
             if (!empty($mainData->metadata['mutual_matches'])) {
                 $matchMetadata['mutual_matches'] = $mainData->metadata['mutual_matches'];
             }
+
+            // Označíme, že synchronizace detailu proběhla v pořádku (včetně boxscore pokud byly nalezeny tabulky)
+            $matchMetadata['boxscore_synced_at'] = now()->toDateTimeString();
 
             $updateData = ['metadata' => $matchMetadata];
             Log::info("DEBUG SYNC: Match metadata before update", ['metadata_keys' => array_keys($matchMetadata)]);

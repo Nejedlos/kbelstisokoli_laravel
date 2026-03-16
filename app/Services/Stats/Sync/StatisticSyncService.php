@@ -703,6 +703,7 @@ class StatisticSyncService
                 'blocks' => isset($rowValues['blocks']) ? (int) $rowValues['blocks'] : null,
                 'fouls_drawn' => isset($rowValues['fouls_drawn']) ? (int) $rowValues['fouls_drawn'] : null,
                 'metadata' => $matchInfo['metadata'] ?? null,
+                'boxscore_synced_at' => $matchInfo['boxscore_synced_at'] ?? null,
             ]
         );
     }

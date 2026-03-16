@@ -55,7 +55,20 @@ Pro zabránění zaplnění disku snapshoty je implementován příkaz:
 - **Běhy importů:** Historie se uchovává standardně 3 měsíce.
 - **HTML Snapshoty:** Smažou se starší než 30 dní, **s výjimkou** snapshotů z neúspěšných běhů (`failed`, `partial_failed`), které se ponechávají pro pozdější analýzu.
 
-## 6. Co dělat, když se změní HTML?
+## 6. Inteligentní přeskakování (Performance & Stability)
+
+Pro zamezení zbytečné zátěži systému a zvýšení rychlosti synchronizace (zejména u velkých historických importů) systém využívá inteligentní přeskakování:
+
+### Pravidla přeskakování:
+1. **Historické sezóny:** Pokud sezóna není označena jako `is_active` a již má nastaven `last_synced_at`, synchronizace týmu v této sezóně se automaticky přeskakuje.
+2. **Historické zápasy:** Pokud je zápas v neaktivní sezóně a již má v metadatech příznak `boxscore_synced_at`, jeho detail (boxscore) se znovu nestahuje.
+3. **Historie hráčů:** Při hloubkové synchronizaci historie hráče se neaktivní sezóny přeskakují, pokud pro ně již v databázi existuje alespoň jeden zápas s nastaveným `boxscore_synced_at`. U jednotlivých zápasů se detail stahuje pouze jednou (pokud není vynuceno), přičemž v neaktivních sezónách se absence statistik (např. asistencí) nepovažuje za důvod k opakování pokusu.
+4. **Detekce změn (Hash):** U všech synchronizací (soupiska, zápasy, detaily) se porovnává hash staženého HTML fragmentu s posledním úspěšným během. Pokud je hash identický, import se přeskakuje (status `skipped`).
+
+**Vynucení synchronizace:**
+Všechna pravidla přeskakování lze obejít použitím příznaku `--force` v CLI příkazech nebo zaškrtnutím volby "Force Sync" v administraci.
+
+## 7. Co dělat, když se změní HTML?
 
 Pokud indikátor zdraví v administraci zčervená:
 1. Zkontrolujte `error_summary` u posledních běhů v `ExternalImportRuns`.

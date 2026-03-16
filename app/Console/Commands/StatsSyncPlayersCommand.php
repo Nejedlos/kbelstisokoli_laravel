@@ -77,6 +77,7 @@ class StatsSyncPlayersCommand extends Command
         $bar->start();
 
         $successCount = 0;
+        $skippedCount = 0;
         $currentIndex = 0;
         foreach ($users as $user) {
             // Kontrola, zda nebyl běh zrušen z UI
@@ -95,9 +96,13 @@ class StatsSyncPlayersCommand extends Command
                 'current_index' => $currentIndex,
                 'total_count' => $users->count(),
             ]);
-            if ($result) {
+
+            if ($result === 1) {
                 $successCount++;
+            } elseif ($result === 2) {
+                $skippedCount++;
             }
+
             $bar->advance();
 
             // Mikropauza mezi hráči, aby se ulevilo externímu webu
@@ -111,10 +116,14 @@ class StatsSyncPlayersCommand extends Command
 
         $mainRun->finish([
             'imported_count' => $successCount,
-            'skipped_count' => $users->count() - $successCount,
+            'skipped_count' => $skippedCount,
+            'failed_count' => $users->count() - $successCount - $skippedCount,
         ]);
 
-        $this->info("Synchronizace dokončena. Úspěšně: {$successCount}, Selhalo: " . ($users->count() - $successCount));
+        $this->info("Synchronizace dokončena.");
+        $this->line("<fg=green>Úspěšně: {$successCount}</>");
+        $this->line("<fg=yellow>Přeskočeno: {$skippedCount}</>");
+        $this->line("<fg=red>Selhalo: " . ($users->count() - $successCount - $skippedCount) . "</>");
 
         return 0;
     }

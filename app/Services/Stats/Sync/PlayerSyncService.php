@@ -30,13 +30,13 @@ class PlayerSyncService
     /**
      * Synchronizuje detail hráče z cz.basketball.
      */
-    public function syncPlayer(User $user, array $options = []): bool
+    public function syncPlayer(User $user, array $options = []): int
     {
         $parentRun = $options['parent_run'] ?? null;
 
         // Kontrola, zda nebyl běh zrušen
         if ($parentRun && $parentRun->status === 'cancelled') {
-            return false;
+            return 0;
         }
 
         // Najdeme externí ID pro czbasketball
@@ -46,7 +46,7 @@ class PlayerSyncService
 
         if (!$mapping || !$mapping->external_id) {
             Log::warning("PlayerSyncService: User {$user->display_name} has no czbasketball external_id.");
-            return false;
+            return 0;
         }
 
         $extId = $mapping->external_id;
@@ -145,8 +145,9 @@ class PlayerSyncService
             }
 
             // 5. Excesivní synchronizace historie (všechny dostupné sezóny a detaily zápasů)
+            $historyResult = 1; // Defaultně úspěch
             if ($options['excesive'] ?? true) {
-                $this->syncExcesiveHistory($user, $data['available_seasons'] ?? [], $run, $options);
+                $historyResult = $this->syncExcesiveHistory($user, $data['available_seasons'] ?? [], $run, $options);
             }
 
             $run->finish([
@@ -155,11 +156,11 @@ class PlayerSyncService
             ]);
             Log::info("PlayerSyncService: Successfully synced player {$user->display_name} (ExtID: {$extId}), " . count($data['stats'] ?? []) . " stat rows and " . count($data['matches'] ?? []) . " matches.");
 
-            return true;
+            return $historyResult;
         } catch (\Exception $e) {
             $run->fail($e);
             Log::error("PlayerSyncService: Failed to sync player {$user->display_name}: " . $e->getMessage());
-            return false;
+            return 0;
         }
     }
 
@@ -225,19 +226,44 @@ class PlayerSyncService
 
     /**
      * Excesivní synchronizace historie (všechny dostupné sezóny a detaily zápasů).
+     * @return int 0 = selhalo, 1 = úspěch, 2 = přeskočeno (všechny sezóny přeskočeny)
      */
-    public function syncExcesiveHistory(User $user, array $seasons, ?ExternalImportRun $run, array $options = []): void
+    public function syncExcesiveHistory(User $user, array $seasons, ?ExternalImportRun $run, array $options = []): int
     {
         $mapping = $user->externalMappings()->where('source_key', 'czbasketball')->first();
-        if (!$mapping) return;
+        if (!$mapping) return 0;
 
         $extId = $mapping->external_id;
         $parentRun = $options['parent_run'] ?? null;
 
+        $totalSeasons = count($seasons);
+        $skippedSeasons = 0;
+
         foreach ($seasons as $season) {
             // Kontrola zrušení
             if ($parentRun && $parentRun->status === 'cancelled') {
-                return;
+                return 0;
+            }
+
+            // Pokud sezóna není aktivní (historická), a nemáme force mode,
+            // podíváme se, zda ji už nemáme kompletně synchronizovanou.
+            $seasonModel = Season::where('name', Season::normalizeName($season))->first();
+            $isHistorical = $seasonModel && !$seasonModel->is_active;
+
+            if ($isHistorical && !($options['force'] ?? false)) {
+                // Pokud máme aspoň jeden zápas s boxscore_synced_at pro tuto sezónu, považujeme ji za "už hotovou"
+                // (pro hromadnou synchronizaci historie to stačí jako indikátor, že jsme tam už byli)
+                $hasAnyData = ExternalPlayerMatch::where('user_id', $user->id)
+                    ->where('source_key', 'czbasketball')
+                    ->where('season_name', $season)
+                    ->whereNotNull('boxscore_synced_at')
+                    ->exists();
+
+                if ($hasAnyData) {
+                    \App\Services\Support\ConsoleService::log("  - Přeskakuji historickou sezónu $season pro hráče {$user->name} (již synchronizováno).", 'debug');
+                    $skippedSeasons++;
+                    continue;
+                }
             }
 
             $year = substr($season, 0, 4);
@@ -262,7 +288,7 @@ class PlayerSyncService
                 foreach ($matches as $matchData) {
                     // Kontrola zrušení
                     if ($parentRun && $parentRun->status === 'cancelled') {
-                        return;
+                        return 0;
                     }
 
                     $extMatchId = $matchData['external_match_id'] ?? null;
@@ -279,18 +305,22 @@ class PlayerSyncService
                     );
 
                     // A nyní detailní boxscore "excesivně"
-                    // Stahujeme pouze pokud ještě nemáme scheduled_at (indikátor že jsme aspoň jednou stáhli detail)
-                    // nebo u odehraných zápasů pokud nemáme asistence (indikátor statistik)
+                    // Stahujeme pouze pokud ještě nemáme boxscore_synced_at (indikátor že jsme aspoň jednou stáhli detail)
+                    // nebo u odehraných zápasů pokud nemáme asistence (indikátor statistik - pouze pro aktivní sezónu)
                     $exists = \App\Models\ExternalPlayerMatch::where('user_id', $user->id)
                         ->where('external_match_id', (string) $extMatchId)
                         ->first();
 
-                    $hasScheduledAt = $exists && $exists->scheduled_at !== null;
+                    $hasSyncedAt = $exists && $exists->boxscore_synced_at !== null;
                     $hasStats = $exists && $exists->assists !== null;
                     $isPast = isset($matchData['match_date']) && $matchData['match_date'] <= now()->format('Y-m-d');
-                    $hasPoints = isset($matchData['points']) && $matchData['points'] > 0;
 
-                    if (!$hasScheduledAt || ($isPast && !$hasStats)) {
+                    $shouldSync = !$hasSyncedAt;
+                    if (!$shouldSync && !$isHistorical && $isPast && !$hasStats) {
+                        $shouldSync = true;
+                    }
+
+                    if ($shouldSync || ($options['force'] ?? false)) {
                         if (\App\Services\Support\ConsoleService::isStopped()) {
                             break 2;
                         }
@@ -301,24 +331,22 @@ class PlayerSyncService
                             $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Zápas: " . ($matchData['opponent_name'] ?? 'neznámý') . ")");
                         }
 
-                        // Skip detailu pokud ho už máme (a nechceme ho force přepsat)
-                        $existingMatch = \App\Models\ExternalPlayerMatch::where('user_id', $user->id)
-                            ->where('external_match_id', $extMatchId)
-                            ->whereNotNull('boxscore_json')
-                            ->first();
+                        $this->syncExternalMatchDetail($user, (string) $extMatchId, $run, $options);
 
-                        if (!$existingMatch || ($options['force'] ?? false)) {
-                            $this->syncExternalMatchDetail($user, (string) $extMatchId, $run, $options);
-
-                            // Mikropauza mezi detaily zápasů (Throttling)
-                            usleep(800000); // 0.8s (excesivní režim vyžaduje vyšší ohleduplnost k API)
-                        }
+                        // Mikropauza mezi detaily zápasů (Throttling)
+                        usleep(800000); // 0.8s (excesivní režim vyžaduje vyšší ohleduplnost k API)
                     }
                 }
             } catch (\Exception $e) {
                 Log::warning("PlayerSyncService: Failed to sync history for season $season for player {$user->display_name}: " . $e->getMessage());
             }
         }
+
+        if ($totalSeasons > 0 && $skippedSeasons === $totalSeasons) {
+            return 2; // Všechny sezóny přeskočeny
+        }
+
+        return 1; // Úspěšně proběhlo (aspoň něco se synchronizovalo nebo nebylo co přeskakovat)
     }
 
     /**
@@ -343,7 +371,7 @@ class PlayerSyncService
             $competitionLabel = $matchHeader['competition'] ?? null;
             $venue = $matchHeader['venue'] ?? null;
 
-            // Pokud nejsou žádné tabulky (budoucí zápas), zkusíme aktualizovat aspoň metadata pro aktuálního hráče
+            // Pokud nejsou žádné tabulky (budoucí zápas nebo nedostupná data), zkusíme aktualizovat aspoň metadata pro aktuálního hráče
             if (empty($boxscoreData['tables'] ?? [])) {
                 $mapping = $user->externalMappings()
                     ->where('source_key', 'czbasketball')
@@ -376,6 +404,7 @@ class PlayerSyncService
                         'venue' => $venue,
                         'source_key' => 'czbasketball',
                         'metadata' => $matchHeader,
+                        'boxscore_synced_at' => now()->toDateTimeString(),
                     ]
                 );
 
@@ -410,6 +439,7 @@ class PlayerSyncService
                                 'venue' => $venue,
                                 'source_key' => 'czbasketball',
                                 'metadata' => $matchHeader,
+                                'boxscore_synced_at' => now()->toDateTimeString(),
                             ]
                         );
 
@@ -418,6 +448,16 @@ class PlayerSyncService
                         }
                     }
                 }
+            }
+
+            // Pokud jsme nenašli našeho hráče v žádné tabulce, ale tabulky existují,
+            // musíme i tak označit náš ExternalPlayerMatch jako synchronizovaný (hráč prostě nenastoupil)
+            $ourMatch = \App\Models\ExternalPlayerMatch::where('user_id', $user->id)
+                ->where('external_match_id', (string) $extMatchId)
+                ->first();
+
+            if ($ourMatch && $ourMatch->boxscore_synced_at === null && !empty($boxscoreData['tables'] ?? [])) {
+                $ourMatch->update(['boxscore_synced_at' => now()]);
             }
         } catch (\Exception $e) {
             Log::warning("PlayerSyncService: Failed to sync match detail $extMatchId: " . $e->getMessage());

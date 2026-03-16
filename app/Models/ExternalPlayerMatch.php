@@ -42,6 +42,7 @@ class ExternalPlayerMatch extends Model
         'blocks',
         'fouls_drawn',
         'metadata',
+        'boxscore_synced_at',
     ];
 
     protected $casts = [
@@ -71,6 +72,7 @@ class ExternalPlayerMatch extends Model
         'blocks' => 'integer',
         'fouls_drawn' => 'integer',
         'metadata' => 'array',
+        'boxscore_synced_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
