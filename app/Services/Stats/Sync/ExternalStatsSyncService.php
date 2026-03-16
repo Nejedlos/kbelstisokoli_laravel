@@ -77,7 +77,7 @@ class ExternalStatsSyncService
         if ($options['sync_roster'] ?? true) {
             try {
                 if ($parentRun) {
-                    $parentRun->updateProgress(1, 3, 'Synchronizace soupisky');
+                    $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync') . ': Soupiska');
                 }
                 ConsoleService::log('- Synchronizace soupisky...');
                 $this->syncRoster($team, $season, $config, $options);
@@ -93,7 +93,7 @@ class ExternalStatsSyncService
         if ($options['sync_matches'] ?? true) {
             try {
                 if ($parentRun) {
-                    $parentRun->updateProgress(2, 3, 'Synchronizace seznamu zápasů');
+                    $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync') . ': Zápasy');
                 }
                 ConsoleService::log('- Synchronizace seznamu zápasů...');
                 $this->syncMatchesList($team, $season, $config, $options);
@@ -106,7 +106,7 @@ class ExternalStatsSyncService
         }
 
         if ($parentRun) {
-            $parentRun->updateProgress(3, 3, 'Synchronizace detailů zápasů');
+            $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync') . ': Detaily zápasů');
         }
 
         $config->update(['last_synced_at' => now()]);

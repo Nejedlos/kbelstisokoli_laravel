@@ -16,7 +16,13 @@ class SyncStatusBar extends Component
 
         if (Auth::check() && Auth::user()->can('manage_stats')) {
             $runs = ExternalImportRun::where('status', 'running')
-                ->whereIn('run_type', ['player_sync_batch', 'player_sync_excesive', 'player_sync_all', 'team_sync_season'])
+                ->where(function ($query) {
+                    $query->where('run_type', 'LIKE', 'player_sync%')
+                        ->orWhere('run_type', 'LIKE', 'team_sync%')
+                        ->orWhere('run_type', 'LIKE', 'match_sync%')
+                        ->orWhere('run_type', 'LIKE', 'batch_%')
+                        ->orWhere('run_type', 'LIKE', '%_command');
+                })
                 ->orderByDesc('started_at')
                 ->get();
         }

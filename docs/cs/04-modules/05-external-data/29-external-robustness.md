@@ -75,6 +75,13 @@ Všechny synchronizační příkazy (`stats:sync-players`, `stats:sync-team-seas
 - **Hromadný import:** Příkaz `stats:import` slouží pro automatizovanou synchronizaci všech definovaných týmů v aktivní sezóně. I tento příkaz podporuje interaktivní progress bar a bezpečné přerušení.
 - **Stavy:** V terminálu se barevně rozlišují výsledky (zelená = úspěch, žlutá = přeskočeno, červená = selhání).
 
+### UI Progress Bar (Basketball Overlay):
+Pro sledování synchronizací spuštěných z administrace (nebo i dlouhotrvajících CLI příkazů) je v horní části Filamentu zobrazen interaktivní panel s "glassmorphism" designem a animací basketbalového míče.
+- **Sledování všech typů:** Panel automaticky zobrazuje všechny běžící synchronizace (hráči, týmy, zápasy, hromadné importy).
+- **Průběžné aktualizace:** Panel se aktualizuje každé 3 sekundy (polling) a zobrazuje aktuálně zpracovávanou položku (např. jméno hráče nebo název týmu a pod-krok jako "Soupiska").
+- **Možnost zrušení:** Přímo z panelu lze běžící proces přerušit kliknutím na tlačítko "Zrušit".
+- **Detekce zaseknutí:** Pokud se proces nepohne déle než 2 minuty, panel na tuto skutečnost upozorní animovaným nápisem "Možná zaseknuto!".
+
 ## 7. Zrušení a detekce zaseknutí (Stuck Detection)
 
 Pro zajištění stability u dlouhotrvajících synchronizací (např. excesivní historie hráčů) je implementován systém kontroly běhu.

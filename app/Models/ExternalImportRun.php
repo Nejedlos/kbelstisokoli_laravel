@@ -76,6 +76,11 @@ class ExternalImportRun extends Model
      */
     public function finish(array $counts = []): void
     {
+        if (isset($counts['imported_count'])) {
+            $this->updateProgress($counts['imported_count'], $counts['total_count'] ?? $this->total_count);
+            unset($counts['imported_count'], $counts['total_count']);
+        }
+
         $this->update(array_merge($counts, [
             'status' => 'success',
             'finished_at' => now(),
@@ -202,24 +207,29 @@ class ExternalImportRun extends Model
     /**
      * Aktualizuje progres běhu.
      */
-    public function updateProgress(int $imported, ?int $total = null, ?string $label = null): void
+    public function updateProgress(?int $imported = null, ?int $total = null, ?string $label = null): void
     {
         $data = [
-            'imported_count' => $imported,
+            'updated_at' => now(),
         ];
+
+        $currentImported = $imported ?? $this->imported_count;
+        $currentTotal = $total ?? $this->total_count;
+
+        if ($imported !== null) {
+            $data['imported_count'] = $imported;
+        }
 
         if ($total !== null) {
             $data['total_count'] = $total;
-        } else {
-            $total = $this->total_count;
         }
 
         if ($label !== null) {
             $data['current_item_label'] = $label;
         }
 
-        if ($total > 0) {
-            $data['progress_percent'] = round(($imported / $total) * 100, 2);
+        if ($currentTotal > 0) {
+            $data['progress_percent'] = round(($currentImported / $currentTotal) * 100, 2);
         }
 
         $this->update($data);

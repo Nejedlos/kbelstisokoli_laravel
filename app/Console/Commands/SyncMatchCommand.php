@@ -101,6 +101,8 @@ class SyncMatchCommand extends Command
                 'match_detail_command',
                 $matchExternalId
             );
+            $run->update(['total_count' => 1]);
+            $run->updateProgress(0, 1, "Zápas: " . ($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
 
             // Podpora pro signály (zrušení přes Ctrl+C)
             if (function_exists('pcntl_signal')) {

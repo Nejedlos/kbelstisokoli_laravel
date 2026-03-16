@@ -46,10 +46,16 @@
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                                 </span>
-                                @if($run->run_type === 'player_sync_excesive')
-                                    Excesivní synchronizace hráčů
-                                @elseif($run->run_type === 'team_sync_season')
-                                    Synchronizace sezóny týmu
+                                @if(str_contains($run->run_type, 'player'))
+                                    Synchronizace hráčů
+                                @elseif(str_contains($run->run_type, 'team'))
+                                    Synchronizace týmu
+                                @elseif(str_contains($run->run_type, 'match'))
+                                    Synchronizace zápasu
+                                @elseif(str_contains($run->run_type, 'batch_recent'))
+                                    Rychlá synchronizace (Recent)
+                                @elseif(str_contains($run->run_type, 'batch_baseline'))
+                                    Kompletní synchronizace (Baseline)
                                 @else
                                     Synchronizace dat
                                 @endif
