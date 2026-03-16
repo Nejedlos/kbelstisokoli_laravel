@@ -7,6 +7,7 @@ use App\Models\Season;
 use App\Models\Team;
 use App\Services\Stats\Sync\ExternalStatsSyncService;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class SyncTeamSeasonCommand extends Command
 {
@@ -131,9 +132,7 @@ class SyncTeamSeasonCommand extends Command
             $barSection = method_exists($output, 'section') ? $output->section() : null;
             $logSection = method_exists($output, 'section') ? $output->section() : $output;
 
-            $bar = $barSection
-                ? $barSection->createProgressBar($totalWork)
-                : $this->output->createProgressBar($totalWork);
+            $bar = new ProgressBar($barSection ?: $this->output, $totalWork);
 
             $bar->start();
 

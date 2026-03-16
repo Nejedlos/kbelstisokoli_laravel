@@ -87,7 +87,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $mutualMatches = $this->extractMutualMatches($crawler);
 
         // 5. Tabulky statistik
-        $tables = $crawler->filter('table.table-condensed');
+        // Dříve: table.table-condensed, nyní stačí prostě table, jelikož boxscore tabulky jsou ty hlavní na stránce
+        $tables = $crawler->filter('table');
 
         $allTablesData = [];
         $allFragmentHtml = "<!-- Match Header -->\n" . json_encode($matchHeader) . "\n";

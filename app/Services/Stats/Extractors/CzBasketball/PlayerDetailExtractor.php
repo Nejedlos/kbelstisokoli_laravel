@@ -108,13 +108,18 @@ class PlayerDetailExtractor implements StatExtractorInterface
         $allStats = [];
 
         // 1. Sekce Kariéra (obvykle nejpodrobnější historická data)
-        $careerTable = $crawler->filterXPath("//h3[contains(., 'Kariéra')]")->nextAll()->filter('table')->first();
-        if ($careerTable->count() > 0) {
-            $allStats = array_merge($allStats, $this->parseTable($careerTable));
+        // Zkusíme najít tabulku, která následuje po nadpisu Kariéra
+        $careerHeading = $crawler->filterXPath("//h3[contains(., 'Kariéra')]");
+        if ($careerHeading->count() > 0) {
+            $careerTable = $careerHeading->nextAll()->filter('table')->first();
+            if ($careerTable->count() > 0) {
+                $allStats = array_merge($allStats, $this->parseTable($careerTable));
+            }
         }
 
         // 2. Záložka Statistiky (může obsahovat aktuální sezónu podrobněji)
-        $statsTab = $crawler->filter('#tab-pane-one table');
+        // Selektor #tab-pane-one je v HTML přítomen, ale může mít div s role="tab-pane"
+        $statsTab = $crawler->filter('#tab-pane-one table, [id="tab-pane-one"] table');
         if ($statsTab->count() > 0) {
             $statsTab->each(function (Crawler $table) use (&$allStats) {
                 $allStats = array_merge($allStats, $this->parseTable($table));
@@ -134,7 +139,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
     protected function extractMatches(Crawler $crawler): array
     {
         $matches = [];
-        $table = $crawler->filter('#tab-pane-two table')->first();
+        $table = $crawler->filter('#tab-pane-two table, [id="tab-pane-two"] table')->first();
 
         if ($table->count() === 0) {
             return [];

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Services\Stats\Sync\PlayerSyncService;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class StatsSyncPlayersCommand extends Command
 {
@@ -91,9 +92,7 @@ class StatsSyncPlayersCommand extends Command
         $barSection = method_exists($output, 'section') ? $output->section() : null;
         $logSection = method_exists($output, 'section') ? $output->section() : $output;
 
-        $bar = $barSection
-            ? $barSection->createProgressBar($users->count())
-            : $this->output->createProgressBar($users->count());
+        $bar = new ProgressBar($barSection ?: $this->output, $users->count());
 
         $bar->start();
 

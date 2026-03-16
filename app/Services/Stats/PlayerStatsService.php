@@ -48,16 +48,16 @@ class PlayerStatsService
      */
     public function getSeasonSummary(int $userId, int $seasonId, ?int $teamId = null): ?array
     {
-        if (! $teamId) {
-            return $this->calculateSummaryFromMatches($userId, $seasonId, null);
-        }
-
+        // 1. Zkusíme najít interní souhrn (vytvořený systémem)
         $query = StatisticRow::where('player_id', $userId)
             ->where('season_id', $seasonId)
-            ->where('team_id', $teamId)
             ->whereHas('set', function ($q) {
                 $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
             });
+
+        if ($teamId) {
+            $query->where('team_id', $teamId);
+        }
 
         $row = $query->first();
 
@@ -65,7 +65,47 @@ class PlayerStatsService
             return $row->values;
         }
 
-        // Fallback: Pokud summary neexistuje, zkusíme ho dopočítat z jednotlivých zápasů
+        // 2. Zkusíme najít externí souhrn (přímo z cz.basketball profilu)
+        $season = \App\Models\Season::find($seasonId);
+        if ($season) {
+            $normalizedSeason = \App\Models\Season::normalizeName($season->name); // např. 2024/25
+
+            $externalStatQuery = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+                ->where('season_label', $normalizedSeason);
+
+            // Pokud máme teamId, zkusíme najít staty pro daný tým (podle názvu)
+            if ($teamId) {
+                $team = \App\Models\Team::find($teamId);
+                if ($team) {
+                    $teamName = $team->getTranslation('name', 'cs');
+                    $externalStatQuery->where('team_name', 'LIKE', "%{$teamName}%");
+                }
+            }
+
+            $extStat = $externalStatQuery->first();
+            if ($extStat) {
+                // Převod ExternalPlayerStat na formát souhrnu
+                return [
+                    'gp' => $extStat->games_played,
+                    'pts_total' => $extStat->points,
+                    'ppg' => $extStat->points_avg,
+                    'minutes_avg' => $extStat->minutes_avg,
+                    'efficiency_avg' => $extStat->valuation_avg,
+                    'rebounds_avg' => $extStat->rebounds_avg,
+                    'assists_avg' => $extStat->assists_avg,
+                    'steals_avg' => $extStat->steals_avg,
+                    'blocks_avg' => $extStat->blocks_avg,
+                    'fg2_avg' => $extStat->two_points_pct,
+                    'fg3_avg' => $extStat->three_points_pct,
+                    'ft_avg' => $extStat->free_throws_pct,
+                    'fouls_avg' => $extStat->fouls_avg,
+                    'is_fallback' => true,
+                    'source' => 'external_stat'
+                ];
+            }
+        }
+
+        // 3. Fallback: Pokud summary neexistuje, zkusíme ho dopočítat z jednotlivých zápasů (interních i externích)
         return $this->calculateSummaryFromMatches($userId, $seasonId, $teamId);
     }
 
@@ -138,14 +178,38 @@ class PlayerStatsService
             ->orderBy('scheduled_at', 'asc');
 
         if ($teamId) {
-            $externalQuery->where(function ($q) use ($teamId) {
-                $q->whereHas('basketballMatch', function ($mq) use ($teamId) {
-                    $mq->where('team_id', $teamId);
-                })->orWhere('metadata->team_id', $teamId);
+            $externalQuery->whereHas('basketballMatch', function ($mq) use ($teamId) {
+                $mq->where('team_id', $teamId);
             });
         }
 
-        return $externalQuery->get()->map(function ($match) {
+        $results = $externalQuery->get();
+
+        // Dodatečná filtrace v PHP pro externí zápasy (kvůli chybějícím sloupcům v SQL a staré DB)
+        if ($teamId && $results->isNotEmpty()) {
+            $team = \App\Models\Team::find($teamId);
+            if ($team) {
+                $teamName = $team->getTranslation('name', 'cs');
+                $results = $results->filter(function($match) use ($teamId, $teamName) {
+                    // 1. Spárované s interním zápasem daného týmu (již odfiltrováno v SQL výše přes whereHas)
+                    if ($match->basketball_match_id) return true;
+
+                    // 2. Metadata nebo název týmu
+                    $metaTeamId = $match->metadata['team_id'] ?? null;
+                    if ($metaTeamId == $teamId) return true;
+
+                    $matchTeamName = $match->team_name ?? ($match->metadata['team_name'] ?? '');
+                    if ($matchTeamName && str_contains(strtolower($matchTeamName), strtolower($teamName))) return true;
+
+                    // Pokud nemáme žádné informace o týmu u externího zápasu,
+                    // v osobních statistikách ho raději zobrazíme (všechny zápasy hráče),
+                    // aby graf nebyl prázdný, pokud hraje jen za jeden tým.
+                    return empty($matchTeamName) && empty($metaTeamId);
+                });
+            }
+        }
+
+        return $results->map(function ($match) {
             $isHome = $match->basketballMatch?->is_home;
             if ($isHome === null) {
                 // Odhad podle názvu domácího týmu v metadatech
@@ -385,14 +449,28 @@ class PlayerStatsService
             });
 
         if ($teamId) {
-            $externalQuery->where(function ($q) use ($teamId) {
-                $q->whereHas('basketballMatch', function ($mq) use ($teamId) {
-                    $mq->where('team_id', $teamId);
-                })->orWhere('metadata->team_id', $teamId);
+            $externalQuery->whereHas('basketballMatch', function ($mq) use ($teamId) {
+                $mq->where('team_id', $teamId);
             });
         }
 
         $externalMatches = $externalQuery->get();
+
+        // Filtrace v PHP (kvůli staré DB na produkci)
+        if ($teamId && $externalMatches->isNotEmpty()) {
+            $team = \App\Models\Team::find($teamId);
+            if ($team) {
+                $teamName = $team->getTranslation('name', 'cs');
+                $externalMatches = $externalMatches->filter(function($match) use ($teamId, $teamName) {
+                    if ($match->basketball_match_id) return true;
+                    $metaTeamId = $match->metadata['team_id'] ?? null;
+                    if ($metaTeamId == $teamId) return true;
+                    $matchTeamName = $match->team_name ?? ($match->metadata['team_name'] ?? '');
+                    if ($matchTeamName && str_contains(strtolower($matchTeamName), strtolower($teamName))) return true;
+                    return empty($matchTeamName) && empty($metaTeamId);
+                });
+            }
+        }
 
         if ($externalMatches->isEmpty()) {
             return null;

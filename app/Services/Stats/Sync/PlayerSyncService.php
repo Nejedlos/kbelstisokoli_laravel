@@ -331,7 +331,11 @@ class PlayerSyncService
                             $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Zápas: " . ($matchData['opponent_name'] ?? 'neznámý') . ")");
                         }
 
-                        $this->syncExternalMatchDetail($user, (string) $extMatchId, $run, $options);
+                        try {
+                            $this->syncExternalMatchDetail($user, (string) $extMatchId, $run, $options);
+                        } catch (\Exception $e) {
+                            Log::warning("PlayerSyncService: Failed to sync match detail $extMatchId for player {$user->display_name}: " . $e->getMessage());
+                        }
 
                         // Mikropauza mezi detaily zápasů (Throttling)
                         usleep(800000); // 0.8s (excesivní režim vyžaduje vyšší ohleduplnost k API)
