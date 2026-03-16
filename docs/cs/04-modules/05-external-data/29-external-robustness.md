@@ -68,7 +68,28 @@ Pro zamezení zbytečné zátěži systému a zvýšení rychlosti synchronizace
 **Vynucení synchronizace:**
 Všechna pravidla přeskakování lze obejít použitím příznaku `--force` v CLI příkazech nebo zaškrtnutím volby "Force Sync" v administraci.
 
-## 7. Co dělat, když se změní HTML?
+### Terminálový výstup a Progress bar (UX):
+Všechny synchronizační příkazy (`stats:sync-players`, `stats:sync-team-season`, `stats:sync-match`, `stats:import`) zobrazují v terminálu interaktivní progress bar.
+- **Výchozí chování:** Synchronizace probíhá přímo v terminálovém procesu (synchronně), aby uživatel viděl okamžitý postup.
+- **Fronta (Queue):** Pro spuštění na pozadí (např. přes cron nebo při velkém objemu dat bez nutnosti sledování) lze použít příznak `--queue`.
+- **Hromadný import:** Příkaz `stats:import` slouží pro automatizovanou synchronizaci všech definovaných týmů v aktivní sezóně. I tento příkaz podporuje interaktivní progress bar a bezpečné přerušení.
+- **Stavy:** V terminálu se barevně rozlišují výsledky (zelená = úspěch, žlutá = přeskočeno, červená = selhání).
+
+## 7. Zrušení a detekce zaseknutí (Stuck Detection)
+
+Pro zajištění stability u dlouhotrvajících synchronizací (např. excesivní historie hráčů) je implementován systém kontroly běhu.
+
+### Zrušení synchronizace (Cancel)
+Uživatel může běžící synchronizaci zrušit:
+1. **Z UI (Filament):** Změnou stavu v `ExternalImportRuns` na `cancelled`. Běžící proces (pokud není zaseknutý) tuto změnu v dalším kroku detekuje a korektně ukončí práci.
+2. **V terminálu:** Stisknutím `Ctrl+C`. CLI příkazy reagují na signály `SIGINT/SIGTERM` a před ukončením označí běh v databázi jako `cancelled` s vysvětlující zprávou.
+
+### Detekce zaseknutí (Stuck Detection)
+Pokud proces synchronizace přestane odpovídat (např. kvůli neošetřenému síťovému timeoutu nebo zablokování PHP procesu), systém jej dokáže identifikovat:
+- **Pravidlo:** Pokud se stav `updated_at` u běžící synchronizace (`status = running`) nepohne déle než 30 minut, je považována za zaseknutou.
+- **Automatické čištění:** Příkaz `php artisan stats:check-stuck-syncs` prochází všechny běžící importy a ty zaseknuté označí stavem `stuck`. Tento příkaz je doporučeno spouštět periodicky přes Scheduler.
+
+## 8. Co dělat, když se změní HTML?
 
 Pokud indikátor zdraví v administraci zčervená:
 1. Zkontrolujte `error_summary` u posledních běhů v `ExternalImportRuns`.

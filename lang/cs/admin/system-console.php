@@ -257,4 +257,33 @@ return [
         'run' => 'Spustit',
         'working' => 'Pracuji...',
     ],
+    'diagnostics' => [
+        'kpi' => [
+            'artisan_processes' => 'Artisan procesy',
+            'stuck_imports' => 'Zaseknuté importy',
+            'table_cleanup' => 'Tabulky k vyčištění',
+            'running' => 'Běžící',
+            'stuck' => 'Zaseknutý',
+            'stale' => 'Neaktivní',
+            'stuck_desc' => 'Procesy běžící déle než 30 minut.',
+            'stale_desc' => 'Importy v stavu "running" bez aktualizace.',
+            'cleanup_desc' => 'Tabulky s velkým počtem záznamů.',
+            'kill' => 'Ukončit',
+            'fix' => 'Opravit',
+            'prune' => 'Vyčistit',
+            'no_issues' => 'Žádné kritické problémy nenalezeny.',
+            'actions' => [
+                'process_killed' => 'Proces :pid byl ukončen.',
+                'process_kill_failed' => 'Nepodařilo se ukončit proces :pid.',
+                'import_fixed' => 'Import :id byl označen jako selhaný.',
+                'table_pruned' => 'Tabulka :table byla vyčištěna.',
+                'bulk_imports_fixed' => 'Bylo opraveno :count zaseknutých importů.',
+                'bulk_processes_killed' => 'Bylo ukončeno :count Artisan procesů.',
+            ],
+            'bulk' => [
+                'fix_all' => 'Opravit vše',
+                'kill_all' => 'Ukončit vše',
+            ],
+        ],
+    ],
 ];

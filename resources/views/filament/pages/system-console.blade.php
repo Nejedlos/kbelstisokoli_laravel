@@ -1,4 +1,164 @@
 <x-filament-panels::page>
+    {{-- KPI Diagnostika --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {{-- Artisan Procesy --}}
+        <div class="bg-white dark:bg-[#0d1117] rounded-2xl p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                        <x-filament::icon icon="fal-microchip" class="h-5 w-5" />
+                    </div>
+                    <h3 class="font-bold text-sm tracking-tight">{{ __('admin/system-console.diagnostics.kpi.artisan_processes') }}</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    @if(count($kpiData['processes']) > 0)
+                        <x-filament::link
+                            color="danger"
+                            tag="button"
+                            size="xs"
+                            wire:click="killAllArtisanProcesses"
+                            wire:confirm="{{ __('admin/system-console.diagnostics.kpi.bulk.kill_all') }}?"
+                            class="text-[10px] font-bold uppercase tracking-wider"
+                        >
+                            {{ __('admin/system-console.diagnostics.kpi.bulk.kill_all') }}
+                        </x-filament::link>
+                    @endif
+                    <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                        {{ count($kpiData['processes']) }} {{ __('admin/system-console.diagnostics.kpi.running') }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+                @forelse($kpiData['processes'] as $proc)
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 group">
+                        <div class="min-w-0 flex-1 mr-3">
+                            <div class="text-[10px] font-mono text-gray-400 mb-0.5 truncate">{{ $proc['cmd'] }}</div>
+                            <div class="text-[9px] font-bold text-gray-500">PID: {{ $proc['pid'] }}</div>
+                        </div>
+                        <x-filament::button
+                            color="danger"
+                            size="xs"
+                            wire:click="killProcess({{ $proc['pid'] }})"
+                            wire:confirm="{{ __('admin/system-console.diagnostics.kpi.kill') }}?"
+                            class="opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            {{ __('admin/system-console.diagnostics.kpi.kill') }}
+                        </x-filament::button>
+                    </div>
+                @empty
+                    <div class="text-center py-4 text-gray-400 text-[11px] italic">
+                        {{ __('admin/system-console.diagnostics.kpi.no_issues') }}
+                    </div>
+                @endforelse
+            </div>
+            <p class="mt-3 text-[10px] text-gray-400 italic">
+                {{ __('admin/system-console.diagnostics.kpi.stuck_desc') }}
+            </p>
+        </div>
+
+        {{-- Zaseknuté Importy --}}
+        <div class="bg-white dark:bg-[#0d1117] rounded-2xl p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                        <x-filament::icon icon="fal-cloud-arrow-down" class="h-5 w-5" />
+                    </div>
+                    <h3 class="font-bold text-sm tracking-tight">{{ __('admin/system-console.diagnostics.kpi.stuck_imports') }}</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    @if(count($kpiData['imports']) > 0)
+                        <x-filament::link
+                            color="warning"
+                            tag="button"
+                            size="xs"
+                            wire:click="fixAllStuckImports"
+                            wire:confirm="{{ __('admin/system-console.diagnostics.kpi.bulk.fix_all') }}?"
+                            class="text-[10px] font-bold uppercase tracking-wider"
+                        >
+                            {{ __('admin/system-console.diagnostics.kpi.bulk.fix_all') }}
+                        </x-filament::link>
+                        <span class="px-2 py-1 rounded-full bg-red-500/10 text-[10px] font-bold uppercase tracking-wider text-red-500 animate-pulse">
+                            {{ count($kpiData['imports']) }} {{ __('admin/system-console.diagnostics.kpi.stuck') }}
+                        </span>
+                    @else
+                        <span class="px-2 py-1 rounded-full bg-green-500/10 text-[10px] font-bold uppercase tracking-wider text-green-500">
+                            OK
+                        </span>
+                    @endif
+                </div>
+            </div>
+
+            <div class="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+                @forelse($kpiData['imports'] as $import)
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 group">
+                        <div class="min-w-0 flex-1 mr-3">
+                            <div class="text-[10px] font-bold text-gray-700 dark:text-gray-300 mb-0.5 truncate">{{ $import['source'] }}</div>
+                            <div class="text-[9px] text-gray-400">{{ $import['type'] }} • {{ $import['updated_at']->diffForHumans() }}</div>
+                        </div>
+                        <x-filament::button
+                            color="warning"
+                            size="xs"
+                            wire:click="fixStuckImport({{ $import['id'] }})"
+                            class="opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            {{ __('admin/system-console.diagnostics.kpi.fix') }}
+                        </x-filament::button>
+                    </div>
+                @empty
+                    <div class="text-center py-4 text-gray-400 text-[11px] italic">
+                        {{ __('admin/system-console.diagnostics.kpi.no_issues') }}
+                    </div>
+                @endforelse
+            </div>
+            <p class="mt-3 text-[10px] text-gray-400 italic">
+                {{ __('admin/system-console.diagnostics.kpi.stale_desc') }}
+            </p>
+        </div>
+
+        {{-- Čištění tabulek --}}
+        <div class="bg-white dark:bg-[#0d1117] rounded-2xl p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+                        <x-filament::icon icon="fal-broom-wide" class="h-5 w-5" />
+                    </div>
+                    <h3 class="font-bold text-sm tracking-tight">{{ __('admin/system-console.diagnostics.kpi.table_cleanup') }}</h3>
+                </div>
+                <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                    {{ count($kpiData['tables']) }}
+                </span>
+            </div>
+
+            <div class="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+                @forelse($kpiData['tables'] as $table)
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 group">
+                        <div class="min-w-0 flex-1 mr-3">
+                            <div class="text-[10px] font-mono text-gray-700 dark:text-gray-300 mb-0.5 truncate">{{ $table['name'] }}</div>
+                            <div class="text-[9px] font-bold text-purple-500">{{ number_format($table['count'], 0, ',', ' ') }} records</div>
+                        </div>
+                        <x-filament::button
+                            color="gray"
+                            size="xs"
+                            wire:click="pruneTable('{{ $table['name'] }}')"
+                            wire:confirm="{{ __('admin/system-console.diagnostics.kpi.prune') }} {{ $table['name'] }}?"
+                            class="opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            {{ __('admin/system-console.diagnostics.kpi.prune') }}
+                        </x-filament::button>
+                    </div>
+                @empty
+                    <div class="text-center py-4 text-gray-400 text-[11px] italic">
+                        {{ __('admin/system-console.diagnostics.kpi.no_issues') }}
+                    </div>
+                @endforelse
+            </div>
+            <p class="mt-3 text-[10px] text-gray-400 italic">
+                {{ __('admin/system-console.diagnostics.kpi.cleanup_desc') }}
+            </p>
+        </div>
+    </div>
+
     <div class="flex flex-col md:flex-row gap-8 items-start">
         {{-- Levý sloupec: Příkazy --}}
         <div class="flex-1 w-full space-y-10">

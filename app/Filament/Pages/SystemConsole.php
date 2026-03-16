@@ -2,13 +2,16 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\ExternalImportRun;
 use App\Support\BinaryHelper;
 use App\Support\FilamentIcon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Process\Process;
 
 class SystemConsole extends Page
@@ -51,7 +54,182 @@ class SystemConsole extends Page
     {
         return [
             'commandGroups' => $this->getCommandGroups(),
+            'kpiData' => $this->getKpiData(),
         ];
+    }
+
+    protected function getKpiData(): array
+    {
+        $kpi = [
+            'processes' => [],
+            'imports' => [],
+            'tables' => [],
+        ];
+
+        // 1. Artisan procesy (přes ps aux)
+        if (function_exists('shell_exec')) {
+            $psOutput = shell_exec('ps aux | grep artisan | grep -v grep');
+            if ($psOutput) {
+                $lines = explode("\n", trim($psOutput));
+                foreach ($lines as $line) {
+                    $parts = preg_split('/\s+/', trim($line));
+                    if (count($parts) >= 11) {
+                        $pid = $parts[1];
+                        $cmd = implode(' ', array_slice($parts, 10));
+                        // Zkusíme najít čas spuštění nebo délku běhu, pokud to PS vrací (záleží na OS)
+                        // Pro jednoduchost bereme vše, co obsahuje 'artisan'
+                        $kpi['processes'][] = [
+                            'pid' => $pid,
+                            'cmd' => $cmd,
+                            'is_stuck' => false, // TODO: pokročilejší detekce délky běhu
+                        ];
+                    }
+                }
+            }
+        }
+
+        // 2. Zaseknuté importy (ExternalImportRun)
+        $kpi['imports'] = ExternalImportRun::where('status', 'running')
+            ->where('updated_at', '<', now()->subMinutes(15))
+            ->get()
+            ->map(fn ($run) => [
+                'id' => $run->id,
+                'source' => $run->source_key,
+                'type' => $run->run_type,
+                'updated_at' => $run->updated_at,
+            ])
+            ->toArray();
+
+        // 3. Tabulky k vyčištění
+        $tablesToCheck = [
+            'new_external_import_logs' => 5000,
+            'activity_log' => 10000,
+            'sessions' => 1000,
+            'telescope_entries' => 5000,
+        ];
+
+        foreach ($tablesToCheck as $table => $threshold) {
+            try {
+                if (Schema::hasTable($table)) {
+                    $count = DB::table($table)->count();
+                    if ($count > $threshold) {
+                        $kpi['tables'][] = [
+                            'name' => $table,
+                            'count' => $count,
+                        ];
+                    }
+                }
+            } catch (\Exception $e) {
+                // Tabulka nemusí existovat v dané DB driveru nebo Schema::hasTable selže
+            }
+        }
+
+        return $kpi;
+    }
+
+    public function killProcess(int $pid): void
+    {
+        if (function_exists('shell_exec')) {
+            shell_exec("kill -9 $pid");
+            Notification::make()
+                ->title(__('admin/system-console.diagnostics.kpi.actions.process_killed', ['pid' => $pid]))
+                ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title(__('admin/system-console.diagnostics.kpi.actions.process_kill_failed', ['pid' => $pid]))
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function fixStuckImport(int $id): void
+    {
+        $run = ExternalImportRun::find($id);
+        if ($run) {
+            $run->update([
+                'status' => 'failed',
+                'error_summary' => 'Terminated manually from System Console (Stuck detection).',
+                'finished_at' => now(),
+            ]);
+            Notification::make()
+                ->title(__('admin/system-console.diagnostics.kpi.actions.import_fixed', ['id' => $id]))
+                ->success()
+                ->send();
+        }
+    }
+
+    public function pruneTable(string $table): void
+    {
+        try {
+            if ($table === 'telescope_entries') {
+                if (Artisan::hasCommand('telescope:prune')) {
+                    Artisan::call('telescope:prune');
+                } else {
+                    throw new \Exception('Command "telescope:prune" not found. Is Telescope installed?');
+                }
+            } elseif ($table === 'activity_log') {
+                DB::table($table)->where('created_at', '<', now()->subDays(30))->delete();
+            } elseif ($table === 'external_import_logs' || $table === 'new_external_import_logs') {
+                // Smazat vše starší než 2 dny (agresivnější) nebo truncate pokud je to extra velké?
+                // Uživatel si stěžoval, že to nejde vyčistit a počet zůstává stejný.
+                // Zkusíme truncate pokud je to specifikováno přes speciální parametr nebo prostě smazat víc.
+                DB::table('new_external_import_logs')->delete(); // Smažeme vše, když uživatel klikne na Prune u této tabulky
+            } elseif (Schema::hasTable($table)) {
+                DB::table($table)->truncate();
+            }
+
+            Notification::make()
+                ->title(__('admin/system-console.diagnostics.kpi.actions.table_pruned', ['table' => $table]))
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Chyba při mazání tabulky')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function fixAllStuckImports(): void
+    {
+        $count = ExternalImportRun::where('status', 'running')
+            ->where('updated_at', '<', now()->subMinutes(15))
+            ->update([
+                'status' => 'failed',
+                'error_summary' => 'Bulk terminated from System Console (Stuck detection).',
+                'finished_at' => now(),
+            ]);
+
+        Notification::make()
+            ->title(__('admin/system-console.diagnostics.kpi.actions.bulk_imports_fixed', ['count' => $count]))
+            ->success()
+            ->send();
+    }
+
+    public function killAllArtisanProcesses(): void
+    {
+        $count = 0;
+        if (function_exists('shell_exec')) {
+            $psOutput = shell_exec('ps aux | grep artisan | grep -v grep');
+            if ($psOutput) {
+                $lines = explode("\n", trim($psOutput));
+                foreach ($lines as $line) {
+                    $parts = preg_split('/\s+/', trim($line));
+                    if (count($parts) >= 11) {
+                        $pid = $parts[1];
+                        shell_exec("kill -9 $pid");
+                        $count++;
+                    }
+                }
+            }
+        }
+
+        Notification::make()
+            ->title(__('admin/system-console.diagnostics.kpi.actions.bulk_processes_killed', ['count' => $count]))
+            ->success()
+            ->send();
     }
 
     protected function getHeaderActions(): array

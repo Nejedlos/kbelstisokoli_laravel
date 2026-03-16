@@ -25,7 +25,7 @@ class SyncTeamSeasonCommand extends Command
                             {--excesive : Spustí hloubkovou synchronizaci všech detailů zápasů}
                             {--max-matches=20 : Maximální počet detailů zápasů ke stažení}
                             {--recent-days=3 : Počet dní zpět pro prioritní synchronizaci}
-                            {--sync : Spustí synchronizaci synchronně (v tomto procesu)}';
+                            {--queue : Zařadí synchronizaci do fronty místo spuštění v tomto procesu}';
 
     /**
      * The console command description.
@@ -100,8 +100,8 @@ class SyncTeamSeasonCommand extends Command
             return self::SUCCESS;
         }
 
-        if ($this->option('sync')) {
-            $this->info('Spouštím synchronizaci synchronně...');
+        if (! $this->option('queue')) {
+            $this->info('Spouštím synchronizaci...');
 
             // Vytvoření hlavního běhu pro UI/Progress
             $mainRun = \App\Models\ExternalImportRun::start(
@@ -113,7 +113,28 @@ class SyncTeamSeasonCommand extends Command
             );
             $mainRun->update(['total_count' => $totalWork]);
 
-            $bar = $this->output->createProgressBar($totalWork);
+            // Podpora pro signály (zrušení přes Ctrl+C)
+            if (function_exists('pcntl_signal')) {
+                declare(ticks=1);
+                pcntl_signal(SIGINT, function () use ($mainRun) {
+                    $mainRun->cancel('Zrušeno signálem SIGINT (Ctrl+C)');
+                    exit;
+                });
+                pcntl_signal(SIGTERM, function () use ($mainRun) {
+                    $mainRun->cancel('Zrušeno signálem SIGTERM');
+                    exit;
+                });
+            }
+
+            // Sekce pro progress bar a logování (pokud jsou podporovány)
+            $output = $this->getOutput()->getOutput();
+            $barSection = method_exists($output, 'section') ? $output->section() : null;
+            $logSection = method_exists($output, 'section') ? $output->section() : $output;
+
+            $bar = $barSection
+                ? $barSection->createProgressBar($totalWork)
+                : $this->output->createProgressBar($totalWork);
+
             $bar->start();
 
             $count = 0;
@@ -122,17 +143,15 @@ class SyncTeamSeasonCommand extends Command
                     foreach ($seasons as $season) {
                         // Kontrola, zda nebyl běh zrušen z UI
                         if ($mainRun->refresh()->status === 'cancelled') {
-                            $this->warn('Synchronizace byla zrušena uživatelem.');
+                            $logSection->writeln('<fg=yellow>Synchronizace byla zrušena uživatelem.</>');
                             break 2;
                         }
 
                         $count++;
-                        // $this->info("Synchronizuji: {$team->name} | {$season->name} ({$count}/{$totalWork})");
+                        // $logSection->writeln("Synchronizuji: {$team->name} | {$season->name} ({$count}/{$totalWork})");
                         $mainRun->updateProgress($count, $totalWork, "Tým: {$team->name} ({$season->name})");
 
                         $syncService->syncTeamSeason($team->id, $season->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
-                        // increment není potřeba, protože updateProgress ho už nastavil správně před syncem,
-                        // případně ho aktualizoval syncTeamSeason uvnitř.
 
                         $bar->advance();
 
@@ -144,11 +163,12 @@ class SyncTeamSeasonCommand extends Command
                     }
                 }
                 $bar->finish();
-                $this->newLine();
+                if ($barSection) {
+                    $barSection->clear();
+                }
                 $mainRun->finish(['status' => 'success']);
             } catch (\Exception $e) {
                 $bar->finish();
-                $this->newLine();
                 $mainRun->fail($e);
                 throw $e;
             }

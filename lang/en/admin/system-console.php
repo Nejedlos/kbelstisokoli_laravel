@@ -257,4 +257,33 @@ return [
         'run' => 'Run',
         'working' => 'Working...',
     ],
+    'diagnostics' => [
+        'kpi' => [
+            'artisan_processes' => 'Artisan Processes',
+            'stuck_imports' => 'Stuck Imports',
+            'table_cleanup' => 'Table Cleanup',
+            'running' => 'Running',
+            'stuck' => 'Stuck',
+            'stale' => 'Stale',
+            'stuck_desc' => 'Processes running for more than 30 minutes.',
+            'stale_desc' => 'Imports in "running" state without update.',
+            'cleanup_desc' => 'Tables with high record counts.',
+            'kill' => 'Kill',
+            'fix' => 'Fix',
+            'prune' => 'Prune',
+            'no_issues' => 'No critical issues found.',
+            'actions' => [
+                'process_killed' => 'Process :pid was killed.',
+                'process_kill_failed' => 'Failed to kill process :pid.',
+                'import_fixed' => 'Import :id was marked as failed.',
+                'table_pruned' => 'Table :table was pruned.',
+                'bulk_imports_fixed' => ':count stuck imports were fixed.',
+                'bulk_processes_killed' => ':count Artisan processes were killed.',
+            ],
+            'bulk' => [
+                'fix_all' => 'Fix all',
+                'kill_all' => 'Kill all',
+            ],
+        ],
+    ],
 ];

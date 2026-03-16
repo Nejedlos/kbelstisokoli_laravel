@@ -73,7 +73,28 @@ class StatsSyncPlayersCommand extends Command
         );
         $mainRun->update(['total_count' => $users->count()]);
 
-        $bar = $this->output->createProgressBar($users->count());
+        // Podpora pro signály (zrušení přes Ctrl+C)
+        if (function_exists('pcntl_signal')) {
+            declare(ticks=1);
+            pcntl_signal(SIGINT, function () use ($mainRun) {
+                $mainRun->cancel('Zrušeno signálem SIGINT (Ctrl+C)');
+                exit;
+            });
+            pcntl_signal(SIGTERM, function () use ($mainRun) {
+                $mainRun->cancel('Zrušeno signálem SIGTERM');
+                exit;
+            });
+        }
+
+        // Sekce pro progress bar a logování (pokud jsou podporovány)
+        $output = $this->getOutput()->getOutput();
+        $barSection = method_exists($output, 'section') ? $output->section() : null;
+        $logSection = method_exists($output, 'section') ? $output->section() : $output;
+
+        $bar = $barSection
+            ? $barSection->createProgressBar($users->count())
+            : $this->output->createProgressBar($users->count());
+
         $bar->start();
 
         $successCount = 0;
@@ -82,12 +103,14 @@ class StatsSyncPlayersCommand extends Command
         foreach ($users as $user) {
             // Kontrola, zda nebyl běh zrušen z UI
             if ($mainRun->refresh()->status === 'cancelled') {
-                $this->warn('Synchronizace byla zrušena uživatelem.');
+                $logSection->writeln('<fg=yellow>Synchronizace byla zrušena uživatelem.</>');
                 break;
             }
 
             $currentIndex++;
             $mainRun->updateProgress($currentIndex, $users->count(), "Hráč: {$user->display_name}");
+
+            // $logSection->writeln("Synchronizuji: {$user->display_name} ({$currentIndex}/{$users->count()})");
 
             $result = $syncService->syncPlayer($user, [
                 'force' => $this->option('force'),
@@ -112,7 +135,9 @@ class StatsSyncPlayersCommand extends Command
         }
 
         $bar->finish();
-        $this->newLine();
+        if ($barSection) {
+            $barSection->clear(); // Volitelně vyčistit sekci baru po dokončení, nebo nechat
+        }
 
         $mainRun->finish([
             'imported_count' => $successCount,

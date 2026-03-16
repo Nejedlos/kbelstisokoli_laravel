@@ -95,6 +95,35 @@ class ExternalImportRun extends Model
     }
 
     /**
+     * Zjistí, zda se běh nehýbe (stuck detection).
+     * @param int $minutes Po kolika minutách bez aktualizace je považován za zaseknutý.
+     */
+    public function isStale(int $minutes = 15): bool
+    {
+        return $this->status === 'running' && $this->updated_at->addMinutes($minutes)->isPast();
+    }
+
+    /**
+     * Označí běh jako zaseknutý.
+     */
+    public function markAsStuck(): void
+    {
+        $this->update([
+            'status' => 'stuck',
+            'finished_at' => now(),
+            'error_summary' => 'Detekováno zaseknutí (neproběhla aktualizace po delší dobu).',
+        ]);
+    }
+
+    /**
+     * Zjistí, zda byl běh zrušen.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->fresh()?->status === 'cancelled';
+    }
+
+    /**
      * Označí běh jako zrušený.
      */
     public function cancel(?string $message = 'Zrušeno uživatelem'): void

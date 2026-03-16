@@ -70,6 +70,9 @@ Artisan::command('telescope:clear {--all : Smazat úplně všechno}', function (
 
 use Illuminate\Support\Facades\Schedule;
 
+// Automatická údržba Telescope (každý den ve 3:15) - ponechá jen posledních 24h
+Schedule::command('telescope:clear')->dailyAt('03:15');
+
 Schedule::command('seo:generate-sitemap')->dailyAt('03:00');
 
 // Automatická obnova sezóny - 31. srpna ve 23:55
@@ -81,16 +84,8 @@ Schedule::command('stats:sync-players')->dailyAt('04:00');
 // Hloubková (excesivní) synchronizace historie hráčů - každou neděli ve 02:00
 Schedule::command('stats:sync-players --excesive')->weeklyOn(0, '02:00');
 
-// Pravidelná synchronizace týmů a zápasů pro aktuální sezóny (denně v 4:30)
-Schedule::call(function () {
-    $configs = \App\Models\ExternalTeamSeasonConfig::where('is_enabled', true)
-        ->whereHas('season', fn($q) => $q->where('is_active', true))
-        ->get();
-
-    foreach ($configs as $config) {
-        \App\Jobs\Stats\SyncTeamSeasonJob::dispatch($config->team_id, $config->season_id);
-    }
-})->dailyAt('04:30');
+// Pravidelná synchronizace všech týmů v aktivní sezóně (denně v 4:30)
+Schedule::command('stats:import --queue')->dailyAt('04:30');
 
 // Měsíční hloubková (excesivní) synchronizace všech historických sezón týmů (1. v měsíci v 1:00)
 Schedule::call(function () {

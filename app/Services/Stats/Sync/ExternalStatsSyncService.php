@@ -555,8 +555,11 @@ class ExternalStatsSyncService
      */
     public function syncMatchDetail(int $matchId, array $options = []): void
     {
-        if (ConsoleService::isStopped()) {
-            // Log::info('syncMatchDetail přeskočen - STOP flag');
+        $parentRunId = $options['parent_run_id'] ?? null;
+        $parentRun = $parentRunId ? ExternalImportRun::find($parentRunId) : null;
+
+        if (ConsoleService::isStopped() || ($parentRun && $parentRun->isCancelled())) {
+            // Log::info('syncMatchDetail přeskočen - STOP flag nebo zrušeno');
             return;
         }
 

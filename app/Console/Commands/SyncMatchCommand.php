@@ -22,7 +22,7 @@ class SyncMatchCommand extends Command
                             {teamSlug : Slug týmu (např. muzi-c)}
                             {--force : Ignoruje hash a vynutí synchronizaci}
                             {--fresh : Smaže stávající data před novým importem}
-                            {--sync : Spustí synchronizaci synchronně (v tomto procesu)}';
+                            {--queue : Zařadí synchronizaci do fronty místo spuštění v tomto procesu}';
 
     /**
      * The console command description.
@@ -73,8 +73,8 @@ class SyncMatchCommand extends Command
             'fresh' => $this->option('fresh'),
         ];
 
-        if ($this->option('sync')) {
-            $this->info('Spouštím synchronizaci synchronně...');
+        if (! $this->option('queue')) {
+            $this->info('Spouštím synchronizaci...');
 
             if (! $match) {
                 $this->warn("Zápas s externím ID {$matchExternalId} nebyl nalezen v interní DB. Zkuste nejdříve sync-team-season.");
@@ -82,20 +82,53 @@ class SyncMatchCommand extends Command
                 return self::FAILURE;
             }
 
-            $bar = $this->output->createProgressBar(1);
+            // Sekce pro progress bar a logování (pokud jsou podporovány)
+            $output = $this->getOutput()->getOutput();
+            $barSection = method_exists($output, 'section') ? $output->section() : null;
+            $logSection = method_exists($output, 'section') ? $output->section() : $output;
+
+            $bar = $barSection
+                ? $barSection->createProgressBar(1)
+                : $this->output->createProgressBar(1);
+
             $bar->start();
 
+            // Vytvoření běhu pro UI/Progress
+            $run = \App\Models\ExternalImportRun::start(
+                'czbasketball',
+                $season->id,
+                $team->id,
+                'match_detail_command',
+                $matchExternalId
+            );
+
+            // Podpora pro signály (zrušení přes Ctrl+C)
+            if (function_exists('pcntl_signal')) {
+                declare(ticks=1);
+                pcntl_signal(SIGINT, function () use ($run) {
+                    $run->cancel('Zrušeno signálem SIGINT (Ctrl+C)');
+                    exit;
+                });
+                pcntl_signal(SIGTERM, function () use ($run) {
+                    $run->cancel('Zrušeno signálem SIGTERM');
+                    exit;
+                });
+            }
+
             try {
-                $syncService->syncMatchDetail($match->id, $options);
+                $syncService->syncMatchDetail($match->id, array_merge($options, ['parent_run_id' => $run->id]));
                 $bar->advance();
+                $run->finish(['imported_count' => 1]);
             } catch (\Exception $e) {
                 $bar->finish();
-                $this->newLine();
+                $run->fail($e);
                 throw $e;
             }
 
             $bar->finish();
-            $this->newLine();
+            if ($barSection) {
+                $barSection->clear();
+            }
             $this->info('Synchronizace zápasu dokončena.');
         } else {
             $this->info('Zařazuji synchronizaci do fronty (SyncMatchDetailJob)...');
