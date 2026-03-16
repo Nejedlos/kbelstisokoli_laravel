@@ -35,13 +35,34 @@
     });
 @endphp
 
-<div class="space-y-4">
+<div class="space-y-4" x-data="{
+    copyToClipboard() {
+        const text = this.$refs.logContainer.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            new FilamentNotification()
+                .title('Zkopírováno do schránky')
+                .success()
+                .send();
+        });
+    }
+}">
+    <div class="flex justify-end">
+        <button
+            type="button"
+            @click="copyToClipboard()"
+            class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors border border-slate-200"
+        >
+            <i class="fa-light fa-copy"></i>
+            Kopírovat vše
+        </button>
+    </div>
+
     @if(empty($allLogs))
         <div class="p-4 bg-slate-50 rounded-xl text-slate-500 text-sm italic border border-slate-100">
             Žádné záznamy k zobrazení.
         </div>
     @else
-        <div class="flex flex-col gap-2 font-mono text-xs max-h-[600px] overflow-y-auto custom-scrollbar p-4 bg-slate-900 rounded-xl">
+        <div x-ref="logContainer" class="flex flex-col gap-2 font-mono text-xs max-h-[600px] overflow-y-auto custom-scrollbar p-4 bg-slate-900 rounded-xl">
             @foreach($allLogs as $log)
                 <div class="flex gap-3 border-b border-slate-800 pb-2 last:border-0 hover:bg-slate-800/50 transition-colors px-1">
                     <span class="text-slate-500 shrink-0">[{{ date('H:i:s', strtotime($log['timestamp'] ?? 'now')) }}]</span>

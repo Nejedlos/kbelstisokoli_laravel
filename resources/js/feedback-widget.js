@@ -377,7 +377,15 @@ function registerKsFeedbackWidget() {
                 if (domToImg) {
                     try {
                         console.log('Attempting screenshot with dom-to-image-more...');
-                        dataUrl = await domToImg.toJpeg(document.body, options);
+                        dataUrl = await domToImg.toJpeg(document.body, {
+                            ...options,
+                            copyStyles: true,
+                            discoverCheck: false, // Disable discoverCheck to avoid some CORS issues
+                            cacheBust: true, // Try to bypass some cache/CORS issues
+                            errorHandler: (err) => {
+                                console.warn('dom-to-image error caught (continuing):', err);
+                            }
+                        });
                         console.log('Screenshot successful (dom-to-image)');
                     } catch (domErr) {
                         console.warn('dom-to-image-more failed, trying html2canvas...', domErr);
@@ -386,12 +394,28 @@ function registerKsFeedbackWidget() {
                                 useCORS: true,
                                 allowTaint: true,
                                 scale: Math.min(window.devicePixelRatio, 2),
-                                ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true'
+                                ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
+                                onclone: (clonedDoc) => {
+                                    // Fix for Tailwind v4 oklab() colors which html2canvas doesn't support
+                                    const styleElements = clonedDoc.getElementsByTagName('style');
+                                    for (let style of styleElements) {
+                                        if (style.innerHTML.includes('oklab')) {
+                                            style.innerHTML = style.innerHTML.replace(/oklab\([^)]+\)/g, 'transparent');
+                                        }
+                                    }
+                                    // Also fix inline styles
+                                    const allElements = clonedDoc.getElementsByTagName('*');
+                                    for (let el of allElements) {
+                                        if (el.style && el.style.cssText && el.style.cssText.includes('oklab')) {
+                                            el.style.cssText = el.style.cssText.replace(/oklab\([^)]+\)/g, 'transparent');
+                                        }
+                                    }
+                                }
                             });
                             dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                             console.log('Screenshot successful (html2canvas fallback)');
                         } else {
-                            throw domErr; // Rethrow if no fallback available
+                            throw domErr;
                         }
                     }
                 } else if (h2c) {
@@ -401,7 +425,15 @@ function registerKsFeedbackWidget() {
                         useCORS: true,
                         allowTaint: true,
                         scale: Math.min(window.devicePixelRatio, 2),
-                        ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true'
+                        ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
+                        onclone: (clonedDoc) => {
+                            const styleElements = clonedDoc.getElementsByTagName('style');
+                            for (let style of styleElements) {
+                                if (style.innerHTML.includes('oklab')) {
+                                    style.innerHTML = style.innerHTML.replace(/oklab\([^)]+\)/g, 'transparent');
+                                }
+                            }
+                        }
                     });
                     dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                     console.log('Screenshot successful (html2canvas)');

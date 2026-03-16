@@ -58,7 +58,7 @@ class InjectFeedbackWidget
 
         // 5. Host-based logic (for guests)
         $host = $request->getHost();
-        $isTestHost = str_starts_with($host, 'new.') || str_contains($host, '.new.') || str_contains($host, 'staging.') || str_contains($host, 'dev.') || str_contains($host, '.test');
+        $isTestHost = str_contains($host, 'new.') || str_contains($host, '.new.') || str_contains($host, 'staging.') || str_contains($host, 'dev.') || str_contains($host, '.test') || str_contains($host, 'localhost');
 
         if (!Auth::check() && !app()->environment('local', 'staging') && !$isTestHost) {
             return false;
@@ -111,6 +111,7 @@ class InjectFeedbackWidget
             if (!window.ksFeedbackWidgetRegistered && !document.querySelector('script[src*="feedback-widget"]')) {
                 const script = document.createElement('script');
                 script.src = '{$jsUrl}';
+                script.type = 'module';
                 script.async = true;
                 document.head.appendChild(script);
             }

@@ -230,7 +230,5 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
     </style>
 
-    <!-- Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@2.9.5/dist/dom-to-image-more.min.js" integrity="sha256-R5wZ4OkG/PtxfpvdJIqyzPKdjbhU0Y88vrmVrz3w8aE=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- Dependencies (Bundled in feedback-widget.js) -->
 </div>

@@ -116,7 +116,16 @@ class FeedbackReportForm
                                 Placeholder::make('dom_snapshot')
                                     ->label('')
                                     ->content(fn ($record) => $record?->dom_path && Storage::exists($record->dom_path)
-                                        ? new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs max-h-[600px]'>" . e(Storage::get($record->dom_path)) . "</pre>")
+                                        ? new HtmlString("
+                                            <div x-data=\"{ copy() { navigator.clipboard.writeText(\$refs.code.innerText); new FilamentNotification().title('Zkopírováno').success().send(); } }\">
+                                                <div class='flex justify-end mb-2'>
+                                                    <button type='button' @click='copy()' class='flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors border border-slate-200'>
+                                                        <i class='fa-light fa-copy'></i> Kopírovat DOM
+                                                    </button>
+                                                </div>
+                                                <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs max-h-[600px]'>" . e(Storage::get($record->dom_path)) . "</pre>
+                                            </div>
+                                        ")
                                         : __('admin.navigation.resources.feedback_report.fields.no_dom_snapshot')),
                             ]),
 
@@ -211,7 +220,17 @@ class FeedbackReportForm
                                     ->content(function ($record) {
                                         if (!$record?->performance_path || !Storage::exists($record->performance_path)) return __('admin.navigation.resources.feedback_report.fields.no_performance_data');
                                         $perf = json_decode(Storage::get($record->performance_path), true);
-                                        return new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . json_encode($perf, JSON_PRETTY_PRINT) . "</pre>");
+                                        $json = json_encode($perf, JSON_PRETTY_PRINT);
+                                        return new HtmlString("
+                                            <div x-data=\"{ copy() { navigator.clipboard.writeText(\$refs.code.innerText); new FilamentNotification().title('Zkopírováno').success().send(); } }\">
+                                                <div class='flex justify-end mb-2'>
+                                                    <button type='button' @click='copy()' class='flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors border border-slate-200'>
+                                                        <i class='fa-light fa-copy'></i> Kopírovat data
+                                                    </button>
+                                                </div>
+                                                <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . e($json) . "</pre>
+                                            </div>
+                                        ");
                                     }),
                             ]),
 
@@ -220,7 +239,16 @@ class FeedbackReportForm
                             ->schema([
                                 Placeholder::make('meta_raw')
                                     ->label('')
-                                    ->content(fn ($record) => $record ? new HtmlString("<pre class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . json_encode($record->meta, JSON_PRETTY_PRINT) . "</pre>") : null),
+                                    ->content(fn ($record) => $record ? new HtmlString("
+                                        <div x-data=\"{ copy() { navigator.clipboard.writeText(\$refs.code.innerText); new FilamentNotification().title('Zkopírováno').success().send(); } }\">
+                                            <div class='flex justify-end mb-2'>
+                                                <button type='button' @click='copy()' class='flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors border border-slate-200'>
+                                                    <i class='fa-light fa-copy'></i> Kopírovat meta
+                                                </button>
+                                            </div>
+                                            <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . e(json_encode($record->meta, JSON_PRETTY_PRINT)) . "</pre>
+                                        </div>
+                                    ") : null),
                             ]),
                     ])->columnSpanFull(),
             ]);
