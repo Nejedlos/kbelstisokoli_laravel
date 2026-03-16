@@ -109,7 +109,14 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             if ($teamNameNode->count() === 0) {
                 $container = $table->closest('div');
                 $depth = 0;
-                while ($container->count() > 0 && $teamNameNode->count() === 0 && $depth < 5) {
+                $lastContainerHash = null;
+                while ($container->count() > 0 && $teamNameNode->count() === 0 && $depth < 8) {
+                    $currentHash = spl_object_hash($container->getNode(0));
+                    if ($lastContainerHash === $currentHash) {
+                        break;
+                    }
+                    $lastContainerHash = $currentHash;
+
                     $teamNameNode = $container->previousAll()->filter('h3, h4, .title')->last();
                     if ($teamNameNode->count() > 0) {
                         break;
@@ -180,16 +187,22 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         // Týmy
         $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-home h1, .team-home h2, h4.text-center')->first();
         if ($homeNode->count() > 0) {
-            $header['home_team'] = trim($homeNode->text());
+            try {
+                $header['home_team'] = trim($homeNode->text());
+            } catch (\Exception $e) {}
         }
 
         $awayNodes = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2, h4.text-center');
         if ($awayNodes->count() >= 2) {
-            $header['away_team'] = trim($awayNodes->eq(1)->text());
+            try {
+                $header['away_team'] = trim($awayNodes->eq(1)->text());
+            } catch (\Exception $e) {}
         } elseif ($awayNodes->count() === 1) {
              $beta = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2')->first();
              if ($beta->count() > 0) {
-                 $header['away_team'] = trim($beta->text());
+                 try {
+                     $header['away_team'] = trim($beta->text());
+                 } catch (\Exception $e) {}
              }
         }
 
@@ -210,16 +223,18 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $periods = [];
         $periodsNode = $searchIn->filter('.periods, .score-periods, .score-quarters, .match-quarters, .match-score-quarters');
         if ($periodsNode->count() > 0) {
-            $header['periods_text'] = trim($periodsNode->text());
-            // Zkusíme naparsovat čtvrtiny (např. 20:15, 10:12, ...)
-            if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $m)) {
-                foreach ($m[0] as $i => $pair) {
-                    $periods[] = [
-                        'home' => (int)$m[1][$i],
-                        'away' => (int)$m[2][$i],
-                    ];
+            try {
+                $header['periods_text'] = trim($periodsNode->text());
+                // Zkusíme naparsovat čtvrtiny (např. 20:15, 10:12, ...)
+                if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $m)) {
+                    foreach ($m[0] as $i => $pair) {
+                        $periods[] = [
+                            'home' => (int)$m[1][$i],
+                            'away' => (int)$m[2][$i],
+                        ];
+                    }
                 }
-            }
+            } catch (\Exception $e) {}
         }
 
         if (empty($periods)) {

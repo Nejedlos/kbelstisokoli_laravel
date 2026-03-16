@@ -259,6 +259,34 @@ class MyStatistics extends Component
                 $externalStatsQuery = \App\Models\ExternalPlayerStat::where('user_id', $userId);
                 $externalMatchesQuery = \App\Models\ExternalPlayerMatch::where('user_id', $userId);
 
+                // Filtrace podle sezóny pro externí data
+                $season = Season::find($this->seasonId);
+                if ($season) {
+                    $externalStatsQuery->where(function ($q) use ($season) {
+                        $q->where('season_label', $season->name)
+                            ->orWhere('is_career_total', true);
+                    });
+
+                    $externalMatchesQuery->where(function ($q) use ($season) {
+                        // 1. Zápasy spárované s interním zápasem dané sezóny
+                        $q->whereHas('basketballMatch', function ($mq) use ($season) {
+                            $mq->where('season_id', $season->id);
+                        });
+
+                        // 2. Nespárované zápasy v časovém rozmezí sezóny
+                        $normalized = Season::normalizeName($season->name);
+                        $parts = explode('/', $normalized);
+                        if (count($parts) === 2) {
+                            $startYear = $parts[0];
+                            $endYear = $parts[1];
+                            $q->orWhere(function ($oq) use ($startYear, $endYear) {
+                                $oq->whereNull('basketball_match_id')
+                                    ->whereBetween('match_date', ["{$startYear}-08-01", "{$endYear}-07-31"]);
+                            });
+                        }
+                    });
+                }
+
                 if ($teamId) {
                     $team = Team::find($teamId);
                     if ($team) {

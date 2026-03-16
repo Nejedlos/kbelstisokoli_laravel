@@ -349,10 +349,12 @@ class PlayerSyncService
                             $run->updateProgress((int) ($run->imported_count ?? 0), null, "Zápas: " . ($matchData['opponent_name'] ?? 'neznámý'));
                         }
                         if ($parentRun) {
-                            $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Zápas: " . ($matchData['opponent_name'] ?? 'neznámý') . ")");
+                            $matchLabel = ($matchData['opponent_name'] ?? 'neznámý');
+                            $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Zápas: $matchLabel)");
                         }
 
                         try {
+                            \Log::info("PlayerSyncService: Syncing match detail $extMatchId for player {$user->display_name} (URL: https://cz.basketball/zapas/$extMatchId)");
                             $this->syncExternalMatchDetail($user, (string) $extMatchId, $run, $options);
                         } catch (\Exception $e) {
                             Log::warning("PlayerSyncService: Failed to sync match detail $extMatchId for player {$user->display_name}: " . $e->getMessage());
