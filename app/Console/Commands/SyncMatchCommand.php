@@ -22,6 +22,7 @@ class SyncMatchCommand extends Command
                             {teamSlug : Slug týmu (např. muzi-c)}
                             {--force : Ignoruje hash a vynutí synchronizaci}
                             {--fresh : Smaže stávající data před novým importem}
+                            {--sync : Alias pro výchozí synchronní běh}
                             {--queue : Zařadí synchronizaci do fronty místo spuštění v tomto procesu}';
 
     /**

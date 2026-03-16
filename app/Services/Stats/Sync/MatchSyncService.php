@@ -18,6 +18,33 @@ class MatchSyncService
     ) {}
 
     /**
+     * Normalizuje název soupeře pro fuzzy párování.
+     */
+    protected function normalizeOpponentName(string $name): string
+    {
+        // 1. Převedeme na malé písmena a odstraníme diakritiku
+        $name = mb_strtolower(trim($name));
+        $name = iconv('UTF-8', 'ASCII//TRANSLIT', $name);
+
+        // 2. Odstraníme stop slova (běžné součásti názvů klubů, které nejsou unikátní)
+        $stopWords = [
+            'sokol', 'basket', 'praha', 'tj', 'sk', 'slavoj', 'sportovni',
+            'klub', 'basketbal', 'basketball', 'bkc', 'bc', 'bk', 'bs',
+            'slavia', 'sparta', 'u23', 'u19', 'u17', 'akademie', 'academy',
+            'praha', 'mesto', 'ostrava', 'brno', 'plzen', 'liberec', 'olomouc',
+        ];
+
+        foreach ($stopWords as $word) {
+            $name = preg_replace('/\b' . preg_quote($word, '/') . '\b/i', '', $name);
+        }
+
+        // 3. Odstraníme vše kromě písmen a čísel (včetně mezer)
+        $name = preg_replace('/[^a-z0-9]/', '', $name);
+
+        return $name;
+    }
+
+    /**
      * Synchronizuje zápas.
      *
      * @param  array  $matchData  [scheduled_at, home_team, away_team, score, status, external_match_id]
@@ -159,10 +186,17 @@ class MatchSyncService
                     if ($nameA === $nameB) {
                         $sim = 100;
                     } else {
-                        // 2. Levenshtein
-                        $lev = levenshtein($nameA, $nameB);
-                        $maxLen = max(strlen($nameA), strlen($nameB));
-                        $sim = $maxLen > 0 ? (1 - ($lev / $maxLen)) * 100 : 0;
+                        // 2. Normalizovaná shoda (propojení "CTS Praha" vs "CTS Basket")
+                        $normA = $this->normalizeOpponentName($opponentName);
+                        $normB = $this->normalizeOpponentName($potentialOpponentName);
+                        if ($normA !== '' && $normA === $normB) {
+                            $sim = 95; // Velmi vysoká podobnost pokud sedí normalizované jméno
+                        } else {
+                            // 3. Levenshtein
+                            $lev = levenshtein($nameA, $nameB);
+                            $maxLen = max(strlen($nameA), strlen($nameB));
+                            $sim = $maxLen > 0 ? (1 - ($lev / $maxLen)) * 100 : 0;
+                        }
                     }
 
                     $isMatch = ($sim > 70);

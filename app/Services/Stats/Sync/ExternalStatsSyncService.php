@@ -518,7 +518,7 @@ class ExternalStatsSyncService
         }
 
         // Načteme dostatečný počet zápasů pro filtraci v PHP (abychom se vyhnuli JSON query v SQL)
-        $matches = $query->limit(100)->get();
+        $matches = $query->limit($limit)->get();
         $totalMatches = $matches->count();
 
         ConsoleService::log("    - Nalezeno $totalMatches zápasů splňujících kritéria pro detailní synchronizaci.", 'info');

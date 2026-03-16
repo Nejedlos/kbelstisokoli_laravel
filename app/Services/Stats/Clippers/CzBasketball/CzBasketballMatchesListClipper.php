@@ -19,59 +19,63 @@ class CzBasketballMatchesListClipper implements ClipperInterface
         \Log::debug("Clipper: Found {$tables->count()} tables on page.");
 
         // Heuristika: <table> kde >= 5 řádků obsahuje /zapas/
-        $matchesTable = $tables->reduce(function (Crawler $node, $i) {
+        $matchingTables = $tables->reduce(function (Crawler $node, $i) {
             $matchLinks = $node->filter('a[href*="/zapas/"]');
             \Log::debug("Clipper: Table #{$i} has {$matchLinks->count()} match links.");
             return $matchLinks->count() >= 5;
-        })->first();
+        });
 
-        if ($matchesTable->count() === 0) {
+        if ($matchingTables->count() === 0) {
             \Log::warning("Clipper: No matches list table found using primary heuristic (>= 5 match links).");
             return [];
         }
 
-        $fragmentHtml = $matchesTable->outerHtml();
-        $prev = $matchesTable->previousAll()->first();
-        if ($prev->count() > 0 && in_array($prev->nodeName(), ['h1', 'h2', 'h3'])) {
-            $fragmentHtml = $prev->outerHtml() . $fragmentHtml;
-        }
+        $allClips = [];
 
-        $links = [];
-        $matchesTable->filter('a[href*="/zapas/"]')->each(function (Crawler $a) use (&$links) {
-            $href = $a->attr('href');
-            if (str_starts_with($href, '/')) {
-                $href = 'https://cz.basketball' . $href;
+        $matchingTables->each(function (Crawler $matchesTable, $tableIndex) use (&$allClips, $matchingTables) {
+            $fragmentHtml = $matchesTable->outerHtml();
+            $prev = $matchesTable->previousAll()->first();
+            if ($prev->count() > 0 && in_array($prev->nodeName(), ['h1', 'h2', 'h3'])) {
+                $fragmentHtml = $prev->outerHtml() . $fragmentHtml;
             }
-            $links[] = [
-                'id' => preg_match('/\/zapas\/(\d+)/', $href, $m) ? $m[1] : null,
-                'url' => $href,
-                'name' => trim($a->text()),
-            ];
+
+            $links = [];
+            $matchesTable->filter('a[href*="/zapas/"]')->each(function (Crawler $a) use (&$links) {
+                $href = $a->attr('href');
+                if (str_starts_with($href, '/')) {
+                    $href = 'https://cz.basketball' . $href;
+                }
+                $links[] = [
+                    'id' => preg_match('/\/zapas\/(\d+)/', $href, $m) ? $m[1] : null,
+                    'url' => $href,
+                    'name' => trim($a->text()),
+                ];
+            });
+
+            // Chunking pokud je tabulka moc velká (nad 60 řádků by mohlo být moc pro AI v jednom promptu)
+            // Musíme ale správně filtrovat řádky v těle tabulky
+            $rows = $matchesTable->filter('tbody tr');
+            if ($rows->count() === 0) {
+                $rows = $matchesTable->filter('tr'); // Pokud není tbody
+            }
+
+            if ($rows->count() > 60) {
+                $allClips = array_merge($allClips, $this->chunkTable($matchesTable, $links));
+            } else {
+                $allClips[] = new ClipDTO(
+                    id: $matchingTables->count() > 1 ? "matches_list_table_" . ($tableIndex + 1) : "matches_list_table",
+                    htmlFragment: $fragmentHtml,
+                    textHint: "Main matches list table" . ($matchingTables->count() > 1 ? " " . ($tableIndex + 1) : ""),
+                    links: $links,
+                    evidence: [
+                        'row_count' => $rows->count(),
+                        'match_link_count' => count($links),
+                    ]
+                );
+            }
         });
 
-        // Chunking pokud je tabulka moc velká (nad 60 řádků by mohlo být moc pro AI v jednom promptu)
-        // Musíme ale správně filtrovat řádky v těle tabulky
-        $rows = $matchesTable->filter('tbody tr');
-        if ($rows->count() === 0) {
-            $rows = $matchesTable->filter('tr'); // Pokud není tbody
-        }
-
-        if ($rows->count() > 60) {
-            return $this->chunkTable($matchesTable, $links);
-        }
-
-        return [
-            new ClipDTO(
-                id: 'matches_list_table',
-                htmlFragment: $fragmentHtml,
-                textHint: 'Main matches list table',
-                links: $links,
-                evidence: [
-                    'row_count' => $rows->count(),
-                    'match_link_count' => count($links),
-                ]
-            )
-        ];
+        return $allClips;
     }
 
     protected function chunkTable(Crawler $table, array $allLinks): array

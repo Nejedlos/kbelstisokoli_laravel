@@ -227,6 +227,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         if ($scoreNodes->count() > 0) {
             foreach ($scoreNodes as $node) {
                 $text = trim($node->nodeValue);
+
+                // Odstraníme závorky pro lepší parsování (časté na cz.basketball v hlavičce)
+                $text = str_replace(['(', ')'], ' ', $text);
+
                 // Regex pro skóre (např. 82:55), kterému nepředchází jiná čísla (aby se nevzalo datum 3.8.)
                 // Upraveno pro ignorování závorek a bílých znaků uvnitř závorek
                 if (preg_match('/(?<![\d:])(\d{1,3})\s*:\s*(\d{1,3})(?![\d:])/u', $text, $m)) {

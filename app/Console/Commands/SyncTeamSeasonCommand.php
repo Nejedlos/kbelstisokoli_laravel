@@ -24,8 +24,9 @@ class SyncTeamSeasonCommand extends Command
                             {--fresh : Smaže stávající data před novým importem}
                             {--ai : Použije AI pro normalizaci}
                             {--excesive : Spustí hloubkovou synchronizaci všech detailů zápasů}
-                            {--max-matches=20 : Maximální počet detailů zápasů ke stažení}
+                            {--max-matches= : Maximální počet detailů zápasů ke stažení (výchozí 20, při --excesive 1000)}
                             {--recent-days=3 : Počet dní zpět pro prioritní synchronizaci}
+                            {--sync : Alias pro výchozí synchronní běh (pro kompatibilitu s dokumentací)}
                             {--queue : Zařadí synchronizaci do fronty místo spuštění v tomto procesu}';
 
     /**
@@ -79,7 +80,7 @@ class SyncTeamSeasonCommand extends Command
             'fresh' => $this->option('fresh'),
             'ai' => $this->option('ai'),
             'excesive' => $this->option('excesive'),
-            'maxMatchDetails' => (int) $this->option('max-matches'),
+            'maxMatchDetails' => $this->option('max-matches') ? (int) $this->option('max-matches') : null,
             // Výchozí chování: nesnižovat rozsah jen na "recent" (uživatel může později dostat samostatný přepínač)
             'recentOnly' => false,
             'recentDays' => (int) $this->option('recent-days'),

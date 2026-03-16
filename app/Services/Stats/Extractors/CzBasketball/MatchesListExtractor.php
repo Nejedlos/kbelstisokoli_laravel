@@ -18,7 +18,7 @@ class MatchesListExtractor implements StatExtractorInterface
         $crawler = new Crawler($content);
         $warnings = [];
 
-        // Hledáme tabulku se zápasy - kandidáti s hlavičkou obsahující "domácí/hosté", "datum" a "skóre"
+        // Hledáme tabulky se zápasy - kandidáti s hlavičkou obsahující "domácí/hosté", "datum" a "skóre"
         $candidates = $crawler->filter('table')->reduce(function (Crawler $node) {
             $thead = $node->filter('thead');
             if ($thead->count() === 0) {
@@ -31,69 +31,40 @@ class MatchesListExtractor implements StatExtractorInterface
                 && (str_contains($headerText, 'skore') || str_contains($headerText, 'skóre'));
         });
 
-        // Preferujeme tabulku s "kolo" (typicky kompletní rozpis soutěže)
-        $table = null;
-        if ($candidates->count() > 1) {
-            $tableWithKolo = $candidates->reduce(function (Crawler $node) {
-                return str_contains(mb_strtolower($node->filter('thead')->text()), 'kolo');
+        $tables = [];
+        if ($candidates->count() > 0) {
+            $candidates->each(function (Crawler $node) use (&$tables) {
+                $tables[] = $node;
             });
-            if ($tableWithKolo->count() > 0) {
-                $table = $tableWithKolo->first();
-            }
         }
 
-        // Pokud nemáme vybráno, vybereme největší tabulku (podle počtu řádků/linků na zápas)
-        if (! $table) {
-            if ($candidates->count() === 1) {
-                $table = $candidates->first();
-            } elseif ($candidates->count() > 1) {
-                $selectedHtml = null;
-                $maxScore = -1;
-                $candidates->each(function (Crawler $node) use (&$selectedHtml, &$maxScore) {
-                    $rows = $node->filter('tbody tr')->count();
-                    if ($rows === 0) {
-                        $rows = $node->filter('tr')->count();
-                    }
-                    $links = $node->filter('a[href*="/zapas/"]')->count();
-                    // O něco víc vážíme skutečné odkazy na zápasy
-                    $score = max($rows, $links * 2);
-                    if ($score > $maxScore) {
-                        $maxScore = $score;
-                        $selectedHtml = $node->outerHtml();
-                    }
-                });
-                if ($selectedHtml) {
-                    $table = new Crawler($selectedHtml);
-                } else {
-                    $table = $candidates->first();
-                }
-            } else {
-                $table = $candidates; // prázdný Crawler
-            }
-        }
-
-        if ($table->count() === 0) {
+        if (count($tables) === 0) {
             // Fallback na table.table-striped, která obsahuje /zapas/
-            $table = $crawler->filter('table.table-striped')->reduce(function (Crawler $node) {
+            $crawler->filter('table.table-striped')->reduce(function (Crawler $node) {
                 return str_contains($node->html(), '/zapas/');
-            })->first();
+            })->each(function (Crawler $node) use (&$tables) {
+                $tables[] = $node;
+            });
         }
 
-        if ($table->count() === 0) {
+        if (count($tables) === 0) {
             return [
                 'data' => new NormalizedTableDTO('Zápasy', [], [], ['warnings' => ['Table not found']]),
                 'fragment_html' => '',
             ];
         }
 
-        $fragmentHtml = $table->outerHtml();
+        $fragmentHtml = '';
         $rows = [];
 
-        $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, &$warnings) {
-            $cells = $tr->filter('td');
-            if ($cells->count() < 3) {
-                return;
-            }
+        foreach ($tables as $table) {
+            $fragmentHtml .= $table->outerHtml();
+
+            $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, &$warnings) {
+                $cells = $tr->filter('td');
+                if ($cells->count() < 3) {
+                    return;
+                }
 
             // Najdeme odkaz na detail zápasu
             $matchLink = $tr->filter('a[href*="/zapas/"]')->first();
@@ -172,12 +143,18 @@ class MatchesListExtractor implements StatExtractorInterface
             $scoreDivs = $scoreCell->filter('div');
 
             if ($scoreDivs->count() >= 2) {
+                // Často jsou body domácích a hostů v samostatných div-ech
                 $score = trim($scoreDivs->eq(0)->text()).':'.trim($scoreDivs->eq(1)->text());
             } else {
                 $score = trim($scoreCell->text());
                 // Pokud obsahuje mezeru nebo pomlčku a neobsahuje dvojtečku, zkusíme ji nahradit
-                if (! str_contains($score, ':') && preg_match('/(\d+)\s*[\s\-]\s*(\d+)/', $score, $scoreMatches)) {
-                    $score = $scoreMatches[1].':'.$scoreMatches[2];
+                // Také vyčistíme text od případných divných znaků
+                if (! str_contains($score, ':')) {
+                    if (preg_match_all('/(\d+)/', $score, $scoreMatches)) {
+                        if (count($scoreMatches[0]) >= 2) {
+                            $score = $scoreMatches[0][0].':'.$scoreMatches[0][1];
+                        }
+                    }
                 }
             }
 
@@ -215,6 +192,7 @@ class MatchesListExtractor implements StatExtractorInterface
                 ]
             );
         });
+    }
 
         $dto = new NormalizedTableDTO(
             name: 'Zápasy',
