@@ -32,6 +32,7 @@ class StatsSyncPlayersCommand extends Command
      */
     public function handle(PlayerSyncService $syncService)
     {
+        set_time_limit(0); // Pro hromadnou synchronizaci historie vypneme časový limit procesu
         $this->info('Zahajuji synchronizaci detailů hráčů...');
 
         $query = User::query();
@@ -74,7 +75,7 @@ class StatsSyncPlayersCommand extends Command
         );
         $mainRun->update(['total_count' => $users->count()]);
 
-        // Podpora pro signály (zrušení přes Ctrl+C)
+        // Podpora pro signály
         if (function_exists('pcntl_signal')) {
             declare(ticks=1);
             pcntl_signal(SIGINT, function () use ($mainRun) {
@@ -84,6 +85,11 @@ class StatsSyncPlayersCommand extends Command
             pcntl_signal(SIGTERM, function () use ($mainRun) {
                 $mainRun->cancel('Zrušeno signálem SIGTERM');
                 exit;
+            });
+
+            // Handler pro timeout (3 minuty na hráče)
+            pcntl_signal(SIGALRM, function () {
+                throw new \RuntimeException('Player sync timeout exceeded (3 minutes)');
             });
         }
 
@@ -109,28 +115,50 @@ class StatsSyncPlayersCommand extends Command
             $currentIndex++;
             $mainRun->updateProgress($currentIndex, $users->count(), "Hráč: {$user->display_name}");
 
-            // $logSection->writeln("Synchronizuji: {$user->display_name} ({$currentIndex}/{$users->count()})");
+            // Nastavení alarmu na 3 minuty
+            if (function_exists('pcntl_alarm')) {
+                pcntl_alarm(180);
+            }
 
-            $result = $syncService->syncPlayer($user, [
-                'force' => $this->option('force'),
-                'excesive' => $this->option('excesive'),
-                'parent_run' => $mainRun,
-                'current_index' => $currentIndex,
-                'total_count' => $users->count(),
-            ]);
+            try {
+                $result = $syncService->syncPlayer($user, [
+                    'force' => $this->option('force'),
+                    'excesive' => $this->option('excesive'),
+                    'parent_run' => $mainRun,
+                    'current_index' => $currentIndex,
+                    'total_count' => $users->count(),
+                ]);
 
-            if ($result === 1) {
-                $successCount++;
-            } elseif ($result === 2) {
-                $skippedCount++;
+                if ($result === 1) {
+                    $successCount++;
+                } elseif ($result === 2) {
+                    $skippedCount++;
+                }
+            } catch (\Throwable $e) {
+                $errorMessage = $e->getMessage();
+                $isTimeout = str_contains($errorMessage, 'timeout exceeded');
+
+                if ($isTimeout) {
+                    $logSection->writeln("<fg=red>Timeout u hráče {$user->display_name} (překročeny 3 minuty). Přeskakuji.</>");
+                    \Log::error("StatsSyncPlayersCommand: Timeout for player {$user->display_name} (ID: {$user->id})");
+                } else {
+                    $logSection->writeln("<fg=red>Chyba u hráče {$user->display_name}: {$errorMessage}</>");
+                    \Log::error("StatsSyncPlayersCommand: Error for player {$user->display_name} (ID: {$user->id}): {$errorMessage}");
+                }
+
+                // Pokud to nebyl timeout, možná budeme chtít počítat jako selhání
+                // Prozatím to necháme v "failed_count", který se dopočítává na konci
+            } finally {
+                // Zrušení alarmu
+                if (function_exists('pcntl_alarm')) {
+                    pcntl_alarm(0);
+                }
             }
 
             $bar->advance();
 
-            // Mikropauza mezi hráči, aby se ulevilo externímu webu
-            if ($users->count() > 1) {
-                usleep(300000); // 0.3s
-            }
+            // Refresh po každém hráči
+            $this->refreshState();
         }
 
         $bar->finish();
@@ -150,5 +178,20 @@ class StatsSyncPlayersCommand extends Command
         $this->line("<fg=red>Selhalo: " . ($users->count() - $successCount - $skippedCount) . "</>");
 
         return 0;
+    }
+    /**
+     * Vyčistí stav aplikace, aby se ušetřila paměť a předešlo se "zaseknutí".
+     */
+    protected function refreshState(): void
+    {
+        // Uvolnění cyklických odkazů v PHP
+        gc_collect_cycles();
+
+        // Vyčištění DB query logu (pokud je zapnutý, může požírat stovky MB)
+        \DB::connection()->flushQueryLog();
+        \DB::connection()->disableQueryLog();
+
+        // Mikropauza mezi hráči, aby se ulevilo externímu webu
+        usleep(300000); // 0.3s
     }
 }

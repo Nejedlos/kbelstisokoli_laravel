@@ -212,8 +212,9 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             foreach ($scoreNodes as $node) {
                 $text = trim($node->nodeValue);
                 // Regex pro skóre (např. 82:55), kterému nepředchází jiná čísla (aby se nevzalo datum 3.8.)
-                if (preg_match('/(?<![\d:])(\d{1,3}\s*:\s*\d{1,3})(?![\d:])/u', $text, $m)) {
-                    $header['score'] = str_replace(' ', '', $m[1]);
+                // Upraveno pro ignorování závorek a bílých znaků uvnitř závorek
+                if (preg_match('/(?<![\d:])(\d{1,3})\s*:\s*(\d{1,3})(?![\d:])/u', $text, $m)) {
+                    $header['score'] = $m[1] . ':' . $m[2];
                     break;
                 }
             }
@@ -286,10 +287,38 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     }
                 });
 
-                // Pokud jsme našli stavy, uložíme je tak, jak jsou (kumulativně)
+                // Pokud jsme našli stavy, pravděpodobně jsou kumulativní (na cz.basketball běžné)
                 if (!empty($periods)) {
-                    // Už neprovádíme normalizaci (odečítání) ani nepřidáváme poslední čtvrtinu
-                    // Uživatel chce vidět přesně to, co je na webu (stavy po Q1, Q2, Q3)
+                    // 1. Přidáme konečné skóre jako poslední periodu, pokud se liší od poslední nalezené
+                    if (isset($header['score'])) {
+                        $scoreParts = explode(':', $header['score']);
+                        if (count($scoreParts) === 2) {
+                            $finalHome = (int)$scoreParts[0];
+                            $finalAway = (int)$scoreParts[1];
+                            $lastPeriod = end($periods);
+
+                            if ($lastPeriod['home'] !== $finalHome || $lastPeriod['away'] !== $finalAway) {
+                                $periods[] = [
+                                    'home' => $finalHome,
+                                    'away' => $finalAway,
+                                ];
+                            }
+                        }
+                    }
+
+                    // 2. Převod kumulativního skóre na body v jednotlivých čtvrtinách
+                    $normalizedPeriods = [];
+                    $prevHome = 0;
+                    $prevAway = 0;
+                    foreach ($periods as $period) {
+                        $normalizedPeriods[] = [
+                            'home' => $period['home'] - $prevHome,
+                            'away' => $period['away'] - $prevAway,
+                        ];
+                        $prevHome = $period['home'];
+                        $prevAway = $period['away'];
+                    }
+                    $periods = $normalizedPeriods;
                 }
             }
         }
