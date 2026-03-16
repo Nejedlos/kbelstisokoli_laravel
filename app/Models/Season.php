@@ -97,6 +97,46 @@ class Season extends Model
         return $name;
     }
 
+    /**
+     * Zjistí, zda datum patří do této sezóny.
+     * Sezóna začíná 1. srpna (aby se chytily i srpnové turnaje/zápasy).
+     */
+    public function containsDate(\Carbon\CarbonInterface $date): bool
+    {
+        $normalized = self::normalizeName($this->name);
+        if (!str_contains($normalized, '/')) {
+            return false;
+        }
+
+        [$startYear, $endYear] = explode('/', $normalized);
+
+        $start = \Illuminate\Support\Carbon::create((int) $startYear, 8, 1)->startOfDay();
+        $end = \Illuminate\Support\Carbon::create((int) $endYear, 7, 31)->endOfDay();
+
+        return $date->between($start, $end);
+    }
+
+    /**
+     * Vrátí sezónu, do které patří dané datum.
+     */
+    public static function forDate(\Carbon\CarbonInterface $date): ?self
+    {
+        $year = (int) $date->format('Y');
+        $month = (int) $date->format('m');
+
+        // Sezóna začíná v srpnu
+        $name = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
+
+        $season = self::where('name', $name)->first();
+        if (!$season) {
+            // Zkusíme zkrácený formát 2024/25
+            $shortName = substr($name, 0, 5) . substr($name, 7, 2);
+            $season = self::where('name', $shortName)->first();
+        }
+
+        return $season;
+    }
+
     public function matches(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'season_id');

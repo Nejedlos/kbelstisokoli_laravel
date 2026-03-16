@@ -30,20 +30,15 @@ class MatchSyncService
             try {
                 $scheduledAt = Carbon::parse($scheduledAtStr);
 
-                // Určení správné sezóny na základě data
-                $year = (int)$scheduledAt->format('Y');
-                $month = (int)$scheduledAt->format('m');
-                $expectedSeasonName = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
-
-                if ($season->name !== $expectedSeasonName) {
-                    $correctSeason = Season::where('name', $expectedSeasonName)->first();
-                    if (!$correctSeason) {
-                        $shortYear = substr($expectedSeasonName, 0, 5) . substr($expectedSeasonName, 7, 2);
-                        $correctSeason = Season::where('name', $shortYear)->first();
-                    }
+                // Kontrola a případná oprava sezóny na základě data zápasu
+                if (!$season->containsDate($scheduledAt)) {
+                    $correctSeason = Season::forDate($scheduledAt);
 
                     if ($correctSeason) {
+                        \Log::info("MatchSync: Redirecting match from season {$season->name} to {$correctSeason->name} based on date {$scheduledAt->toDateString()}");
                         $season = $correctSeason;
+                    } else {
+                        \Log::warning("MatchSync: Match date {$scheduledAt->toDateString()} does not belong to provided season {$season->name}, and no suitable season was found. Proceeding anyway (may cause issues).");
                     }
                 }
             } catch (\Exception $e) {

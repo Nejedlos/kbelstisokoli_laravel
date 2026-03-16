@@ -597,20 +597,14 @@ class PlayerSyncService
         // 2. Najdeme nebo vytvoříme oponenta
         $opponent = Opponent::firstOrCreate(['name' => $opponentName]);
 
-        // 3. Najdeme nebo vytvoříme sezónu
+        // 3. Najdeme nebo určíme správnou sezónu
         $matchDate = $extMatch->scheduled_at ?: ($extMatch->match_date ? $extMatch->match_date->startOfDay() : now());
-        $year = (int)$matchDate->format('Y');
-        $month = (int)$matchDate->format('m');
-        $seasonName = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
-
-        $season = Season::where('name', $seasonName)->first();
-        if (!$season) {
-            // Zkusíme najít se zkráceným rokem 2024/25 místo 2024/2025
-            $shortYear = substr($seasonName, 0, 5) . substr($seasonName, 7, 2);
-            $season = Season::where('name', $shortYear)->first();
-        }
+        $season = Season::forDate($matchDate);
 
         if (!$season) {
+            $year = (int)$matchDate->format('Y');
+            $month = (int)$matchDate->format('m');
+            $seasonName = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
             $season = Season::create(['name' => $seasonName]);
         }
 
