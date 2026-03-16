@@ -1,4 +1,3 @@
-import domtoimage from 'dom-to-image-more';
 import html2canvas from 'html2canvas';
 
 /**
@@ -356,96 +355,111 @@ function registerKsFeedbackWidget() {
             const originalDisplay = widgetEl.style.display;
             widgetEl.style.display = 'none';
 
-            try {
-                let dataUrl = '';
-                const options = {
-                    quality: 0.8,
-                    bgcolor: '#ffffff',
-                    filter: (node) => {
-                        if (node.id === 'ks-fb-root' || node.dataset?.html2canvasIgnore === 'true') return false;
-                        if (this.options.maskSensitive && (node.classList?.contains('bugmask') || node.dataset?.bugmask === 'true')) return false;
-                        if (node.tagName === 'INPUT' && node.type === 'password') return false;
-                        return true;
-                    }
-                };
+            const cfg = window.KS_FEEDBACK_CONFIG || { strategy: 'auto', playwright: { enabled: false }, endpoints: {} };
+            const strategy = cfg.strategy || 'auto';
+            const startTs = performance.now();
+            console.log('[FB] captureScreenshot start | strategy =', strategy);
 
-                // Získání referencí na knihovny z window (pro jistotu, pokud nejsou v lokálním scope)
-                const domToImg = window.domtoimage || (typeof domtoimage !== 'undefined' ? domtoimage : null);
+            const restore = () => { widgetEl.style.display = originalDisplay; };
+
+            const buildDomSnapshot = () => {
+                const main = document.querySelector('main') || document.body;
+                let html = main.outerHTML;
+                html = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+                html = html.replace(/value="[^"]*"/gi, 'value="[redacted]"');
+                return html.substring(0, 200 * 1024);
+            };
+
+            const sanitizeClone = (clonedDoc) => {
+                try {
+                    // Remove cross-origin stylesheets
+                    const links = Array.from(clonedDoc.getElementsByTagName('link'));
+                    for (let link of links) {
+                        if (link.rel === 'stylesheet' && link.href) {
+                            const isSameOrigin = link.href.includes(window.location.hostname) || link.href.startsWith('/') || link.href.includes('localhost');
+                            if (!isSameOrigin) link.remove();
+                        }
+                    }
+                    // Replace unsupported colors
+                    const styleElements = Array.from(clonedDoc.getElementsByTagName('style'));
+                    for (let style of styleElements) {
+                        style.innerHTML = style.innerHTML.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
+                    }
+                    const allElements = Array.from(clonedDoc.getElementsByTagName('*'));
+                    let cleaned = 0;
+                    for (let el of allElements) {
+                        if (el.hasAttribute && el.hasAttribute('style')) {
+                            const s = el.getAttribute('style');
+                            if (s && /(oklab|oklch)\s*\([^)]+\)/i.test(s)) {
+                                el.setAttribute('style', s.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent'));
+                                cleaned++;
+                            }
+                        }
+                    }
+                    console.log(`[FB] sanitizeClone cleaned ${cleaned} inline styles.`);
+                } catch (e) { console.warn('[FB] sanitizeClone error', e); }
+            };
+
+            const html2canvasFallback = async () => {
                 const h2c = window.html2canvas || (typeof html2canvas !== 'undefined' ? html2canvas : null);
+                if (!h2c) return null;
+                console.log('[FB] html2canvas fallback start');
+                const canvas = await h2c(document.body, {
+                    useCORS: true,
+                    allowTaint: true,
+                    scale: Math.min(window.devicePixelRatio, 2),
+                    ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
+                    onclone: sanitizeClone,
+                });
+                console.log('[FB] html2canvas fallback done');
+                return canvas.toDataURL('image/jpeg', 0.8);
+            };
 
-                // First try: dom-to-image
-                if (domToImg) {
+            try {
+                let dataUrl = null;
+                // 1) Primárně Playwright (server)
+                if ((strategy === 'auto' || strategy === 'playwright') && cfg.playwright?.enabled && cfg.endpoints?.serverScreenshot) {
                     try {
-                        console.log('Attempting screenshot with dom-to-image-more...');
-                        dataUrl = await domToImg.toJpeg(document.body, {
-                            ...options,
-                            copyStyles: true,
-                            discoverCheck: false, // Disable discoverCheck to avoid some CORS issues
-                            cacheBust: true, // Try to bypass some cache/CORS issues
-                            errorHandler: (err) => {
-                                console.warn('dom-to-image error caught (continuing):', err);
-                            }
+                        console.log('[FB] server screenshot attempt');
+                        const dom = buildDomSnapshot();
+                        const res = await fetch(cfg.endpoints.serverScreenshot, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                dom,
+                                viewport: { width: window.innerWidth, height: window.innerHeight },
+                                dpr: Math.min(window.devicePixelRatio || 1, 2),
+                                fullPage: false,
+                            })
                         });
-                        console.log('Screenshot successful (dom-to-image)');
-                    } catch (domErr) {
-                        console.warn('dom-to-image-more failed, trying html2canvas...', domErr);
-                        if (h2c) {
-                            const canvas = await h2c(document.body, {
-                                useCORS: true,
-                                allowTaint: true,
-                                scale: Math.min(window.devicePixelRatio, 2),
-                                ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
-                                onclone: (clonedDoc) => {
-                                    // Fix for Tailwind v4 oklab() colors which html2canvas doesn't support
-                                    const styleElements = clonedDoc.getElementsByTagName('style');
-                                    for (let style of styleElements) {
-                                        if (style.innerHTML.includes('oklab')) {
-                                            style.innerHTML = style.innerHTML.replace(/oklab\([^)]+\)/g, 'transparent');
-                                        }
-                                    }
-                                    // Also fix inline styles
-                                    const allElements = clonedDoc.getElementsByTagName('*');
-                                    for (let el of allElements) {
-                                        if (el.style && el.style.cssText && el.style.cssText.includes('oklab')) {
-                                            el.style.cssText = el.style.cssText.replace(/oklab\([^)]+\)/g, 'transparent');
-                                        }
-                                    }
-                                }
-                            });
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                            console.log('Screenshot successful (html2canvas fallback)');
+                        const out = await res.json();
+                        if (out.ok && out.image) {
+                            console.log('[FB] server screenshot ok');
+                            dataUrl = out.image;
                         } else {
-                            throw domErr;
+                            console.warn('[FB] server screenshot failed, status', res.status, out?.message || out?.error);
                         }
+                    } catch (e) {
+                        console.warn('[FB] server screenshot exception', e.message);
                     }
-                } else if (h2c) {
-                    // Only html2canvas available
-                    console.log('Attempting screenshot with html2canvas (standalone)...');
-                    const canvas = await h2c(document.body, {
-                        useCORS: true,
-                        allowTaint: true,
-                        scale: Math.min(window.devicePixelRatio, 2),
-                        ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
-                        onclone: (clonedDoc) => {
-                            const styleElements = clonedDoc.getElementsByTagName('style');
-                            for (let style of styleElements) {
-                                if (style.innerHTML.includes('oklab')) {
-                                    style.innerHTML = style.innerHTML.replace(/oklab\([^)]+\)/g, 'transparent');
-                                }
-                            }
-                        }
-                    });
-                    dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    console.log('Screenshot successful (html2canvas)');
-                } else {
-                    console.error('No screenshot library (domtoimage or html2canvas) found!');
                 }
 
-                widgetEl.style.display = originalDisplay;
+                // 2) Fallback html2canvas
+                if (!dataUrl) {
+                    dataUrl = await html2canvasFallback();
+                }
+
+                // 3) Last resort: no screenshot
+                restore();
+                console.log('[FB] captureScreenshot end | ms =', Math.round(performance.now() - startTs));
                 return dataUrl;
             } catch (e) {
-                console.error('Screenshot failed completely', e);
-                widgetEl.style.display = originalDisplay;
+                console.error('[FB] captureScreenshot fatal', e);
+                restore();
                 return null;
             }
         },

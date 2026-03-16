@@ -30,8 +30,20 @@ return [
     ],
 
     'screenshot' => [
+        'strategy' => env('FEEDBACK_SCREENSHOT_STRATEGY', 'auto'), // auto, playwright, html2canvas, none
         'quality' => 0.80,
         'max_width' => 1600,
+        'playwright' => [
+            'enabled' => env('FEEDBACK_PLAYWRIGHT_ENABLED', true),
+            'timeout' => 30000,
+            'node_path' => env('FEEDBACK_NODE_PATH', 'node'),
+            'script_path' => 'resources/js/screenshot-worker.cjs',
+            'temp_path' => 'storage/app/temp/screenshots',
+            'viewports' => [
+                'desktop' => ['width' => 1920, 'height' => 1080],
+                'mobile' => ['width' => 390, 'height' => 844],
+            ],
+        ],
     ],
 
     'dom_snapshot' => [

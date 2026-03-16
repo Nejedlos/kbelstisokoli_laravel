@@ -12,12 +12,29 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class FeedbackController extends Controller
 {
     public function renderWidget(Request $request): string
     {
         return view('partials.feedback-widget')->render();
+    }
+
+    public function snapshot(string $token): \Illuminate\View\View
+    {
+        // Snapshot token by měl být jednorázový a krátkodobý (např. 5 minut)
+        $data = Cache::get("fb_snap_{$token}");
+
+        if (!$data) {
+            abort(404, 'Snapshot not found or expired.');
+        }
+
+        // Změna view pro renderování
+        return view('feedback.snapshot', [
+            'dom' => $data['dom'],
+            'context' => $data['context'],
+        ]);
     }
 
     public function store(Request $request): JsonResponse
@@ -173,12 +190,12 @@ class FeedbackController extends Controller
         ]);
     }
 
-    public function screenshot(FeedbackReport $report): \Symfony\Component\HttpFoundation\Response
+    public function screenshot(FeedbackReport $report): SymfonyResponse
     {
         // Kontrola oprávnění (zjednodušená na to, zda má uživatel přístup do adminu)
         // V produkci by tu byla kontrola na konkrétní permission spatie
-        if (!auth()->user()->hasRole(['super_admin', 'admin', 'technician'])) {
-             abort(403);
+        if (!auth()->user() || !auth()->user()->hasRole(['super_admin', 'admin', 'technician'])) {
+            abort(403);
         }
 
         if (!$report->screenshot_path || !Storage::disk('local')->exists($report->screenshot_path)) {
@@ -186,6 +203,59 @@ class FeedbackController extends Controller
         }
 
         return response()->file(Storage::disk('local')->path($report->screenshot_path));
+    }
+
+    public function serverScreenshot(Request $request): JsonResponse
+    {
+        // Strategy gate
+        $strategy = config('feedback.screenshot.strategy', 'auto');
+        $allow = in_array($strategy, ['auto', 'playwright'], true) && config('feedback.screenshot.playwright.enabled', true);
+        if (!$allow) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Server-side screenshot disabled',
+            ], 503);
+        }
+
+        $validated = $request->validate([
+            'dom' => 'required|string',
+            'viewport' => 'nullable|array',
+            'viewport.width' => 'nullable|integer|min:320|max:3840',
+            'viewport.height' => 'nullable|integer|min:240|max:2160',
+            'dpr' => 'nullable|numeric|min:1|max:3',
+            'selector' => 'nullable|string',
+            'fullPage' => 'nullable|boolean',
+        ]);
+
+        try {
+            $svc = app(\App\Services\ScreenshotService::class);
+            $result = $svc->captureViaPlaywrightFromDom($validated['dom'], [
+                'viewport' => $validated['viewport'] ?? ['width' => 1728, 'height' => 919],
+                'dpr' => $validated['dpr'] ?? 2,
+                'selector' => $validated['selector'] ?? '#snapshot-root',
+                'fullPage' => $validated['fullPage'] ?? false,
+                'context' => [
+                    'user_id' => $request->user()?->id,
+                ],
+            ]);
+
+            return response()->json([
+                'ok' => true,
+                'image' => $result['data_url'] ?? null,
+                'width' => $result['width'],
+                'height' => $result['height'],
+                'mime' => $result['mime'] ?? 'image/png',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('Server screenshot failed', [
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'ok' => false,
+                'message' => 'Server screenshot failed',
+                'error' => app()->environment('local', 'testing') ? $e->getMessage() : null,
+            ], 500);
+        }
     }
 
     protected function redactData(array $data): array

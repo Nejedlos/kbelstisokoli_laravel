@@ -62,6 +62,13 @@ Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'stor
     ->middleware(['web', 'auth', 'throttle:' . config('feedback.limits.rate_limit', '10,1')])
     ->name('feedback.store');
 
+Route::post('/feedback/screenshot', [\App\Http\Controllers\FeedbackController::class, 'serverScreenshot'])
+    ->middleware(['web', 'auth', 'throttle:5,1'])
+    ->name('feedback.screenshot');
+
+Route::get('/feedback/snapshot/{token}', [\App\Http\Controllers\FeedbackController::class, 'snapshot'])
+    ->name('feedback.snapshot');
+
 // Impersonifikace uživatelů (pro adminy)
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/admin/users/search-ajax', [\App\Http\Controllers\Admin\ImpersonateController::class, 'search'])

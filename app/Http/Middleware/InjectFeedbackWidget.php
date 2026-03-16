@@ -96,7 +96,20 @@ class InjectFeedbackWidget
             return;
         }
 
+        $cfg = [
+            'strategy' => config('feedback.screenshot.strategy', 'auto'),
+            'playwright' => [
+                'enabled' => config('feedback.screenshot.playwright.enabled', true),
+                'timeout' => config('feedback.screenshot.playwright.timeout', 30000),
+            ],
+            'endpoints' => [
+                'serverScreenshot' => route('feedback.screenshot'),
+            ],
+        ];
+        $cfgJson = json_encode($cfg);
+
         $loader = <<<HTML
+<script id="ks-fb-config">window.KS_FEEDBACK_CONFIG = {$cfgJson};</script>
 <script id="ks-fb-loader" data-navigate-once>
     (function() {
         let isFeedbackLoading = false;
