@@ -15,6 +15,11 @@ class TeamStatsService
      */
     public function getSeasonSummary(int $teamId, int $seasonId): ?array
     {
+        // Preferujeme oficiální souhrn ze stránky soutěže, pokud je k dispozici
+        if ($official = $this->getOfficialTeamSummary($teamId, $seasonId)) {
+            return $official;
+        }
+
         $row = StatisticRow::where('team_id', $teamId)
             ->where('season_id', $seasonId)
             ->whereNull('player_id')
@@ -325,6 +330,51 @@ class TeamStatsService
     }
 
     /**
+     * Zkusí vrátit souhrn z oficiální tabulky soutěže, pokud je uložen v konfiguraci.
+     */
+    protected function getOfficialTeamSummary(int $teamId, int $seasonId): ?array
+    {
+        try {
+            /** @var \App\Models\ExternalTeamSeasonConfig|null $config */
+            $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $teamId)
+                ->where('season_id', $seasonId)
+                ->first();
+
+            $official = $config?->metadata['official_standing'] ?? null;
+            if ($official && isset($official['gp'], $official['w'], $official['l'], $official['score'])) {
+                $gp = (int) $official['gp'];
+                $wins = (int) $official['w'];
+                $losses = (int) $official['l'];
+
+                $ptsFor = 0;
+                $ptsAgainst = 0;
+                if (preg_match('/(\d+)\s*[:\-]\s*(\d+)/', (string) $official['score'], $m)) {
+                    $ptsFor = (int) $m[1];
+                    $ptsAgainst = (int) $m[2];
+                }
+
+                $ptsAvg = $gp > 0 ? round($ptsFor / $gp, 1) : 0;
+                $ptsAgainstAvg = $gp > 0 ? round($ptsAgainst / $gp, 1) : 0;
+
+                return [
+                    'gp' => $gp,
+                    'wins' => $wins,
+                    'losses' => $losses,
+                    'pts_for' => $ptsFor,
+                    'pts_against' => $ptsAgainst,
+                    'pts_avg' => $ptsAvg,
+                    'pts_against_avg' => $ptsAgainstAvg,
+                    'source' => 'official',
+                ];
+            }
+        } catch (\Throwable $e) {
+            // Ignorujeme a vrátíme null
+        }
+
+        return null;
+    }
+
+    /**
      * Získá bilanci výher a proher týmu.
      */
     public function getWinLossBalance(int $teamId, int $seasonId): array
@@ -424,6 +474,44 @@ class TeamStatsService
      */
     protected function calculateSummaryFromMatches(int $teamId, int $seasonId): array
     {
+        // 0) Pokud máme oficiální souhrn ze stránky soutěže, použijeme jej jako zdroj pravdy
+        try {
+            /** @var \App\Models\ExternalTeamSeasonConfig|null $config */
+            $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $teamId)
+                ->where('season_id', $seasonId)
+                ->first();
+
+            $official = $config?->metadata['official_standing'] ?? null;
+            if ($official && isset($official['gp'], $official['w'], $official['l'], $official['score'])) {
+                $gp = (int) $official['gp'];
+                $wins = (int) $official['w'];
+                $losses = (int) $official['l'];
+
+                $ptsFor = 0;
+                $ptsAgainst = 0;
+                if (preg_match('/(\d+)\s*[:\-]\s*(\d+)/', (string) $official['score'], $m)) {
+                    $ptsFor = (int) $m[1];
+                    $ptsAgainst = (int) $m[2];
+                }
+
+                $ptsAvg = $gp > 0 ? round($ptsFor / $gp, 1) : 0;
+                $ptsAgainstAvg = $gp > 0 ? round($ptsAgainst / $gp, 1) : 0;
+
+                return [
+                    'gp' => $gp,
+                    'wins' => $wins,
+                    'losses' => $losses,
+                    'pts_for' => $ptsFor,
+                    'pts_against' => $ptsAgainst,
+                    'pts_avg' => $ptsAvg,
+                    'pts_against_avg' => $ptsAgainstAvg,
+                    'source' => 'official',
+                ];
+            }
+        } catch (\Throwable $e) {
+            // Pokud selže, tiše pokračujeme fallbackem z našich zápasů
+        }
+
         $balance = $this->getWinLossBalance($teamId, $seasonId);
 
         $matches = BasketballMatch::where('team_id', $teamId)

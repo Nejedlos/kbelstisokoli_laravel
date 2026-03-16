@@ -36,9 +36,10 @@ class CompetitionSyncService
         $run->updateMetadata(['url' => $config->competition_url]);
 
         try {
+            // 1. Stažení hlavní stránky soutěže (pro tabulku pořadí)
             $html = $this->fetcher->fetch($config->competition_url, $run);
 
-            // 1. Extrakce tabulky pořadí (Standings)
+            // 1a. Extrakce tabulky pořadí (Standings)
             $standingExtractor = app(CompetitionStandingExtractor::class);
             $standingResult = $standingExtractor->extract($html);
             $standingData = $standingResult['data'];
@@ -48,8 +49,30 @@ class CompetitionSyncService
 
             // 2. Extrakce rozpisu (Schedule)
             $scheduleExtractor = app(CompetitionScheduleExtractor::class);
-            $scheduleResult = $scheduleExtractor->extract($html);
-            $scheduleData = $scheduleResult['data'];
+
+            // Zkusíme dotáhnout kompletní rozpis pro náš tým pomocí parametru ?t=[external_id]
+            // cz.basketball díky tomu vygeneruje stránku se všemi zápasy daného týmu napříč fázemi.
+            $allMatches = [];
+            if ($config->external_team_id) {
+                $separator = str_contains($config->competition_url, '?') ? '&' : '?';
+                $teamSpecificUrl = $config->competition_url . $separator . 't=' . $config->external_team_id;
+
+                ConsoleService::log("    - Stahuji kompletní rozpis týmu ({$teamSpecificUrl})", 'debug');
+                try {
+                    $teamHtml = $this->fetcher->fetch($teamSpecificUrl, $run);
+                    $teamScheduleResult = $scheduleExtractor->extract($teamHtml);
+                    $allMatches = $teamScheduleResult['data']->rows;
+                    ConsoleService::log("    - Z týmového rozpisu získáno " . count($allMatches) . " zápasů.", 'debug');
+                } catch (\Exception $e) {
+                    Log::warning("Nepodařilo se stáhnout týmový rozpis soutěže: " . $e->getMessage());
+                }
+            }
+
+            // Pokud nemáme zápasy z týmové URL (nebo ji nemáme), vezmeme ty z hlavní stránky
+            if (empty($allMatches)) {
+                $scheduleResult = $scheduleExtractor->extract($html);
+                $allMatches = $scheduleResult['data']->rows;
+            }
 
             // 3. Najdeme náš tým v tabulce pořadí pro "kontrolní součet"
             $teamNameInSource = $config->team_name_in_source ?: $team->name;
@@ -108,7 +131,7 @@ class CompetitionSyncService
             preg_match('/\b([a-gA-G])\b/', mb_strtolower($team->name), $mMy);
             $suffixMy = isset($mMy[1]) ? mb_strtolower($mMy[1]) : null;
 
-            foreach ($scheduleData->rows as $row) {
+            foreach ($allMatches as $row) {
                 $homeTeam = mb_strtolower($row->values['home_team']);
                 $awayTeam = mb_strtolower($row->values['away_team']);
 
@@ -140,7 +163,7 @@ class CompetitionSyncService
             ConsoleService::log("    Z rozpisu soutěže zpracováno {$importedCount} zápasů týmu.", 'debug');
 
             $run->finish([
-                'extracted_count' => count($scheduleData->rows),
+                'extracted_count' => count($allMatches),
                 'imported_count' => $importedCount,
             ]);
 

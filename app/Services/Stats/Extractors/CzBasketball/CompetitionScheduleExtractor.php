@@ -15,30 +15,35 @@ class CompetitionScheduleExtractor implements StatExtractorInterface
         $crawler = new Crawler($content);
         $rows = [];
 
-        // Hledáme tabulku s rozpisem
-        $table = $crawler->filter('table')->reduce(function (Crawler $node) {
+        // Hledáme VŠECHNY tabulky s rozpisem (některé soutěže mají více fází/tabulek na jedné stránce)
+        $tables = $crawler->filter('table')->reduce(function (Crawler $node) {
             $text = mb_strtolower($node->text());
             return (str_contains($text, 'domácí') && str_contains($text, 'hosté')) ||
-                   (str_contains($text, 'datum') && str_contains($text, 'skore'));
-        })->first();
+                   (str_contains($text, 'datum') && str_contains($text, 'skore')) ||
+                   (str_contains($text, 'datum') && str_contains($text, 'skóre'));
+        });
 
-        if ($table->count() === 0) {
+        if ($tables->count() === 0) {
             return [
                 'data' => new NormalizedTableDTO('Competition Schedule', [], []),
                 'fragment_html' => '',
             ];
         }
 
-        // Zjistíme indexy sloupců z hlavičky
-        $headers = [];
-        $table->filter('thead th')->each(function (Crawler $th, $i) use (&$headers) {
-            $text = mb_strtolower(trim($th->text()));
-            if (str_contains($text, 'domácí') || str_contains($text, 'hosté')) $headers['teams'] = $i;
-            if (str_contains($text, 'datum')) $headers['date'] = $i;
-            if (str_contains($text, 'skore') || str_contains($text, 'skóre')) $headers['score'] = $i;
-        });
+        $seen = [];
+        $fragments = [];
 
-        $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $headers) {
+        $tables->each(function (Crawler $table) use (&$rows, &$seen, &$fragments) {
+            // Zjistíme indexy sloupců z hlavičky pro tuto tabulku
+            $headers = [];
+            $table->filter('thead th')->each(function (Crawler $th, $i) use (&$headers) {
+                $text = mb_strtolower(trim($th->text()));
+                if (str_contains($text, 'domácí') || str_contains($text, 'hosté')) $headers['teams'] = $i;
+                if (str_contains($text, 'datum')) $headers['date'] = $i;
+                if (str_contains($text, 'skore') || str_contains($text, 'skóre')) $headers['score'] = $i;
+            });
+
+            $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, &$seen, $headers) {
             $cells = $tr->filter('td');
             if ($cells->count() < 3) return;
 
@@ -103,28 +108,38 @@ class CompetitionScheduleExtractor implements StatExtractorInterface
             if ($matchExtId) {
                 $score = ($scoreHome !== null && $scoreAway !== null) ? "$scoreHome:$scoreAway" : null;
 
-                $rows[] = new NormalizedRowDTO(
-                    values: [
-                        'external_match_id' => $matchExtId,
-                        'scheduled_at' => $scheduledAt,
-                        'home_team' => $homeTeam,
-                        'away_team' => $awayTeam,
-                        'score' => $score,
-                        'score_home' => $scoreHome,
-                        'score_away' => $scoreAway,
-                        'status' => ($scoreHome !== null) ? 'finished' : 'scheduled',
-                    ],
-                    metadata: [
-                        'external_id' => $matchExtId,
-                        'original_date' => $dateText,
-                    ]
-                );
+                // Deduplikace podle external_match_id (zápas se může objevit ve více tabulkách/fázích)
+                if (!isset($seen[$matchExtId])) {
+                    $rows[] = new NormalizedRowDTO(
+                        values: [
+                            'external_match_id' => $matchExtId,
+                            'scheduled_at' => $scheduledAt,
+                            'home_team' => $homeTeam,
+                            'away_team' => $awayTeam,
+                            'score' => $score,
+                            'score_home' => $scoreHome,
+                            'score_away' => $scoreAway,
+                            'status' => ($scoreHome !== null) ? 'finished' : 'scheduled',
+                        ],
+                        metadata: [
+                            'external_id' => $matchExtId,
+                            'original_date' => $dateText,
+                        ]
+                    );
+                    $seen[$matchExtId] = true;
+                }
+            }
+        });
+
+            // Uložíme fragment tabulky pro debugging (jen první 2 kvůli velikosti)
+            if (count($fragments) < 2) {
+                $fragments[] = $table->outerHtml();
             }
         });
 
         return [
             'data' => new NormalizedTableDTO('Competition Schedule', [], $rows),
-            'fragment_html' => $table->outerHtml(),
+            'fragment_html' => implode("\n\n", $fragments),
         ];
     }
 }
