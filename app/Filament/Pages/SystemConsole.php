@@ -270,6 +270,16 @@ class SystemConsole extends Page
             $seasonOptions[$season->name] = $season->name;
         }
 
+        // Uživatelé pro select (pouze ti s externím mapováním nebo všichni?)
+        // Vzhledem k tomu, že stats:sync-players syncuje s cz.basketball, je dobré nabídnout ty, co mají mapping.
+        // Ale user_id může být kdokoliv, kdo má profil.
+        $users = \App\Models\User::query()
+            ->orderBy('id', 'desc')
+            ->get()
+            ->mapWithKeys(fn ($user) => [$user->id => ($user->last_name . ' ' . $user->first_name ?: $user->name) . " (#{$user->id})"])
+            ->toArray();
+        $userOptions = ['' => '-- Všichni uživatelé --'] + $users;
+
         $groups = [];
 
         // 1. AI & Vyhledávání (Vždy)
@@ -389,11 +399,12 @@ class SystemConsole extends Page
                         'label' => __('admin/system-console.commands.stats_sync_players.team_filter_label'),
                         'options' => array_merge(['' => __('admin/system-console.commands.stats_sync_players.all_teams')], \App\Models\Team::orderBy('name')->pluck('name', 'id')->toArray()),
                     ],
-                ],
-                'input' => [
-                    'name' => '--user_id',
-                    'label' => __('admin/system-console.commands.stats_sync_players.input_label'),
-                    'placeholder' => 'Např. 108 (pokud prázdné, synchronizuje tým/všechny)',
+                    [
+                        'name' => '--user_id',
+                        'label' => __('admin/system-console.commands.stats_sync_players.input_label'),
+                        'options' => $userOptions,
+                        'searchable' => true,
+                    ],
                 ],
                 'color' => 'primary',
                 'icon' => FilamentIcon::get('users'),

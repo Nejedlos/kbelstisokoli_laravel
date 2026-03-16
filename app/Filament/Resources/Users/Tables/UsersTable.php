@@ -33,7 +33,7 @@ class UsersTable
         return $table
             ->striped()
             ->modifyQueryUsing(fn ($query) => $query
-                ->with(['externalMappings'])
+                ->with(['externalMappings', 'roles', 'playerProfile.primaryTeam'])
                 ->select("{$userTable}.*")
                 ->addSelect(['duplicates_count' => \App\Models\User::query()
                     ->from("{$userTable} as u2")
@@ -217,7 +217,7 @@ class UsersTable
                         ->label('Synchronizovat z cz.basketball')
                         ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
-                        ->visible(fn ($record) => $record->externalMappings()->where('source_key', 'czbasketball')->exists())
+                        ->visible(fn ($record) => $record->externalMappings->where('source_key', 'czbasketball')->isNotEmpty())
                         ->action(function ($record, \App\Services\Stats\Sync\PlayerSyncService $service) {
                             $result = $service->syncPlayer($record);
 

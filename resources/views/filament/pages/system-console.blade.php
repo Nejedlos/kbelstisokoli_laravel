@@ -239,7 +239,11 @@
                                                 <label class="text-[9px] uppercase tracking-wider font-bold text-gray-400">
                                                     {{ $config['select']['label'] }}
                                                 </label>
-                                                <x-filament::input.select x-model="selectValue" class="w-full text-[11px] py-1 h-8">
+                                                <x-filament::input.select
+                                                    x-model="selectValue"
+                                                    class="w-full text-[11px] py-1 h-8"
+                                                    :searchable="isset($config['select']['searchable']) && $config['select']['searchable']"
+                                                >
                                                     <option value="">-- vybrat --</option>
                                                     @foreach($config['select']['options'] as $val => $label)
                                                         <option value="{{ $val }}">{{ $label }}</option>
@@ -254,7 +258,11 @@
                                                     <label class="text-[9px] uppercase tracking-wider font-bold text-gray-400">
                                                         {{ $select['label'] }}
                                                     </label>
-                                                    <x-filament::input.select x-model="inputValues['{{ $select['name'] }}']" class="w-full text-[11px] py-1 h-8">
+                                                    <x-filament::input.select
+                                                        x-model="inputValues['{{ $select['name'] }}']"
+                                                        class="w-full text-[11px] py-1 h-8"
+                                                        :searchable="isset($select['searchable']) && $select['searchable']"
+                                                    >
                                                         <option value="">-- vybrat --</option>
                                                         @foreach($select['options'] as $val => $label)
                                                             <option value="{{ $val }}">{{ $label }}</option>
