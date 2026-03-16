@@ -80,7 +80,7 @@ class MatchSyncService
             $team->slug,
             $scheduledAt,
             $isHome,
-            $opponentName
+            $opponent->name
         );
 
         $match = null;
@@ -206,16 +206,27 @@ class MatchSyncService
             }
         }
 
+        // Zpracování statusu
+        $status = $matchData['status'] ?? 'planned';
+
         // Zpracování skóre
         $scoreHome = null;
         $scoreAway = null;
         if (isset($matchData['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $matchData['score'], $m)) {
-            $scoreHome = (int) $m[1];
-            $scoreAway = (int) $m[2];
+            $canHaveScore = ! in_array($status, ['planned', 'scheduled']);
+
+            // Pokud je zápas v minulosti, může mít skóre i když je status planned (dočasně při synchronizaci)
+            if ($scheduledAt && $scheduledAt->isPast()) {
+                $canHaveScore = true;
+            }
+
+            if ($canHaveScore) {
+                $scoreHome = (int) $m[1];
+                $scoreAway = (int) $m[2];
+            }
         }
 
-        // Zpracování statusu
-        $status = $matchData['status'] ?? 'planned';
+        // Finální určení statusu
         if (($scoreHome !== null && $scoreAway !== null) || in_array($status, ['played', 'completed'])) {
             $status = 'finished';
         }

@@ -87,6 +87,9 @@ Schedule::command('stats:sync-players --excesive')->weeklyOn(0, '02:00');
 // Pravidelná synchronizace všech týmů v aktivní sezóně (denně v 4:30)
 Schedule::command('stats:import --queue')->dailyAt('04:30');
 
+// Čištění duplicit (každý den ve 4:00)
+Schedule::command('stats:cleanup-duplicates')->dailyAt('04:00');
+
 // Měsíční hloubková (excesivní) synchronizace všech historických sezón týmů (1. v měsíci v 1:00)
 Schedule::call(function () {
     $configs = \App\Models\ExternalTeamSeasonConfig::where('is_enabled', true)->get();
