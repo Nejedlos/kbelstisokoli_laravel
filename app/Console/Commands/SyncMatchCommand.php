@@ -75,13 +75,6 @@ class SyncMatchCommand extends Command
 
         if ($this->option('sync')) {
             $this->info('Spouštím synchronizaci synchronně...');
-            // syncMatchDetail očekává interní matchId, ale my ho možná ještě nemáme v DB
-            // nebo chceme jen synchronizovat podle externího ID.
-            // Služba syncMatchDetail v ExternalStatsSyncService bere matchId.
-            // Ale my můžeme chtít volat StatSyncService přímo nebo upravit ExternalStatsSyncService.
-
-            // Pokud match neexistuje, musíme ho nejdřív najít v seznamu zápasů.
-            // Ale z CLI obvykle synchronizujeme už existující nebo známý zápas.
 
             if (! $match) {
                 $this->warn("Zápas s externím ID {$matchExternalId} nebyl nalezen v interní DB. Zkuste nejdříve sync-team-season.");
@@ -89,7 +82,20 @@ class SyncMatchCommand extends Command
                 return self::FAILURE;
             }
 
-            $syncService->syncMatchDetail($match->id);
+            $bar = $this->output->createProgressBar(1);
+            $bar->start();
+
+            try {
+                $syncService->syncMatchDetail($match->id, $options);
+                $bar->advance();
+            } catch (\Exception $e) {
+                $bar->finish();
+                $this->newLine();
+                throw $e;
+            }
+
+            $bar->finish();
+            $this->newLine();
             $this->info('Synchronizace zápasu dokončena.');
         } else {
             $this->info('Zařazuji synchronizaci do fronty (SyncMatchDetailJob)...');

@@ -113,6 +113,9 @@ class SyncTeamSeasonCommand extends Command
             );
             $mainRun->update(['total_count' => $totalWork]);
 
+            $bar = $this->output->createProgressBar($totalWork);
+            $bar->start();
+
             $count = 0;
             try {
                 foreach ($teams as $team) {
@@ -124,12 +127,14 @@ class SyncTeamSeasonCommand extends Command
                         }
 
                         $count++;
-                        $this->info("Synchronizuji: {$team->name} | {$season->name} ({$count}/{$totalWork})");
+                        // $this->info("Synchronizuji: {$team->name} | {$season->name} ({$count}/{$totalWork})");
                         $mainRun->updateProgress($count, $totalWork, "Tým: {$team->name} ({$season->name})");
 
                         $syncService->syncTeamSeason($team->id, $season->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
                         // increment není potřeba, protože updateProgress ho už nastavil správně před syncem,
                         // případně ho aktualizoval syncTeamSeason uvnitř.
+
+                        $bar->advance();
 
                         // Mikropauza mezi týmy/sezónami, abychom nehltili externí web
                         if ($totalWork > 1) {
@@ -138,8 +143,12 @@ class SyncTeamSeasonCommand extends Command
                         }
                     }
                 }
+                $bar->finish();
+                $this->newLine();
                 $mainRun->finish(['status' => 'success']);
             } catch (\Exception $e) {
+                $bar->finish();
+                $this->newLine();
                 $mainRun->fail($e);
                 throw $e;
             }
