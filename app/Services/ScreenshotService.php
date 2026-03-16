@@ -48,6 +48,18 @@ class ScreenshotService
 
         // 4) Run Node Playwright worker
         $node = config('feedback.screenshot.playwright.node_path', 'node');
+
+        // Simple heuristic for common paths if 'node' is not found in PATH
+        if ($node === 'node' && !$this->canExecute($node)) {
+            $commonPaths = ['/usr/local/bin/node', '/opt/homebrew/bin/node', '/usr/bin/node'];
+            foreach ($commonPaths as $p) {
+                if (file_exists($p) && is_executable($p)) {
+                    $node = $p;
+                    break;
+                }
+            }
+        }
+
         $script = base_path(config('feedback.screenshot.playwright.script_path', 'resources/js/screenshot-worker.cjs'));
         $timeoutMs = (int) config('feedback.screenshot.playwright.timeout', 30000);
 
@@ -72,6 +84,7 @@ class ScreenshotService
             $stderr = $proc->getErrorOutput();
             Log::warning('Playwright screenshot failed', [
                 'stderr' => $stderr,
+                'args' => $args,
             ]);
             throw new \RuntimeException('Playwright worker failed: ' . trim($stderr));
         }
@@ -101,5 +114,15 @@ class ScreenshotService
         ];
 
         return $meta;
+    }
+
+    protected function canExecute(string $command): bool
+    {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            return false; // Skip on Windows
+        }
+        $proc = new Process(['which', $command]);
+        $proc->run();
+        return $proc->isSuccessful();
     }
 }

@@ -219,12 +219,16 @@ class FeedbackController extends Controller
 
         $validated = $request->validate([
             'dom' => 'required|string',
+            'head' => 'nullable|string',
             'viewport' => 'nullable|array',
             'viewport.width' => 'nullable|integer|min:320|max:3840',
             'viewport.height' => 'nullable|integer|min:240|max:2160',
             'dpr' => 'nullable|numeric|min:1|max:3',
             'selector' => 'nullable|string',
             'fullPage' => 'nullable|boolean',
+            'bodyClass' => 'nullable|string',
+            'bodyStyle' => 'nullable|string',
+            'htmlClass' => 'nullable|string',
         ]);
 
         try {
@@ -236,6 +240,10 @@ class FeedbackController extends Controller
                 'fullPage' => $validated['fullPage'] ?? false,
                 'context' => [
                     'user_id' => $request->user()?->id,
+                    'head' => $validated['head'] ?? '',
+                    'body_class' => $validated['bodyClass'] ?? '',
+                    'body_style' => $validated['bodyStyle'] ?? '',
+                    'html_class' => $validated['htmlClass'] ?? '',
                 ],
             ]);
 

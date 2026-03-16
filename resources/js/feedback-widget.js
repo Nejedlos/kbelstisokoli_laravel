@@ -363,16 +363,35 @@ function registerKsFeedbackWidget() {
             const restore = () => { widgetEl.style.display = originalDisplay; };
 
             const buildDomSnapshot = () => {
-                const main = document.querySelector('main') || document.body;
-                let html = main.outerHTML;
-                html = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+                // Zachytit relevantní CSS z headu
+                const headElements = Array.from(document.head.querySelectorAll('link[rel="stylesheet"], style'));
+                const headHtml = headElements
+                    .filter(el => !el.classList.contains('ks-feedback-ignore'))
+                    .map(el => el.outerHTML)
+                    .join('\n');
+
+                // Zachytit kompletní body, ale bez skriptů
+                const bodyClone = document.body.cloneNode(true);
+
+                // Odstranit skripty, widget, overlay a další věci z klonu
+                const toRemove = bodyClone.querySelectorAll('script, #ks-fb-root, .ks-fb-overlay, .ks-fab-trigger');
+                toRemove.forEach(el => el.remove());
+
+                let html = bodyClone.innerHTML;
                 html = html.replace(/value="[^"]*"/gi, 'value="[redacted]"');
-                return html.substring(0, 200 * 1024);
+
+                return {
+                    dom: html.substring(0, 1048576), // Zvýšeno na 1MB
+                    head: headHtml,
+                    bodyClass: document.body.className,
+                    bodyStyle: document.body.style.cssText,
+                    htmlClass: document.documentElement.className,
+                };
             };
 
             const sanitizeClone = (clonedDoc) => {
                 try {
-                    // Remove cross-origin stylesheets
+                    // 1. Remove cross-origin stylesheets
                     const links = Array.from(clonedDoc.getElementsByTagName('link'));
                     for (let link of links) {
                         if (link.rel === 'stylesheet' && link.href) {
@@ -380,23 +399,71 @@ function registerKsFeedbackWidget() {
                             if (!isSameOrigin) link.remove();
                         }
                     }
-                    // Replace unsupported colors
+
+                    // 2. Add global override for Tailwind v4 variables and known crashers
+                    const override = clonedDoc.createElement('style');
+                    override.innerHTML = `
+                        :root, * {
+                            --tw-ring-color: transparent !important;
+                            --tw-ring-offset-color: transparent !important;
+                            --tw-shadow-color: transparent !important;
+                            --tw-outline-color: transparent !important;
+                            --tw-bg-color: transparent !important;
+                            --tw-text-color: inherit !important;
+                        }
+                        /* Disable animations/transitions */
+                        *, *::before, *::after {
+                            animation: none !important;
+                            transition: none !important;
+                        }
+                    `;
+                    clonedDoc.head.appendChild(override);
+
+                    // 3. Clean all style elements
                     const styleElements = Array.from(clonedDoc.getElementsByTagName('style'));
                     for (let style of styleElements) {
-                        style.innerHTML = style.innerHTML.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
+                        if (style === override) continue;
+                        if (/(oklab|oklch)/i.test(style.innerHTML)) {
+                            style.innerHTML = style.innerHTML.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
+                        }
                     }
+
+                    // 4. Clean all inline styles
                     const allElements = Array.from(clonedDoc.getElementsByTagName('*'));
-                    let cleaned = 0;
+                    let cleanedInline = 0;
                     for (let el of allElements) {
                         if (el.hasAttribute && el.hasAttribute('style')) {
                             const s = el.getAttribute('style');
-                            if (s && /(oklab|oklch)\s*\([^)]+\)/i.test(s)) {
+                            if (s && /(oklab|oklch)/i.test(s)) {
                                 el.setAttribute('style', s.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent'));
-                                cleaned++;
+                                cleanedInline++;
                             }
                         }
                     }
-                    console.log(`[FB] sanitizeClone cleaned ${cleaned} inline styles.`);
+
+                    // 5. Aggressively clean accessible stylesheets (rules)
+                    let cleanedRules = 0;
+                    for (let i = 0; i < clonedDoc.styleSheets.length; i++) {
+                        const sheet = clonedDoc.styleSheets[i];
+                        try {
+                            const rules = sheet.cssRules || sheet.rules;
+                            if (!rules) {
+                                sheet.disabled = true;
+                                continue;
+                            }
+                            for (let j = 0; j < rules.length; j++) {
+                                const rule = rules[j];
+                                if (rule.style && rule.style.cssText && /(oklab|oklch)/i.test(rule.style.cssText)) {
+                                    rule.style.cssText = rule.style.cssText.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
+                                    cleanedRules++;
+                                }
+                            }
+                        } catch (e) {
+                            // CORS or access error - disable to be safe
+                            try { sheet.disabled = true; } catch(err) {}
+                        }
+                    }
+                    console.log(`[FB] sanitizeClone: cleaned ${cleanedInline} inline, ${cleanedRules} rules.`);
                 } catch (e) { console.warn('[FB] sanitizeClone error', e); }
             };
 
@@ -404,15 +471,21 @@ function registerKsFeedbackWidget() {
                 const h2c = window.html2canvas || (typeof html2canvas !== 'undefined' ? html2canvas : null);
                 if (!h2c) return null;
                 console.log('[FB] html2canvas fallback start');
-                const canvas = await h2c(document.body, {
-                    useCORS: true,
-                    allowTaint: true,
-                    scale: Math.min(window.devicePixelRatio, 2),
-                    ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
-                    onclone: sanitizeClone,
-                });
-                console.log('[FB] html2canvas fallback done');
-                return canvas.toDataURL('image/jpeg', 0.8);
+                try {
+                    const canvas = await h2c(document.body, {
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: true,
+                        scale: Math.min(window.devicePixelRatio, 2),
+                        ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
+                        onclone: sanitizeClone,
+                    });
+                    console.log('[FB] html2canvas fallback done');
+                    return canvas.toDataURL('image/jpeg', 0.8);
+                } catch (e) {
+                    console.warn('[FB] html2canvas fallback failed', e.message);
+                    return null;
+                }
             };
 
             try {
@@ -421,7 +494,7 @@ function registerKsFeedbackWidget() {
                 if ((strategy === 'auto' || strategy === 'playwright') && cfg.playwright?.enabled && cfg.endpoints?.serverScreenshot) {
                     try {
                         console.log('[FB] server screenshot attempt');
-                        const dom = buildDomSnapshot();
+                        const snap = buildDomSnapshot();
                         const res = await fetch(cfg.endpoints.serverScreenshot, {
                             method: 'POST',
                             headers: {
@@ -430,7 +503,11 @@ function registerKsFeedbackWidget() {
                                 'Accept': 'application/json'
                             },
                             body: JSON.stringify({
-                                dom,
+                                dom: snap.dom,
+                                head: snap.head,
+                                bodyClass: snap.bodyClass,
+                                bodyStyle: snap.bodyStyle,
+                                htmlClass: snap.htmlClass,
                                 viewport: { width: window.innerWidth, height: window.innerHeight },
                                 dpr: Math.min(window.devicePixelRatio || 1, 2),
                                 fullPage: false,
@@ -449,7 +526,7 @@ function registerKsFeedbackWidget() {
                 }
 
                 // 2) Fallback html2canvas
-                if (!dataUrl) {
+                if (!dataUrl && strategy !== 'playwright') {
                     dataUrl = await html2canvasFallback();
                 }
 
@@ -465,7 +542,7 @@ function registerKsFeedbackWidget() {
         },
 
         async submitFeedback() {
-            if (!this.form.title || !this.form.description) return;
+            if (this.submitting || !this.form.title || !this.form.description) return;
             this.submitting = true;
 
             try {

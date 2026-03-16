@@ -109,8 +109,8 @@ class InjectFeedbackWidget
         $cfgJson = json_encode($cfg);
 
         $loader = <<<HTML
-<script id="ks-fb-config">window.KS_FEEDBACK_CONFIG = {$cfgJson};</script>
-<script id="ks-fb-loader" data-navigate-once>
+<script id="ks-fb-config" class="ks-feedback-ignore">window.KS_FEEDBACK_CONFIG = {$cfgJson};</script>
+<script id="ks-fb-loader" class="ks-feedback-ignore" data-navigate-once>
     (function() {
         let isFeedbackLoading = false;
 

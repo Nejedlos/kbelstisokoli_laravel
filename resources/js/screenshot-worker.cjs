@@ -33,6 +33,8 @@ function parseArgs(argv) {
     const page = await context.newPage();
 
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Počkat na načtení všech fontů
+    try { await page.evaluate(() => document.fonts.ready); } catch (e) {}
     // Další stabilizace sítě
     try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch (e) {}
 
