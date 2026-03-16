@@ -150,6 +150,20 @@ class PlayerSyncService
                 $historyResult = $this->syncExcesiveHistory($user, $data['available_seasons'] ?? [], $run, $options);
             }
 
+            // 6. Přepočet souhrnů pro všechny dostupné sezóny
+            try {
+                if (!empty($data['available_seasons'])) {
+                    foreach ($data['available_seasons'] as $seasonLabel) {
+                        $season = \App\Models\Season::where('name', 'LIKE', "%{$seasonLabel}%")->first();
+                        if ($season) {
+                            $this->statisticSyncService->recomputePlayerSummaries($season->id);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning("PlayerSyncService: Failed to recompute summaries for {$user->display_name}: " . $e->getMessage());
+            }
+
             $run->finish([
                 'imported_count' => count($data['stats'] ?? []),
                 'matches_count' => count($data['matches'] ?? [])
@@ -253,11 +267,18 @@ class PlayerSyncService
             if ($isHistorical && !($options['force'] ?? false)) {
                 // Pokud máme aspoň jeden zápas s boxscore_synced_at pro tuto sezónu, považujeme ji za "už hotovou"
                 // (pro hromadnou synchronizaci historie to stačí jako indikátor, že jsme tam už byli)
-                $hasAnyData = ExternalPlayerMatch::where('user_id', $user->id)
-                    ->where('source_key', 'czbasketball')
-                    ->where('season_name', $season)
-                    ->whereNotNull('boxscore_synced_at')
-                    ->exists();
+                $normalized = Season::normalizeName($season);
+                $parts = explode('/', $normalized);
+                $hasAnyData = false;
+                if (count($parts) === 2) {
+                    $startYear = $parts[0];
+                    $endYear = $parts[1];
+                    $hasAnyData = ExternalPlayerMatch::where('user_id', $user->id)
+                        ->where('source_key', 'czbasketball')
+                        ->whereBetween('match_date', ["{$startYear}-08-01", "{$endYear}-07-31"])
+                        ->whereNotNull('boxscore_synced_at')
+                        ->exists();
+                }
 
                 if ($hasAnyData) {
                     \App\Services\Support\ConsoleService::log("  - Přeskakuji historickou sezónu $season pro hráče {$user->name} (již synchronizováno).", 'debug');

@@ -94,9 +94,22 @@ class FinanceService
             }
         }
 
-        $paidTotal = FinanceCharge::where('user_id', $user->id)
+        $paidTotalFullyPaid = (float) FinanceCharge::where('user_id', $user->id)
+            ->where('is_visible_to_member', true)
             ->where('status', 'paid')
             ->sum('amount_total');
+
+        $paidTotalPartial = (float) DB::table('charge_payment_allocations')
+            ->whereIn('finance_charge_id', function ($query) use ($user) {
+                $query->select('id')
+                    ->from('finance_charges')
+                    ->where('user_id', $user->id)
+                    ->where('is_visible_to_member', true)
+                    ->where('status', '!=', 'paid');
+            })
+            ->sum('amount');
+
+        $paidTotal = $paidTotalFullyPaid + $paidTotalPartial;
 
         return [
             'total_to_pay' => $totalToPay,

@@ -57,19 +57,27 @@ class FinanceArchiveOldCharges extends Command
         // 1. Předpisy navázané na staré sezónní konfigurace
         $configIds = UserSeasonConfig::whereIn('season_id', $inactiveSeasonIds)->pluck('id');
 
-        $query = FinanceCharge::whereIn('status', ['open', 'partially_paid', 'overdue'])
-            ->where(function ($q) use ($configIds) {
-                // Hledáme v JSON metadatech (season_config_id)
-                foreach ($configIds as $id) {
-                    $q->orWhereJsonContains('metadata->season_config_id', $id);
-                }
-            });
+        $openCharges = FinanceCharge::whereIn('status', ['open', 'partially_paid', 'overdue'])->get();
+        $toUpdateConfigs = [];
+        $toUpdateOthers = [];
 
-        $countConfigs = $query->count();
+        foreach ($openCharges as $charge) {
+            $seasonConfigId = $charge->metadata['season_config_id'] ?? null;
+            if ($seasonConfigId && $configIds->contains($seasonConfigId)) {
+                $toUpdateConfigs[] = $charge->id;
+                continue;
+            }
+
+            if ($charge->due_date && $charge->due_date->lt($thresholdDate)) {
+                $toUpdateOthers[] = $charge->id;
+            }
+        }
+
+        $countConfigs = count($toUpdateConfigs);
         $this->info("Nalezeno {$countConfigs} neuzavřených členských předpisů ze starých sezón.");
 
         if (! $this->option('dry-run') && $countConfigs > 0) {
-            $query->update([
+            FinanceCharge::whereIn('id', $toUpdateConfigs)->update([
                 'status' => 'paid',
                 'notes_internal' => DB::raw("CONCAT(COALESCE(notes_internal, ''), '\n[ARCHIVACE] Automaticky zaplaceno - archivace staré sezóny (Junie)')"),
             ]);
@@ -77,20 +85,11 @@ class FinanceArchiveOldCharges extends Command
         }
 
         // 2. Ostatní předpisy (např. pokuty) starší než rozhodné datum
-        $queryOthers = FinanceCharge::whereIn('status', ['open', 'partially_paid', 'overdue'])
-            ->where('due_date', '<', $thresholdDate)
-            ->where(function($q) use ($configIds) {
-                // Nechceme ty, které jsme už zpracovali výše (pokud by tam byla shoda)
-                foreach ($configIds as $id) {
-                    $q->whereJsonDoesntContain('metadata->season_config_id', $id);
-                }
-            });
-
-        $countOthers = $queryOthers->count();
+        $countOthers = count($toUpdateOthers);
         $this->info("Nalezeno {$countOthers} ostatních neuzavřených předpisů (např. pokuty) starších než rozhodné datum.");
 
         if (! $this->option('dry-run') && $countOthers > 0) {
-            $queryOthers->update([
+            FinanceCharge::whereIn('id', $toUpdateOthers)->update([
                 'status' => 'paid',
                 'notes_internal' => DB::raw("CONCAT(COALESCE(notes_internal, ''), '\n[ARCHIVACE] Automaticky zaplaceno - staré datum splatnosti (Junie)')"),
             ]);

@@ -157,7 +157,7 @@ class HelpQueryService
                 ->where('is_active', true)
                 ->whereNull('parent_id')
                 ->where(function ($q) {
-                    $this->applySectionFilter($q);
+                    $this->applySectionFilterToCategories($q);
                 })
                 ->orderBy('sort_order')
                 ->get();
@@ -208,7 +208,7 @@ class HelpQueryService
                     $q->whereNull('published_at')->orWhere('published_at', '<=', now());
                 })
                 ->where(function ($q) {
-                    $this->applySectionFilter($q);
+                    $this->applySectionFilterToArticles($q);
                 })
                 ->orderBy('is_featured', 'desc')
                 ->orderBy('sort_order')
@@ -244,7 +244,7 @@ class HelpQueryService
                 ->where('slug', $slug)
                 ->where('is_active', true)
                 ->where(function ($q) {
-                    $this->applySectionFilter($q);
+                    $this->applySectionFilterToCategories($q);
                 })
                 ->first();
 
@@ -274,7 +274,7 @@ class HelpQueryService
                     $q->whereNull('published_at')->orWhere('published_at', '<=', now());
                 })
                 ->where(function ($q) {
-                    $this->applySectionFilter($q);
+                    $this->applySectionFilterToArticles($q);
                 })
                 ->orderBy('sort_order')
                 ->get()
@@ -329,7 +329,7 @@ class HelpQueryService
             $article = HelpArticle::query()
                 ->published()
                 ->where(function ($q) {
-                    $this->applySectionFilter($q);
+                    $this->applySectionFilterToArticles($q);
                 })
                 ->where('slug', $slug)
                 ->with(['category', 'faqs', 'quickActions'])
@@ -387,7 +387,7 @@ class HelpQueryService
                 ->select(['id', 'slug', 'name', 'parent_id', 'icon', 'color', 'audience_roles'])
                 ->where('is_active', true)
                 ->where(function ($q) {
-                    $this->applySectionFilter($q);
+                    $this->applySectionFilterToCategories($q);
                 })
                 ->orderBy('sort_order')
                 ->get()
@@ -401,7 +401,7 @@ class HelpQueryService
                 ->select(['id', 'slug', 'title', 'category_id', 'audience_roles', 'sort_order', 'metadata'])
                 ->where('is_published', true)
                 ->where(function ($q) {
-                    $this->applySectionFilter($q);
+                    $this->applySectionFilterToArticles($q);
                 })
                 ->orderBy('sort_order')
                 ->get()

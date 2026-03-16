@@ -65,13 +65,23 @@ class PlayerStatsService
             return $row->values;
         }
 
-        // 2. Zkusíme najít externí souhrn (přímo z cz.basketball profilu)
+        // 2. Zkusíme najít externí souhrn (přímo z cz.basketball profilu) jako fallback
         $season = \App\Models\Season::find($seasonId);
         if ($season) {
-            $normalizedSeason = \App\Models\Season::normalizeName($season->name); // např. 2024/25
+            $normalizedSeason = \App\Models\Season::normalizeName($season->name); // např. 2024/2025
+            $shortSeason = "";
+            $parts = explode('/', $normalizedSeason);
+            if (count($parts) === 2) {
+                $shortSeason = $parts[0].'/'.substr($parts[1], 2, 2); // 2024/25
+            }
 
             $externalStatQuery = \App\Models\ExternalPlayerStat::where('user_id', $userId)
-                ->where('season_label', $normalizedSeason);
+                ->where(function ($q) use ($normalizedSeason, $shortSeason) {
+                    $q->where('season_label', 'LIKE', "%{$normalizedSeason}%");
+                    if ($shortSeason) {
+                        $q->orWhere('season_label', 'LIKE', "%{$shortSeason}%");
+                    }
+                });
 
             // Pokud máme teamId, zkusíme najít staty pro daný tým (podle názvu)
             if ($teamId) {
@@ -105,7 +115,7 @@ class PlayerStatsService
             }
         }
 
-        // 3. Fallback: Pokud summary neexistuje, zkusíme ho dopočítat z jednotlivých zápasů (interních i externích)
+        // 3. Fallback: Pokud summary neexistuje ani v externích datech, zkusíme ho dopočítat z jednotlivých zápasů (interních i externích)
         return $this->calculateSummaryFromMatches($userId, $seasonId, $teamId);
     }
 
@@ -203,8 +213,8 @@ class PlayerStatsService
 
                     // Pokud nemáme žádné informace o týmu u externího zápasu,
                     // v osobních statistikách ho raději zobrazíme (všechny zápasy hráče),
-                    // aby graf nebyl prázdný, pokud hraje jen za jeden tým.
-                    return empty($matchTeamName) && empty($metaTeamId);
+                    // aby graf nebyl prázdný, pokud hraje jen za náš klub obecně.
+                    return empty($matchTeamName) && (empty($metaTeamId) || $metaTeamId == 0);
                 });
             }
         }

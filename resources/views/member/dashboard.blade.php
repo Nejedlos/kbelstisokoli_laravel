@@ -185,9 +185,9 @@
                 :route="route('member.statistics.players')"
             />
             <x-member.kpi-card
-                :title="__('dashboard.kpi.my_payments')"
-                :value="number_format($economySummary['total_to_pay'] ?? 0, 0, ',', ' ') . ' Kč'"
-                icon="wallet"
+                :title="__('member.economy.kpi.paid_total')"
+                :value="number_format($economySummary['paid_total'] ?? 0, 0, ',', ' ') . ' Kč'"
+                icon="heroicon-o-check-badge"
                 color="info"
                 :route="route('member.economy.index')"
             />

@@ -129,7 +129,9 @@ class Help extends Page
     protected function getHelpService(): HelpService
     {
         if ($this->helpService === null) {
-            $this->helpService = app(HelpService::class)->forAudience(auth()->user()->getRoleNames()->toArray());
+            $this->helpService = app(HelpService::class)
+                ->forSection('admin')
+                ->forAudience(auth()->user()->getRoleNames()->toArray());
         }
 
         return $this->helpService;
