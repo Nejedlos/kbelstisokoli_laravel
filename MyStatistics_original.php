@@ -407,23 +407,92 @@ class MyStatistics extends Component
 
     public function render()
     {
-        $user = $this->selectedUserId ? \App\Models\User::find($this->selectedUserId) : Auth::user();
+        $userId = $this->selectedUserId ?? Auth::id();
+        $user = \App\Models\User::find($userId);
         $playerProfile = $user?->playerProfile;
+        $teamIdInt = ($this->teamId === 'all' || ! $this->teamId) ? null : (int) $this->teamId;
 
-        // Získání týmů uživatele v aktuálně vybrané sezóně
-        $userTeams = collect();
+        // --- DYNAMICKÉ FILTRY (CHYTRÉ) ---
+
+        // 1. Získání sezón pro aktuální kontext (tým nebo hráč)
+        $allSeasons = Season::orderBy('name', 'desc')->get();
+        $activeSeasonIds = [];
+
+        if ($teamIdInt) {
+            // Sezóny, kde má daný tým data nebo zápasy
+            $activeSeasonIds = \App\Models\StatisticRow::where('team_id', $teamIdInt)
+                ->distinct()->pluck('season_id')->toArray();
+            $matchSeasonIds = \App\Models\BasketballMatch::where('team_id', $teamIdInt)
+                ->distinct()->pluck('season_id')->toArray();
+            $activeSeasonIds = array_unique(array_merge($activeSeasonIds, $matchSeasonIds));
+        } else {
+            // Sezóny, kde má daný uživatel data (souhrny nebo boxscore)
+            $activeSeasonIds = \App\Models\StatisticRow::where('player_id', $userId)
+                ->distinct()->pluck('season_id')->toArray();
+            // Plus sezóny z external matches (přes spárované interní zápasy)
+            $extActiveSeasonIds = \App\Models\ExternalPlayerMatch::where('user_id', $userId)
+                ->whereNotNull('basketball_match_id')
+                ->join('matches', 'new_external_player_matches.basketball_match_id', '=', 'matches.id')
+                ->distinct()->pluck('season_id')->toArray();
+            $activeSeasonIds = array_unique(array_merge($activeSeasonIds, $extActiveSeasonIds));
+
+            // Fallback na externí staty (historie v profilu cz.basketball)
+            $externalStatSeasons = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+                ->pluck('season_label')->toArray();
+            foreach($allSeasons as $s) {
+                if (in_array($s->id, $activeSeasonIds)) continue;
+                $normalized = Season::normalizeName($s->name);
+                foreach($externalStatSeasons as $label) {
+                    if (str_contains($label, $normalized)) {
+                        $activeSeasonIds[] = $s->id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $seasonsForDropdown = $allSeasons->map(function($s) use ($activeSeasonIds) {
+            $s->has_data = in_array($s->id, $activeSeasonIds);
+            return $s;
+        });
+
+        // 2. Získání týmů pro vybranou sezónu
+        $teamsInSeasonIds = \App\Models\StatisticRow::where('season_id', $this->seasonId)
+            ->distinct()->pluck('team_id')->toArray();
+        $matchTeamIds = \App\Models\BasketballMatch::where('season_id', $this->seasonId)
+            ->distinct()->pluck('team_id')->toArray();
+        $teamsWithData = array_unique(array_merge($teamsInSeasonIds, $matchTeamIds));
+
+        $allTeams = Team::orderBy('name')->get()->map(function($t) use ($teamsWithData) {
+            $t->has_data = in_array($t->id, $teamsWithData);
+            return $t;
+        });
+
+        $userTeamsInSeason = collect();
         if ($playerProfile) {
-            $userTeams = $playerProfile->teams()
+            // Týmy uživatele v dané sezóně (podle soupisky)
+            // POZOR: pivot tabulka nemá season_id, takže filtrujeme podle aktivního týmu v dané sezóně přes zápasy nebo staty
+            $userTeamsInSeason = $playerProfile->teams()
                 ->wherePivot('is_on_roster', true)
                 ->get();
+
+            // Pokud chceme být extra chytří, můžeme označit ty, kde má hráč v dané sezóně data
+            $userTeamsInSeason = $userTeamsInSeason->map(function($t) use ($userId) {
+                $hasData = \App\Models\StatisticRow::where('player_id', $userId)
+                    ->where('team_id', $t->id)
+                    ->where('season_id', $this->seasonId)
+                    ->exists();
+                $t->has_data_in_season = $hasData;
+                return $t;
+            });
         }
 
         return view('livewire.member.my-statistics', [
-            'seasons' => Season::orderBy('name', 'desc')->get(),
-            'allTeams' => Team::orderBy('name')->get(),
-            'userTeams' => $userTeams,
+            'seasons' => $seasonsForDropdown,
+            'allTeams' => $allTeams,
+            'userTeams' => $userTeamsInSeason,
             'activeSeasonName' => Season::find($this->seasonId)?->name ?? '?',
-            'activeTeamName' => Team::find($this->teamId)?->name ?? '?',
+            'activeTeamName' => ($this->teamId === 'all' || ! $this->teamId) ? __('Všechny týmy') : (Team::find($this->teamId)?->name ?? '?'),
         ]);
     }
 }

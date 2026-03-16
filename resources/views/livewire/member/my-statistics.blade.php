@@ -69,9 +69,7 @@
                     class="w-full bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-2xl text-xs font-black focus:ring-2 focus:ring-primary-500 py-2.5 pl-4 pr-10 appearance-none shadow-sm cursor-pointer hover:border-primary-200 transition-colors uppercase tracking-tight"
                 >
                     @foreach($seasons as $season)
-                        <option value="{{ $season->id }}" @if(!$season->has_data) class="text-gray-400" @endif>
-                            {{ $season->name }}@if(!$season->has_data) (bez dat)@endif
-                        </option>
+                        <option value="{{ $season->id }}">{{ $season->name }}</option>
                     @endforeach
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary-500">
@@ -88,17 +86,13 @@
                     <option value="all">Všechny týmy</option>
                     <optgroup label="Moje týmy">
                         @foreach($userTeams as $team)
-                            <option value="{{ $team->id }}" @if(!$team->has_data) class="text-gray-400" @endif>
-                                {{ $team->name }}@if(!$team->has_data) (bez dat)@endif
-                            </option>
+                            <option value="{{ $team->id }}">{{ $team->name }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="Ostatní týmy">
                         @foreach($allTeams as $team)
                             @if(!$userTeams->contains($team))
-                                <option value="{{ $team->id }}" @if(!$team->has_data) class="text-gray-400" @endif>
-                                    {{ $team->name }}@if(!$team->has_data) (bez dat)@endif
-                                </option>
+                                <option value="{{ $team->id }}">{{ $team->name }}</option>
                             @endif
                         @endforeach
                     </optgroup>
