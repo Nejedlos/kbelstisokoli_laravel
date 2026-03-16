@@ -600,7 +600,17 @@ class PlayerSyncService
         $year = (int)$matchDate->format('Y');
         $month = (int)$matchDate->format('m');
         $seasonName = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
-        $season = Season::firstOrCreate(['name' => $seasonName]);
+
+        $season = Season::where('name', $seasonName)->first();
+        if (!$season) {
+            // Zkusíme najít se zkráceným rokem 2024/25 místo 2024/2025
+            $shortYear = substr($seasonName, 0, 5) . substr($seasonName, 7, 2);
+            $season = Season::where('name', $shortYear)->first();
+        }
+
+        if (!$season) {
+            $season = Season::create(['name' => $seasonName]);
+        }
 
         // 3.5 Najdeme nebo vytvoříme halu (Venue)
         $venueName = $header['venue'] ?? $extMatch->venue;
@@ -612,13 +622,17 @@ class PlayerSyncService
         $extMatchId = (string) $extMatch->external_match_id;
 
         if ($extMatchId) {
-            $match = BasketballMatch::where('metadata', 'LIKE', '%"external_id":"' . $extMatchId . '"%')
-                ->orWhere('metadata', 'LIKE', '%"external_match_id":"' . $extMatchId . '"%')
+            $match = BasketballMatch::where('season_id', $season->id)
+                ->where(function ($q) use ($extMatchId) {
+                    $q->where('metadata', 'LIKE', '%"external_id":"' . $extMatchId . '"%')
+                      ->orWhere('metadata', 'LIKE', '%"external_match_id":"' . $extMatchId . '"%');
+                })
                 ->first();
         }
 
         if (!$match) {
             $match = BasketballMatch::where('team_id', $ourTeam->id)
+                ->where('season_id', $season->id)
                 ->where('scheduled_at', $extMatch->scheduled_at)
                 ->first();
         }

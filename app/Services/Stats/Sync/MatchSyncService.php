@@ -29,6 +29,23 @@ class MatchSyncService
         if ($scheduledAtStr) {
             try {
                 $scheduledAt = Carbon::parse($scheduledAtStr);
+
+                // Určení správné sezóny na základě data
+                $year = (int)$scheduledAt->format('Y');
+                $month = (int)$scheduledAt->format('m');
+                $expectedSeasonName = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
+
+                if ($season->name !== $expectedSeasonName) {
+                    $correctSeason = Season::where('name', $expectedSeasonName)->first();
+                    if (!$correctSeason) {
+                        $shortYear = substr($expectedSeasonName, 0, 5) . substr($expectedSeasonName, 7, 2);
+                        $correctSeason = Season::where('name', $shortYear)->first();
+                    }
+
+                    if ($correctSeason) {
+                        $season = $correctSeason;
+                    }
+                }
             } catch (\Exception $e) {
                 \Log::warning("Failed to parse scheduled_at: {$scheduledAtStr} for match " . ($matchData['external_match_id'] ?? 'unknown'));
             }
@@ -101,8 +118,10 @@ class MatchSyncService
 
         // 4. NOVÉ KRITICKÉ PRAVIDLO: Tým nemůže hrát ve stejný den a čas dva zápasy.
         // Pokud existuje jakýkoliv zápas našeho týmu v tento čas (tolerance 120 min), je to on, bez ohledu na jméno soupeře.
+        // DŮLEŽITÉ: Omezujeme na sezónu, abychom neaktualizovali staré zápasy z jiných sezón, které mají náhodou podobný čas.
         if (! $match && $scheduledAt) {
             $match = BasketballMatch::where('team_id', $team->id)
+                ->where('season_id', $season->id)
                 ->where('scheduled_at', '>=', $scheduledAt->copy()->subMinutes(120)->toDateTimeString())
                 ->where('scheduled_at', '<=', $scheduledAt->copy()->addMinutes(120)->toDateTimeString())
                 ->first();

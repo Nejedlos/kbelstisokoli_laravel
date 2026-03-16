@@ -671,7 +671,7 @@
                 {{-- Row 1: Evolution Charts --}}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" wire:ignore>
                     {{-- Points Evolution --}}
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-[380px] flex flex-col group hover:shadow-md transition-shadow">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 min-h-[380px] h-auto flex flex-col group hover:shadow-md transition-shadow overflow-hidden">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest flex items-center">
                                 <i class="fa-light fa-chart-line mr-2 text-primary-500"></i> Vývoj bodů zápas po zápase
@@ -687,7 +687,7 @@
                     </div>
 
                     {{-- Efficiency Evolution --}}
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-[380px] flex flex-col group hover:shadow-md transition-shadow">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 min-h-[380px] h-auto flex flex-col group hover:shadow-md transition-shadow overflow-hidden">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest flex items-center">
                                 <i class="fa-light fa-bolt mr-2 text-orange-500"></i> Index užitečnosti (VAL)
@@ -706,7 +706,7 @@
                 {{-- Row 2: Analysis Charts --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" wire:ignore>
                     {{-- Skill Radar --}}
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-[420px] flex flex-col group hover:shadow-md transition-shadow @if(empty($rankings)) hidden @endif">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 min-h-[420px] h-auto flex flex-col group hover:shadow-md transition-shadow @if(empty($rankings)) hidden @endif overflow-hidden">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest flex items-center">
                                 <i class="fa-light fa-radar mr-2 text-indigo-500"></i> Profil tvých dovedností
@@ -722,7 +722,7 @@
                     </div>
 
                     {{-- Comparison vs Team Avg --}}
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-[420px] flex flex-col group hover:shadow-md transition-shadow">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 min-h-[420px] h-auto flex flex-col group hover:shadow-md transition-shadow overflow-hidden">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest flex items-center">
                                 <i class="fa-light fa-chart-mixed mr-2 text-blue-500"></i> Moje PPG vs Tým
@@ -738,7 +738,7 @@
                     </div>
 
                     {{-- Shots Distribution --}}
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-[420px] flex flex-col group hover:shadow-md transition-shadow">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 min-h-[420px] h-auto flex flex-col group hover:shadow-md transition-shadow overflow-hidden">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest flex items-center">
                                 <i class="fa-light fa-bullseye-arrow mr-2 text-pink-500"></i> Rozložení tvých bodů
