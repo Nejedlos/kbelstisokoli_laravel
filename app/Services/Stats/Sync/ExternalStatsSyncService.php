@@ -39,8 +39,10 @@ class ExternalStatsSyncService
      */
     public function syncTeamSeason(int $teamId, int $seasonId, array $options = []): void
     {
-        if (ConsoleService::isStopped()) {
-            ConsoleService::log('Synchronizace týmu přeskočena (STOP flag aktivní).', 'warning');
+        $parentRun = isset($options['parent_run_id']) ? ExternalImportRun::find($options['parent_run_id']) : null;
+
+        if (ConsoleService::isStopped() || ($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped'))) {
+            ConsoleService::log('Synchronizace týmu přeskočena (STOP flag nebo zrušeno/přeskočeno).', 'warning');
 
             return;
         }
@@ -130,12 +132,17 @@ class ExternalStatsSyncService
         }
 
         try {
-            if (ConsoleService::isStopped()) {
+            if (ConsoleService::isStopped() || $run->isCancelled() || $run->status === 'skipped') {
                 throw new \Exception('Synchronizace soupisky zastavena uživatelem.');
             }
 
             $run->updateMetadata(['url' => $config->team_season_url]);
             $html = $this->fetcher->fetch($config->team_season_url, $run);
+
+            if (ConsoleService::isStopped() || $run->isCancelled() || $run->status === 'skipped') {
+                throw new \Exception('Synchronizace soupisky zastavena uživatelem po stažení HTML.');
+            }
+
             ConsoleService::log("    - Staženo " . number_format(strlen($html) / 1024, 1) . " KB HTML.", 'debug');
 
             $aiOnly = config('external_sources.czbasketball.ai_only', env('CZBASKETBALL_AI_ONLY', false)) || ($options['ai'] ?? false);
@@ -311,6 +318,11 @@ class ExternalStatsSyncService
         try {
             $run->updateMetadata(['url' => $config->matches_list_url]);
             $html = $this->fetcher->fetch($config->matches_list_url, $run);
+
+            if (ConsoleService::isStopped() || $run->isCancelled() || $run->status === 'skipped') {
+                throw new \Exception('Synchronizace seznamu zápasů zastavena uživatelem po stažení HTML.');
+            }
+
             ConsoleService::log("    - Staženo " . number_format(strlen($html) / 1024, 1) . " KB HTML.", 'debug');
 
             $aiOnly = config('external_sources.czbasketball.ai_only', env('CZBASKETBALL_AI_ONLY', false)) || ($options['ai'] ?? false);
@@ -558,8 +570,8 @@ class ExternalStatsSyncService
         $parentRunId = $options['parent_run_id'] ?? null;
         $parentRun = $parentRunId ? ExternalImportRun::find($parentRunId) : null;
 
-        if (ConsoleService::isStopped() || ($parentRun && $parentRun->isCancelled())) {
-            // Log::info('syncMatchDetail přeskočen - STOP flag nebo zrušeno');
+        if (ConsoleService::isStopped() || ($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped'))) {
+            // Log::info('syncMatchDetail přeskočen - STOP flag nebo zrušeno/přeskočeno');
             return;
         }
 
@@ -590,6 +602,10 @@ class ExternalStatsSyncService
 
         try {
             $html = $this->fetcher->fetch($url, $run);
+
+            if (ConsoleService::isStopped() || $run->isCancelled() || $run->status === 'skipped' || ($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped'))) {
+                throw new \Exception('Synchronizace detailu zápasu zastavena uživatelem po stažení HTML.');
+            }
 
             $aiOnly = config('external_sources.czbasketball.ai_only', env('CZBASKETBALL_AI_ONLY', false)) || ($options['ai'] ?? false);
 

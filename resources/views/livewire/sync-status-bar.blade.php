@@ -76,6 +76,17 @@
                         <div class="flex justify-between w-full text-[11px] font-black font-mono tracking-tighter items-center">
                             <span class="text-white/40">{{ $run->imported_count }}<span class="text-white/20 mx-1">/</span>{{ $run->total_count ?: '?' }}</span>
                             <div class="flex items-center gap-3">
+                                @if(in_array($run->run_type, ['player_detail', 'match_detail', 'team_page']))
+                                    <button
+                                        wire:click="skipRun({{ $run->id }})"
+                                        class="text-white/20 hover:text-amber-500 transition-colors flex items-center gap-1 group/skip"
+                                        title="Přeskočit tuto položku a pokračovat dále"
+                                    >
+                                        <i class="fa-light fa-forward-step text-sm"></i>
+                                        <span class="hidden group-hover/skip:inline text-[9px] uppercase tracking-wider">Přeskočit</span>
+                                    </button>
+                                @endif
+
                                 <button
                                     wire:click="cancelRun({{ $run->id }})"
                                     wire:confirm="Opravdu chcete přerušit tento proces?"

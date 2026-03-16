@@ -18,31 +18,59 @@ class MatchesListExtractor implements StatExtractorInterface
         $crawler = new Crawler($content);
         $warnings = [];
 
-        // Hledáme tabulku se zápasy - hledáme tu, která má v hlavičce "domácí / hosté" a "datum a čas"
-        $table = $crawler->filter('table')->reduce(function (Crawler $node) {
+        // Hledáme tabulku se zápasy - kandidáti s hlavičkou obsahující "domácí/hosté", "datum" a "skóre"
+        $candidates = $crawler->filter('table')->reduce(function (Crawler $node) {
             $thead = $node->filter('thead');
             if ($thead->count() === 0) {
                 return false;
             }
             $headerText = mb_strtolower($thead->text());
 
-            // Kontrolujeme, zda obsahuje aspoň "hosté" a "datum" a "skore" (to je v obou variantách)
             return (str_contains($headerText, 'hosté') || str_contains($headerText, 'domácí'))
-                && (str_contains($headerText, 'datum'))
+                && str_contains($headerText, 'datum')
                 && (str_contains($headerText, 'skore') || str_contains($headerText, 'skóre'));
         });
 
-        // Pokud jich je víc, chceme tu, která má "kolo" (to je ta z tabu #3 nebo ze stránky zápasů)
-        if ($table->count() > 1) {
-            $tableWithKolo = $table->reduce(function (Crawler $node) {
+        // Preferujeme tabulku s "kolo" (typicky kompletní rozpis soutěže)
+        $table = null;
+        if ($candidates->count() > 1) {
+            $tableWithKolo = $candidates->reduce(function (Crawler $node) {
                 return str_contains(mb_strtolower($node->filter('thead')->text()), 'kolo');
             });
             if ($tableWithKolo->count() > 0) {
-                $table = $tableWithKolo;
+                $table = $tableWithKolo->first();
             }
         }
 
-        $table = $table->first();
+        // Pokud nemáme vybráno, vybereme největší tabulku (podle počtu řádků/linků na zápas)
+        if (! $table) {
+            if ($candidates->count() === 1) {
+                $table = $candidates->first();
+            } elseif ($candidates->count() > 1) {
+                $selectedHtml = null;
+                $maxScore = -1;
+                $candidates->each(function (Crawler $node) use (&$selectedHtml, &$maxScore) {
+                    $rows = $node->filter('tbody tr')->count();
+                    if ($rows === 0) {
+                        $rows = $node->filter('tr')->count();
+                    }
+                    $links = $node->filter('a[href*="/zapas/"]')->count();
+                    // O něco víc vážíme skutečné odkazy na zápasy
+                    $score = max($rows, $links * 2);
+                    if ($score > $maxScore) {
+                        $maxScore = $score;
+                        $selectedHtml = $node->outerHtml();
+                    }
+                });
+                if ($selectedHtml) {
+                    $table = new Crawler($selectedHtml);
+                } else {
+                    $table = $candidates->first();
+                }
+            } else {
+                $table = $candidates; // prázdný Crawler
+            }
+        }
 
         if ($table->count() === 0) {
             // Fallback na table.table-striped, která obsahuje /zapas/

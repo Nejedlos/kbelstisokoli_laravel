@@ -9,6 +9,7 @@ use App\Models\Season;
 use App\Models\Team;
 use App\Support\MatchIdentityKey;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class MatchSyncService
 {
@@ -80,11 +81,19 @@ class MatchSyncService
 
         $match = null;
 
-        // 1. Přednost má external_id (hledáme v rámci sezóny napříč týmy pro případ overlapu)
+        // 1. Přednost má external_id (hledáme v rámci sezóny a týmu; zároveň deduplikujeme pokud je více záznamů)
         if ($externalMatchId) {
-            $match = BasketballMatch::where('season_id', $season->id)
+            $matchesByExt = BasketballMatch::where('season_id', $season->id)
+                ->where('team_id', $team->id)
                 ->where('metadata', 'like', '%"external_id":"' . (string) $externalMatchId . '"%')
-                ->first();
+                ->orderBy('id')
+                ->get();
+
+            if ($matchesByExt->count() > 1) {
+                $match = $this->mergeDuplicatesByExternalId($team, $season, (string) $externalMatchId, $run);
+            } elseif ($matchesByExt->count() === 1) {
+                $match = $matchesByExt->first();
+            }
         }
 
         // 2. Fallback na identity key (v rámci sezóny a týmu)
@@ -281,7 +290,182 @@ class MatchSyncService
             }
         }
 
+        // Finální deduplikační průchod pro jistotu (sloučí záznamy podle data/soupeře)
+        $match = $this->mergeDuplicatesForMatch($match, $run);
+
         return $match;
+    }
+
+    /**
+     * Sloučí duplicitní zápasy se stejným external_id v rámci daného týmu a sezóny.
+     */
+    protected function mergeDuplicatesByExternalId(Team $team, Season $season, string $externalId, ?ExternalImportRun $run = null): ?BasketballMatch
+    {
+        $dups = BasketballMatch::where('season_id', $season->id)
+            ->where('team_id', $team->id)
+            ->where('metadata', 'like', '%"external_id":"' . $externalId . '"%')
+            ->orderBy('id')
+            ->get();
+
+        if ($dups->count() <= 1) {
+            return $dups->first();
+        }
+
+        // Vybereme primární záznam: preferujeme ten se skóre nebo finished/statistikami
+        $primary = $dups->first(function (BasketballMatch $m) {
+            return ($m->score_home !== null && $m->score_away !== null)
+                || ($m->status === 'finished')
+                || (!empty($m->metadata['boxscore_synced_at'] ?? null));
+        }) ?: $dups->first();
+
+        foreach ($dups as $m) {
+            if ($m->id === $primary->id) {
+                continue;
+            }
+
+            // Přesunout pivoty týmů
+            $teamIds = $m->teams()->pluck('teams.id')->all();
+            if (!empty($teamIds)) {
+                $primary->teams()->syncWithoutDetaching($teamIds);
+            }
+            DB::table('basketball_match_team')->where('basketball_match_id', $m->id)->delete();
+
+            // Přesunout statistic_rows
+            DB::table('statistic_rows')->where('basketball_match_id', $m->id)
+                ->update(['basketball_match_id' => $primary->id]);
+
+            // Přesunout external_player_matches
+            DB::table('external_player_matches')->where('basketball_match_id', $m->id)
+                ->update(['basketball_match_id' => $primary->id]);
+
+            // Přesunout attendances (polymorfní) s deduplikací podle user_id
+            $attendanceRows = DB::table('attendances')
+                ->where('attendable_type', BasketballMatch::class)
+                ->where('attendable_id', $m->id)
+                ->get();
+
+            foreach ($attendanceRows as $row) {
+                $exists = DB::table('attendances')
+                    ->where('attendable_type', BasketballMatch::class)
+                    ->where('attendable_id', $primary->id)
+                    ->where('user_id', $row->user_id)
+                    ->exists();
+
+                if ($exists) {
+                    // Pokud existuje konflikt, smažeme duplicitní záznam z původního zápasu
+                    DB::table('attendances')->where('id', $row->id)->delete();
+                } else {
+                    DB::table('attendances')->where('id', $row->id)->update(['attendable_id' => $primary->id]);
+                }
+            }
+
+            // Sloučit metadata (primární má přednost)
+            $metaPrimary = $primary->metadata ?? [];
+            $metaOther = $m->metadata ?? [];
+            $primary->metadata = array_replace_recursive($metaOther, $metaPrimary);
+
+            // Sjednotit další pole pokud chybí na primárním
+            if (!$primary->scheduled_at && $m->scheduled_at) {
+                $primary->scheduled_at = $m->scheduled_at;
+            }
+            if ($primary->opponent_id === null && $m->opponent_id) {
+                $primary->opponent_id = $m->opponent_id;
+            }
+            if ($primary->venue_id === null && $m->venue_id) {
+                $primary->venue_id = $m->venue_id;
+            }
+
+            if ($run) {
+                $run->addLog('merged_duplicate', $primary, ['merged_id' => $m->id], null);
+            }
+
+            $m->delete();
+        }
+
+        $primary->save();
+
+        return $primary->fresh();
+    }
+
+    /**
+     * Sloučí potenciální duplicitní záznamy podle data a soupeře do primárního zápasu.
+     */
+    protected function mergeDuplicatesForMatch(BasketballMatch $primary, ?ExternalImportRun $run = null): BasketballMatch
+    {
+        if (!$primary) {
+            return $primary;
+        }
+
+        $query = BasketballMatch::where('season_id', $primary->season_id)
+            ->where('team_id', $primary->team_id)
+            ->where('id', '!=', $primary->id);
+
+        if ($primary->scheduled_at) {
+            $query->whereDate('scheduled_at', $primary->scheduled_at->toDateString());
+        }
+
+        if ($primary->opponent_id) {
+            $query->where('opponent_id', $primary->opponent_id);
+        }
+
+        $candidates = $query->get();
+
+        foreach ($candidates as $m) {
+            // Bezpečná merge: slučujeme, pokud druhý záznam nemá jiné external_id než primary
+            $primaryExt = $primary->metadata['external_id'] ?? null;
+            $otherExt = $m->metadata['external_id'] ?? null;
+            $isSafe = $otherExt === null || $otherExt === $primaryExt;
+            if (! $isSafe) {
+                continue;
+            }
+
+            // Přesunout pivoty a data
+            $teamIds = $m->teams()->pluck('teams.id')->all();
+            if (!empty($teamIds)) {
+                $primary->teams()->syncWithoutDetaching($teamIds);
+            }
+            DB::table('basketball_match_team')->where('basketball_match_id', $m->id)->delete();
+
+            DB::table('statistic_rows')->where('basketball_match_id', $m->id)
+                ->update(['basketball_match_id' => $primary->id]);
+
+            DB::table('external_player_matches')->where('basketball_match_id', $m->id)
+                ->update(['basketball_match_id' => $primary->id]);
+
+            // Přesunout attendances (polymorfní) s deduplikací podle user_id
+            $attendanceRows = DB::table('attendances')
+                ->where('attendable_type', BasketballMatch::class)
+                ->where('attendable_id', $m->id)
+                ->get();
+
+            foreach ($attendanceRows as $row) {
+                $exists = DB::table('attendances')
+                    ->where('attendable_type', BasketballMatch::class)
+                    ->where('attendable_id', $primary->id)
+                    ->where('user_id', $row->user_id)
+                    ->exists();
+
+                if ($exists) {
+                    DB::table('attendances')->where('id', $row->id)->delete();
+                } else {
+                    DB::table('attendances')->where('id', $row->id)->update(['attendable_id' => $primary->id]);
+                }
+            }
+
+            $metaPrimary = $primary->metadata ?? [];
+            $metaOther = $m->metadata ?? [];
+            $primary->metadata = array_replace_recursive($metaOther, $metaPrimary);
+
+            if ($run) {
+                $run->addLog('merged_candidate', $primary, ['merged_id' => $m->id], null);
+            }
+
+            $m->delete();
+        }
+
+        $primary->save();
+
+        return $primary->fresh();
     }
 
     protected function isMyTeam(string $scrapedName, Team $team): bool

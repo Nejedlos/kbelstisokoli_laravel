@@ -184,26 +184,42 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $mainContainer = $crawler->filter('.match-detail-header, .match-teams, .match-summary, .match_box, .match-header, .wrapper.bg-white.box-shadow')->first();
         $searchIn = $mainContainer->count() > 0 ? $mainContainer : $crawler;
 
-        // Týmy
-        $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-home h1, .team-home h2, h4.text-center')->first();
-        if ($homeNode->count() > 0) {
-            try {
-                $header['home_team'] = trim($homeNode->text());
-            } catch (\Exception $e) {}
-        }
+        // Týmy (pokročilá detekce s podporou pro .alfa u obou týmů a h4 jako fallback)
+        $allPossibleTeams = $searchIn->filter('.alfa, .beta, .score-home-team, .score-away-team, .team-home h1, .team-home h2, .team-away h1, .team-away h2, h4.text-center');
+        // Odfiltrujeme skóre, které má často také třídu .alfa a .article-title
+        $teamNodes = $allPossibleTeams->reduce(function (Crawler $node) {
+            $classes = explode(' ', (string) $node->attr('class'));
+            if (in_array('article-title', $classes) || in_array('score', $classes) || in_array('match-header-score', $classes)) {
+                return false;
+            }
+            return true;
+        });
 
-        $awayNodes = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2, h4.text-center');
-        if ($awayNodes->count() >= 2) {
-            try {
-                $header['away_team'] = trim($awayNodes->eq(1)->text());
-            } catch (\Exception $e) {}
-        } elseif ($awayNodes->count() === 1) {
-             $beta = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2')->first();
-             if ($beta->count() > 0) {
-                 try {
-                     $header['away_team'] = trim($beta->text());
-                 } catch (\Exception $e) {}
-             }
+        if ($teamNodes->count() >= 2) {
+            $header['home_team'] = trim($teamNodes->eq(0)->text());
+            $header['away_team'] = trim($teamNodes->eq(1)->text());
+        } else {
+            // Původní fallback logika
+            $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-home h1, .team-home h2, h4.text-center')->first();
+            if ($homeNode->count() > 0) {
+                try {
+                    $header['home_team'] = trim($homeNode->text());
+                } catch (\Exception $e) {}
+            }
+
+            $awayNodes = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2, h4.text-center');
+            if ($awayNodes->count() >= 2) {
+                try {
+                    $header['away_team'] = trim($awayNodes->eq(1)->text());
+                } catch (\Exception $e) {}
+            } elseif ($awayNodes->count() === 1) {
+                 $beta = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2')->first();
+                 if ($beta->count() > 0) {
+                     try {
+                         $header['away_team'] = trim($beta->text());
+                     } catch (\Exception $e) {}
+                 }
+            }
         }
 
         // Skóre
@@ -337,6 +353,9 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     }
                 }
             }
+        }
+        if (!empty($periods) && empty($header['periods_text'])) {
+            $header['periods_text'] = implode(', ', array_map(fn($p) => $p['home'] . ':' . $p['away'], $periods));
         }
         $header['periods'] = $periods;
 

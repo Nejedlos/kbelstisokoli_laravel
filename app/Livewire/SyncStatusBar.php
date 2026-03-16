@@ -48,4 +48,15 @@ class SyncStatusBar extends Component
             }
         }
     }
+
+    public function skipRun(int $runId)
+    {
+        if (Auth::check() && Auth::user()->can('manage_stats')) {
+            $run = ExternalImportRun::find($runId);
+            if ($run && $run->status === 'running') {
+                $run->skip();
+                $this->dispatch('sync-skipped', runId: $runId);
+            }
+        }
+    }
 }

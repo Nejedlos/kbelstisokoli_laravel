@@ -22,12 +22,12 @@ class CzBasketballFetcher implements StatFetcherInterface
     /**
      * Timeout v sekundách.
      */
-    protected int $timeout = 30;
+    protected int $timeout = 15;
 
     /**
      * Počet pokusů o stažení.
      */
-    protected int $retryCount = 3;
+    protected int $retryCount = 2;
 
     /**
      * Prodleva mezi pokusy v milisekundách (exponenciální backoff).

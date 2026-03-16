@@ -35,7 +35,7 @@ class PlayerSyncService
         $parentRun = $options['parent_run'] ?? null;
 
         // Kontrola, zda nebyl běh zrušen
-        if ($parentRun && $parentRun->status === 'cancelled') {
+        if ($parentRun && ($parentRun->status === 'cancelled' || $parentRun->status === 'skipped')) {
             return 0;
         }
 
@@ -62,6 +62,11 @@ class PlayerSyncService
             }
 
             $html = $this->fetcher->fetch($url);
+
+            // Kontrola zrušení po fetch (který mohl trvat dlouho)
+            if ($run->isCancelled() || $run->status === 'skipped' || ($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped'))) {
+                return 0;
+            }
 
             if ($parentRun) {
                 $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Extrakce dat)");
@@ -254,8 +259,9 @@ class PlayerSyncService
         $skippedSeasons = 0;
 
         foreach ($seasons as $season) {
-            // Kontrola zrušení
-            if ($parentRun && $parentRun->status === 'cancelled') {
+            // Kontrola zrušení (u rodiče i aktuálního běhu)
+            if (($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped')) ||
+                ($run && ($run->isCancelled() || $run->status === 'skipped'))) {
                 return 0;
             }
 
@@ -300,6 +306,13 @@ class PlayerSyncService
                     $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Sezóna: $season)");
                 }
                 $html = $this->fetcher->fetch($url);
+
+                // Kontrola zrušení po fetch
+                if (($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped')) ||
+                    ($run && ($run->isCancelled() || $run->status === 'skipped'))) {
+                    return 0;
+                }
+
                 $result = $this->extractor->extract($html);
                 $matches = $result['data']['matches'] ?? [];
 
@@ -308,7 +321,8 @@ class PlayerSyncService
 
                 foreach ($matches as $matchData) {
                     // Kontrola zrušení
-                    if ($parentRun && $parentRun->status === 'cancelled') {
+                    if (($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped')) ||
+                        ($run && ($run->isCancelled() || $run->status === 'skipped'))) {
                         return 0;
                     }
 

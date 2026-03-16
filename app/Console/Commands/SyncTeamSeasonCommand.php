@@ -80,7 +80,8 @@ class SyncTeamSeasonCommand extends Command
             'ai' => $this->option('ai'),
             'excesive' => $this->option('excesive'),
             'maxMatchDetails' => (int) $this->option('max-matches'),
-            'recentOnly' => (bool) $this->option('recent-days'),
+            // Výchozí chování: nesnižovat rozsah jen na "recent" (uživatel může později dostat samostatný přepínač)
+            'recentOnly' => false,
             'recentDays' => (int) $this->option('recent-days'),
         ];
 
@@ -140,9 +141,10 @@ class SyncTeamSeasonCommand extends Command
             try {
                 foreach ($teams as $team) {
                     foreach ($seasons as $season) {
-                        // Kontrola, zda nebyl běh zrušen z UI
-                        if ($mainRun->refresh()->status === 'cancelled') {
-                            $logSection->writeln('<fg=yellow>Synchronizace byla zrušena uživatelem.</>');
+                        // Kontrola, zda nebyl běh zrušen nebo přeskočen z UI
+                        $currentStatus = $mainRun->refresh()->status;
+                        if ($currentStatus === 'cancelled' || $currentStatus === 'skipped') {
+                            $logSection->writeln('<fg=yellow>Synchronizace byla ' . ($currentStatus === 'cancelled' ? 'zrušena' : 'přeskočena') . ' uživatelem.</>');
                             break 2;
                         }
 
