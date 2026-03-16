@@ -502,6 +502,53 @@ class MatchSyncService
         return $primary->fresh();
     }
 
+    /**
+     * Ověří konzistenci lokálních dat s oficiální tabulkou ze zdroje.
+     */
+    public function validateSeasonConsistency(Team $team, Season $season, \App\Models\ExternalTeamSeasonConfig $config): array
+    {
+        $official = $config->metadata['official_standing'] ?? null;
+        if (! $official) {
+            return ['status' => 'unknown', 'message' => 'Oficiální tabulka není k dispozici.'];
+        }
+
+        $myStats = BasketballMatch::where('team_id', $team->id)
+            ->where('season_id', $season->id)
+            ->where('status', 'finished')
+            ->selectRaw('COUNT(*) as gp,
+                         SUM(CASE WHEN (is_home = 1 AND score_home > score_away) OR (is_home = 0 AND score_away > score_home) THEN 1 ELSE 0 END) as w,
+                         SUM(CASE WHEN (is_home = 1 AND score_home < score_away) OR (is_home = 0 AND score_away < score_home) THEN 1 ELSE 0 END) as l')
+            ->first();
+
+        // Přetypování na int, protože DB může vrátit string
+        $localGp = (int) $myStats->gp;
+        $localW = (int) $myStats->w;
+        $localL = (int) $myStats->l;
+
+        $gpMatch = ($localGp == $official['gp']);
+        $wMatch = ($localW == $official['w']);
+        $lMatch = ($localL == $official['l']);
+
+        $isConsistent = $gpMatch && $wMatch && $lMatch;
+
+        $metadata = $config->metadata ?? [];
+        $metadata['consistency'] = [
+            'is_consistent' => $isConsistent,
+            'last_check_at' => now()->toDateTimeString(),
+            'local' => ['gp' => $localGp, 'w' => $localW, 'l' => $localL],
+            'official' => ['gp' => (int) $official['gp'], 'w' => (int) $official['w'], 'l' => (int) $official['l']],
+        ];
+        $config->update(['metadata' => $metadata]);
+
+        if (! $isConsistent) {
+            \Log::warning("Nekonzistence dat pro tým {$team->slug} v sezóně {$season->name}. Lokální: Z:{$localGp}, V:{$localW}, P:{$localL}. Oficiální: Z:{$official['gp']}, V:{$official['w']}, P:{$official['l']}.");
+
+            return ['status' => 'inconsistent', 'details' => $metadata['consistency']];
+        }
+
+        return ['status' => 'consistent'];
+    }
+
     protected function isMyTeam(string $scrapedName, Team $team): bool
     {
         $scrapedNormalized = mb_strtolower(trim($scrapedName));

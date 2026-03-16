@@ -13,6 +13,7 @@ class ExternalTeamSeasonConfig extends Model
         'external_team_id',
         'external_season_year',
         'team_season_url',
+        'competition_url',
         'matches_list_url',
         'competition_label',
         'team_name_in_source',

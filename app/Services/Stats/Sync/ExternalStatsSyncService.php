@@ -29,7 +29,8 @@ class ExternalStatsSyncService
         protected MatchSyncService $matchSyncService,
         protected StatisticSyncService $statisticSyncService,
         protected StatNormalizerInterface $normalizer,
-        protected PlayerSyncService $playerSyncService
+        protected PlayerSyncService $playerSyncService,
+        protected CompetitionSyncService $competitionSyncService
     ) {}
 
     /**
@@ -75,7 +76,7 @@ class ExternalStatsSyncService
         $errors = [];
         $parentRun = isset($options['parent_run_id']) ? ExternalImportRun::find($options['parent_run_id']) : null;
 
-        // 1. Synchronizace soupisky
+        // 1. Synchronizace soupisky (zjistí i URL soutěže)
         if ($options['sync_roster'] ?? true) {
             try {
                 if ($parentRun) {
@@ -91,7 +92,17 @@ class ExternalStatsSyncService
             }
         }
 
-        // 2. Synchronizace seznamu zápasů
+        // 1b. Synchronizace dat soutěže (pokud je URL k dispozici)
+        if ($config->competition_url && ($options['sync_competition'] ?? true)) {
+            try {
+                $this->competitionSyncService->sync($team, $season, $config, $options);
+            } catch (\Exception $e) {
+                $errors[] = 'Soutěž: '.$e->getMessage();
+                Log::error('Chyba při synchronizaci soutěže: '.$e->getMessage());
+            }
+        }
+
+        // 2. Synchronizace seznamu zápasů (z týmové stránky)
         if ($options['sync_matches'] ?? true) {
             try {
                 if ($parentRun) {
@@ -109,6 +120,13 @@ class ExternalStatsSyncService
 
         if ($parentRun) {
             $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync') . ': Detaily zápasů');
+        }
+
+        // 3. Verifikace konzistence
+        try {
+            $this->matchSyncService->validateSeasonConsistency($team, $season, $config);
+        } catch (\Exception $e) {
+            Log::warning("Chyba při verifikaci konzistence sezóny: ".$e->getMessage());
         }
 
         $config->update(['last_synced_at' => now()]);
@@ -222,7 +240,9 @@ class ExternalStatsSyncService
                 try {
                     $headerData = $aiOnly
                         ? $this->normalizer->normalize($headerClip->htmlFragment, ['type' => 'team_header', 'strict_schema' => $this->getTeamHeaderSchema()])
-                        : app(\App\Services\Stats\Extractors\CzBasketball\TeamHeaderExtractor::class)->extract($html)['data'];
+                        : app(\App\Services\Stats\Extractors\CzBasketball\TeamHeaderExtractor::class)->extract($html, [
+                            'external_season_year' => $config->external_season_year
+                        ])['data'];
 
                     if ($headerData && isset($headerData->metadata['team_name'])) {
                         $run->updateMetadata(['team_name_external' => $headerData->metadata['team_name']]);
@@ -240,6 +260,15 @@ class ExternalStatsSyncService
 
                         if (!empty($headerData->metadata['competition']) && empty($config->competition_label)) {
                             $config->update(['competition_label' => $headerData->metadata['competition']]);
+                        }
+
+                        if (!empty($headerData->metadata['competition_url']) && empty($config->competition_url)) {
+                            // Zajistíme, aby URL byla absolutní, pokud je relativní
+                            $compUrl = $headerData->metadata['competition_url'];
+                            if (str_starts_with($compUrl, '/')) {
+                                $compUrl = 'https://cz.basketball' . $compUrl;
+                            }
+                            $config->update(['competition_url' => $compUrl]);
                         }
                     }
                 } catch (\Exception $e) {

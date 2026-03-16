@@ -70,6 +70,7 @@ Route::middleware(['member'])
             Route::get('/hraci', [StatisticsController::class, 'players'])->name('players');
             Route::get('/zapasy', [StatisticsController::class, 'matches'])->name('matches');
             Route::get('/zapasy/{matchId}', [StatisticsController::class, 'matchDetail'])->name('matches.show');
+            Route::get('/tabulky', [StatisticsController::class, 'standings'])->name('standings');
         });
 
         // Týmové přehledy (původní trenérské, ponecháno pro kompatibilitu, odstraněno z menu)

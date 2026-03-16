@@ -75,4 +75,17 @@ class StatisticsController extends Controller
             'prediction' => $prediction,
         ]);
     }
+
+    /**
+     * Display competition standings.
+     */
+    public function standings(Request $request): View
+    {
+        $activeTeamId = app(MemberContext::class)->getActiveTeamId();
+
+        return view('member.statistics.standings', [
+            'title' => __('nav.competition_standings'),
+            'activeTeamId' => $activeTeamId,
+        ]);
+    }
 }

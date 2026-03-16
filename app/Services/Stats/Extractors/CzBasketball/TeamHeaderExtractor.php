@@ -15,13 +15,82 @@ class TeamHeaderExtractor implements StatExtractorInterface
         $h1 = $crawler->filter('h1')->first();
         $teamName = $h1->count() > 0 ? trim($h1->text()) : 'Unknown Team';
 
-        // Zkusíme najít soutěž (často v menším textu pod h1 nebo v okolí)
+        // Zkusíme najít soutěž (často v menším textu pod h1 nebo v okolí, nebo pomocí labelu "Soutěž")
         $competition = null;
-        $crawler->filter('h2, .competition-label, .league-name')->each(function (Crawler $node) use (&$competition) {
-            if (!$competition && strlen(trim($node->text())) > 3) {
-                $competition = trim($node->text());
-            }
-        });
+        $competitionUrl = null;
+
+        $compLabel = $crawler->filterXPath("//*[normalize-space(.)='Soutěž']");
+        if ($compLabel->count() > 0) {
+            $compLabel->each(function (Crawler $labelNode) use (&$competition, &$competitionUrl) {
+                if ($competition) return;
+
+                // Zkusíme najít hodnotu vedle (pokud je to v tabulce nebo seznamu)
+                $compValue = $labelNode->filterXPath("following::*[1]");
+                if ($compValue->count() > 0 && strlen(trim($compValue->text())) > 2) {
+                    $competition = trim($compValue->text());
+                    $compLink = $compValue->filter('a')->first();
+                    if ($compLink->count() > 0) {
+                        $competitionUrl = $compLink->attr('href');
+                    }
+                }
+
+                // Zkusíme najít hodnotu v sibling divu (pokud je to v mřížce divů)
+                if (!$competition || strlen($competition) < 3) {
+                    $parent = $labelNode->closest('div');
+                    if ($parent->count() > 0) {
+                        $sibling = $parent->filterXPath("following-sibling::div[1]");
+                        if ($sibling->count() > 0) {
+                            $competition = trim($sibling->text());
+                            $compLink = $sibling->filter('a')->first();
+                            if ($compLink->count() > 0) {
+                                $competitionUrl = $compLink->attr('href');
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        if (!$competition) {
+            $crawler->filter('h2, .competition-label, .league-name')->each(function (Crawler $node) use (&$competition, &$competitionUrl) {
+                if (!$competition && strlen(trim($node->text())) > 3) {
+                    $competition = trim($node->text());
+                    $link = $node->filter('a')->first();
+                    if ($link->count() > 0) {
+                        $competitionUrl = $link->attr('href');
+                    }
+                }
+            });
+        }
+
+        // Pokud stále nemáme URL soutěže, zkusíme najít v tabulce historie sezón (pokud známe rok)
+        $year = $config['external_season_year'] ?? null;
+        if (!$competitionUrl && $year) {
+            $crawler->filter('table')->each(function (Crawler $table) use ($year, &$competition, &$competitionUrl) {
+                if ($competitionUrl) return;
+                $table->filter('tr')->each(function (Crawler $tr) use ($year, &$competition, &$competitionUrl) {
+                     if ($competitionUrl) return;
+                     if (str_contains($tr->text(), (string)$year)) {
+                         $link = $tr->filter('a[href*="/soutez/"]')->first();
+                         if ($link->count() > 0) {
+                             $competitionUrl = $link->attr('href');
+                             if (!$competition || $competition === 'Základní informace') {
+                                 $competition = trim($link->text());
+                             }
+                         }
+                     }
+                });
+            });
+        }
+
+        // Pokud stále nemáme URL soutěže, zkusíme najít jakýkoliv odkaz /soutez/, který má v textu název soutěže
+        if ($competition && $competition !== 'Základní informace' && !$competitionUrl) {
+            $crawler->filter('a[href*="/soutez/"]')->each(function (Crawler $node) use ($competition, &$competitionUrl) {
+                if (!$competitionUrl && str_contains(mb_strtolower(trim($node->text())), mb_strtolower($competition))) {
+                    $competitionUrl = $node->attr('href');
+                }
+            });
+        }
 
         // Zkusíme najít další detaily (Trenér, Hala, atd.)
         $coach = null;
@@ -57,6 +126,7 @@ class TeamHeaderExtractor implements StatExtractorInterface
             metadata: [
                 'team_name' => $teamName,
                 'competition' => $competition,
+                'competition_url' => $competitionUrl,
                 'coach' => $coach,
                 'assistants' => $assistants,
                 'manager' => $manager,

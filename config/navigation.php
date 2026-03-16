@@ -33,6 +33,7 @@ return [
             ['title' => 'nav.my_statistics', 'route' => 'member.statistics.me', 'icon' => 'heroicon-o-chart-bar'],
             ['title' => 'nav.players_statistics', 'route' => 'member.statistics.players', 'icon' => 'heroicon-o-users'],
             ['title' => 'nav.matches_statistics', 'route' => 'member.statistics.matches', 'icon' => 'heroicon-o-trophy'],
+            ['title' => 'nav.competition_standings', 'route' => 'member.statistics.standings', 'icon' => 'heroicon-o-list-bullet'],
         ],
         'support' => [
             ['title' => 'nav.help', 'route' => 'member.help', 'icon' => 'heroicon-o-question-mark-circle'],

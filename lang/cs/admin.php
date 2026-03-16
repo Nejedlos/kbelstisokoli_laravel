@@ -73,6 +73,10 @@ return [
                 'label' => 'Klubová akce',
                 'plural_label' => 'Klubové akce',
             ],
+            'competition_standing' => [
+                'label' => 'Pořadí v soutěži',
+                'plural_label' => 'Tabulky soutěží',
+            ],
             'cron_log' => [
                 'label' => 'Log plánované úlohy',
                 'plural_label' => 'Logy cronu',

@@ -67,7 +67,13 @@ class CzBasketballMatchesListDomExtractor
                     $rowData['score'] = $val;
                     $rowData['status'] = (str_contains($val, ':') && preg_match('/\d+/', $val)) ? 'finished' : 'planned';
                 }
-                if (str_contains($label, 'Soutěž')) $rowData['competition'] = $val;
+                if (str_contains($label, 'Soutěž')) {
+                    $rowData['competition'] = $val;
+                    $compLink = $cell->filter('a[href*="/soutez/"]')->first();
+                    if ($compLink->count() > 0) {
+                        $rowData['competition_url'] = $compLink->attr('href');
+                    }
+                }
                 if (str_contains($label, 'Kolo')) $rowData['round'] = $val;
             }
 

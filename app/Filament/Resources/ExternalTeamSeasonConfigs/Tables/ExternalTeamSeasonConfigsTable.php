@@ -44,6 +44,24 @@ class ExternalTeamSeasonConfigsTable
                     ->label('Poslední sync')
                     ->dateTime()
                     ->sortable(),
+                TextColumn::make('consistency')
+                    ->label('Konzistence')
+                    ->getStateUsing(fn ($record) => $record->metadata['consistency']['is_consistent'] ?? null)
+                    ->badge()
+                    ->color(fn ($state) => match ($state) {
+                        true => 'success',
+                        false => 'danger',
+                        null => 'gray',
+                    })
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        true => 'Sedí',
+                        false => 'Chyba',
+                        null => 'Neznámo',
+                    })
+                    ->tooltip(fn ($record) => ($record->metadata['consistency']['is_consistent'] ?? null) === false
+                        ? "Lokálně: Z:{$record->metadata['consistency']['local']['gp']}, V:{$record->metadata['consistency']['local']['w']}, P:{$record->metadata['consistency']['local']['l']}. " .
+                          "Oficiálně: Z:{$record->metadata['consistency']['official']['gp']}, V:{$record->metadata['consistency']['official']['w']}, P:{$record->metadata['consistency']['official']['l']}."
+                        : null),
                 TextColumn::make('health')
                     ->label('Zdraví')
                     ->getStateUsing(fn ($record) => $record->getFailCountInARow())
