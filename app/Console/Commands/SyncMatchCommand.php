@@ -87,7 +87,7 @@ class SyncMatchCommand extends Command
             $barSection = method_exists($output, 'section') ? $output->section() : null;
             $logSection = method_exists($output, 'section') ? $output->section() : $output;
 
-            $bar = $barSection
+            $bar = $barSection && method_exists($barSection, 'createProgressBar')
                 ? $barSection->createProgressBar(1)
                 : $this->output->createProgressBar(1);
 

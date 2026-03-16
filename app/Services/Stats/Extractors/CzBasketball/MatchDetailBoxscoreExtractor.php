@@ -140,18 +140,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         });
 
         // Pokud nejsou žádné tabulky a zápas nemá žádné detaily o čtvrtinách, pravděpodobně jde o budoucí zápas.
-        // V takovém případě skóre v hlavičce může být ve skutečnosti čas utkání.
-        if (empty($allTablesData) && empty($matchHeader['periods']) && isset($matchHeader['score'])) {
-            // Pokud scheduled_at nemá čas (je tam jen datum), nebo pokud skóre vypadá jako čas
-            if (preg_match('/^\d{1,2}:\d{2}$/', $matchHeader['score'])) {
-                if (isset($matchHeader['scheduled_at']) && str_contains($matchHeader['scheduled_at'], '00:00:00')) {
-                    $datePart = explode(' ', $matchHeader['scheduled_at'])[0];
-                    $matchHeader['scheduled_at'] = $datePart . ' ' . $matchHeader['score'] . ':00';
-                }
-                $matchHeader['is_future'] = true;
-                unset($matchHeader['score']);
-            }
-        }
+        // Vše podstatné by už mělo být vyřešeno v extractHeader().
 
         // Pro zjednodušení vracíme první tabulku jako hlavní data, ale v metadatech máme vše
         $mainTable = $allTablesData[0] ?? new NormalizedTableDTO('Boxscore', [], [
@@ -344,6 +333,33 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                         $header['scheduled_at'] = Carbon::createFromFormat('j. n. Y G:i', $cleanDateStr, 'Europe/Prague')->toDateTimeString();
                     } catch (\Exception $e2) {
                         // Ignorujeme
+                    }
+                }
+            }
+
+            // Pokud skóre vypadá jako čas a shoduje se s časem začátku, nebo pokud je zápas v budoucnu a skóre má podezřelý formát, zrušíme ho.
+            if (isset($header['score']) && isset($header['scheduled_at'])) {
+                $scheduledAt = Carbon::parse($header['scheduled_at']);
+                $scheduledTime = $scheduledAt->format('H:i');
+
+                // Pokud scheduled_at nemá čas (je tam jen datum), zkusíme ho vzít ze skóre (pokud vypadá jako čas)
+                if (str_contains($header['scheduled_at'], '00:00:00') && preg_match('/^\d{1,2}:\d{2}$/', $header['score'])) {
+                    $datePart = explode(' ', $header['scheduled_at'])[0];
+                    $header['scheduled_at'] = $datePart . ' ' . $header['score'] . ':00';
+                    $header['is_future'] = true;
+                    unset($header['score']);
+                }
+                // Přesná shoda s časem (již nastaveným)
+                elseif ($header['score'] === $scheduledTime) {
+                    $header['is_future'] = true;
+                    unset($header['score']);
+                }
+                // Zápas je v budoucnu (více než 15 minut) a skóre vypadá jako čas (HH:MM)
+                elseif ($scheduledAt->isFuture() && preg_match('/^\d{1,2}:\d{2}$/', $header['score'])) {
+                    // Pokud nemáme žádné čtvrtiny, je to skoro jistě čas
+                    if (empty($periods)) {
+                        $header['is_future'] = true;
+                        unset($header['score']);
                     }
                 }
             }
