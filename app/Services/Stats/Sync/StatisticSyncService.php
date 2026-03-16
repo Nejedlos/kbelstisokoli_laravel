@@ -184,17 +184,21 @@ class StatisticSyncService
                 // Smažeme případné existující řádky statistik soupeře, pokud tam nějaké zůstaly
                 StatisticRow::where('statistic_set_id', $set->id)
                     ->where('basketball_match_id', (int) $match->id)
-                    ->where(function($query) use ($match) {
+                    ->where(function($query) {
                         $query->whereNotNull('opponent_id')
-                              ->orWhere('team_id', '!=', (int) $match->team_id)
-                              ->orWhere(function($q) {
-                                  $q->whereNull('team_id')->whereNull('player_id');
-                              });
+                              ->orWhereNull('team_id');
                     })
                     ->delete();
 
                 return;
             }
+
+            // Pokud je to náš tým, nejdříve smažeme existující boxscore záznamy pro tento zápas a tým,
+            // abychom zabránili duplicitám při opakované synchronizaci.
+            StatisticRow::where('statistic_set_id', $set->id)
+                ->where('basketball_match_id', (int) $match->id)
+                ->where('team_id', (int) $match->team_id)
+                ->delete();
 
             foreach ($data->rows as $row) {
                 $externalPlayerId = $row->metadata['external_player_id'] ?? $row->playerId;
@@ -351,6 +355,11 @@ class StatisticSyncService
             return;
         }
 
+        // NEJDŘÍVE: Smažeme všechny stávající sumáře pro tuto sezónu, abychom odstranili případné sirotky a duplicity.
+        StatisticRow::where('statistic_set_id', $summarySet->id)
+            ->where('season_id', $seasonId)
+            ->delete();
+
         // Najdeme všechny hráče, kteří mají záznam v boxscoru pro tuto sezónu
         $playerIds = StatisticRow::where('statistic_set_id', $boxscoreSet->id)
             ->where('season_id', $seasonId)
@@ -373,23 +382,20 @@ class StatisticSyncService
                 ->where('player_id', $playerId)
                 ->get();
 
+            // Vytvoříme souhrny per hráč (za celou sezónu napříč týmy)
             $summaryData = $this->aggregateRows($rows);
 
-            StatisticRow::updateOrCreate(
-                [
-                    'statistic_set_id' => $summarySet->id,
-                    'player_id' => $playerId,
-                    'season_id' => $seasonId,
-                    'team_id' => null, // Globální souhrn pro sezónu
+            StatisticRow::create([
+                'statistic_set_id' => $summarySet->id,
+                'player_id' => $playerId,
+                'season_id' => $seasonId,
+                'team_id' => null, // Globální souhrn pro sezónu
+                'values' => $summaryData,
+                'source_metadata' => [
+                    'last_computed_at' => now()->toDateTimeString(),
+                    'source' => 'aggregation_global',
                 ],
-                [
-                    'values' => $summaryData,
-                    'source_metadata' => [
-                        'last_computed_at' => now()->toDateTimeString(),
-                        'source' => 'aggregation_global',
-                    ],
-                ]
-            );
+            ]);
 
             // PŘIDÁNO: Přepočítáme souhrny i pro jednotlivé týmy (kvůli rankingům v rámci týmu)
             $teamIds = $rows->pluck('team_id')->unique()->filter();
@@ -397,21 +403,17 @@ class StatisticSyncService
                 $teamRows = $rows->where('team_id', $teamId);
                 $teamSummaryData = $this->aggregateRows($teamRows);
 
-                StatisticRow::updateOrCreate(
-                    [
-                        'statistic_set_id' => $summarySet->id,
-                        'player_id' => $playerId,
-                        'season_id' => $seasonId,
-                        'team_id' => $teamId,
+                StatisticRow::create([
+                    'statistic_set_id' => $summarySet->id,
+                    'player_id' => $playerId,
+                    'season_id' => $seasonId,
+                    'team_id' => $teamId,
+                    'values' => $teamSummaryData,
+                    'source_metadata' => [
+                        'last_computed_at' => now()->toDateTimeString(),
+                        'source' => 'aggregation_team',
                     ],
-                    [
-                        'values' => $teamSummaryData,
-                        'source_metadata' => [
-                            'last_computed_at' => now()->toDateTimeString(),
-                            'source' => 'aggregation_team',
-                        ],
-                    ]
-                );
+                ]);
             }
         }
         ConsoleService::log("    - Hotovo ($count hráčů).", 'success');
