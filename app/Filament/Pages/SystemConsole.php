@@ -163,18 +163,28 @@ class SystemConsole extends Page
     {
         try {
             if ($table === 'telescope_entries') {
-                if (Artisan::hasCommand('telescope:prune')) {
-                    Artisan::call('telescope:prune');
+                // U Telescope preferujeme náš vlastní clear --all, který smaže i dnešní data,
+                // protože uživatel kliká na čištění u konkrétní tabulky v KPI sekci.
+                $allCommands = Artisan::all();
+                if (isset($allCommands['telescope:clear'])) {
+                    Artisan::call('telescope:clear', ['--all' => true]);
+                } elseif (isset($allCommands['telescope:prune'])) {
+                    Artisan::call('telescope:prune', ['--hours' => 0]);
                 } else {
-                    throw new \Exception('Command "telescope:prune" not found. Is Telescope installed?');
+                    DB::table('telescope_entries')->delete();
                 }
             } elseif ($table === 'activity_log') {
-                DB::table($table)->where('created_at', '<', now()->subDays(30))->delete();
+                // Agresivnější čištění pro activity_log z KPI (7 dní místo 30)
+                if (Schema::hasTable($table)) {
+                    DB::table($table)->where('created_at', '<', now()->subDays(7))->delete();
+                }
             } elseif ($table === 'external_import_logs' || $table === 'new_external_import_logs') {
                 // Smazat vše starší než 2 dny (agresivnější) nebo truncate pokud je to extra velké?
                 // Uživatel si stěžoval, že to nejde vyčistit a počet zůstává stejný.
                 // Zkusíme truncate pokud je to specifikováno přes speciální parametr nebo prostě smazat víc.
-                DB::table('new_external_import_logs')->delete(); // Smažeme vše, když uživatel klikne na Prune u této tabulky
+                if (Schema::hasTable($table)) {
+                    DB::table($table)->delete();
+                }
             } elseif (Schema::hasTable($table)) {
                 DB::table($table)->truncate();
             }

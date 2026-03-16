@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 class InjectFeedbackWidget
@@ -40,7 +41,7 @@ class InjectFeedbackWidget
         }
 
         // 2. Skip AJAX/JSON/Widget requests
-        if ($request->isXmlHttpRequest() || $request->expectsJson() || $request->routeIs('feedback.widget')) {
+        if ($request->isXmlHttpRequest() || $request->expectsJson() || $request->routeIs('feedback.*')) {
             return false;
         }
 
@@ -86,27 +87,28 @@ class InjectFeedbackWidget
                     $jsUrl = asset('build/' . $manifest['resources/js/feedback-widget.js']['file']);
                 }
             }
+
+            if (empty($jsUrl)) {
+                \Illuminate\Support\Facades\Log::warning('Feedback widget JS not found in manifest at ' . $manifestPath . ', skipping injection.');
+                return;
+            }
+
+            $cfg = [
+                'strategy' => config('feedback.screenshot.strategy', 'auto'),
+                'playwright' => [
+                    'enabled' => config('feedback.screenshot.playwright.enabled', true),
+                    'timeout' => config('feedback.screenshot.playwright.timeout', 30000),
+                ],
+                'endpoints' => [
+                    'serverScreenshot' => Route::has('feedback.screenshot') ? route('feedback.screenshot') : null,
+                ],
+            ];
+            $cfgJson = json_encode($cfg);
+
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Feedback widget route or asset not found, skipping injection: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('Feedback widget initialization failed, skipping injection: ' . $e->getMessage());
             return;
         }
-
-        if (empty($jsUrl)) {
-            \Illuminate\Support\Facades\Log::warning('Feedback widget JS not found in manifest at ' . $manifestPath . ', skipping injection.');
-            return;
-        }
-
-        $cfg = [
-            'strategy' => config('feedback.screenshot.strategy', 'auto'),
-            'playwright' => [
-                'enabled' => config('feedback.screenshot.playwright.enabled', true),
-                'timeout' => config('feedback.screenshot.playwright.timeout', 30000),
-            ],
-            'endpoints' => [
-                'serverScreenshot' => route('feedback.screenshot'),
-            ],
-        ];
-        $cfgJson = json_encode($cfg);
 
         $loader = <<<HTML
 <script id="ks-fb-config" class="ks-feedback-ignore">window.KS_FEEDBACK_CONFIG = {$cfgJson};</script>
