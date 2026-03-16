@@ -184,7 +184,20 @@ class EventMigrationSeeder extends Seeder
             'metadata' => ['legacy_z_id' => (int) $old->id],
         ];
 
+        if (! $existing && $scheduledAt && !empty($teamIds)) {
+            $existing = \App\Models\BasketballMatch::where('team_id', $teamIds[0])
+                ->where('season_id', $seasonId)
+                ->where('scheduled_at', '>=', $scheduledAt->copy()->subMinutes(120)->toDateTimeString())
+                ->where('scheduled_at', '<=', $scheduledAt->copy()->addMinutes(120)->toDateTimeString())
+                ->first();
+        }
+
         if ($existing) {
+            // Sloučíme metadata, aby se zachovalo např. external_id pokud tam už je
+            $metadata = $existing->metadata ?? [];
+            $metadata['legacy_z_id'] = (int) $old->id;
+            $matchData['metadata'] = $metadata;
+
             $existing->update($matchData);
             $match = $existing;
         } else {
@@ -206,7 +219,20 @@ class EventMigrationSeeder extends Seeder
             'metadata' => ['legacy_z_id' => (int) $old->id],
         ];
 
+        if (! $existing && $scheduledAt && !empty($teamIds)) {
+            $existing = \App\Models\Training::whereHas('teams', function ($q) use ($teamIds) {
+                $q->whereIn('teams.id', $teamIds);
+            })
+                ->where('starts_at', '>=', $scheduledAt->copy()->subMinutes(60)->toDateTimeString())
+                ->where('starts_at', '<=', $scheduledAt->copy()->addMinutes(60)->toDateTimeString())
+                ->first();
+        }
+
         if ($existing) {
+            $metadata = $existing->metadata ?? [];
+            $metadata['legacy_z_id'] = (int) $old->id;
+            $trainingData['metadata'] = $metadata;
+
             $existing->update($trainingData);
             $training = $existing;
         } else {
@@ -221,9 +247,19 @@ class EventMigrationSeeder extends Seeder
         $teamIds = (array) $teamIds;
         $event = $existing;
 
+        if (! $event && $scheduledAt) {
+            $event = \App\Models\ClubEvent::where('starts_at', '>=', $scheduledAt->copy()->subMinutes(60)->toDateTimeString())
+                ->where('starts_at', '<=', $scheduledAt->copy()->addMinutes(60)->toDateTimeString())
+                ->first();
+        }
+
         if (! $event) {
             $event = new \App\Models\ClubEvent;
             $event->metadata = ['legacy_z_id' => (int) $old->id];
+        } else {
+            $metadata = $event->metadata ?? [];
+            $metadata['legacy_z_id'] = (int) $old->id;
+            $event->metadata = $metadata;
         }
 
         $event->title = [
