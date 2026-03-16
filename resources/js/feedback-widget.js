@@ -1,3 +1,6 @@
+import domtoimage from 'dom-to-image-more';
+import html2canvas from 'html2canvas';
+
 /**
  * RING BUFFER
  */
@@ -290,7 +293,7 @@ function registerKsFeedbackWidget() {
                 if (!this.options.clicks || !this.clicks) return;
 
                 const el = e.target;
-                const descriptor = `${el.tagName.toLowerCase()}${el.id ? '#'+el.id : ''}${el.className ? '.'+el.className.split(' ').join('.') : ''}`;
+                const descriptor = `${el.tagName.toLowerCase()}${el.id ? '#'+el.id : ''}${el.className ? '.'+el.className.split(' ').join('.').substring(0, 50) : ''}`;
 
                 this.clicks.push({
                     x: e.clientX,
@@ -299,6 +302,8 @@ function registerKsFeedbackWidget() {
                     text: (el.innerText || el.value || '').substring(0, 80).trim(),
                     timestamp: new Date().toISOString()
                 });
+                // Force Alpine update
+                this.clicks = this.clicks;
             }, true);
         },
 
@@ -357,23 +362,27 @@ function registerKsFeedbackWidget() {
                     quality: 0.8,
                     bgcolor: '#ffffff',
                     filter: (node) => {
-                        if (node.dataset?.html2canvasIgnore === 'true') return false;
+                        if (node.id === 'ks-fb-root' || node.dataset?.html2canvasIgnore === 'true') return false;
                         if (this.options.maskSensitive && (node.classList?.contains('bugmask') || node.dataset?.bugmask === 'true')) return false;
                         if (node.tagName === 'INPUT' && node.type === 'password') return false;
                         return true;
                     }
                 };
 
+                // Získání referencí na knihovny z window (pro jistotu, pokud nejsou v lokálním scope)
+                const domToImg = window.domtoimage || (typeof domtoimage !== 'undefined' ? domtoimage : null);
+                const h2c = window.html2canvas || (typeof html2canvas !== 'undefined' ? html2canvas : null);
+
                 // First try: dom-to-image
-                if (typeof domtoimage !== 'undefined') {
+                if (domToImg) {
                     try {
                         console.log('Attempting screenshot with dom-to-image-more...');
-                        dataUrl = await domtoimage.toJpeg(document.body, options);
+                        dataUrl = await domToImg.toJpeg(document.body, options);
                         console.log('Screenshot successful (dom-to-image)');
                     } catch (domErr) {
                         console.warn('dom-to-image-more failed, trying html2canvas...', domErr);
-                        if (typeof html2canvas !== 'undefined') {
-                            const canvas = await html2canvas(document.body, {
+                        if (h2c) {
+                            const canvas = await h2c(document.body, {
                                 useCORS: true,
                                 allowTaint: true,
                                 scale: Math.min(window.devicePixelRatio, 2),
@@ -385,10 +394,10 @@ function registerKsFeedbackWidget() {
                             throw domErr; // Rethrow if no fallback available
                         }
                     }
-                } else if (typeof html2canvas !== 'undefined') {
+                } else if (h2c) {
                     // Only html2canvas available
                     console.log('Attempting screenshot with html2canvas (standalone)...');
-                    const canvas = await html2canvas(document.body, {
+                    const canvas = await h2c(document.body, {
                         useCORS: true,
                         allowTaint: true,
                         scale: Math.min(window.devicePixelRatio, 2),

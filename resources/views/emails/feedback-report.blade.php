@@ -23,11 +23,27 @@
         <p>{{ $report->steps }}</p>
     @endif
 
-    @if($report->screenshot_path && \Illuminate\Support\Facades\Storage::exists($report->screenshot_path))
+    @if($report->screenshot_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($report->screenshot_path))
         <h3 style="font-size: 16px; color: {{ config('email_branding.colors.text') }}; margin-top: 20px;">Screenshot</h3>
         <div style="margin-top: 10px;">
-            <img src="{{ $message->embed(storage_path('app/private/' . $report->screenshot_path)) }}" alt="Screenshot" style="max-width: 100%; border-radius: 8px; border: 1px solid {{ config('email_branding.colors.border') }};">
+            <img src="{{ $message->embed(\Illuminate\Support\Facades\Storage::disk('local')->path($report->screenshot_path)) }}" alt="Screenshot" style="max-width: 100%; border-radius: 8px; border: 1px solid {{ config('email_branding.colors.border') }};">
         </div>
+    @endif
+
+    @if($report->clicks_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($report->clicks_path))
+        <h3 style="font-size: 16px; color: {{ config('email_branding.colors.text') }}; margin-top: 20px;">Poslední kliknutí</h3>
+        @php
+            $clicks = json_decode(\Illuminate\Support\Facades\Storage::disk('local')->get($report->clicks_path), true);
+            $lastClicks = array_slice($clicks, -10);
+        @endphp
+        <ul style="font-size: 14px; color: {{ config('email_branding.colors.text') }}; padding-left: 20px;">
+            @foreach($lastClicks as $click)
+                <li>
+                    <strong>{{ $click['element'] ?? 'Prvek' }}</strong>: {{ $click['text'] ?? 'bez textu' }}
+                    <span style="color: #64748b; font-size: 12px;">(x: {{ $click['x'] }}, y: {{ $click['y'] }})</span>
+                </li>
+            @endforeach
+        </ul>
     @endif
 
     @include('emails.partials.divider')

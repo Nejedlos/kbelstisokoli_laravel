@@ -54,28 +54,46 @@ class FeedbackReportNotification extends Mailable implements ShouldQueue
     {
         $attachments = [];
 
-        if ($this->report->screenshot_path && Storage::exists($this->report->screenshot_path)) {
+        if ($this->report->screenshot_path && Storage::disk('local')->exists($this->report->screenshot_path)) {
             $attachments[] = Attachment::fromStorage($this->report->screenshot_path)
                 ->as('screenshot.jpg')
-                ->withMime('image/jpeg');
+                ->withMime('image/jpeg')
+                ->withDisk('local');
         }
 
-        if ($this->report->logs_path && Storage::exists($this->report->logs_path)) {
+        if ($this->report->logs_path && Storage::disk('local')->exists($this->report->logs_path)) {
             $attachments[] = Attachment::fromStorage($this->report->logs_path)
                 ->as('console-logs.json')
-                ->withMime('application/json');
+                ->withMime('application/json')
+                ->withDisk('local');
         }
 
-        if ($this->report->network_path && Storage::exists($this->report->network_path)) {
+        if ($this->report->network_path && Storage::disk('local')->exists($this->report->network_path)) {
             $attachments[] = Attachment::fromStorage($this->report->network_path)
                 ->as('network-logs.json')
-                ->withMime('application/json');
+                ->withMime('application/json')
+                ->withDisk('local');
         }
 
-        if ($this->report->dom_path && Storage::exists($this->report->dom_path)) {
+        if ($this->report->dom_path && Storage::disk('local')->exists($this->report->dom_path)) {
             $attachments[] = Attachment::fromStorage($this->report->dom_path)
                 ->as('dom-snapshot.html')
-                ->withMime('text/html');
+                ->withMime('text/html')
+                ->withDisk('local');
+        }
+
+        if ($this->report->breadcrumbs_path && Storage::disk('local')->exists($this->report->breadcrumbs_path)) {
+            $attachments[] = Attachment::fromStorage($this->report->breadcrumbs_path)
+                ->as('breadcrumbs.json')
+                ->withMime('application/json')
+                ->withDisk('local');
+        }
+
+        if ($this->report->clicks_path && Storage::disk('local')->exists($this->report->clicks_path)) {
+            $attachments[] = Attachment::fromStorage($this->report->clicks_path)
+                ->as('clicks.json')
+                ->withMime('application/json')
+                ->withDisk('local');
         }
 
         return $attachments;

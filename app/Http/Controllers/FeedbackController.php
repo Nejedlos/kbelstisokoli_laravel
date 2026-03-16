@@ -105,19 +105,19 @@ class FeedbackController extends Controller
         if (!empty($redacted['capture']['screenshot'])) {
             $screenshotData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $redacted['capture']['screenshot']));
             $path = "{$storageDir}/screenshot.jpg";
-            Storage::put($path, $screenshotData);
+            Storage::disk('local')->put($path, $screenshotData);
             $report->screenshot_path = $path;
         }
 
         if (!empty($redacted['capture']['domLight'])) {
             $path = "{$storageDir}/dom.html";
-            Storage::put($path, $redacted['capture']['domLight']);
+            Storage::disk('local')->put($path, $redacted['capture']['domLight']);
             $report->dom_path = $path;
         }
 
         if (!empty($redacted['logs']['console']) || !empty($redacted['logs']['errors'])) {
             $path = "{$storageDir}/logs.json";
-            Storage::put($path, json_encode([
+            Storage::disk('local')->put($path, json_encode([
                 'console' => $redacted['logs']['console'] ?? [],
                 'errors' => $redacted['logs']['errors'] ?? []
             ], JSON_PRETTY_PRINT));
@@ -126,26 +126,26 @@ class FeedbackController extends Controller
 
         if (!empty($redacted['logs']['network'])) {
             $path = "{$storageDir}/network.json";
-            Storage::put($path, json_encode($redacted['logs']['network'], JSON_PRETTY_PRINT));
+            Storage::disk('local')->put($path, json_encode($redacted['logs']['network'], JSON_PRETTY_PRINT));
             $report->network_path = $path;
         }
 
         if (!empty($redacted['logs']['breadcrumbs'])) {
             $path = "{$storageDir}/breadcrumbs.json";
-            Storage::put($path, json_encode($redacted['logs']['breadcrumbs'], JSON_PRETTY_PRINT));
+            Storage::disk('local')->put($path, json_encode($redacted['logs']['breadcrumbs'], JSON_PRETTY_PRINT));
             $report->breadcrumbs_path = $path;
         }
 
         // Clicks jsou nyní v breadcrumbs nebo meta, pokud jsou povoleny
         if (!empty($redacted['clicks'])) {
              $path = "{$storageDir}/clicks.json";
-             Storage::put($path, json_encode($redacted['clicks'], JSON_PRETTY_PRINT));
+             Storage::disk('local')->put($path, json_encode($redacted['clicks'], JSON_PRETTY_PRINT));
              $report->clicks_path = $path;
         }
 
         if (!empty($redacted['performance'])) {
             $path = "{$storageDir}/performance.json";
-            Storage::put($path, json_encode($redacted['performance'], JSON_PRETTY_PRINT));
+            Storage::disk('local')->put($path, json_encode($redacted['performance'], JSON_PRETTY_PRINT));
             $report->performance_path = $path;
         }
 
@@ -181,11 +181,11 @@ class FeedbackController extends Controller
              abort(403);
         }
 
-        if (!$report->screenshot_path || !Storage::exists($report->screenshot_path)) {
+        if (!$report->screenshot_path || !Storage::disk('local')->exists($report->screenshot_path)) {
             abort(404);
         }
 
-        return response()->file(storage_path('app/private/' . $report->screenshot_path));
+        return response()->file(Storage::disk('local')->path($report->screenshot_path));
     }
 
     protected function redactData(array $data): array
