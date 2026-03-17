@@ -284,7 +284,7 @@
                                     <div class="min-w-0">
                                         <div class="text-sm font-bold text-secondary truncate {{ $p['is_me'] ? 'text-primary' : '' }}">
                                             {{ $p['user']->name }}
-                                            @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
+                                            @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">{{ __('member.is_me') }}</span> @endif
                                         </div>
                                         @if($p['attendance']?->note)
                                             <div class="text-[9px] text-success-600/70 italic font-medium truncate mt-0.5">
@@ -320,7 +320,7 @@
                                         <div class="min-w-0">
                                             <div class="text-sm font-bold text-slate-600 truncate">
                                                 {{ $p['user']->name }}
-                                                @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
+                                                @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">{{ __('member.is_me') }}</span> @endif
                                             </div>
                                             @if($p['attendance']?->excuse_reason)
                                                 <div class="text-[9px] font-black uppercase tracking-tighter text-danger-500/70">
@@ -361,7 +361,7 @@
                                     <div class="min-w-0">
                                         <div class="text-sm font-bold text-secondary truncate">
                                             {{ $p['user']->name }}
-                                            @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">(Já)</span> @endif
+                                            @if($p['is_me']) <span class="text-[10px] text-primary/60 font-black ml-1 uppercase">{{ __('member.is_me') }}</span> @endif
                                         </div>
                                         @if($p['attendance']?->note)
                                             <div class="text-[9px] text-warning-600/70 italic font-medium truncate mt-0.5">

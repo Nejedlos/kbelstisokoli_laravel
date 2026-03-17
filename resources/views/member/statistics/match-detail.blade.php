@@ -130,7 +130,9 @@
                                 </div>
                                 <div class="mt-3 md:mt-4">
                                     <div class="px-3 py-1 md:px-4 md:py-1.5 bg-black/50 rounded-full backdrop-blur-xl border border-white/10 shadow-2xl">
-                                        <span class="text-[8px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/80 whitespace-nowrap">{{ $hasScore ? 'Konečný výsledek' : 'Zatím neodehráno' }}</span>
+                                        <span class="text-[8px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/80 whitespace-nowrap">
+                                            {{ $hasScore ? __('matches.result_status.final') : __('matches.result_status.planned') }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -436,7 +438,7 @@
                                                             <div class="flex-shrink-0 text-right relative">
                                                                 <div class="flex flex-col items-end">
                                                                     <span class="text-2xl font-black {{ $valColor }} tabular-nums leading-none mb-1">{{ $players[$side]['value'] ?? '' }}</span>
-                                                                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">HODNOTA</span>
+                                                                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">{{ __('matches.stats.value') }}</span>
                                                                 </div>
                                                             </div>
                                                         </div>

@@ -66,6 +66,15 @@ return [
     'pre_match_stats' => 'Předzápasové srovnání',
     'pre_match_analysis_desc' => 'Hloubková analýza před zápasem',
     'match_stats' => 'Statistiky a průběh',
+    'result_status' => [
+        'final' => 'Konečný výsledek',
+        'planned' => 'Zatím neodehráno',
+    ],
+    'stats' => [
+        'value' => 'HODNOTA',
+        'starter' => 'Základní pětka',
+        'player' => 'Hráč',
+    ],
     'team_comparison' => 'Srovnání kádrů',
     'last_matches' => 'Poslední zápasy',
     'average_age' => 'Průměrný věk',

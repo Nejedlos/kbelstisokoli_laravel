@@ -3,20 +3,20 @@
         {{-- SEZÓNNÍ STATISTIKY --}}
         <div class="space-y-6">
             <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center px-1">
-                <i class="fa-light fa-history mr-3 text-primary-500"></i> Historie a kariéra (cz.basketball)
+                <i class="fa-light fa-history mr-3 text-primary-500"></i> {{ __('member.external_stats.title') }}
             </h3>
             <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead class="bg-gray-50/50 dark:bg-gray-900/30">
                             <tr>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Sezóna / Soutěž</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tým</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Z</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">B Ø</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">EF Ø</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">DOS Ø</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-primary-500">TH %</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ __('member.external_stats.season_competition') }}</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ __('member.external_stats.team') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.games_short') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.points_avg_short') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.efficiency_avg_short') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.rebounds_avg_short') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-primary-500">{{ __('member.external_stats.free_throws_pct_short') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -27,7 +27,7 @@
                                 ])>
                                     <td class="px-6 py-4">
                                         @if($stat['is_career_total'])
-                                            <span class="text-primary-600 uppercase tracking-wider">Celkem kariéra</span>
+                                            <span class="text-primary-600 uppercase tracking-wider">{{ __('member.external_stats.career_total') }}</span>
                                         @else
                                             <div class="text-sm font-black text-gray-800 dark:text-white">{{ $stat['season_label'] }}</div>
                                             <div class="text-[10px] text-gray-400 font-medium">{{ $stat['competition_label'] }}</div>
@@ -60,21 +60,21 @@
         {{-- POSLEDNÍ ZÁPASY --}}
         <div class="space-y-6">
             <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center px-1">
-                <i class="fa-light fa-basketball-hoop mr-3 text-orange-500"></i> Poslední zápasy (cz.basketball)
+                <i class="fa-light fa-basketball-hoop mr-3 text-orange-500"></i> {{ __('member.external_stats.last_matches') }}
             </h3>
             <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead class="bg-gray-50/50 dark:bg-gray-900/30">
                             <tr>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Datum / Soutěž</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Soupeř</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Body</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">EF</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">DOS</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">AS</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-emerald-500">Z</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">F-</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ __('member.external_stats.date_competition') }}</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ __('member.external_stats.opponent') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.points') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.efficiency') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.rebounds') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.assists') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-emerald-500">{{ __('member.external_stats.steals') }}</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{{ __('member.external_stats.fouls') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -123,8 +123,7 @@
                     <i class="fa-light fa-info-circle"></i>
                 </div>
                 <p class="text-[11px] text-gray-500 font-medium leading-relaxed">
-                    Tyto statistiky jsou synchronizovány z externího portálu <a href="https://cz.basketball" target="_blank" class="text-primary-600 font-bold hover:underline">cz.basketball</a>.
-                    Mohou se lišit od našich interních výpočtů v závislosti na kvalitě a rychlosti dodání dat ze strany ČBF.
+                    {!! __('member.external_stats.sync_info', ['url' => '<a href="https://cz.basketball" target="_blank" class="text-primary-600 font-bold hover:underline">cz.basketball</a>']) !!}
                 </p>
             </div>
         </div>

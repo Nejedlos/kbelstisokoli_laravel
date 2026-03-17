@@ -55,14 +55,14 @@ class UsersTable
                     ->description(fn ($record) => $record->email)
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->duplicates_count > 0
-                            ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="Nalezeny další záznamy se stejným jménem ('.$record->duplicates_count.')"></i> '
+                            ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="'.__('user.warnings.duplicates', ['count' => $record->duplicates_count]).'"></i> '
                             : '').
                         ($record->isGhost()
-                            ? '<i class="fa-light fa-ghost fa-fw text-gray-400 mr-1" title="Dočasný Ghost profil"></i> '
+                            ? '<i class="fa-light fa-ghost fa-fw text-gray-400 mr-1" title="'.__('user.warnings.ghost').'"></i> '
                             : '').
                         ($record->externalMappings->isNotEmpty()
-                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
-                            : '').e($state).($record->duplicates_count > 0 ? ' <span class="text-xs text-warning">('.$record->duplicates_count.' duplicity)</span>' : '')
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="'.__('user.warnings.external_sync').'"></i> '
+                            : '').e($state).($record->duplicates_count > 0 ? ' <span class="text-xs text-warning">('.__('user.warnings.duplicates_simple', ['count' => $record->duplicates_count]).')</span>' : '')
                     ))
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
                     ->sortable(),
@@ -82,7 +82,7 @@ class UsersTable
                     ->color('primary')
                     ->toggleable(),
                 TextColumn::make('roles.display_name')
-                    ->label('Role')
+                    ->label(__('user.fields.roles'))
                     ->badge()
                     ->color('info')
                     ->separator(','),
@@ -102,7 +102,7 @@ class UsersTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('last_login_at')
-                    ->label('Aktivita')
+                    ->label(__('user.fields.last_activity'))
                     ->description(fn ($record) => $record->last_login_at?->diffForHumans() ?? '-')
                     ->dateTime('d.m.Y H:i')
                     ->sortable()
@@ -145,8 +145,8 @@ class UsersTable
                     ->label(__('user.fields.gender'))
                     ->options(Gender::class),
                 \Filament\Tables\Filters\Filter::make('duplicates')
-                    ->label('Duplicity podle jména')
-                    ->indicator('Duplicity')
+                    ->label(__('user.filters.duplicates'))
+                    ->indicator(__('user.filters.duplicates_indicator'))
                     ->query(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->whereIn('name', function ($sub) {
                         $sub->select('name')
                             ->from((new \App\Models\User)->getTable())
@@ -156,7 +156,7 @@ class UsersTable
             ])
             ->recordActions([
                 Action::make('viewDuplicates')
-                    ->label('Zobrazit duplicity')
+                    ->label(__('user.actions.view_duplicates'))
                     ->icon(new HtmlString('<i class="fa-light fa-users-viewfinder"></i>'))
                     ->color('info')
                     ->url(fn ($record) => route('filament.admin.resources.users.index', [
@@ -174,47 +174,47 @@ class UsersTable
                             $record->notify(new UserInvitationNotification($token));
 
                             FilamentNotification::make()
-                                ->title('Pozvánka byla odeslána')
+                                ->title(__('user.notifications.invitation_sent'))
                                 ->success()
                                 ->send();
                         })
                         ->visible(fn ($record) => $record->is_active && ! $record->onboarding_completed_at),
                     Action::make('impersonate')
-                        ->label(__('permissions.impersonate_users'))
+                        ->label(__('user.actions.impersonate'))
                         ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMPERSONATE))
                         ->color('warning')
-                        ->requiresConfirmation(fn ($record) => __('permissions.impersonate_confirm').$record->name.'?')
+                        ->requiresConfirmation(fn ($record) => __('user.actions.impersonate_confirm').$record->name.'?')
                         ->url(fn ($record) => route('admin.impersonate.start', ['userId' => $record->id]))
                         ->visible(fn ($record) => auth()->user()->can('impersonate_users') && auth()->user()->id !== $record->id),
                     Action::make('merge')
-                        ->label('Sloučit s...')
+                        ->label(__('user.actions.merge'))
                         ->icon(new HtmlString('<i class="fa-light fa-object-group"></i>'))
                         ->color('warning')
                         ->form([
                             \Filament\Forms\Components\Select::make('target_user_id')
-                                ->label('Cílový uživatel (ten, který zůstane)')
+                                ->label(__('user.actions.merge_target'))
                                 ->options(fn ($record) => \App\Models\User::where('id', '!=', $record->id)
                                     ->orderBy('name')
                                     ->pluck('name', 'id'))
                                 ->searchable()
                                 ->required()
-                                ->helperText('Všechny vazby, statistiky a mapování budou převedeny na vybraného uživatele. Tento (původní) uživatel bude následně smazán.'),
+                                ->helperText(__('user.actions.merge_helper')),
                         ])
                         ->requiresConfirmation()
-                        ->modalHeading('Sloučení uživatelů')
-                        ->modalDescription('Tato operace je nevratná. Dojde k převodu všech dat na cílového uživatele.')
-                        ->modalSubmitActionLabel('Sloučit uživatele')
+                        ->modalHeading(__('user.actions.merge_title'))
+                        ->modalDescription(__('user.actions.merge_desc'))
+                        ->modalSubmitActionLabel(__('user.actions.merge_submit'))
                         ->action(function ($record, array $data, \App\Services\Users\UserMergeService $service) {
                             $targetUser = \App\Models\User::findOrFail($data['target_user_id']);
                             $service->merge($record, $targetUser);
 
                             FilamentNotification::make()
-                                ->title('Uživatelé byli úspěšně sloučeni')
+                                ->title(__('user.notifications.merged'))
                                 ->success()
                                 ->send();
                         }),
                     Action::make('syncExternal')
-                        ->label('Synchronizovat z cz.basketball')
+                        ->label(__('user.actions.sync_external'))
                         ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
                         ->visible(fn ($record) => $record->externalMappings->where('source_key', 'czbasketball')->isNotEmpty())
@@ -223,13 +223,13 @@ class UsersTable
 
                             if ($result) {
                                 FilamentNotification::make()
-                                    ->title('Synchronizace úspěšně dokončena')
+                                    ->title(__('user.notifications.sync_success'))
                                     ->success()
                                     ->send();
                             } else {
                                 FilamentNotification::make()
-                                    ->title('Synchronizace selhala')
-                                    ->body('Zkontrolujte logy pro více informací.')
+                                    ->title(__('user.notifications.sync_failed'))
+                                    ->body(__('user.notifications.sync_failed_body'))
                                     ->danger()
                                     ->send();
                             }
@@ -239,11 +239,11 @@ class UsersTable
             ])
             ->headerActions([
                 Action::make('mergeAllGhosts')
-                    ->label('Sloučit identifikované Ghosty')
+                    ->label(__('user.actions.merge_ghosts'))
                     ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-object-group"></i>'))
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->modalDescription('Tato akce vyhledá v databázi všechny dočasné "Ghost" profily, které mají jednoznačný protějšek mezi reálnými uživateli, a automaticky je sloučí. Tato operace je nevratná.')
+                    ->modalDescription(__('user.actions.merge_ghosts_desc'))
                     ->action(function (\App\Services\Users\UserMergeService $service) {
                         // Musíme pracovat s query, abychom se vyhnuli problémům s pamětí u velkého množství uživatelů
                         // Ale pro začátek stačí filter na kolekci, pokud jich není tisíce
@@ -261,14 +261,13 @@ class UsersTable
                         if ($mergedCount > 0) {
                             \Filament\Notifications\Notification::make()
                                 ->success()
-                                ->title('Hromadné sloučení dokončeno')
-                                ->body("Úspěšně sloučeno {$mergedCount} profilů.")
+                                ->title(__('user.notifications.bulk_merge_success'))
+                                ->body(__('user.notifications.bulk_merge_body', ['count' => $mergedCount]))
                                 ->send();
                         } else {
                             \Filament\Notifications\Notification::make()
                                 ->info()
-                                ->title('Nebyly nalezeny žádné jasné duplicity')
-                                ->body('Všechny Ghost profily jsou buď již spárované, nebo nemají jednoznačný protějšek.')
+                                ->title(__('user.notifications.bulk_merge_none'))
                                 ->send();
                         }
                     }),
@@ -277,13 +276,13 @@ class UsersTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     BulkAction::make('mergeAutomatically')
-                        ->label('Sloučit Ghosty automaticky')
+                        ->label(__('user.actions.merge_bulk_submit'))
                         ->icon(new HtmlString('<i class="fa-light fa-object-group"></i>'))
                         ->color('warning')
                         ->requiresConfirmation()
-                        ->modalHeading('Hromadné sloučení Ghost profilů')
-                        ->modalDescription('Systém u vybraných Ghost uživatelů vyhledá reálné uživatele se stejným jménem a automaticky je sloučí. Pokud shoda není jednoznačná, bude uživatel přeskočen.')
-                        ->modalSubmitActionLabel('Spustit sloučení')
+                        ->modalHeading(__('user.actions.merge_bulk_title'))
+                        ->modalDescription(__('user.actions.merge_bulk_desc'))
+                        ->modalSubmitActionLabel(__('user.actions.merge_bulk_submit'))
                         ->action(function (Collection $records, \App\Services\Users\UserMergeService $service) {
                             $mergedCount = 0;
                             $skippedCount = 0;
@@ -306,13 +305,13 @@ class UsersTable
                             }
 
                             FilamentNotification::make()
-                                ->title('Hromadné sloučení dokončeno')
-                                ->body("Úspěšně sloučeno: {$mergedCount}, Přeskočeno: {$skippedCount}")
+                                ->title(__('user.notifications.bulk_merge_success'))
+                                ->body(__('user.notifications.bulk_merge_summary', ['merged' => $mergedCount, 'skipped' => $skippedCount]))
                                 ->success()
                                 ->send();
                         }),
                     BulkAction::make('syncExternalBulk')
-                        ->label('Synchronizovat z cz.basketball')
+                        ->label(__('user.actions.sync_external'))
                         ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
                         ->requiresConfirmation()
@@ -325,19 +324,19 @@ class UsersTable
                             }
 
                             FilamentNotification::make()
-                                ->title('Hromadná synchronizace dokončena')
-                                ->body("Úspěšně synchronizováno: {$successCount}, Celkem vybráno: ".$records->count())
+                                ->title(__('user.notifications.bulk_sync_success'))
+                                ->body(__('user.notifications.bulk_sync_body', ['success' => $successCount, 'total' => $records->count()]))
                                 ->success()
                                 ->send();
                         }),
                     BulkAction::make('activate')
-                        ->label('Aktivovat vybrané')
+                        ->label(__('user.actions.activate_selected'))
                         ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::ACTIVATE))
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => true])),
                     BulkAction::make('deactivate')
-                        ->label('Deaktivovat vybrané')
+                        ->label(__('user.actions.deactivate_selected'))
                         ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::DEACTIVATE))
                         ->color('danger')
                         ->requiresConfirmation()

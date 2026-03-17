@@ -27,6 +27,7 @@ return [
             'documentation' => 'Documentation',
             'real_attendance' => 'Real Attendance',
             'season_renewal' => 'Bulk Season Initialization',
+            'email_debug' => 'Email Debug',
             'help_search_results_for' => 'Search results for',
             'help_search_cancel' => 'Cancel search',
             'help_no_results' => 'Nothing found',
@@ -559,10 +560,52 @@ return [
         ],
     ],
     'real_attendance' => [
-        // ... (zkráceno pro přehlednost, ale vložím to správně)
+        'title' => 'Real Attendance',
+        'event_types' => [
+            'training' => 'Training',
+            'match' => 'Match',
+        ],
+        'back_to_list' => 'Back to event list',
+        'event_title' => 'Event Details',
+        'attendance' => 'Attendance',
+        'excuses' => 'Excuses',
+        'no_events' => 'No events in this period',
+        'no_events_desc' => 'No training or matches were found in the last 14 days.',
+        'tracker' => [
+            'add_member' => 'Add member to attendance',
+            'search_placeholder' => 'Search name or email...',
+            'no_member_found' => 'No member found',
+            'submitted_count' => 'Recorded',
+            'players_count' => '{0} 0 players|{1} 1 player|[2,*] :count players',
+            'finalize_button' => 'Finalize attendance & generate payments',
+            'finalize_modal_title' => 'Finalize Attendance',
+            'finalize_warning_title' => 'Warning!',
+            'finalize_warning_desc' => 'This action is irreversible and will automatically deduct appropriate funds from member accounts according to their tariffs.',
+            'finalize_confirmation_text' => 'Are you sure you want to close and bill this attendance?',
+            'cancel' => 'Cancel',
+            'confirm_finalize' => 'Yes, finalize',
+            'present' => 'Present',
+            'remove_from_attendance' => 'Remove from attendance',
+            'no_attendance_yet' => 'No attendance recorded yet',
+            'use_search_to_add' => 'Use the search above to add members.',
+        ],
     ],
     'ai_search' => [
-        // ... (zkráceno)
+        'title' => 'AI Intelligent Search',
+        'description' => 'Ask anything about the club, players, or statistics.',
+        'placeholder' => 'Ask me anything (e.g., "Who scored the most goals last season?")',
+        'thinking' => 'Thinking...',
+        'no_results' => 'Unfortunately, I couldn\'t find an answer to this question.',
+        'welcome' => [
+            'title' => 'Welcome to AI Search',
+            'desc' => 'This is your intelligent assistant for Kbelští sokoli club data.',
+        ],
+        'tips' => [
+            'title' => 'Search Tips',
+        ],
+        'sources' => [
+            'title' => 'Information Sources',
+        ],
     ],
     'season_renewal' => [
         'title' => 'Bulk Season Initialization',
@@ -606,6 +649,25 @@ return [
             'success' => 'Saved',
             'success_body' => 'Created :created and updated :updated configurations.',
             'error' => 'Error while saving',
+        ],
+    ],
+    'email_debug' => [
+        'title' => 'Email Debugging and Testing',
+        'navigation_label' => 'Email Debug',
+        'actions' => [
+            'send_test' => 'Send Test Email',
+            'send_error' => 'Test Error Report',
+            'clear_logs' => 'Clear Logs (laravel.log)',
+        ],
+        'fields' => [
+            'recipient' => 'Recipient',
+            'message' => 'Message',
+            'test_message_default' => 'This is a test message to verify SMTP.',
+        ],
+        'notifications' => [
+            'sent' => 'Email has been sent',
+            'error' => 'Error while sending',
+            'logs_cleared' => 'Logs have been cleared',
         ],
     ],
 ];

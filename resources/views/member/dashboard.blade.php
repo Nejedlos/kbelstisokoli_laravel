@@ -186,7 +186,7 @@
             />
             <x-member.kpi-card
                 :title="__('member.economy.kpi.paid_total')"
-                :value="number_format($economySummary['paid_total'] ?? 0, 0, ',', ' ') . ' Kč'"
+                :value="number_format($economySummary['paid_total'] ?? 0, 0, ',', ' ') . ' ' . __('member.currency_czk')"
                 icon="heroicon-o-check-badge"
                 color="info"
                 :route="route('member.economy.index')"
@@ -270,11 +270,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="p-4 rounded-club bg-slate-50 border border-slate-200">
                             <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.economy.kpi.total_to_pay') }}</div>
-                            <div class="text-xl font-black text-secondary">{{ number_format($economySummary['total_to_pay'] ?? 0, 0, ',', ' ') }} Kč</div>
+                            <div class="text-xl font-black text-secondary">{{ number_format($economySummary['total_to_pay'] ?? 0, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
                         </div>
                         <div class="p-4 rounded-club bg-slate-50 border border-slate-200">
                             <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('member.economy.kpi.overdue') }}</div>
-                            <div class="text-xl font-black {{ ($economySummary['overdue_amount'] ?? 0) > 0 ? 'text-danger-600' : 'text-secondary' }}">{{ number_format($economySummary['overdue_amount'] ?? 0, 0, ',', ' ') }} Kč</div>
+                            <div class="text-xl font-black {{ ($economySummary['overdue_amount'] ?? 0) > 0 ? 'text-danger-600' : 'text-secondary' }}">{{ number_format($economySummary['overdue_amount'] ?? 0, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
                         </div>
                     </div>
                     <a href="{{ route('member.economy.index') }}" class="btn btn-outline w-full py-2 text-xs">{{ __('member.dashboard.economy.cta') }}</a>

@@ -9,19 +9,19 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <x-member.kpi-card
                 :title="__('member.economy.kpi.total_to_pay')"
-                :value="number_format($summary['total_to_pay'], 0, ',', ' ') . ' Kč'"
+                :value="number_format($summary['total_to_pay'], 0, ',', ' ') . ' ' . __('member.currency_czk')"
                 icon="heroicon-o-banknotes"
                 color="primary"
             />
             <x-member.kpi-card
                 :title="__('member.economy.kpi.overdue')"
-                :value="number_format($summary['overdue_amount'], 0, ',', ' ') . ' Kč'"
+                :value="number_format($summary['overdue_amount'], 0, ',', ' ') . ' ' . __('member.currency_czk')"
                 icon="heroicon-o-clock"
                 color="danger"
             />
             <x-member.kpi-card
                 :title="__('member.economy.kpi.paid_total')"
-                :value="number_format($summary['paid_total'], 0, ',', ' ') . ' Kč'"
+                :value="number_format($summary['paid_total'], 0, ',', ' ') . ' ' . __('member.currency_czk')"
                 icon="heroicon-o-check-badge"
                 color="success"
             />
@@ -59,11 +59,10 @@
                                 @endif
                             </div>
 
-                            <div class="flex items-end md:items-center justify-between md:justify-end gap-4 border-t md:border-t-0 border-slate-100 pt-4 md:pt-0">
                                 <div class="text-left md:text-right leading-none">
-                                    <div class="text-xl sm:text-2xl font-black text-secondary">{{ number_format($charge->amount_remaining, 0, ',', ' ') }} Kč</div>
+                                    <div class="text-xl sm:text-2xl font-black text-secondary">{{ number_format($charge->amount_remaining, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
                                     @if($charge->amount_paid > 0)
-                                        <div class="text-[9px] sm:text-[10px] font-black text-success uppercase tracking-widest mt-1">{{ __('member.economy.paid_amount') }} {{ number_format($charge->amount_paid, 0, ',', ' ') }} Kč</div>
+                                        <div class="text-[9px] sm:text-[10px] font-black text-success uppercase tracking-widest mt-1">{{ __('member.economy.paid_amount') }} {{ number_format($charge->amount_paid, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
                                     @endif
                                 </div>
                                 <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
@@ -90,10 +89,7 @@
                                     <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
                                         <x-heroicon-o-arrow-down-left class="w-5 h-5" />
                                     </div>
-                                    <div>
-                                        <div class="text-sm font-bold text-secondary">{{ number_format($payment->amount, 0, ',', ' ') }} Kč</div>
-                                        <div class="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{{ $payment->paid_at->format('d. m. Y') }}</div>
-                                    </div>
+                                    <div class="text-sm font-bold text-secondary">{{ number_format($payment->amount, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
                                 </div>
                                 <div class="text-right">
                                     <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-50 text-slate-400">
@@ -123,7 +119,7 @@
                                         <div class="text-[10px] text-slate-400 font-medium uppercase tracking-widest">{{ __('member.economy.paid_amount') }} {{ $charge->updated_at->format('d. m. Y') }}</div>
                                     </div>
                                 </div>
-                                <div class="text-right font-black text-success text-sm">OK</div>
+                                <div class="text-right font-black text-success text-sm">{{ __('member.status_ok') }}</div>
                             </div>
                         @endforeach
                     </div>

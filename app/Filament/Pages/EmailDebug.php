@@ -35,12 +35,12 @@ class EmailDebug extends Page
 
     public static function getNavigationLabel(): string
     {
-        return 'Debugování e-mailů';
+        return __('admin.email_debug.navigation_label');
     }
 
     public function getTitle(): string
     {
-        return 'Debugování a testování e-mailů';
+        return __('admin.email_debug.title');
     }
 
     public function getMailConfig(): array
@@ -106,24 +106,24 @@ class EmailDebug extends Page
     {
         return [
             Action::make('sendTestMail')
-                ->label('Odeslat zkušební e-mail')
+                ->label(__('admin.email_debug.actions.send_test'))
                 ->color('info')
                 ->form([
                     TextInput::make('email')
-                        ->label('Příjemce')
+                        ->label(__('admin.email_debug.fields.recipient'))
                         ->email()
                         ->required()
                         ->default(auth()->user()->email),
                     TextInput::make('message')
-                        ->label('Zpráva')
-                        ->default('Toto je testovací zpráva pro ověření SMTP.'),
+                        ->label(__('admin.email_debug.fields.message'))
+                        ->default(__('admin.email_debug.fields.test_message_default')),
                 ])
                 ->action(function (array $data) {
                     try {
                         Mail::to($data['email'])->send(new TestMail($data['message']));
 
                         Notification::make()
-                            ->title('E-mail byl odeslán')
+                            ->title(__('admin.email_debug.notifications.sent'))
                             ->success()
                             ->send();
                     } catch (\Throwable $e) {
@@ -133,7 +133,7 @@ class EmailDebug extends Page
                         ]);
 
                         Notification::make()
-                            ->title('Chyba při odesílání')
+                            ->title(__('admin.email_debug.notifications.error'))
                             ->body($e->getMessage())
                             ->danger()
                             ->persistent()
@@ -142,7 +142,7 @@ class EmailDebug extends Page
                 }),
 
             Action::make('sendErrorReport')
-                ->label('Testovací Error Report')
+                ->label(__('admin.email_debug.actions.send_error'))
                 ->color('danger')
                 ->requiresConfirmation()
                 ->modalHeading('Odeslat simulovaný report chyby 500')

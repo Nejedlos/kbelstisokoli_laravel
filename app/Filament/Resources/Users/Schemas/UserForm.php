@@ -306,7 +306,7 @@ class UserForm
                             ]),
                     ]),
 
-                Section::make('Nouzový kontakt')
+                Section::make(__('user.sections.emergency_contact'))
                     ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::EMERGENCY))
                     ->compact()
                     ->schema([

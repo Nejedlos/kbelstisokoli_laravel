@@ -44,12 +44,12 @@ class PhotoPoolResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return 'Pool fotografií';
+        return __('admin.navigation.resources.photo_pool.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Pooly fotografií';
+        return __('admin.navigation.resources.photo_pool.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
@@ -77,9 +77,9 @@ class PhotoPoolResource extends Resource
                                         <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-red-500 text-white shadow-2xl border border-red-400">
                                             <i class="fa-light fa-trash-can-xmark text-3xl animate-bounce"></i>
                                         </div>
-                                        <strong class="text-2xl font-black block mb-2 text-white tracking-tight uppercase italic leading-none">Přerušit import?</strong>
+                                        <strong class="text-2xl font-black block mb-2 text-white tracking-tight uppercase italic leading-none">{{ __("admin.navigation.resources.photo_pool.import.cancel_title") }}</strong>
                                         <p class="text-[13px] text-white/80 font-medium leading-relaxed mb-8 px-4">
-                                            Opravdu chcete zastavit nahrávání? <br><strong class="text-red-400 uppercase tracking-wider">Zbývající fotografie ve frontě budou smazány!</strong>
+                                            {!! __("admin.navigation.resources.photo_pool.import.cancel_desc") !!}
                                         </p>
 
                                         <div class="flex flex-col gap-3 max-w-[200px] mx-auto">
@@ -89,27 +89,27 @@ class PhotoPoolResource extends Resource
                                                 class="flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-900/40 transition-all duration-300"
                                             >
                                                 <i class="fa-light fa-check-double"></i>
-                                                Ano, smazat a zrušit
+                                                {{ __("admin.navigation.resources.photo_pool.import.confirm_cancel") }}
                                             </button>
                                             <button
                                                 type="button"
                                                 wire:click="dismissCancelImportQueue"
                                                 class="flex items-center justify-center gap-2 px-6 py-2 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300"
                                             >
-                                                Zpět
+                                                {{ __("admin.navigation.resources.photo_pool.import.back") }}
                                             </button>
                                         </div>
                                     @else
                                         <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/10 text-white shadow-2xl border border-white/20 rotate-6 transition-transform duration-500">
                                             <i class="fa-light fa-arrows-rotate fa-spin text-3xl text-primary-500"></i>
                                         </div>
-                                        <strong class="text-3xl font-black block mb-3 text-white tracking-tight uppercase italic leading-none">Hromadný import</strong>
+                                        <strong class="text-3xl font-black block mb-3 text-white tracking-tight uppercase italic leading-none">{{ __("admin.navigation.resources.photo_pool.import.bulk_title") }}</strong>
                                         <p class="text-[14px] text-white/70 font-medium leading-relaxed mb-6">
-                                            Právě nahráváme a optimalizujeme vaše fotografie. Toto může chvíli trvat v závislosti na počtu souborů.
+                                            {{ __("admin.navigation.resources.photo_pool.import.bulk_desc") }}
                                         </p>
                                         <div class="inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white text-[11px] font-black uppercase tracking-widest rounded-full animate-pulse shadow-xl shadow-red-600/40 border border-red-500/50">
                                             <i class="fa-light fa-shield-exclamation text-base"></i>
-                                            Nezavírejte okno
+                                            {{ __("admin.navigation.resources.photo_pool.import.dont_close") }}
                                         </div>
 
                                         <button
@@ -118,7 +118,7 @@ class PhotoPoolResource extends Resource
                                             class="mt-6 flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-full border border-white/20 transition-all duration-300 mx-auto group"
                                         >
                                             <i class="fa-light fa-circle-xmark text-sm text-red-400 group-hover:scale-110 transition-transform"></i>
-                                            Zrušit import
+                                            {{ __("admin.navigation.resources.photo_pool.import.cancel_button") }}
                                         </button>
                                     @endif
                                 </div>

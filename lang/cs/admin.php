@@ -27,6 +27,7 @@ return [
             'documentation' => 'Dokumentace',
             'real_attendance' => 'Reálná docházka',
             'season_renewal' => 'Hromadná inicializace sezóny',
+            'email_debug' => 'Debugování e-mailů',
             'help_search_results_for' => 'Výsledky hledání pro',
             'help_search_cancel' => 'Zrušit vyhledávání',
             'help_no_results' => 'Nic jsme nenašli',
@@ -559,10 +560,52 @@ return [
         ],
     ],
     'real_attendance' => [
-        // ... (zkráceno pro přehlednost, ale vložím to správně)
+        'title' => 'Reálná docházka',
+        'event_types' => [
+            'training' => 'Trénink',
+            'match' => 'Zápas',
+        ],
+        'back_to_list' => 'Zpět na seznam událostí',
+        'event_title' => 'Detail události',
+        'attendance' => 'Docházka',
+        'excuses' => 'Omluvenky',
+        'no_events' => 'Žádné události v tomto období',
+        'no_events_desc' => 'V posledních 14 dnech nebyly nalezeny žádné tréninky ani zápasy.',
+        'tracker' => [
+            'add_member' => 'Přidat člena k docházce',
+            'search_placeholder' => 'Hledat jméno nebo e-mail...',
+            'no_member_found' => 'Nebyl nalezen žádný člen',
+            'submitted_count' => 'Zaznamenáno',
+            'players_count' => '{0} 0 hráčů|{1} 1 hráč|[2,4] :count hráči|[5,*] :count hráčů',
+            'finalize_button' => 'Finalizovat docházku a vygenerovat platby',
+            'finalize_modal_title' => 'Finalizace docházky',
+            'finalize_warning_title' => 'Pozor!',
+            'finalize_warning_desc' => 'Tato akce je nevratná a dojde k automatickému stržení příslušných finančních prostředků z účtů členů podle jejich tarifů.',
+            'finalize_confirmation_text' => 'Opravdu chcete tuto docházku uzavřít a vyúčtovat?',
+            'cancel' => 'Zrušit',
+            'confirm_finalize' => 'Ano, finalizovat',
+            'present' => 'Přítomen',
+            'remove_from_attendance' => 'Odebrat z docházky',
+            'no_attendance_yet' => 'Zatím nebyla zaznamenána žádná docházka',
+            'use_search_to_add' => 'Použijte vyhledávání výše pro přidání členů.',
+        ],
     ],
     'ai_search' => [
-        // ... (zkráceno)
+        'title' => 'AI Inteligentní vyhledávání',
+        'description' => 'Zeptejte se na cokoliv o klubu, hráčích nebo statistikách.',
+        'placeholder' => 'Zeptejte se mě na cokoliv (např. "Kdo dal nejvíc gólů v minulé sezóně?")',
+        'thinking' => 'Přemýšlím...',
+        'no_results' => 'Bohužel jsem na tuhle otázku nenašel odpověď.',
+        'welcome' => [
+            'title' => 'Vítejte v AI vyhledávání',
+            'desc' => 'Toto je váš inteligentní asistent pro data klubu Kbelští sokoli.',
+        ],
+        'tips' => [
+            'title' => 'Tipy na dotazy',
+        ],
+        'sources' => [
+            'title' => 'Zdroje informací',
+        ],
     ],
     'season_renewal' => [
         'title' => 'Hromadná inicializace sezóny',
@@ -606,6 +649,25 @@ return [
             'success' => 'Uloženo',
             'success_body' => 'Vytvořeno :created a aktualizováno :updated konfigurací.',
             'error' => 'Chyba při ukládání',
+        ],
+    ],
+    'email_debug' => [
+        'title' => 'Debugování a testování e-mailů',
+        'navigation_label' => 'Debugování e-mailů',
+        'actions' => [
+            'send_test' => 'Odeslat zkušební e-mail',
+            'send_error' => 'Testovací Error Report',
+            'clear_logs' => 'Promazat logy (laravel.log)',
+        ],
+        'fields' => [
+            'recipient' => 'Příjemce',
+            'message' => 'Zpráva',
+            'test_message_default' => 'Toto je testovací zpráva pro ověření SMTP.',
+        ],
+        'notifications' => [
+            'sent' => 'E-mail byl odeslán',
+            'error' => 'Chyba při odesílání',
+            'logs_cleared' => 'Logy byly promazány',
         ],
     ],
 ];

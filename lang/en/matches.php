@@ -65,6 +65,15 @@ return [
     'pre_match_stats' => 'Pre-match comparison',
     'pre_match_analysis_desc' => 'In-depth analysis before the game',
     'match_stats' => 'Statistics and progress',
+    'result_status' => [
+        'final' => 'Final result',
+        'planned' => 'Not played yet',
+    ],
+    'stats' => [
+        'value' => 'VALUE',
+        'starter' => 'Starter',
+        'player' => 'Player',
+    ],
     'team_comparison' => 'Team comparison',
     'last_matches' => 'Last matches',
     'average_age' => 'Average age',
