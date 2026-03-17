@@ -6,22 +6,22 @@
                     <button
                         wire:click="resetSelection"
                         class="p-2 -ml-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"
-                        title="Zpět na seznam událostí"
+                        title="{{ __('admin.real_attendance.back_to_list') }}"
                     >
                         <i class="fa-light fa-arrow-left text-xl"></i>
                     </button>
 
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight break-words">
                             @php
                                 $event = $this->selected_event;
-                                $title = 'Událost';
+                                $title = __('admin.real_attendance.event_title');
                                 if ($event instanceof \App\Models\BasketballMatch) {
                                     $title = $event->getOfficialTeamNameAttribute() . ' vs ' . $event->getOfficialOpponentNameAttribute();
                                 } elseif ($event instanceof \App\Models\Training) {
-                                    $title = 'Trénink' . ($event->location ? ' - ' . $event->location : '');
+                                    $title = __('admin.real_attendance.event_types.training') . ($event->location ? ' - ' . $event->location : '');
                                 } elseif ($event instanceof \App\Models\ClubEvent) {
-                                    $title = $event->getTranslation('title', 'cs');
+                                    $title = $event->getTranslation('title', app()->getLocale());
                                 }
                             @endphp
                             {{ $title }}
@@ -101,7 +101,7 @@
                                     </span>
                                 @endforeach
                             </div>
-                            <h3 class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 transition-colors truncate text-base mb-1">
+                            <h3 class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 transition-colors text-base mb-1 break-words">
                                 {{ $event['title'] }}
                             </h3>
                             <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
@@ -116,16 +116,16 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-6 pr-2">
+                        <div class="flex items-center gap-4 sm:gap-6 pr-2 ml-auto sm:ml-0">
                             <div class="flex gap-4 text-center">
                                 <div class="flex flex-col">
-                                    <span class="text-xs text-gray-400 uppercase font-bold tracking-tighter">Účast</span>
+                                    <span class="text-xs text-gray-400 uppercase font-bold tracking-tighter">{{ __('admin.real_attendance.attendance') }}</span>
                                     <span class="text-lg font-black {{ $event['stats']['attended'] > 0 ? 'text-success-600' : 'text-gray-400' }}">
                                         {{ $event['stats']['attended'] }}<span class="text-xs text-gray-300 font-normal mx-0.5">/</span>{{ $event['stats']['expected'] }}
                                     </span>
                                 </div>
                                 <div class="flex flex-col border-l border-gray-100 dark:border-gray-800 pl-4">
-                                    <span class="text-xs text-gray-400 uppercase font-bold tracking-tighter">Omluvy</span>
+                                    <span class="text-xs text-gray-400 uppercase font-bold tracking-tighter">{{ __('admin.real_attendance.excuses') }}</span>
                                     <span class="text-lg font-black {{ $event['stats']['excused'] > 0 ? 'text-warning-600' : 'text-gray-400' }}">
                                         {{ $event['stats']['excused'] }}
                                     </span>
@@ -139,8 +139,8 @@
                 @empty
                     <div class="p-12 text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800">
                         <i class="fa-light fa-calendar-xmark text-4xl text-gray-400 mb-4 block"></i>
-                        <p class="text-gray-500 font-medium">Žádné nedávné události k zapsání docházky nebyly nalezeny.</p>
-                        <p class="text-sm text-gray-400 mt-1">Zobrazujeme události 7 dní zpět a 2 dny dopředu.</p>
+                        <p class="text-gray-500 font-medium">{{ __('admin.real_attendance.no_events') }}</p>
+                        <p class="text-sm text-gray-400 mt-1">{{ __('admin.real_attendance.no_events_desc') }}</p>
                     </div>
                 @endforelse
             </div>

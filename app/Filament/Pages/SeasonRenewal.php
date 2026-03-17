@@ -46,9 +46,14 @@ class SeasonRenewal extends Page implements HasForms
         return 100;
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.season_renewal.navigation_label');
+    }
+
     public function getTitle(): string
     {
-        return 'Hromadná inicializace sezóny';
+        return __('admin.season_renewal.title');
     }
 
     protected static ?string $slug = 'season-renewal';
@@ -74,41 +79,41 @@ class SeasonRenewal extends Page implements HasForms
     {
         return $schema
             ->components([
-                Section::make('Základní nastavení')
+                Section::make(__('admin.season_renewal.sections.general'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 Select::make('season_id')
-                                    ->label('Cílová sezóna')
+                                    ->label(__('admin.season_renewal.fields.season_id'))
                                     ->options(Season::all()->pluck('name', 'id'))
                                     ->required()
                                     ->searchable()
-                                    ->helperText('Vyberte sezónu, pro kterou chcete vytvořit konfigurace.')
+                                    ->helperText(__('admin.season_renewal.fields.season_id_help'))
                                     ->live()
                                     ->afterStateUpdated(fn () => $this->loadFromPreviousSeason(notify: false)),
 
                                 Select::make('source_season_id')
-                                    ->label('Zdrojová sezóna (pro načtení)')
+                                    ->label(__('admin.season_renewal.fields.source_season_id'))
                                     ->options(Season::all()->pluck('name', 'id'))
-                                    ->placeholder('Vyberte pro načtení dat...')
+                                    ->placeholder(__('admin.season_renewal.fields.source_season_placeholder'))
                                     ->dehydrated(false)
                                     ->live()
                                     ->hintAction(
                                         Action::make('load_specific')
-                                            ->label('Načíst data ze sezóny')
+                                            ->label(__('admin.season_renewal.actions.load_specific'))
                                             ->icon('fal-download')
                                             ->color('primary')
                                             ->requiresConfirmation()
-                                            ->modalHeading('Načíst data ze zvolené sezóny?')
-                                            ->modalDescription('Tato akce nahradí aktuální seznam konfigurací daty z vybrané sezóny.')
+                                            ->modalHeading(__('admin.season_renewal.modals.load_specific_title'))
+                                            ->modalDescription(__('admin.season_renewal.modals.load_specific_desc'))
                                             ->action(fn ($get) => $this->loadFromSeason($get('source_season_id')))
                                             ->visible(fn ($get) => filled($get('source_season_id')))
                                     ),
                             ]),
                     ]),
 
-                Section::make('Konfigurace členů')
-                    ->description('Zde můžete hromadně nastavit parametry pro jednotlivé členy.')
+                Section::make(__('admin.season_renewal.sections.configs'))
+                    ->description(__('admin.season_renewal.sections.configs_desc'))
                     ->schema([
                         Placeholder::make('configs_empty_state')
                             ->label('')
@@ -116,38 +121,38 @@ class SeasonRenewal extends Page implements HasForms
                             ->content(new HtmlString('
                                 <div class="flex flex-col items-center justify-center p-6 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 dark:bg-white/5 dark:border-white/10">
                                     <i class="fa-light fa-users-slash text-4xl text-gray-400 mb-3"></i>
-                                    <h4 class="text-base font-bold text-gray-900 dark:text-white">Žádní členové nebyli načteni</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mt-1">Pro tuto sezónu zatím neexistují žádné konfigurace. Vyberte zdrojovou sezónu výše a klikněte na "Načíst data", nebo přidejte členy ručně tlačítkem níže.</p>
+                                    <h4 class="text-base font-bold text-gray-900 dark:text-white">'.__('admin.season_renewal.empty_state.title').'</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mt-1">'.__('admin.season_renewal.empty_state.desc').'</p>
                                 </div>
                             ')),
 
                         Repeater::make('configs')
-                            ->label('Seznam členů')
+                            ->label(__('admin.season_renewal.fields.configs'))
                             ->schema([
                                 Select::make('user_id')
-                                    ->label('Člen')
+                                    ->label(__('admin.season_renewal.fields.user_id'))
                                     ->options(User::active()->pluck('name', 'id'))
                                     ->required()
                                     ->searchable(),
 
                                 Select::make('financial_tariff_id')
-                                    ->label('Tarif')
+                                    ->label(__('admin.season_renewal.fields.financial_tariff_id'))
                                     ->options(FinancialTariff::all()->pluck('name', 'id'))
                                     ->required(),
 
                                 TextInput::make('opening_balance')
-                                    ->label('Počáteční zůstatek')
+                                    ->label(__('admin.season_renewal.fields.opening_balance'))
                                     ->numeric()
                                     ->default(0)
                                     ->prefix('Kč'),
 
                                 Toggle::make('track_attendance')
-                                    ->label('Hlídat docházku')
+                                    ->label(__('admin.season_renewal.fields.track_attendance'))
                                     ->default(true)
                                     ->inline(false),
                             ])
                             ->itemLabel(fn ($state): ?string => isset($state['user_id']) ? User::find($state['user_id'])?->name : null)
-                            ->addActionLabel('Přidat dalšího člena')
+                            ->addActionLabel(__('admin.season_renewal.fields.add_member'))
                             ->reorderableWithButtons()
                             ->collapsible()
                             ->cloneable()
@@ -161,12 +166,12 @@ class SeasonRenewal extends Page implements HasForms
     {
         return [
             Action::make('load_from_previous')
-                ->label('Načíst z předchozí sezóny')
+                ->label(__('admin.season_renewal.actions.load_from_previous'))
                 ->color('gray')
                 ->icon('fal-download')
                 ->requiresConfirmation()
-                ->modalHeading('Načíst data?')
-                ->modalDescription('Tato akce nahradí aktuální seznam konfigurací daty z předchozí sezóny.')
+                ->modalHeading(__('admin.season_renewal.modals.load_from_previous_title'))
+                ->modalDescription(__('admin.season_renewal.modals.load_from_previous_desc'))
                 ->action(fn () => $this->loadFromPreviousSeason()),
         ];
     }
@@ -190,7 +195,7 @@ class SeasonRenewal extends Page implements HasForms
         if (! $sourceSeason) {
             if ($notify) {
                 Notification::make()
-                    ->title('Předchozí sezóna nebyla nalezena')
+                    ->title(__('admin.season_renewal.notifications.prev_not_found'))
                     ->warning()
                     ->send();
             }
@@ -228,8 +233,11 @@ class SeasonRenewal extends Page implements HasForms
 
         if ($notify) {
             Notification::make()
-                ->title('Data byla načtena')
-                ->body('Bylo načteno '.count($configs)." záznamů ze sezóny {$sourceSeason->name}.")
+                ->title(__('admin.season_renewal.notifications.data_loaded'))
+                ->body(__('admin.season_renewal.notifications.data_loaded_body', [
+                    'count' => count($configs),
+                    'name' => $sourceSeason->name,
+                ]))
                 ->success()
                 ->send();
         }
@@ -245,8 +253,11 @@ class SeasonRenewal extends Page implements HasForms
             $result = $renewSeasonAction->execute($seasonId, $sourceSeasonId);
 
             Notification::make()
-                ->title('Uloženo')
-                ->body("Vytvořeno {$result['created']} a aktualizováno {$result['updated']} konfigurací.")
+                ->title(__('admin.season_renewal.notifications.success'))
+                ->body(__('admin.season_renewal.notifications.success_body', [
+                    'created' => $result['created'],
+                    'updated' => $result['updated'],
+                ]))
                 ->success()
                 ->persistent()
                 ->send();
@@ -255,7 +266,7 @@ class SeasonRenewal extends Page implements HasForms
 
         } catch (\Exception $e) {
             Notification::make()
-                ->title('Chyba při ukládání')
+                ->title(__('admin.season_renewal.notifications.error'))
                 ->body($e->getMessage())
                 ->danger()
                 ->send();

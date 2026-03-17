@@ -25,17 +25,17 @@ class ExternalTeamSeasonConfigResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Konfigurace sezón';
+        return __('admin.navigation.resources.external_team_season_config.plural_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Konfigurace sezón';
+        return __('admin.navigation.resources.external_team_season_config.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return 'Konfigurace sezóny';
+        return __('admin.navigation.resources.external_team_season_config.label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

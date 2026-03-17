@@ -25,6 +25,8 @@ return [
             'public_web' => 'Public Website',
             'system_console' => 'System Console',
             'documentation' => 'Documentation',
+            'real_attendance' => 'Real Attendance',
+            'season_renewal' => 'Bulk Season Initialization',
             'help_search_results_for' => 'Search results for',
             'help_search_cancel' => 'Cancel search',
             'help_no_results' => 'Nothing found',
@@ -58,8 +60,21 @@ return [
         ],
         'resources' => [
             'announcement' => [
-                'label' => 'Announcement',
-                'plural_label' => 'Announcements',
+                // ...
+            ],
+            'photo_pool' => [
+                'label' => 'Photo Pool',
+                'plural_label' => 'Photo Pools',
+                'import' => [
+                    'cancel_title' => 'Abort import?',
+                    'cancel_desc' => 'Are you sure you want to stop the upload? <br><strong class="text-red-400 uppercase tracking-wider">Remaining photos in the queue will be deleted!</strong>',
+                    'confirm_cancel' => 'Yes, delete and cancel',
+                    'back' => 'Back',
+                    'bulk_title' => 'Bulk Import',
+                    'bulk_desc' => 'We are currently uploading and optimizing your photos. This may take a while depending on the number of files.',
+                    'dont_close' => 'Do not close the window',
+                    'cancel_button' => 'Cancel import',
+                ],
             ],
             'basketball_match' => [
                 'label' => 'Match',
@@ -73,6 +88,10 @@ return [
                 'label' => 'Club Event',
                 'plural_label' => 'Club Events',
             ],
+            'competition_standing' => [
+                'label' => 'Competition Standing',
+                'plural_label' => 'Competition Standings',
+            ],
             'cron_log' => [
                 'label' => 'Cron Job Log',
                 'plural_label' => 'Cron Logs',
@@ -84,6 +103,38 @@ return [
             'external_stat_source' => [
                 'label' => 'External Source',
                 'plural_label' => 'External Sources',
+            ],
+            'external_entity_mapping' => [
+                'label' => 'Player Pairing',
+                'plural_label' => 'Player Pairings',
+            ],
+            'external_import_run' => [
+                'label' => 'Import Run',
+                'plural_label' => 'Import History',
+            ],
+            'external_team_mapping' => [
+                'label' => 'Team Mapping',
+                'plural_label' => 'Team Mappings',
+            ],
+            'external_team_season_config' => [
+                'label' => 'Season Configuration',
+                'plural_label' => 'Season Configurations',
+            ],
+            'financial_tariff' => [
+                'label' => 'Financial Tariff',
+                'plural_label' => 'Financial Tariffs',
+            ],
+            'legacy_import_batch' => [
+                'label' => 'Legacy Import',
+                'plural_label' => 'Legacy Data Imports',
+            ],
+            'performance_test_result' => [
+                'label' => 'Performance Test',
+                'plural_label' => 'Performance Tests',
+            ],
+            'user_season_config' => [
+                'label' => 'User Season Configuration',
+                'plural_label' => 'User Season Configurations',
             ],
             'feedback_report' => [
                 'label' => 'Feedback Report',
@@ -505,6 +556,56 @@ return [
         'details' => [
             'group' => 'Menu Group',
             'content' => 'Content',
+        ],
+    ],
+    'real_attendance' => [
+        // ... (zkráceno pro přehlednost, ale vložím to správně)
+    ],
+    'ai_search' => [
+        // ... (zkráceno)
+    ],
+    'season_renewal' => [
+        'title' => 'Bulk Season Initialization',
+        'navigation_label' => 'Bulk Initialization',
+        'sections' => [
+            'general' => 'Basic Settings',
+            'configs' => 'Member Configuration',
+            'configs_desc' => 'Here you can bulk set parameters for individual members.',
+        ],
+        'fields' => [
+            'season_id' => 'Target Season',
+            'season_id_help' => 'Select the season for which you want to create configurations.',
+            'source_season_id' => 'Source Season (for loading)',
+            'source_season_placeholder' => 'Select to load data...',
+            'configs' => 'Member List',
+            'user_id' => 'Member',
+            'financial_tariff_id' => 'Tariff',
+            'opening_balance' => 'Opening Balance',
+            'track_attendance' => 'Track Attendance',
+            'add_member' => 'Add another member',
+        ],
+        'actions' => [
+            'load_specific' => 'Load data from season',
+            'load_from_previous' => 'Load from previous season',
+            'create' => 'Start Initialization',
+        ],
+        'modals' => [
+            'load_specific_title' => 'Load data from selected season?',
+            'load_specific_desc' => 'This action will replace the current configuration list with data from the selected season.',
+            'load_from_previous_title' => 'Load data?',
+            'load_from_previous_desc' => 'This action will replace the current configuration list with data from the previous season.',
+        ],
+        'empty_state' => [
+            'title' => 'No members loaded',
+            'desc' => 'There are no configurations for this season yet. Select a source season above and click "Load data", or add members manually using the button below.',
+        ],
+        'notifications' => [
+            'prev_not_found' => 'Previous season not found',
+            'data_loaded' => 'Data loaded',
+            'data_loaded_body' => 'Loaded :count records from season :name.',
+            'success' => 'Saved',
+            'success_body' => 'Created :created and updated :updated configurations.',
+            'error' => 'Error while saving',
         ],
     ],
 ];

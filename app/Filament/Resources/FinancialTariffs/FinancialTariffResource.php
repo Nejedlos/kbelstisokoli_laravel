@@ -21,12 +21,12 @@ class FinancialTariffResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return 'Finanční tarif';
+        return __('admin.navigation.resources.financial_tariff.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Finanční tarify';
+        return __('admin.navigation.resources.financial_tariff.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

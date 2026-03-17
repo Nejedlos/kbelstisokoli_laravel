@@ -17,17 +17,17 @@ class LegacyImportBatchResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Import historických dat';
+        return __('admin.navigation.resources.legacy_import_batch.plural_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Importy historických dat';
+        return __('admin.navigation.resources.legacy_import_batch.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return 'Historický import';
+        return __('admin.navigation.resources.legacy_import_batch.label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

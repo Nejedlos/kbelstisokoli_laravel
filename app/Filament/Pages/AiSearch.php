@@ -10,9 +10,17 @@ class AiSearch extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'fal-sparkles';
 
-    protected static ?string $navigationLabel = 'AI Vyhledávání';
+    protected static ?string $navigationLabel = null;
 
-    protected static ?string $title = 'AI Vyhledávání';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.ai_search.navigation_label');
+    }
+
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('admin.ai_search.title');
+    }
 
     protected string $view = 'filament.pages.ai-search';
 
@@ -69,7 +77,7 @@ class AiSearch extends Page
         } catch (\Throwable $e) {
             $this->messages[] = [
                 'role' => 'assistant',
-                'content' => 'Omlouvám se, ale došlo k chybě při komunikaci s AI. Zkuste to prosím později. ('.$e->getMessage().')',
+                'content' => __('admin.ai_search.error_message') . ' ('.$e->getMessage().')',
                 'time' => now()->format('H:i'),
             ];
         }

@@ -20,7 +20,7 @@
                         <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
                             {{ __('admin.navigation.pages.help') }}
                         </h2>
-                        <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Informační centrum</p>
+                        <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">{{ __('admin.navigation.pages.help_info_center') }}</p>
                     </div>
                 </div>
 
@@ -51,11 +51,11 @@
                 <div class="flex items-center justify-between px-4">
                     <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">
                         <i class="fa-light fa-magnifying-glass text-primary-600 bg-primary-50 p-3 rounded-2xl shadow-sm border border-primary-100"></i>
-                        Výsledky vyhledávání pro <span class="text-primary-600">"{{ $searchQuery }}"</span>
+                        {{ __('admin.navigation.pages.help_search_results_for') }} <span class="text-primary-600">"{{ $searchQuery }}"</span>
                     </h2>
                     <button wire:click="$set('searchQuery', '')" class="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-bold text-sm">
                         <i class="fa-light fa-xmark group-hover:rotate-90 transition-transform"></i>
-                        Zrušit
+                        {{ __('admin.navigation.pages.help_search_cancel') }}
                     </button>
                 </div>
 
@@ -70,9 +70,9 @@
                             <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <i class="fa-light fa-face-frown text-4xl text-slate-300"></i>
                             </div>
-                            <h4 class="text-3xl font-black text-slate-900 mb-4 tracking-tight">Žádné výsledky</h4>
+                            <h4 class="text-3xl font-black text-slate-900 mb-4 tracking-tight">{{ __('admin.navigation.pages.help_no_results') }}</h4>
                             <p class="text-slate-500 max-w-md mx-auto text-lg font-medium leading-relaxed">
-                                Zkuste zadat jiné klíčové slovo nebo prozkoumejte kategorie nápovědy níže.
+                                {{ __('admin.navigation.pages.help_no_results_desc') }}
                             </p>
                         </div>
                     @endforelse
@@ -128,7 +128,7 @@
 
                                     @if(count($article->faqs ?? []) > 0)
                                         <div class="mt-24 pt-12 border-t border-slate-100">
-                                            <h3 class="text-3xl font-black text-slate-900 tracking-tight mb-12">Často kladené dotazy</h3>
+                                            <h3 class="text-3xl font-black text-slate-900 tracking-tight mb-12">{{ __('admin.navigation.resources.help_faq.plural_label') }}</h3>
                                             <div class="space-y-4">
                                                 @foreach($article->faqs as $faq)
                                                     <x-help.faq-item :faq="$faq" />
@@ -143,7 +143,7 @@
                         <aside class="w-full lg:w-80 space-y-12">
                             @if(count($article->quickActions ?? []) > 0)
                                 <div class="space-y-4">
-                                    <h4 class="text-xs font-black uppercase tracking-widest text-slate-400 px-4">Rychlé akce</h4>
+                                    <h4 class="text-xs font-black uppercase tracking-widest text-slate-400 px-4">{{ __('admin.navigation.resources.help_quick_action.plural_label') }}</h4>
                                     <div class="space-y-2">
                                         @foreach($article->quickActions as $action)
                                             <x-help.quick-action :action="$action" />
@@ -154,7 +154,7 @@
 
                             @if(count($article->relatedArticles ?? []) > 0)
                                 <div class="space-y-4">
-                                    <h4 class="text-xs font-black uppercase tracking-widest text-slate-400 px-4">Související články</h4>
+                                    <h4 class="text-xs font-black uppercase tracking-widest text-slate-400 px-4">{{ __('admin.navigation.pages.help_related_articles') }}</h4>
                                     <div class="space-y-2">
                                         @foreach($article->relatedArticles as $related)
                                             <a href="{{ \App\Filament\Pages\Help::getUrl(['file' => $related->slug]) }}"

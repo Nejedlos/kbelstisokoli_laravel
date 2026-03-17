@@ -22,18 +22,18 @@
                     <div class="w-24 h-24 bg-primary/5 dark:bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
                         <i class="fa-light fa-sparkles text-4xl text-primary"></i>
                     </div>
-                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">Vítejte v AI Vyhledávání</h2>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">{{ __('admin.ai_search.welcome_title') }}</h2>
                     <p class="text-gray-500 dark:text-gray-400 max-w-lg mx-auto text-lg leading-relaxed">
-                        Položte dotaz naší umělé inteligenci. Pomůže vám s navigací v administraci, vyhledáním informací nebo s fungováním klubu.
+                        {{ __('admin.ai_search.welcome_desc') }}
                     </p>
 
                     <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
                         @php
                             $tips = [
-                                ['icon' => 'fa-palette', 'title' => 'Branding', 'text' => 'Jak změnit logo a barvy?'],
-                                ['icon' => 'fa-user-gear', 'title' => 'Členové', 'text' => 'Jak resetovat heslo člena?'],
-                                ['icon' => 'fa-calendar-xmark', 'title' => 'Omluvy', 'text' => 'Jak fungují omluvy?'],
-                                ['icon' => 'fa-basketball', 'title' => 'Zápasy', 'text' => 'Kdy je další zápas?'],
+                                ['icon' => 'fa-palette', 'title' => __('admin.ai_search.tips.branding.title'), 'text' => __('admin.ai_search.tips.branding.text')],
+                                ['icon' => 'fa-user-gear', 'title' => __('admin.ai_search.tips.members.title'), 'text' => __('admin.ai_search.tips.members.text')],
+                                ['icon' => 'fa-calendar-xmark', 'title' => __('admin.ai_search.tips.excuses.title'), 'text' => __('admin.ai_search.tips.excuses.text')],
+                                ['icon' => 'fa-basketball', 'title' => __('admin.ai_search.tips.matches.title'), 'text' => __('admin.ai_search.tips.matches.text')],
                             ];
                         @endphp
                         @foreach($tips as $tip)
@@ -57,13 +57,13 @@
                                 <div class="px-5 py-1.5 bg-primary/5 border-b border-primary/10 flex items-center justify-between gap-4">
                                     <div class="flex items-center gap-2">
                                         <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Kbelští sokoli AI</span>
+                                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{{ __('admin.ai_search.ai_name') }}</span>
                                     </div>
                                     <span class="text-[8px] opacity-40 uppercase font-black tracking-widest">{{ $msg['time'] }}</span>
                                 </div>
                             @else
                                 <div class="px-5 py-1.5 bg-black/10 flex items-center justify-between gap-4">
-                                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/90">Vy</span>
+                                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/90">{{ __('admin.ai_search.you') }}</span>
                                     <span class="text-[8px] text-white/60 uppercase font-black tracking-widest">{{ $msg['time'] }}</span>
                                 </div>
                             @endif
@@ -82,7 +82,7 @@
             <div class="mb-16 bg-gray-50/50 dark:bg-gray-800/30 rounded-[2rem] p-8 border border-gray-100/50 dark:border-gray-800/50 animate-in fade-in duration-1000">
                 <div class="text-[11px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.3em] flex items-center gap-4 mb-6">
                     <span class="w-8 h-px bg-gray-200 dark:bg-gray-700"></span>
-                    Zdroje informací
+                    {{ __('admin.ai_search.sources') }}
                     <span class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
                 </div>
 
@@ -101,7 +101,7 @@
                                 </div>
                                 @if($doc->url)
                                     <a href="{{ $doc->url }}" class="mt-2 inline-flex items-center text-[10px] text-primary font-black uppercase tracking-widest hover:underline">
-                                        Otevřít <i class="fa-light fa-arrow-up-right-from-square ml-1.5 text-[8px]"></i>
+                                        {{ __('admin.ai_search.open') }} <i class="fa-light fa-arrow-up-right-from-square ml-1.5 text-[8px]"></i>
                                     </a>
                                 @endif
                             </div>
@@ -124,7 +124,7 @@
                     wire:model.live.debounce.300ms="query"
                     x-on:input="qLen = $el.value.length"
                     x-on:keydown.enter.prevent="if (qLen >= 2) $wire.askAi()"
-                    placeholder="Zde napište svůj dotaz (např. 'Jak změnit barvy klubu?')"
+                    placeholder="{{ __('admin.ai_search.input_placeholder') }}"
                     class="relative w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-2 border-white dark:border-gray-800 rounded-[2rem] py-5 pl-8 pr-20 shadow-2xl focus:ring-primary focus:border-primary dark:text-white transition-all text-lg placeholder:text-gray-400 dark:placeholder:text-gray-600 outline-none"
                     @disabled($isProcessing)
                     autofocus

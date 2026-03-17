@@ -26,17 +26,17 @@ class ExternalEntityMappingResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Párování hráčů';
+        return __('admin.navigation.resources.external_entity_mapping.plural_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Párování hráčů';
+        return __('admin.navigation.resources.external_entity_mapping.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return 'Párování hráče';
+        return __('admin.navigation.resources.external_entity_mapping.label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

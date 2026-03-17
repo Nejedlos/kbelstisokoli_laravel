@@ -28,17 +28,17 @@ class ExternalImportRunResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Historie importů';
+        return __('admin.navigation.resources.external_import_run.plural_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Historie importů';
+        return __('admin.navigation.resources.external_import_run.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return 'Běh importu';
+        return __('admin.navigation.resources.external_import_run.label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

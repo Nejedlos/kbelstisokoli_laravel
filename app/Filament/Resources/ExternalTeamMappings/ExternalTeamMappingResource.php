@@ -25,17 +25,17 @@ class ExternalTeamMappingResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Mapování týmů';
+        return __('admin.navigation.resources.external_team_mapping.plural_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Mapování týmů';
+        return __('admin.navigation.resources.external_team_mapping.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return 'Mapování týmu';
+        return __('admin.navigation.resources.external_team_mapping.label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

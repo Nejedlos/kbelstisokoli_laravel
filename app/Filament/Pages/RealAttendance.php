@@ -21,12 +21,12 @@ class RealAttendance extends Page
 
     public static function getNavigationLabel(): string
     {
-        return 'Reálná docházka';
+        return __('admin.navigation.pages.real_attendance');
     }
 
     public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return 'Reálná docházka';
+        return __('admin.real_attendance.title');
     }
 
     public static function getNavigationSort(): ?int
@@ -87,17 +87,17 @@ class RealAttendance extends Page
         $trainings = Training::whereBetween('starts_at', [$startDate, $endDate])
             ->with(['teams.activePlayers.user', 'attendances'])
             ->get()
-            ->map(fn($item) => $this->mapEvent($item, Training::class, 'Trénink ' . ($item->location ? ' - ' . $item->location : ''), $item->starts_at, \App\Support\IconHelper::TRAININGS, $activeSeason));
+            ->map(fn($item) => $this->mapEvent($item, Training::class, __('admin.real_attendance.event_types.training') . ($item->location ? ' - ' . $item->location : ''), $item->starts_at, \App\Support\IconHelper::TRAININGS, $activeSeason));
 
         $matches = BasketballMatch::whereBetween('scheduled_at', [$startDate, $endDate])
             ->with(['teams.activePlayers.user', 'attendances', 'opponent'])
             ->get()
-            ->map(fn($item) => $this->mapEvent($item, BasketballMatch::class, 'Zápas: ' . $item->getOfficialTeamNameAttribute() . ' vs ' . $item->getOfficialOpponentNameAttribute(), $item->scheduled_at, \App\Support\IconHelper::MATCHES, $activeSeason));
+            ->map(fn($item) => $this->mapEvent($item, BasketballMatch::class, __('admin.real_attendance.event_types.match') . ': ' . $item->getOfficialTeamNameAttribute() . ' vs ' . $item->getOfficialOpponentNameAttribute(), $item->scheduled_at, \App\Support\IconHelper::MATCHES, $activeSeason));
 
         $clubEvents = ClubEvent::whereBetween('starts_at', [$startDate, $endDate])
             ->with(['teams.activePlayers.user', 'attendances'])
             ->get()
-            ->map(fn($item) => $this->mapEvent($item, ClubEvent::class, $item->getTranslation('title', 'cs'), $item->starts_at, \App\Support\IconHelper::EVENTS, $activeSeason));
+            ->map(fn($item) => $this->mapEvent($item, ClubEvent::class, $item->getTranslation('title', app()->getLocale()), $item->starts_at, \App\Support\IconHelper::EVENTS, $activeSeason));
 
         return collect([])
             ->concat($trainings)

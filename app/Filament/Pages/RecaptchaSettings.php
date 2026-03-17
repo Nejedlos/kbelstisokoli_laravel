@@ -84,21 +84,21 @@ class RecaptchaSettings extends Page implements HasForms
                     ->schema([
                         Toggle::make('recaptcha_enabled')
                             ->label(__('admin/recaptcha-settings.fields.enabled'))
-                            ->helperText('Pokud je vypnuto, formuláře nebudou vyžadovat ověření.')
+                            ->helperText(__('admin/recaptcha-settings.fields.enabled_help'))
                             ->default(false),
 
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('recaptcha_site_key')
                                     ->label(__('admin/recaptcha-settings.fields.site_key'))
-                                    ->helperText('Veřejný klíč (Site Key) pro frontend.')
+                                    ->helperText(__('admin/recaptcha-settings.fields.site_key_help'))
                                     ->password()
                                     ->revealable()
                                     ->required(fn ($get) => $get('recaptcha_enabled')),
 
                                 TextInput::make('recaptcha_secret_key')
                                     ->label(__('admin/recaptcha-settings.fields.secret_key'))
-                                    ->helperText('Tajný klíč (Secret Key) pro komunikaci se serverem Google.')
+                                    ->helperText(__('admin/recaptcha-settings.fields.secret_key_help'))
                                     ->password()
                                     ->revealable()
                                     ->required(fn ($get) => $get('recaptcha_enabled')),
@@ -106,7 +106,7 @@ class RecaptchaSettings extends Page implements HasForms
 
                         TextInput::make('recaptcha_threshold')
                             ->label(__('admin/recaptcha-settings.fields.threshold'))
-                            ->helperText('Práh citlivosti (0.0 až 1.0). Čím vyšší číslo, tím přísnější kontrola (0.5 je standard).')
+                            ->helperText(__('admin/recaptcha-settings.fields.threshold_help'))
                             ->numeric()
                             ->step(0.1)
                             ->minValue(0.0)
@@ -115,27 +115,12 @@ class RecaptchaSettings extends Page implements HasForms
                             ->maxWidth('xs'),
                     ]),
 
-                Section::make('Nápověda k reCAPTCHA v3')
-                    ->description('Jak získat klíče a nastavit ochranu')
+                Section::make(__('admin/recaptcha-settings.help.title'))
+                    ->description(__('admin/recaptcha-settings.help.description'))
                     ->icon(new HtmlString('<i class="fa-light fa-circle-info text-info mr-2"></i>'))
                     ->collapsed()
                     ->schema([
-                        new HtmlString('
-                            <div class="prose dark:prose-invert max-w-none text-sm">
-                                <p>Tento web používá <strong>Google reCAPTCHA v3</strong>. Tato verze nevyžaduje od uživatelů klikání na obrázky, ale vrací skóre na základě jejich chování.</p>
-                                <ol>
-                                    <li>Přejděte na <a href="https://www.google.com/recaptcha/admin" target="_blank" class="text-primary underline">Google reCAPTCHA Admin Console</a>.</li>
-                                    <li>Vytvořte nový web typu <strong>v3</strong>.</li>
-                                    <li>Přidejte doménu (např. <code>kbelstisokoli.cz</code>).</li>
-                                    <li>Zkopírujte klíče a vložte je výše.</li>
-                                </ol>
-                                <div class="bg-primary/5 p-4 rounded-xl border border-primary/10 mt-4">
-                                    <p class="font-bold text-primary mb-1 italic">Klíče pro tento projekt:</p>
-                                    <code class="block bg-white p-2 rounded border mb-2">Site key: 6LfRn3csAAAAAKPzWb8wMPDrP8k9qRNbh6ZA6E_I</code>
-                                    <code class="block bg-white p-2 rounded border">Secret key: 6LfRn3csAAAAAH7X7gs09H8TJ8VCTX7lCDJLvldN</code>
-                                </div>
-                            </div>
-                        '),
+                        new HtmlString(__('admin/recaptcha-settings.help.content')),
                     ]),
             ]);
     }

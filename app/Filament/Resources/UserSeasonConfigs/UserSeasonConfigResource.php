@@ -21,12 +21,12 @@ class UserSeasonConfigResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return 'Sezónní konfigurace uživatele';
+        return __('admin.navigation.resources.user_season_config.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Sezónní konfigurace uživatelů';
+        return __('admin.navigation.resources.user_season_config.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
