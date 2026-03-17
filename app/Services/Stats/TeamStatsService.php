@@ -78,7 +78,10 @@ class TeamStatsService
         }
 
         // Pokud nemáme summaries, agregujeme z boxscoru
+        $matchIds = $this->getTeamMatchesQuery($teamId, $seasonId)->pluck('id');
+
         return StatisticRow::with('player')
+            ->whereIn('basketball_match_id', $matchIds)
             ->where('team_id', $teamId)
             ->where('season_id', $seasonId)
             ->whereNotNull('player_id')
@@ -131,8 +134,8 @@ class TeamStatsService
      */
     public function getMatchStats(int $teamId, int $seasonId): array
     {
-        $matches = BasketballMatch::where('team_id', $teamId)
-            ->where('season_id', $seasonId)
+        $matches = $this->getTeamMatchesQuery($teamId, $seasonId)
+            ->with('opponent')
             ->whereNotNull('score_home')
             ->whereNotNull('score_away')
             ->get();
@@ -302,7 +305,10 @@ class TeamStatsService
         }
 
         // Pokud nemáme summaries, agregujeme z boxscoru v PHP (DB JSON_EXTRACT není všude dostupný)
+        $matchIds = $this->getTeamMatchesQuery($teamId, $seasonId)->pluck('id');
+
         return StatisticRow::with('player')
+            ->whereIn('basketball_match_id', $matchIds)
             ->where('team_id', $teamId)
             ->where('season_id', $seasonId)
             ->whereNotNull('player_id')
@@ -382,8 +388,7 @@ class TeamStatsService
      */
     public function getWinLossBalance(int $teamId, int $seasonId): array
     {
-        $matches = BasketballMatch::where('team_id', $teamId)
-            ->where('season_id', $seasonId)
+        $matches = $this->getTeamMatchesQuery($teamId, $seasonId)
             ->whereNotNull('score_home')
             ->whereNotNull('score_away')
             ->get();
@@ -427,8 +432,8 @@ class TeamStatsService
      */
     public function getPointsSeries(int $teamId, int $seasonId): Collection
     {
-        return BasketballMatch::where('team_id', $teamId)
-            ->where('season_id', $seasonId)
+        return $this->getTeamMatchesQuery($teamId, $seasonId)
+            ->with('opponent')
             ->whereNotNull('score_home')
             ->whereNotNull('score_away')
             ->orderBy('scheduled_at', 'asc')
@@ -473,55 +478,13 @@ class TeamStatsService
     }
 
     /**
-     * Výpočet souhrnu on-the-fly (fallback).
+     * Výpočet souhrnu čistě z odehraných zápasů v databázi.
      */
-    protected function calculateSummaryFromMatches(int $teamId, int $seasonId): array
+    public function calculateSummaryFromMatches(int $teamId, int $seasonId): array
     {
-        // 0) Pokud máme oficiální souhrn ze stránky soutěže, použijeme jej jako zdroj pravdy
-        try {
-            /** @var \App\Models\ExternalTeamSeasonConfig|null $config */
-            $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $teamId)
-                ->where('season_id', $seasonId)
-                ->first();
-
-            $official = $config?->metadata['official_standing'] ?? null;
-            if ($official && isset($official['gp'], $official['w'], $official['l'], $official['score'])) {
-                $gp = (int) $official['gp'];
-                $wins = (int) $official['w'];
-                $losses = (int) $official['l'];
-
-                $ptsFor = 0;
-                $ptsAgainst = 0;
-                $scoreRaw = (string) ($official['score'] ?? '');
-                // Odstraníme oddělovače tisíců (tečky, čárky, mezery včetně NBSP a úzké NBSP), ponecháme dvojtečku
-                $scoreClean = str_replace([',', '.', ' ', "\xC2\xA0", "\xE2\x80\xAF"], '', $scoreRaw);
-                if (preg_match('/(\d+)\s*[:\-]\s*(\d+)/', $scoreClean, $m)) {
-                    $ptsFor = (int) $m[1];
-                    $ptsAgainst = (int) $m[2];
-                }
-
-                $ptsAvg = $gp > 0 ? round($ptsFor / $gp, 1) : 0;
-                $ptsAgainstAvg = $gp > 0 ? round($ptsAgainst / $gp, 1) : 0;
-
-                return [
-                    'gp' => $gp,
-                    'wins' => $wins,
-                    'losses' => $losses,
-                    'pts_for' => $ptsFor,
-                    'pts_against' => $ptsAgainst,
-                    'pts_avg' => $ptsAvg,
-                    'pts_against_avg' => $ptsAgainstAvg,
-                    'source' => 'official',
-                ];
-            }
-        } catch (\Throwable $e) {
-            // Pokud selže, tiše pokračujeme fallbackem z našich zápasů
-        }
-
         $balance = $this->getWinLossBalance($teamId, $seasonId);
 
-        $matches = BasketballMatch::where('team_id', $teamId)
-            ->where('season_id', $seasonId)
+        $matches = $this->getTeamMatchesQuery($teamId, $seasonId)
             ->whereNotNull('score_home')
             ->whereNotNull('score_away')
             ->get();
@@ -531,11 +494,11 @@ class TeamStatsService
 
         foreach ($matches as $match) {
             if ($match->is_home) {
-                $ptsFor += ($match->score_home ?? 0);
-                $ptsAgainst += ($match->score_away ?? 0);
+                $ptsFor += (int) ($match->score_home ?? 0);
+                $ptsAgainst += (int) ($match->score_away ?? 0);
             } else {
-                $ptsFor += ($match->score_away ?? 0);
-                $ptsAgainst += ($match->score_home ?? 0);
+                $ptsFor += (int) ($match->score_away ?? 0);
+                $ptsAgainst += (int) ($match->score_home ?? 0);
             }
         }
 
@@ -551,7 +514,22 @@ class TeamStatsService
             'pts_against' => $ptsAgainst,
             'pts_avg' => $ptsAvg,
             'pts_against_avg' => $ptsAgainstAvg,
-            'is_fallback' => true,
+            'source' => 'internal',
         ];
+    }
+
+    /**
+     * Pomocná metoda pro získání query builderu zápasů týmu v sezóně.
+     * Kombinuje legacy team_id a relaci teams.
+     */
+    protected function getTeamMatchesQuery(int $teamId, int $seasonId): \Illuminate\Database\Eloquent\Builder
+    {
+        return BasketballMatch::where('season_id', $seasonId)
+            ->where(function ($query) use ($teamId) {
+                $query->where('team_id', $teamId)
+                    ->orWhereHas('teams', function ($q) use ($teamId) {
+                        $q->where('teams.id', $teamId);
+                    });
+            });
     }
 }

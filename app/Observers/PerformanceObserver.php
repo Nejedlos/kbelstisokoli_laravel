@@ -60,6 +60,7 @@ class PerformanceObserver
                     ->where('key', 'like', $prefix.'fragment_%')
                     ->orWhere('key', 'like', $prefix.'full_page_%')
                     ->orWhere('key', 'like', $prefix.'help_%')
+                    ->orWhere('key', 'like', $prefix.'stats_%')
                     ->delete();
             } catch (\Throwable $e) {
                 // Fallback v případě chyby DB - v tichosti ignorujeme,

@@ -15,7 +15,7 @@ class MyStatistics extends Component
 
     public $teamId;
 
-    public $view = 'personal'; // 'personal', 'team', or 'matches'
+    public $view = 'personal'; // 'personal', 'team', 'matches', or 'career'
 
     public $selectedUserId;
 
@@ -50,10 +50,18 @@ class MyStatistics extends Component
 
     public $teamMatchesCount = 0;
 
+    public $careerSummary = [];
+
+    public $careerHistory = [];
+
     public $statsView = 'avg'; // 'avg' or 'total'
+
+    public $readyToLoad = false;
 
     // Pro týmový pohled (pokud přepnuto na tým)
     public $teamSummary = [];
+
+    public $calculatedSummary = [];
 
     public $topScorers = [];
 
@@ -107,7 +115,11 @@ class MyStatistics extends Component
         }
 
         $this->teamId = $teamId;
+    }
 
+    public function init()
+    {
+        $this->readyToLoad = true;
         $this->loadStats();
     }
 
@@ -157,15 +169,7 @@ class MyStatistics extends Component
     {
         $userId = $this->selectedUserId ?? Auth::id();
 
-        \Log::debug('MyStatistics::loadStats starting', [
-            'userId' => $userId,
-            'seasonId' => $this->seasonId,
-            'teamId' => $this->teamId,
-            'view' => $this->view
-        ]);
-
         if (! $this->seasonId) {
-            \Log::debug('MyStatistics::loadStats skipping - missing seasonId');
             return;
         }
 
@@ -340,10 +344,21 @@ class MyStatistics extends Component
                     ->orderBy('match_date', 'desc')
                     ->get()
                     ->toArray();
+
+                // Načtení kariérních statistik (vždy pro osobní pohled nebo kariérní pohled)
+                $careerData = $service->getCareerOverview($userId);
+                $this->careerSummary = $careerData['summary'];
+                $this->careerHistory = $careerData['history'];
+            } elseif ($this->view === 'career') {
+                $service = app(PlayerStatsService::class);
+                $careerData = $service->getCareerOverview($userId);
+                $this->careerSummary = $careerData['summary'];
+                $this->careerHistory = $careerData['history'];
             } elseif ($this->view === 'team') {
                 if ($teamId) {
                     $service = app(TeamStatsService::class);
                     $this->teamSummary = $service->getSeasonSummary($teamId, $this->seasonId);
+                    $this->calculatedSummary = $service->calculateSummaryFromMatches($teamId, $this->seasonId);
 
                     $allPlayers = $service->getAllPlayersStats($teamId, $this->seasonId);
 
@@ -376,6 +391,7 @@ class MyStatistics extends Component
                 if ($teamId) {
                     $service = app(TeamStatsService::class);
                     $this->teamSummary = $service->getSeasonSummary($teamId, $this->seasonId);
+                    $this->calculatedSummary = $service->calculateSummaryFromMatches($teamId, $this->seasonId);
                     $this->matchStats = $service->getMatchStats($teamId, $this->seasonId);
                     $this->pointsSeries = $service->getPointsSeries($teamId, $this->seasonId)->toArray();
 

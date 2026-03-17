@@ -67,11 +67,24 @@ class PerformanceService
     protected function fetchSettingsFromDb(): array
     {
         try {
-            return DB::table('settings')
+            $settings = DB::table('settings')
                 ->where('key', 'like', 'perf_%')
                 ->get(['key', 'value'])
                 ->pluck('value', 'key')
                 ->toArray();
+
+            // Normalizace lokalizovaných hodnot (JSON) na prosté řetězce
+            foreach ($settings as $key => $value) {
+                if (str_starts_with($value, '{') && str_ends_with($value, '}')) {
+                    $decoded = json_decode($value, true);
+                    if (is_array($decoded)) {
+                        // Vezmeme první dostupnou hodnotu (např. 'cs')
+                        $settings[$key] = reset($decoded);
+                    }
+                }
+            }
+
+            return $settings;
         } catch (\Throwable $e) {
             // Pokud tabulka neexistuje nebo je jiný problém, vrátíme prázdné pole
             return [];

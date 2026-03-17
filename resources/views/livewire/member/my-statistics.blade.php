@@ -1,4 +1,4 @@
-<div class="space-y-8 relative" x-data="{ view: @entangle('view') }" x-init="
+<div class="space-y-8 relative" wire:init="init" x-data="{ view: @entangle('view') }" x-init="
     console.log('MyStatistics initialized');
 ">
     <style>
@@ -23,6 +23,14 @@
                 >
                     <i class="fa-light fa-user-chart mr-2"></i> Osobní
                 </a>
+                <button
+                    wire:click="$set('view', 'career')"
+                    @click="window.dispatchEvent(new CustomEvent('loading-start'))"
+                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                    :class="view === 'career' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                >
+                    <i class="fa-light fa-sparkles mr-2"></i> Kariéra
+                </button>
                 <a
                     href="{{ route('member.statistics.players') }}"
                     @click="window.dispatchEvent(new CustomEvent('loading-start'))"
@@ -104,7 +112,20 @@
         </div>
     </div>
 
-    @if($view === 'personal')
+    @if(!$readyToLoad)
+        <div class="flex flex-col items-center justify-center p-32 space-y-6 bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-[4rem] border border-dashed border-gray-200 dark:border-gray-700 animate-pulse">
+             <div class="relative">
+                 <i class="fa-light fa-basketball fa-spin text-7xl text-primary-500 opacity-20" style="animation-duration: 3s;"></i>
+                 <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="fa-light fa-chart-mixed text-4xl text-primary-600 animate-bounce-subtle"></i>
+                 </div>
+             </div>
+             <div class="flex flex-col items-center gap-2">
+                 <div class="text-gray-400 font-black uppercase tracking-[0.3em] text-[11px]">Sestavujeme tvé statistiky</div>
+                 <div class="text-[9px] text-gray-400/60 font-bold uppercase tracking-widest italic">Chvilku strpení, stahujeme nejnovější data...</div>
+             </div>
+        </div>
+    @elseif($view === 'personal')
         {{-- PERSONAL VIEW --}}
         @if($selectedUserId && $selectedUserId != Auth::id())
             @php $viewedUser = \App\Models\User::find($selectedUserId); @endphp
@@ -958,6 +979,202 @@
                 @include('member.statistics.partials.external-stats-view')
             </div>
         @endif
+    @elseif($view === 'career')
+        <div class="space-y-8" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+            {{-- Career KPI Cards --}}
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                @php
+                    $careerCards = [
+                        ['label' => 'Zápasy celkem', 'value' => $careerSummary['total_gp'] ?? 0, 'icon' => 'fa-basketball', 'color' => 'blue', 'unit' => 'Z', 'gradient' => 'from-blue-500/10 to-blue-600/5'],
+                        ['label' => 'Body celkem', 'value' => $careerSummary['total_pts'] ?? 0, 'icon' => 'fa-sigma', 'color' => 'orange', 'unit' => 'B', 'gradient' => 'from-orange-500/10 to-orange-600/5'],
+                        ['label' => 'Kariérní průměr', 'value' => number_format($careerSummary['ppg_avg'] ?? 0, 1, ',', ' '), 'icon' => 'fa-chart-line-up', 'color' => 'emerald', 'unit' => 'B/Z', 'gradient' => 'from-emerald-500/10 to-emerald-600/5'],
+                        ['label' => 'Počet sezón', 'value' => $careerSummary['seasons_count'] ?? 0, 'icon' => 'fa-calendar-star', 'color' => 'purple', 'unit' => 'S', 'gradient' => 'from-purple-500/10 to-purple-600/5'],
+                    ];
+
+                    // Mapování barev na Tailwind třídy (pro Tailwind v4 je lepší nepoužívat dynamické složení tříd v šabloně u barev)
+                    $colorMap = [
+                        'blue' => ['bg' => 'bg-blue-50 dark:bg-blue-900/30', 'text' => 'text-blue-600 dark:text-blue-400', 'border' => 'border-blue-100/50 dark:border-blue-800/50', 'glow' => 'bg-blue-500/5'],
+                        'orange' => ['bg' => 'bg-orange-50 dark:bg-orange-900/30', 'text' => 'text-orange-600 dark:text-orange-400', 'border' => 'border-orange-100/50 dark:border-orange-800/50', 'glow' => 'bg-orange-500/5'],
+                        'emerald' => ['bg' => 'bg-emerald-50 dark:bg-emerald-900/30', 'text' => 'text-emerald-600 dark:text-emerald-400', 'border' => 'border-emerald-100/50 dark:border-emerald-800/50', 'glow' => 'bg-emerald-500/5'],
+                        'purple' => ['bg' => 'bg-purple-50 dark:bg-purple-900/30', 'text' => 'text-purple-600 dark:text-purple-400', 'border' => 'border-purple-100/50 dark:border-purple-800/50', 'glow' => 'bg-purple-500/5'],
+                    ];
+                @endphp
+
+                @foreach($careerCards as $card)
+                    @php $c = $colorMap[$card['color']]; @endphp
+                    <div class="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3rem] shadow-xl shadow-gray-200/40 dark:shadow-none border border-white/40 dark:border-gray-700/50 hover:scale-[1.02] transition-all duration-500">
+                        <div class="absolute -right-4 -top-4 w-32 h-32 {{ $c['glow'] }} rounded-full blur-3xl group-hover:opacity-100 opacity-50 transition-opacity"></div>
+                        <div class="relative z-10 flex flex-col items-center text-center">
+                            <div class="w-14 h-14 sm:w-16 sm:h-16 {{ $c['bg'] }} rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-500 shadow-sm border {{ $c['border'] }}">
+                                <i class="fa-light {{ $card['icon'] }} text-xl sm:text-2xl {{ $c['text'] }}"></i>
+                            </div>
+                            <span class="text-[9px] sm:text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-1">{{ $card['label'] }}</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ $card['value'] }}</span>
+                                @if($card['unit'])
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase">{{ $card['unit'] }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Career Charts --}}
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                {{-- PPG History Chart --}}
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-xl border border-white/40 dark:border-gray-700/50">
+                    <div class="flex justify-between items-center mb-8 px-2">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Vývoj výkonnosti</h3>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Průměrné body a efektivita napříč sezónami</p>
+                        </div>
+                        <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center border border-primary-100/50 dark:border-primary-800/50">
+                            <i class="fa-light fa-chart-line text-primary-600 dark:text-primary-400"></i>
+                        </div>
+                    </div>
+                    <div id="career-performance-chart" style="min-height: 350px;" wire:ignore></div>
+                </div>
+
+                {{-- Games Played History Chart --}}
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-xl border border-white/40 dark:border-gray-700/50">
+                    <div class="flex justify-between items-center mb-8 px-2">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Zápasové vytížení</h3>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Počet odehraných zápasů za sezónu</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-50 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center border border-orange-100/50 dark:border-orange-800/50">
+                            <i class="fa-light fa-basketball-hoop text-orange-600 dark:text-orange-400"></i>
+                        </div>
+                    </div>
+                    <div id="career-gp-chart" style="min-height: 350px;" wire:ignore></div>
+                </div>
+            </div>
+
+            {{-- Best Seasons Highlights --}}
+            @if($careerSummary['best_ppg_season'] || $careerSummary['best_eff_season'])
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                @if($careerSummary['best_ppg_season'])
+                <div class="group relative bg-gradient-to-br from-primary-600 to-primary-800 p-1 rounded-[3rem] shadow-2xl overflow-hidden shadow-primary-500/20">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                    <div class="relative bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-8 rounded-[2.9rem] h-full flex items-center justify-between overflow-hidden">
+                        <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-primary-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+                        <div class="relative z-10">
+                            <span class="text-[10px] font-black text-primary-500 uppercase tracking-[0.3em]">Nejlepší bodová sezóna</span>
+                            <h4 class="text-3xl font-black text-gray-900 dark:text-white mt-1">{{ $careerSummary['best_ppg_season']['season'] }}</h4>
+                            <div class="flex items-center gap-4 mt-4">
+                                <div class="flex flex-col">
+                                    <span class="text-2xl font-black text-primary-600">{{ $careerSummary['best_ppg_season']['ppg'] }}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Body / Zápas</span>
+                                </div>
+                                <div class="w-px h-8 bg-gray-200 dark:bg-gray-800"></div>
+                                <div class="flex flex-col">
+                                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ $careerSummary['best_ppg_season']['gp'] }}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Zápasů</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative z-10 text-primary-100 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700">
+                             <i class="fa-light fa-crown text-7xl opacity-20"></i>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                @if($careerSummary['best_eff_season'])
+                <div class="group relative bg-gradient-to-br from-emerald-600 to-emerald-800 p-1 rounded-[3rem] shadow-2xl overflow-hidden shadow-emerald-500/20">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                    <div class="relative bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-8 rounded-[2.9rem] h-full flex items-center justify-between overflow-hidden">
+                        <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+                        <div class="relative z-10">
+                            <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">Nejužitečnější sezóna</span>
+                            <h4 class="text-3xl font-black text-gray-900 dark:text-white mt-1">{{ $careerSummary['best_eff_season']['season'] }}</h4>
+                            <div class="flex items-center gap-4 mt-4">
+                                <div class="flex flex-col">
+                                    <span class="text-2xl font-black text-emerald-600">{{ $careerSummary['best_eff_season']['efficiency_avg'] }}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Užitečnost Ø</span>
+                                </div>
+                                <div class="w-px h-8 bg-gray-200 dark:bg-gray-800"></div>
+                                <div class="flex flex-col">
+                                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ $careerSummary['best_eff_season']['gp'] }}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Zápasů</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative z-10 text-emerald-100 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700">
+                             <i class="fa-light fa-rocket text-7xl opacity-20"></i>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            {{-- Career History Table --}}
+            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-[3rem] shadow-xl border border-white/40 dark:border-gray-700/50 overflow-hidden">
+                <div class="p-8 border-b border-gray-100 dark:border-gray-700/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Sezónní historie</h3>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Přehled všech odehraných sezón v klubu</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="px-4 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 text-[10px] font-black uppercase text-gray-500 tracking-widest">
+                            Celkem {{ count($careerHistory) }} sezón
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50">
+                                <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Sezóna</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Zápasy</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Body celkem</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">B / Z</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Užitečnost</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Doskoky</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Asistence</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                            @foreach(collect($careerHistory)->sortByDesc('season') as $row)
+                                <tr class="group hover:bg-primary-50/30 dark:hover:bg-primary-900/10 transition-colors">
+                                    <td class="px-8 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/50 group-hover:text-primary-600 transition-colors">
+                                                {{ substr($row['season'], 2, 2) }}
+                                            </div>
+                                            <span class="text-sm font-black text-gray-900 dark:text-white">{{ $row['season'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        <span class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ $row['gp'] }}</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        <span class="text-sm font-black text-gray-900 dark:text-white">{{ $row['pts_total'] }}</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-black">
+                                            {{ number_format($row['ppg'], 1) }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">{{ number_format($row['efficiency_avg'], 1) }}</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        <span class="text-sm font-medium text-gray-500">{{ number_format($row['rebounds_avg'], 1) }}</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        <span class="text-sm font-medium text-gray-500">{{ number_format($row['assists_avg'], 1) }}</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     @elseif($view === 'team')
         {{-- TEAM VIEW --}}
         @if($teamSummary && ($teamSummary['gp'] ?? 0) > 0)
@@ -1152,8 +1369,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
                 {{-- Record --}}
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-lg shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-gray-700 relative overflow-hidden group hover:scale-[1.02] transition-all">
-                    <div class="absolute top-4 right-4 text-gray-300 dark:text-gray-600 hover:text-primary-500 transition-colors cursor-help" x-tooltip="'Počet výher ku počtu proher v sezóně.'">
-                        <i class="fa-solid fa-circle-question text-[10px]"></i>
+                    <div class="absolute top-4 right-4 flex items-center gap-2">
+                        @if(($teamSummary['gp'] ?? 0) != ($calculatedSummary['gp'] ?? 0))
+                            <div class="text-amber-500 animate-pulse cursor-help p-1" x-tooltip="'Pozor: Oficiální tabulka uvádí {{ $teamSummary['gp'] }} zápasů, ale v našem itineráři je jich zatím jen {{ $calculatedSummary['gp'] }} s výsledkem. Některé zápasy se ještě synchronizují.'">
+                                <i class="fa-solid fa-circle-exclamation text-[12px]"></i>
+                            </div>
+                        @endif
+                        <div class="text-gray-300 dark:text-gray-600 hover:text-primary-500 transition-colors cursor-help p-1" x-tooltip="'Počet výher ku počtu proher v sezóně.'">
+                            <i class="fa-solid fa-circle-question text-[10px]"></i>
+                        </div>
                     </div>
                     <div class="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:opacity-[0.08] transition-all group-hover:rotate-12 group-hover:scale-125">
                         <i class="fa-light fa-trophy-star text-[10rem]"></i>
@@ -2052,22 +2276,101 @@
             }
         };
 
-        // Initialize based on initial view
-        setTimeout(() => {
+        const initCareerCharts = () => {
+            console.log('initCareerCharts starting');
+            if (typeof ApexCharts === 'undefined') return;
+
+            try {
+                const history = $wire.careerHistory;
+                if (!history || history.length === 0) return;
+
+                const seasons = history.map(h => h.season);
+                const ppg = history.map(h => h.ppg);
+                const efficiency = history.map(h => h.efficiency_avg);
+                const gp = history.map(h => h.gp);
+
+                // 1. Performance Chart (PPG + Efficiency)
+                const chartEl1 = document.querySelector("#career-performance-chart");
+                if (chartEl1) {
+                    chartEl1.innerHTML = '';
+                    new ApexCharts(chartEl1, {
+                        series: [
+                            { name: 'Body / Zápas', type: 'column', data: ppg },
+                            { name: 'Užitečnost Ø', type: 'line', data: efficiency }
+                        ],
+                        chart: {
+                            height: 350,
+                            type: 'line',
+                            toolbar: { show: false },
+                            animations: { enabled: true, easing: 'easeinout', speed: 800 },
+                            fontFamily: 'inherit'
+                        },
+                        stroke: { width: [0, 4], curve: 'smooth' },
+                        colors: [colors.primary, colors.emerald],
+                        dataLabels: {
+                            enabled: true,
+                            enabledOnSeries: [0],
+                            style: { fontSize: '10px', fontWeight: 'bold', colors: ['#fff'] },
+                            offsetY: -5
+                        },
+                        labels: seasons,
+                        xaxis: {
+                            type: 'category',
+                            labels: {
+                                rotate: -45,
+                                rotateAlways: false,
+                                style: { fontSize: '10px', fontWeight: 'bold', colors: '#94a3b8' }
+                            }
+                        },
+                        yaxis: [
+                            { title: { text: 'Body / Zápas', style: { color: colors.primary, fontWeight: 900 } } },
+                            { opposite: true, title: { text: 'Užitečnost', style: { color: colors.emerald, fontWeight: 900 } } }
+                        ],
+                        legend: { position: 'top', horizontalAlign: 'left', fontSize: '10px', fontWeight: 'bold' },
+                        grid: { borderColor: '#f1f1f1', strokeDashArray: 4 },
+                        tooltip: { shared: true, intersect: false }
+                    }).render();
+                }
+
+                // 2. Games Played Chart
+                const chartEl2 = document.querySelector("#career-gp-chart");
+                if (chartEl2) {
+                    chartEl2.innerHTML = '';
+                    new ApexCharts(chartEl2, {
+                        series: [{ name: 'Odehrané zápasy', data: gp }],
+                        chart: { height: 350, type: 'area', toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'inherit' },
+                        dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 'bold' } },
+                        stroke: { curve: 'stepline', width: 3 },
+                        colors: [colors.orange],
+                        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
+                        xaxis: { categories: seasons, labels: { style: { fontSize: '10px', fontWeight: 'bold', colors: '#94a3b8' } } },
+                        yaxis: { min: 0, title: { text: 'Počet zápasů', style: { color: colors.orange, fontWeight: 900 } } },
+                        grid: { borderColor: '#f1f1f1', strokeDashArray: 4 }
+                    }).render();
+                }
+            } catch (e) {
+                console.error('initCareerCharts error:', e);
+            }
+        };
+
+        const initCharts = () => {
             if ($wire.view === 'personal') initPersonalCharts();
             else if ($wire.view === 'team') initTeamCharts();
             else if ($wire.view === 'matches') initMatchesCharts();
+            else if ($wire.view === 'career') initCareerCharts();
+        };
+
+        // Initialize based on initial view
+        setTimeout(() => {
+            initCharts();
         }, 100);
 
         // Re-initialize on Livewire updates
         $wire.on('statsLoaded', () => {
             console.log('statsLoaded event received');
             window.dispatchEvent(new CustomEvent('loading-stop'));
-
             setTimeout(() => {
-                if ($wire.view === 'personal') initPersonalCharts();
-                else if ($wire.view === 'team') initTeamCharts();
-                else if ($wire.view === 'matches') initMatchesCharts();
+                initCharts();
             }, 50);
         });
     </script>

@@ -32,15 +32,141 @@ class PlayerStatsService
 
         // Neproměněné střely (pokud známe pokusy)
         $missed_fg = 0;
-        if ($fg2_att > 0) $missed_fg += ($fg2_att - $fg2_made);
-        if ($fg3_att > 0) $missed_fg += ($fg3_att - $fg3_made);
+        if ($fg2_att > 0) {
+            $missed_fg += ($fg2_att - $fg2_made);
+        }
+        if ($fg3_att > 0) {
+            $missed_fg += ($fg3_att - $fg3_made);
+        }
 
         $missed_ft = 0;
-        if ($ft_att > 0) $missed_ft += ($ft_att - $ft_made);
+        if ($ft_att > 0) {
+            $missed_ft += ($ft_att - $ft_made);
+        }
 
         // Výpočet VAL
         // Pokud nemáme doskoky, asistence atd. (v nižších ligách), aspoň zohledníme Body - Fauly - Neproměněné hody.
         return $pts + $reb + $ast + $stl + $blk - $missed_fg - $missed_ft - $to - $fouls;
+    }
+
+    /**
+     * Získá celkový kariérní přehled hráče.
+     */
+    public function getCareerOverview(int $userId): array
+    {
+        // 1. Získáme všechna externí data (historie)
+        $externalStats = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+            ->where('is_career_total', false)
+            ->orderBy('season_label', 'asc')
+            ->get();
+
+        // 2. Získáme všechna interní data (sezónní souhrny)
+        $internalStats = \App\Models\StatisticRow::where('player_id', $userId)
+            ->whereHas('set', function ($q) {
+                $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
+            })
+            ->with('season')
+            ->get();
+
+        // 3. Agregujeme všechna data do jednotné struktury podle sezóny
+        $historyData = collect();
+
+        // Přidáme externí data
+        foreach ($externalStats as $row) {
+            $seasonLabel = \App\Models\Season::normalizeName($row->season_label);
+            if (! $historyData->has($seasonLabel)) {
+                $historyData->put($seasonLabel, [
+                    'season' => $seasonLabel,
+                    'gp' => 0,
+                    'pts_total' => 0,
+                    'efficiency_total' => 0,
+                    'rebounds_total' => 0,
+                    'assists_total' => 0,
+                ]);
+            }
+
+            $current = $historyData->get($seasonLabel);
+            $current['gp'] += $row->games_played;
+            $current['pts_total'] += round($row->games_played * $row->points_avg);
+            $current['efficiency_total'] += round($row->games_played * ($row->valuation_avg ?? 0));
+            $current['rebounds_total'] += round($row->games_played * ($row->rebounds_total_avg ?? 0));
+            $current['assists_total'] += round($row->games_played * ($row->assists_avg ?? 0));
+
+            $historyData->put($seasonLabel, $current);
+        }
+
+        // Přidáme interní data (pokud už tam nejsou pro danou sezónu, nebo je sloučíme)
+        foreach ($internalStats as $row) {
+            $seasonLabel = \App\Models\Season::normalizeName($row->season?->name ?? 'Neznámá sezóna');
+            $values = $row->values;
+
+            if (! $historyData->has($seasonLabel)) {
+                $historyData->put($seasonLabel, [
+                    'season' => $seasonLabel,
+                    'gp' => 0,
+                    'pts_total' => 0,
+                    'efficiency_total' => 0,
+                    'rebounds_total' => 0,
+                    'assists_total' => 0,
+                ]);
+            }
+
+            $current = $historyData->get($seasonLabel);
+            $current['gp'] += ($values['gp'] ?? 0);
+            $current['pts_total'] += ($values['pts_total'] ?? 0);
+            $current['efficiency_total'] += ($values['efficiency_total'] ?? 0);
+            $current['rebounds_total'] += ($values['rebounds_total'] ?? 0);
+            $current['assists_total'] += ($values['assists_total'] ?? 0);
+
+            $historyData->put($seasonLabel, $current);
+        }
+
+        // Vypočítáme průměry pro každou sezónu
+        $finalHistory = $historyData->sortBy('season')->map(function ($data) {
+            $gp = $data['gp'];
+
+            return [
+                'season' => $data['season'],
+                'gp' => $gp,
+                'pts_total' => $data['pts_total'],
+                'ppg' => $gp > 0 ? round($data['pts_total'] / $gp, 1) : 0,
+                'efficiency_avg' => $gp > 0 ? round($data['efficiency_total'] / $gp, 1) : 0,
+                'rebounds_avg' => $gp > 0 ? round($data['rebounds_total'] / $gp, 1) : 0,
+                'assists_avg' => $gp > 0 ? round($data['assists_total'] / $gp, 1) : 0,
+            ];
+        })->values();
+
+        // 4. Celkové kariérní statistiky
+        $totalGp = $finalHistory->sum('gp');
+        $totalPts = $finalHistory->sum('pts_total');
+        $avgPpg = $totalGp > 0 ? round($totalPts / $totalGp, 1) : 0;
+
+        // Fallback na speciální kariérní řádek z externích dat (pokud obsahuje víc historie)
+        $careerRow = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+            ->where('is_career_total', true)
+            ->first();
+
+        if ($careerRow) {
+            if ($careerRow->games_played > $totalGp) {
+                $totalGp = $careerRow->games_played;
+                if ($totalPts == 0) {
+                    $totalPts = round($careerRow->games_played * $careerRow->points_avg);
+                }
+                $avgPpg = $careerRow->points_avg;
+            }
+        }
+
+        return [
+            'summary' => [
+                'total_gp' => (int) $totalGp,
+                'total_pts' => (int) $totalPts,
+                'ppg_avg' => (float) $avgPpg,
+                'seasons_count' => $finalHistory->count(),
+                'best_ppg_season' => $finalHistory->sortByDesc('ppg')->first(),
+                'best_eff_season' => $finalHistory->sortByDesc('efficiency_avg')->first(),
+            ],
+            'history' => $finalHistory->toArray(),
+        ];
     }
 
     /**
@@ -69,7 +195,7 @@ class PlayerStatsService
         $season = \App\Models\Season::find($seasonId);
         if ($season) {
             $normalizedSeason = \App\Models\Season::normalizeName($season->name); // např. 2024/2025
-            $shortSeason = "";
+            $shortSeason = '';
             $parts = explode('/', $normalizedSeason);
             if (count($parts) === 2) {
                 $shortSeason = $parts[0].'/'.substr($parts[1], 2, 2); // 2024/25
@@ -110,7 +236,7 @@ class PlayerStatsService
                     'ft_avg' => $extStat->free_throws_pct,
                     'fouls_avg' => $extStat->fouls_avg,
                     'is_fallback' => true,
-                    'source' => 'external_stat'
+                    'source' => 'external_stat',
                 ];
             }
         }
@@ -124,7 +250,7 @@ class PlayerStatsService
      */
     public function getPerGameSeries(int $userId, int $seasonId, ?int $teamId = null): Collection
     {
-        $query = StatisticRow::with(['match', 'match.opponent'])
+        $query = StatisticRow::with(['match', 'match.opponent', 'match.team'])
             ->where('statistic_rows.player_id', $userId)
             ->where('statistic_rows.season_id', $seasonId)
             ->whereHas('set', function ($q) {
@@ -145,7 +271,7 @@ class PlayerStatsService
                 $values = $row->values;
                 // Zajistíme přítomnost klíče efficiency pro grafy.
                 // Pokud chybí, pokusíme se ji vypočítat z dostupných metrik.
-                if (!isset($values['efficiency']) || (float)$values['efficiency'] === 0.0) {
+                if (! isset($values['efficiency']) || (float) $values['efficiency'] === 0.0) {
                     $values['efficiency'] = $values['valuation'] ?? $this->calculateEfficiencyFromValues($values);
                 }
 
@@ -162,7 +288,7 @@ class PlayerStatsService
         }
 
         // Fallback na ExternalPlayerMatch
-        $externalQuery = \App\Models\ExternalPlayerMatch::with(['basketballMatch', 'basketballMatch.opponent'])
+        $externalQuery = \App\Models\ExternalPlayerMatch::with(['basketballMatch', 'basketballMatch.opponent', 'basketballMatch.team'])
             ->where('user_id', $userId)
             ->where(function ($q) use ($seasonId) {
                 // 1. Zápasy, které jsou spárované s interním zápasem dané sezóny
@@ -200,16 +326,22 @@ class PlayerStatsService
             $team = \App\Models\Team::find($teamId);
             if ($team) {
                 $teamName = $team->getTranslation('name', 'cs');
-                $results = $results->filter(function($match) use ($teamId, $teamName) {
+                $results = $results->filter(function ($match) use ($teamId, $teamName) {
                     // 1. Spárované s interním zápasem daného týmu (již odfiltrováno v SQL výše přes whereHas)
-                    if ($match->basketball_match_id) return true;
+                    if ($match->basketball_match_id) {
+                        return true;
+                    }
 
                     // 2. Metadata nebo název týmu
                     $metaTeamId = $match->metadata['team_id'] ?? null;
-                    if ($metaTeamId == $teamId) return true;
+                    if ($metaTeamId == $teamId) {
+                        return true;
+                    }
 
                     $matchTeamName = $match->team_name ?? ($match->metadata['team_name'] ?? '');
-                    if ($matchTeamName && str_contains(strtolower($matchTeamName), strtolower($teamName))) return true;
+                    if ($matchTeamName && str_contains(strtolower($matchTeamName), strtolower($teamName))) {
+                        return true;
+                    }
 
                     // Pokud nemáme žádné informace o týmu u externího zápasu,
                     // v osobních statistikách ho raději zobrazíme (všechny zápasy hráče),
@@ -284,7 +416,7 @@ class PlayerStatsService
             'minutes_avg',
             'fg3_total',
             'ft_pct',
-            'fouls_avg'
+            'fouls_avg',
         ];
 
         // Vždy chceme aspoň 6 karet, abychom naplnili grid 3x2
@@ -304,9 +436,11 @@ class PlayerStatsService
         $selectedMetrics = array_slice($metricsWithData, 0, 6);
         if (count($selectedMetrics) < 6) {
             foreach ($potentialMetrics as $metric) {
-                if (!in_array($metric, $selectedMetrics)) {
+                if (! in_array($metric, $selectedMetrics)) {
                     $selectedMetrics[] = $metric;
-                    if (count($selectedMetrics) >= 6) break;
+                    if (count($selectedMetrics) >= 6) {
+                        break;
+                    }
                 }
             }
         }
@@ -471,12 +605,19 @@ class PlayerStatsService
             $team = \App\Models\Team::find($teamId);
             if ($team) {
                 $teamName = $team->getTranslation('name', 'cs');
-                $externalMatches = $externalMatches->filter(function($match) use ($teamId, $teamName) {
-                    if ($match->basketball_match_id) return true;
+                $externalMatches = $externalMatches->filter(function ($match) use ($teamId, $teamName) {
+                    if ($match->basketball_match_id) {
+                        return true;
+                    }
                     $metaTeamId = $match->metadata['team_id'] ?? null;
-                    if ($metaTeamId == $teamId) return true;
+                    if ($metaTeamId == $teamId) {
+                        return true;
+                    }
                     $matchTeamName = $match->team_name ?? ($match->metadata['team_name'] ?? '');
-                    if ($matchTeamName && str_contains(strtolower($matchTeamName), strtolower($teamName))) return true;
+                    if ($matchTeamName && str_contains(strtolower($matchTeamName), strtolower($teamName))) {
+                        return true;
+                    }
+
                     return empty($matchTeamName) && empty($metaTeamId);
                 });
             }
