@@ -125,7 +125,7 @@ class MyStatistics extends Component
 
     public function updated($propertyName)
     {
-        if (in_array($propertyName, ['seasonId', 'teamId', 'sortField', 'sortDirection'])) {
+        if (in_array($propertyName, ['seasonId', 'teamId', 'sortField', 'sortDirection', 'view', 'statsView'])) {
             if ($propertyName === 'teamId') {
                 app(\App\Services\Member\MemberContext::class)->setActiveTeamId((int)$this->teamId);
             }
@@ -344,16 +344,6 @@ class MyStatistics extends Component
                     ->orderBy('match_date', 'desc')
                     ->get()
                     ->toArray();
-
-                // Načtení kariérních statistik (vždy pro osobní pohled nebo kariérní pohled)
-                $careerData = $service->getCareerOverview($userId);
-                $this->careerSummary = $careerData['summary'];
-                $this->careerHistory = $careerData['history'];
-            } elseif ($this->view === 'career') {
-                $service = app(PlayerStatsService::class);
-                $careerData = $service->getCareerOverview($userId);
-                $this->careerSummary = $careerData['summary'];
-                $this->careerHistory = $careerData['history'];
             } elseif ($this->view === 'team') {
                 if ($teamId) {
                     $service = app(TeamStatsService::class);
@@ -437,6 +427,15 @@ class MyStatistics extends Component
                     ->get()
                     ->toArray();
             }
+
+            // Vždy načteme kariérní statistiky pro osobní a kariérní pohled
+            if ($this->view === 'personal' || $this->view === 'career') {
+                $service = app(PlayerStatsService::class);
+                $careerData = $service->getCareerOverview($userId);
+                $this->careerSummary = $careerData['summary'];
+                $this->careerHistory = $careerData['history'];
+            }
+
             \Log::debug('MyStatistics::loadStats finished successfully');
         } catch (\Exception $e) {
             \Log::error('MyStatistics::loadStats failed: ' . $e->getMessage(), [

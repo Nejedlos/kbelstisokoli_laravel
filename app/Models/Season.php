@@ -18,8 +18,12 @@ class Season extends Model
     /**
      * Normalizuje název sezóny do jednotného formátu YYYY/YYYY.
      */
-    public static function normalizeName(string $name): string
+    public static function normalizeName(?string $name): string
     {
+        if (empty($name)) {
+            return 'Neznámá sezóna';
+        }
+
         $name = trim($name);
 
         // 1. Podpora YYYY - YYYY, YYYY-YYYY, YYYY / YYYY -> YYYY/YYYY
