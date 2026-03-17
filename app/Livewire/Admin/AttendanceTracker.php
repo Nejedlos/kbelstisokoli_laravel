@@ -86,11 +86,18 @@ class AttendanceTracker extends Component
     {
         $attendance = Attendance::find($attendanceId);
         if ($attendance) {
-            // Místo smazání nastavíme status na null nebo absent, pokud chceme zachovat historii omluv
-            // Ale zadání říká "přidávat ty kteří na akci byli", tak smazání reality dává smysl
             $attendance->update(['actual_status' => null]);
         }
         $this->dispatch('refreshAttendance');
+    }
+
+    public function finalize()
+    {
+        $event = $this->attendable;
+        if ($event) {
+            app(\App\Services\Finance\FinanceAutomationService::class)->finalizeAttendance($event);
+            session()->flash('message', 'Docházka uzavřena a pokuty vygenerovány.');
+        }
     }
 
     public function render()

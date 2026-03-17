@@ -83,8 +83,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Načtení a aplikace výkonnostních nastavení z DB
-        app(\App\Services\PerformanceService::class)->bootSettings();
+        // Fix pro Webglobe: potlačení notice o tempnam fallbacku, která shazuje aplikaci na produkci
+        // Tento handler registrujeme v boot() metodě, aby byl co nejvíce robustní a přežil Laravel bootstrap
+        $previousHandler = set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$previousHandler) {
+            if ($errno === E_NOTICE && (str_contains($errstr, 'tempnam()') && str_contains($errstr, 'temporary directory'))) {
+                return true; // Ignorovat tuto konkrétní notice
+            }
+
+            return is_callable($previousHandler) ? $previousHandler($errno, $errstr, $errfile, $errline) : false;
+        });
+
+        \App\Models\UserSeasonConfig::observe(\App\Observers\UserSeasonConfigObserver::class);
+
+        // Načtení a aplikace výkonnostních nastavení z DB (pouze pokud neběžíme v konzoli nebo neběžíme optimize)
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            app(\App\Services\PerformanceService::class)->bootSettings();
+        }
 
         // Vlastní Blade direktiva pro fragment caching
         \Illuminate\Support\Facades\Blade::directive('cacheFragment', function ($expression) {

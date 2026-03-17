@@ -7,6 +7,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class FinanceChargeForm
@@ -16,9 +18,9 @@ class FinanceChargeForm
         return $schema
             ->components([
                 Section::make('Základní údaje předpisu')
-                    ->schema([
+                    ->components([
                         Grid::make(2)
-                            ->schema([
+                            ->components([
                                 Select::make('user_id')
                                     ->label('Člen (Uživatel)')
                                     ->relationship('user', 'name')
@@ -48,9 +50,9 @@ class FinanceChargeForm
                     ]),
 
                 Section::make('Finanční detaily')
-                    ->schema([
+                    ->components([
                         Grid::make(2)
-                            ->schema([
+                            ->components([
                                 TextInput::make('amount_total')
                                     ->label('Celková částka')
                                     ->numeric()
@@ -61,7 +63,7 @@ class FinanceChargeForm
                                     ->native(false),
                             ]),
                         Grid::make(2)
-                            ->schema([
+                            ->components([
                                 DatePicker::make('period_from')
                                     ->label('Období od')
                                     ->native(false),
@@ -72,9 +74,9 @@ class FinanceChargeForm
                     ]),
 
                 Section::make('Nastavení a stav')
-                    ->schema([
+                    ->components([
                         Grid::make(2)
-                            ->schema([
+                            ->components([
                                 Select::make('status')
                                     ->label('Stav')
                                     ->options([

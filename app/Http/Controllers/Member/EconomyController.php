@@ -29,10 +29,10 @@ class EconomyController extends Controller
             ->orderBy('due_date', 'asc')
             ->get();
 
-        // 3. Historie (uhrazené předpisy a platby)
+        // 3. Historie (uhrazené a prominuté předpisy a platby)
         $paidCharges = FinanceCharge::where('user_id', $user->id)
             ->where('is_visible_to_member', true)
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'waived'])
             ->withSum('allocations as paid_sum', 'amount')
             ->orderBy('updated_at', 'desc')
             ->limit(10)

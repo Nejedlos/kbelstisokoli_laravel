@@ -43,6 +43,7 @@ class FinanceChargesTable
                         'paid' => 'success',
                         'cancelled' => 'danger',
                         'overdue' => 'danger',
+                        'waived' => 'warning',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state, $record): string => match ($state) {
@@ -52,6 +53,7 @@ class FinanceChargesTable
                         'paid' => 'Zaplaceno',
                         'cancelled' => 'Zrušeno',
                         'overdue' => 'Po splatnosti',
+                        'waived' => 'Prominuto',
                         default => $state,
                     })
                     ->sortable(),
@@ -74,17 +76,32 @@ class FinanceChargesTable
                         'paid' => 'Zaplaceno',
                         'overdue' => 'Po splatnosti',
                         'cancelled' => 'Zrušeno',
+                        'waived' => 'Prominuto',
                     ]),
                 \Filament\Tables\Filters\SelectFilter::make('charge_type')
                     ->label('Typ')
                     ->options([
                         'membership_fee' => 'Členský příspěvek',
+                        'fine' => 'Pokuta',
+                        'tariff' => 'Tarif / Splátka',
+                        'event_fee' => 'Poplatek za akci',
                         'camp_fee' => 'Soustředění',
                         'tournament_fee' => 'Turnaj',
                         'other' => 'Ostatní',
                     ]),
             ])
             ->recordActions([
+                \Filament\Actions\Action::make('waive')
+                    ->label('Prominout')
+                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CANCEL))
+                    ->requiresConfirmation()
+                    ->modalHeading('Prominout předpis platby?')
+                    ->modalDescription('Předpis bude označen jako prominutý a nebude vyžadováno jeho zaplacení.')
+                    ->visible(fn ($record) => $record->status !== 'paid' && $record->status !== 'waived' && $record->status !== 'cancelled')
+                    ->action(function ($record) {
+                        $record->update(['status' => 'waived']);
+                    })
+                    ->color('warning'),
                 EditAction::make(),
             ])
             ->toolbarActions([

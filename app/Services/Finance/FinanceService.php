@@ -48,7 +48,7 @@ class FinanceService
      */
     public function syncChargeStatus(FinanceCharge $charge): void
     {
-        if ($charge->status === 'cancelled' || $charge->status === 'draft') {
+        if ($charge->status === 'cancelled' || $charge->status === 'draft' || $charge->status === 'waived') {
             return;
         }
 

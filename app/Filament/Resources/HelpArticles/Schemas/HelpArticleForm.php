@@ -3,15 +3,15 @@
 namespace App\Filament\Resources\HelpArticles\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
@@ -39,9 +39,9 @@ class HelpArticleForm
                     ->tabs([
                         Tabs\Tab::make(__('admin.navigation.resources.help_article.tabs.content'))
                             ->icon(new HtmlString('<i class="fa-light fa-pen-nib fa-fw mr-1"></i>'))
-                            ->schema([
+                            ->components([
                                 Grid::make(2)
-                                    ->schema([
+                                    ->components([
                                         TextInput::make('title.cs')
                                             ->label(__('admin.navigation.resources.help_article.fields.title_cs'))
                                             ->required()
@@ -53,7 +53,7 @@ class HelpArticleForm
                                     ]),
 
                                 Grid::make(2)
-                                    ->schema([
+                                    ->components([
                                         Textarea::make('excerpt.cs')
                                             ->label(__('admin.navigation.resources.help_article.fields.excerpt_cs'))
                                             ->rows(2)
@@ -76,9 +76,9 @@ class HelpArticleForm
 
                         Tabs\Tab::make(__('admin.navigation.resources.help_article.tabs.settings'))
                             ->icon(new HtmlString('<i class="fa-light fa-gear fa-fw mr-1"></i>'))
-                            ->schema([
+                            ->components([
                                 Grid::make(2)
-                                    ->schema([
+                                    ->components([
                                         Select::make('category_id')
                                             ->label(__('admin.navigation.resources.help_article.fields.category'))
                                             ->relationship('category', 'name->cs')
@@ -91,7 +91,7 @@ class HelpArticleForm
                                     ]),
 
                                 Grid::make(3)
-                                    ->schema([
+                                    ->components([
                                         TextInput::make('sort_order')
                                             ->label(__('admin.navigation.resources.help_article.fields.sort_order'))
                                             ->required()
@@ -113,7 +113,7 @@ class HelpArticleForm
                                     ->columnSpanFull(),
 
                                 Grid::make(3)
-                                    ->schema([
+                                    ->components([
                                         Toggle::make('is_published')
                                             ->label(__('admin.navigation.resources.help_article.fields.is_published'))
                                             ->default(true)
@@ -132,9 +132,9 @@ class HelpArticleForm
 
                         Tabs\Tab::make(__('admin.navigation.resources.help_article.tabs.metadata'))
                             ->icon(new HtmlString('<i class="fa-light fa-code fa-fw mr-1"></i>'))
-                            ->schema([
+                            ->components([
                                 Grid::make(2)
-                                    ->schema([
+                                    ->components([
                                         Textarea::make('metadata.cs')
                                             ->label(__('admin.navigation.resources.help_article.fields.metadata') . ' (CS)')
                                             ->rows(8)

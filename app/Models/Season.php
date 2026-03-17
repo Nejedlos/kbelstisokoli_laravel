@@ -9,10 +9,20 @@ class Season extends Model
     protected $fillable = [
         'name',
         'is_active',
+        'fine_no_response',
+        'fine_no_show',
+        'fine_unannounced_show',
+        'fine_excused_show',
+        'fine_missed_free_throw',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'fine_no_response' => 'decimal:2',
+        'fine_no_show' => 'decimal:2',
+        'fine_unannounced_show' => 'decimal:2',
+        'fine_excused_show' => 'decimal:2',
+        'fine_missed_free_throw' => 'decimal:2',
     ];
 
     /**

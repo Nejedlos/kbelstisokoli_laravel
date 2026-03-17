@@ -7,10 +7,10 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -25,7 +25,7 @@ class QuickActionsRelationManager extends RelationManager
         return $schema
             ->components([
                 Grid::make(2)
-                    ->schema([
+                    ->components([
                         TextInput::make('title.cs')
                             ->label(__('admin.navigation.resources.help_quick_action.fields.title_cs'))
                             ->required(),
@@ -34,7 +34,7 @@ class QuickActionsRelationManager extends RelationManager
                             ->required(),
                     ]),
                 Grid::make(2)
-                    ->schema([
+                    ->components([
                         Textarea::make('description.cs')
                             ->label(__('admin.navigation.resources.help_quick_action.fields.description_cs'))
                             ->rows(2)
@@ -45,7 +45,7 @@ class QuickActionsRelationManager extends RelationManager
                             ->default(null),
                     ]),
                 Grid::make(3)
-                    ->schema([
+                    ->components([
                         TextInput::make('url')
                             ->label(__('admin.navigation.resources.help_quick_action.fields.url'))
                             ->placeholder('admin.resource.index nebo /admin/...')

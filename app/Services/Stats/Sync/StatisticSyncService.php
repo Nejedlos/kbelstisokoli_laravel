@@ -278,6 +278,15 @@ class StatisticSyncService
                 }
 
                 if ($isOurTeam && $playerId) {
+                    // Generování automatických pokut za TH
+                    try {
+                        app(\App\Services\Finance\FinanceAutomationService::class)->processThFines($statRow);
+                    } catch (\Exception $e) {
+                        if ($run) {
+                            $run->addLog('error', $statRow, null, null, "Chyba při generování pokut za TH: " . $e->getMessage());
+                        }
+                    }
+
                     $this->updateExternalPlayerMatch(
                         userId: $playerId,
                         externalMatchId: (string) ($match->external_id ?: ($match->metadata['external_id'] ?? null)),

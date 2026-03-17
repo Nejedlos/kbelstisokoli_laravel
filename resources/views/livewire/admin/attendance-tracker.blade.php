@@ -1,4 +1,11 @@
 <div class="space-y-6">
+    @if (session()->has('message'))
+        <div class="p-4 rounded-xl bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 text-success-700 dark:text-success-400 flex items-center gap-3">
+            <i class="fa-light fa-circle-check"></i>
+            {{ session('message') }}
+        </div>
+    @endif
+
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm">
         <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
             <i class="fa-light fa-user-plus text-primary-500"></i>
@@ -69,4 +76,17 @@
             </div>
         @endforelse
     </div>
+
+    @if(count($this->attendances) > 0)
+        <div class="flex justify-center pt-4">
+            <button
+                wire:click="finalize"
+                wire:confirm="Opravdu chcete uzavřít docházku? Dojde k vyúčtování pokut všem nezúčastněným členům."
+                class="px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-2xl shadow-lg shadow-primary-500/20 flex items-center gap-3 transition-all hover:scale-105 active:scale-95"
+            >
+                <i class="fa-light fa-file-invoice-dollar text-xl"></i>
+                Uzavřít docházku a vyúčtovat pokuty
+            </button>
+        </div>
+    @endif
 </div>

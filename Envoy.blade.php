@@ -234,7 +234,7 @@
     mkdir -p storage/framework/{sessions,views,cache}
     mkdir -p storage/framework/cache/data
     mkdir -p storage/logs
-    chmod -R 775 storage bootstrap/cache || true
+    chmod -R 777 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/*.php
@@ -286,7 +286,7 @@
     mkdir -p storage/framework/{sessions,views,cache}
     mkdir -p storage/framework/cache/data
     mkdir -p storage/logs
-    chmod -R 775 storage bootstrap/cache || true
+    chmod -R 777 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/*.php
@@ -385,7 +385,7 @@
     mkdir -p storage/framework/{sessions,views,cache}
     mkdir -p storage/framework/cache/data
     mkdir -p storage/logs
-    chmod -R 775 storage bootstrap/cache || true
+    chmod -R 777 storage bootstrap/cache || true
 
     echo "Cleaning up cache..."
     rm -f bootstrap/cache/*.php

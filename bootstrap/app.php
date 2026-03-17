@@ -16,8 +16,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $app->useEnvironmentPath($envPath);
 
         // Pokud již máme načtený .env v této fázi (což by měl být), nastavíme public_path
-        $publicPath = config('app.prod_public_path') ?: env('PROD_PUBLIC_PATH');
-        if ((config('app.public_path_mode') ?: env('PUBLIC_PATH_MODE')) !== 'external') {
+        $publicPath = env('PROD_PUBLIC_PATH');
+        if (env('PUBLIC_PATH_MODE') !== 'external') {
             $publicPath = null;
         }
 
@@ -26,7 +26,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         if (! $publicPath) {
-            $publicPath = config('app.public_path') ?: env('APP_PUBLIC_PATH');
+            $publicPath = env('APP_PUBLIC_PATH');
         }
 
         // Pokud stále nemáme publicPath a jsme na produkci, zkusíme relativní cestu
@@ -54,22 +54,28 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         foreach ($storagePaths as $path) {
             if (! is_dir($path)) {
-                @mkdir($path, 0775, true);
+                @mkdir($path, 0777, true);
+            }
+            if (is_dir($path) && ! is_writable($path)) {
+                @chmod($path, 0777);
             }
         }
 
         // Potlačení notice o tempnam fallbacku, která shazuje aplikaci na produkci
+        // Používáme robustnější kontrolu řetězce a capture previous handleru
         // (E_NOTICE je v Laravelu standardně převáděna na ErrorException)
-        $previousHandler = set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$previousHandler) {
-            if ($errno === E_NOTICE && str_contains($errstr, 'tempnam(): file created in the system\'s temporary directory')) {
+        $handler = function ($errno, $errstr, $errfile, $errline) use (&$handler, &$previousHandler) {
+            if ($errno === E_NOTICE && (str_contains($errstr, 'tempnam()') && str_contains($errstr, 'temporary directory'))) {
                 return true; // Ignorovat tuto konkrétní notice
             }
-            if ($previousHandler) {
+
+            if (is_callable($previousHandler)) {
                 return $previousHandler($errno, $errstr, $errfile, $errline);
             }
 
             return false;
-        });
+        };
+        $previousHandler = set_error_handler($handler);
     })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

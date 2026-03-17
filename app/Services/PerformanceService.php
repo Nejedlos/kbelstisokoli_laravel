@@ -49,8 +49,12 @@ class PerformanceService
             return $this->settings;
         }
 
+        // Na produkci používáme file cache pro nastavení, abychom eliminovali DB dotaz při každém requestu.
+        // Cache::store('file') je na Webglobe rychlejší než DB dotaz.
+        $store = app()->isProduction() ? 'file' : 'database';
+
         try {
-            return $this->settings = Cache::store('database')->remember('performance_settings', 3600, function () {
+            return $this->settings = Cache::store($store)->remember('performance_settings', 3600, function () {
                 return $this->fetchSettingsFromDb();
             });
         } catch (\Throwable $e) {
@@ -93,7 +97,8 @@ class PerformanceService
 
     public function clearCache(): void
     {
-        Cache::forget('performance_settings');
+        Cache::store('file')->forget('performance_settings');
+        Cache::store('database')->forget('performance_settings');
         $this->settings = null;
     }
 

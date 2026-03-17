@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\HelpCategories\Schemas;
 
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
@@ -19,7 +19,7 @@ class HelpCategoryForm
         return $schema
             ->components([
                 Section::make()
-                    ->schema([
+                    ->components([
                         Placeholder::make('is_customized_notice')
                             ->label('')
                             ->content(new HtmlString('
@@ -35,7 +35,7 @@ class HelpCategoryForm
                             ->columnSpanFull(),
 
                         Grid::make(2)
-                            ->schema([
+                            ->components([
                                 Select::make('parent_id')
                                     ->label(__('admin.navigation.resources.help_category.fields.parent'))
                                     ->relationship('parent', 'name->cs')
@@ -50,7 +50,7 @@ class HelpCategoryForm
                             ]),
 
                         Grid::make(2)
-                            ->schema([
+                            ->components([
                                 TextInput::make('name.cs')
                                     ->label(__('admin.navigation.resources.help_category.fields.name_cs'))
                                     ->required(),
@@ -60,7 +60,7 @@ class HelpCategoryForm
                             ]),
 
                         Grid::make(2)
-                            ->schema([
+                            ->components([
                                 Textarea::make('description.cs')
                                     ->label(__('admin.navigation.resources.help_category.fields.description_cs'))
                                     ->rows(3)
@@ -72,7 +72,7 @@ class HelpCategoryForm
                             ]),
 
                         Grid::make(3)
-                            ->schema([
+                            ->components([
                                 TextInput::make('icon')
                                     ->label(__('admin.navigation.resources.help_category.fields.icon'))
                                     ->placeholder('fa-light fa-...')
@@ -97,7 +97,7 @@ class HelpCategoryForm
                             ->default(null),
 
                         Grid::make(3)
-                            ->schema([
+                            ->components([
                                 Toggle::make('is_active')
                                     ->label(__('admin.navigation.resources.help_category.fields.is_active'))
                                     ->default(true)
@@ -116,7 +116,7 @@ class HelpCategoryForm
 
                 Section::make('Systémové informace')
                     ->collapsed()
-                    ->schema([
+                    ->components([
                         TextInput::make('source_hash')
                             ->label(__('admin.navigation.resources.help_category.fields.source_hash'))
                             ->disabled()

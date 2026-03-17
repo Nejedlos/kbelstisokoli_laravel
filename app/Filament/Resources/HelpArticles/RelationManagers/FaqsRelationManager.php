@@ -2,10 +2,15 @@
 
 namespace App\Filament\Resources\HelpArticles\RelationManagers;
 
-use Filament\Forms\Components\Grid;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -19,7 +24,7 @@ class FaqsRelationManager extends RelationManager
         return $schema
             ->components([
                 Grid::make(2)
-                    ->schema([
+                    ->components([
                         TextInput::make('question.cs')
                             ->label(__('admin.navigation.resources.help_faq.fields.question_cs'))
                             ->required(),
@@ -28,7 +33,7 @@ class FaqsRelationManager extends RelationManager
                             ->required(),
                     ]),
                 Grid::make(2)
-                    ->schema([
+                    ->components([
                         Textarea::make('answer.cs')
                             ->label(__('admin.navigation.resources.help_faq.fields.answer_cs'))
                             ->required()
