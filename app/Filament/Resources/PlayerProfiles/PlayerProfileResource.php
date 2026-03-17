@@ -16,7 +16,7 @@ class PlayerProfileResource extends Resource
 {
     protected static ?string $model = PlayerProfile::class;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::PLAYER_PROFILES);
     }

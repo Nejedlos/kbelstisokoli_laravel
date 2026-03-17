@@ -11,10 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('financial_tariffs', function (Blueprint $table) {
-            $table->integer('prepaid_events_count')->nullable()->after('type');
-            $table->decimal('extra_event_amount', 10, 2)->nullable()->after('prepaid_events_count');
-        });
+        // 1. prepaid_events_count
+        try {
+            Schema::table('financial_tariffs', function (Blueprint $table) {
+                $table->integer('prepaid_events_count')->nullable()->after('type');
+            });
+        } catch (\Throwable $e) {
+            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        }
+
+        // 2. extra_event_amount
+        try {
+            Schema::table('financial_tariffs', function (Blueprint $table) {
+                $table->decimal('extra_event_amount', 10, 2)->nullable()->after('prepaid_events_count');
+            });
+        } catch (\Throwable $e) {
+            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        }
     }
 
     /**
@@ -23,7 +36,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('financial_tariffs', function (Blueprint $table) {
-            $table->dropColumn(['prepaid_events_count', 'extra_event_amount']);
+            try {
+                $table->dropColumn(['prepaid_events_count', 'extra_event_amount']);
+            } catch (\Throwable $e) {
+                if (!str_contains($e->getMessage(), '1091')) throw $e;
+            }
         });
     }
 };

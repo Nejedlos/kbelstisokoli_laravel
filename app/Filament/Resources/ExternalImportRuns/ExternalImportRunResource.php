@@ -41,7 +41,7 @@ class ExternalImportRunResource extends Resource
         return 'Běh importu';
     }
 
-    public static function getNavigationIcon(): string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return FilamentIcon::get(AppIcon::CRON_LOGS);
     }

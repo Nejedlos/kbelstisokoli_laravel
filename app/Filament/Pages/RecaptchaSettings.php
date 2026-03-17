@@ -28,7 +28,7 @@ class RecaptchaSettings extends Page implements HasForms
         return __('admin/recaptcha-settings.navigation');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::RECAPTCHA);
     }

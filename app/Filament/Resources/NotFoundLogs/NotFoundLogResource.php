@@ -24,7 +24,7 @@ class NotFoundLogResource extends Resource
         return __('admin.navigation.resources.not_found_log.plural_label');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::NOT_FOUND);
     }

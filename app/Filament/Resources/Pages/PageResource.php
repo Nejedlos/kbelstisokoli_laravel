@@ -21,7 +21,7 @@ class PageResource extends Resource
         return __('admin.navigation.groups.web_settings');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::PAGES);
     }

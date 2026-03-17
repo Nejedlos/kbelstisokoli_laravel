@@ -29,7 +29,7 @@ class SeasonRenewal extends Page implements HasForms
     use InteractsWithFormActions;
     use InteractsWithForms;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return 'fal-arrows-rotate';
     }

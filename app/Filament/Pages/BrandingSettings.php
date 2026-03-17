@@ -26,7 +26,7 @@ class BrandingSettings extends Page implements HasForms
         return __('admin.navigation.pages.branding');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::BRANDING);
     }

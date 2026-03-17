@@ -34,7 +34,7 @@ class TeamResource extends Resource
         return __('admin.navigation.resources.team.plural_label');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::TEAMS);
     }

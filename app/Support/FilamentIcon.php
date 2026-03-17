@@ -19,7 +19,7 @@ class FilamentIcon
      * @param  string  $style  Požadovaný styl (fal, fas, far, fab, fad, fat)
      * @param  string  $fallback  Bezpečná ikona pro případ chyby
      */
-    public static function get(string|AppIcon $icon, string $style = 'fal', string $fallback = 'heroicon-o-question-mark-circle'): string
+    public static function get(string|AppIcon $icon, string $style = 'fal', string $fallback = 'heroicon-o-question-mark-circle'): string|HtmlString
     {
         // 0. V testech vracíme bezpečný placeholder, abychom se vyhnuli SvgNotFound
         // během bootování aplikací v testovacím prostředí.
@@ -47,41 +47,18 @@ class FilamentIcon
         if (\Illuminate\Support\Str::contains($iconName, ['-'])) {
             $parts = explode('-', $iconName);
             $prefix = $parts[0];
-            if (in_array($prefix, ['heroicon', 'fas', 'far', 'fab', 'fal', 'fad', 'fat', 'app'])) {
+            if ($prefix === 'heroicon') {
                 return $iconName;
             }
+            if (in_array($prefix, ['fas', 'far', 'fab', 'fal', 'fad', 'fat', 'app'])) {
+                $realIconName = implode('-', array_slice($parts, 1));
+
+                return self::render($realIconName, $prefix);
+            }
         }
 
-        // 3. Validace stylu a Pro fallback
-        $finalStyle = self::resolveStyle($style);
-
-        // 4. Sestavení výsledného názvu pro Blade Icons
-        $fullIconName = "{$finalStyle}-{$iconName}";
-
-        // 5. Pokusíme se ověřit, zda ikona existuje v Blade Icons Factory,
-        // aby nedošlo k SvgNotFound Exception v postranním panelu.
-        // Pouze pokud už je aplikace nabootovaná a Factory dostupná.
-        // Vyhýbáme se volání app() během raného LoadConfiguration bootstrapu (Target class [env] not found).
-        try {
-            // Použijeme static pro kontrolu, abychom se vyhnuli opakovaným kontrolám v configu
-            static $isBootstrapping = null;
-            if ($isBootstrapping === null) {
-                // Pokud nemůžeme získat instanci Containeru bez vyvolání chyby, jsme v bootstrapu
-                $isBootstrapping = ! \Illuminate\Container\Container::getInstance()->bound('env');
-            }
-
-            if (!$isBootstrapping) {
-                $app = \Illuminate\Container\Container::getInstance();
-                if ($app instanceof \Illuminate\Contracts\Foundation\Application && $app->isBooted() && $app->bound(\BladeUI\Icons\Factory::class)) {
-                    // Rychlý test existence v cache/setech
-                    $app->make(\BladeUI\Icons\Factory::class)->svg($fullIconName);
-                }
-            }
-        } catch (\Throwable $e) {
-            // Tichý fail - pokud nemůžeme ověřit existenci, vrátíme sestavený název a spolehneme se na runtime
-        }
-
-        return $fullIconName;
+        // 3. Pro Filament v tomto projektu preferujeme Webfont/HtmlString dle guidelines
+        return self::render($icon, $style);
     }
 
     /**
@@ -118,7 +95,7 @@ class FilamentIcon
     /**
      * Bezpečné získání ikony. Pokud nastane chyba, vrátí fallback.
      */
-    public static function safe(string|AppIcon $icon, string $fallback = 'heroicon-o-question-mark-circle'): string
+    public static function safe(string|AppIcon $icon, string $fallback = 'heroicon-o-question-mark-circle'): string|HtmlString
     {
         try {
             return self::get($icon);
@@ -151,17 +128,17 @@ class FilamentIcon
 
     // --- Aliasy pro pohodlí ---
 
-    public static function solid(string|AppIcon $icon): string
+    public static function solid(string|AppIcon $icon): string|HtmlString
     {
         return self::get($icon, 'fas');
     }
 
-    public static function regular(string|AppIcon $icon): string
+    public static function regular(string|AppIcon $icon): string|HtmlString
     {
         return self::get($icon, 'far');
     }
 
-    public static function light(string|AppIcon $icon): string
+    public static function light(string|AppIcon $icon): string|HtmlString
     {
         return self::get($icon, 'fal');
     }

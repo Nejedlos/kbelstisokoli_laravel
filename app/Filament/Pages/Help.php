@@ -163,7 +163,7 @@ class Help extends Page
         ];
     }
 
-    public static function getNavigationIcon(): string|HtmlString|null
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return new HtmlString('
             <div class="relative inline-flex items-center justify-center">

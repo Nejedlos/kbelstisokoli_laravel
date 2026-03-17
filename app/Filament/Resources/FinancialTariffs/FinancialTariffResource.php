@@ -29,7 +29,7 @@ class FinancialTariffResource extends Resource
         return 'Finanční tarify';
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::BANKNOTES);
     }

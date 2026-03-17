@@ -39,7 +39,7 @@ class ExternalEntityMappingResource extends Resource
         return 'Párování hráče';
     }
 
-    public static function getNavigationIcon(): string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return FilamentIcon::get(AppIcon::USER_SECRET);
     }

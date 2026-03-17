@@ -34,7 +34,7 @@ class AiSettings extends Page implements HasForms
         return auth()->user()->can('manage_ai_settings');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::AI);
     }

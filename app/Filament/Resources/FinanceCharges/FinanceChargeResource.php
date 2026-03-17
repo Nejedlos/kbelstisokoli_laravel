@@ -16,7 +16,7 @@ class FinanceChargeResource extends Resource
 {
     protected static ?string $model = FinanceCharge::class;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::FINANCE_CHARGES);
     }

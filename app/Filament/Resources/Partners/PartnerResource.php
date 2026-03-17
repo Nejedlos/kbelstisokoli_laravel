@@ -17,7 +17,7 @@ class PartnerResource extends Resource
 {
     protected static ?string $model = Partner::class;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return IconHelper::get(IconHelper::PARTNERS);
     }

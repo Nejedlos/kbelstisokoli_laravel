@@ -29,7 +29,7 @@ class UserSeasonConfigResource extends Resource
         return 'Sezónní konfigurace uživatelů';
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::USER_GEAR);
     }

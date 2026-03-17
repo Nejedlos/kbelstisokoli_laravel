@@ -21,7 +21,7 @@ class CronTaskResource extends Resource
         return __('admin.navigation.resources.cron_task.plural_label');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::CRON_TASKS);
     }

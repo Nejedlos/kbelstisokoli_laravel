@@ -17,7 +17,7 @@ class FeedbackReportResource extends Resource
 {
     protected static ?string $model = FeedbackReport::class;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return FilamentIcon::get(AppIcon::BUG);
     }

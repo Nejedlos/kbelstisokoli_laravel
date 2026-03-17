@@ -17,7 +17,7 @@ class PerformanceTestResultResource extends Resource
 {
     protected static ?string $model = PerformanceTestResult::class;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return IconHelper::get(\App\Support\Icons\AppIcon::GAUGE);
     }

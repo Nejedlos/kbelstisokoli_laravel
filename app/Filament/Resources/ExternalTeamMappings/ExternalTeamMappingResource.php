@@ -38,7 +38,7 @@ class ExternalTeamMappingResource extends Resource
         return 'Mapování týmu';
     }
 
-    public static function getNavigationIcon(): string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return FilamentIcon::get(AppIcon::TABLE);
     }

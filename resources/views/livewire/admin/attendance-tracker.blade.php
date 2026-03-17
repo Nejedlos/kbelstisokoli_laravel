@@ -48,6 +48,21 @@
         </div>
     </div>
 
+    @if(count($this->attendances) > 0)
+        <div class="flex items-center justify-center -my-2 relative z-10">
+            <div class="bg-primary-600 dark:bg-primary-500 px-6 py-2 rounded-full shadow-lg shadow-primary-500/40 flex items-center gap-4 border-2 border-white dark:border-gray-900 transform transition-transform hover:scale-105">
+                <div class="text-sm font-black text-white uppercase tracking-tighter flex items-center gap-1">
+                    <span>Zadáno</span>
+                    <span class="text-xl px-2 py-0.5 bg-white/20 rounded-lg leading-none">{{ count($this->attendances) }}</span>
+                    <span>{{ count($this->attendances) === 1 ? 'hráč' : (count($this->attendances) < 5 ? 'hráči' : 'hráčů') }}</span>
+                </div>
+                <div class="hidden sm:block">
+                    <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         @forelse($this->attendances as $attendance)
             <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 shadow-sm flex items-center justify-between group animate-in fade-in zoom-in duration-300">

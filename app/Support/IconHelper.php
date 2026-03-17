@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Support\Icons\AppIcon;
+use Illuminate\Support\HtmlString;
 
 /**
  * Centrální správa ikon pro Filament administraci.
@@ -216,7 +217,7 @@ class IconHelper
      * @param  string|AppIcon  $icon  Klíč ikony
      * @param  string  $style  Styl ikony
      */
-    public static function get(string|AppIcon $icon, string $style = 'fal'): string
+    public static function get(string|AppIcon $icon, string $style = 'fal'): string|HtmlString
     {
         return FilamentIcon::get($icon, $style);
     }
@@ -235,7 +236,7 @@ class IconHelper
     /**
      * Bezpečné získání ikony s garantovaným fallbackem na otazník.
      */
-    public static function safe(string|AppIcon $icon, string $fallback = 'heroicon-o-question-mark-circle'): string
+    public static function safe(string|AppIcon $icon, string $fallback = 'heroicon-o-question-mark-circle'): string|HtmlString
     {
         return FilamentIcon::safe($icon, $fallback);
     }
@@ -243,7 +244,7 @@ class IconHelper
     /**
      * Alias pro get() se stylem Solid (fas).
      */
-    public static function solid(string|AppIcon $icon): string
+    public static function solid(string|AppIcon $icon): string|HtmlString
     {
         return FilamentIcon::solid($icon);
     }
@@ -251,7 +252,7 @@ class IconHelper
     /**
      * Alias pro get() se stylem Regular (far).
      */
-    public static function regular(string|AppIcon $icon): string
+    public static function regular(string|AppIcon $icon): string|HtmlString
     {
         return FilamentIcon::regular($icon);
     }
@@ -259,7 +260,7 @@ class IconHelper
     /**
      * Alias pro get() se stylem Light (fal).
      */
-    public static function light(string|AppIcon $icon): string
+    public static function light(string|AppIcon $icon): string|HtmlString
     {
         return FilamentIcon::light($icon);
     }

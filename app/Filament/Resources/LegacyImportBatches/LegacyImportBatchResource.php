@@ -30,7 +30,7 @@ class LegacyImportBatchResource extends Resource
         return 'Historický import';
     }
 
-    public static function getNavigationIcon(): string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return FilamentIcon::get(AppIcon::UPLOAD);
     }

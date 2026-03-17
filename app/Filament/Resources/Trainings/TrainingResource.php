@@ -32,7 +32,7 @@ class TrainingResource extends Resource
         return __('admin.navigation.resources.training.plural_label');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::TRAININGS);
     }

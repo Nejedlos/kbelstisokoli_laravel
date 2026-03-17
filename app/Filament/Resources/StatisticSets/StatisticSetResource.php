@@ -16,7 +16,7 @@ class StatisticSetResource extends Resource
 {
     protected static ?string $model = StatisticSet::class;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::STAT_SETS);
     }

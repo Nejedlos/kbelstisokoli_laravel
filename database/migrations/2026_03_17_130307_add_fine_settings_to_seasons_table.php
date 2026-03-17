@@ -11,13 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('seasons', function (Blueprint $table) {
-            $table->decimal('fine_no_response', 12, 2)->default(0)->after('is_active');
-            $table->decimal('fine_no_show', 12, 2)->default(0)->after('fine_no_response');
-            $table->decimal('fine_unannounced_show', 12, 2)->default(0)->after('fine_no_show');
-            $table->decimal('fine_excused_show', 12, 2)->default(0)->after('fine_unannounced_show');
-            $table->decimal('fine_missed_free_throw', 12, 2)->default(0)->after('fine_excused_show');
-        });
+        $columns = [
+            ['fine_no_response', 12, 2, 'is_active'],
+            ['fine_no_show', 12, 2, 'fine_no_response'],
+            ['fine_unannounced_show', 12, 2, 'fine_no_show'],
+            ['fine_excused_show', 12, 2, 'fine_unannounced_show'],
+            ['fine_missed_free_throw', 12, 2, 'fine_excused_show'],
+        ];
+
+        foreach ($columns as $column) {
+            try {
+                Schema::table('seasons', function (Blueprint $table) use ($column) {
+                    $table->decimal($column[0], $column[1], $column[2])->default(0)->after($column[3]);
+                });
+            } catch (\Throwable $e) {
+                if (!str_contains($e->getMessage(), '1060')) throw $e;
+            }
+        }
     }
 
     /**
@@ -26,13 +36,17 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('seasons', function (Blueprint $table) {
-            $table->dropColumn([
-                'fine_no_response',
-                'fine_no_show',
-                'fine_unannounced_show',
-                'fine_excused_show',
-                'fine_missed_free_throw',
-            ]);
+            try {
+                $table->dropColumn([
+                    'fine_no_response',
+                    'fine_no_show',
+                    'fine_unannounced_show',
+                    'fine_excused_show',
+                    'fine_missed_free_throw',
+                ]);
+            } catch (\Throwable $e) {
+                if (!str_contains($e->getMessage(), '1091')) throw $e;
+            }
         });
     }
 };

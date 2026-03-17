@@ -21,7 +21,7 @@ class PostResource extends Resource
         return __('admin.navigation.groups.content_and_media');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::POSTS);
     }

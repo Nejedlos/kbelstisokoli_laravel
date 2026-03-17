@@ -20,7 +20,7 @@ class AuditLogResource extends Resource
         return __('admin.navigation.resources.audit_log.plural_label');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\IconHelper::AUDIT_LOGS);
     }

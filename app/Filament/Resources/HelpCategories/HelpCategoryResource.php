@@ -23,7 +23,7 @@ class HelpCategoryResource extends Resource
         return __('admin.navigation.groups.system');
     }
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return \App\Support\IconHelper::get(\App\Support\Icons\AppIcon::HELP);
     }

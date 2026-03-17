@@ -33,6 +33,7 @@ class AttendanceTracker extends Component
             ->where('attendable_type', $this->attendableType)
             ->where('actual_status', 'attended')
             ->with('user')
+            ->latest('responded_at')
             ->get();
     }
 

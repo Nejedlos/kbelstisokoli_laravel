@@ -55,7 +55,7 @@ class Documentation extends Page
         return app(DocumentationService::class)->search($this->searchQuery);
     }
 
-    public static function getNavigationIcon(): string|HtmlString|null
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return FilamentIcon::render(AppIcon::DOCUMENTATION);
     }
