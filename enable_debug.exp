@@ -1,9 +1,0 @@
-set timeout 60
-spawn ssh -p 20001 -o StrictHostKeyChecking=no ssh-588875@dw191.webglobe.com "sed -i 's/APP_DEBUG=\"false\"/APP_DEBUG=\"true\"/' /home/html/kbelstisokoli.cz/public_html/secret/.env"
-expect {
-    "password:" {
-        send "oaFZeUjI\r"
-        exp_continue
-    }
-    eof
-}

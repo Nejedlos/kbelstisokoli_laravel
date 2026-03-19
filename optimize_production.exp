@@ -1,0 +1,26 @@
+set timeout 600
+set php "/usr/bin/php8.4"
+set base_dir "/home/html/kbelstisokoli.cz/public_html/secret"
+set artisan "$php $base_dir/artisan"
+
+spawn ssh -p 20001 -o StrictHostKeyChecking=no ssh-588875@dw191.webglobe.com "
+sed -i 's/APP_DEBUG=\"true\"/APP_DEBUG=\"false\"/' $base_dir/.env &&
+$php /usr/bin/composer install --optimize-autoloader --no-dev --working-dir=$base_dir &&
+$artisan config:cache &&
+$artisan route:cache &&
+$artisan view:cache &&
+$artisan icons:cache &&
+$artisan filament:cache-components
+"
+
+expect {
+    "password:" {
+        send "oaFZeUjI\r"
+        exp_continue
+    }
+    "word:" {
+        send "oaFZeUjI\r"
+        exp_continue
+    }
+    eof
+}

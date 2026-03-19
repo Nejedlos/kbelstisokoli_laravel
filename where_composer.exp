@@ -1,9 +1,0 @@
-set timeout 60
-spawn ssh -p 20001 -o StrictHostKeyChecking=no ssh-588875@dw191.webglobe.com "which composer"
-expect {
-    "password:" {
-        send "oaFZeUjI\r"
-        exp_continue
-    }
-    eof
-}

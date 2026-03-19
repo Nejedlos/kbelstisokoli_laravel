@@ -113,15 +113,15 @@
     '
     echo "✅ .env updated."
 
-    if ! grep -q "APP_KEY=base64" .env; then
-        echo "Generating APP_KEY..."
-        {{ $php }} artisan key:generate --no-interaction
-    fi
-
     echo "Running composer install..."
     COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
     rm -f bootstrap/cache/*.php
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+    if ! grep -q "APP_KEY=base64" .env; then
+        echo "Generating APP_KEY..."
+        {{ $php }} artisan key:generate --no-interaction
+    fi
 
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
         echo "Ensuring custom public path is configured: {{ $public_path }}"
@@ -288,13 +288,14 @@
     mkdir -p storage/logs
     chmod -R 777 storage bootstrap/cache || true
 
-    echo "Cleaning up cache..."
+    echo "Running composer install..."
+    COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
     rm -f bootstrap/cache/*.php
+    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+    echo "Cleaning up cache..."
     {{ $php }} artisan config:clear
     {{ $php }} artisan cache:clear
-
-    COMPOSER_BIN=$(which composer 2>/dev/null || echo "composer")
-    {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
     echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
