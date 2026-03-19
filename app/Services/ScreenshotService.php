@@ -13,22 +13,28 @@ class ScreenshotService
 {
     /**
      * Generate screenshot via Playwright from provided DOM snippet using a secure snapshot route.
-     * Returns array: [ 'data_url' => string, 'width' => int, 'height' => int, 'mime' => 'image/png' ]
+     * Returns array: [ 'data_url' => string, 'width' => int, 'height' => int, 'mime' => 'image/png', 'path' => string ]
      */
     public function captureViaPlaywrightFromDom(string $dom, array $options = []): array
     {
+        $logContext = ['id' => Str::random(8)];
+        Log::info('[ScreenshotService] Starting server-side capture', $logContext);
+
         if (!config('feedback.screenshot.playwright.enabled', true)) {
+            Log::warning('[ScreenshotService] Playwright is disabled in config', $logContext);
             throw new \RuntimeException('Playwright disabled by config');
         }
 
         $ttl = $options['ttl'] ?? 120; // seconds
         $selector = $options['selector'] ?? '#snapshot-root';
-        $viewport = $options['viewport'] ?? ['width' => 1728, 'height' => 919];
+        $viewport = $options['viewport'] ?? config('feedback.screenshot.playwright.viewports.desktop', ['width' => 1728, 'height' => 919]);
         $dpr = $options['dpr'] ?? 2;
         $fullPage = (bool)($options['fullPage'] ?? false);
 
         // 1) Create one-time token and cache DOM
         $token = Str::random(40);
+        Log::debug('[ScreenshotService] Generating snapshot token', array_merge($logContext, ['token' => substr($token, 0, 8) . '...']));
+
         Cache::put("fb_snap_{$token}", [
             'dom' => $dom,
             'context' => $options['context'] ?? [],
@@ -36,6 +42,7 @@ class ScreenshotService
 
         // 2) Build URL to snapshot route
         $url = URL::to(route('feedback.snapshot', ['token' => $token], false));
+        Log::debug('[ScreenshotService] Snapshot URL prepared', array_merge($logContext, ['url' => $url]));
 
         // 3) Prepare output file path
         $tempRelativeDir = trim(config('feedback.screenshot.playwright.temp_path', 'storage/app/temp/screenshots'), '/');
@@ -82,16 +89,42 @@ class ScreenshotService
             $fullPage ? '--fullPage=true' : '--fullPage=false',
         ];
 
+        if ($chromiumPath = config('feedback.screenshot.playwright.chromium_path')) {
+            $args[] = '--executablePath=' . $chromiumPath;
+        }
+
         $timeoutSec = max(1, (int) ceil($timeoutMs / 1000));
 
         $nodePath = base_path('node_modules');
-        if (getenv('NODE_PATH')) {
-            $nodePath .= PATH_SEPARATOR . getenv('NODE_PATH');
+        if ($envNodePath = getenv('NODE_PATH')) {
+            $nodePath .= PATH_SEPARATOR . $envNodePath;
         }
+
+        $extraPaths = [
+            base_path('node_modules/.bin'),
+            base_path('vendor/bin'),
+        ];
 
         $env = [
             'NODE_PATH' => $nodePath,
+            'PATH' => implode(PATH_SEPARATOR, array_filter([
+                getenv('PATH'),
+                '/usr/local/bin',
+                '/usr/bin',
+                '/bin',
+                ...$extraPaths
+            ])),
         ];
+
+        if (PHP_OS_FAMILY !== 'Darwin' && !getenv('PLAYWRIGHT_BROWSERS_PATH')) {
+            $env['HOME'] = base_path('storage/app');
+        }
+
+        if ($browsersPath = config('feedback.screenshot.playwright.browsers_path')) {
+            $env['PLAYWRIGHT_BROWSERS_PATH'] = $browsersPath;
+        }
+
+        Log::info('[ScreenshotService] Launching Playwright worker', array_merge($logContext, ['timeout' => $timeoutSec]));
 
         $proc = new Process($args, base_path(), $env);
         $proc->setTimeout($timeoutSec);
@@ -99,10 +132,10 @@ class ScreenshotService
 
         if (!$proc->isSuccessful()) {
             $stderr = $proc->getErrorOutput();
-            Log::warning('Playwright screenshot failed', [
+            Log::error('[ScreenshotService] Playwright worker failed', array_merge($logContext, [
                 'stderr' => $stderr,
-                'args' => $args,
-            ]);
+                'exitCode' => $proc->getExitCode(),
+            ]));
             throw new \RuntimeException('Playwright worker failed: ' . trim($stderr));
         }
 
@@ -111,26 +144,29 @@ class ScreenshotService
         try {
             $json = json_decode($stdout, true, 512, JSON_THROW_ON_ERROR);
         } catch (\Throwable $e) {
-            // ignore, we can still read file directly
+            Log::debug('[ScreenshotService] Could not parse worker stdout as JSON', array_merge($logContext, ['stdout' => $stdout]));
         }
 
         if (!file_exists($outAbs)) {
+            Log::error('[ScreenshotService] Output file not found after successful process', $logContext);
             throw new \RuntimeException('Playwright did not produce output file.');
         }
 
         $image = file_get_contents($outAbs);
         $dataUrl = 'data:image/png;base64,' . base64_encode($image);
 
-        // Cleanup could be deferred; we keep file for debugging for now
-        $meta = [
+        Log::info('[ScreenshotService] Screenshot captured successfully', array_merge($logContext, [
+            'size' => strlen($image),
+            'dimensions' => ($json['width'] ?? '?') . 'x' . ($json['height'] ?? '?'),
+        ]));
+
+        return [
             'data_url' => $dataUrl,
             'mime' => 'image/png',
             'width' => $json['width'] ?? null,
             'height' => $json['height'] ?? null,
             'path' => $outAbs,
         ];
-
-        return $meta;
     }
 
     protected function canExecute(string $command): bool

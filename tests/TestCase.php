@@ -13,6 +13,20 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
+        // Totální pojistka: Pokud jsme v testech a náhodou by se mělo běžet na MySQL, tak TESTY ZASTAVÍME.
+        // RefreshDatabase trait v Laravelu by jinak mohl vymazat reálná data.
+        // Kontrolujeme superglobální pole, abychom se vyhnuli BindingResolutionException před bootem.
+        $dbConn = $_ENV['DB_CONNECTION'] ?? $_SERVER['DB_CONNECTION'] ?? 'unknown';
+        $appEnv = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? 'unknown';
+
+        if ($dbConn === 'mysql' || $appEnv !== 'testing') {
+             die("\e[31mFATAL ERROR: Testy se pokouší běžet v nevhodném prostředí! \n" .
+                 "DB_CONNECTION: " . $dbConn . "\n" .
+                 "APP_ENV: " . $appEnv . "\n" .
+                 "Pro ochranu vaší databáze ukončuji proces. \n" .
+                 "Ujistěte se, že spouštíte testy s --env=testing a máte správně nastaven phpunit.xml.\e[0m\n");
+        }
+
         parent::setUp();
         $this->seed(\Database\Seeders\PermissionSeeder::class);
         $this->seed(RoleSeeder::class);

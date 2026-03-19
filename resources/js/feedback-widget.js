@@ -1,4 +1,5 @@
 import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 
 /**
  * RING BUFFER
@@ -26,13 +27,307 @@ class RingBuffer {
  * KBELSTÍ SOKOLI - FEEDBACK WIDGET
  */
 function registerKsFeedbackWidget() {
-    if (!window.Alpine) return;
-    if (window.Alpine.data('ksFeedbackWidget')) return;
+    if (!window.Alpine) {
+        console.debug('[FB] Alpine not ready yet for registration');
+        return;
+    }
 
-    window.ksFeedbackWidgetRegistered = true;
+    if (window.ksFeedbackWidgetRegistered) {
+        console.debug('[FB] ksFeedbackWidget already registered.');
+        return;
+    }
+
+    console.log('[FB] Registering Alpine component...');
+    const ScreenshotService = {
+        logs: [],
+        addLog(msg) { this.logs.push(`[${new Date().toISOString().split('T')[1].split('.')[0]}] ${msg}`); },
+
+        async capture(options = {}) {
+            const startTs = performance.now();
+            this.logs = [];
+            this.addLog(`[JS] Capture start | strategy = ${options.strategy || 'auto'}`);
+
+            const config = window.KS_FEEDBACK_CONFIG || { strategy: 'playwright', playwright: { enabled: false }, endpoints: {} };
+            const strategy = options.strategy || config.strategy || 'playwright';
+            const targetSelector = options.targetSelector || 'body';
+
+            let result = { ok: false, durationMs: 0, strategy: 'none', logs: this.logs };
+
+            try {
+                // 1. Try Server Screenshot (Playwright) - Main Strategy
+                if (strategy === 'playwright' || strategy === 'server' || strategy === 'auto') {
+                    if (config.endpoints?.serverScreenshot) {
+                        this.addLog('[JS] Attempting server-side screenshot (Playwright)');
+                        const serverRes = await this.tryServer(config.endpoints.serverScreenshot);
+                        if (serverRes.ok) {
+                            this.addLog('[JS] Server screenshot success');
+                            result = { ...serverRes, strategy: 'server' };
+                        } else {
+                            this.addLog(`[JS] Server screenshot failed: ${serverRes.error?.message || 'unknown'}`);
+                        }
+                    } else {
+                        this.addLog('[JS] Server screenshot skipped (no endpoint)');
+                    }
+                }
+
+                // 2. Fallback to client-side only if server failed and allowed
+                if (!result.ok && (strategy === 'auto' || strategy === 'client')) {
+                    this.addLog('[JS] Attempting client-side fallback (html-to-image)');
+                    const htiRes = await this.tryHtmlToImage(targetSelector);
+                    if (htiRes.ok) {
+                        this.addLog('[JS] Client fallback success');
+                        result = { ...htiRes, strategy: 'client-html-to-image' };
+                    } else {
+                        this.addLog(`[JS] Client fallback failed: ${htiRes.error?.message || 'unknown'}`);
+                    }
+                }
+
+            } catch (e) {
+                this.addLog(`[JS] Fatal capture error: ${e.message}`);
+                result.error = { code: 'FATAL', message: e.message };
+            } finally {
+                result.durationMs = Math.round(performance.now() - startTs);
+                result.logs = this.logs;
+            }
+
+            return result;
+        },
+
+        async tryServer(endpoint) {
+            try {
+                // Server supports modern CSS, no need to sanitize!
+                const snap = this.buildDomSnapshot(false);
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        dom: snap.dom,
+                        head: snap.head,
+                        bodyClass: snap.bodyClass,
+                        bodyStyle: snap.bodyStyle,
+                        htmlClass: snap.htmlClass,
+                        viewport: { width: window.innerWidth, height: window.innerHeight },
+                        dpr: Math.min(window.devicePixelRatio || 1, 2),
+                        fullPage: false,
+                    })
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    return { ok: false, error: { code: errorData.code || 'HTTP_' + res.status, message: errorData.message || res.statusText } };
+                }
+
+                const out = await res.json();
+                if (out.ok && out.image) {
+                    return { ok: true, base64: out.image, width: out.width, height: out.height, mime: out.mime || 'image/png' };
+                }
+                return { ok: false, error: { code: out.code || 'SERVER_ERROR', message: out.message || 'Worker failed' } };
+            } catch (e) {
+                return { ok: false, error: { code: 'EXCEPTION', message: e.message } };
+            }
+        },
+
+        isSameOrigin(href) {
+            if (!href) return true;
+            try {
+                const url = new URL(href, window.location.origin);
+                return url.origin === window.location.origin;
+            } catch (e) {
+                return href.startsWith('/') || href.startsWith('./') || href.startsWith('../');
+            }
+        },
+
+        buildDomSnapshot(shouldSanitize = true) {
+            // Zachytit relevantní CSS
+            let consolidatedCss = '';
+            const styleSheets = Array.from(document.styleSheets);
+
+            for (let sheet of styleSheets) {
+                try {
+                    if (sheet.href && !this.isSameOrigin(sheet.href)) {
+                        continue;
+                    }
+
+                    const rules = sheet.cssRules || sheet.rules;
+                    if (!rules) continue;
+
+                    let sheetCss = '';
+                    for (let j = 0; j < rules.length; j++) {
+                        try {
+                            sheetCss += rules[j].cssText + '\n';
+                        } catch (re) {}
+                    }
+
+                    // Clean modern colors from CSS only if required
+                    consolidatedCss += shouldSanitize ? this.sanitizeCssString(sheetCss) : sheetCss;
+                } catch (e) {}
+            }
+
+            // Cache for potential reuse in fallback
+            this._lastConsolidatedCss = consolidatedCss;
+
+            const headHtml = `<style class="ks-feedback-consolidated-css">${consolidatedCss}</style>`;
+
+            // Zachytit body klon
+            const bodyClone = document.body.cloneNode(true);
+            const toRemove = bodyClone.querySelectorAll('script, #ks-fb-root, .ks-fb-overlay, .ks-fab-trigger');
+            toRemove.forEach(el => el.remove());
+
+            if (shouldSanitize) {
+                this.sanitizeElementRecursively(bodyClone);
+            }
+
+            let html = bodyClone.innerHTML;
+            html = html.replace(/value="[^"]*"/gi, 'value="[redacted]"');
+
+            return {
+                dom: html.substring(0, 1048576), // 1MB limit
+                head: headHtml,
+                bodyClass: document.body.className,
+                bodyStyle: document.body.style.cssText,
+                htmlClass: document.documentElement.className,
+            };
+        },
+
+        async tryHtml2Canvas(selector) {
+            const h2c = window.html2canvas || (typeof html2canvas !== 'undefined' ? html2canvas : null);
+            if (!h2c) return { ok: false, error: { code: 'LIBRARY_MISSING', message: 'html2canvas not loaded' } };
+
+            try {
+                // For html2canvas we ALWAYS need a clean DOM
+                const snap = this.buildDomSnapshot(true);
+                const target = document.querySelector(selector) || document.body;
+                const canvas = await h2c(target, {
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    scale: Math.min(window.devicePixelRatio || 1, 2),
+                    ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
+                    onclone: (clonedDoc) => {
+                        this.sanitizeClonedDocument(clonedDoc);
+                    },
+                });
+                return { ok: true, base64: canvas.toDataURL('image/jpeg', 0.8), mime: 'image/jpeg', width: canvas.width, height: canvas.height };
+            } catch (e) {
+                return { ok: false, error: { code: 'H2C_ERROR', message: e.message } };
+            }
+        },
+
+        async tryHtmlToImage(selector) {
+            if (!htmlToImage) return { ok: false, error: { code: 'LIBRARY_MISSING', message: 'html-to-image not loaded' } };
+
+            try {
+                const target = document.querySelector(selector) || document.body;
+
+                // html-to-image takes options to filter elements
+                const options = {
+                    filter: (node) => {
+                        if (node.dataset && node.dataset.html2canvasIgnore === 'true') return false;
+                        if (node.classList && node.classList.contains('ks-fb-root')) return false; // self protection
+                        return true;
+                    },
+                    pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+                    backgroundColor: window.getComputedStyle(document.body).backgroundColor || '#ffffff',
+                };
+
+                // html-to-image uses SVG foreignObject which is usually better with modern CSS,
+                // but we still sanitize just in case.
+                const dataUrl = await htmlToImage.toJpeg(target, options);
+                return { ok: true, base64: dataUrl, mime: 'image/jpeg' };
+            } catch (e) {
+                return { ok: false, error: { code: 'HTI_ERROR', message: e.message } };
+            }
+        },
+
+        sanitizeCssString(css) {
+            if (!css) return '';
+            // Náhrada pro oklab/oklch/color-p3 za neutrální šedou, aby se předešlo pádu html2canvas
+            // ale zachoval se aspoň nějaký vizuální prvek.
+            return css.replace(/(oklab|oklch|color)\s*\((?:[^()]+|\([^()]*\))*\)/gi, 'rgb(120, 120, 120)');
+        },
+
+        sanitizeElementRecursively(rootEl) {
+            const all = rootEl.querySelectorAll('*');
+            all.forEach(el => {
+                // Inline styles
+                if (el.style) {
+                    const properties = ['color', 'backgroundColor', 'borderColor', 'outlineColor', 'stopColor', 'fill', 'stroke'];
+                    properties.forEach(prop => {
+                        try {
+                            const val = el.style[prop];
+                            if (val && /(oklab|oklch|color)/i.test(val)) {
+                                // Zkusíme se zeptat prohlížeče na computed barvu, pokud to jde
+                                el.style[prop] = 'rgb(120, 120, 120)';
+                            }
+                        } catch (e) {}
+                    });
+
+                    if (el.style.backgroundImage && /(oklab|oklch|color)/i.test(el.style.backgroundImage)) {
+                        el.style.backgroundImage = 'none'; // Background image s moderní barvou (gradient) raději pryč
+                    }
+                }
+
+                // Pokud má element inline style atribut, vyčistíme ho i jako string
+                if (el.hasAttribute && el.hasAttribute('style')) {
+                    const s = el.getAttribute('style');
+                    if (s && /(oklab|oklch|color)/i.test(s)) {
+                        el.setAttribute('style', this.sanitizeCssString(s));
+                    }
+                }
+
+                // SVG attributes
+                ['fill', 'stroke'].forEach(attr => {
+                    if (el.hasAttribute && el.hasAttribute(attr)) {
+                        const val = el.getAttribute(attr);
+                        if (val && /(oklab|oklch|color)/i.test(val)) {
+                            el.setAttribute(attr, 'rgb(120, 120, 120)');
+                        }
+                    }
+                });
+            });
+        },
+
+        sanitizeClonedDocument(clonedDoc) {
+            // 1. Keep important links (fonts, icons) but remove standard local styles
+            // that we have consolidated and cleaned.
+            Array.from(clonedDoc.querySelectorAll('link[rel="stylesheet"]')).forEach(el => {
+                const href = el.getAttribute('href');
+                if (href && (href.includes('fonts.googleapis') || href.includes('font-awesome'))) {
+                    // Keep
+                } else {
+                    el.remove();
+                }
+            });
+            Array.from(clonedDoc.querySelectorAll('style:not(.ks-feedback-consolidated-css)')).forEach(el => el.remove());
+
+            // 2. Inject cleaned consolidated CSS from last capture attempt
+            const consolidatedCss = this._lastConsolidatedCss || '';
+            const style = clonedDoc.createElement('style');
+            style.className = 'ks-feedback-consolidated-css';
+            style.textContent = consolidatedCss + '\n' + `
+                :root, * {
+                    --tw-gradient-from: #888 !important;
+                    --tw-gradient-to: #888 !important;
+                    --tw-gradient-stops: #888 !important;
+                    --tw-gradient-via: #888 !important;
+                    animation: none !important;
+                    transition: none !important;
+                }
+            `;
+            clonedDoc.head.appendChild(style);
+
+            // 3. Clean all elements (inline styles, SVGs)
+            this.sanitizeElementRecursively(clonedDoc.body);
+        }
+    };
+
     window.Alpine.data('ksFeedbackWidget', () => ({
         isOpen: false,
-        submitting: false,
+        submitState: 'idle', // idle, validating, closing_modal, capturing_screenshot, submitting_report, success, failed
         // Ring Buffery inicializované v init()
         logs: null,
         errors: null,
@@ -90,12 +385,15 @@ function registerKsFeedbackWidget() {
 
         openModal() {
             this.isOpen = true;
+            this.submitState = 'idle';
             document.body.style.overflow = 'hidden';
         },
 
-        closeModal() {
+        async closeModal() {
             this.isOpen = false;
             document.body.style.overflow = '';
+            // Počkat na dokončení Alpine.js transition (cca 200-300ms)
+            return new Promise(r => setTimeout(r, 350));
         },
 
         safeStringify(obj, maxLen = 800) {
@@ -359,314 +657,52 @@ function registerKsFeedbackWidget() {
 
         getDomSnapshot() {
             if (!this.options.dom) return null;
-            const main = document.querySelector('main') || document.body;
-            let html = main.outerHTML;
-
-            // Sanitize
-            html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-            // Mask inputs
-            html = html.replace(/value="[^"]*"/gi, 'value="[redacted]"');
-
-            return html.substring(0, 102400); // 100KB limit
-        },
-
-        async captureScreenshot() {
-            const widgetEl = document.getElementById('ks-fb-root');
-            const originalDisplay = widgetEl.style.display;
-            widgetEl.style.display = 'none';
-
-            const cfg = window.KS_FEEDBACK_CONFIG || { strategy: 'auto', playwright: { enabled: false }, endpoints: {} };
-            const strategy = cfg.strategy || 'auto';
-            const startTs = performance.now();
-            console.log('[FB] captureScreenshot start | strategy =', strategy);
-
-            const restore = () => { widgetEl.style.display = originalDisplay; };
-
-            const buildDomSnapshot = () => {
-                // Zachytit relevantní CSS
-                let consolidatedCss = '';
-                const styleSheets = Array.from(document.styleSheets);
-
-                for (let sheet of styleSheets) {
-                    try {
-                        const isSameOrigin = !sheet.href || sheet.href.includes(window.location.hostname) || sheet.href.startsWith('/') || sheet.href.includes('localhost');
-                        if (!isSameOrigin) continue;
-
-                        const rules = sheet.cssRules || sheet.rules;
-                        if (!rules) continue;
-
-                        let sheetCss = '';
-                        for (let j = 0; j < rules.length; j++) {
-                            sheetCss += rules[j].cssText + '\n';
-                        }
-
-                        // Clean oklab/oklch from this batch
-                        if (/(oklab|oklch)\s*\([^)]+\)/i.test(sheetCss)) {
-                            sheetCss = sheetCss.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
-                        }
-                        consolidatedCss += sheetCss;
-                    } catch (e) {
-                        // console.warn('[FB] Could not read stylesheet', sheet.href, e);
-                    }
-                }
-
-                const headHtml = `<style class="ks-feedback-consolidated-css">${consolidatedCss}</style>`;
-
-                // Zachytit kompletní body, ale bez skriptů
-                const bodyClone = document.body.cloneNode(true);
-
-                // Odstranit skripty, widget, overlay a další věci z klonu
-                const toRemove = bodyClone.querySelectorAll('script, #ks-fb-root, .ks-fb-overlay, .ks-fab-trigger');
-                toRemove.forEach(el => el.remove());
-
-                // Sanitize bodyClone inline styles (pro jistotu i pro server)
-                bodyClone.querySelectorAll('*').forEach(el => {
-                    if (el.hasAttribute && el.hasAttribute('style')) {
-                        const s = el.getAttribute('style');
-                        if (s && /(oklab|oklch)\s*\([^)]+\)/i.test(s)) {
-                            el.setAttribute('style', s.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent'));
-                        }
-                    }
-                    // SVG attributes
-                    if (el.hasAttribute && el.hasAttribute('fill') && /(oklab|oklch)/i.test(el.getAttribute('fill'))) {
-                        el.setAttribute('fill', 'transparent');
-                    }
-                    if (el.hasAttribute && el.hasAttribute('stroke') && /(oklab|oklch)/i.test(el.getAttribute('stroke'))) {
-                        el.setAttribute('stroke', 'transparent');
-                    }
-                    if (el.style && el.style.backgroundImage && /(oklab|oklch)\s*\([^)]+\)/i.test(el.style.backgroundImage)) {
-                        el.style.backgroundImage = 'none';
-                    }
-                });
-
-                let html = bodyClone.innerHTML;
-                html = html.replace(/value="[^"]*"/gi, 'value="[redacted]"');
-
-                return {
-                    dom: html.substring(0, 1048576), // Zvýšeno na 1MB
-                    head: headHtml,
-                    bodyClass: document.body.className,
-                    bodyStyle: document.body.style.cssText,
-                    htmlClass: document.documentElement.className,
-                };
-            };
-
-            const sanitizeClone = (clonedDoc) => {
-                try {
-                    // 1. Remove ALL external stylesheets to prevent html2canvas from trying to parse them
-                    const links = Array.from(clonedDoc.getElementsByTagName('link'));
-                    for (let link of links) {
-                        if (link.rel === 'stylesheet') link.remove();
-                    }
-
-                    // 1b. Consolidate and clean CSS from original document and inject it
-                    let consolidatedCss = '';
-                    try {
-                        const styleSheets = Array.from(document.styleSheets);
-                        for (let sheet of styleSheets) {
-                            try {
-                                const isSameOrigin = !sheet.href || sheet.href.includes(window.location.hostname) || sheet.href.startsWith('/') || sheet.href.includes('localhost');
-                                if (!isSameOrigin) continue;
-                                const rules = sheet.cssRules || sheet.rules;
-                                if (!rules) continue;
-                                for (let j = 0; j < rules.length; j++) {
-                                    consolidatedCss += rules[j].cssText + '\n';
-                                }
-                            } catch (e) {}
-                        }
-                        if (/(oklab|oklch)\s*\([^)]+\)/i.test(consolidatedCss)) {
-                            consolidatedCss = consolidatedCss.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
-                        }
-                        const consolidatedStyle = clonedDoc.createElement('style');
-                        consolidatedStyle.className = 'ks-fb-consolidated';
-                        consolidatedStyle.textContent = consolidatedCss;
-                        clonedDoc.head.appendChild(consolidatedStyle);
-                    } catch (e) {}
-
-                    // 2. Add global override for Tailwind v4 variables and known crashers
-                    const override = clonedDoc.createElement('style');
-                    override.innerHTML = `
-                        :root, * {
-                            --tw-ring-color: transparent !important;
-                            --tw-ring-offset-color: transparent !important;
-                            --tw-shadow-color: transparent !important;
-                            --tw-outline-color: transparent !important;
-                            --tw-bg-color: transparent !important;
-                            --tw-text-color: inherit !important;
-                            /* Reset common TW v4 variables that might still contain oklab even if we missed some */
-                            --tw-gradient-from: transparent !important;
-                            --tw-gradient-to: transparent !important;
-                            --tw-gradient-stops: transparent !important;
-                        }
-                        /* Disable animations/transitions */
-                        *, *::before, *::after {
-                            animation: none !important;
-                            transition: none !important;
-                        }
-                    `;
-                    clonedDoc.head.appendChild(override);
-
-                    // 3. Clean all style elements
-                    const styleElements = Array.from(clonedDoc.getElementsByTagName('style'));
-                    for (let style of styleElements) {
-                        if (style === override) continue;
-                        if (/(oklab|oklch)/i.test(style.innerHTML)) {
-                            // Replace function call with transparent, even if multi-line
-                            style.innerHTML = style.innerHTML.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
-                        }
-                    }
-
-                    // 4. Clean all inline styles
-                    const allElements = Array.from(clonedDoc.getElementsByTagName('*'));
-                    let cleanedInline = 0;
-                    for (let el of allElements) {
-                        if (el.hasAttribute && el.hasAttribute('style')) {
-                            const s = el.getAttribute('style');
-                            if (s && /(oklab|oklch)/i.test(s)) {
-                                el.setAttribute('style', s.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent'));
-                                cleanedInline++;
-                            }
-                        }
-                        // SVG attributes
-                        if (el.hasAttribute && el.hasAttribute('fill') && /(oklab|oklch)/i.test(el.getAttribute('fill'))) {
-                            el.setAttribute('fill', 'transparent');
-                        }
-                        if (el.hasAttribute && el.hasAttribute('stroke') && /(oklab|oklch)/i.test(el.getAttribute('stroke'))) {
-                            el.setAttribute('stroke', 'transparent');
-                        }
-                        // Also check for background-image with gradients that might contain oklab
-                        if (el.style && el.style.backgroundImage && /(oklab|oklch)/i.test(el.style.backgroundImage)) {
-                            el.style.backgroundImage = 'none';
-                        }
-                    }
-
-                    // 5. Aggressively clean accessible stylesheets (rules) rekurzivně
-                    let cleanedRules = 0;
-                    const colorRegexTest = /(oklab|oklch)\s*\([^)]+\)/i;
-                    const cleanRule = (rule) => {
-                        try {
-                            if (rule.style) {
-                                let changed = false;
-                                if (colorRegexTest.test(rule.style.cssText)) {
-                                    for (let k = 0; k < rule.style.length; k++) {
-                                        const prop = rule.style[k];
-                                        const val = rule.style.getPropertyValue(prop);
-                                        if (colorRegexTest.test(val)) {
-                                            rule.style.setProperty(prop, 'transparent', 'important');
-                                            changed = true;
-                                        }
-                                    }
-                                    if (changed) cleanedRules++;
-                                }
-                            }
-                            const subRules = rule.cssRules || rule.rules;
-                            if (subRules) {
-                                for (let j = 0; j < subRules.length; j++) {
-                                    cleanRule(subRules[j]);
-                                }
-                            }
-                        } catch (e) {}
-                    };
-
-                    for (let i = 0; i < clonedDoc.styleSheets.length; i++) {
-                        const sheet = clonedDoc.styleSheets[i];
-                        try {
-                            const rules = sheet.cssRules || sheet.rules;
-                            if (!rules) {
-                                sheet.disabled = true;
-                                continue;
-                            }
-                            for (let j = 0; j < rules.length; j++) {
-                                cleanRule(rules[j]);
-                            }
-                        } catch (e) {
-                            try { sheet.disabled = true; } catch(err) {}
-                        }
-                    }
-                    console.log(`[FB] sanitizeClone: cleaned ${cleanedInline} inline, ${cleanedRules} rules.`);
-                } catch (e) { console.warn('[FB] sanitizeClone error', e); }
-            };
-
-            const html2canvasFallback = async () => {
-                const h2c = window.html2canvas || (typeof html2canvas !== 'undefined' ? html2canvas : null);
-                if (!h2c) return null;
-                console.log('[FB] html2canvas fallback start');
-                try {
-                    const canvas = await h2c(document.body, {
-                        useCORS: true,
-                        allowTaint: true,
-                        logging: true,
-                        scale: Math.min(window.devicePixelRatio, 2),
-                        ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
-                        onclone: sanitizeClone,
-                    });
-                    console.log('[FB] html2canvas fallback done');
-                    return canvas.toDataURL('image/jpeg', 0.8);
-                } catch (e) {
-                    console.warn('[FB] html2canvas fallback failed', e.message);
-                    return null;
-                }
-            };
-
             try {
-                let dataUrl = null;
-                // 1) Primárně Playwright (server)
-                if ((strategy === 'auto' || strategy === 'playwright') && cfg.playwright?.enabled && cfg.endpoints?.serverScreenshot) {
-                    try {
-                        console.log('[FB] server screenshot attempt');
-                        const snap = buildDomSnapshot();
-                        const res = await fetch(cfg.endpoints.serverScreenshot, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                dom: snap.dom,
-                                head: snap.head,
-                                bodyClass: snap.bodyClass,
-                                bodyStyle: snap.bodyStyle,
-                                htmlClass: snap.htmlClass,
-                                viewport: { width: window.innerWidth, height: window.innerHeight },
-                                dpr: Math.min(window.devicePixelRatio || 1, 2),
-                                fullPage: false,
-                            })
-                        });
-                        const out = await res.json();
-                        if (out.ok && out.image) {
-                            console.log('[FB] server screenshot ok');
-                            dataUrl = out.image;
-                        } else {
-                            console.warn('[FB] server screenshot failed, status', res.status, out?.message || out?.error);
-                        }
-                    } catch (e) {
-                        console.warn('[FB] server screenshot exception', e.message);
-                    }
-                }
-
-                // 2) Fallback html2canvas
-                if (!dataUrl && strategy !== 'playwright') {
-                    dataUrl = await html2canvasFallback();
-                }
-
-                // 3) Last resort: no screenshot
-                restore();
-                console.log('[FB] captureScreenshot end | ms =', Math.round(performance.now() - startTs));
-                return dataUrl;
+                const snap = ScreenshotService.buildDomSnapshot();
+                return snap.dom;
             } catch (e) {
-                console.error('[FB] captureScreenshot fatal', e);
-                restore();
+                console.error('[FB] getDomSnapshot error', e);
                 return null;
             }
         },
 
         async submitFeedback() {
-            if (this.submitting || !this.form.title || !this.form.description) return;
-            this.submitting = true;
+            if (this.submitState !== 'idle' || !this.form.title || !this.form.description) return;
+
+            this.submitState = 'validating';
+            console.log('[FB] Submit started - validating');
+
+            const config = window.KS_FEEDBACK_CONFIG || { screenshot_required: false, strategy: 'playwright' };
+            const isScreenshotRequired = config.screenshot_required || false;
 
             try {
-                const screenshot = this.options.screenshot ? await this.captureScreenshot() : null;
+                // 1. Zavřít modal před pořízením screenshotu
+                this.submitState = 'closing_modal';
+                console.log('[FB] Closing modal for clean screenshot');
+                await this.closeModal();
+
+                // 2. Capture screenshot if enabled
+                let screenshotResult = { ok: false };
+                if (this.options.screenshot) {
+                    this.submitState = 'capturing_screenshot';
+                    console.log('[FB] Requesting server-side screenshot');
+
+                    screenshotResult = await ScreenshotService.capture({
+                        strategy: config.strategy || 'playwright',
+                        targetSelector: 'body',
+                        hideSelectorsBeforeCapture: ['#ks-fb-root', '.ks-fb-overlay', '.ks-fab-trigger']
+                    });
+                }
+
+                if (this.options.screenshot && !screenshotResult.ok && isScreenshotRequired) {
+                    this.submitState = 'failed';
+                    this.showStatus('Screenshot je povinný, ale nepodařilo se jej pořídit.', 'error');
+                    return;
+                }
+
+                this.submitState = 'submitting_report';
+                console.log('[FB] Submitting report to backend');
+
                 const domSnapshot = this.options.dom ? this.getDomSnapshot() : null;
                 const perf = this.options.performance ? this.getPerformanceContext() : {};
 
@@ -706,7 +742,14 @@ function registerKsFeedbackWidget() {
                         }
                     },
                     capture: {
-                        screenshot: screenshot,
+                        screenshot: screenshotResult.ok ? screenshotResult.base64 : null,
+                        screenshot_meta: {
+                            strategy: screenshotResult.strategy,
+                            duration: screenshotResult.durationMs,
+                            error: screenshotResult.error,
+                            logs: screenshotResult.logs,
+                            server_side: screenshotResult.strategy === 'server'
+                        },
                         domLight: domSnapshot
                     },
                     logs: {
@@ -734,24 +777,27 @@ function registerKsFeedbackWidget() {
                 if (contentType && contentType.includes('application/json')) {
                     result = await response.json();
                 } else {
-                    // Non-JSON response (likely a redirect or server error page)
                     const text = await response.text();
-                    console.error('Server returned non-JSON response:', text.substring(0, 500));
+                    console.error('[FB] Server returned non-JSON response:', text.substring(0, 500));
                     throw new Error(`Server returned status ${response.status} with non-JSON content.`);
                 }
 
                 if (response.ok) {
+                    this.submitState = 'success';
+                    console.log('[FB] Report submitted successfully');
                     this.showStatus(result.message || 'Feedback byl úspěšně odeslán.', 'success');
                     this.resetForm();
-                    this.closeModal();
                 } else {
+                    this.submitState = 'failed';
                     this.showStatus(result.message || result.error || 'Chyba při odesílání.', 'error');
+                    // Pokud selhalo odeslání, znovu otevřeme modal?
+                    // Raději ne, aby se nepořizoval screenshot znovu, ale uživatel by měl mít šanci to opravit.
+                    // Ale zadání říká "odeslat bug report", tak to necháme na failed stavu.
                 }
             } catch (e) {
+                this.submitState = 'failed';
                 this.showStatus('Došlo k neočekávané chybě: ' + (e.message || 'Neznámá chyba'), 'error');
-                console.error(e);
-            } finally {
-                this.submitting = false;
+                console.error('[FB] Fatal error during submission:', e);
             }
         },
 
@@ -789,11 +835,18 @@ function registerKsFeedbackWidget() {
             };
         }
     }));
+
+    window.ksFeedbackWidgetRegistered = true;
+    console.log('[FB] Alpine component "ksFeedbackWidget" registered successfully.');
 }
 
-// Inicializace
+// Inicializace - zajistit, že Alpine.data() se volá okamžitě, i pokud je Alpine už načtené.
 if (window.Alpine) {
     registerKsFeedbackWidget();
-} else {
-    document.addEventListener('alpine:init', registerKsFeedbackWidget);
 }
+
+// Ale vždy posloucháme i na alpine:init pro případ, že se Alpine teprve inicializuje.
+document.addEventListener('alpine:init', registerKsFeedbackWidget);
+
+// Pro jistotu i na Livewire navigaci, pokud by Livewire čistil registry
+document.addEventListener('livewire:navigated', registerKsFeedbackWidget);

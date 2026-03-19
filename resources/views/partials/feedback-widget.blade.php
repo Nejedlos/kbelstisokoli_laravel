@@ -13,11 +13,10 @@
     <!-- Floating Action Button -->
     <button @click="$dispatch('ks-feedback-open')"
             type="button"
-            class="ks-fab-trigger fixed left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
-            style="z-index: 2147483647 !important; background-color: #e11d48 !important; display: flex !important; pointer-events: auto !important; visibility: visible !important; opacity: 1 !important;"
+            class="ks-fab-trigger fixed z-[9999] left-4 bottom-[calc(env(safe-area-inset-bottom,0)+16px)] md:left-6 md:bottom-6 w-14 h-14 md:w-12 md:h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
             :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'"
             aria-label="Odeslat zpětnou vazbu">
-        <i class="fa-light fa-bug text-2xl group-hover:rotate-12 transition-transform" style="opacity: 1 !important; visibility: visible !important;"></i>
+        <i class="fa-light fa-bug text-2xl group-hover:rotate-12 transition-transform"></i>
         <span class="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 transition-all duration-500 ease-in-out whitespace-nowrap text-sm font-medium">
             Feedback
         </span>
@@ -33,7 +32,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @click="closeModal()"
-         class="ks-fb-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
+         class="ks-fb-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100000] flex items-center justify-center p-4">
 
         <!-- Modal -->
         <div x-show="isOpen"
@@ -172,15 +171,15 @@
                     <button @click="closeModal()" type="button" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
                         Zrušit
                     </button>
-                    <button @click="submitFeedback()" :disabled="submitting" type="button"
+                    <button @click="submitFeedback()" :disabled="submitState !== 'idle'" type="button"
                             class="px-6 py-2 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 text-white text-sm font-bold rounded-xl shadow-lg shadow-rose-500/30 transition-all flex items-center gap-2">
-                        <template x-if="submitting">
+                        <template x-if="submitState !== 'idle'">
                             <i class="fa-light fa-spinner fa-spin"></i>
                         </template>
-                        <template x-if="!submitting">
+                        <template x-if="submitState === 'idle'">
                             <i class="fa-light fa-paper-plane"></i>
                         </template>
-                        <span x-text="submitting ? 'Odesílám...' : 'Odeslat feedback'"></span>
+                        <span x-text="submitState !== 'idle' ? 'Odesílám...' : 'Odeslat feedback'"></span>
                     </button>
                 </div>
             </div>
@@ -189,46 +188,31 @@
 
     <!-- Status Toast -->
     <template x-if="status.show">
-        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[10001] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce-in"
+        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[2147483647] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3"
              :class="status.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'">
             <i class="fa-light" :class="status.type === 'success' ? 'fa-check-circle' : 'fa-triangle-exclamation'"></i>
             <span class="text-sm font-bold" x-text="status.message"></span>
         </div>
     </template>
 
-    <style>
-        .ks-fab-trigger {
-            left: 24px !important;
-            bottom: 24px !important;
-            width: 48px !important;
-            height: 48px !important;
-            z-index: 2147483647 !important;
-            background-color: #e11d48 !important;
-            display: flex !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
-        }
-        @media (max-width: 640px) {
-            .ks-fab-trigger {
-                left: 16px !important;
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
-                width: 56px !important;
-                height: 56px !important;
-            }
-        }
-        .animate-bounce-in {
-            animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        @keyframes bounceIn {
-            0% { transform: translate(-50%, 100%) scale(0.5); opacity: 0; }
-            100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
-        }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-    </style>
+    <!-- Global Submission Loader -->
+    <div x-show="submitState !== 'idle' && submitState !== 'success' && submitState !== 'failed' && !isOpen"
+         x-cloak
+         class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[2147483646] flex items-center justify-center p-4">
+        <div class="bg-white px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 max-w-sm w-full">
+            <div class="relative">
+                <div class="w-12 h-12 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin"></div>
+                <i class="fa-light fa-bug text-rose-600 absolute inset-0 flex items-center justify-center text-xl"></i>
+            </div>
+            <div class="text-center">
+                <p class="font-bold text-slate-900 text-lg" x-text="
+                    submitState === 'closing_modal' ? 'Připravuji...' :
+                    (submitState === 'capturing_screenshot' ? 'Pořizuji screenshot...' : 'Odesílám hlášení...')
+                "></p>
+                <p class="text-sm text-slate-500">Tato operace může trvat několik sekund</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Dependencies (Bundled in feedback-widget.js) -->
 </div>

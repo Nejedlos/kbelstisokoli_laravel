@@ -26,25 +26,30 @@ return [
         'max_clicks' => 200,
         'max_breadcrumbs' => 50,
         'duplicate_check_minutes' => 5,
-        'rate_limit' => '10,1', // 10 per 1 minute
+        'rate_limit' => env('FEEDBACK_RATE_LIMIT', '10,1'), // 10 per 1 minute
     ],
 
     'screenshot' => [
-        'strategy' => env('FEEDBACK_SCREENSHOT_STRATEGY', 'auto'), // auto, playwright, html2canvas, none
+        'strategy' => env('SCREENSHOT_DRIVER', env('FEEDBACK_SCREENSHOT_STRATEGY', 'playwright')), // auto, playwright, html2canvas, none
         'quality' => 0.80,
         'max_width' => 1600,
         'playwright' => [
             'enabled' => env('FEEDBACK_PLAYWRIGHT_ENABLED', true),
-            'timeout' => 30000,
-            'node_path' => env('FEEDBACK_NODE_PATH', 'node'),
+            'timeout' => env('SCREENSHOT_TIMEOUT_MS', 30000),
+            'node_path' => env('SCREENSHOT_NODE_BINARY', env('FEEDBACK_NODE_PATH', 'node')),
+            'chromium_path' => env('SCREENSHOT_CHROMIUM_PATH'),
+            'browsers_path' => env('FEEDBACK_PLAYWRIGHT_BROWSERS_PATH'),
             'script_path' => 'resources/js/screenshot-worker.cjs',
-            'temp_path' => 'storage/app/temp/screenshots',
+            'temp_path' => env('SCREENSHOT_TEMP_DIR', 'storage/app/temp/screenshots'),
             'viewports' => [
                 'desktop' => ['width' => 1920, 'height' => 1080],
                 'mobile' => ['width' => 390, 'height' => 844],
             ],
+            'full_page' => env('FEEDBACK_SCREENSHOT_FULL_PAGE', false),
         ],
     ],
+
+    'screenshot_required' => env('FEEDBACK_SCREENSHOT_REQUIRED', false),
 
     'dom_snapshot' => [
         'max_length' => 100 * 1024, // 100KB

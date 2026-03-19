@@ -53,7 +53,7 @@ Route::get('/auth/two-factor-setup', \App\Http\Controllers\Auth\TwoFactorSetupCo
 Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'])
     ->name('media.download');
 
-// Feedback systém (přístupný pouze přihlášeným v produkci, v local i pro náhledy)
+// Feedback systém
 Route::get('/feedback/widget', [\App\Http\Controllers\FeedbackController::class, 'renderWidget'])
     ->middleware(['web'])
     ->name('feedback.widget');

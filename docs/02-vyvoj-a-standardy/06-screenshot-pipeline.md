@@ -1,15 +1,16 @@
-# Screenshot pipeline (Playwright → html2canvas → graceful)
+# Screenshot pipeline (Playwright → html-to-image → html2canvas)
 
 Tento dokument popisuje architekturu a provoz vícevrstvého řešení pro pořizování screenshotů ve feedback widgetu.
 
 ## Architektura
-1. Primární vrstva: server-side screenshot přes Playwright (Chromium, headless).
-2. Fallback: klientský screenshot přes html2canvas nad sanitizovaným klonem DOMu.
-3. Poslední fallback: bez screenshotu (odeslání reportu s DOM snapshotem a logy), aby akce nikdy neselhávala tvrdou chybou.
+1. Primární vrstva: server-side screenshot přes Playwright (Chromium, headless). Podporuje moderní CSS barvy (oklab, oklch).
+2. Fallback #1: klientský screenshot přes html-to-image (využívá SVG foreignObject, velmi věrný render).
+3. Fallback #2: klientský screenshot přes html2canvas nad sanitizovaným klonem DOMu (poslední záchrana).
+4. Poslední fallback: bez screenshotu (odeslání reportu s DOM snapshotem a logy), aby akce nikdy neselhávala tvrdou chybou.
 
 ## Konfigurace
 - `config/feedback.php`
-  - `screenshot.strategy`: `auto|playwright|html2canvas|none` (výchozí `auto`).
+  - `screenshot.strategy`: `auto|playwright|html-to-image|html2canvas|none` (výchozí `auto`).
   - `screenshot.playwright.enabled`: zapnutí/vypnutí server-side.
   - `screenshot.playwright.timeout`: timeout v ms (default 30000).
   - `screenshot.playwright.node_path`: binárka Node (default `node`).
@@ -22,8 +23,13 @@ Tento dokument popisuje architekturu a provoz vícevrstvého řešení pro poři
 ## Frontend flow
 - `resources/js/feedback-widget.js`
   - Přečte `window.KS_FEEDBACK_CONFIG` (injektováno middlewarem).
-  - Strategie `auto`/`playwright`: 1) pokus o server-side screenshot, 2) při selhání fallback na html2canvas nad sanitizovaným DOM (odstranění CORS stylesheetů, náhrada `oklab/oklch`), 3) bez screenshotu.
-  - Záznam konzolových logů je stručný (prefx `[FB]`).
+  - Strategie `auto`/`playwright`:
+    1. Pokus o server-side screenshot (bez sanitizace barev, aby byl render 1:1).
+    2. Při selhání fallback na `html-to-image`.
+    3. Při selhání fallback na `html2canvas` nad sanitizovaným DOM (zachovává fonty/ikony, ale moderní barvy `oklab/oklch` nahrazuje šedou `rgb(120, 120, 120)` pro stabilitu).
+    4. Odeslání bez screenshotu.
+  - Záznam konzolových logů je stručný (prefix `[FB]`).
+  - Trasy `/feedback` a `/feedback/screenshot` mají v `bootstrap/app.php` výjimku z CSRF ochrany pro maximální robustnost.
 
 ## Playwright worker
 - Skript: `resources/js/screenshot-worker.cjs`
@@ -49,3 +55,5 @@ Tento dokument popisuje architekturu a provoz vícevrstvého řešení pro poři
 ## Poznámky
 - `dom-to-image-more` byl odstraněn – nespolehlivé na CORS a moderní CSS.
 - html2canvas fallback prochází a čistí inline styly i vložené `<style>` bloky.
+- `html-to-image` slouží jako sekundární klientský fallback využívající SVG foreignObject.
+- Implementována ochrana proti 419 (CSRF) u feedback endpointů patterny `feedback*` a `*/feedback*`.

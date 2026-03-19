@@ -46,20 +46,31 @@ class InjectFeedbackWidget
             return false;
         }
 
-        // 2. Skip AJAX/JSON/Widget requests
-        if ($request->isXmlHttpRequest() || $request->expectsJson() || $request->routeIs('feedback.*')) {
+        // 2. Skip AJAX/JSON/Widget/Livewire requests
+        if ($request->isXmlHttpRequest() ||
+            $request->expectsJson() ||
+            $request->hasHeader('X-Livewire') ||
+            $request->routeIs('feedback.*')) {
             return false;
         }
 
-        // 3. Skip redirects and special responses
+        // 3. Skip redirects, special responses and partials
         if ($response instanceof \Symfony\Component\HttpFoundation\RedirectResponse ||
             $response instanceof \Symfony\Component\HttpFoundation\StreamedResponse ||
-            $response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse) {
+            $response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse ||
+            $response->isServerError() ||
+            $response->isClientError()) {
+            return false;
+        }
+
+        // 4. Content check: MUST have </body> tag for reliable injection
+        $content = $response->getContent();
+        if (!str_contains($content, '</body>')) {
             return false;
         }
 
         // 4. Always inject in Debug mode (except in tests to avoid noisy output)
-        if (config('app.debug') && !app()->environment('testing')) {
+        if (config('app.debug') && !app()->runningUnitTests()) {
             return true;
         }
 
@@ -67,11 +78,7 @@ class InjectFeedbackWidget
         $host = $request->getHost();
         $isTestHost = str_contains($host, 'new.') || str_contains($host, '.new.') || str_contains($host, 'staging.') || str_contains($host, 'dev.') || str_contains($host, '.test') || str_contains($host, 'localhost');
 
-        if (!Auth::check() && !app()->environment('local', 'staging') && !$isTestHost) {
-            return false;
-        }
-
-        return true;
+        return $isTestHost;
     }
 
     protected function injectWidget(Response $response): void
@@ -139,79 +146,59 @@ class InjectFeedbackWidget
                 const script = document.createElement('script');
                 script.src = '{$jsUrl}';
                 script.type = 'module';
-                script.async = true;
                 document.head.appendChild(script);
             }
 
-            // 2. Fetch the widget HTML
+            // Fetch the widget HTML
             fetch('{$widgetUrl}')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Feedback widget fetch failed: ' + response.status);
-                    }
-                    return response.text();
-                })
+                .then(response => response.text())
                 .then(html => {
                     if (!html || document.getElementById('ks-fb-root')) return;
-                    const temp = document.createElement('div');
-                    temp.innerHTML = html.trim();
-                    const widgetRoot = temp.querySelector('#ks-fb-root');
 
-                    if (!widgetRoot) {
-                        console.error('Feedback widget: Root element not found in response');
-                        return;
-                    }
-
-                    // Wait for Alpine to be ready and component to be registered
+                    // Počkáme na registraci komponenty v Alpine
                     let attempts = 0;
-                    const inject = () => {
+                    const checkRegistration = () => {
                         attempts++;
-                        if (window.Alpine && window.ksFeedbackWidgetRegistered) {
-                             if (!document.getElementById('ks-fb-root')) {
+                        if (window.ksFeedbackWidgetRegistered) {
+                            const temp = document.createElement('div');
+                            temp.innerHTML = html.trim();
+                            const widgetRoot = temp.querySelector('#ks-fb-root');
+                            if (widgetRoot) {
                                 document.body.appendChild(widgetRoot);
-                                console.log('Feedback widget: Injected into DOM after ' + attempts + ' attempts');
-                                if (window.Alpine.initTree) {
+                                // Pokud už Alpine běží, musíme ho upozornit na nový prvek
+                                if (window.Alpine && typeof window.Alpine.initTree === 'function') {
                                     window.Alpine.initTree(widgetRoot);
                                 }
-                             }
+                            }
                         } else if (attempts < 100) {
-                            setTimeout(inject, 50);
+                            setTimeout(checkRegistration, 50);
+                            return; // Wait for the next check
                         } else {
-                            console.warn('Feedback widget: Alpine or component not ready after 5s, giving up injection');
+                            console.error('Feedback widget: Alpine component registration timeout');
                         }
+                        isFeedbackLoading = false;
                     };
-                    inject();
+                    checkRegistration();
                 })
                 .catch(err => {
-                    console.warn('Feedback widget: Failed to load widget HTML', err);
-                })
-                .finally(() => {
+                    console.error('Feedback widget load failed', err);
                     isFeedbackLoading = false;
                 });
         }
 
-        if (document.readyState !== 'loading') {
-            loadFeedback();
-        } else {
-            document.addEventListener('DOMContentLoaded', loadFeedback);
-        }
-
-        // Pro jistotu i na load a Livewire navigaci
-        window.addEventListener('load', loadFeedback);
-        document.addEventListener('livewire:navigated', () => setTimeout(loadFeedback, 200));
+        loadFeedback();
+        document.addEventListener('livewire:navigated', loadFeedback);
     })();
 </script>
 HTML;
 
+        // Bezpečné vložení před </body>
+        // Použijeme replace, aby se zamezilo chybnému rozdělení stringu
         $pos = strripos($content, '</body>');
 
         if (false !== $pos) {
-            $content = substr($content, 0, $pos) . $loader . substr($content, $pos);
-        } else {
-            // Fallback: append to the end
-            $content .= $loader;
+            $newContent = substr_replace($content, $loader . "\n</body>", $pos, 7);
+            $response->setContent($newContent);
         }
-
-        $response->setContent($content);
     }
 }

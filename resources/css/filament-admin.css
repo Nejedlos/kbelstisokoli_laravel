@@ -175,7 +175,7 @@
     --animate-pulse-aura: pulse-aura 3s ease-in-out infinite;
 }
 
-@source '../../resources/views/filament/**/*.blade.php';
+@source '../../resources/views/**/*.blade.php';
 @source '../../resources/views/components/help/**/*.blade.php';
 @source '../**/*.js';
 @source '../../app/Filament/**/*.php';

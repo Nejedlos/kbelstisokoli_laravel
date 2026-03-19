@@ -132,6 +132,13 @@ $app = Application::configure(basePath: dirname(__DIR__))
             '2fa.timeout',
             'permission:access_admin',
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'feedback',
+            'feedback/*',
+            '*/feedback',
+            '*/feedback/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {

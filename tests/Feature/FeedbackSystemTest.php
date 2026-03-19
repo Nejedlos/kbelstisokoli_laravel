@@ -7,6 +7,7 @@ use App\Models\FeedbackReport;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -19,17 +20,20 @@ class FeedbackSystemTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('local');
         Config::set('feedback.enabled', true);
         Config::set('feedback.environments', ['testing']);
-        Config::set('app.env', 'testing');
+        Config::set('app.debug', false);
+
+        Mail::fake();
+        Storage::fake('local');
     }
 
-    public function test_guest_cannot_see_widget(): void
+    public function test_guest_sees_widget_in_html_response_on_localhost(): void
     {
+        // Localhost is considered a test host in InjectFeedbackWidget
         $response = $this->get('/');
         $response->assertStatus(200);
-        $response->assertDontSee('ks-fb-loader');
+        $response->assertSee('ks-fb-loader');
     }
 
     public function test_auth_user_sees_widget_in_html_response(): void
@@ -63,6 +67,16 @@ class FeedbackSystemTest extends TestCase
     public function test_widget_renders_successfully_for_guest(): void
     {
         $response = $this->get('/feedback/widget');
+        // dump($response->content());
+
+        $response->assertStatus(200);
+        $response->assertSee('ks-feedback-system');
+    }
+
+    public function test_widget_renders_successfully_for_auth(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->actingAs($user)->get('/feedback/widget');
 
         $response->assertStatus(200);
         $response->assertSee('ks-feedback-system');
@@ -150,7 +164,12 @@ class FeedbackSystemTest extends TestCase
 
     public function test_rate_limit_works(): void
     {
+        // dd(config('feedback.limits.rate_limit'));
+        Cache::flush();
         $user = User::factory()->create();
+
+        // Limity z configu mohou být v testech vysoké, pro test je snížíme
+        Config::set('feedback.limits.rate_limit', '3,1');
 
         $payload = [
             'type' => 'bug',
@@ -162,17 +181,18 @@ class FeedbackSystemTest extends TestCase
             ],
         ];
 
-        // Send 10 successful requests
-        for ($i = 1; $i <= 10; $i++) {
+        // Send 3 successful requests
+        for ($i = 1; $i <= 3; $i++) {
             $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test $i"]))->assertStatus(200);
         }
 
-        // 11th should be throttled (429)
-        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test 11"]))->assertStatus(429);
+        // 4th should be throttled (429)
+        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test 4"]))->assertStatus(429);
     }
 
     public function test_duplicate_guard_works(): void
     {
+        Cache::flush();
         $user = User::factory()->create();
 
         $payload = [

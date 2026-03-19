@@ -120,8 +120,17 @@ class FeedbackController extends Controller
         $storageDir = "feedback/{$report->id}";
 
         if (!empty($redacted['capture']['screenshot'])) {
-            $screenshotData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $redacted['capture']['screenshot']));
-            $path = "{$storageDir}/screenshot.jpg";
+            $data = $redacted['capture']['screenshot'];
+            $extension = 'jpg';
+
+            if (Str::startsWith($data, 'data:image/png')) {
+                $extension = 'png';
+            } elseif (Str::startsWith($data, 'data:image/webp')) {
+                $extension = 'webp';
+            }
+
+            $screenshotData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
+            $path = "{$storageDir}/screenshot.{$extension}";
             Storage::disk('local')->put($path, $screenshotData);
             $report->screenshot_path = $path;
         }
@@ -210,10 +219,11 @@ class FeedbackController extends Controller
         // Strategy gate
         $strategy = config('feedback.screenshot.strategy', 'auto');
         $allow = in_array($strategy, ['auto', 'playwright'], true) && config('feedback.screenshot.playwright.enabled', true);
+
         if (!$allow) {
             return response()->json([
                 'ok' => false,
-                'message' => 'Server-side screenshot disabled',
+                'message' => 'Server-side screenshot is disabled in configuration.',
             ], 503);
         }
 
@@ -231,10 +241,17 @@ class FeedbackController extends Controller
             'htmlClass' => 'nullable|string',
         ]);
 
+        Log::info('[FeedbackController] Server screenshot request accepted', [
+            'user_id' => $request->user()?->id,
+            'dom_size' => strlen($validated['dom']),
+        ]);
+
         try {
+            /** @var \App\Services\ScreenshotService $svc */
             $svc = app(\App\Services\ScreenshotService::class);
+
             $result = $svc->captureViaPlaywrightFromDom($validated['dom'], [
-                'viewport' => $validated['viewport'] ?? ['width' => 1728, 'height' => 919],
+                'viewport' => $validated['viewport'] ?? config('feedback.screenshot.playwright.viewports.desktop', ['width' => 1728, 'height' => 919]),
                 'dpr' => $validated['dpr'] ?? 2,
                 'selector' => $validated['selector'] ?? '#snapshot-root',
                 'fullPage' => $validated['fullPage'] ?? false,
@@ -255,15 +272,20 @@ class FeedbackController extends Controller
                 'mime' => $result['mime'] ?? 'image/png',
             ]);
         } catch (\Throwable $e) {
-            \Log::error('Server screenshot failed', [
+            Log::error('[FeedbackController] Server screenshot failed', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
+                'trace' => substr($e->getTraceAsString(), 0, 1000),
             ]);
+
+            $code = 'SCREENSHOT_SERVER_FAILED';
+            if (Str::contains($e->getMessage(), ['Could not load playwright', 'not found', 'ENOENT'])) {
+                $code = 'SCREENSHOT_SERVER_UNAVAILABLE';
+            }
+
             return response()->json([
                 'ok' => false,
-                'message' => 'Server screenshot failed: ' . $e->getMessage(),
+                'message' => 'Nepodařilo se vytvořit screenshot na serveru.',
+                'code' => $code,
                 'error' => $e->getMessage(),
             ], 500);
         }

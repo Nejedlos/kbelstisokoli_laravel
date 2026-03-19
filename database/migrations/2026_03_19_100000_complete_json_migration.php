@@ -50,6 +50,14 @@ return new class extends Migration
         if (Schema::hasTable('ai_documents')) {
             $fixJson('ai_documents', ['title', 'summary', 'content', 'keywords', 'metadata']);
             Schema::table('ai_documents', function (Blueprint $table) {
+                // Drop FULLTEXT index if exists (MySQL doesn't support it on JSON)
+                try {
+                    $table->dropIndex('ai_documents_fulltext');
+                } catch (\Throwable $e) {}
+                try {
+                    $table->dropIndex('fulltext_title_content');
+                } catch (\Throwable $e) {}
+
                 // Převod na JSON typ v MySQL 8
                 $table->json('title')->nullable()->change();
                 $table->json('summary')->nullable()->change();
