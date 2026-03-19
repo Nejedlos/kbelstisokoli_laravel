@@ -21,6 +21,63 @@ class CompetitionSyncService
     ) {}
 
     /**
+     * Synchronizuje tabulky ze všech soutěží pro danou sezónu.
+     */
+    public function syncAllStandings(Season $season): array
+    {
+        $configs = ExternalTeamSeasonConfig::where('season_id', $season->id)
+            ->whereNotNull('competition_url')
+            ->where('is_enabled', true)
+            ->get();
+
+        $urls = $configs->pluck('competition_url')->unique();
+
+        if ($urls->isEmpty()) {
+            return ['synced' => 0, 'total' => 0];
+        }
+
+        ConsoleService::log("Zahajuji synchronizaci tabulek pro " . $urls->count() . " soutěží (Sezóna: {$season->name}).", 'info');
+
+        $synced = 0;
+        foreach ($urls as $url) {
+            try {
+                $this->syncStandingsOnly($url, $season);
+                $synced++;
+            } catch (\Exception $e) {
+                ConsoleService::log("  Chyba při synchronizaci tabulky z {$url}: " . $e->getMessage(), 'error');
+            }
+        }
+
+        ConsoleService::log("Synchronizace tabulek pro sezónu {$season->name} dokončena. Úspěšně: {$synced}/" . $urls->count() . ".");
+
+        return ['synced' => $synced, 'total' => $urls->count()];
+    }
+
+    /**
+     * Synchronizuje pouze tabulky z dané URL.
+     */
+    public function syncStandingsOnly(string $url, Season $season): void
+    {
+        ConsoleService::log("- Synchronizace tabulek z URL: {$url}");
+
+        $run = ExternalImportRun::start('czbasketball', $season->id, null, 'competition_standings_only', null);
+        $run->updateMetadata(['url' => $url]);
+
+        try {
+            $html = $this->fetcher->fetch($url, $run);
+            $standingExtractor = app(CompetitionStandingExtractor::class);
+            $standingResult = $standingExtractor->extract($html);
+
+            $this->saveFullStandings($standingResult['data']->rows, $season, $url);
+            $run->finish(['status' => 'success']);
+        } catch (\Exception $e) {
+            $run->fail($e);
+            Log::error("Chyba při synchronizaci tabulek z $url: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * Synchronizuje data ze stránky soutěže.
      */
     public function sync(Team $team, Season $season, ExternalTeamSeasonConfig $config, array $options = []): void
@@ -45,7 +102,7 @@ class CompetitionSyncService
             $standingData = $standingResult['data'];
 
             // 1b. Uložit kompletní tabulku pořadí
-            $this->saveFullStandings($standingData->rows, $season, $config);
+            $this->saveFullStandings($standingData->rows, $season, $config->competition_url, $config);
 
             // 2. Extrakce rozpisu (Schedule)
             $scheduleExtractor = app(CompetitionScheduleExtractor::class);
@@ -177,15 +234,23 @@ class CompetitionSyncService
     /**
      * Uloží kompletní tabulku pořadí soutěže.
      */
-    protected function saveFullStandings(array $rows, Season $season, ExternalTeamSeasonConfig $config): void
+    protected function saveFullStandings(array $rows, Season $season, string $url, ?ExternalTeamSeasonConfig $config = null): void
     {
-        $competitionName = $config->competition_label ?: ($config->metadata['competition'] ?? null);
+        $competitionName = $config ? ($config->competition_label ?: ($config->metadata['competition'] ?? null)) : null;
+
+        // Pokud nemáme název ze zadaného configu, zkusíme najít jakýkoliv jiný config pro tuto URL
+        if (!$competitionName) {
+            $otherConfig = ExternalTeamSeasonConfig::where('competition_url', $url)->whereNotNull('competition_label')->first();
+            if ($otherConfig) {
+                $competitionName = $otherConfig->competition_label;
+            }
+        }
 
         foreach ($rows as $row) {
             CompetitionStanding::updateOrCreate(
                 [
                     'season_id' => $season->id,
-                    'competition_url' => $config->competition_url,
+                    'competition_url' => $url,
                     'team_name' => $row->values['team_name'],
                 ],
                 [

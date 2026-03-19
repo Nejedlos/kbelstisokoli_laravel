@@ -146,7 +146,9 @@ class HelpArticle extends Model
         return $query->where(function (Builder $q) use ($roles) {
             $q->whereNull('audience_roles');
             foreach ($roles as $role) {
-                $q->orWhereJsonContains('audience_roles', $role);
+                // FALLBACK: Pro produkční DB bez JSON funkcí (Webglobe) použijeme LIKE.
+                // V JSON poli rolí ["role"] je název role v uvozovkách.
+                $q->orWhere('audience_roles', 'LIKE', '%"' . (string) $role . '"%');
             }
         });
     }

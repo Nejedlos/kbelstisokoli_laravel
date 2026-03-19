@@ -648,12 +648,15 @@ class PlayerSyncService
         $extMatchId = (string) $extMatch->external_match_id;
 
         if ($extMatchId) {
+            // Pro kompatibilitu s DB bez JSON funkcí načteme zápasy v sezóně a profiltrujeme v PHP
             $match = BasketballMatch::where('season_id', $season->id)
-                ->where(function ($q) use ($extMatchId) {
-                    $q->where('metadata->external_id', $extMatchId)
-                      ->orWhere('metadata->external_match_id', $extMatchId);
-                })
-                ->first();
+                ->get()
+                ->first(function ($m) use ($extMatchId) {
+                    $meta = $m->metadata;
+
+                    return ($meta['external_id'] ?? null) == $extMatchId
+                        || ($meta['external_match_id'] ?? null) == $extMatchId;
+                });
         }
 
         if (!$match) {

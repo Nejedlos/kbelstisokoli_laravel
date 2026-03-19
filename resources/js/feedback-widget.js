@@ -383,12 +383,34 @@ function registerKsFeedbackWidget() {
             const restore = () => { widgetEl.style.display = originalDisplay; };
 
             const buildDomSnapshot = () => {
-                // Zachytit relevantní CSS z headu
-                const headElements = Array.from(document.head.querySelectorAll('link[rel="stylesheet"], style'));
-                const headHtml = headElements
-                    .filter(el => !el.classList.contains('ks-feedback-ignore'))
-                    .map(el => el.outerHTML)
-                    .join('\n');
+                // Zachytit relevantní CSS
+                let consolidatedCss = '';
+                const styleSheets = Array.from(document.styleSheets);
+
+                for (let sheet of styleSheets) {
+                    try {
+                        const isSameOrigin = !sheet.href || sheet.href.includes(window.location.hostname) || sheet.href.startsWith('/') || sheet.href.includes('localhost');
+                        if (!isSameOrigin) continue;
+
+                        const rules = sheet.cssRules || sheet.rules;
+                        if (!rules) continue;
+
+                        let sheetCss = '';
+                        for (let j = 0; j < rules.length; j++) {
+                            sheetCss += rules[j].cssText + '\n';
+                        }
+
+                        // Clean oklab/oklch from this batch
+                        if (/(oklab|oklch)\s*\([^)]+\)/i.test(sheetCss)) {
+                            sheetCss = sheetCss.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
+                        }
+                        consolidatedCss += sheetCss;
+                    } catch (e) {
+                        // console.warn('[FB] Could not read stylesheet', sheet.href, e);
+                    }
+                }
+
+                const headHtml = `<style class="ks-feedback-consolidated-css">${consolidatedCss}</style>`;
 
                 // Zachytit kompletní body, ale bez skriptů
                 const bodyClone = document.body.cloneNode(true);
@@ -396,6 +418,26 @@ function registerKsFeedbackWidget() {
                 // Odstranit skripty, widget, overlay a další věci z klonu
                 const toRemove = bodyClone.querySelectorAll('script, #ks-fb-root, .ks-fb-overlay, .ks-fab-trigger');
                 toRemove.forEach(el => el.remove());
+
+                // Sanitize bodyClone inline styles (pro jistotu i pro server)
+                bodyClone.querySelectorAll('*').forEach(el => {
+                    if (el.hasAttribute && el.hasAttribute('style')) {
+                        const s = el.getAttribute('style');
+                        if (s && /(oklab|oklch)\s*\([^)]+\)/i.test(s)) {
+                            el.setAttribute('style', s.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent'));
+                        }
+                    }
+                    // SVG attributes
+                    if (el.hasAttribute && el.hasAttribute('fill') && /(oklab|oklch)/i.test(el.getAttribute('fill'))) {
+                        el.setAttribute('fill', 'transparent');
+                    }
+                    if (el.hasAttribute && el.hasAttribute('stroke') && /(oklab|oklch)/i.test(el.getAttribute('stroke'))) {
+                        el.setAttribute('stroke', 'transparent');
+                    }
+                    if (el.style && el.style.backgroundImage && /(oklab|oklch)\s*\([^)]+\)/i.test(el.style.backgroundImage)) {
+                        el.style.backgroundImage = 'none';
+                    }
+                });
 
                 let html = bodyClone.innerHTML;
                 html = html.replace(/value="[^"]*"/gi, 'value="[redacted]"');
@@ -411,14 +453,35 @@ function registerKsFeedbackWidget() {
 
             const sanitizeClone = (clonedDoc) => {
                 try {
-                    // 1. Remove cross-origin stylesheets
+                    // 1. Remove ALL external stylesheets to prevent html2canvas from trying to parse them
                     const links = Array.from(clonedDoc.getElementsByTagName('link'));
                     for (let link of links) {
-                        if (link.rel === 'stylesheet' && link.href) {
-                            const isSameOrigin = link.href.includes(window.location.hostname) || link.href.startsWith('/') || link.href.includes('localhost');
-                            if (!isSameOrigin) link.remove();
-                        }
+                        if (link.rel === 'stylesheet') link.remove();
                     }
+
+                    // 1b. Consolidate and clean CSS from original document and inject it
+                    let consolidatedCss = '';
+                    try {
+                        const styleSheets = Array.from(document.styleSheets);
+                        for (let sheet of styleSheets) {
+                            try {
+                                const isSameOrigin = !sheet.href || sheet.href.includes(window.location.hostname) || sheet.href.startsWith('/') || sheet.href.includes('localhost');
+                                if (!isSameOrigin) continue;
+                                const rules = sheet.cssRules || sheet.rules;
+                                if (!rules) continue;
+                                for (let j = 0; j < rules.length; j++) {
+                                    consolidatedCss += rules[j].cssText + '\n';
+                                }
+                            } catch (e) {}
+                        }
+                        if (/(oklab|oklch)\s*\([^)]+\)/i.test(consolidatedCss)) {
+                            consolidatedCss = consolidatedCss.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
+                        }
+                        const consolidatedStyle = clonedDoc.createElement('style');
+                        consolidatedStyle.className = 'ks-fb-consolidated';
+                        consolidatedStyle.textContent = consolidatedCss;
+                        clonedDoc.head.appendChild(consolidatedStyle);
+                    } catch (e) {}
 
                     // 2. Add global override for Tailwind v4 variables and known crashers
                     const override = clonedDoc.createElement('style');
@@ -430,6 +493,10 @@ function registerKsFeedbackWidget() {
                             --tw-outline-color: transparent !important;
                             --tw-bg-color: transparent !important;
                             --tw-text-color: inherit !important;
+                            /* Reset common TW v4 variables that might still contain oklab even if we missed some */
+                            --tw-gradient-from: transparent !important;
+                            --tw-gradient-to: transparent !important;
+                            --tw-gradient-stops: transparent !important;
                         }
                         /* Disable animations/transitions */
                         *, *::before, *::after {
@@ -444,6 +511,7 @@ function registerKsFeedbackWidget() {
                     for (let style of styleElements) {
                         if (style === override) continue;
                         if (/(oklab|oklch)/i.test(style.innerHTML)) {
+                            // Replace function call with transparent, even if multi-line
                             style.innerHTML = style.innerHTML.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
                         }
                     }
@@ -459,10 +527,47 @@ function registerKsFeedbackWidget() {
                                 cleanedInline++;
                             }
                         }
+                        // SVG attributes
+                        if (el.hasAttribute && el.hasAttribute('fill') && /(oklab|oklch)/i.test(el.getAttribute('fill'))) {
+                            el.setAttribute('fill', 'transparent');
+                        }
+                        if (el.hasAttribute && el.hasAttribute('stroke') && /(oklab|oklch)/i.test(el.getAttribute('stroke'))) {
+                            el.setAttribute('stroke', 'transparent');
+                        }
+                        // Also check for background-image with gradients that might contain oklab
+                        if (el.style && el.style.backgroundImage && /(oklab|oklch)/i.test(el.style.backgroundImage)) {
+                            el.style.backgroundImage = 'none';
+                        }
                     }
 
-                    // 5. Aggressively clean accessible stylesheets (rules)
+                    // 5. Aggressively clean accessible stylesheets (rules) rekurzivně
                     let cleanedRules = 0;
+                    const colorRegexTest = /(oklab|oklch)\s*\([^)]+\)/i;
+                    const cleanRule = (rule) => {
+                        try {
+                            if (rule.style) {
+                                let changed = false;
+                                if (colorRegexTest.test(rule.style.cssText)) {
+                                    for (let k = 0; k < rule.style.length; k++) {
+                                        const prop = rule.style[k];
+                                        const val = rule.style.getPropertyValue(prop);
+                                        if (colorRegexTest.test(val)) {
+                                            rule.style.setProperty(prop, 'transparent', 'important');
+                                            changed = true;
+                                        }
+                                    }
+                                    if (changed) cleanedRules++;
+                                }
+                            }
+                            const subRules = rule.cssRules || rule.rules;
+                            if (subRules) {
+                                for (let j = 0; j < subRules.length; j++) {
+                                    cleanRule(subRules[j]);
+                                }
+                            }
+                        } catch (e) {}
+                    };
+
                     for (let i = 0; i < clonedDoc.styleSheets.length; i++) {
                         const sheet = clonedDoc.styleSheets[i];
                         try {
@@ -472,14 +577,9 @@ function registerKsFeedbackWidget() {
                                 continue;
                             }
                             for (let j = 0; j < rules.length; j++) {
-                                const rule = rules[j];
-                                if (rule.style && rule.style.cssText && /(oklab|oklch)/i.test(rule.style.cssText)) {
-                                    rule.style.cssText = rule.style.cssText.replace(/(oklab|oklch)\s*\([^)]+\)/gi, 'transparent');
-                                    cleanedRules++;
-                                }
+                                cleanRule(rules[j]);
                             }
                         } catch (e) {
-                            // CORS or access error - disable to be safe
                             try { sheet.disabled = true; } catch(err) {}
                         }
                     }

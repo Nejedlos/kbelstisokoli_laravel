@@ -51,7 +51,14 @@ class ScreenshotService
 
         // Simple heuristic for common paths if 'node' is not found in PATH
         if ($node === 'node' && !$this->canExecute($node)) {
-            $commonPaths = ['/usr/local/bin/node', '/opt/homebrew/bin/node', '/usr/bin/node'];
+            $commonPaths = [
+                '/usr/local/bin/node',
+                '/opt/homebrew/bin/node',
+                '/usr/bin/node',
+                '/bin/node',
+                '/usr/local/sbin/node',
+                '/opt/node/bin/node'
+            ];
             foreach ($commonPaths as $p) {
                 if (file_exists($p) && is_executable($p)) {
                     $node = $p;
@@ -76,7 +83,17 @@ class ScreenshotService
         ];
 
         $timeoutSec = max(1, (int) ceil($timeoutMs / 1000));
-        $proc = new Process($args, base_path());
+
+        $nodePath = base_path('node_modules');
+        if (getenv('NODE_PATH')) {
+            $nodePath .= PATH_SEPARATOR . getenv('NODE_PATH');
+        }
+
+        $env = [
+            'NODE_PATH' => $nodePath,
+        ];
+
+        $proc = new Process($args, base_path(), $env);
         $proc->setTimeout($timeoutSec);
         $proc->run();
 

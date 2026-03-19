@@ -479,7 +479,7 @@
                             </div>
                         </div>
                     @else
-                        {{ $consoleOutput }}
+                        {!! $consoleOutput !!}
                     @endif
                 </div>
             </div>

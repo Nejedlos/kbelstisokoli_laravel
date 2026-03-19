@@ -6,6 +6,7 @@ use App\Models\ClubCompetitionEntry;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 
 class CompetitionLeaderboardWidget extends Widget
 {
@@ -14,6 +15,12 @@ class CompetitionLeaderboardWidget extends Widget
     protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'filament.resources.club-competitions.widgets.leaderboard-widget';
+
+    #[On('refreshLeaderboard')]
+    public function refresh(): void
+    {
+        // Žádná explicitní akce není potřeba, Livewire se postará o překreslení díky volání getViewData()
+    }
 
     protected function getViewData(): array
     {
@@ -28,16 +35,16 @@ class CompetitionLeaderboardWidget extends Widget
 
         // Debug log to terminal if possible, but let's just make it work
         $entries = ClubCompetitionEntry::query()
-            ->where("{$tableName}.club_competition_id", $this->ownerRecord->id)
-            ->leftJoin($usersTable, "{$usersTable}.id", '=', "{$tableName}.player_id")
+            ->where("club_competition_id", $this->ownerRecord->id)
+            ->leftJoin($usersTable, "{$usersTable}.id", '=', "player_id")
             ->select(
-                "{$tableName}.player_id",
-                "{$tableName}.label",
+                "player_id",
+                "label",
                 "{$usersTable}.name as user_name",
-                DB::raw("SUM({$tableName}.value) as total_value"),
-                DB::raw("RANK() OVER (ORDER BY SUM({$tableName}.value) DESC) as competition_rank")
+                DB::raw("SUM(value) as total_value"),
+                DB::raw("RANK() OVER (ORDER BY SUM(value) DESC) as competition_rank")
             )
-            ->groupBy("{$tableName}.player_id", "{$tableName}.label", "{$usersTable}.name")
+            ->groupBy("player_id", "label", "{$usersTable}.name")
             ->orderBy('total_value', 'desc')
             ->get();
 

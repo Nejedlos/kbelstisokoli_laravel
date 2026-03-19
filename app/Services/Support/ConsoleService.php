@@ -12,6 +12,10 @@ class ConsoleService
 
     public static function log(string $message, string $type = 'info'): void
     {
+        if (app()->runningInConsole()) {
+            echo $message . "\n";
+        }
+
         $timestamp = now()->format('H:i:s');
         $color = match ($type) {
             'error' => 'text-red-500',

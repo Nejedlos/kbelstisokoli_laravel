@@ -97,6 +97,20 @@ return [
                 'force' => 'Force refresh (Ignore cache)',
             ],
         ],
+        'stats_sync_standings' => [
+            'label' => 'Stats: Standings (Sync)',
+            'desc' => 'Synchronize league standings (team ranking) from all competitions.',
+            'flags' => [
+                'force' => 'Force (ignore cache)',
+            ],
+            'selects' => [
+                'season' => [
+                    'label' => 'Season',
+                    'active' => '--- Current Season ---',
+                    'all' => '--- All Seasons ---',
+                ],
+            ],
+        ],
         'stats_sync_team' => [
             'label' => 'Statistics: Team (Sync)',
             'desc' => 'Synchronization of the complete roster and matches for a selected team.',

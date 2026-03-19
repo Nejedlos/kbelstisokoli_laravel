@@ -110,11 +110,14 @@ class MatchSyncService
 
         // 1. Přednost má external_id (hledáme v rámci sezóny a týmu; zároveň deduplikujeme pokud je více záznamů)
         if ($externalMatchId) {
-            $matchesByExt = BasketballMatch::where('season_id', $season->id)
+            // Pro kompatibilitu s DB bez JSON funkcí načteme zápasy týmu v sezóně a profiltrujeme v PHP
+            $matchesInSeason = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata->external_id', (string) $externalMatchId)
-                ->orderBy('id')
                 ->get();
+
+            $matchesByExt = $matchesInSeason->filter(function ($m) use ($externalMatchId) {
+                return ($m->metadata['external_id'] ?? null) == (string) $externalMatchId;
+            })->sortBy('id');
 
             if ($matchesByExt->count() > 1) {
                 $match = $this->mergeDuplicatesByExternalId($team, $season, (string) $externalMatchId, $run);
@@ -123,21 +126,18 @@ class MatchSyncService
             }
 
             // Pokud jsme stále nenašli, zkusíme najít zápas s tímto external_id KDEKOLIV v této sezóně (i pro jiný tým)
-            // To pomůže v případě, že se match identity key změnil tak drasticky, že se netrefil ani fallback.
-            // POZOR: Toto by mohlo najít zápas jiného našeho týmu ve stejné soutěži, proto kontrolujeme, zda existující match má našeho soupeře.
             if (! $match) {
+                // Pozor: Zde by globální dotaz mohl být pomalý, ale v dané sezóně bývá jen pár set zápasů celkem.
                 $globalMatch = BasketballMatch::where('season_id', $season->id)
-                    ->where('metadata->external_id', (string) $externalMatchId)
-                    ->first();
+                    ->get()
+                    ->first(function ($m) use ($externalMatchId) {
+                        return ($m->metadata['external_id'] ?? null) == (string) $externalMatchId;
+                    });
 
                 if ($globalMatch) {
-                    // Pokud je to zápas pro jiný tým, ale má stejné external_id, tak je to pravděpodobně ten samý zápas
-                    // a my ho chceme "převzít" pod náš tým, pokud náš tým v tom zápase skutečně figuruje.
-                    // Ale bezpečnější je ho jen zalogovat a pokračovat, pokud si nejsme jisti.
                     \Log::info("MatchSync: Found match {$externalMatchId} under different team (ID {$globalMatch->team_id}), existing match ID: {$globalMatch->id}");
 
-                    // Pokud má stejný team_id jako my, tak ho použijeme (to by se ale mělo stát už v prvním dotazu)
-                    if ((int)$globalMatch->team_id === (int)$team->id) {
+                    if ((int) $globalMatch->team_id === (int) $team->id) {
                         $match = $globalMatch;
                     }
                 }
@@ -146,10 +146,16 @@ class MatchSyncService
 
         // 2. Fallback na identity key (v rámci sezóny a týmu)
         if (! $match) {
-            $match = BasketballMatch::where('season_id', $season->id)
-                ->where('team_id', $team->id)
-                ->where('metadata->match_identity_key', (string) $matchIdentityKey)
-                ->first();
+            // Zápasy pro tým v sezóně už máme načtené z kroku 1, pokud bylo externalMatchId
+            if (! isset($matchesInSeason)) {
+                $matchesInSeason = BasketballMatch::where('season_id', $season->id)
+                    ->where('team_id', $team->id)
+                    ->get();
+            }
+
+            $match = $matchesInSeason->first(function ($m) use ($matchIdentityKey) {
+                return ($m->metadata['match_identity_key'] ?? null) == (string) $matchIdentityKey;
+            });
         }
 
         // 3. Poslední záchrana: vyhledání podle data, soupeře a směru zápasu (is_home)
@@ -364,9 +370,11 @@ class MatchSyncService
     {
         $dups = BasketballMatch::where('season_id', $season->id)
             ->where('team_id', $team->id)
-            ->where('metadata->external_id', $externalId)
-            ->orderBy('id')
-            ->get();
+            ->get()
+            ->filter(function ($m) use ($externalId) {
+                return ($m->metadata['external_id'] ?? null) == (string) $externalId;
+            })
+            ->sortBy('id');
 
         if ($dups->count() <= 1) {
             return $dups->first();

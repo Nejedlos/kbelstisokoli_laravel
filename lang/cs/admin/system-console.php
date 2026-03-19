@@ -97,6 +97,20 @@ return [
                 'force' => 'Vynutit refresh (Ignore cache)',
             ],
         ],
+        'stats_sync_standings' => [
+            'label' => 'Statistiky: Tabulky (Sync)',
+            'desc' => 'Synchronizace ligových tabulek (pořadí týmů) ze všech soutěží.',
+            'flags' => [
+                'force' => 'Vynutit (ignorovat cache)',
+            ],
+            'selects' => [
+                'season' => [
+                    'label' => 'Sezóna',
+                    'active' => '--- Aktuální sezóna ---',
+                    'all' => '--- Všechny sezóny ---',
+                ],
+            ],
+        ],
         'stats_sync_team' => [
             'label' => 'Statistiky: Tým (Sync)',
             'desc' => 'Synchronizace kompletní soupisky a zápasů vybraného týmu.',

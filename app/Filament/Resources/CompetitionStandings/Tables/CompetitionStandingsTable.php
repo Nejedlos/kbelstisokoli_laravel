@@ -4,6 +4,15 @@ namespace App\Filament\Resources\CompetitionStandings\Tables;
 
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Stats\Sync\CompetitionSyncService;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -87,7 +96,28 @@ class CompetitionStandingsTable
                     })
             ])
             ->actions([
-                //
+                Action::make('syncCompetition')
+                    ->label('Synchronizovat')
+                    ->icon(FilamentIcon::get(AppIcon::REFRESH))
+                    ->color('success')
+                    ->action(function ($record, CompetitionSyncService $syncService) {
+                        try {
+                            $syncService->syncStandingsOnly($record->competition_url, $record->season);
+
+                            Notification::make()
+                                ->title('Tabulka soutěže synchronizována')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Chyba při synchronizaci')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

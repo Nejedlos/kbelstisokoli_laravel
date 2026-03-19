@@ -77,14 +77,16 @@ class HelpQueryService
     {
         if ($this->section === 'admin') {
             $query->where(function ($q) {
-                $q->where('metadata->section', 'admin')
-                    ->orWhere('metadata->section', 'both');
+                // FALLBACK pro Webglobe (bez JSON operátorů v SQL)
+                $q->where('metadata', 'LIKE', '%"section":"admin"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%');
             });
         } elseif ($this->section === 'member') {
             $query->where(function ($q) {
-                $q->where('metadata->section', 'member')
-                    ->orWhere('metadata->section', 'both')
-                    ->orWhereNull('metadata->section'); // Default je member
+                // FALLBACK pro Webglobe (bez JSON operátorů v SQL)
+                $q->where('metadata', 'LIKE', '%"section":"member"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%')
+                    ->orWhereNull('metadata'); // Default je member
             });
         }
 
@@ -93,7 +95,8 @@ class HelpQueryService
             $query->where(function ($q) use ($filteringRoles) {
                 $q->whereNull('audience_roles');
                 foreach ($filteringRoles as $role) {
-                    $q->orWhereJsonContains('audience_roles', $role);
+                    // FALLBACK: Pro produkční DB bez JSON funkcí (Webglobe) použijeme LIKE.
+                    $q->orWhere('audience_roles', 'LIKE', '%"' . (string) $role . '"%');
                 }
             });
         }
@@ -114,12 +117,14 @@ class HelpQueryService
                     })
                     ->where(function ($q) use ($section) {
                         if ($section === 'admin') {
-                            $q->where('help_articles.metadata->section', 'admin')
-                              ->orWhere('help_articles.metadata->section', 'both');
+                            // FALLBACK pro Webglobe
+                            $q->where('help_articles.metadata', 'LIKE', '%"section":"admin"%')
+                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%');
                         } elseif ($section === 'member') {
-                            $q->where('help_articles.metadata->section', 'member')
-                              ->orWhere('help_articles.metadata->section', 'both')
-                              ->orWhereNull('help_articles.metadata->section');
+                            // FALLBACK pro Webglobe
+                            $q->where('help_articles.metadata', 'LIKE', '%"section":"member"%')
+                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%')
+                              ->orWhereNull('help_articles.metadata');
                         }
                     });
             });
@@ -131,7 +136,8 @@ class HelpQueryService
             $query->where(function ($q) use ($filteringRoles) {
                 $q->whereNull('audience_roles');
                 foreach ($filteringRoles as $role) {
-                    $q->orWhereJsonContains('audience_roles', $role);
+                    // FALLBACK pro Webglobe
+                    $q->orWhere('audience_roles', 'LIKE', '%"' . (string) $role . '"%');
                 }
             });
         }

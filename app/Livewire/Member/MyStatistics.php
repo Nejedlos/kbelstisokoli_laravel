@@ -20,6 +20,7 @@ class MyStatistics extends Component
     public $selectedUserId;
 
     public $sortField = 'pts_total';
+
     public $sortDirection = 'desc';
 
     public $matches = [];
@@ -70,6 +71,7 @@ class MyStatistics extends Component
     public $recentForm = [];
 
     public $teamLeaders = [];
+
     public $matchStats = [];
 
     public function mount($teamId = null, $seasonId = null, $view = null, $userId = null)
@@ -80,7 +82,7 @@ class MyStatistics extends Component
             $this->view = $view;
         }
 
-        $this->sortField = match($this->view) {
+        $this->sortField = match ($this->view) {
             'team' => 'pts_total',
             'personal' => 'pts',
             'matches' => 'date',
@@ -127,7 +129,7 @@ class MyStatistics extends Component
     {
         if (in_array($propertyName, ['seasonId', 'teamId', 'sortField', 'sortDirection', 'view', 'statsView'])) {
             if ($propertyName === 'teamId') {
-                app(\App\Services\Member\MemberContext::class)->setActiveTeamId((int)$this->teamId);
+                app(\App\Services\Member\MemberContext::class)->setActiveTeamId((int) $this->teamId);
             }
             $this->loadStats();
         }
@@ -224,9 +226,14 @@ class MyStatistics extends Component
                 $this->chartSeries = $series->sortBy('date')->values()->toArray();
 
                 // Řazení pro osobní zápisy (podle aktuálního filtru tabulky)
-                $this->perGameSeries = $series->sortBy(function($item) {
-                    if ($this->sortField === 'date') return $item['date'];
-                    if ($this->sortField === 'opponent') return $item['opponent'];
+                $this->perGameSeries = $series->sortBy(function ($item) {
+                    if ($this->sortField === 'date') {
+                        return $item['date'];
+                    }
+                    if ($this->sortField === 'opponent') {
+                        return $item['opponent'];
+                    }
+
                     return $item['values'][$this->sortField] ?? 0;
                 }, SORT_REGULAR, $this->sortDirection === 'desc')->values()->toArray();
 
@@ -239,7 +246,7 @@ class MyStatistics extends Component
                 } else {
                     // Pokud jsou "Všechny týmy", sečteme unikátní zápasy všech týmů uživatele v sezóně
                     $userTeamsIds = $user?->playerProfile?->teams()->wherePivot('is_on_roster', true)->pluck('teams.id')->toArray() ?? [];
-                    if (!empty($userTeamsIds)) {
+                    if (! empty($userTeamsIds)) {
                         $this->teamMatchesCount = \App\Models\BasketballMatch::whereIn('team_id', $userTeamsIds)
                             ->where('season_id', $this->seasonId)
                             ->whereNotNull('score_home')
@@ -323,13 +330,13 @@ class MyStatistics extends Component
                             $q->whereHas('basketballMatch', function ($mq) use ($teamId) {
                                 $mq->where('team_id', $teamId);
                             })
-                            ->orWhere('metadata', 'like', '%"team_id":' . (int)$teamId . '%')
-                            ->orWhere(function($oq) use ($baseNames) {
-                                foreach (array_unique($baseNames) as $name) {
-                                    $oq->orWhere('metadata', 'like', '%"home_team":"%'.$name.'%"%')
-                                       ->orWhere('metadata', 'like', '%"away_team":"%'.$name.'%"%');
-                                }
-                            });
+                                ->orWhere('metadata', 'like', '%"team_id":'.(int) $teamId.'%')
+                                ->orWhere(function ($oq) use ($baseNames) {
+                                    foreach (array_unique($baseNames) as $name) {
+                                        $oq->orWhere('metadata', 'like', '%"home_team":"%'.$name.'%"%')
+                                            ->orWhere('metadata', 'like', '%"away_team":"%'.$name.'%"%');
+                                    }
+                                });
                         });
                     }
                 }
@@ -353,7 +360,7 @@ class MyStatistics extends Component
                     $allPlayers = $service->getAllPlayersStats($teamId, $this->seasonId);
 
                     // Řazení
-                    $this->topScorers = $allPlayers->sortBy(function($item) {
+                    $this->topScorers = $allPlayers->sortBy(function ($item) {
                         return $item[$this->sortField];
                     }, SORT_REGULAR, $this->sortDirection === 'desc')->values()->toArray();
 
@@ -363,7 +370,7 @@ class MyStatistics extends Component
                     $this->teamFormSummary = $formData['count'] > 0 ? [
                         'avg_pts_for' => $formData['avg_pts_for'],
                         'avg_pts_against' => $formData['avg_pts_against'],
-                        'count' => $formData['count']
+                        'count' => $formData['count'],
                     ] : null;
                     $this->teamLeaders = $service->getTeamLeaders($teamId, $this->seasonId);
                     $this->pointsContribution = $service->getPointsDistribution($teamId, $this->seasonId);
@@ -390,7 +397,7 @@ class MyStatistics extends Component
                     $this->teamFormSummary = $formData['count'] > 0 ? [
                         'avg_pts_for' => $formData['avg_pts_for'],
                         'avg_pts_against' => $formData['avg_pts_against'],
-                        'count' => $formData['count']
+                        'count' => $formData['count'],
                     ] : null;
                 } else {
                     $this->teamSummary = [];
@@ -421,7 +428,9 @@ class MyStatistics extends Component
 
                 // Mapování polí pro řazení zápasů
                 $sortField = $this->sortField;
-                if ($sortField === 'date') $sortField = 'scheduled_at';
+                if ($sortField === 'date') {
+                    $sortField = 'scheduled_at';
+                }
 
                 $this->matches = $query->orderBy($sortField, $this->sortDirection)
                     ->get()
@@ -438,15 +447,14 @@ class MyStatistics extends Component
 
             \Log::debug('MyStatistics::loadStats finished successfully');
         } catch (\Exception $e) {
-            \Log::error('MyStatistics::loadStats failed: ' . $e->getMessage(), [
+            \Log::error('MyStatistics::loadStats failed: '.$e->getMessage(), [
                 'exception' => $e,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
         }
 
         $this->dispatch('statsLoaded');
     }
-
 
     public function render()
     {

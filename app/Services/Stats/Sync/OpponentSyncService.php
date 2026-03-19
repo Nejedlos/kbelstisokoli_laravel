@@ -16,16 +16,31 @@ class OpponentSyncService
 
         $opponent = null;
 
+        // Pro maximální kompatibilitu s produkční DB (Webglobe), která může mít problém s JSON funkcemi,
+        // načteme všechny soupeře do paměti a vyhledáme je tam. Soupeřů je jen pár stovek.
+        $allOpponents = Opponent::all();
+
         // 1. Zkusíme hledat podle external_id v metadatech
         if ($externalId) {
-            $opponent = Opponent::where('metadata->external_id', (string) $externalId)->first();
+            $opponent = $allOpponents->first(function ($op) use ($externalId) {
+                return ($op->metadata['external_id'] ?? null) == $externalId;
+            });
         }
 
         // 2. Pokud nemáme external_id nebo jsme nenašli, hledáme podle jména nebo variant v metadatech
         if (! $opponent) {
-            $opponent = Opponent::where('name', (string) $name)
-                ->orWhereJsonContains('metadata->external_name_variants', (string) $name)
-                ->first();
+            // Nejprve zkusíme přesnou shodu jména
+            $opponent = $allOpponents->firstWhere('name', $name);
+
+            if (! $opponent) {
+                // Pokud nemáme přesnou shodu, prohledáme varianty jmen v paměti.
+                $opponent = $allOpponents->first(function ($op) use ($name) {
+                    $metadata = $op->metadata;
+                    $variants = $metadata['external_name_variants'] ?? [];
+
+                    return in_array($name, (array) $variants);
+                });
+            }
         }
 
         // 3. Poslední záchrana: Pokud jsme stále nenašli, zkusíme najít, zda neexistuje přijatý merge

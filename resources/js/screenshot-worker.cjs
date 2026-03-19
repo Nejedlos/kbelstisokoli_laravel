@@ -1,6 +1,29 @@
 'use strict';
 
-const { chromium } = require('playwright');
+let playwright;
+try {
+  playwright = require('playwright');
+} catch (e) {
+  try {
+    playwright = require('playwright-core');
+  } catch (e2) {
+    try {
+      playwright = require('playwright-chromium');
+    } catch (e3) {
+      console.error(JSON.stringify({
+        ok: false,
+        error: 'Could not load playwright, playwright-core or playwright-chromium',
+        details: e.message,
+        stack: e.stack,
+        node_path: process.env.NODE_PATH,
+        cwd: process.cwd()
+      }));
+      process.exit(1);
+    }
+  }
+}
+
+const { chromium } = playwright;
 
 function parseArgs(argv) {
   const out = {};
@@ -27,7 +50,10 @@ function parseArgs(argv) {
     process.exit(2);
   }
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+  });
   try {
     const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: dpr });
     const page = await context.newPage();

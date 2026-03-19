@@ -13,6 +13,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -139,6 +140,7 @@ class SystemConsole extends Page
     {
         if (function_exists('shell_exec')) {
             shell_exec("kill -9 $pid");
+            Cache::forget('system_console_kpi_data');
             Notification::make()
                 ->title(__('admin/system-console.diagnostics.kpi.actions.process_killed', ['pid' => $pid]))
                 ->success()
@@ -160,6 +162,7 @@ class SystemConsole extends Page
                 'error_summary' => 'Terminated manually from System Console (Stuck detection).',
                 'finished_at' => now(),
             ]);
+            Cache::forget('system_console_kpi_data');
             Notification::make()
                 ->title(__('admin/system-console.diagnostics.kpi.actions.import_fixed', ['id' => $id]))
                 ->success()
@@ -197,6 +200,8 @@ class SystemConsole extends Page
                 DB::table($table)->truncate();
             }
 
+            Cache::forget('system_console_kpi_data');
+
             Notification::make()
                 ->title(__('admin/system-console.diagnostics.kpi.actions.table_pruned', ['table' => $table]))
                 ->success()
@@ -219,6 +224,8 @@ class SystemConsole extends Page
                 'error_summary' => 'Bulk terminated from System Console (Stuck detection).',
                 'finished_at' => now(),
             ]);
+
+        Cache::forget('system_console_kpi_data');
 
         Notification::make()
             ->title(__('admin/system-console.diagnostics.kpi.actions.bulk_imports_fixed', ['count' => $count]))
@@ -243,6 +250,8 @@ class SystemConsole extends Page
                 }
             }
         }
+
+        Cache::forget('system_console_kpi_data');
 
         Notification::make()
             ->title(__('admin/system-console.diagnostics.kpi.actions.bulk_processes_killed', ['count' => $count]))
@@ -426,6 +435,26 @@ class SystemConsole extends Page
                 ],
                 'color' => 'primary',
                 'icon' => FilamentIcon::get(AppIcon::USERS),
+            ],
+            'stats:sync-standings' => [
+                'label' => __('admin/system-console.commands.stats_sync_standings.label'),
+                'desc' => __('admin/system-console.commands.stats_sync_standings.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--force' => __('admin/system-console.commands.stats_sync_standings.flags.force'),
+                ],
+                'selects' => [
+                    [
+                        'name' => 'seasonNameOrId',
+                        'label' => __('admin/system-console.commands.stats_sync_standings.selects.season.label'),
+                        'options' => [
+                            '' => __('admin/system-console.commands.stats_sync_standings.selects.season.active'),
+                            ...$seasonOptions,
+                        ],
+                    ],
+                ],
+                'color' => 'success',
+                'icon' => 'heroicon-m-table-cells',
             ],
             'stats:sync-team-season' => [
                 'label' => __('admin/system-console.commands.stats_sync_team.label'),
@@ -1309,7 +1338,8 @@ class SystemConsole extends Page
             // Pokud hook není nalezen (např. po vymazání/změně cache), HandlesStreaming trait
             // vyhodí chybu, protože se snaží volat metodu na null objektu (StreamManager::to()).
             // Zde voláme stream() s parametry a pokud selže, tiše ignorujeme - výstup je stále v $this->consoleOutput.
-            $this->stream(to: 'consoleOutput', content: $content, replace: $replace);
+            // Používáme HtmlString, aby Livewire 3 streaming neescapoval HTML tagy (např. barvy z ConsoleService).
+            $this->stream(to: 'consoleOutput', content: new \Illuminate\Support\HtmlString($content), replace: $replace);
         } catch (\Throwable $e) {
             // Ignorujeme chybu streamování, uživatel uvidí výstup po dokončení akce v $this->consoleOutput.
             Log::debug('SystemConsole: Streaming failed, likely due to cache change.', [

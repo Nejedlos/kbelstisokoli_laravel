@@ -255,13 +255,16 @@ class FeedbackController extends Controller
                 'mime' => $result['mime'] ?? 'image/png',
             ]);
         } catch (\Throwable $e) {
-            \Log::warning('Server screenshot failed', [
+            \Log::error('Server screenshot failed', [
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return response()->json([
                 'ok' => false,
-                'message' => 'Server screenshot failed',
-                'error' => app()->environment('local', 'testing') ? $e->getMessage() : null,
+                'message' => 'Server screenshot failed: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

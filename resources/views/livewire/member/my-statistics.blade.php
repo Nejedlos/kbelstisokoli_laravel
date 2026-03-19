@@ -146,12 +146,12 @@
                 </button>
             </div>
         @endif
-        @if(($summary || $isActiveInSelectedTeam) && $view === 'personal')
+        @if($summary && ($summary['gp'] ?? 0) > 0 && $view === 'personal')
             {{-- Summary Cards --}}
             <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-6">
                 @php
                     $gpValue = $summary['gp'] ?? 0;
-                    if ($teamMatchesCount > 0) {
+                    if ($teamMatchesCount > 0 && ($summary['gp'] ?? 0) > 0) {
                         $gpValue = $gpValue . ' / ' . $teamMatchesCount;
                     }
 
@@ -775,8 +775,24 @@
                     </div>
                 </div>
             </div>
+        @elseif($view === 'personal')
+            <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-12 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-gray-700 text-center flex flex-col items-center justify-center gap-6 shadow-inner">
+                <div class="w-24 h-24 rounded-full bg-white dark:bg-gray-900 shadow-xl flex items-center justify-center text-gray-200 dark:text-gray-800 relative">
+                    <i class="fa-light fa-chart-user text-5xl"></i>
+                    <div class="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg border-4 border-white dark:border-gray-800">
+                        <i class="fa-light fa-magnifying-glass text-sm"></i>
+                    </div>
+                </div>
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight mb-3">Žádná data k zobrazení</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                        Pro vybraného hráče, sezónu a tým nebyla nalezena žádná odehraná utkání. Zkuste změnit filtry nebo vybrat jinou sezónu.
+                    </p>
+                </div>
+            </div>
+        @endif
 
-            {{-- Match Table --}}
+        @if($summary && ($summary['gp'] ?? 0) > 0 && $view === 'personal')
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="p-6 border-b border-gray-50 dark:border-gray-700 flex justify-between items-center">
                     <h3 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-widest">
@@ -964,26 +980,6 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        @else
-            {{-- Empty State --}}
-            <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
-                <i class="fa-light fa-chart-user text-6xl text-gray-100 dark:text-gray-700"></i>
-                <div class="text-gray-400 font-medium italic">Pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }} nejsou v databázi pro tohoto hráče žádná data.</div>
-            </div>
-        @endif
-        @elseif($view === 'personal')
-            {{-- Empty State pokud nejsou data (případně i pro neaktivní týmy) --}}
-            <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
-                <i class="fa-light fa-chart-user text-6xl text-gray-100 dark:text-gray-700"></i>
-                <div class="text-gray-400 font-medium italic">Pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }} nejsou v databázi pro tohoto hráče žádná data.</div>
-            </div>
-        @endif
-
-        {{-- EXTERNAL STATS --}}
-        @if(!empty($externalStats) || !empty($externalMatches))
-            <div class="mt-16">
-                @include('member.statistics.partials.external-stats-view')
             </div>
         @endif
     @elseif($view === 'career')

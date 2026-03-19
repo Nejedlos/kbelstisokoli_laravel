@@ -49,11 +49,13 @@ class StatisticSyncService
 
         $query = StatisticRow::where($attributes);
 
-        if ($contentHash) {
-            $query->where('source_metadata->content_hash', (string) $contentHash);
-        }
+        $statRow = $query->get()->first(function ($r) use ($contentHash) {
+            if (! $contentHash) {
+                return true;
+            }
 
-        $statRow = $query->first();
+            return ($r->source_metadata['content_hash'] ?? null) == (string) $contentHash;
+        });
 
         if ($statRow) {
             $oldValues = $statRow->only(['values']);
