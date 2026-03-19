@@ -29,7 +29,10 @@
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-gray-500">
                             <span class="flex items-center gap-1.5">
                                 <i class="fa-light fa-calendar text-primary-500"></i>
-                                {{ $this->selected_event?->starts_at->format('d.m.Y H:i') }}
+                                @php
+                                    $eventDate = $this->selected_event?->starts_at ?? $this->selected_event?->scheduled_at;
+                                @endphp
+                                {{ $eventDate?->format('d.m.Y H:i') }}
                             </span>
                             @if($this->selected_event?->location)
                                 <span class="flex items-center gap-1.5">

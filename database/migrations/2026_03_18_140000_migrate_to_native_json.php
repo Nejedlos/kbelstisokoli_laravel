@@ -72,6 +72,38 @@ return new class extends Migration
 
         foreach ($tables as $table => $columns) {
             if (Schema::hasTable($table)) {
+                // Vyčištění neplatných dat před konverzí na JSON
+                // Prázdné řetězce nebo neplatné JSON formáty dělají MariaDB problémy při změně na JSON typ.
+                foreach ($columns as $column) {
+                    try {
+                        // 1. Nejprve převedeme prázdné řetězce na NULL
+                        DB::table($table)
+                            ->where($column, '')
+                            ->orWhere($column, '""')
+                            ->update([$column => null]);
+
+                        // 2. Projdeme neplatné JSON hodnoty a zkusíme je "opravit" (zabalit do uvozovek přes json_encode)
+                        // Toto řeší případy jako 'aggressive' -> '"aggressive"'
+                        // Používáme chunk, abychom nezahltili paměť u velkých tabulek (např. logs)
+                        DB::table($table)
+                            ->whereNotNull($column)
+                            ->select(['id', $column])
+                            ->chunkById(500, function ($rows) use ($table, $column) {
+                                foreach ($rows as $row) {
+                                    $value = $row->{$column};
+                                    // Pokud to není validní JSON, zkusíme to zakódovat
+                                    if (! $this->isValidJson($value)) {
+                                        DB::table($table)
+                                            ->where('id', $row->id)
+                                            ->update([$column => json_encode($value, JSON_UNESCAPED_UNICODE)]);
+                                    }
+                                }
+                            });
+                    } catch (\Throwable $e) {
+                        // Tichý fail - pokud např. chybí ID sloupec v tabulce, chunkById selže
+                    }
+                }
+
                 Schema::table($table, function (Blueprint $tableGroup) use ($columns) {
                     foreach ($columns as $column) {
                         $tableGroup->json($column)->nullable()->change();
@@ -79,6 +111,26 @@ return new class extends Migration
                 });
             }
         }
+    }
+
+    /**
+     * Pomocná metoda pro ověření JSONu v PHP (MariaDB JSON_VALID() nemusí být v této fázi spolehlivé)
+     */
+    protected function isValidJson($value): bool
+    {
+        if (! is_string($value)) {
+            return false;
+        }
+
+        if ($value === 'null' || $value === 'true' || $value === 'false') {
+            return true;
+        }
+
+        // Zkusíme dekódovat. Pokud to není pole nebo objekt, musí to být obalené v uvozovkách
+        // aby to MariaDB brala jako validní JSON string.
+        json_decode($value);
+
+        return json_last_error() === JSON_ERROR_NONE;
     }
 
     /**
@@ -148,7 +200,7 @@ return new class extends Migration
             if (Schema::hasTable($table)) {
                 Schema::table($table, function (Blueprint $tableGroup) use ($columns) {
                     foreach ($columns as $column) {
-                        $tableGroup->json($column)->nullable()->change();
+                        $tableGroup->longText($column)->nullable()->change();
                     }
                 });
             }

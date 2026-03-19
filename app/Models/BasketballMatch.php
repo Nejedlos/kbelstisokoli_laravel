@@ -43,6 +43,14 @@ class BasketballMatch extends Model
     ];
 
     /**
+     * Alias pro scheduled_at, aby se model choval stejně jako Training/ClubEvent.
+     */
+    public function getStartsAtAttribute()
+    {
+        return $this->scheduled_at;
+    }
+
+    /**
      * Docházka (dostupnost) k tomuto zápasu.
      */
     public function attendances(): MorphMany

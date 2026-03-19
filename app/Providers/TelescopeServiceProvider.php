@@ -21,9 +21,35 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $isLocal = $this->app->environment('local');
 
+        // Optimalizace pro localhost: vypneme náročné sledovače, které nepotřebujeme neustále
+        if ($isLocal) {
+            config([
+                'telescope.watchers.' . \Laravel\Telescope\Watchers\ModelWatcher::class . '.hydrations' => false,
+                'telescope.watchers.' . \Laravel\Telescope\Watchers\QueryWatcher::class . '.slow' => 50, // Zaznamenáváme jen dotazy nad 50ms
+                'telescope.watchers.' . \Laravel\Telescope\Watchers\ViewWatcher::class => false, // ViewWatcher je na localhostu velmi hlučný
+            ]);
+        }
+
         Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
-            return $isLocal ||
-                   $entry->isReportableException() ||
+            if ($isLocal) {
+                // Na localhostu filtrujeme Livewire polling a tiché requesty, pokud nejsou chybové
+                if ($entry->type === 'request' && (
+                    str_contains($entry->content['uri'] ?? '', 'livewire/update') ||
+                    str_contains($entry->content['uri'] ?? '', '_debugbar') ||
+                    str_contains($entry->content['uri'] ?? '', 'telescope')
+                )) {
+                    return $entry->isReportableException() || $entry->isFailedRequest();
+                }
+
+                // Pokud jde o query, na localhostu nás zajímají jen ty pomalé (config výše zajistí 'slow' flag)
+                if ($entry->type === 'query') {
+                    return ($entry->content['slow'] ?? false) || $entry->isReportableException();
+                }
+
+                return true;
+            }
+
+            return $entry->isReportableException() ||
                    $entry->isFailedRequest() ||
                    $entry->isFailedJob() ||
                    $entry->isScheduledTask() ||

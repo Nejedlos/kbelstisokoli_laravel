@@ -85,30 +85,48 @@ class RealAttendance extends Page
         $activeSeason = Season::where('is_active', true)->first();
 
         $trainings = Training::whereBetween('starts_at', [$startDate, $endDate])
-            ->with(['teams.activePlayers.user', 'attendances'])
-            ->get()
-            ->map(fn($item) => $this->mapEvent($item, Training::class, __('admin.real_attendance.event_types.training') . ($item->location ? ' - ' . $item->location : ''), $item->starts_at, \App\Support\IconHelper::TRAININGS, $activeSeason));
+            ->with(['teams.activePlayers', 'attendances'])
+            ->get();
 
         $matches = BasketballMatch::whereBetween('scheduled_at', [$startDate, $endDate])
-            ->with(['teams.activePlayers.user', 'attendances', 'opponent'])
-            ->get()
-            ->map(fn($item) => $this->mapEvent($item, BasketballMatch::class, __('admin.real_attendance.event_types.match') . ': ' . $item->getOfficialTeamNameAttribute() . ' vs ' . $item->getOfficialOpponentNameAttribute(), $item->scheduled_at, \App\Support\IconHelper::MATCHES, $activeSeason));
+            ->with(['teams.activePlayers', 'attendances', 'opponent', 'team'])
+            ->get();
 
         $clubEvents = ClubEvent::whereBetween('starts_at', [$startDate, $endDate])
-            ->with(['teams.activePlayers.user', 'attendances'])
-            ->get()
-            ->map(fn($item) => $this->mapEvent($item, ClubEvent::class, $item->getTranslation('title', app()->getLocale()), $item->starts_at, \App\Support\IconHelper::EVENTS, $activeSeason));
+            ->with(['teams.activePlayers', 'attendances'])
+            ->get();
 
-        return collect([])
+        // Optimalizace: Získáme všechny uživatele najednou pro výpočet statistik
+        $allUserIds = collect([])
             ->concat($trainings)
             ->concat($matches)
             ->concat($clubEvents)
+            ->flatMap(fn($event) => $event->teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id')))
+            ->unique();
+
+        $configs = $activeSeason
+            ? UserSeasonConfig::where('season_id', $activeSeason->id)
+                ->whereIn('user_id', $allUserIds)
+                ->where('track_attendance', true)
+                ->get()
+            : collect([]);
+
+        $trainingsMapped = $trainings->map(fn($item) => $this->mapEvent($item, Training::class, __('admin.real_attendance.event_types.training') . ($item->location ? ' - ' . $item->location : ''), $item->starts_at, \App\Support\IconHelper::TRAININGS, $activeSeason, $configs));
+
+        $matchesMapped = $matches->map(fn($item) => $this->mapEvent($item, BasketballMatch::class, __('admin.real_attendance.event_types.match') . ': ' . $item->getOfficialTeamNameAttribute() . ' vs ' . $item->getOfficialOpponentNameAttribute(), $item->scheduled_at, \App\Support\IconHelper::MATCHES, $activeSeason, $configs));
+
+        $clubEventsMapped = $clubEvents->map(fn($item) => $this->mapEvent($item, ClubEvent::class, $item->getTranslation('title', app()->getLocale()), $item->starts_at, \App\Support\IconHelper::EVENTS, $activeSeason, $configs));
+
+        return collect([])
+            ->concat($trainingsMapped)
+            ->concat($matchesMapped)
+            ->concat($clubEventsMapped)
             ->sortByDesc('starts_at');
     }
 
-    protected function mapEvent($item, $type, $title, $startsAt, $icon, $activeSeason)
+    protected function mapEvent($item, $type, $title, $startsAt, $icon, $activeSeason, $configs = null)
     {
-        $stats = $this->calculateStats($item, $activeSeason);
+        $stats = $this->calculateStats($item, $activeSeason, $configs);
 
         return [
             'id' => $item->id,
@@ -121,7 +139,7 @@ class RealAttendance extends Page
         ];
     }
 
-    protected function calculateStats($event, $activeSeason)
+    protected function calculateStats($event, $activeSeason, $configs = null)
     {
         if (!$activeSeason) {
             return [
@@ -145,10 +163,14 @@ class RealAttendance extends Page
         }
 
         // Zjistíme, kolik z nich má zapnutý track_attendance v této sezóně
-        $expectedCount = UserSeasonConfig::where('season_id', $activeSeason->id)
-            ->whereIn('user_id', $userIds)
-            ->where('track_attendance', true)
-            ->count();
+        if ($configs) {
+            $expectedCount = $configs->whereIn('user_id', $userIds)->count();
+        } else {
+            $expectedCount = UserSeasonConfig::where('season_id', $activeSeason->id)
+                ->whereIn('user_id', $userIds)
+                ->where('track_attendance', true)
+                ->count();
+        }
 
         return [
             'expected' => $expectedCount,
@@ -163,6 +185,14 @@ class RealAttendance extends Page
             return null;
         }
 
-        return $this->selectedEventType::find($this->selectedEventId);
+        $query = $this->selectedEventType::query();
+
+        if ($this->selectedEventType === BasketballMatch::class) {
+            $query->with(['team', 'opponent', 'venue', 'teams.activePlayers']);
+        } elseif ($this->selectedEventType === Training::class || $this->selectedEventType === ClubEvent::class) {
+            $query->with(['teams.activePlayers']);
+        }
+
+        return $query->find($this->selectedEventId);
     }
 }

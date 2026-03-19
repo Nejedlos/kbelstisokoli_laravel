@@ -29,7 +29,7 @@ class FinanceAutomationService
         }
 
         $teams = $event->teams;
-        $userIds = $teams->flatMap(fn($team) => $team->members->pluck('id'))->unique();
+        $userIds = $teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id'))->unique();
 
         foreach ($userIds as $userId) {
             $user = User::find($userId);
@@ -81,7 +81,7 @@ class FinanceAutomationService
 
         // Načteme všechny členy z týmů přiřazených k akci
         $teams = $event->teams;
-        $userIds = $teams->flatMap(fn($team) => $team->members->pluck('id'))->unique();
+        $userIds = $teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id'))->unique();
 
         foreach ($userIds as $userId) {
             $user = User::find($userId);

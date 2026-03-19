@@ -36,7 +36,17 @@ export default defineConfig(({ mode }) => {
         ],
         server: {
             watch: {
-                ignored: ['**/storage/framework/views/**'],
+                ignored: [
+                    '**/storage/framework/views/**',
+                    '**/storage/logs/**',
+                    '**/node_modules/**',
+                    '**/vendor/**',
+                    '**/*.html', // Ignorujeme pomocné HTML soubory v rootu
+                    '**/.env*',
+                    '**/composer.lock',
+                    '**/package-lock.json',
+                    '**/.junie/**',
+                ],
             },
         },
     };

@@ -32,7 +32,7 @@ class AttendanceTracker extends Component
             if (!class_exists($this->attendableType)) {
                 return null;
             }
-            return $this->attendableType::find($this->attendableId);
+            return $this->attendableType::with(['teams'])->find($this->attendableId);
         } catch (\Throwable $e) {
             return null;
         }
@@ -57,7 +57,9 @@ class AttendanceTracker extends Component
         $attendable = $this->attendable;
         $teamIds = [];
 
-        if ($attendable && method_exists($attendable, 'teams')) {
+        if ($attendable && $attendable->relationLoaded('teams')) {
+            $teamIds = $attendable->teams->pluck('id')->toArray();
+        } elseif ($attendable && method_exists($attendable, 'teams')) {
             $teamIds = $attendable->teams()->pluck('teams.id')->toArray();
         }
 

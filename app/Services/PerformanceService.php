@@ -49,10 +49,18 @@ class PerformanceService
             return $this->settings;
         }
 
-        // Na produkci používáme primárně redis, fallback na file (pokud redis není dostupný/nastavený)
-        // Cache::store('redis') je na Webglobe nejrychlejší pro sdílená data.
-        // Nicméně v případě, že se k Redisu nelze připojit (RedisException), musíme se tomu vyhnout
-        $store = app()->isProduction() ? (config('cache.default') === 'redis' ? 'redis' : 'file') : 'database';
+        // Na produkci používáme primárně redis, fallback na file.
+        // Na localhostu preferujeme file před databází pro rychlost bootu.
+        $defaultCache = config('cache.default');
+        $store = 'file';
+
+        if (app()->isProduction()) {
+            $store = ($defaultCache === 'redis') ? 'redis' : 'file';
+        } else {
+            // Na localhostu použijeme 'file' i když je default 'database',
+            // protože performance settings se čtou při každém bootu a nechceme zbytečný DB dotaz.
+            $store = ($defaultCache === 'redis' || $defaultCache === 'array') ? $defaultCache : 'file';
+        }
 
         try {
             // Pokusíme se o přístup k cache s krátkým timeoutem (pokud by ovladač podporoval)
