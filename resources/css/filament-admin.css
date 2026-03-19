@@ -334,7 +334,7 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
 
 /* ==========================
    Globální basketbalový loader (KS)
-   Použití: <x-loader.basketball /> uvnitř Livewire komponenty.
+   Použití: <x-loader-basketball /> uvnitř Livewire komponenty.
    Overlay se zobrazuje při Livewire aktivitě díky [wire:loading.delay].
    ========================== */
 .ks-loader-overlay {

@@ -1,7 +1,7 @@
 <x-filament-panels::page>
-    <x-loader.basketball wire:target="askAi">
+    <x-loader-basketball wire:target="askAi">
         {{ __('admin.loader.ai_thinking') }}
-    </x-loader.basketball>
+    </x-loader-basketball>
 
     <div wire:init="askAi"
          x-data="{

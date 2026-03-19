@@ -82,7 +82,7 @@ Pro dlouhotrvající operace (AI odpovědi, importy, generování reportů) je k
 Vložte komponentu uvnitř Livewire komponenty (např. Filament Page):
 
 ```blade
-<x-loader.basketball />
+<x-loader-basketball />
 ```
 
 Loader je standardně skrytý (`hidden`) a automaticky se zobrazí při probíhající Livewire akci. Pokud potřebujete loader vázat jen na konkrétní akci, použijte `wire:target` na obalový element:

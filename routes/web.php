@@ -101,4 +101,3 @@ Route::middleware(['web'])->group(function () {
         ->name('dev.mail-preview.index');
 });
 
-include __DIR__ . '/test_loader.php';

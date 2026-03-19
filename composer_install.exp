@@ -1,0 +1,9 @@
+set timeout 600
+spawn ssh -p 20001 -o StrictHostKeyChecking=no ssh-588875@dw191.webglobe.com "/usr/bin/php8.4 /usr/bin/composer install --no-dev --working-dir=/home/html/kbelstisokoli.cz/public_html/secret"
+expect {
+    "password:" {
+        send "oaFZeUjI\r"
+        exp_continue
+    }
+    eof
+}

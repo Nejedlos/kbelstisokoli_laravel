@@ -13,7 +13,7 @@ Tento dokument popisuje použití globálního overlay loaderu s basketbalovým 
 Vložte komponentu do Livewire komponenty (např. Filament Page, Resource page):
 
 ```blade
-<x-loader.basketball />
+<x-loader-basketball />
 ```
 
 Loader je výchozím stavem skrytý (`hidden`) a objeví se automaticky při probíhající Livewire akci na dané komponentě.
