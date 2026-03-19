@@ -114,8 +114,8 @@ class PredictionService
         $finalProb = $this->invLogit($logitMix);
 
         // Zmírnění extrémů (squashing) - sport není nikdy 100% jistý
-        // Mapujeme 0-1 na 0.05-0.95
-        $finalProb = 0.05 + ($finalProb * 0.90);
+        // Mapujeme 0-1 na 0.10-0.90
+        $finalProb = 0.10 + ($finalProb * 0.80);
 
         // Confidence
         $confidence = 'low';
@@ -135,7 +135,7 @@ class PredictionService
                 'season_id' => $match->season_id,
                 'team_id' => $match->team_id,
                 'computed_at' => now(),
-                'model_version' => 'elo+form+roster+preview:v1',
+                'model_version' => 'elo+form+roster+preview:v2',
                 'probability_win' => $finalProb,
                 'probability_loss' => 1 - $finalProb,
                 'confidence' => $confidence,
@@ -210,8 +210,8 @@ class PredictionService
     private function sigmoid(float $x): float
     {
         // Simple mapping for delta to probability
-        // Používáme 600 místo 400 pro méně extrémní pravděpodobnosti (více konzervativní odhad pro basketbal)
-        return 1 / (1 + 10 ** (-$x / 600));
+        // Používáme 1000 místo 600 pro méně extrémní pravděpodobnosti (více konzervativní odhad pro basketbal)
+        return 1 / (1 + 10 ** (-$x / 1000));
     }
 
     private function generateExplanation(BasketballMatch $match, float $eloProb, array $formResult, array $rosterResult, array $previewResult, array $mutualResult): array

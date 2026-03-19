@@ -64,71 +64,73 @@ class SystemConsole extends Page
 
     protected function getKpiData(): array
     {
-        $kpi = [
-            'processes' => [],
-            'imports' => [],
-            'tables' => [],
-        ];
+        // Cachujeme na 60 sekund, aby polling nebo časté refreshe nebrzdily systém
+        return \Illuminate\Support\Facades\Cache::remember('system_console_kpi_data', 60, function () {
+            $kpi = [
+                'processes' => [],
+                'imports' => [],
+                'tables' => [],
+            ];
 
-        // 1. Artisan procesy (přes ps aux)
-        if (function_exists('shell_exec')) {
-            $psOutput = shell_exec('ps aux | grep artisan | grep -v grep');
-            if ($psOutput) {
-                $lines = explode("\n", trim($psOutput));
-                foreach ($lines as $line) {
-                    $parts = preg_split('/\s+/', trim($line));
-                    if (count($parts) >= 11) {
-                        $pid = $parts[1];
-                        $cmd = implode(' ', array_slice($parts, 10));
-                        // Zkusíme najít čas spuštění nebo délku běhu, pokud to PS vrací (záleží na OS)
-                        // Pro jednoduchost bereme vše, co obsahuje 'artisan'
-                        $kpi['processes'][] = [
-                            'pid' => $pid,
-                            'cmd' => $cmd,
-                            'is_stuck' => false, // TODO: pokročilejší detekce délky běhu
-                        ];
+            // 1. Artisan procesy (přes ps aux)
+            if (function_exists('shell_exec')) {
+                $psOutput = shell_exec('ps aux | grep artisan | grep -v grep');
+                if ($psOutput) {
+                    $lines = explode("\n", trim($psOutput));
+                    foreach ($lines as $line) {
+                        $parts = preg_split('/\s+/', trim($line));
+                        if (count($parts) >= 11) {
+                            $pid = $parts[1];
+                            $cmd = implode(' ', array_slice($parts, 10));
+                            $kpi['processes'][] = [
+                                'pid' => $pid,
+                                'cmd' => $cmd,
+                                'is_stuck' => false,
+                            ];
+                        }
                     }
                 }
             }
-        }
 
-        // 2. Zaseknuté importy (ExternalImportRun)
-        $kpi['imports'] = ExternalImportRun::where('status', 'running')
-            ->where('updated_at', '<', now()->subMinutes(15))
-            ->get()
-            ->map(fn ($run) => [
-                'id' => $run->id,
-                'source' => $run->source_key,
-                'type' => $run->run_type,
-                'updated_at' => $run->updated_at,
-            ])
-            ->toArray();
+            // 2. Zaseknuté importy (ExternalImportRun)
+            $kpi['imports'] = ExternalImportRun::where('status', 'running')
+                ->where('updated_at', '<', now()->subMinutes(15))
+                ->get()
+                ->map(fn ($run) => [
+                    'id' => $run->id,
+                    'source' => $run->source_key,
+                    'type' => $run->run_type,
+                    'updated_at' => $run->updated_at,
+                ])
+                ->toArray();
 
-        // 3. Tabulky k vyčištění
-        $tablesToCheck = [
-            'new_external_import_logs' => 5000,
-            'activity_log' => 10000,
-            'sessions' => 1000,
-            'telescope_entries' => 5000,
-        ];
+            // 3. Tabulky k vyčištění
+            $tablesToCheck = [
+                'new_external_import_logs' => 5000,
+                'activity_log' => 10000,
+                'sessions' => 1000,
+                'telescope_entries' => 5000,
+            ];
 
-        foreach ($tablesToCheck as $table => $threshold) {
-            try {
-                if (Schema::hasTable($table)) {
-                    $count = DB::table($table)->count();
-                    if ($count > $threshold) {
-                        $kpi['tables'][] = [
-                            'name' => $table,
-                            'count' => $count,
-                        ];
+            foreach ($tablesToCheck as $table => $threshold) {
+                try {
+                    if (Schema::hasTable($table)) {
+                        // Používáme limit pro count na velkých tabulkách, pokud je to možné,
+                        // nebo prostě jen count a spoléháme na cache.
+                        $count = DB::table($table)->count();
+                        if ($count > $threshold) {
+                            $kpi['tables'][] = [
+                                'name' => $table,
+                                'count' => $count,
+                            ];
+                        }
                     }
+                } catch (\Exception $e) {
                 }
-            } catch (\Exception $e) {
-                // Tabulka nemusí existovat v dané DB driveru nebo Schema::hasTable selže
             }
-        }
 
-        return $kpi;
+            return $kpi;
+        });
     }
 
     public function killProcess(int $pid): void

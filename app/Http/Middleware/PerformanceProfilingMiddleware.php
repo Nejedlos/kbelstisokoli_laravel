@@ -23,9 +23,10 @@ class PerformanceProfilingMiddleware
         $startTime = microtime(true);
         $bootstrapDuration = defined('LARAVEL_START') ? ($startTime - LARAVEL_START) * 1000 : 0;
 
-        // Zapnutí query logu co nejdříve
+        // Zapnutí query logu co nejdříve (pouze pokud nejsme na produkci nebo jsme v profilačním módu)
+        $shouldProfile = $this->shouldProfile($request);
         try {
-            if (!DB::getQueryLog()) {
+            if ($shouldProfile && !DB::getQueryLog()) {
                 DB::enableQueryLog();
             }
         } catch (\Throwable $e) {
@@ -39,9 +40,11 @@ class PerformanceProfilingMiddleware
         $totalTime = $duration + $bootstrapDuration;
 
         $queries = [];
-        try {
-            $queries = DB::getQueryLog();
-        } catch (\Throwable $e) {}
+        if ($shouldProfile) {
+            try {
+                $queries = DB::getQueryLog();
+            } catch (\Throwable $e) {}
+        }
 
         $queryCount = count($queries);
         $queryTime = array_sum(array_column($queries, 'time'));
@@ -68,11 +71,11 @@ class PerformanceProfilingMiddleware
         $isLivewire = $request->hasHeader('X-Livewire');
         $isXhr = $request->ajax() || $request->wantsJson();
 
-        $shouldLog = $this->shouldProfile($request) || $totalTime > 500 || $queryCount > 50;
+        $shouldLog = $shouldProfile || $totalTime > 1000 || $queryCount > 50;
 
         if ($shouldLog) {
             $prefix = "[PERF] ";
-            if ($totalTime > 1000 || $queryCount > 50) {
+            if ($totalTime > 2000 || $queryCount > 100) {
                 $prefix = "[SLOW] ";
                 $duplicatedQueries = $this->getDuplicatedQueries($queries);
                 if ($duplicatedQueries) {
@@ -85,8 +88,8 @@ class PerformanceProfilingMiddleware
         }
 
         // Přidání headers pro snadnou diagnostiku v DevTools
-        // Vždy přidáme základní časy, pokud je to pomalé nebo jsme v debug módu
-        if ($shouldLog || config('app.debug')) {
+        // Vždy přidáme základní časy, pokud jsme v profilačním módu nebo jsme v debug módu na lokálu
+        if ($shouldProfile || (config('app.debug') && app()->isLocal())) {
             $response->headers->set('X-Perf-Bootstrap-MS', round($bootstrapDuration, 2));
             $response->headers->set('X-Perf-Logic-MS', round($duration, 2));
             $response->headers->set('X-Perf-Total-MS', round($totalTime, 2));

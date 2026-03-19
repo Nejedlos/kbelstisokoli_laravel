@@ -49,9 +49,9 @@ class PerformanceService
             return $this->settings;
         }
 
-        // Na produkci používáme file cache pro nastavení, abychom eliminovali DB dotaz při každém requestu.
-        // Cache::store('file') je na Webglobe rychlejší než DB dotaz.
-        $store = app()->isProduction() ? 'file' : 'database';
+        // Na produkci používáme primárně redis, fallback na file (pokud redis není dostupný/nastavený)
+        // Cache::store('redis') je na Webglobe nejrychlejší pro sdílená data.
+        $store = app()->isProduction() ? (config('cache.default') === 'redis' ? 'redis' : 'file') : 'database';
 
         try {
             return $this->settings = Cache::store($store)->remember('performance_settings', 3600, function () {

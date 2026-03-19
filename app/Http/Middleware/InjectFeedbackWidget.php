@@ -34,6 +34,12 @@ class InjectFeedbackWidget
             return false;
         }
 
+        // 0. Quick path for performance: skip images, css, js by extension before anything else
+        $path = $request->getPathInfo();
+        if (preg_match('/\.(jpg|jpeg|png|gif|svg|webp|css|js|map|woff|woff2|ttf|eot)$/i', $path)) {
+            return false;
+        }
+
         // 1. MUST be HTML response
         $contentType = $response->headers->get('Content-Type');
         if (!str_contains((string)$contentType, 'text/html')) {

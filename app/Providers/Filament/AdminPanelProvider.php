@@ -104,13 +104,17 @@ class AdminPanelProvider extends PanelProvider
 
                 return "
                     {$favicons}
-                    <script>
+                    <script data-navigate-once>
                         /**
                          * KRITICKÝ FIX: Globální potlačení Livewire 3 abort rejekcí v <head>.
                          * Tento skript zachytává \"prázdné\" rejekce, které Livewire 3 vyhazuje při přerušení
                          * asynchronního požadavku (např. při pollingu nebo navigaci).
+                         *
+                         * Používáme data-navigate-once, aby se listener v SPA mode nepřidával duplicitně.
                          */
                         (function() {
+                            if (window.livewireAbortHandlerInitialized) return;
+
                             var suppress = function(e) {
                                 var r = e.reason;
                                 // Livewire 3 abort objekt: { status: null, body: null, json: null, errors: null }
@@ -126,6 +130,7 @@ class AdminPanelProvider extends PanelProvider
                                 }
                             };
                             window.addEventListener('unhandledrejection', suppress, true);
+                            window.livewireAbortHandlerInitialized = true;
                         })();
                     </script>
                     <link rel='preconnect' href='https://fonts.googleapis.com'>

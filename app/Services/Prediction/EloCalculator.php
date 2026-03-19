@@ -16,7 +16,7 @@ class EloCalculator
     public function calculateExpected(float $eloTeam, float $eloOpponent, bool $isHome = false): float
     {
         $ratingDiff = ($eloOpponent - ($eloTeam + ($isHome ? self::HOME_ADVANTAGE : 0)));
-        return 1 / (1 + 10 ** ($ratingDiff / 400));
+        return 1 / (1 + 10 ** ($ratingDiff / 800));
     }
 
     /**
