@@ -29,14 +29,14 @@ class RelatedArticlesRelationManager extends RelationManager
             ->recordTitleAttribute('title->cs')
             ->columns([
                 TextColumn::make('title')
-                    ->label(__('admin.navigation.resources.help_article.fields.title_cs'))
+                    ->label(__('admin.resources.help_article.fields.title_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
                         return $query->where('title->cs', 'like', "%{$search}%")
                             ->orWhere('title->en', 'like', "%{$search}%");
                     }),
                 TextColumn::make('category.name')
-                    ->label(__('admin.navigation.resources.help_article.fields.category'))
+                    ->label(__('admin.resources.help_article.fields.category'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '-')
                     ->searchable(),
             ])

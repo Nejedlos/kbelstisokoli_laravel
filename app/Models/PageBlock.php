@@ -36,13 +36,6 @@ class PageBlock extends Model
 
     protected static function booted()
     {
-        static::saved(function ($block) {
-            try {
-                \Illuminate\Support\Facades\Artisan::call('view:clear');
-                \Illuminate\Support\Facades\Artisan::call('cache:clear');
-            } catch (\Throwable $e) {
-                // Ignorovat
-            }
-        });
+        // Cache pro bloky je nyní spravována globálním PerformanceObserverem
     }
 }

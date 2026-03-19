@@ -111,7 +111,8 @@ class StatisticSyncService
 
             // Znovu načteme aktuální metadata z DB pro jistotu (pro atomicitu v transakci)
             $freshMatch = DB::table('matches')->where('id', $match->id)->lockForUpdate()->first();
-            $matchMetadata = json_decode($freshMatch->metadata ?? '[]', true) ?: [];
+            $metaRaw = $freshMatch->metadata;
+            $matchMetadata = is_array($metaRaw) ? $metaRaw : (json_decode($metaRaw ?? '[]', true) ?: []);
             $metaChanged = false;
 
             if (isset($data->metadata['header'])) {
@@ -174,7 +175,8 @@ class StatisticSyncService
             if (! $isOurTeam) {
                 // Znovu načteme, protože se mohla metadata změnit v předchozím kroku (header atd.)
                 $freshMatch = DB::table('matches')->where('id', $match->id)->first();
-                $matchMetadata = json_decode($freshMatch->metadata ?? '[]', true) ?: [];
+                $metaRaw = $freshMatch->metadata;
+                $matchMetadata = is_array($metaRaw) ? $metaRaw : (json_decode($metaRaw ?? '[]', true) ?: []);
                 $matchMetadata['opponent_boxscore'] = $data->toArray();
 
                 DB::table('matches')->where('id', $match->id)->update([

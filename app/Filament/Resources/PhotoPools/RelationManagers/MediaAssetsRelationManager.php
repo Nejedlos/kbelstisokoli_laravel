@@ -32,7 +32,7 @@ class MediaAssetsRelationManager extends RelationManager
 
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
-        return __('admin.navigation.resources.photo_pool.title');
+        return __('admin.resources.photo_pool.title');
     }
 
     public function table(Table $table): Table
@@ -41,7 +41,7 @@ class MediaAssetsRelationManager extends RelationManager
             ->reorderable('sort_order')
             ->columns([
                 SpatieMediaLibraryImageColumn::make('default')
-                    ->label(__('admin.navigation.resources.photo_pool.fields.photos'))
+                    ->label(__('admin.resources.photo_pool.fields.photos'))
                     ->collection('default')
                     ->conversion('thumb')
                     ->height(100)
@@ -74,14 +74,14 @@ class MediaAssetsRelationManager extends RelationManager
                 EditAction::make()
                     ->label(__('user.actions.edit')),
                 DetachAction::make()
-                    ->label(__('admin.navigation.resources.photo_pool.actions.detach')),
+                    ->label(__('admin.resources.photo_pool.actions.detach')),
                 DeleteAction::make()
                     ->label(__('user.actions.delete')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
-                        ->label(__('admin.navigation.resources.photo_pool.actions.detach')),
+                        ->label(__('admin.resources.photo_pool.actions.detach')),
                     DeleteBulkAction::make()
                         ->label(__('user.actions.delete_selected')),
                 ]),

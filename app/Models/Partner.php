@@ -30,7 +30,7 @@ class Partner extends Model
         'opened_in_new_tab',
     ];
 
-    public $translatable = ['label', 'description'];
+    public $translatable = ['name', 'slug', 'website_url', 'label', 'description'];
 
     protected $casts = [
         'is_active' => 'boolean',

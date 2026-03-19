@@ -22,15 +22,15 @@ class OpponentMergeSuggestionsTable
         return $table
             ->columns([
                 TextColumn::make('sourceOpponent.name')
-                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.source_opponent'))
+                    ->label(__('admin.resources.opponent_merge_suggestion.fields.source_opponent'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('targetOpponent.name')
-                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.target_opponent'))
+                    ->label(__('admin.resources.opponent_merge_suggestion.fields.target_opponent'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('similarity')
-                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.similarity'))
+                    ->label(__('admin.resources.opponent_merge_suggestion.fields.similarity'))
                     ->suffix('%')
                     ->badge()
                     ->color(fn (int $state): string => match (true) {
@@ -40,7 +40,7 @@ class OpponentMergeSuggestionsTable
                     })
                     ->sortable(),
                 TextColumn::make('status')
-                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.status'))
+                    ->label(__('admin.resources.opponent_merge_suggestion.fields.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'warning',
@@ -48,7 +48,7 @@ class OpponentMergeSuggestionsTable
                         'rejected' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => __('admin.navigation.resources.opponent_merge_suggestion.status.' . $state)),
+                    ->formatStateUsing(fn (string $state): string => __('admin.resources.opponent_merge_suggestion.status.' . $state)),
                 TextColumn::make('created_at')
                     ->label(__('admin.fields.created_at'))
                     ->dateTime()
@@ -58,32 +58,32 @@ class OpponentMergeSuggestionsTable
             ->defaultSort('similarity', 'desc')
             ->filters([
                 SelectFilter::make('status')
-                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.status'))
+                    ->label(__('admin.resources.opponent_merge_suggestion.fields.status'))
                     ->options([
-                        'pending' => __('admin.navigation.resources.opponent_merge_suggestion.status.pending'),
-                        'accepted' => __('admin.navigation.resources.opponent_merge_suggestion.status.accepted'),
-                        'rejected' => __('admin.navigation.resources.opponent_merge_suggestion.status.rejected'),
+                        'pending' => __('admin.resources.opponent_merge_suggestion.status.pending'),
+                        'accepted' => __('admin.resources.opponent_merge_suggestion.status.accepted'),
+                        'rejected' => __('admin.resources.opponent_merge_suggestion.status.rejected'),
                     ])
                     ->default('pending'),
             ])
             ->recordActions([
                 Action::make('accept')
-                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.accept'))
+                    ->label(__('admin.resources.opponent_merge_suggestion.actions.accept'))
                     ->icon(FilamentIcon::get(AppIcon::ACTIVATE))
                     ->color('success')
                     ->hidden(fn (OpponentMergeSuggestion $record) => $record->status !== 'pending')
                     ->form(fn (OpponentMergeSuggestion $record) => [
                         TextInput::make('new_name')
-                            ->label(__('admin.navigation.resources.opponent_merge_suggestion.fields.new_name'))
+                            ->label(__('admin.resources.opponent_merge_suggestion.fields.new_name'))
                             ->default($record->targetOpponent->name)
                             ->required()
                             ->hintActions([
                                 Action::make('use_target')
-                                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.use_target'))
+                                    ->label(__('admin.resources.opponent_merge_suggestion.actions.use_target'))
                                     ->icon(FilamentIcon::get(AppIcon::REFRESH))
                                     ->action(fn ($set) => $set('new_name', $record->targetOpponent->name)),
                                 Action::make('use_source')
-                                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.use_source'))
+                                    ->label(__('admin.resources.opponent_merge_suggestion.actions.use_source'))
                                     ->icon(FilamentIcon::get(AppIcon::REFRESH))
                                     ->action(fn ($set) => $set('new_name', $record->sourceOpponent->name)),
                             ]),
@@ -93,18 +93,18 @@ class OpponentMergeSuggestionsTable
 
                         if ($success) {
                             Notification::make()
-                                ->title(__('admin.navigation.resources.opponent_merge_suggestion.notifications.merge_success'))
+                                ->title(__('admin.resources.opponent_merge_suggestion.notifications.merge_success'))
                                 ->success()
                                 ->send();
                         } else {
                             Notification::make()
-                                ->title(__('admin.navigation.resources.opponent_merge_suggestion.notifications.merge_error'))
+                                ->title(__('admin.resources.opponent_merge_suggestion.notifications.merge_error'))
                                 ->danger()
                                 ->send();
                         }
                     }),
                 Action::make('reject')
-                    ->label(__('admin.navigation.resources.opponent_merge_suggestion.actions.reject'))
+                    ->label(__('admin.resources.opponent_merge_suggestion.actions.reject'))
                     ->icon(FilamentIcon::get(AppIcon::CANCEL))
                     ->color('danger')
                     ->hidden(fn (OpponentMergeSuggestion $record) => $record->status !== 'pending')
@@ -112,7 +112,7 @@ class OpponentMergeSuggestionsTable
                         $service->reject($record);
 
                         Notification::make()
-                            ->title(__('admin.navigation.resources.opponent_merge_suggestion.notifications.rejected'))
+                            ->title(__('admin.resources.opponent_merge_suggestion.notifications.rejected'))
                             ->info()
                             ->send();
                     }),

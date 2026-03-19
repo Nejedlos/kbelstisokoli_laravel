@@ -21,12 +21,12 @@ class MediaAssetResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.media_asset.label');
+        return __('admin.resources.media_asset.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.media_asset.plural_label');
+        return __('admin.resources.media_asset.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

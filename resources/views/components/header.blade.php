@@ -1,6 +1,6 @@
 @props(['branding', 'navigation'])
 
-@cacheFragment('header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl().serialize($branding).serialize($navigation)), 3600)
+@cacheFragment('fragment_header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 3600)
 <header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container py-4 flex items-center justify-between gap-4">
         <!-- Logo -->
@@ -232,8 +232,9 @@
                                     @foreach($item['children'] as $child)
                                         @if(Route::has($child['route']))
                                             <a href="{{ route($child['route']) }}"
+                                               @wireNavigate
                                                class="flex items-center font-bold uppercase text-[10px] tracking-widest py-3 px-6 rounded-xl hover:bg-white hover:text-primary transition-all {{ request()->routeIs($child['route']) ? 'text-primary bg-white' : 'text-slate-500' }}">
-                                                {{ __($child['title']) }}
+                                               {{ __($child['title']) }}
                                             </a>
                                         @endif
                                     @endforeach
@@ -242,6 +243,7 @@
                         </div>
                     @elseif(isset($item['route']) && Route::has($item['route']))
                         <a href="{{ route($item['route']) }}"
+                           @wireNavigate
                            class="block font-black uppercase text-xs tracking-widest py-4 px-4 border-b border-slate-50 hover:bg-slate-50 transition-colors {{ request()->routeIs($item['route']) ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
                             {{ __($item['title']) }}
                         </a>

@@ -37,12 +37,19 @@ class PerformanceObserver
     protected function clearCache(): void
     {
         try {
-            // 1. Mažeme statické klíče systémových nastavení
-            // Používáme try-catch pro eliminaci SQL deadlocků na Webglobe hostingu
+            // 1. Mažeme statické klíče systémových nastavení (včetně lokalizace)
             Cache::forget('performance_settings');
-            Cache::forget('view_composer_data');
+            Cache::forget('view_composer_data_cs');
+            Cache::forget('view_composer_data_en');
             Cache::forget('global_branding_settings_cs');
             Cache::forget('global_branding_settings_en');
+
+            // Mažeme také globální cache pro partnery
+            Cache::forget('partners_homepage_strip');
+            Cache::forget('partners_footer');
+            Cache::forget('partners_match');
+            Cache::forget('partners_contact');
+            Cache::forget('partners_recruitment');
         } catch (\Throwable $e) {
             // V tichosti ignorujeme - uložení modelu je důležitější než okamžitý flush cache
         }

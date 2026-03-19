@@ -19,7 +19,8 @@ class PagesTable
                 TextColumn::make('title')
                     ->label('Titulek')
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('title', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->description(fn ($record) => $record->slug),
 

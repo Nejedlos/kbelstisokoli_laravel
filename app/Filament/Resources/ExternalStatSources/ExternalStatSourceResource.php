@@ -28,12 +28,12 @@ class ExternalStatSourceResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.external_stat_source.label');
+        return __('admin.resources.external_stat_source.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.external_stat_source.plural_label');
+        return __('admin.resources.external_stat_source.plural_label');
     }
 
     public static function getNavigationSort(): ?int

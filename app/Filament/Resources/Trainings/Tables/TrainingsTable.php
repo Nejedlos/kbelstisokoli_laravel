@@ -18,7 +18,7 @@ class TrainingsTable
             ->recordClasses(fn (Training $record) => $record->starts_at->isFuture() ? 'bg-success-50/70 dark:bg-success-900/10' : 'bg-gray-50/50 dark:bg-white/5')
             ->columns([
                 TextColumn::make('teams.name')
-                    ->label(__('admin.navigation.resources.team.plural_label'))
+                    ->label(__('admin.resources.team.plural_label'))
                     ->badge()
                     ->state(fn (Training $record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
                     ->searchable(),
@@ -40,10 +40,12 @@ class TrainingsTable
                     ->dateTime('j.n.Y H:i')
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin.resources.training.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('admin.resources.training.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -21,12 +21,12 @@ class GalleryResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.gallery.label');
+        return __('admin.resources.gallery.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.gallery.plural_label');
+        return __('admin.resources.gallery.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

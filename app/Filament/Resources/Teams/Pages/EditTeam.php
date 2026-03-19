@@ -16,7 +16,7 @@ class EditTeam extends EditRecord
     {
         return [
             Action::make('view_public')
-                ->label(__('admin.navigation.resources.team.actions.view_public'))
+                ->label(__('admin.resources.team.actions.view_public'))
                 ->icon(IconHelper::get(IconHelper::GLOBE))
                 ->url(fn ($record) => route('public.teams.show', $record->slug))
                 ->openUrlInNewTab()

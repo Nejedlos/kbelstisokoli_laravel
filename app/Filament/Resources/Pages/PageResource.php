@@ -28,12 +28,12 @@ class PageResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.page.label');
+        return __('admin.resources.page.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.page.plural_label');
+        return __('admin.resources.page.plural_label');
     }
 
     public static function getNavigationSort(): ?int

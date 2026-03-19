@@ -14,28 +14,28 @@ class ExternalTeamMappingForm
     {
         return $schema
             ->components([
-                Section::make('Základní informace')
+                Section::make(__('admin.resources.external_team_mapping.sections.general'))
                     ->columns(2)
                     ->schema([
                         Select::make('source_key')
-                            ->label('Zdroj')
+                            ->label(__('admin.resources.external_team_mapping.fields.source'))
                             ->options(ExternalStatSource::all()->pluck('name', 'slug'))
                             ->default('czbasketball')
                             ->searchable()
                             ->required(),
                         Select::make('team_id')
-                            ->label('Interní tým')
+                            ->label(__('admin.resources.external_team_mapping.fields.team'))
                             ->relationship('team', 'name')
                             ->required(),
                         TextInput::make('external_team_id')
-                            ->label('Externí ID týmu')
+                            ->label(__('admin.resources.external_team_mapping.fields.external_team_id'))
                             ->required()
-                            ->helperText('Např. 7738 pro Muži E'),
+                            ->helperText(__('admin.resources.external_team_mapping.helpers.external_team_id')),
                         TextInput::make('base_team_url')
-                            ->label('URL týmu')
+                            ->label(__('admin.resources.external_team_mapping.fields.base_team_url'))
                             ->url()
                             ->required()
-                            ->helperText('https://cz.basketball/tym/7738'),
+                            ->helperText(__('admin.resources.external_team_mapping.helpers.base_team_url')),
                     ]),
             ]);
     }

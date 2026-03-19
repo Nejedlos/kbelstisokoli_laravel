@@ -24,33 +24,34 @@ class BasketballMatchesTable
             ->striped()
             ->columns([
                 TextColumn::make('scheduled_at')
-                    ->label('Datum a čas')
+                    ->label(__('admin.resources.basketball_match.fields.scheduled_at'))
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ((! empty($record->metadata['external_id']) || ! empty($record->metadata['season_external_match_id']))
-                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="' . __('admin.resources.basketball_match.tooltips.external_sync') . '"></i> '
                             : '').$state->format('d.m.Y H:i')
                     ))
                     ->sortable(),
                 TextColumn::make('teams.name')
-                    ->label('Týmy')
+                    ->label(__('admin.resources.basketball_match.fields.teams'))
                     ->badge()
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->whereHas('teams', function ($q) use ($search) {
-                            $q->where('name', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->whereHas('teams', function ($q) use ($search, $locale) {
+                            $q->where("name->{$locale}", 'LIKE', "%{$search}%");
                         });
                     }),
                 TextColumn::make('opponent.name')
-                    ->label('Soupeř')
+                    ->label(__('admin.resources.basketball_match.fields.opponent'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('mismatches_count')
-                    ->label('Rozpory')
+                    ->label(__('admin.resources.basketball_match.fields.mismatches'))
                     ->counts('mismatches')
                     ->badge()
                     ->color(fn (int $state): string => $state > 0 ? 'danger' : 'gray')
                     ->sortable(),
                 TextColumn::make('score')
-                    ->label('Skóre')
+                    ->label(__('admin.resources.basketball_match.fields.score'))
                     ->state(fn ($record) => in_array($record->status, ['finished', 'completed', 'played']) ? "{$record->score_home} : {$record->score_away}" : '-')
                     ->badge()
                     ->color(fn ($record): string => match (true) {
@@ -68,7 +69,7 @@ class BasketballMatchesTable
                         default => null,
                     }),
                 TextColumn::make('status')
-                    ->label('Stav')
+                    ->label(__('admin.resources.basketball_match.fields.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'planned' => 'info',
@@ -81,42 +82,42 @@ class BasketballMatchesTable
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'planned' => 'Plánováno',
-                        'scheduled' => 'Naplánováno',
-                        'played' => 'Odehráno',
-                        'completed' => 'Odehráno',
-                        'finished' => 'Odehráno',
-                        'cancelled' => 'Zrušeno',
-                        'postponed' => 'Odloženo',
+                        'planned' => __('admin.resources.basketball_match.statuses.planned'),
+                        'scheduled' => __('admin.resources.basketball_match.statuses.scheduled'),
+                        'played' => __('admin.resources.basketball_match.statuses.played'),
+                        'completed' => __('admin.resources.basketball_match.statuses.completed'),
+                        'finished' => __('admin.resources.basketball_match.statuses.finished'),
+                        'cancelled' => __('admin.resources.basketball_match.statuses.cancelled'),
+                        'postponed' => __('admin.resources.basketball_match.statuses.postponed'),
                         default => $state,
                     }),
                 IconColumn::make('is_home')
-                    ->label('Doma')
+                    ->label(__('admin.resources.basketball_match.fields.is_home'))
                     ->boolean(),
                 TextColumn::make('location')
-                    ->label('Místo')
+                    ->label(__('admin.resources.basketball_match.fields.location'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('teams')
-                    ->label('Tým')
+                    ->label(__('admin.resources.basketball_match.fields.teams'))
                     ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('season')
-                    ->label('Sezóna')
+                    ->label(__('admin.resources.basketball_match.fields.season'))
                     ->relationship('season', 'name'),
                 SelectFilter::make('status')
-                    ->label('Stav')
+                    ->label(__('admin.resources.basketball_match.fields.status'))
                     ->options([
-                        'planned' => 'Plánováno',
-                        'scheduled' => 'Naplánováno',
-                        'finished' => 'Odehráno',
-                        'played' => 'Odehráno (staré)',
-                        'completed' => 'Odehráno (ručně)',
-                        'cancelled' => 'Zrušeno',
-                        'postponed' => 'Odloženo',
+                        'planned' => __('admin.resources.basketball_match.statuses.planned'),
+                        'scheduled' => __('admin.resources.basketball_match.statuses.scheduled'),
+                        'finished' => __('admin.resources.basketball_match.statuses.finished'),
+                        'played' => __('admin.resources.basketball_match.statuses.played'),
+                        'completed' => __('admin.resources.basketball_match.statuses.completed'),
+                        'cancelled' => __('admin.resources.basketball_match.statuses.cancelled'),
+                        'postponed' => __('admin.resources.basketball_match.statuses.postponed'),
                     ]),
             ])
             ->recordActions([
@@ -126,7 +127,7 @@ class BasketballMatchesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     BulkAction::make('ai_sync')
-                        ->label('AI Synchronizace detailů')
+                        ->label(__('admin.resources.basketball_match.actions.ai_sync'))
                         ->icon(FilamentIcon::get(AppIcon::AI))
                         ->color('info')
                         ->action(function (\Illuminate\Support\Collection $records) {
@@ -137,7 +138,7 @@ class BasketballMatchesTable
                                     'ai' => true,
                                 ]);
                             });
-                            Notification::make()->title('AI synchronizace detailů zápasů byla naplánována.')->success()->send();
+                            Notification::make()->title(__('admin.resources.basketball_match.notifications.ai_sync_scheduled'))->success()->send();
                         })
                         ->requiresConfirmation()
                         ->deselectRecordsAfterCompletion(),

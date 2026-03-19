@@ -26,16 +26,31 @@ class PartnerForm
                     ->schema([
                         Section::make(new HtmlString(IconHelper::render(IconHelper::INFO) . ' Základní informace'))
                             ->schema([
-                                TextInput::make('name')
-                                    ->label('Název partnera')
-                                    ->required()
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(fn ($state, $set, $operation) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('name.cs')
+                                            ->label('Název partnera (CZ)')
+                                            ->required()
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(fn ($state, $set, $operation) => $operation === 'create' ? $set('slug.cs', Str::slug($state)) : null),
+                                        TextInput::make('name.en')
+                                            ->label('Partner Name (EN)')
+                                            ->required()
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(fn ($state, $set, $operation) => $operation === 'create' ? $set('slug.en', Str::slug($state)) : null),
+                                    ]),
 
-                                TextInput::make('slug')
-                                    ->label('Slug')
-                                    ->required()
-                                    ->unique('partners', 'slug', ignoreRecord: true),
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('slug.cs')
+                                            ->label('Slug (CZ)')
+                                            ->required()
+                                            ->unique('partners', 'slug->cs', ignoreRecord: true),
+                                        TextInput::make('slug.en')
+                                            ->label('Slug (EN)')
+                                            ->required()
+                                            ->unique('partners', 'slug->en', ignoreRecord: true),
+                                    ]),
 
                                 Select::make('type')
                                     ->label('Typ partnera')
@@ -49,9 +64,15 @@ class PartnerForm
                                     ->default('partner')
                                     ->native(false),
 
-                                TextInput::make('website_url')
-                                    ->label('Webová stránka (URL)')
-                                    ->url()
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('website_url.cs')
+                                            ->label('Webová stránka (URL CZ)')
+                                            ->url(),
+                                        TextInput::make('website_url.en')
+                                            ->label('Website (URL EN)')
+                                            ->url(),
+                                    ])
                                     ->columnSpanFull(),
 
                                 Toggle::make('opened_in_new_tab')
@@ -97,7 +118,7 @@ class PartnerForm
                                             return $baseName . '.' . $file->getClientOriginalExtension();
                                         }
 
-                                        $name = $get('slug') ?: Str::slug($get('name'));
+                                        $name = $get('slug.cs') ?: Str::slug($get('name.cs') ?: 'partner');
                                         return (string) str($name . '-' . time() . '.' . $file->getClientOriginalExtension());
                                     })
                                     ->live()
@@ -113,7 +134,7 @@ class PartnerForm
                                             return;
                                         }
 
-                                        $name = $get('slug') ?: Str::slug($get('name'));
+                                        $name = $get('slug.cs') ?: Str::slug($get('name.cs') ?: 'partner');
                                         $timestamp = time();
                                         $baseName = $name . '-' . $timestamp;
                                         $extension = strtolower($file->getClientOriginalExtension());

@@ -148,8 +148,8 @@
                     }, 600); // Necháme puls běžet 0.6 sekundy (2 cykly po 0.3s)
                 });
 
-                fail(() => {
-                    console.error('PaymentWidget: Update failed!');
+                fail((error) => {
+                    console.error('PaymentWidget: Update failed!', error);
                     window.dispatchEvent(new CustomEvent('qr-updating-stop'));
                 });
             });

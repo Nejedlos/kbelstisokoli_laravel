@@ -93,7 +93,16 @@
                         <div class="flex-grow min-w-0">
                             <div class="flex flex-wrap items-center gap-2 mb-1">
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">
-                                    {{ (new \ReflectionClass($event['type']))->getShortName() }}
+                                    @php
+                                        $type = (new \ReflectionClass($event['type']))->getShortName();
+                                        $transKey = match($type) {
+                                            'BasketballMatch' => 'admin.real_attendance.event_types.match',
+                                            'Training' => 'admin.real_attendance.event_types.training',
+                                            'ClubEvent' => 'admin.real_attendance.event_types.club_event',
+                                            default => $type
+                                        };
+                                    @endphp
+                                    {{ __($transKey) }}
                                 </span>
                                 @foreach($event['teams'] as $team)
                                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-white/50 dark:bg-primary-900/30 text-gray-600 dark:text-primary-300 border border-gray-200 dark:border-primary-800">

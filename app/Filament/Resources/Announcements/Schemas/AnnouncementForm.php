@@ -19,16 +19,34 @@ class AnnouncementForm
             ->components([
                 Section::make('Obsah oznámení')
                     ->schema([
-                        TextInput::make('title')
-                            ->label('Krátký štítek / Titulek')
-                            ->placeholder('např. DŮLEŽITÉ, INFO, ZMĚNA')
-                            ->maxLength(50),
-                        Textarea::make('message')
-                            ->label('Text oznámení')
-                            ->placeholder('Zadejte text, který se zobrazí v horní liště.')
-                            ->required()
-                            ->rows(2)
-                            ->maxLength(255),
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('title.cs')
+                                    ->label('Štítek / Titulek (CZ)')
+                                    ->placeholder('např. DŮLEŽITÉ, INFO, ZMĚNA')
+                                    ->required()
+                                    ->maxLength(50),
+                                TextInput::make('title.en')
+                                    ->label('Label / Title (EN)')
+                                    ->placeholder('e.g. IMPORTANT, INFO, UPDATE')
+                                    ->required()
+                                    ->maxLength(50),
+                            ]),
+                        Grid::make(2)
+                            ->schema([
+                                Textarea::make('message.cs')
+                                    ->label('Text oznámení (CZ)')
+                                    ->placeholder('Zadejte text, který se zobrazí v horní liště.')
+                                    ->required()
+                                    ->rows(2)
+                                    ->maxLength(255),
+                                Textarea::make('message.en')
+                                    ->label('Message (EN)')
+                                    ->placeholder('Enter the announcement text.')
+                                    ->required()
+                                    ->rows(2)
+                                    ->maxLength(255),
+                            ]),
                     ]),
 
                 Section::make('Odkaz (CTA)')
@@ -37,9 +55,15 @@ class AnnouncementForm
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextInput::make('cta_label')
-                                    ->label('Text tlačítka')
-                                    ->placeholder('Zjistit více'),
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('cta_label.cs')
+                                            ->label('Text tlačítka (CZ)')
+                                            ->placeholder('Zjistit více'),
+                                        TextInput::make('cta_label.en')
+                                            ->label('Button text (EN)')
+                                            ->placeholder('Find out more'),
+                                    ]),
                                 TextInput::make('cta_url')
                                     ->label('Odkaz (URL)')
                                     ->placeholder('/kontakt nebo https://...'),

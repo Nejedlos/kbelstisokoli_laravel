@@ -30,12 +30,12 @@ class UserResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.user.label');
+        return __('admin.resources.user.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.user.plural_label');
+        return __('admin.resources.user.plural_label');
     }
 
     public static function getNavigationSort(): ?int

@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->spa() // Zapnutí SPA navigace (wire:navigate) pro bleskovou administraci
             ->colors(fn () => app(BrandingService::class)->getSettings()['colors'])
             ->darkMode(false)
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
@@ -103,6 +104,30 @@ class AdminPanelProvider extends PanelProvider
 
                 return "
                     {$favicons}
+                    <script>
+                        /**
+                         * KRITICKÝ FIX: Globální potlačení Livewire 3 abort rejekcí v <head>.
+                         * Tento skript zachytává \"prázdné\" rejekce, které Livewire 3 vyhazuje při přerušení
+                         * asynchronního požadavku (např. při pollingu nebo navigaci).
+                         */
+                        (function() {
+                            var suppress = function(e) {
+                                var r = e.reason;
+                                // Livewire 3 abort objekt: { status: null, body: null, json: null, errors: null }
+                                // Rejekce může být i undefined/null při navigaci.
+                                var isLivewireAbort = !r || (
+                                    typeof r === 'object' &&
+                                    'status' in r && r.status === null &&
+                                    ('body' in r || 'json' in r || 'errors' in r)
+                                );
+                                if (isLivewireAbort) {
+                                    e.preventDefault();
+                                    e.stopImmediatePropagation();
+                                }
+                            };
+                            window.addEventListener('unhandledrejection', suppress, true);
+                        })();
+                    </script>
                     <link rel='preconnect' href='https://fonts.googleapis.com'>
                     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
                     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap' media='print' onload=\"this.media='all'\">
@@ -132,9 +157,12 @@ class AdminPanelProvider extends PanelProvider
                     return '';
                 }
 
+                // Renderování přes Blade::render pro správnou inicializaci Livewire a komponent
                 return Blade::render('
+                    <x-loader.global title="Administrace" />
                     <x-impersonation-banner />
                     <x-impersonation-notification />
+                    <livewire:sync-status-bar />
                 ');
             })
             ->renderHook('panels::body.end', function (): string {
@@ -145,7 +173,6 @@ class AdminPanelProvider extends PanelProvider
                 return Blade::render('
                     <x-back-to-top />
                     <livewire:member.avatar-modal />
-                    <livewire:sync-status-bar />
                 ');
             })
             ->renderHook('panels::global-search.before', function (): string {
@@ -247,7 +274,6 @@ class AdminPanelProvider extends PanelProvider
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
-                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
                 DispatchServingFilamentEvent::class,
                 \App\Http\Middleware\InjectFeedbackWidget::class,
             ])
@@ -255,7 +281,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 \App\Http\Middleware\EnsureTwoFactorEnabled::class,
                 \App\Http\Middleware\CheckTwoFactorTimeout::class,
-                \App\Http\Middleware\PerformanceProfilingMiddleware::class,
             ]);
     }
 }

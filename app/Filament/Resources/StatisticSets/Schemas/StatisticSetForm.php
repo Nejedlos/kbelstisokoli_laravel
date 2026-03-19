@@ -25,10 +25,17 @@ class StatisticSetForm
                             ->schema([
                                 Section::make('Metadata')
                                     ->schema([
-                                        TextInput::make('name')
-                                            ->label('Název sady')
-                                            ->helperText('Např. Tabulka 1. ligy, Hráčské statistiky 2024')
-                                            ->required(),
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('name.cs')
+                                                    ->label('Název sady (CZ)')
+                                                    ->helperText('Např. Tabulka 1. ligy, Hráčské statistiky 2024')
+                                                    ->required(),
+                                                TextInput::make('name.en')
+                                                    ->label('Set Name (EN)')
+                                                    ->helperText('e.g. 1st League Table, Player Stats 2024')
+                                                    ->required(),
+                                            ]),
                                         TextInput::make('slug')
                                             ->label('Slug')
                                             ->required()
@@ -42,8 +49,15 @@ class StatisticSetForm
                                                 'custom_competition' => 'Vlastní soutěž/tabulka',
                                             ])
                                             ->required(),
-                                        Textarea::make('description')
-                                            ->label('Popis')
+                                        Grid::make(2)
+                                            ->schema([
+                                                Textarea::make('description.cs')
+                                                    ->label('Popis (CZ)')
+                                                    ->rows(2),
+                                                Textarea::make('description.en')
+                                                    ->label('Description (EN)')
+                                                    ->rows(2),
+                                            ])
                                             ->columnSpanFull(),
                                     ])->columns(2),
 

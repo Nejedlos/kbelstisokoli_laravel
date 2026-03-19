@@ -86,6 +86,17 @@ class DiagnosePerformanceCommand extends Command
             app(\App\Services\BrandingService::class)->getSettings();
         });
 
+        // 7. Partners Check (JSON decoding pressure)
+        $this->info("\n[PARTNERS & JSON]");
+        $this->measure('Partners Cold Load (Cache Clear)', function () {
+            Cache::forget('partners_homepage_strip');
+            app(\App\Services\PartnerService::class)->getHomepagePartners();
+        });
+
+        $this->measure('Partners Cached Load (Hit)', function () {
+            app(\App\Services\PartnerService::class)->getHomepagePartners();
+        });
+
         $this->line("\n[DONE] Diagnostika dokončena.");
 
         return 0;

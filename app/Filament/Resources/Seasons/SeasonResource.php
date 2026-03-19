@@ -23,12 +23,12 @@ class SeasonResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.season.label');
+        return __('admin.resources.season.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.season.plural_label');
+        return __('admin.resources.season.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

@@ -19,7 +19,8 @@ class ClubCompetitionsTable
                 TextColumn::make('name')
                     ->label('Soutěž')
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('name', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->where("name->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->sortable()
                     ->description(fn ($record) => $record->metric_description),

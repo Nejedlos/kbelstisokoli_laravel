@@ -12,70 +12,30 @@ use Illuminate\Support\Facades\Schema;
 $app = Application::configure(basePath: dirname(__DIR__))
     ->booting(function ($app) {
         // 1. Nastavení cest (Environment a Public) co nejdříve
-        $envPath = file_exists(base_path('.env')) ? base_path() : base_path('public');
-        $app->useEnvironmentPath($envPath);
+        // Optimalizováno pro localhost a produkci (Webglobe)
+        if (! $app->runningInConsole()) {
+            $envPath = file_exists(base_path('.env')) ? base_path() : base_path('public');
+            $app->useEnvironmentPath($envPath);
 
-        // Pokud již máme načtený .env v této fázi (což by měl být), nastavíme public_path
-        $publicPath = env('PROD_PUBLIC_PATH');
-        if (env('PUBLIC_PATH_MODE') !== 'external') {
-            $publicPath = null;
-        }
-
-        if (! $publicPath && isset($_SERVER['SCRIPT_FILENAME']) && PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
-            $publicPath = dirname($_SERVER['SCRIPT_FILENAME']);
-        }
-
-        if (! $publicPath) {
-            $publicPath = env('APP_PUBLIC_PATH');
-        }
-
-        // Pokud stále nemáme publicPath a jsme na produkci, zkusíme relativní cestu
-        if (! $publicPath && $app->isProduction()) {
-            $subdomainPath = realpath(base_path('../subdomains/new'));
-            if ($subdomainPath && is_dir($subdomainPath)) {
-                $publicPath = $subdomainPath;
-            }
-        }
-
-        if ($publicPath) {
-            $app->usePublicPath($publicPath);
-            $app->instance('path.public', $publicPath);
-        }
-
-        // 2. Fix pro Webglobe a jiné hostingy se specifickým nastavením temp složek
-        // Automatické vytvoření storage podadresářů pro zamezení chyb při kompilaci Blade (tempnam fallback)
-        $storagePaths = [
-            storage_path('framework/cache'),
-            storage_path('framework/cache/data'),
-            storage_path('framework/sessions'),
-            storage_path('framework/views'),
-            storage_path('logs'),
-        ];
-
-        foreach ($storagePaths as $path) {
-            if (! is_dir($path)) {
-                @mkdir($path, 0777, true);
-            }
-            if (is_dir($path) && ! is_writable($path)) {
-                @chmod($path, 0777);
-            }
-        }
-
-        // Potlačení notice o tempnam fallbacku, která shazuje aplikaci na produkci
-        // Používáme robustnější kontrolu řetězce a capture previous handleru
-        // (E_NOTICE je v Laravelu standardně převáděna na ErrorException)
-        $handler = function ($errno, $errstr, $errfile, $errline) use (&$handler, &$previousHandler) {
-            if ($errno === E_NOTICE && (str_contains($errstr, 'tempnam()') && str_contains($errstr, 'temporary directory'))) {
-                return true; // Ignorovat tuto konkrétní notice
+            // Pokud již máme načtený .env v této fázi, nastavíme public_path
+            $publicPath = env('PROD_PUBLIC_PATH');
+            if (env('PUBLIC_PATH_MODE') !== 'external') {
+                $publicPath = null;
             }
 
-            if (is_callable($previousHandler)) {
-                return $previousHandler($errno, $errstr, $errfile, $errline);
+            if (! $publicPath && isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
+                $publicPath = dirname($_SERVER['SCRIPT_FILENAME']);
             }
 
-            return false;
-        };
-        $previousHandler = set_error_handler($handler);
+            if (! $publicPath) {
+                $publicPath = env('APP_PUBLIC_PATH');
+            }
+
+            if ($publicPath) {
+                $app->usePublicPath($publicPath);
+                $app->instance('path.public', $publicPath);
+            }
+        }
     })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -146,6 +106,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(prepend: [
+            \App\Http\Middleware\FullPageCacheMiddleware::class,
             \App\Http\Middleware\PerformanceProfilingMiddleware::class,
         ]);
 
@@ -154,7 +115,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\AddRequestIdToResponse::class,
             \App\Http\Middleware\MinifyHtmlMiddleware::class,
             \App\Http\Middleware\InjectFeedbackWidget::class,
-            \App\Http\Middleware\FullPageCacheMiddleware::class,
             \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
 

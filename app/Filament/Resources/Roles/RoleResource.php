@@ -32,12 +32,12 @@ class RoleResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.role.label');
+        return __('admin.resources.role.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.role.plural_label');
+        return __('admin.resources.role.plural_label');
     }
 
     public static function getNavigationSort(): ?int

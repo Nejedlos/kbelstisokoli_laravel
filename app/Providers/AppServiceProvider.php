@@ -33,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
             return new \App\Services\BrandingService;
         });
 
+        $this->app->singleton(\App\Services\Communication\CommunicationService::class);
+
         $this->app->singleton(\App\Services\Member\MemberContext::class);
 
         $this->app->bind(
@@ -144,37 +146,48 @@ class AppServiceProvider extends ServiceProvider
             $switch->visible(false);
         });
 
-        // Registrace Performance Observeru pro automatické mazání cache
-        $models = [
-            \App\Models\Post::class,
-            \App\Models\BasketballMatch::class,
-            \App\Models\Team::class,
-            \App\Models\Training::class,
-            \App\Models\Setting::class,
-            \App\Models\Page::class,
-            \App\Models\PageBlock::class,
-            \App\Models\Menu::class,
-            \App\Models\MenuItem::class,
-            \App\Models\Announcement::class,
-            \App\Models\MediaAsset::class,
-            \App\Models\Gallery::class,
-            \App\Models\PhotoPool::class,
-            \App\Models\HelpCategory::class,
-            \App\Models\HelpArticle::class,
-            \App\Models\HelpFaq::class,
-            \App\Models\HelpQuickAction::class,
-        ];
+        // Registrace Performance Observeru pro automatické mazání cache (pouze pokud neběžíme v konzoli a není to static asset)
+        // Optimalizováno: Registrujeme pouze pro požadavky, které mohou měnit data (POST, PUT, DELETE, PATCH)
+        if (! $this->app->runningInConsole()
+            && ! request()->isMethod('GET')
+            && ! request()->is('assets/*', 'livewire/livewire.js')) {
+            $models = [
+                \App\Models\Post::class,
+                \App\Models\BasketballMatch::class,
+                \App\Models\Team::class,
+                \App\Models\Training::class,
+                \App\Models\Setting::class,
+                \App\Models\Page::class,
+                \App\Models\PageBlock::class,
+                \App\Models\Menu::class,
+                \App\Models\MenuItem::class,
+                \App\Models\Announcement::class,
+                \App\Models\MediaAsset::class,
+                \App\Models\Gallery::class,
+                \App\Models\PhotoPool::class,
+                \App\Models\HelpCategory::class,
+                \App\Models\HelpArticle::class,
+                \App\Models\HelpFaq::class,
+                \App\Models\HelpQuickAction::class,
+                \App\Models\Partner::class,
+                \App\Models\Opponent::class,
+                \App\Models\Page::class,
+                \App\Models\Post::class,
+                \App\Models\PostCategory::class,
+                \App\Models\ClubCompetition::class,
+            ];
 
-        foreach ($models as $model) {
-            if (class_exists($model)) {
-                $model::observe(\App\Observers\PerformanceObserver::class);
+            foreach ($models as $model) {
+                if (class_exists($model)) {
+                    $model::observe(\App\Observers\PerformanceObserver::class);
+                }
             }
+
+            \App\Models\BasketballMatch::observe(\App\Observers\MatchPredictionObserver::class);
+            \App\Models\StatisticRow::observe(\App\Observers\MatchPredictionObserver::class);
         }
 
-        \App\Models\BasketballMatch::observe(\App\Observers\MatchPredictionObserver::class);
-        \App\Models\StatisticRow::observe(\App\Observers\MatchPredictionObserver::class);
-
-        \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*'], function ($view) {
+        \Illuminate\Support\Facades\View::composer(['layouts.*', 'errors.*', 'filament-panels::layout.*', 'filament-panels::pages.*'], function ($view) {
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
             static $cachedData = null;
             static $unreadCount = null;

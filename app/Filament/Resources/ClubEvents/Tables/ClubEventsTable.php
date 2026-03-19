@@ -21,7 +21,8 @@ class ClubEventsTable
                 TextColumn::make('title')
                     ->label('Název')
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('title', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->sortable()
                     ->formatStateUsing(fn ($state) => is_array($state) ? ($state['cs'] ?? $state['en'] ?? '') : $state),
@@ -48,7 +49,8 @@ class ClubEventsTable
                     ->badge()
                     ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->whereHas('teams', fn ($q) => $q->where('name', 'LIKE', "%{$search}%"));
+                        $locale = app()->getLocale();
+                        return $query->whereHas('teams', fn ($q) => $q->where("name->{$locale}", 'LIKE', "%{$search}%"));
                     }),
                 TextColumn::make('starts_at')
                     ->label('Od')

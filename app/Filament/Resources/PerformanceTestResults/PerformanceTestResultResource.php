@@ -34,12 +34,12 @@ class PerformanceTestResultResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.performance_test_result.label');
+        return __('admin.resources.performance_test_result.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.performance_test_result.plural_label');
+        return __('admin.resources.performance_test_result.plural_label');
     }
 
     public static function form(Schema $schema): Schema

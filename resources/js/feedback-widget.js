@@ -155,15 +155,32 @@ function registerKsFeedbackWidget() {
                 }
             });
 
+            // Zachycení rejekcí pro logování do interního bufferu chyb.
+            // Poznámka: Livewire 3 abort stavy jsou potlačeny globálním listenerem v <head>.
             window.addEventListener('unhandledrejection', (e) => {
+                const reason = e.reason;
+
+                // Opětovná kontrola pro jistotu (pokud by globální listener selhal nebo nebyl přítomen)
+                const isLivewireAbort = !reason || (
+                    typeof reason === 'object' &&
+                    'status' in reason && reason.status === null &&
+                    ('body' in reason || 'json' in reason || 'errors' in reason)
+                );
+
+                if (isLivewireAbort) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+
                 if (this.errors) {
                     this.errors.push({
                         type: 'promise-rejection',
-                        reason: this.safeStringify(e.reason),
+                        reason: this.safeStringify(reason),
                         timestamp: new Date().toISOString()
                     });
                 }
-            });
+            }, true);
         },
 
         setupNetworkTracking() {
@@ -178,7 +195,10 @@ function registerKsFeedbackWidget() {
                     }
                     return response;
                 } catch (error) {
-                    this.logNetworkFailure(args[0], args[1]?.method || 'GET', 'EXCEPTION', Date.now() - start, error.message);
+                    // Ignorujeme AbortError (např. od Livewire při navigaci) v logování, ale vyhodíme ho dál
+                    if (error.name !== 'AbortError') {
+                        this.logNetworkFailure(args[0], args[1]?.method || 'GET', 'EXCEPTION', Date.now() - start, error.message);
+                    }
                     throw error;
                 }
             };

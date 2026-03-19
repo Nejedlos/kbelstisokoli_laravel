@@ -254,7 +254,8 @@ class BrandingService
 
             $locale = app()->getLocale();
 
-            return $this->dbSettings = Cache::store('database')->remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {
+            $store = app()->isProduction() ? 'file' : 'database';
+            return $this->dbSettings = Cache::store($store)->remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {
                 try {
                     // Načteme klíče přes Query Builder (mnohem rychlejší než Eloquent pro mnoho malých řádků)
                     $settings = DB::table('settings')
@@ -282,7 +283,8 @@ class BrandingService
                     $mapped = [];
                     foreach ($settings as $setting) {
                         // Ruční dekódování Spatie translatable JSONu (bypass traitu)
-                        $value = json_decode($setting->value, true);
+                        $rawValue = $setting->value;
+                        $value = is_array($rawValue) ? $rawValue : json_decode((string)$rawValue, true);
 
                         if (is_array($value)) {
                             $mapped[$setting->key] = $value[$locale] ?? $value['cs'] ?? reset($value);

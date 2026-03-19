@@ -28,12 +28,12 @@ class FinanceChargeResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.finance_charge.label');
+        return __('admin.resources.finance_charge.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.finance_charge.plural_label');
+        return __('admin.resources.finance_charge.plural_label');
     }
 
     public static function getNavigationSort(): ?int

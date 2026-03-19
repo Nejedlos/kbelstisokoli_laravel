@@ -78,18 +78,24 @@ class InjectFeedbackWidget
 
         try {
             $widgetUrl = route('feedback.widget');
-            $manifestPath = public_path('build/manifest.json');
             $jsUrl = '';
 
-            if (file_exists($manifestPath)) {
-                $manifest = json_decode(file_get_contents($manifestPath), true);
-                if (isset($manifest['resources/js/feedback-widget.js']['file'])) {
-                    $jsUrl = asset('build/' . $manifest['resources/js/feedback-widget.js']['file']);
+            // Optimalizováno: Cachujeme URL widgetu v rámci requestu a framework cache, ale s ohledem na verzi manifestu
+            $manifestPath = public_path('build/manifest.json');
+            $mtime = file_exists($manifestPath) ? filemtime($manifestPath) : '0';
+            $cacheKey = "feedback_widget_js_url_{$mtime}";
+
+            $jsUrl = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function() use ($manifestPath) {
+                if (file_exists($manifestPath)) {
+                    $manifest = json_decode(file_get_contents($manifestPath), true);
+                    if (isset($manifest['resources/js/feedback-widget.js']['file'])) {
+                        return asset('build/' . $manifest['resources/js/feedback-widget.js']['file']);
+                    }
                 }
-            }
+                return '';
+            });
 
             if (empty($jsUrl)) {
-                \Illuminate\Support\Facades\Log::warning('Feedback widget JS not found in manifest at ' . $manifestPath . ', skipping injection.');
                 return;
             }
 
@@ -133,7 +139,12 @@ class InjectFeedbackWidget
 
             // 2. Fetch the widget HTML
             fetch('{$widgetUrl}')
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Feedback widget fetch failed: ' + response.status);
+                    }
+                    return response.text();
+                })
                 .then(html => {
                     if (!html || document.getElementById('ks-fb-root')) return;
                     const temp = document.createElement('div');
@@ -164,6 +175,9 @@ class InjectFeedbackWidget
                         }
                     };
                     inject();
+                })
+                .catch(err => {
+                    console.warn('Feedback widget: Failed to load widget HTML', err);
                 })
                 .finally(() => {
                     isFeedbackLoading = false;

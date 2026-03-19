@@ -25,7 +25,9 @@ class PerformanceProfilingMiddleware
 
         // Zapnutí query logu co nejdříve
         try {
-            DB::enableQueryLog();
+            if (!DB::getQueryLog()) {
+                DB::enableQueryLog();
+            }
         } catch (\Throwable $e) {
             // Ignorujeme, pokud DB není připravena
         }
@@ -44,33 +46,41 @@ class PerformanceProfilingMiddleware
         $queryCount = count($queries);
         $queryTime = array_sum(array_column($queries, 'time'));
         $memoryPeak = memory_get_peak_usage(true) / 1024 / 1024; // v MB
-        $opcacheEnabled = function_exists('opcache_get_status') && opcache_get_status(false);
+        $opcacheStatus = function_exists('opcache_get_status') ? opcache_get_status(false) : false;
+        $opcacheEnabled = $opcacheStatus && (is_array($opcacheStatus) ? ($opcacheStatus['opcache_enabled'] ?? false) : false);
 
         $logData = [
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'status' => $response->getStatusCode(),
-            'duration_ms' => round($duration, 2),
             'bootstrap_ms' => round($bootstrapDuration, 2),
+            'logic_ms' => round($duration, 2),
             'total_ms' => round($totalTime, 2),
             'query_count' => $queryCount,
             'query_time_ms' => round($queryTime, 2),
             'memory_mb' => round($memoryPeak, 2),
             'route' => $request->route() ? $request->route()->getName() : 'n/a',
             'opcache' => $opcacheEnabled ? 'on' : 'off',
+            'opcache_info' => $opcacheStatus ? 'ext_loaded' : 'ext_missing',
         ];
+
+        // Rozlišení typu požadavku pro logy
+        $isLivewire = $request->hasHeader('X-Livewire');
+        $isXhr = $request->ajax() || $request->wantsJson();
 
         $shouldLog = $this->shouldProfile($request) || $totalTime > 500 || $queryCount > 50;
 
         if ($shouldLog) {
+            $prefix = "[PERF] ";
             if ($totalTime > 1000 || $queryCount > 50) {
+                $prefix = "[SLOW] ";
                 $duplicatedQueries = $this->getDuplicatedQueries($queries);
                 if ($duplicatedQueries) {
                     $logData['duplicated_queries'] = $duplicatedQueries;
                 }
-                Log::warning('Slow request detected', $logData);
+                Log::warning($prefix . "Request: {$request->method()} {$request->path()}, Duration: " . round($totalTime, 2) . "ms, Queries: {$queryCount}", $logData);
             } else {
-                Log::info('Performance profile', $logData);
+                Log::info($prefix . "Request: {$request->method()} {$request->path()}, Duration: " . round($totalTime, 2) . "ms", $logData);
             }
         }
 
@@ -78,10 +88,17 @@ class PerformanceProfilingMiddleware
         // Vždy přidáme základní časy, pokud je to pomalé nebo jsme v debug módu
         if ($shouldLog || config('app.debug')) {
             $response->headers->set('X-Perf-Bootstrap-MS', round($bootstrapDuration, 2));
-            $response->headers->set('X-Perf-Duration-MS', round($duration, 2));
+            $response->headers->set('X-Perf-Logic-MS', round($duration, 2));
             $response->headers->set('X-Perf-Total-MS', round($totalTime, 2));
-            $response->headers->set('X-Perf-Query-Count', $queryCount);
-            $response->headers->set('X-Perf-Opcache', $opcacheEnabled ? 'enabled' : 'disabled');
+            $response->headers->set('X-Perf-Queries-Count', $queryCount);
+            $response->headers->set('X-Perf-Queries-MS', round($queryTime, 2));
+            $response->headers->set('X-Perf-Memory-MB', round($memoryPeak, 2));
+            $response->headers->set('X-Perf-OPcache', $opcacheEnabled ? 'On' : 'Off');
+
+            $duplicatedQueries = $this->getDuplicatedQueries($queries);
+            if (!empty($duplicatedQueries)) {
+                $response->headers->set('X-Perf-Queries-Duplicated', count($duplicatedQueries));
+            }
         }
 
         return $response;

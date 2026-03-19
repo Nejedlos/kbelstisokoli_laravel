@@ -17,7 +17,7 @@ class HelpArticlesTable
         return $table
             ->columns([
                 TextColumn::make('title')
-                    ->label(__('admin.navigation.resources.help_article.fields.title_cs'))
+                    ->label(__('admin.resources.help_article.fields.title_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
                         return $query->where('title->cs', 'like', "%{$search}%")
@@ -28,41 +28,41 @@ class HelpArticlesTable
                     }),
 
                 TextColumn::make('category.name')
-                    ->label(__('admin.navigation.resources.help_article.fields.category'))
+                    ->label(__('admin.resources.help_article.fields.category'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '-')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('audience_roles')
-                    ->label(__('admin.navigation.resources.help_article.fields.audience_roles'))
+                    ->label(__('admin.resources.help_article.fields.audience_roles'))
                     ->badge()
                     ->separator(',')
                     ->toggleable(),
 
                 TextColumn::make('sort_order')
-                    ->label(__('admin.navigation.resources.help_article.fields.sort_order'))
+                    ->label(__('admin.resources.help_article.fields.sort_order'))
                     ->numeric()
                     ->sortable(),
 
                 IconColumn::make('is_published')
-                    ->label(__('admin.navigation.resources.help_article.fields.is_published'))
+                    ->label(__('admin.resources.help_article.fields.is_published'))
                     ->boolean()
                     ->alignCenter(),
 
                 IconColumn::make('is_featured')
-                    ->label(__('admin.navigation.resources.help_article.fields.is_featured'))
+                    ->label(__('admin.resources.help_article.fields.is_featured'))
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->alignCenter(),
 
                 IconColumn::make('is_customized')
-                    ->label(__('admin.navigation.resources.help_article.fields.is_customized'))
+                    ->label(__('admin.resources.help_article.fields.is_customized'))
                     ->boolean()
                     ->toggleable()
                     ->alignCenter(),
 
                 TextColumn::make('published_at')
-                    ->label(__('admin.navigation.resources.help_article.fields.published_at'))
+                    ->label(__('admin.resources.help_article.fields.published_at'))
                     ->dateTime('d.m.Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -76,17 +76,17 @@ class HelpArticlesTable
             ->defaultSort('sort_order', 'asc')
             ->filters([
                 SelectFilter::make('category_id')
-                    ->label(__('admin.navigation.resources.help_article.fields.category'))
+                    ->label(__('admin.resources.help_article.fields.category'))
                     ->relationship('category', 'name->cs')
                     ->searchable(),
                 SelectFilter::make('is_published')
-                    ->label(__('admin.navigation.resources.help_article.fields.is_published'))
+                    ->label(__('admin.resources.help_article.fields.is_published'))
                     ->options([
                         '1' => 'Publikováno',
                         '0' => 'Koncept',
                     ]),
                 SelectFilter::make('audience_roles')
-                    ->label(__('admin.navigation.resources.help_article.fields.audience_roles'))
+                    ->label(__('admin.resources.help_article.fields.audience_roles'))
                     ->multiple()
                     ->options([
                         'admin' => 'Admin',

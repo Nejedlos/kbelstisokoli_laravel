@@ -18,35 +18,35 @@ class UserSeasonConfigsTable
         return $table
             ->columns([
                 TextColumn::make('user.name')
-                    ->label('Uživatel')
+                    ->label(__('admin.resources.user_season_config.fields.user'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('season.name')
-                    ->label('Sezóna')
+                    ->label(__('admin.resources.user_season_config.fields.season'))
                     ->sortable(),
                 TextColumn::make('tariff.name')
-                    ->label('Tarif')
+                    ->label(__('admin.resources.user_season_config.fields.tariff'))
                     ->sortable(),
                 TextColumn::make('opening_balance')
-                    ->label('Zůstatek')
+                    ->label(__('admin.resources.user_season_config.fields.opening_balance_short'))
                     ->money('CZK')
                     ->sortable(),
                 IconColumn::make('track_attendance')
-                    ->label('Docházka')
+                    ->label(__('admin.resources.user_season_config.fields.track_attendance_short'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label('Vytvořeno')
+                    ->label(__('admin.resources.user_season_config.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('season')
-                    ->label('Sezóna')
+                    ->label(__('admin.resources.user_season_config.fields.season'))
                     ->relationship('season', 'name'),
                 SelectFilter::make('tariff')
-                    ->label('Tarif')
+                    ->label(__('admin.resources.user_season_config.fields.tariff'))
                     ->relationship('tariff', 'name'),
             ])
             ->recordActions([

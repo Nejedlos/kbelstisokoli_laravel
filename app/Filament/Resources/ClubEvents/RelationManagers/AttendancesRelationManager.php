@@ -23,53 +23,68 @@ class AttendancesRelationManager extends RelationManager
 {
     protected static string $relationship = 'attendances';
 
-    protected static ?string $title = 'Docházka';
+    protected static ?string $title = 'admin.resources.attendance.plural_label';
 
-    protected static ?string $modelLabel = 'Záznam docházky';
+    protected static ?string $modelLabel = 'admin.resources.attendance.label';
 
-    protected static ?string $pluralModelLabel = 'Záznamy docházky';
+    protected static ?string $pluralModelLabel = 'admin.resources.attendance.plural_label';
+
+    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    {
+        return __('admin.resources.attendance.plural_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin.resources.attendance.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.resources.attendance.plural_label');
+    }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('user_id')
-                    ->label('Člen')
+                    ->label(__('admin.resources.attendance.fields.user'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('planned_status')
-                    ->label('Plánovaná docházka')
+                    ->label(__('admin.resources.attendance.fields.planned_status'))
                     ->options([
-                        'pending' => 'Čeká na vyjádření',
-                        'confirmed' => 'Potvrzeno (Přijde)',
-                        'declined' => 'Omluveno (Nepřijde)',
-                        'maybe' => 'Možná',
+                        'pending' => __('admin.resources.attendance.planned_statuses.pending'),
+                        'confirmed' => __('admin.resources.attendance.planned_statuses.confirmed'),
+                        'declined' => __('admin.resources.attendance.planned_statuses.declined'),
+                        'maybe' => __('admin.resources.attendance.planned_statuses.maybe'),
                     ])
                     ->default('pending')
                     ->required()
                     ->live(),
                 Select::make('excuse_reason')
-                    ->label('Důvod omluvy')
+                    ->label(__('admin.resources.attendance.fields.excuse_reason'))
                     ->options(ExcuseReason::class)
                     ->hidden(fn ($get) => $get('planned_status') !== 'declined')
                     ->nullable(),
                 Select::make('actual_status')
-                    ->label('Realita (Trenér)')
+                    ->label(__('admin.resources.attendance.fields.actual_status'))
                     ->options([
-                        'attended' => 'Přítomen',
-                        'absent' => 'Nepřítomen (neomluven)',
-                        'excused' => 'Omluven (trenérem)',
+                        'attended' => __('admin.resources.attendance.actual_statuses.attended'),
+                        'absent' => __('admin.resources.attendance.actual_statuses.absent'),
+                        'excused' => __('admin.resources.attendance.actual_statuses.excused'),
                     ])
                     ->nullable(),
                 Textarea::make('note')
-                    ->label('Poznámka člena / Důvod omluvenky')
-                    ->placeholder('Zadáno členem...')
+                    ->label(__('admin.resources.attendance.fields.note'))
+                    ->placeholder(__('admin.resources.attendance.placeholders.note'))
                     ->rows(2),
                 Textarea::make('internal_note')
-                    ->label('Interní poznámka (pro trenéry)')
-                    ->placeholder('Zadáno trenérem...')
+                    ->label(__('admin.resources.attendance.fields.internal_note'))
+                    ->placeholder(__('admin.resources.attendance.placeholders.internal_note'))
                     ->rows(2),
             ]);
     }
@@ -81,11 +96,11 @@ class AttendancesRelationManager extends RelationManager
             ->recordClasses(fn (\App\Models\Attendance $record) => $record->is_mismatch ? 'bg-danger-50 dark:bg-danger-900/20' : null)
             ->columns([
                 TextColumn::make('user.name')
-                    ->label('Člen')
+                    ->label(__('admin.resources.attendance.fields.user'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('planned_status')
-                    ->label('Plánováno')
+                    ->label(__('admin.resources.attendance.fields.planned_status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
@@ -95,16 +110,16 @@ class AttendancesRelationManager extends RelationManager
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'Čeká',
-                        'confirmed' => 'Přijde',
-                        'declined' => 'Nepřijde',
-                        'maybe' => 'Možná',
+                        'pending' => __('admin.resources.attendance.planned_statuses.pending'),
+                        'confirmed' => __('admin.resources.attendance.planned_statuses.confirmed'),
+                        'declined' => __('admin.resources.attendance.planned_statuses.declined'),
+                        'maybe' => __('admin.resources.attendance.planned_statuses.maybe'),
                         default => $state,
                     })
                     ->description(fn (\App\Models\Attendance $record): ?string => $record->excuse_reason?->getLabel())
                     ->sortable(),
                 TextColumn::make('actual_status')
-                    ->label('Realita')
+                    ->label(__('admin.resources.attendance.fields.actual_status'))
                     ->badge()
                     ->color(fn (?string $state): string => match ($state) {
                         'attended' => 'success',
@@ -113,60 +128,60 @@ class AttendancesRelationManager extends RelationManager
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (?string $state): string => match ($state) {
-                        'attended' => 'Byl',
-                        'absent' => 'Nebyl',
-                        'excused' => 'Omluven',
+                        'attended' => __('admin.resources.attendance.actual_statuses.attended'),
+                        'absent' => __('admin.resources.attendance.actual_statuses.absent'),
+                        'excused' => __('admin.resources.attendance.actual_statuses.excused'),
                         default => '?',
                     })
                     ->sortable(),
                 IconColumn::make('is_mismatch')
-                    ->label('Mismatch')
+                    ->label(__('admin.resources.attendance.fields.is_mismatch'))
                     ->boolean()
                     ->trueIcon(FilamentIcon::get('triangle-exclamation'))
                     ->falseIcon(null)
                     ->color('danger')
                     ->sortable(),
                 TextColumn::make('note')
-                    ->label('Poznámka')
+                    ->label(__('admin.resources.attendance.fields.note'))
                     ->limit(30)
                     ->toggleable(),
                 TextColumn::make('internal_note')
-                    ->label('Interní pozn.')
+                    ->label(__('admin.resources.attendance.fields.internal_note'))
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('responded_at')
-                    ->label('Odpovězeno')
+                    ->label(__('admin.resources.attendance.fields.responded_at'))
                     ->dateTime('d.m. H:i')
                     ->sortable()
                     ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('planned_status')
-                    ->label('Stav docházky (plán)')
+                    ->label(__('admin.resources.attendance.fields.planned_status'))
                     ->options([
-                        'pending' => 'Čeká',
-                        'confirmed' => 'Přijde',
-                        'declined' => 'Nepřijde',
-                        'maybe' => 'Možná',
+                        'pending' => __('admin.resources.attendance.planned_statuses.pending'),
+                        'confirmed' => __('admin.resources.attendance.planned_statuses.confirmed'),
+                        'declined' => __('admin.resources.attendance.planned_statuses.declined'),
+                        'maybe' => __('admin.resources.attendance.planned_statuses.maybe'),
                     ]),
                 SelectFilter::make('actual_status')
-                    ->label('Stav Realita')
+                    ->label(__('admin.resources.attendance.fields.actual_status'))
                     ->options([
-                        'attended' => 'Byl',
-                        'absent' => 'Nebyl',
-                        'excused' => 'Omluven',
+                        'attended' => __('admin.resources.attendance.actual_statuses.attended'),
+                        'absent' => __('admin.resources.attendance.actual_statuses.absent'),
+                        'excused' => __('admin.resources.attendance.actual_statuses.excused'),
                     ]),
                 TernaryFilter::make('is_mismatch')
-                    ->label('Pouze mismatch'),
+                    ->label(__('admin.resources.attendance.fields.is_mismatch')),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Přidat člena ručně'),
+                    ->label(__('admin.resources.attendance.actions.add_member')),
             ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->label('Odebrat'),
+                    ->label(__('user.actions.delete')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

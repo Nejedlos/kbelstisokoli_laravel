@@ -34,7 +34,7 @@ class UserForm
                 static::getSummaryCard()
                     ->columnSpanFull(),
 
-                Tabs::make('User Management')
+                Tabs::make(__('admin.resources.user.tabs.title'))
                     ->tabs([
                         static::getOverviewTab(),
                         static::getPersonalTab(),

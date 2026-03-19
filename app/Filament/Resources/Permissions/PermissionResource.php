@@ -31,12 +31,12 @@ class PermissionResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.permission.label');
+        return __('admin.resources.permission.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.permission.plural_label');
+        return __('admin.resources.permission.plural_label');
     }
 
     public static function getNavigationSort(): ?int

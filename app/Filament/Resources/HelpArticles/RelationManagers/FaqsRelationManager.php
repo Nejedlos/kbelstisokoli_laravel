@@ -26,25 +26,25 @@ class FaqsRelationManager extends RelationManager
                 Grid::make(2)
                     ->components([
                         TextInput::make('question.cs')
-                            ->label(__('admin.navigation.resources.help_faq.fields.question_cs'))
+                            ->label(__('admin.resources.help_faq.fields.question_cs'))
                             ->required(),
                         TextInput::make('question.en')
-                            ->label(__('admin.navigation.resources.help_faq.fields.question_en'))
+                            ->label(__('admin.resources.help_faq.fields.question_en'))
                             ->required(),
                     ]),
                 Grid::make(2)
                     ->components([
                         Textarea::make('answer.cs')
-                            ->label(__('admin.navigation.resources.help_faq.fields.answer_cs'))
+                            ->label(__('admin.resources.help_faq.fields.answer_cs'))
                             ->required()
                             ->rows(3),
                         Textarea::make('answer.en')
-                            ->label(__('admin.navigation.resources.help_faq.fields.answer_en'))
+                            ->label(__('admin.resources.help_faq.fields.answer_en'))
                             ->required()
                             ->rows(3),
                     ]),
                 TextInput::make('sort_order')
-                    ->label(__('admin.navigation.resources.help_faq.fields.sort_order'))
+                    ->label(__('admin.resources.help_faq.fields.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->required(),
@@ -57,14 +57,14 @@ class FaqsRelationManager extends RelationManager
             ->recordTitleAttribute('question')
             ->columns([
                 TextColumn::make('question')
-                    ->label(__('admin.navigation.resources.help_faq.fields.question_cs'))
+                    ->label(__('admin.resources.help_faq.fields.question_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
                         return $query->where('question->cs', 'like', "%{$search}%")
                             ->orWhere('question->en', 'like', "%{$search}%");
                     }),
                 TextColumn::make('sort_order')
-                    ->label(__('admin.navigation.resources.help_faq.fields.sort_order'))
+                    ->label(__('admin.resources.help_faq.fields.sort_order'))
                     ->sortable(),
             ])
             ->defaultSort('sort_order', 'asc')

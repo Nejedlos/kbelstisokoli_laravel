@@ -28,12 +28,12 @@ class AnnouncementResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.announcement.label');
+        return __('admin.resources.announcement.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.announcement.plural_label');
+        return __('admin.resources.announcement.plural_label');
     }
 
     public static function getNavigationSort(): ?int

@@ -19,7 +19,8 @@ class GalleriesTable
                 TextColumn::make('title')
                     ->label('Název')
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('title', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->description(fn ($record) => $record->slug),
 

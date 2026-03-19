@@ -46,7 +46,7 @@
     if (window.Livewire && typeof Livewire.hook === 'function') {
       Livewire.hook('request', ({ succeed, fail }) => {
         succeed(() => stop());
-        fail(() => {
+        fail((error) => {
           stop();
           gentleShakeFirstInvalid(root);
         });

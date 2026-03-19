@@ -89,7 +89,7 @@ class CreatePhotoPool extends CreateRecord
 
         // Informujeme uživatele
         \Filament\Notifications\Notification::make()
-            ->title(__('admin.navigation.resources.photo_pool.notifications.uploading'))
+            ->title(__('admin.resources.photo_pool.notifications.uploading'))
             ->info()
             ->body('Fotografie byly nahrány a zařazeny do fronty ke zpracování.')
             ->send();

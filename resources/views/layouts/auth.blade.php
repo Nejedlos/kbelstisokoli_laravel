@@ -45,6 +45,7 @@
     @stack('head')
 </head>
 <body class="antialiased">
+    <x-loader.global title="Přihlášení" />
     <div class="ks-auth-page auth-gradient w-full min-h-dvh flex items-center justify-center py-6 px-4 md:px-6 lg:px-8 relative overflow-x-hidden"
          style="
             background-color: #0f172a !important;

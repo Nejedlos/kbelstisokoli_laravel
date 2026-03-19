@@ -31,12 +31,12 @@ class PostCategoryResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.post_category.label');
+        return __('admin.resources.post_category.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.post_category.plural_label');
+        return __('admin.resources.post_category.plural_label');
     }
 
     public static function getNavigationSort(): ?int
@@ -76,7 +76,9 @@ class PostCategoryResource extends Resource
                 TextColumn::make('name')
                     ->label('Název')
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('name', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+
+                        return $query->where("name->{$locale}", 'LIKE', "%{$search}%");
                     }),
 
                 TextColumn::make('slug')

@@ -29,12 +29,12 @@ class MenuResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.menu.label');
+        return __('admin.resources.menu.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.menu.plural_label');
+        return __('admin.resources.menu.plural_label');
     }
 
     public static function getNavigationSort(): ?int

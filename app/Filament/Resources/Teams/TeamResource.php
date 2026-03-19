@@ -26,12 +26,12 @@ class TeamResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.team.label');
+        return __('admin.resources.team.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.team.plural_label');
+        return __('admin.resources.team.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

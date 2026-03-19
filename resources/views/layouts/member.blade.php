@@ -12,6 +12,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 
+    <script>
+        /**
+         * KRITICKÝ FIX: Globální potlačení Livewire 3 abort rejekcí v <head>.
+         * Tento skript zachytává "prázdné" rejekce, které Livewire 3 vyhazuje při přerušení
+         * asynchronního požadavku (např. při pollingu nebo navigaci).
+         */
+        (function() {
+            var suppress = function(e) {
+                var r = e.reason;
+                // Livewire 3 abort objekt: { status: null, body: null, json: null, errors: null }
+                // Rejekce může být i undefined/null při navigaci.
+                var isLivewireAbort = !r || (
+                    typeof r === 'object' &&
+                    'status' in r && r.status === null &&
+                    ('body' in r || 'json' in r || 'errors' in r)
+                );
+                if (isLivewireAbort) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            };
+            window.addEventListener('unhandledrejection', suppress, true);
+        })();
+    </script>
+
     <style>{!! $branding_css !!}</style>
     <style>
         /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
@@ -24,16 +49,16 @@
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 
     <!-- Tooltips (Tippy.js) -->
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="https://unpkg.com/@popperjs/core@2" defer></script>
+    <script src="https://unpkg.com/tippy.js@6" defer></script>
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/shift-away.css" />
 
     <!-- Charts (ApexCharts) -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
 
     @stack('head')
     <style>[x-cloak] { display: none !important; }</style>
@@ -62,21 +87,9 @@
     }
 @endphp
 <body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50"
-      x-data="{
-          sidebarOpen: false,
-          globalLoading: false,
-          loadingMessages: {{ json_encode($loadingMessages) }},
-          currentLoadingMessage: '',
-          updateLoadingMessage() {
-              this.currentLoadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
-          }
-      }"
-      x-init="updateLoadingMessage()"
-      @loading-start.window="globalLoading = true; updateLoadingMessage()"
-      @loading-stop.window="globalLoading = false">
-    <x-loader.basketball x-show="globalLoading" x-cloak class="z-[100]">
-        <span x-text="currentLoadingMessage"></span>
-    </x-loader.basketball>
+      x-data="{ sidebarOpen: false }"
+>
+    <x-loader.global :title="$title ?? __('nav.member_section')" />
     <x-impersonation-banner />
     <x-impersonation-notification />
     <x-announcement-bar :announcements="$announcements ?? []" />
@@ -91,7 +104,7 @@
                 </button>
 
                 <!-- Logo -->
-                <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2 sm:gap-3 group">
+                <a href="{{ route('member.dashboard') }}" @wireNavigate class="flex items-center gap-2 sm:gap-3 group">
                     @if($branding['logo_path'] ?? null)
                         <div class="w-10 h-10 sm:w-11 sm:h-11 bg-slate-50 rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 transition-all group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/5 group-hover:bg-white border border-slate-100">
                             <img src="{{ web_asset($branding['logo_path']) }}" class="max-w-full max-h-full object-contain" alt="">
@@ -306,6 +319,7 @@
             <nav class="flex-1 overflow-y-auto p-6 space-y-1.5 custom-scrollbar">
                 @foreach (config('navigation.member.main', []) as $item)
                     <a href="{{ route($item['route']) }}"
+                       @wireNavigate
                        class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-secondary' }}">
                         <div class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm group-hover:text-primary' }}">
                             @if($item['icon'] ?? null)
@@ -326,6 +340,7 @@
                     </div>
                     @foreach (config('navigation.member.statistics', []) as $item)
                         <a href="{{ route($item['route']) }}"
+                           @wireNavigate
                            class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-xl shadow-secondary/20 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-secondary' }}">
                             <div class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/10' : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm group-hover:text-primary' }}">
                                 @if($item['icon'] ?? null)
@@ -343,6 +358,7 @@
                 <div class="px-6 py-4">
                     @foreach (config('navigation.member.support', []) as $item)
                         <a href="{{ route($item['route']) }}"
+                           @wireNavigate
                            class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all relative {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/30' : 'bg-slate-50 text-slate-600 hover:bg-white hover:shadow-sm border border-slate-100/50' }}">
 
                             {{-- Pulzující tečka pro nápovědu --}}
@@ -516,7 +532,7 @@
 
                         <div class="space-y-1">
                             <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
-                                <a href="{{ route('member.dashboard') }}" class="hover:text-primary transition-colors">{{ __('nav.dashboard') }}</a>
+                                <a href="{{ route('member.dashboard') }}" @wireNavigate class="hover:text-primary transition-colors">{{ __('nav.dashboard') }}</a>
                                 <i class="fa-light fa-chevron-right text-[8px]"></i>
                                 <span class="text-slate-300 italic">{{ brand_text($title ?? '') }}</span>
                             </div>
@@ -586,15 +602,15 @@
     <!-- Bottom Navigation (Mobile Only) -->
     <nav class="lg:hidden h-20 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 flex items-center justify-around px-2 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] relative">
         <span class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-50"></span>
-        <a href="{{ route('member.dashboard') }}" class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.dashboard') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
+        <a href="{{ route('member.dashboard') }}" @wireNavigate class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.dashboard') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
             <i class="fa-light fa-grid-2 text-xl"></i>
             <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ __('nav.dashboard') }}</span>
         </a>
-        <a href="{{ route('member.attendance.index') }}" class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.attendance.*') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
+        <a href="{{ route('member.attendance.index') }}" @wireNavigate class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.attendance.*') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
             <i class="fa-light fa-calendar-star text-xl"></i>
             <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ __('nav.program') }}</span>
         </a>
-        <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.profile.*') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
+        <a href="{{ route('member.profile.edit') }}" @wireNavigate class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all duration-300 min-w-[64px] min-h-[64px] {{ request()->routeIs('member.profile.*') ? 'text-primary bg-primary/5' : 'text-slate-400' }}">
             <i class="fa-light fa-user-gear text-xl"></i>
             <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ __('nav.profile') }}</span>
         </a>
@@ -634,9 +650,7 @@
                 }
             }
         });
-    </script>
-    @stack('scripts')
-    <script>
+
         // Resetujeme atributy na body při navigaci, aby nezůstaly viset (např. batch-active pro feedback widget)
         document.addEventListener('livewire:navigating', () => {
             document.body.removeAttribute('data-batch-active');
@@ -646,54 +660,8 @@
                 fab.style.setProperty('display', 'flex', 'important');
             }
         });
-
-        // Detekce uživatelské interakce pro odlišení od automatických Livewire requestů (polling, Echo)
-        let lastUserInteraction = 0;
-        ['mousedown', 'keydown', 'submit', 'change', 'click', 'touchstart'].forEach(type => {
-            window.addEventListener(type, () => {
-                lastUserInteraction = Date.now();
-            }, true);
-        });
-
-        document.addEventListener('livewire:init', () => {
-            Livewire.hook('request', ({ respond, succeed, fail, options }) => {
-                // 1. Základní Livewire flagy pro tiché požadavky
-                if (options.method === 'POLL' || options.silent || options.background) {
-                    return;
-                }
-
-                // 2. Detekce, zda požadavek vyvolal uživatel nebo jde o navigaci
-                const isUserAction = (Date.now() - lastUserInteraction) < 150;
-                const isNavigation = !!options.navigate;
-
-                // 3. Pokud nejde o akci uživatele ani navigaci, loader nepouštíme
-                // Toto odfiltruje veškerý polling, Echo listenery a automatické refreshy
-                if (!isUserAction && !isNavigation) {
-                    return;
-                }
-
-                // 4. Pojistka pro specifické background komponenty
-                const isNotificationComponent = (options.fingerprint && options.fingerprint.name === 'member.notification-dropdown') ||
-                                                (options.name === 'member.notification-dropdown') ||
-                                                (options.updates && options.updates.some(u => u.name === 'member.notification-dropdown'));
-
-                if (isNotificationComponent && !isUserAction) {
-                    return;
-                }
-
-                window.dispatchEvent(new CustomEvent('loading-start'));
-
-                const stopLoading = () => window.dispatchEvent(new CustomEvent('loading-stop'));
-                respond(stopLoading);
-                succeed(stopLoading);
-                fail(stopLoading);
-            });
-        });
-
-        window.addEventListener('beforeunload', () => {
-            window.dispatchEvent(new CustomEvent('loading-start'));
-        });
     </script>
+    @stack('scripts')
     @livewireScripts
     <script>
         document.addEventListener('livewire:init', () => {

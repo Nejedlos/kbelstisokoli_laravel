@@ -33,7 +33,7 @@ class ListPhotoPools extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label(__('admin.navigation.resources.photo_pool.actions.create_wizard'))
+                ->label(__('admin.resources.photo_pool.actions.create_wizard'))
                 ->icon(new HtmlString('<i class="fa-light fa-plus"></i>'))
                 ->modalWidth('4xl')
                 ->form([
@@ -76,28 +76,28 @@ class ListPhotoPools extends ListRecords
 
                     Wizard::make([
                         Step::make('Kontext akce')
-                            ->label(__('admin.navigation.resources.photo_pool.steps.context.label'))
-                            ->description(__('admin.navigation.resources.photo_pool.steps.context.description'))
+                            ->label(__('admin.resources.photo_pool.steps.context.label'))
+                            ->description(__('admin.resources.photo_pool.steps.context.description'))
                             ->icon(new HtmlString('<i class="fa-light fa-sparkles"></i>'))
                             ->schema([
                                 TextInput::make('preliminary_title')
-                                    ->label(__('admin.navigation.resources.photo_pool.fields.preliminary_title'))
+                                    ->label(__('admin.resources.photo_pool.fields.preliminary_title'))
                                     ->placeholder('Např. Turnaj v Kbelích')
                                     ->required(),
                                 DatePicker::make('preliminary_date')
-                                    ->label(__('admin.navigation.resources.photo_pool.fields.preliminary_date'))
+                                    ->label(__('admin.resources.photo_pool.fields.preliminary_date'))
                                     ->native(false)
                                     ->displayFormat('m/Y')
                                     ->required(),
                                 Select::make('teams')
-                                    ->label(__('admin.navigation.resources.team.plural_label'))
+                                    ->label(__('admin.resources.team.plural_label'))
                                     ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                                     ->multiple()
                                     ->searchable()
                                     ->preload()
                                     ->native(false),
                                 Textarea::make('preliminary_description')
-                                    ->label(__('admin.navigation.resources.photo_pool.fields.preliminary_description'))
+                                    ->label(__('admin.resources.photo_pool.fields.preliminary_description'))
                                     ->placeholder('O co šlo, kdo tam byl...')
                                     ->rows(4)
                                     ->required(),
@@ -131,13 +131,13 @@ class ListPhotoPools extends ListRecords
                             }),
 
                         Step::make('AI Návrh & Revize')
-                            ->label(__('admin.navigation.resources.photo_pool.steps.review.label'))
-                            ->description(__('admin.navigation.resources.photo_pool.steps.review.description'))
+                            ->label(__('admin.resources.photo_pool.steps.review.label'))
+                            ->description(__('admin.resources.photo_pool.steps.review.description'))
                             ->icon(new HtmlString('<i class="fa-light fa-language"></i>'))
                             ->schema([
                                 Actions::make([
                                     Action::make('regenerateAi')
-                                        ->label(__('admin.navigation.resources.photo_pool.actions.regenerate_ai'))
+                                        ->label(__('admin.resources.photo_pool.actions.regenerate_ai'))
                                         ->icon(new HtmlString('<i class="fa-light fa-wand-magic-sparkles"></i>'))
                                         ->color('info')
                                         ->action(function ($get, $set, AiTextEnhancer $enhancer) {
@@ -168,18 +168,18 @@ class ListPhotoPools extends ListRecords
                                             $set('seo.og_description.en', $result['en']['seo']['og_description']);
 
                                             \Filament\Notifications\Notification::make()
-                                                ->title(__('admin.navigation.resources.photo_pool.notifications.ai_regenerated'))
+                                                ->title(__('admin.resources.photo_pool.notifications.ai_regenerated'))
                                                 ->success()
                                                 ->send();
                                         }),
                                 ])->columnSpanFull(),
                                 Grid::make(2)->schema([
                                     DatePicker::make('event_date')
-                                        ->label(__('admin.navigation.resources.photo_pool.fields.event_date'))
+                                        ->label(__('admin.resources.photo_pool.fields.event_date'))
                                         ->required()
                                         ->native(false),
                                     TextInput::make('slug')
-                                        ->label(__('admin.navigation.resources.photo_pool.fields.slug'))
+                                        ->label(__('admin.resources.photo_pool.fields.slug'))
                                         ->required(),
                                 ]),
                                 Tabs::make('Translations')
@@ -188,20 +188,20 @@ class ListPhotoPools extends ListRecords
                                             ->icon(new HtmlString('<i class="fa-light fa-flag-checkered"></i>'))
                                             ->schema([
                                                 TextInput::make('title_cs')
-                                                    ->label(__('admin.navigation.resources.photo_pool.fields.title_cs'))
+                                                    ->label(__('admin.resources.photo_pool.fields.title_cs'))
                                                     ->required(),
                                                 Textarea::make('description_cs')
-                                                    ->label(__('admin.navigation.resources.photo_pool.fields.description_cs'))
+                                                    ->label(__('admin.resources.photo_pool.fields.description_cs'))
                                                     ->rows(4),
                                             ]),
                                         Tabs\Tab::make('English')
                                             ->icon(new HtmlString('<i class="fa-light fa-flag-usa"></i>'))
                                             ->schema([
                                                 TextInput::make('title_en')
-                                                    ->label(__('admin.navigation.resources.photo_pool.fields.title_en'))
+                                                    ->label(__('admin.resources.photo_pool.fields.title_en'))
                                                     ->required(),
                                                 Textarea::make('description_en')
-                                                    ->label(__('admin.navigation.resources.photo_pool.fields.description_en'))
+                                                    ->label(__('admin.resources.photo_pool.fields.description_en'))
                                                     ->rows(4),
                                             ]),
                                         Tabs\Tab::make('SEO')
@@ -217,12 +217,12 @@ class ListPhotoPools extends ListRecords
                             ]),
 
                         Step::make('Nahrávání fotografií')
-                            ->label(__('admin.navigation.resources.photo_pool.steps.upload.label'))
-                            ->description(__('admin.navigation.resources.photo_pool.steps.upload.description'))
+                            ->label(__('admin.resources.photo_pool.steps.upload.label'))
+                            ->description(__('admin.resources.photo_pool.steps.upload.description'))
                             ->icon(new HtmlString('<i class="fa-light fa-images"></i>'))
                             ->schema([
                                 FileUpload::make('photos')
-                                    ->label(__('admin.navigation.resources.photo_pool.fields.photos'))
+                                    ->label(__('admin.resources.photo_pool.fields.photos'))
                                     ->placeholder(CmsForms::getUploadPlaceholder('Klikněte nebo přetáhněte fotografie sem'))
                                     ->multiple()
                                     ->image()
@@ -237,7 +237,7 @@ class ListPhotoPools extends ListRecords
                                     ->imageResizeTargetHeight('1920')
                                     ->imageResizeMode('contain')
                                     ->imageResizeUpscale(false)
-                                    ->uploadingMessage(__('admin.navigation.resources.photo_pool.notifications.uploading'))
+                                    ->uploadingMessage(__('admin.resources.photo_pool.notifications.uploading'))
                                     ->extraAttributes([
                                         'style' => 'max-height: 60vh; overflow-y: auto;',
                                         'x-on:file-pond-init' => "console.log('KS DEBUG: FilePond inicializován')",
@@ -290,7 +290,7 @@ class ListPhotoPools extends ListRecords
 
                     // Informujeme uživatele
                     \Filament\Notifications\Notification::make()
-                        ->title(__('admin.navigation.resources.photo_pool.notifications.uploading'))
+                        ->title(__('admin.resources.photo_pool.notifications.uploading'))
                         ->info()
                         ->body('Fotografie byly nahrány. Budete přesměrováni na detail galerie pro dokončení zpracování.')
                         ->send();

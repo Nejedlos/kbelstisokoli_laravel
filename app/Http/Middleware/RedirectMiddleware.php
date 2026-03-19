@@ -17,23 +17,28 @@ class RedirectMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $path = '/'.ltrim($request->getPathInfo(), '/');
+        $locale = app()->getLocale();
 
-        // 1. Hledání přesného match (nejrychlejší)
-        $redirect = Redirect::where('is_active', true)
-            ->where('source_path', $path)
-            ->where('match_type', 'exact')
-            ->orderBy('priority', 'desc')
-            ->first();
-
-        // 2. Pokud není exact, hledáme prefix match (volitelně)
-        if (! $redirect) {
-            $redirects = Redirect::where('is_active', true)
-                ->where('match_type', 'prefix')
+        // 1. Hledání přesného match (nacachované)
+        $redirect = \Illuminate\Support\Facades\Cache::remember("redirect_exact_{$locale}_".md5($path), 3600, function() use ($path) {
+            return Redirect::where('is_active', true)
+                ->where('source_path', $path)
+                ->where('match_type', 'exact')
                 ->orderBy('priority', 'desc')
-                ->orderByRaw('LENGTH(source_path) DESC')
-                ->get();
+                ->first();
+        });
 
-            foreach ($redirects as $pRedirect) {
+        // 2. Pokud není exact, hledáme prefix match (nacachované)
+        if (! $redirect) {
+            $prefixRedirects = \Illuminate\Support\Facades\Cache::remember("redirect_prefixes_{$locale}", 3600, function() {
+                return Redirect::where('is_active', true)
+                    ->where('match_type', 'prefix')
+                    ->orderBy('priority', 'desc')
+                    ->orderByRaw('LENGTH(source_path) DESC')
+                    ->get();
+            });
+
+            foreach ($prefixRedirects as $pRedirect) {
                 if (str_starts_with($path, $pRedirect->source_path)) {
                     $redirect = $pRedirect;
                     break;

@@ -167,10 +167,10 @@ class HelpQueryService
                 if (empty($item->color)) {
                     $item->color = 'slate';
                 }
-                $name = json_decode($item->name, true) ?: [];
+                $name = is_array($item->name) ? $item->name : (json_decode($item->name ?? '[]', true) ?: []);
                 $item->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
 
-                $desc = json_decode($item->description, true) ?: [];
+                $desc = is_array($item->description) ? $item->description : (json_decode($item->description ?? '[]', true) ?: []);
                 $item->description_str = $desc[$locale] ?? ($desc['cs'] ?? ($desc['en'] ?? ''));
 
                 // Optimalizace N+1: Pro HomeCategories to necháme v Query Builderu pro výkon,
@@ -216,10 +216,12 @@ class HelpQueryService
                 ->get();
 
             return $rows->map(function ($item) use ($locale) {
-                $title = json_decode($item->title, true) ?: [];
+                $titleRaw = $item->title;
+                $title = is_array($titleRaw) ? $titleRaw : (json_decode((string)$titleRaw, true) ?: []);
                 $item->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
                 $item->is_featured = (bool) $item->is_featured;
-                $item->audience_roles = json_decode($item->audience_roles, true) ?: [];
+                $rolesRaw = $item->audience_roles;
+                $item->audience_roles = is_array($rolesRaw) ? $rolesRaw : (json_decode((string)$rolesRaw, true) ?: []);
                 return $item;
             });
         });
@@ -258,11 +260,11 @@ class HelpQueryService
             }
 
             // Dekódování polí kategorie
-            $category->audience_roles = json_decode($category->audience_roles ?? '[]', true) ?: [];
-            $category->name = json_decode($category->name ?? '[]', true) ?: [];
+            $category->audience_roles = is_array($category->audience_roles) ? $category->audience_roles : (json_decode($category->audience_roles ?? '[]', true) ?: []);
+            $category->name = is_array($category->name) ? $category->name : (json_decode($category->name ?? '[]', true) ?: []);
             $category->name_str = $category->name[$locale] ?? ($category->name['cs'] ?? ($category->name['en'] ?? 'Untitled'));
 
-            $category->description = json_decode($category->description ?? '[]', true) ?: [];
+            $category->description = is_array($category->description) ? $category->description : (json_decode($category->description ?? '[]', true) ?: []);
             $category->description_str = $category->description[$locale] ?? ($category->description['cs'] ?? ($category->description['en'] ?? ''));
 
             // Načtení článků kategorie přes Query Builder - ultra lean
@@ -279,11 +281,14 @@ class HelpQueryService
                 ->orderBy('sort_order')
                 ->get()
                 ->map(function ($article) use ($locale) {
-                    $article->audience_roles = json_decode($article->audience_roles ?? '[]', true) ?: [];
-                    $article->title = json_decode($article->title ?? '[]', true) ?: [];
+                    $rolesRaw = $article->audience_roles;
+                    $article->audience_roles = is_array($rolesRaw) ? $rolesRaw : (json_decode((string)$rolesRaw, true) ?: []);
+                    $titleRaw = $article->title;
+                    $article->title = is_array($titleRaw) ? $titleRaw : (json_decode((string)$titleRaw, true) ?: []);
                     $article->title_str = $article->title[$locale] ?? ($article->title['cs'] ?? ($article->title['en'] ?? 'Untitled'));
 
-                    $m = json_decode($article->metadata ?? '[]', true) ?: [];
+                    $metaRaw = $article->metadata;
+                    $m = is_array($metaRaw) ? $metaRaw : (json_decode((string)$metaRaw ?? '[]', true) ?: []);
                     if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                         $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                         $article->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
@@ -301,7 +306,8 @@ class HelpQueryService
                 ->orderBy('sort_order')
                 ->get()
                 ->map(function ($sub) use ($locale) {
-                    $name = json_decode($sub->name, true) ?: [];
+                    $nameRaw = $sub->name;
+                    $name = is_array($nameRaw) ? $nameRaw : (json_decode((string)$nameRaw, true) ?: []);
                     $sub->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
                     return $sub;
                 });
@@ -392,7 +398,8 @@ class HelpQueryService
                 ->orderBy('sort_order')
                 ->get()
                 ->map(function ($cat) use ($locale) {
-                    $name = json_decode($cat->name, true) ?: [];
+                    $nameRaw = $cat->name;
+                    $name = is_array($nameRaw) ? $nameRaw : (json_decode((string)$nameRaw, true) ?: []);
                     $cat->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
                     return $cat;
                 });
@@ -406,10 +413,12 @@ class HelpQueryService
                 ->orderBy('sort_order')
                 ->get()
                 ->map(function ($art) use ($locale) {
-                    $title = json_decode($art->title, true) ?: [];
+                    $titleRaw = $art->title;
+                    $title = is_array($titleRaw) ? $titleRaw : (json_decode((string)$titleRaw, true) ?: []);
                     $art->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
 
-                    $m = json_decode($art->metadata ?? '[]', true) ?: [];
+                    $metaRaw = $art->metadata;
+                    $m = is_array($metaRaw) ? $metaRaw : (json_decode((string)$metaRaw ?? '[]', true) ?: []);
                     if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                         $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                         $art->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
@@ -459,10 +468,12 @@ class HelpQueryService
         $next = $currentIndex !== false && $currentIndex < $articles->count() - 1 ? $articles->get($currentIndex + 1) : null;
 
         if ($prev) {
-            $t = json_decode($prev->title, true) ?: [];
+            $tRaw = $prev->title;
+            $t = is_array($tRaw) ? $tRaw : (json_decode((string)$tRaw, true) ?: []);
             $prev->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
 
-            $m = json_decode($prev->metadata, true) ?: [];
+            $mRaw = $prev->metadata;
+            $m = is_array($mRaw) ? $mRaw : (json_decode((string)$mRaw, true) ?: []);
             if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                 $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                 $prev->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
@@ -471,10 +482,12 @@ class HelpQueryService
             }
         }
         if ($next) {
-            $t = json_decode($next->title, true) ?: [];
+            $tRaw = $next->title;
+            $t = is_array($tRaw) ? $tRaw : (json_decode((string)$tRaw, true) ?: []);
             $next->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
 
-            $m = json_decode($next->metadata, true) ?: [];
+            $mRaw = $next->metadata;
+            $m = is_array($mRaw) ? $mRaw : (json_decode((string)$mRaw, true) ?: []);
             if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                 $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                 $next->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);

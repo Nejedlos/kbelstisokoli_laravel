@@ -31,8 +31,11 @@ class AiDocument extends Model
     ];
 
     protected $casts = [
-        'keywords' => 'array',
-        'metadata' => 'array',
+        'title' => 'json',
+        'summary' => 'json',
+        'content' => 'json',
+        'keywords' => 'json',
+        'metadata' => 'json',
         'is_active' => 'boolean',
         'last_indexed_at' => 'datetime',
     ];

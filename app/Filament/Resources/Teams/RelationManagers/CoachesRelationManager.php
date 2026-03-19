@@ -27,7 +27,7 @@ class CoachesRelationManager extends RelationManager
 
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
-        return __('admin.navigation.resources.team.fields.coaches');
+        return __('admin.resources.team.fields.coaches');
     }
 
     public function table(Table $table): Table
@@ -46,11 +46,11 @@ class CoachesRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('pivot.email')
-                    ->label(__('admin.navigation.resources.team.fields.coach_email'))
+                    ->label(__('admin.resources.team.fields.coach_email'))
                     ->placeholder(fn ($record) => $record->email)
                     ->searchable(),
                 TextColumn::make('pivot.phone')
-                    ->label(__('admin.navigation.resources.team.fields.coach_phone'))
+                    ->label(__('admin.resources.team.fields.coach_phone'))
                     ->placeholder(fn ($record) => (string) $record->phone)
                     ->searchable(),
             ])
@@ -59,7 +59,7 @@ class CoachesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->label(__('admin.navigation.resources.team.actions.attach_coach'))
+                    ->label(__('admin.resources.team.actions.attach_coach'))
                     ->icon(IconHelper::render(IconHelper::PLUS))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
@@ -80,30 +80,30 @@ class CoachesRelationManager extends RelationManager
                                 }
                             }),
                         TextInput::make('email')
-                            ->label(__('admin.navigation.resources.team.fields.coach_email'))
-                            ->helperText(__('admin.navigation.resources.team.fields.coach_email_help'))
+                            ->label(__('admin.resources.team.fields.coach_email'))
+                            ->helperText(__('admin.resources.team.fields.coach_email_help'))
                             ->email()
                             ->maxLength(255),
                         TextInput::make('phone')
-                            ->label(__('admin.navigation.resources.team.fields.coach_phone'))
-                            ->helperText(__('admin.navigation.resources.team.fields.coach_phone_help'))
+                            ->label(__('admin.resources.team.fields.coach_phone'))
+                            ->helperText(__('admin.resources.team.fields.coach_phone_help'))
                             ->maxLength(20)
                             ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state),
                     ]),
             ])
             ->recordActions([
                 EditAction::make()
-                    ->label(__('admin.navigation.resources.team.actions.edit_coach_contact'))
+                    ->label(__('admin.resources.team.actions.edit_coach_contact'))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->form([
                         TextInput::make('email')
-                            ->label(__('admin.navigation.resources.team.fields.coach_email'))
-                            ->helperText(__('admin.navigation.resources.team.fields.coach_email_help'))
+                            ->label(__('admin.resources.team.fields.coach_email'))
+                            ->helperText(__('admin.resources.team.fields.coach_email_help'))
                             ->email()
                             ->maxLength(255),
                         TextInput::make('phone')
-                            ->label(__('admin.navigation.resources.team.fields.coach_phone'))
-                            ->helperText(__('admin.navigation.resources.team.fields.coach_phone_help'))
+                            ->label(__('admin.resources.team.fields.coach_phone'))
+                            ->helperText(__('admin.resources.team.fields.coach_phone_help'))
                             ->maxLength(20)
                             ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state),
                     ]),
@@ -113,14 +113,14 @@ class CoachesRelationManager extends RelationManager
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(),
                 DetachAction::make()
-                    ->label(__('admin.navigation.resources.team.actions.detach'))
+                    ->label(__('admin.resources.team.actions.detach'))
                     ->icon(IconHelper::render(IconHelper::TRASH))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
-                        ->label(__('admin.navigation.resources.team.actions.detach_selected')),
+                        ->label(__('admin.resources.team.actions.detach_selected')),
                 ])->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ]);
     }

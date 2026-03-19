@@ -79,7 +79,9 @@ class PerformanceService
 
             // Normalizace lokalizovaných hodnot (JSON) na prosté řetězce
             foreach ($settings as $key => $value) {
-                if (str_starts_with($value, '{') && str_ends_with($value, '}')) {
+                if (is_array($value)) {
+                    $settings[$key] = reset($value);
+                } elseif (is_string($value) && str_starts_with($value, '{') && str_ends_with($value, '}')) {
                     $decoded = json_decode($value, true);
                     if (is_array($decoded)) {
                         // Vezmeme první dostupnou hodnotu (např. 'cs')

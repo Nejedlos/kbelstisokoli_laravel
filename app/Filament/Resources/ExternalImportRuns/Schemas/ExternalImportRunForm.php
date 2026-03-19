@@ -18,89 +18,93 @@ class ExternalImportRunForm
     {
         return $schema
             ->components([
-                Section::make('Základní informace')
+                Section::make(__('admin.resources.external_import_run.sections.general'))
                     ->columns(3)
                     ->schema([
                         TextInput::make('source_key')
-                            ->label('Zdroj')
+                            ->label(__('admin.resources.external_import_run.fields.source'))
                             ->readOnly(),
                         TextInput::make('run_type')
-                            ->label('Typ běhu')
+                            ->label(__('admin.resources.external_import_run.fields.run_type'))
                             ->formatStateUsing(fn (string $state): string => match ($state) {
-                                'team_page' => 'Tým (soupiska)',
-                                'matches_list' => 'Seznam zápasů',
-                                'match_detail' => 'Detail zápasu',
-                                'preview' => 'Náhled (preview)',
+                                'team_page' => __('admin.resources.external_import_run.run_types.team_page'),
+                                'matches_list' => __('admin.resources.external_import_run.run_types.matches_list'),
+                                'match_detail' => __('admin.resources.external_import_run.run_types.match_detail'),
+                                'preview' => __('admin.resources.external_import_run.run_types.preview'),
                                 default => $state,
                             })
                             ->readOnly(),
                         TextInput::make('status')
-                            ->label('Stav')
+                            ->label(__('admin.resources.external_import_run.fields.status'))
                             ->formatStateUsing(fn (string $state): string => match ($state) {
-                                'success' => 'Úspěch',
-                                'skipped' => 'Přeskočeno',
-                                'failed' => 'Chyba',
-                                'partial_failed' => 'Částečná chyba',
-                                'running' => 'Běží',
+                                'success' => __('admin.resources.external_import_run.statuses.success'),
+                                'skipped' => __('admin.resources.external_import_run.statuses.skipped'),
+                                'failed' => __('admin.resources.external_import_run.statuses.failed'),
+                                'partial_failed' => __('admin.resources.external_import_run.statuses.partial_failed'),
+                                'running' => __('admin.resources.external_import_run.statuses.running'),
                                 default => $state,
                             })
                             ->readOnly(),
                         TextInput::make('season.name')
-                            ->label('Sezóna')
+                            ->label(__('admin.resources.external_import_run.fields.season'))
                             ->readOnly(),
                         TextInput::make('team.name')
-                            ->label('Tým')
+                            ->label(__('admin.resources.external_import_run.fields.team'))
                             ->readOnly(),
                         TextInput::make('target_external_id')
-                            ->label('Cílové externí ID')
+                            ->label(__('admin.resources.external_import_run.fields.target_external_id'))
                             ->readOnly(),
                     ]),
-                Section::make('Časové údaje')
+                Section::make(__('admin.resources.external_import_run.sections.times'))
                     ->columns(3)
                     ->schema([
                         TextInput::make('started_at')
-                            ->label('Zahájeno')
+                            ->label(__('admin.resources.external_import_run.fields.started_at'))
                             ->readOnly(),
                         TextInput::make('finished_at')
-                            ->label('Dokončeno')
+                            ->label(__('admin.resources.external_import_run.fields.finished_at'))
                             ->readOnly(),
                         TextInput::make('created_at')
-                            ->label('Vytvořeno')
+                            ->label(__('admin.resources.external_import_run.fields.created_at'))
                             ->readOnly(),
                     ]),
-                Section::make('Výsledky')
+                Section::make(__('admin.resources.external_import_run.sections.results'))
                     ->columns(3)
                     ->schema([
                         TextInput::make('extracted_count')
-                            ->label('Extrahováno')
+                            ->label(__('admin.resources.external_import_run.fields.extracted_count'))
                             ->numeric()
                             ->readOnly(),
                         TextInput::make('imported_count')
-                            ->label('Importováno')
+                            ->label(__('admin.resources.external_import_run.fields.imported_count'))
                             ->numeric()
                             ->readOnly(),
                         TextInput::make('skipped_count')
-                            ->label('Přeskočeno')
+                            ->label(__('admin.resources.external_import_run.fields.skipped_count'))
                             ->numeric()
                             ->readOnly(),
                         TextInput::make('content_hash')
-                            ->label('Hash obsahu')
+                            ->label(__('admin.resources.external_import_run.fields.content_hash'))
                             ->columnSpanFull()
                             ->readOnly(),
                         Textarea::make('error_summary')
-                            ->label('Chyba')
+                            ->label(__('admin.resources.external_import_run.fields.error_summary'))
                             ->columnSpanFull()
                             ->readOnly()
                             ->rows(15)
                             ->extraAttributes([
                                 'style' => 'font-family: "JetBrains Mono", "Courier New", monospace; font-size: 0.8rem; line-height: 1.2; background-color: #fef2f2;',
                             ])
-                            ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? "Původní HTML: " . number_format($record->metadata['html_size'] / 1024, 1) . " KB | Sanitizováno: " . (isset($record->metadata['sanitized_length']) ? number_format($record->metadata['sanitized_length'] / 1024, 1) . " KB" : "N/A") . " | Timeout: " . (config('services.openai.timeout') ?? 60) . "s | Connect: 10s" : null)
+                            ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? __('admin.resources.external_import_run.helpers.html_info', [
+                                'size' => number_format($record->metadata['html_size'] / 1024, 1),
+                                'sanitized' => (isset($record->metadata['sanitized_length']) ? number_format($record->metadata['sanitized_length'] / 1024, 1) : "N/A"),
+                                'timeout' => (config('services.openai.timeout') ?? 60)
+                            ]) : null)
                             ->hintAction(
                                 Action::make('copyError')
                                     ->label(new \Illuminate\Support\HtmlString('
-                                        <span x-show="!copied">Kopírovat chybu</span>
-                                        <span x-show="copied" x-cloak>Zkopírováno!</span>
+                                        <span x-show="!copied">' . __('admin.resources.external_import_run.actions.copy_error') . '</span>
+                                        <span x-show="copied" x-cloak>' . __('admin.resources.external_import_run.actions.copied') . '</span>
                                     '))
                                     ->icon(new \Illuminate\Support\HtmlString('
                                         <span x-show="!copied">' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::COPY) . '</span>
@@ -143,10 +147,10 @@ class ExternalImportRunForm
                             })
                             ->hidden(fn ($record) => ! $record || ! isset($record->metadata['debug_logs'])),
                     ]),
-                Section::make('Metadata a doplňky')
+                Section::make(__('admin.resources.external_import_run.sections.metadata'))
                     ->schema([
                         KeyValue::make('metadata')
-                            ->label('Metadata')
+                            ->label(__('admin.resources.external_import_run.fields.metadata'))
                             ->disableAddingRows()
                             ->disableDeletingRows()
                             ->disableEditingKeys()

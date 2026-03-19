@@ -17,7 +17,7 @@ class TeamForm
     {
         return $schema
             ->components([
-                Section::make(new HtmlString(IconHelper::render(IconHelper::INFO).' '.__('admin.navigation.resources.team.tabs.general')))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::INFO).' '.__('admin.resources.team.tabs.general')))
                     ->schema([
                         TextInput::make('name.cs')
                             ->label('Název týmu (CZ)')
@@ -29,12 +29,12 @@ class TeamForm
                             ->label('Team name (EN)')
                             ->maxLength(255),
                         TextInput::make('slug')
-                            ->label(__('admin.navigation.resources.team.fields.slug'))
+                            ->label(__('admin.resources.team.fields.slug'))
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
                         Select::make('category')
-                            ->label(__('admin.navigation.resources.team.fields.category'))
+                            ->label(__('admin.resources.team.fields.category'))
                             ->options([
                                 'senior' => __('teams.categories.senior'),
                                 'youth' => __('teams.categories.youth'),
@@ -43,7 +43,7 @@ class TeamForm
                             ->native(false),
                     ])->columns(2),
 
-                Section::make(new HtmlString(IconHelper::render(IconHelper::LIST_ICON).' '.__('admin.navigation.resources.team.fields.description')))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::LIST_ICON).' '.__('admin.resources.team.fields.description')))
                     ->schema([
                         Textarea::make('description.cs')
                             ->label('Popis týmu (CZ)')

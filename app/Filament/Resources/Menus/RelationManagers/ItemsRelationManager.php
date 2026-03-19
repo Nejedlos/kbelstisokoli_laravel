@@ -66,7 +66,9 @@ class ItemsRelationManager extends RelationManager
                 TextColumn::make('label')
                     ->label('Popisek')
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('label', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+
+                        return $query->where("label->{$locale}", 'LIKE', "%{$search}%");
                     }),
                 TextColumn::make('route_name')->label('Route')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('url')->label('URL')->toggleable(isToggledHiddenByDefault: true),

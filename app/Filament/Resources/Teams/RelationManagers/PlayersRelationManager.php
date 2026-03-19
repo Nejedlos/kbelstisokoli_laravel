@@ -36,7 +36,7 @@ class PlayersRelationManager extends RelationManager
 
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
-        return __('admin.navigation.resources.team.fields.players');
+        return __('admin.resources.team.fields.players');
     }
 
     public function form(Schema $schema): Schema
@@ -48,13 +48,13 @@ class PlayersRelationManager extends RelationManager
                     ->disabled()
                     ->columnSpanFull(),
                 Select::make('role_in_team')
-                    ->label(__('admin.navigation.resources.team.fields.role_in_team'))
-                    ->options(__('admin.navigation.resources.team.fields.roles'))
+                    ->label(__('admin.resources.team.fields.role_in_team'))
+                    ->options(__('admin.resources.team.fields.roles'))
                     ->default('player')
                     ->required()
                     ->native(false),
                 Checkbox::make('is_primary_team')
-                    ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
+                    ->label(__('admin.resources.team.fields.is_primary_team'))
                     ->default(false),
                 Checkbox::make('is_on_roster')
                     ->label(__('Hráč je na soupisce'))
@@ -78,14 +78,14 @@ class PlayersRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('jersey_number')
-                    ->label(__('admin.navigation.resources.player_profile.fields.jersey_number'))
+                    ->label(__('admin.resources.player_profile.fields.jersey_number'))
                     ->sortable(),
                 TextColumn::make('pivot.role_in_team')
-                    ->label(__('admin.navigation.resources.team.fields.role_in_team'))
-                    ->formatStateUsing(fn (string $state): string => __("admin.navigation.resources.team.fields.roles.{$state}") ?? $state)
+                    ->label(__('admin.resources.team.fields.role_in_team'))
+                    ->formatStateUsing(fn (string $state): string => __("admin.resources.team.fields.roles.{$state}") ?? $state)
                     ->searchable(),
                 IconColumn::make('pivot.is_primary_team')
-                    ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
+                    ->label(__('admin.resources.team.fields.is_primary_team'))
                     ->boolean()
                     ->sortable(),
                 IconColumn::make('pivot.is_on_roster')
@@ -98,7 +98,7 @@ class PlayersRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->label(__('admin.navigation.resources.team.actions.attach_player'))
+                    ->label(__('admin.resources.team.actions.attach_player'))
                     ->icon(IconHelper::render(IconHelper::PLUS))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
@@ -116,13 +116,13 @@ class PlayersRelationManager extends RelationManager
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Select::make('role_in_team')
-                            ->label(__('admin.navigation.resources.team.fields.role_in_team'))
-                            ->options(__('admin.navigation.resources.team.fields.roles'))
+                            ->label(__('admin.resources.team.fields.role_in_team'))
+                            ->options(__('admin.resources.team.fields.roles'))
                             ->default('player')
                             ->required()
                             ->native(false),
                         Checkbox::make('is_primary_team')
-                            ->label(__('admin.navigation.resources.team.fields.is_primary_team'))
+                            ->label(__('admin.resources.team.fields.is_primary_team'))
                             ->default(true),
                         Checkbox::make('is_on_roster')
                             ->label(__('Hráč je na soupisce'))
@@ -154,18 +154,18 @@ class PlayersRelationManager extends RelationManager
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id]))
                     ->openUrlInNewTab(),
                 EditAction::make()
-                    ->label(__('admin.navigation.resources.team.fields.role_in_team'))
+                    ->label(__('admin.resources.team.fields.role_in_team'))
                     ->icon(IconHelper::render(IconHelper::EDIT))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->form([
                         Select::make('role_in_team')
-                            ->label(__('admin.navigation.resources.team.fields.role_in_team'))
-                            ->options(__('admin.navigation.resources.team.fields.roles'))
+                            ->label(__('admin.resources.team.fields.role_in_team'))
+                            ->options(__('admin.resources.team.fields.roles'))
                             ->default('player')
                             ->required()
                             ->native(false),
                         Checkbox::make('is_primary_team')
-                            ->label(__('admin.navigation.resources.team.fields.is_primary_team')),
+                            ->label(__('admin.resources.team.fields.is_primary_team')),
                         Checkbox::make('is_on_roster')
                             ->label(__('Hráč je na soupisce')),
                     ])
@@ -194,7 +194,7 @@ class PlayersRelationManager extends RelationManager
                         }
                     }),
                 DetachAction::make()
-                    ->label(__('admin.navigation.resources.team.actions.detach'))
+                    ->label(__('admin.resources.team.actions.detach'))
                     ->icon(IconHelper::render(IconHelper::TRASH))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->after(function (\App\Models\PlayerProfile $record, RelationManager $livewire) {
@@ -206,7 +206,7 @@ class PlayersRelationManager extends RelationManager
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
-                        ->label(__('admin.navigation.resources.team.actions.detach_selected'))
+                        ->label(__('admin.resources.team.actions.detach_selected'))
                         ->after(function (\Illuminate\Support\Collection $records, RelationManager $livewire) {
                             $teamId = $livewire->getOwnerRecord()->id;
                             foreach ($records as $record) {

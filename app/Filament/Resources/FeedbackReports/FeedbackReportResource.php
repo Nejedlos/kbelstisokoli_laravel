@@ -39,12 +39,12 @@ class FeedbackReportResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.feedback_report.label');
+        return __('admin.resources.feedback_report.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.feedback_report.plural_label');
+        return __('admin.resources.feedback_report.plural_label');
     }
 
     public static function form(Schema $schema): Schema

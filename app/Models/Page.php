@@ -36,13 +36,6 @@ class Page extends Model
 
     protected static function booted()
     {
-        static::saved(function ($page) {
-            try {
-                \Illuminate\Support\Facades\Artisan::call('view:clear');
-                \Illuminate\Support\Facades\Artisan::call('cache:clear');
-            } catch (\Throwable $e) {
-                // Ignorovat během migrací/seedování
-            }
-        });
+        // Cache pro stránky je nyní spravována globálním PerformanceObserverem
     }
 }

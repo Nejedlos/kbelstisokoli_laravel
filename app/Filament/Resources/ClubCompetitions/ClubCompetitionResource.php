@@ -28,12 +28,12 @@ class ClubCompetitionResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.club_competition.label');
+        return __('admin.resources.club_competition.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.club_competition.plural_label');
+        return __('admin.resources.club_competition.plural_label');
     }
 
     public static function getNavigationSort(): ?int

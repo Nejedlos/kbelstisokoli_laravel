@@ -27,13 +27,15 @@ class AnnouncementsTable
                         default => 'info',
                     })
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('title', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     }),
                 TextColumn::make('message')
                     ->label('Zpráva')
                     ->limit(50)
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('message', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->where("message->{$locale}", 'LIKE', "%{$search}%");
                     }),
                 TextColumn::make('audience')
                     ->label('Publikum')

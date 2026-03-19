@@ -23,7 +23,7 @@ class RedirectResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.navigation.resources.redirect.plural_label');
+        return __('admin.resources.redirect.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
@@ -33,7 +33,7 @@ class RedirectResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.redirect.plural_label');
+        return __('admin.resources.redirect.plural_label');
     }
 
     public static function getNavigationSort(): ?int

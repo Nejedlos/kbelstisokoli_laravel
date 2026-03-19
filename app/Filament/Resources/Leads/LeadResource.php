@@ -34,12 +34,12 @@ class LeadResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.lead.label');
+        return __('admin.resources.lead.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.lead.plural_label');
+        return __('admin.resources.lead.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

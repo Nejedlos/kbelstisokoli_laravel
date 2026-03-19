@@ -26,17 +26,17 @@ class ExternalEntityMappingResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.navigation.resources.external_entity_mapping.plural_label');
+        return __('admin.resources.external_entity_mapping.plural_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.external_entity_mapping.plural_label');
+        return __('admin.resources.external_entity_mapping.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.external_entity_mapping.label');
+        return __('admin.resources.external_entity_mapping.label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

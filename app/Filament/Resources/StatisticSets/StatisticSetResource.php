@@ -28,12 +28,12 @@ class StatisticSetResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.statistic_set.label');
+        return __('admin.resources.statistic_set.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.statistic_set.plural_label');
+        return __('admin.resources.statistic_set.plural_label');
     }
 
     public static function getNavigationSort(): ?int

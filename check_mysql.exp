@@ -1,0 +1,9 @@
+set timeout 20
+spawn ssh -p 20001 -o StrictHostKeyChecking=no ssh-588875@dw191.webglobe.com "find ~ -name '*.sock'"
+expect {
+    "password:" {
+        send "7hhyUXhn\r"
+        exp_continue
+    }
+    eof
+}

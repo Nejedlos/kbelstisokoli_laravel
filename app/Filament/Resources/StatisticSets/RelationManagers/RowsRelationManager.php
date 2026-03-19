@@ -61,7 +61,7 @@ class RowsRelationManager extends RelationManager
                             ->searchable()
                             ->preload(),
                         Select::make('teams')
-                            ->label(__('admin.navigation.resources.team.plural_label'))
+                            ->label(__('admin.resources.team.plural_label'))
                             ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                             ->multiple()
                             ->searchable()

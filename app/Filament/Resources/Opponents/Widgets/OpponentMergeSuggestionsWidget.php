@@ -19,7 +19,7 @@ class OpponentMergeSuggestionsWidget extends BaseWidget
                     ->where('status', 'pending')
                     ->latest()
             )
-            ->heading(__('admin.navigation.resources.opponent_merge_suggestion.plural_label'))
+            ->heading(__('admin.resources.opponent_merge_suggestion.plural_label'))
             ->paginated([5, 10, 25, 50])
             ->defaultPaginationPageOption(5);
     }

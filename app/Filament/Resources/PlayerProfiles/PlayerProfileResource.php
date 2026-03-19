@@ -28,12 +28,12 @@ class PlayerProfileResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.player_profile.label');
+        return __('admin.resources.player_profile.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.player_profile.plural_label');
+        return __('admin.resources.player_profile.plural_label');
     }
 
     public static function getNavigationSort(): ?int

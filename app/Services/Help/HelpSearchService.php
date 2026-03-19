@@ -109,11 +109,14 @@ class HelpSearchService
                 ->limit($limit)
                 ->get()
                 ->map(function ($article) use ($query, $locale) {
-                    $title = json_decode($article->title, true) ?: [];
+                    $titleRaw = $article->title;
+                    $title = is_array($titleRaw) ? $titleRaw : (json_decode((string)$titleRaw, true) ?: []);
                     $article->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
 
                     $article->search_excerpt = $this->generateExcerpt($article, $query, $locale);
-                    $article->audience_roles = json_decode($article->audience_roles, true) ?: [];
+
+                    $rolesRaw = $article->audience_roles;
+                    $article->audience_roles = is_array($rolesRaw) ? $rolesRaw : (json_decode((string)$rolesRaw, true) ?: []);
                     $article->is_featured = (bool) $article->is_featured;
 
                     return $article;
@@ -126,10 +129,12 @@ class HelpSearchService
      */
     protected function generateExcerpt(object $article, string $query, string $locale): string
     {
-        $contentArr = json_decode($article->content, true) ?: [];
+        $contentRaw = $article->content;
+        $contentArr = is_array($contentRaw) ? $contentRaw : (json_decode((string)$contentRaw, true) ?: []);
         $content = strip_tags($contentArr[$locale] ?? ($contentArr['cs'] ?? ($contentArr['en'] ?? '')));
 
-        $meta = json_decode($article->metadata, true) ?: [];
+        $metaRaw = $article->metadata;
+        $meta = is_array($metaRaw) ? $metaRaw : (json_decode((string)$metaRaw, true) ?: []);
         $purpose = $meta[$locale]['purpose'] ?? ($meta['cs']['purpose'] ?? '');
 
         if (empty($query)) {

@@ -17,17 +17,17 @@ class LegacyImportBatchResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.navigation.resources.legacy_import_batch.plural_label');
+        return __('admin.resources.legacy_import_batch.plural_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.legacy_import_batch.plural_label');
+        return __('admin.resources.legacy_import_batch.plural_label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.legacy_import_batch.label');
+        return __('admin.resources.legacy_import_batch.label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null

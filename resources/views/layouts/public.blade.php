@@ -54,6 +54,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 
+    <script>
+        /**
+         * KRITICKÝ FIX: Globální potlačení Livewire 3 abort rejekcí v <head>.
+         * Tento skript zachytává "prázdné" rejekce, které Livewire 3 vyhazuje při přerušení
+         * asynchronního požadavku (např. při pollingu nebo navigaci).
+         */
+        (function() {
+            var suppress = function(e) {
+                var r = e.reason;
+                // Livewire 3 abort objekt: { status: null, body: null, json: null, errors: null }
+                // Rejekce může být i undefined/null při navigaci.
+                var isLivewireAbort = !r || (
+                    typeof r === 'object' &&
+                    'status' in r && r.status === null &&
+                    ('body' in r || 'json' in r || 'errors' in r)
+                );
+                if (isLivewireAbort) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            };
+            window.addEventListener('unhandledrejection', suppress, true);
+        })();
+    </script>
+
     <!-- Open Graph -->
     <meta property="og:title" content="{{ $seo['og_title'] }}">
     <meta property="og:description" content="{{ $seo['og_description'] }}">
@@ -103,7 +128,7 @@
     <style>[x-cloak] { display: none !important; }</style>
 
     <!-- Charts (ApexCharts) -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
     @if($gtmId = env('GTM_CONTAINER_ID'))
@@ -113,6 +138,7 @@
         <!-- End Google Tag Manager (noscript) -->
     @endif
     <x-announcement-bar :announcements="$announcements ?? []" />
+    <x-loader.global />
 
     <!-- Header -->
     <x-header :branding="$branding ?? []" :navigation="config('navigation.public', [])" />

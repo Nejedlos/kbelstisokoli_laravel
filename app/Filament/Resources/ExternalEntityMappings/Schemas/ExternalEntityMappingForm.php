@@ -13,33 +13,33 @@ class ExternalEntityMappingForm
     {
         return $schema
             ->components([
-                Section::make('Externí identita')
+                Section::make(__('admin.resources.external_entity_mapping.sections.external'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('source_key')
-                            ->label('Zdroj')
+                            ->label(__('admin.resources.external_entity_mapping.fields.source'))
                             ->readOnly(),
                         TextInput::make('external_id')
-                            ->label('Externí ID')
+                            ->label(__('admin.resources.external_entity_mapping.fields.external_id'))
                             ->readOnly(),
                         TextInput::make('identity_key')
-                            ->label('Klíč identity')
+                            ->label(__('admin.resources.external_entity_mapping.fields.identity_key'))
                             ->readOnly()
                             ->columnSpanFull(),
                         TextInput::make('metadata.player_name')
-                            ->label('Jméno (z externu)')
+                            ->label(__('admin.resources.external_entity_mapping.fields.player_name'))
                             ->readOnly(),
                         TextInput::make('metadata.birth_year')
-                            ->label('Ročník (z externu)')
+                            ->label(__('admin.resources.external_entity_mapping.fields.birth_year'))
                             ->readOnly(),
                     ]),
-                Section::make('Interní propojení')
+                Section::make(__('admin.resources.external_entity_mapping.sections.internal'))
                     ->schema([
                         Select::make('internal_id')
-                            ->label('Přiřazený uživatel')
+                            ->label(__('admin.resources.external_entity_mapping.fields.assigned_user'))
                             ->relationship('user', 'name')
                             ->searchable()
-                            ->helperText('Vyberte uživatele, kterému patří tyto statistiky'),
+                            ->helperText(__('admin.resources.external_entity_mapping.helpers.assigned_user')),
                     ]),
             ]);
     }

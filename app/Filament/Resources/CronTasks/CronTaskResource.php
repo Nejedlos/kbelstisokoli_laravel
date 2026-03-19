@@ -18,7 +18,7 @@ class CronTaskResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.navigation.resources.cron_task.plural_label');
+        return __('admin.resources.cron_task.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
@@ -33,12 +33,12 @@ class CronTaskResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.cron_task.label');
+        return __('admin.resources.cron_task.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.cron_task.plural_label');
+        return __('admin.resources.cron_task.plural_label');
     }
 
     public static function getNavigationSort(): ?int

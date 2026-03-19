@@ -23,13 +23,12 @@ class ClubEvent extends Model
         'ends_at',
         'is_public',
         'rsvp_enabled',
+        'metadata',
     ];
 
     public $translatable = ['title', 'description'];
 
     protected $casts = [
-        'title' => 'array',
-        'description' => 'array',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
         'is_public' => 'boolean',

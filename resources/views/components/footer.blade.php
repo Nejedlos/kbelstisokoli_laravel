@@ -1,6 +1,6 @@
 @props(['branding'])
 
-@cacheFragment('footer_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl().serialize($branding).serialize(config('navigation.public', []))), 86400)
+@cacheFragment('fragment_footer_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 86400)
 @php
     $footerNav = $footerMenu ?? [];
     $clubNav = $footerClubMenu ?? [];
@@ -41,7 +41,7 @@
                 @endphp
 
                 @if($isTeamLogoEnabled)
-                    <a href="{{ url('/') }}" class="inline-flex items-center gap-4 group">
+                    <a href="{{ url('/') }}" @wireNavigate class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl shadow-lg shadow-black/20">
                             <picture>
                                 <source srcset="{{ web_asset($teamLogo['paths']['mini'] ?? '', true) }}" type="image/webp">
@@ -56,7 +56,7 @@
                         </span>
                     </a>
                 @elseif($branding['logo_path'])
-                    <a href="{{ url('/') }}" class="inline-flex items-center gap-4 group">
+                    <a href="{{ url('/') }}" @wireNavigate class="inline-flex items-center gap-4 group">
                         <div class="p-2 bg-white rounded-xl">
                             <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ $branding['club_name'] }}" class="h-10 w-auto">
                         </div>
@@ -337,21 +337,21 @@
             </div>
 
             <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-4 gap-y-4 sm:gap-x-8 sm:gap-y-6 md:gap-x-6 md:gap-y-4 w-full md:w-auto">
-                <a href="{{ Route::has('public.contact.index') ? route('public.contact.index') : url('/kontakt') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 justify-center sm:justify-start">
+                <a href="{{ Route::has('public.contact.index') ? route('public.contact.index') : url('/kontakt') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 justify-center sm:justify-start">
                     <span class="w-1.5 h-1.5 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Kontakt') }}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full"></span>
 
-                <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
+                <a href="{{ Route::has('login') ? route('login') : url('/login') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {!! str_replace(' ', '&nbsp;', __('Členská sekce')) !!}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full"></span>
 
-                <a href="{{ Route::has('public.pages.show') ? route('public.pages.show', 'gdpr') : url('/gdpr') }}" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
+                <a href="{{ Route::has('public.pages.show') ? route('public.pages.show', 'gdpr') : url('/gdpr') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Ochrana soukromí') }}
                 </a>

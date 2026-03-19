@@ -18,97 +18,97 @@ class FinancialTariffForm
     {
         return $schema
             ->components([
-                Section::make('Základní nastavení')
+                Section::make(__('admin.resources.financial_tariff.sections.general'))
                     ->components([
                         TextInput::make('name')
-                            ->label('Název tarifu')
-                            ->placeholder('např. Členský příspěvek - Elite')
+                            ->label(__('admin.resources.financial_tariff.fields.name'))
+                            ->placeholder(__('admin.resources.financial_tariff.placeholders.name'))
                             ->required()
                             ->maxLength(255),
                         Select::make('type')
-                            ->label('Typ platby')
+                            ->label(__('admin.resources.financial_tariff.fields.type'))
                             ->options([
-                                'flat' => 'Paušál / Splátky',
-                                'per_event' => 'Platba za akci (Pay-per-event)',
-                                'prepaid' => 'Předplacený balíček akcí (Prepaid)',
+                                'flat' => __('admin.resources.financial_tariff.types.flat'),
+                                'per_event' => __('admin.resources.financial_tariff.types.per_event'),
+                                'prepaid' => __('admin.resources.financial_tariff.types.prepaid'),
                             ])
                             ->default('flat')
                             ->required()
                             ->live(),
                         TextInput::make('base_amount')
                             ->label(fn ($get) => match($get('type')) {
-                                'per_event' => 'Částka za jednu akci',
-                                'prepaid' => 'Cena za celý balíček',
-                                default => 'Celková částka / Základ'
+                                'per_event' => __('admin.resources.financial_tariff.fields.amount_per_event'),
+                                'prepaid' => __('admin.resources.financial_tariff.fields.amount_per_package'),
+                                default => __('admin.resources.financial_tariff.fields.base_amount')
                             })
                             ->numeric()
                             ->required()
                             ->prefix('CZK'),
                         TextInput::make('prepaid_events_count')
-                            ->label('Počet akcí v balíčku')
+                            ->label(__('admin.resources.financial_tariff.fields.prepaid_events_count'))
                             ->numeric()
                             ->required(fn ($get) => $get('type') === 'prepaid')
                             ->visible(fn ($get) => $get('type') === 'prepaid'),
                         TextInput::make('extra_event_amount')
-                            ->label('Cena za akci po vyčerpání balíčku')
+                            ->label(__('admin.resources.financial_tariff.fields.extra_event_amount'))
                             ->numeric()
                             ->required(fn ($get) => $get('type') === 'prepaid')
                             ->visible(fn ($get) => $get('type') === 'prepaid')
                             ->prefix('CZK'),
                         Select::make('unit')
-                            ->label('Časová jednotka')
+                            ->label(__('admin.resources.financial_tariff.fields.unit'))
                             ->options([
-                                'month' => 'Měsíc',
-                                'season' => 'Sezóna',
-                                'event' => 'Akce',
+                                'month' => __('admin.resources.financial_tariff.units.month'),
+                                'season' => __('admin.resources.financial_tariff.units.season'),
+                                'event' => __('admin.resources.financial_tariff.units.event'),
                             ])
                             ->default('month')
                             ->required(),
                     ])->columns(2),
 
-                Section::make('Splátkový kalendář')
-                    ->description('Definujte jednotlivé splátky pro paušální tarify. Systém je vygeneruje automaticky při přiřazení tarifu.')
+                Section::make(__('admin.resources.financial_tariff.sections.installments'))
+                    ->description(__('admin.resources.financial_tariff.descriptions.installments'))
                     ->visible(fn ($get) => $get('type') === 'flat')
                     ->components([
                         Repeater::make('installment_plan')
-                            ->label('Plán splátek')
+                            ->label(__('admin.resources.financial_tariff.fields.installment_plan'))
                             ->schema([
                                 TextInput::make('label')
-                                    ->label('Popis splátky')
-                                    ->placeholder('např. 1. splátka')
+                                    ->label(__('admin.resources.financial_tariff.fields.installment_label'))
+                                    ->placeholder(__('admin.resources.financial_tariff.placeholders.installment_label'))
                                     ->required(),
                                 TextInput::make('amount')
-                                    ->label('Částka')
+                                    ->label(__('admin.resources.financial_tariff.fields.amount'))
                                     ->numeric()
                                     ->required()
                                     ->prefix('CZK'),
                                 DatePicker::make('due_date')
-                                    ->label('Datum splatnosti')
+                                    ->label(__('admin.resources.financial_tariff.fields.due_date'))
                                     ->required(),
                             ])
                             ->columns(3)
                             ->defaultItems(0)
-                            ->addActionLabel('Přidat splátku'),
+                            ->addActionLabel(__('admin.resources.financial_tariff.add_installment')),
                     ]),
 
-                Section::make('Automatizace a pokuty')
-                    ->description('Nastavte, zda se pro tento tarif mají automaticky počítat pokuty.')
+                Section::make(__('admin.resources.financial_tariff.sections.automation'))
+                    ->description(__('admin.resources.financial_tariff.descriptions.automation'))
                     ->icon(new HtmlString('<i class="fa-light fa-robot text-primary-500"></i>'))
                     ->components([
                         Toggle::make('calculate_attendance_fines')
-                            ->label('Hlídat a pokutovat docházku')
-                            ->helperText('Pokud je zapnuto, systém bude generovat pokuty za nevyjádření, pozdní omluvy atd.')
+                            ->label(__('admin.resources.financial_tariff.fields.calculate_attendance_fines'))
+                            ->helperText(__('admin.resources.financial_tariff.helpers.attendance_fines'))
                             ->default(false),
                         Toggle::make('calculate_th_fines')
-                            ->label('Pokutovat neproměněné trestné hody')
-                            ->helperText('Pokud je zapnuto, systém bude generovat pokuty za neproměněné TH ze statistik.')
+                            ->label(__('admin.resources.financial_tariff.fields.calculate_th_fines'))
+                            ->helperText(__('admin.resources.financial_tariff.helpers.th_fines'))
                             ->default(false),
                     ])->columns(2),
 
-                Section::make('Doplňující informace')
+                Section::make(__('admin.resources.financial_tariff.sections.additional'))
                     ->components([
                         Textarea::make('description')
-                            ->label('Interní popis')
+                            ->label(__('admin.resources.financial_tariff.fields.description'))
                             ->rows(3),
                     ]),
             ]);

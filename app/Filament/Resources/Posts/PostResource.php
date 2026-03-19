@@ -28,12 +28,12 @@ class PostResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.post.label');
+        return __('admin.resources.post.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.post.plural_label');
+        return __('admin.resources.post.plural_label');
     }
 
     public static function getNavigationSort(): ?int

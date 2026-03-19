@@ -30,12 +30,12 @@ class HelpArticleResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.help_article.label');
+        return __('admin.resources.help_article.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.help_article.plural_label');
+        return __('admin.resources.help_article.plural_label');
     }
 
     public static function getNavigationSort(): ?int

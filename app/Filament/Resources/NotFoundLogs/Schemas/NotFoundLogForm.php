@@ -15,15 +15,15 @@ class NotFoundLogForm
     {
         return $schema
             ->components([
-                Section::make('Informace o chybě')
+                Section::make(__('admin.resources.not_found_log.sections.error'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('url')
-                                    ->label('URL')
+                                    ->label(__('admin.resources.not_found_log.fields.url'))
                                     ->readOnly(),
                                 TextInput::make('hits_count')
-                                    ->label('Počet výskytů')
+                                    ->label(__('admin.resources.not_found_log.fields.hits_count'))
                                     ->numeric()
                                     ->readOnly(),
                             ]),
@@ -31,24 +31,24 @@ class NotFoundLogForm
                         Grid::make(2)
                             ->schema([
                                 DateTimePicker::make('last_seen_at')
-                                    ->label('Naposledy viděno')
+                                    ->label(__('admin.resources.not_found_log.fields.last_seen_at'))
                                     ->readOnly(),
                                 TextInput::make('status')
-                                    ->label('Stav')
+                                    ->label(__('admin.resources.not_found_log.fields.status'))
                                     ->readOnly(),
                             ]),
                     ]),
 
-                Section::make('Detaily o požadavku')
+                Section::make(__('admin.resources.not_found_log.sections.request'))
                     ->schema([
                         TextInput::make('referer')
-                            ->label('Referer')
+                            ->label(__('admin.resources.not_found_log.fields.referer'))
                             ->readOnly(),
                         TextInput::make('ip_address')
-                            ->label('IP adresa')
+                            ->label(__('admin.resources.not_found_log.fields.ip_address'))
                             ->readOnly(),
                         Textarea::make('user_agent')
-                            ->label('User Agent')
+                            ->label(__('admin.resources.not_found_log.fields.user_agent'))
                             ->readOnly()
                             ->rows(3),
                     ]),

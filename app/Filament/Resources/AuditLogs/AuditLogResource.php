@@ -17,7 +17,7 @@ class AuditLogResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.navigation.resources.audit_log.plural_label');
+        return __('admin.resources.audit_log.plural_label');
     }
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
@@ -32,12 +32,12 @@ class AuditLogResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('admin.navigation.resources.audit_log.label');
+        return __('admin.resources.audit_log.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.navigation.resources.audit_log.plural_label');
+        return __('admin.resources.audit_log.plural_label');
     }
 
     public static function getNavigationGroup(): ?string

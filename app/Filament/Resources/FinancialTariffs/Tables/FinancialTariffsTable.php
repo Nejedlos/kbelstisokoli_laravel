@@ -16,23 +16,24 @@ class FinancialTariffsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Název')
+                    ->label(__('admin.resources.financial_tariff.fields.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('base_amount')
-                    ->label('Základní částka')
+                    ->label(__('admin.resources.financial_tariff.fields.base_amount'))
                     ->money('CZK')
                     ->sortable(),
                 TextColumn::make('unit')
-                    ->label('Jednotka')
+                    ->label(__('admin.resources.financial_tariff.fields.unit'))
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'month' => 'Měsíc',
-                        'season' => 'Sezóna',
+                        'month' => __('admin.resources.financial_tariff.units.month'),
+                        'season' => __('admin.resources.financial_tariff.units.season'),
+                        'event' => __('admin.resources.financial_tariff.units.event'),
                         default => $state,
                     })
                     ->badge(),
                 TextColumn::make('created_at')
-                    ->label('Vytvořeno')
+                    ->label(__('admin.resources.financial_tariff.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

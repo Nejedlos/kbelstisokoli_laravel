@@ -22,15 +22,16 @@ class TeamsTable
             ->striped()
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('admin.navigation.resources.team.fields.name'))
+                    ->label(__('admin.resources.team.fields.name'))
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
-                        return $query->where('name', 'LIKE', "%{$search}%");
+                        $locale = app()->getLocale();
+                        return $query->where("name->{$locale}", 'LIKE', "%{$search}%");
                     }),
                 TextColumn::make('slug')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('category')
-                    ->label(__('admin.navigation.resources.team.fields.category'))
+                    ->label(__('admin.resources.team.fields.category'))
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'senior' => __('teams.categories.senior'),
                         'youth' => __('teams.categories.youth'),
@@ -44,22 +45,24 @@ class TeamsTable
                     })
                     ->searchable(),
                 TextColumn::make('active_coaches_count')
-                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS_GROUP).' '.__('admin.navigation.resources.team.fields.coaches_count')))
+                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS_GROUP).' '.__('admin.resources.team.fields.coaches_count')))
                     ->counts('activeCoaches')
                     ->sortable(),
                 TextColumn::make('active_players_count')
-                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS).' '.__('admin.navigation.resources.team.fields.players_count')))
+                    ->label(new HtmlString(IconHelper::render(IconHelper::USERS).' '.__('admin.resources.team.fields.players_count')))
                     ->counts('activePlayers')
                     ->sortable(),
                 TextColumn::make('roster_players_count')
-                    ->label(new HtmlString(IconHelper::render(IconHelper::BASKETBALL).' '.__('Soupiska')))
+                    ->label(new HtmlString(IconHelper::render(IconHelper::BASKETBALL).' '.__('admin.resources.team.fields.roster_count')))
                     ->counts('rosterPlayers')
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin.resources.team.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('admin.resources.team.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -70,7 +73,7 @@ class TeamsTable
             ->recordActions([
                 ActionGroup::make([
                     Action::make('view_public')
-                        ->label(__('admin.navigation.resources.team.actions.view_public'))
+                        ->label(__('admin.resources.team.actions.view_public'))
                         ->icon(IconHelper::render(IconHelper::GLOBE))
                         ->url(fn ($record) => route('public.teams.show', $record->slug))
                         ->openUrlInNewTab()
