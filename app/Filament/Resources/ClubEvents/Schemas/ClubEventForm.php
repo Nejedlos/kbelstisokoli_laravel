@@ -78,7 +78,7 @@ class ClubEventForm
                                 Toggle::make('is_public')
                                     ->label('Veřejná akce?')
                                     ->helperText('Pokud je vypnuto, uvidí ji pouze přihlášení členové.')
-                                    ->default(true)
+                                    ->default(false)
                                     ->required(),
                                 Toggle::make('rsvp_enabled')
                                     ->label('Povolit přihlašování (Docházku)?')

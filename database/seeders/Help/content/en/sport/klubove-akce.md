@@ -10,7 +10,7 @@ The system distinguishes several categories of events, which differ in color and
 ### Creating and Configuring an Event
 When creating a new event, you define its scope and interactivity:
 1. **Team Assignment**: The event can concern specific teams or "the entire club" (if you do not select any team).
-2. **Visibility (is_public)**: Public events are automatically displayed on the club's website in the calendar for the general public.
+2. **Visibility (is_public)**: Public events are automatically displayed on the club's website in the calendar for the general public. **New events are private by default (off).**
 3. **RSVP / Attendance**: If you turn on the "Enable Attendance" option, players in the mobile app will see a button to sign up, and coaches can keep track of those present.
 
 ### Working with Participants (RSVP)

@@ -10,7 +10,7 @@ V systému rozlišujeme několik kategorií akcí, které se liší barvou a ú�
 ### Vytvoření a nastavení akce
 Při zakládání nové akce definujete její rozsah a interaktivitu:
 1. **Přiřazení týmů**: Akce se může týkat konkrétních týmů nebo "celého klubu" (pokud nevyberete žádný tým).
-2. **Viditelnost (is_public)**: Veřejné akce se automaticky zobrazují na klubovém webu v kalendáři pro širokou veřejnost.
+2. **Viditelnost (is_public)**: Veřejné akce se automaticky zobrazují na klubovém webu v kalendáři pro širokou veřejnost. **Nová akce je ve výchozím stavu neveřejná (vypnuto).**
 3. **RSVP / Docházka**: Pokud zapnete volbu "Povolit docházku", hráči v mobilní aplikaci uvidí tlačítko pro přihlášení a trenéři mohou vést evidenci přítomných.
 
 ### Práce s účastníky (RSVP)
