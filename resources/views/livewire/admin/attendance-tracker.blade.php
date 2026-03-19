@@ -49,7 +49,7 @@
     </div>
 
     @if(count($this->attendances) > 0)
-        <div class="flex flex-col md:flex-row items-center justify-center gap-4 relative z-10 -my-4 px-4 w-full">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 relative z-10 my-4 md:mt-2 md:mb-10 px-4 w-full">
             <div class="w-full md:w-auto bg-primary-600 dark:bg-primary-500 px-6 py-3 rounded-full shadow-lg shadow-primary-500/40 flex items-center justify-center gap-4 border-2 border-white dark:border-gray-900 transform transition-transform hover:scale-105 shrink-0">
                 <div class="text-sm font-black text-white uppercase tracking-tighter flex items-center gap-1">
                     <span>{{ __('admin.real_attendance.tracker.submitted_count') }}</span>
