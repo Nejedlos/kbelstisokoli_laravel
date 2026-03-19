@@ -10,6 +10,7 @@ class ClubCompetitionEntry extends Model
     protected $fillable = [
         'club_competition_id',
         'player_id',
+        'entry_date',
         'label',
         'value',
         'value_type',
@@ -19,6 +20,7 @@ class ClubCompetitionEntry extends Model
     ];
 
     protected $casts = [
+        'entry_date' => 'date',
         'value' => 'float',
         'metadata' => 'array',
     ];

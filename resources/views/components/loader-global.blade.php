@@ -93,6 +93,16 @@
                     return;
                 }
 
+                // 5. Ignorujeme stránky s vlastním terminálem nebo specifickou indikací (System Console, AI Search)
+                // Povolujeme pouze navigaci NA tyto stránky (aby se loader ukázal při kliknutí v menu),
+                // ale při akcích PŘÍMO NA STRÁNCE (isNavigation === false) jej vypínáme.
+                const isCustomIndicatorPage = window.location.pathname.includes('/system-console')
+                    || window.location.pathname.includes('/ai-search');
+
+                if (isCustomIndicatorPage && !isNavigation) {
+                    return;
+                }
+
                 window.dispatchEvent(new CustomEvent('loading-start'));
 
                 const stopLoading = () => window.dispatchEvent(new CustomEvent('loading-stop'));

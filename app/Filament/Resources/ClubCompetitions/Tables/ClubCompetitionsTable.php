@@ -17,18 +17,17 @@ class ClubCompetitionsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Soutěž')
+                    ->label(__('admin.resources.club_competition.fields.name'))
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
                         $locale = app()->getLocale();
                         return $query->where("name->{$locale}", 'LIKE', "%{$search}%");
                     })
-                    ->sortable()
-                    ->description(fn ($record) => $record->metric_description),
+                    ->sortable(),
                 TextColumn::make('season.name')
-                    ->label('Sezóna')
+                    ->label(__('admin.resources.club_competition.fields.season'))
                     ->sortable(),
                 TextColumn::make('status')
-                    ->label('Stav')
+                    ->label(__('admin.resources.club_competition.fields.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
@@ -43,10 +42,10 @@ class ClubCompetitionsTable
                         default => $state,
                     }),
                 TextColumn::make('entries_count')
-                    ->label('Počet zápisů')
+                    ->label(__('admin.resources.club_competition.fields.entries_count'))
                     ->counts('entries'),
                 IconColumn::make('is_public')
-                    ->label('Veřejné')
+                    ->label(__('admin.resources.club_competition.fields.is_public'))
                     ->boolean(),
                 TextColumn::make('updated_at')
                     ->label('Poslední aktivita')

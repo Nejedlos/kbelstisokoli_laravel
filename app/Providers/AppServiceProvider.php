@@ -33,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
             return new \App\Services\BrandingService;
         });
 
+        $this->app->singleton(\App\Services\PerformanceService::class);
+
         $this->app->singleton(\App\Services\Communication\CommunicationService::class);
 
         $this->app->singleton(\App\Services\Member\MemberContext::class);

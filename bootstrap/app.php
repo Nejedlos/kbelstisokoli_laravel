@@ -60,7 +60,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Zabezpečení pro případy, kdy DB není dostupná (např. při setupu nebo migracích)
         $argv = $_SERVER['argv'] ?? [];
-        if (count(array_intersect(['migrate', 'key:generate', 'package:discover', 'optimize', 'filament:upgrade'], $argv)) > 0) {
+        if (count(array_intersect(['help', 'list', 'migrate', 'key:generate', 'package:discover', 'optimize', 'filament:upgrade'], $argv)) > 0) {
             return;
         }
 

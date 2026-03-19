@@ -2,24 +2,31 @@
 
 namespace App\Filament\Resources\ClubCompetitions\RelationManagers;
 
+use App\Filament\Resources\ClubCompetitions\Widgets\CompetitionLeaderboardWidget;
+use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class EntriesRelationManager extends RelationManager
 {
     protected static string $relationship = 'entries';
 
-    protected static ?string $title = 'Výsledky / Leaderboard';
+    protected static ?string $title = 'DEBUG_VYSLEDKY';
 
     protected static ?string $modelLabel = 'Záznam';
 
@@ -29,45 +36,48 @@ class EntriesRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Grid::make(2)
+                Grid::make(3)
                     ->schema([
+                        DatePicker::make('entry_date')
+                            ->label(__('admin.resources.club_competition.entry_fields.entry_date'))
+                            ->default(now())
+                            ->required(),
                         Select::make('player_id')
-                            ->label('Hráč')
+                            ->label(__('admin.resources.club_competition.entry_fields.player_id'))
                             ->relationship('player', 'name')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->name ?? 'Uživatel bez jména (ID: ' . $record->id . ')')
                             ->searchable()
-                            ->preload(),
-                        Select::make('teams')
-                            ->label(__('admin.resources.team.plural_label'))
-                            ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
-                            ->multiple()
-                            ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->helperText(__('admin.resources.club_competition.entry_fields.player_id_help')),
+                        TextInput::make('label')
+                            ->label(__('admin.resources.club_competition.entry_fields.label'))
+                            ->helperText(__('admin.resources.club_competition.entry_fields.label_help')),
+                        TextInput::make('debug_check')
+                            ->label('I_AM_NEW')
+                            ->default('YES')
+                            ->disabled(),
                     ]),
-                TextInput::make('label')
-                    ->label('Vlastní štítek')
-                    ->helperText('Použijte pro účastníky mimo DB.'),
                 Grid::make(2)
                     ->schema([
                         TextInput::make('value')
-                            ->label('Hodnota / Skóre')
+                            ->label(__('admin.resources.club_competition.entry_fields.value'))
                             ->numeric()
                             ->required(),
-                        Select::make('value_type')
-                            ->label('Typ zápisu')
-                            ->options([
-                                'incremental' => 'Přičíst k celku',
-                                'absolute' => 'Absolutní hodnota (celkem)',
-                            ])
-                            ->default('absolute'),
+                        TextInput::make('source_note')
+                            ->label(__('admin.resources.club_competition.entry_fields.source_note'))
+                            ->placeholder('např. Zápas proti Sokolu'),
                     ]),
-                TextInput::make('source_note')
-                    ->label('Zdroj / Poznámka')
-                    ->placeholder('např. Zápas proti Sokolu'),
-                Select::make('basketball_match_id')
-                    ->label('Vazba na zápas')
-                    ->relationship('match', 'scheduled_at') // scheduled_at není ideální pro label, ale pro skeleton stačí
-                    ->searchable()
-                    ->preload(),
+            ]);
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Livewire::make(CompetitionLeaderboardWidget::class, [
+                    'ownerRecord' => $this->getOwnerRecord(),
+                ]),
+                EmbeddedTable::make(),
             ]);
     }
 
@@ -76,42 +86,45 @@ class EntriesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('label')
             ->columns([
-                TextColumn::make('rank')
-                    ->label('Pořadí')
-                    ->state(fn ($rowLoop) => $rowLoop->iteration),
+                TextColumn::make('entry_date')
+                    ->label(__('admin.resources.club_competition.entry_fields.entry_date'))
+                    ->date('d.m.Y')
+                    ->sortable(),
                 TextColumn::make('displayName')
-                    ->label('Účastník')
+                    ->label('DEBUG_' . __('admin.resources.club_competition.leaderboard.participant'))
                     ->state(fn ($record) => $record->player?->name ?? ($record->teams->count() ? $record->teams->pluck('name')->join(', ') : null) ?? $record->label)
                     ->searchable(['label']),
                 TextColumn::make('value')
-                    ->label('Hodnota')
+                    ->label(__('admin.resources.club_competition.entry_fields.value'))
                     ->numeric()
                     ->sortable()
                     ->badge()
                     ->color('info'),
                 TextColumn::make('source_note')
-                    ->label('Poznámka')
+                    ->label(__('admin.resources.club_competition.entry_fields.source_note'))
                     ->limit(30),
-                TextColumn::make('updated_at')
-                    ->label('Datum')
-                    ->dateTime('d.m.Y')
-                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->label(__('admin.resources.club_competition.entry_fields.add_entry'))
+                    ->icon(new HtmlString(IconHelper::render(AppIcon::CREATE)))
+                    ->modalHeading(__('admin.resources.club_competition.entry_fields.new_entry_modal')),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->icon(new HtmlString(IconHelper::render(AppIcon::EDIT))),
+                DeleteAction::make()
+                    ->icon(new HtmlString(IconHelper::render(AppIcon::DELETE))),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('value', 'desc');
+            ->modifyQueryUsing(fn ($query) => $query->orderBy('entry_date', 'desc')->orderBy('value', 'desc'));
     }
+
 }

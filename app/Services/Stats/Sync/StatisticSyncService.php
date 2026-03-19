@@ -183,23 +183,19 @@ class StatisticSyncService
                     'metadata' => json_encode($matchMetadata)
                 ]);
 
-                // Smažeme případné existující řádky statistik soupeře, pokud tam nějaké zůstaly
+                // Smažeme případné existující řádky statistik pro tento zápas, které by se mohly tvářit jako naše
+                // (při změně detekce týmu z našeho na soupeře)
                 StatisticRow::where('statistic_set_id', $set->id)
                     ->where('basketball_match_id', (int) $match->id)
-                    ->where(function($query) {
-                        $query->whereNotNull('opponent_id')
-                              ->orWhereNull('team_id');
-                    })
                     ->delete();
 
                 return;
             }
 
-            // Pokud je to náš tým, nejdříve smažeme existující boxscore záznamy pro tento zápas a tým,
-            // abychom zabránili duplicitám při opakované synchronizaci.
+            // Pokud je to náš tým, nejdříve smažeme existující boxscore záznamy pro tento zápas
+            // abychom zabránili duplicitám při opakované synchronizaci (např. pokud se změnila metadata soupeře).
             StatisticRow::where('statistic_set_id', $set->id)
                 ->where('basketball_match_id', (int) $match->id)
-                ->where('team_id', (int) $match->team_id)
                 ->delete();
 
             foreach ($data->rows as $row) {

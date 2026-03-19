@@ -321,6 +321,15 @@ class PlayerStatsService
 
         $results = $externalQuery->get();
 
+        // Eliminace duplicit: Pokud již máme pro stejný externí zápas interní data (StatisticRow),
+        // externí záznam přeskočíme, abychom ho v grafu neměli 2x.
+        $internalExternalIds = $internal->pluck('match.metadata.external_id')->filter()->toArray();
+        if (!empty($internalExternalIds)) {
+            $results = $results->filter(function ($match) use ($internalExternalIds) {
+                return !in_array((string)($match->external_match_id), $internalExternalIds);
+            });
+        }
+
         // Dodatečná filtrace v PHP pro externí zápasy (kvůli chybějícím sloupcům v SQL a staré DB)
         if ($teamId && $results->isNotEmpty()) {
             $team = \App\Models\Team::find($teamId);

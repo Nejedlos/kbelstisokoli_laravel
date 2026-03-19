@@ -295,6 +295,22 @@ class PlayerSyncService
 
             $year = substr($season, 0, 4);
             $url = "https://cz.basketball/hrac/{$extId}?tab=matches&y=" . $year;
+
+            // Při force módu nebo synchronizaci historické sezóny smažeme staré externí zápasy pro toto období,
+            // abychom zabránili duplicitám při změně struktury dat nebo chybné předchozí synchronizaci.
+            if (($options['force'] ?? false) || $isHistorical) {
+                $normalized = Season::normalizeName($season);
+                $parts = explode('/', $normalized);
+                if (count($parts) === 2) {
+                    $startYear = $parts[0];
+                    $endYear = $parts[1];
+                    ExternalPlayerMatch::where('user_id', $user->id)
+                        ->where('source_key', 'czbasketball')
+                        ->whereBetween('match_date', ["{$startYear}-08-01", "{$endYear}-07-31"])
+                        ->delete();
+                }
+            }
+
             try {
                 if (\App\Services\Support\ConsoleService::isStopped()) {
                     break;
