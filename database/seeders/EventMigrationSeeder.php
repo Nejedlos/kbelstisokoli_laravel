@@ -21,12 +21,28 @@ class EventMigrationSeeder extends Seeder
         $isFresh = config('app.seed_fresh', false);
 
         if ($isFresh) {
-            $this->command->warn('Režim FRESH: Mažu existující události (zápasy, tréninky, klubové akce)...');
+            $this->command->warn('Režim FRESH: Mažu existující události (zápasy, tréninky, klubové akce, statistiky a docházku)...');
             \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
-            \App\Models\BasketballMatch::where('metadata', 'LIKE', '%"legacy_z_id"%')->delete();
-            \App\Models\Training::where('metadata', 'LIKE', '%"legacy_z_id"%')->delete();
-            \App\Models\ClubEvent::where('metadata', 'LIKE', '%"legacy_z_id"%')->delete();
+
+            // Smažeme všechna data v cílových tabulkách, abychom začali s čistým štítem
+            // Toto vymaže i data, která nebyla migrována z legacy (včetně statistik a docházky)
+            \App\Models\StatisticRow::truncate();
+            \App\Models\StatisticSet::truncate();
+            \App\Models\Attendance::truncate();
+            \App\Models\MatchPrediction::truncate();
+            \App\Models\ExternalPlayerMatch::truncate();
+
+            \App\Models\BasketballMatch::truncate();
+            \Illuminate\Support\Facades\DB::table('basketball_match_team')->truncate();
+
+            \App\Models\Training::truncate();
+            \Illuminate\Support\Facades\DB::table('team_training')->truncate();
+
+            \App\Models\ClubEvent::truncate();
+            \Illuminate\Support\Facades\DB::table('club_event_team')->truncate();
+
             \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+            $this->command->info('Data byla smazána.');
         }
 
         $this->command->info('Načítám zápasy a tréninky ze staré DB...');

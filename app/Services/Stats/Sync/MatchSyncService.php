@@ -134,10 +134,16 @@ class MatchSyncService
         // 3. Poslední záchrana: vyhledání podle data, soupeře a směru zápasu (is_home)
         // Toto pomáhá identifikovat zápasy, které byly importovány z jiného zdroje (legacy)
         // a nemají v metadatech identity key ani external_id.
+        // POZNÁMKA: Normalizujeme název soupeře pro lepší párování, pokud legacy název nesedí úplně přesně.
         if (! $match && $scheduledAt && $opponent) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('opponent_id', $opponent->id)
+                ->where(function ($q) use ($opponent, $opponentName) {
+                    $q->where('opponent_id', $opponent->id)
+                      ->orWhereHas('opponent', function ($sq) use ($opponentName) {
+                          $sq->where('name', 'LIKE', '%' . $opponentName . '%');
+                      });
+                })
                 ->where('is_home', $isHome)
                 ->whereDate('scheduled_at', $scheduledAt->format('Y-m-d'))
                 ->first();
