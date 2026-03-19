@@ -965,11 +965,18 @@
                     </table>
                 </div>
             </div>
-        @elseif($isActiveInSelectedTeam && $view === 'personal')
-            {{-- Empty State jen pro aktivní týmy, kde OPRAVDU nic není (ani fallback nepomohl) --}}
+        @else
+            {{-- Empty State --}}
             <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
                 <i class="fa-light fa-chart-user text-6xl text-gray-100 dark:text-gray-700"></i>
-                <div class="text-gray-400 font-medium italic">Zatím nemáme nahrané žádné tvé osobní statistiky pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }}.</div>
+                <div class="text-gray-400 font-medium italic">Pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }} nejsou v databázi pro tohoto hráče žádná data.</div>
+            </div>
+        @endif
+        @elseif($view === 'personal')
+            {{-- Empty State pokud nejsou data (případně i pro neaktivní týmy) --}}
+            <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
+                <i class="fa-light fa-chart-user text-6xl text-gray-100 dark:text-gray-700"></i>
+                <div class="text-gray-400 font-medium italic">Pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }} nejsou v databázi pro tohoto hráče žádná data.</div>
             </div>
         @endif
 
@@ -1359,7 +1366,7 @@
             {{-- Empty State --}}
             <div class="bg-white dark:bg-gray-800 p-20 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center space-y-4">
                 <i class="fa-light fa-users-slash text-6xl text-gray-100 dark:text-gray-700"></i>
-                <div class="text-gray-400 font-medium italic">Tým {{ $activeTeamName }} v sezóně {{ $activeSeasonName }} zatím nemá synchronizované týmové statistiky.</div>
+                <div class="text-gray-400 font-medium italic">Pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }} nejsou v databázi žádná týmová data.</div>
             </div>
         @endif
     @elseif($view === 'matches')
@@ -1873,7 +1880,7 @@
                         @empty
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center text-gray-400 italic">
-                                Žádné zápasy pro tým {{ $activeTeamName }} v sezóně {{ $activeSeasonName }} nebyly nalezeny.
+                                Pro sezónu {{ $activeSeasonName }} a tým {{ $activeTeamName }} nebyly nalezeny žádné zápasy.
                             </td>
                         </tr>
                         @endforelse

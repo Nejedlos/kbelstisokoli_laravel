@@ -98,7 +98,13 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
 
         $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison, $lastMatches, $mutualMatches) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
-            if ($table->filter('thead th')->count() < 5) {
+            if ($table->filter('thead th')->count() < 8) {
+                return;
+            }
+
+            // Ignorujeme tabulky, které nejsou boxscore (např. "Poslední zápasy", "Vzájemné zápasy")
+            $tableText = mb_strtolower($table->text());
+            if (str_contains($tableText, 'poslední zápasy') || str_contains($tableText, 'vzájemné zápasy') || str_contains($tableText, 'fáze sezony')) {
                 return;
             }
 

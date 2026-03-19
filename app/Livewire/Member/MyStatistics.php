@@ -466,7 +466,7 @@ class MyStatistics extends Component
             'allTeams' => Team::orderBy('name')->get(),
             'userTeams' => $userTeams,
             'activeSeasonName' => Season::find($this->seasonId)?->name ?? '?',
-            'activeTeamName' => Team::find($this->teamId)?->name ?? '?',
+            'activeTeamName' => $this->teamId === 'all' ? 'Všechny týmy' : (Team::find($this->teamId)?->name ?? '?'),
         ]);
     }
 }

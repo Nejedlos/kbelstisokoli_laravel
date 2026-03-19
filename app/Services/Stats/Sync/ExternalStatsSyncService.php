@@ -732,6 +732,9 @@ class ExternalStatsSyncService
             $matchMetadata = $match->metadata ?? [];
             $matchMetadata['last_synced_at'] = now()->toDateTimeString();
 
+            // Před synchronizací nových tabulek smažeme staré statistiky pro tento zápas
+            $this->statisticSyncService->clearMatchBoxscore($match, $run);
+
             foreach ($tables as $tableData) {
                 $this->statisticSyncService->syncMatchBoxscore($match, $tableData, $run);
 
