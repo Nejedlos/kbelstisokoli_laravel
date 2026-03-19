@@ -1,5 +1,6 @@
 import html2canvas from 'html2canvas';
 import * as htmlToImage from 'html-to-image';
+import domtoimage from 'dom-to-image-more';
 
 /**
  * RING BUFFER
@@ -49,19 +50,42 @@ function registerKsFeedbackWidget() {
         async capture(options = {}) {
             const startTs = performance.now();
             this.logs = [];
-            const strategy = options.strategy || window.KS_FEEDBACK_CONFIG?.strategy || 'auto';
+            // default priority for Webglobe: client-side first
+            const strategy = options.strategy || window.KS_FEEDBACK_CONFIG?.strategy || 'client';
             this.addLog(`[JS] Capture start | strategy = ${strategy}`);
 
-            const config = window.KS_FEEDBACK_CONFIG || { strategy: 'auto', playwright: { enabled: false }, endpoints: {} };
+            const config = window.KS_FEEDBACK_CONFIG || { strategy: 'client', playwright: { enabled: false }, endpoints: {} };
             const targetSelector = options.targetSelector || 'body';
 
             let result = { ok: false, durationMs: 0, strategy: 'none', logs: this.logs };
 
             try {
-                // 1. Try Server Screenshot (Playwright) - Main Strategy
-                if (strategy === 'playwright' || strategy === 'server' || strategy === 'auto') {
+                // 1. Try Client Screenshot (dom-to-image-more) - Main Strategy for production compatibility
+                if (strategy === 'client' || strategy === 'auto') {
+                    this.addLog('[JS] Attempting client-side capture (dom-to-image-more)');
+                    const dtiRes = await this.tryDomToImageMore(targetSelector);
+                    if (dtiRes.ok) {
+                        this.addLog('[JS] Client capture (dom-to-image-more) success');
+                        result = { ...dtiRes, strategy: 'client-dom-to-image-more' };
+                    } else {
+                        this.addLog(`[JS] dom-to-image-more failed: ${dtiRes.error?.message || 'unknown'}`);
+
+                        // Fallback to html2canvas if dom-to-image-more fails
+                        this.addLog('[JS] Falling back to html2canvas');
+                        const h2cRes = await this.tryHtml2Canvas(targetSelector);
+                        if (h2cRes.ok) {
+                             this.addLog('[JS] html2canvas fallback success');
+                             result = { ...h2cRes, strategy: 'client-html2canvas' };
+                        } else {
+                             this.addLog(`[JS] html2canvas failed: ${h2cRes.error?.message || 'unknown'}`);
+                        }
+                    }
+                }
+
+                // 2. Try Server Screenshot (Playwright) - ONLY if client fails and it's allowed
+                if (!result.ok && (strategy === 'server' || strategy === 'playwright' || strategy === 'auto')) {
                     if (config.endpoints?.serverScreenshot) {
-                        this.addLog('[JS] Attempting server-side screenshot (Playwright)');
+                        this.addLog('[JS] Attempting server-side screenshot (Playwright) as fallback');
                         const serverRes = await this.tryServer(config.endpoints.serverScreenshot);
                         if (serverRes.ok) {
                             this.addLog('[JS] Server screenshot success');
@@ -70,19 +94,7 @@ function registerKsFeedbackWidget() {
                             this.addLog(`[JS] Server screenshot failed: ${serverRes.error?.message || 'unknown'}`);
                         }
                     } else {
-                        this.addLog('[JS] Server screenshot skipped (no endpoint)');
-                    }
-                }
-
-                // 2. Fallback to client-side only if server failed and allowed
-                if (!result.ok && (strategy === 'auto' || strategy === 'client' || strategy === 'playwright')) {
-                    this.addLog('[JS] Attempting client-side fallback (html-to-image)');
-                    const htiRes = await this.tryHtmlToImage(targetSelector);
-                    if (htiRes.ok) {
-                        this.addLog('[JS] Client fallback success');
-                        result = { ...htiRes, strategy: 'client-html-to-image' };
-                    } else {
-                        this.addLog(`[JS] Client fallback failed: ${htiRes.error?.message || 'unknown'}`);
+                        this.addLog('[JS] Server screenshot skipped (no endpoint or disabled)');
                     }
                 }
 
@@ -226,6 +238,120 @@ function registerKsFeedbackWidget() {
             }
         },
 
+        async tryDomToImageMore(selector) {
+            if (!domtoimage) return { ok: false, error: { code: 'LIBRARY_MISSING', message: 'dom-to-image-more not loaded' } };
+
+            const disabledLinks = [];
+            const addedStyles = [];
+
+            try {
+                // Najdeme styly, které "straší" dom-to-image-more (cross-origin bez CORS)
+                const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+                for (const link of links) {
+                    try {
+                        // Zkusíme, zda máme přístup k pravidlům (CORS check)
+                        if (link.sheet && link.sheet.cssRules) {
+                            continue; // Je to v pořádku
+                        }
+                    } catch (e) {
+                        // SecurityError: Not allowed to access cross-origin stylesheet
+                        const href = link.href;
+                        this.addLog(`[JS] Attempting to inline cross-origin stylesheet: ${href?.substring(0, 60)}...`);
+
+                        try {
+                            // Pokusíme se stáhnout obsah přes fetch
+                            const response = await fetch(href);
+                            if (response.ok) {
+                                let css = await response.text();
+
+                                // Vytvoříme inline style
+                                const style = document.createElement('style');
+                                style.textContent = css;
+                                style.setAttribute('data-inlined-from', href);
+                                document.head.appendChild(style);
+                                addedStyles.push(style);
+
+                                // Původní link dočasně vypneme
+                                link.disabled = true;
+                                disabledLinks.push(link);
+                                this.addLog(`[JS] Successfully inlined: ${href?.substring(0, 40)}`);
+                            } else {
+                                throw new Error(`Status ${response.status}`);
+                            }
+                        } catch (fetchErr) {
+                            this.addLog(`[JS] Failed to inline (disabling): ${href?.substring(0, 40)} - ${fetchErr.message}`);
+                            // Pokud to nejde ani fetchout, musíme to bohužel vypnout, jinak dom-to-image spadne
+                            link.disabled = true;
+                            disabledLinks.push(link);
+                        }
+                    }
+                }
+            } catch (e) {
+                this.addLog(`[JS] CSS preparation error: ${e.message}`);
+            }
+
+            try {
+                const target = document.querySelector(selector) || document.body;
+                console.log('[FB] Generating client-side screenshot using dom-to-image-more...');
+
+                const filter = (node) => {
+                    try {
+                        if (!node) return true;
+                        if (node.dataset && (node.dataset.html2canvasIgnore === 'true' || node.dataset.domToImageIgnore === 'true')) return false;
+                        if (node.classList && (
+                            node.classList.contains('ks-fb-root') ||
+                            node.classList.contains('ks-fb-overlay') ||
+                            node.classList.contains('ks-fab-trigger') ||
+                            node.classList.contains('ks-feedback-ignore')
+                        )) return false;
+                        return true;
+                    } catch { return true; }
+                };
+
+                // Přidáme dočasný styl pro skrytí animací a fixaci vzhledu
+                const fixStyle = document.createElement('style');
+                fixStyle.textContent = `
+                    *, *::before, *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        transition-duration: 0s !important;
+                    }
+                `;
+                document.head.appendChild(fixStyle);
+                addedStyles.push(fixStyle);
+
+                const dataUrl = await domtoimage.toJpeg(target, {
+                    quality: 0.85,
+                    filter,
+                    bgcolor: '#ffffff',
+                    width: document.documentElement.scrollWidth,
+                    height: document.documentElement.scrollHeight,
+                    style: {
+                        'transform': 'none',
+                        'transition': 'none',
+                        'animation': 'none'
+                    },
+                });
+
+                if (!dataUrl || dataUrl.length < 100) {
+                    throw new Error('Generated image is empty');
+                }
+
+                return { ok: true, base64: dataUrl, mime: 'image/jpeg' };
+            } catch (e) {
+                console.error('[FB] dom-to-image-more failed:', e);
+                return { ok: false, error: { code: 'DTI_ERROR', message: e.message } };
+            } finally {
+                // Obnovit styly
+                disabledLinks.forEach(link => link.disabled = false);
+                addedStyles.forEach(style => {
+                    if (style && style.parentNode) {
+                        style.parentNode.removeChild(style);
+                    }
+                });
+            }
+        },
+
         async tryHtmlToImage(selector) {
             if (!htmlToImage) return { ok: false, error: { code: 'LIBRARY_MISSING', message: 'html-to-image not loaded' } };
 
@@ -245,8 +371,6 @@ function registerKsFeedbackWidget() {
                     },
                     pixelRatio: 1, // Zmenšeno pro rychlost a stabilitu na produkci
                     backgroundColor: '#ffffff',
-                    skipFonts: true,
-                    fontEmbedCSS: '',
                     timeout: 8000, // Zvýšeno na 8s
                 };
 
@@ -263,9 +387,9 @@ function registerKsFeedbackWidget() {
 
         sanitizeCssString(css) {
             if (!css) return '';
-            // Náhrada pro oklab/oklch/color-p3 za neutrální šedou, aby se předešlo pádu html2canvas
-            // ale zachoval se aspoň nějaký vizuální prvek.
-            return css.replace(/(oklab|oklch|color)\s*\((?:[^()]+|\([^()]*\))*\)/gi, 'rgb(120, 120, 120)');
+            // Náhrada pro oklab/oklch/color/color-mix za neutrální šedou, aby se předešlo pádu html2canvas
+            // a dom-to-image-more, pokud tyto funkce neumí zpracovat.
+            return css.replace(/(oklab|oklch|color|color-mix)\s*\((?:[^()]+|\((?:[^()]+|\([^()]*\))*\))*\)/gi, 'rgb(120, 120, 120)');
         },
 
         sanitizeElementRecursively(rootEl) {
@@ -277,14 +401,14 @@ function registerKsFeedbackWidget() {
                     properties.forEach(prop => {
                         try {
                             const val = el.style[prop];
-                            if (val && /(oklab|oklch|color)/i.test(val)) {
+                            if (val && /(oklab|oklch|color|color-mix)/i.test(val)) {
                                 // Zkusíme se zeptat prohlížeče na computed barvu, pokud to jde
                                 el.style[prop] = 'rgb(120, 120, 120)';
                             }
                         } catch (e) {}
                     });
 
-                    if (el.style.backgroundImage && /(oklab|oklch|color)/i.test(el.style.backgroundImage)) {
+                    if (el.style.backgroundImage && /(oklab|oklch|color|color-mix)/i.test(el.style.backgroundImage)) {
                         el.style.backgroundImage = 'none'; // Background image s moderní barvou (gradient) raději pryč
                     }
                 }
@@ -292,7 +416,7 @@ function registerKsFeedbackWidget() {
                 // Pokud má element inline style atribut, vyčistíme ho i jako string
                 if (el.hasAttribute && el.hasAttribute('style')) {
                     const s = el.getAttribute('style');
-                    if (s && /(oklab|oklch|color)/i.test(s)) {
+                    if (s && /(oklab|oklch|color|color-mix)/i.test(s)) {
                         el.setAttribute('style', this.sanitizeCssString(s));
                     }
                 }
@@ -301,7 +425,7 @@ function registerKsFeedbackWidget() {
                 ['fill', 'stroke'].forEach(attr => {
                     if (el.hasAttribute && el.hasAttribute(attr)) {
                         const val = el.getAttribute(attr);
-                        if (val && /(oklab|oklch|color)/i.test(val)) {
+                        if (val && /(oklab|oklch|color|color-mix)/i.test(val)) {
                             el.setAttribute(attr, 'rgb(120, 120, 120)');
                         }
                     }

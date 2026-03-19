@@ -30,7 +30,7 @@ return [
     ],
 
     'screenshot' => [
-        'strategy' => env('SCREENSHOT_DRIVER', env('FEEDBACK_SCREENSHOT_STRATEGY', 'auto')), // auto, playwright, html2canvas, none
+        'strategy' => env('SCREENSHOT_DRIVER', env('FEEDBACK_SCREENSHOT_STRATEGY', 'client')), // auto, client, playwright, html2canvas, none
         'quality' => 0.80,
         'max_width' => 1600,
         'playwright' => [
