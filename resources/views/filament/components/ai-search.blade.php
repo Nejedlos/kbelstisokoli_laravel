@@ -1,5 +1,5 @@
 <div x-data="{ searchOpen: false, loading: false }" class="relative flex items-center">
-    <x-loader.basketball x-show="loading" x-cloak class="z-[60]" />
+    <x-loader-basketball x-show="loading" x-cloak class="z-[60]" />
 
     <!-- Desktop Trigger (Pill) -->
     <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"

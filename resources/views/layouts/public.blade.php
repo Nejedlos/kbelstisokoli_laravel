@@ -138,7 +138,7 @@
         <!-- End Google Tag Manager (noscript) -->
     @endif
     <x-announcement-bar :announcements="$announcements ?? []" />
-    <x-loader.global />
+    <x-loader-global />
 
     <!-- Header -->
     <x-header :branding="$branding ?? []" :navigation="config('navigation.public', [])" />

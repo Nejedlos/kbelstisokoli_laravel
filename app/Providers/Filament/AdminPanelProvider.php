@@ -159,7 +159,7 @@ class AdminPanelProvider extends PanelProvider
 
                 // Renderování přes Blade::render pro správnou inicializaci Livewire a komponent
                 return Blade::render('
-                    <x-loader.global title="Administrace" />
+                    <x-loader-global title="Administrace" />
                     <x-impersonation-banner />
                     <x-impersonation-notification />
                     <livewire:sync-status-bar />

@@ -89,7 +89,7 @@
 <body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50"
       x-data="{ sidebarOpen: false }"
 >
-    <x-loader.global :title="$title ?? __('nav.member_section')" />
+    <x-loader-global :title="$title ?? __('nav.member_section')" />
     <x-impersonation-banner />
     <x-impersonation-notification />
     <x-announcement-bar :announcements="$announcements ?? []" />

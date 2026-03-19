@@ -40,7 +40,7 @@ class ListPhotoPools extends ListRecords
                     Placeholder::make('ks_global_loader')
                         ->hiddenLabel()
                         ->content(fn () => new HtmlString(Blade::render('
-                            <x-loader.basketball custom wire:target="mountAction,callMountedAction,nextStep,regenerateAi">
+                            <x-loader-basketball custom wire:target="mountAction,callMountedAction,nextStep,regenerateAi">
                                 <div class="text-center p-10 bg-white/5 dark:bg-black/40 backdrop-blur-2xl rounded-[3rem] border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] max-w-sm mx-auto overflow-hidden relative">
                                     <div class="relative z-10">
                                         <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/10 text-white shadow-2xl border border-white/20 rotate-6 transition-transform duration-500">
@@ -52,7 +52,7 @@ class ListPhotoPools extends ListRecords
                                         </p>
                                     </div>
                                 </div>
-                            </x-loader.basketball>
+                            </x-loader-basketball>
                         ')))
                         ->columnSpanFull(),
 

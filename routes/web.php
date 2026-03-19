@@ -99,6 +99,6 @@ Route::post('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::c
 Route::middleware(['web'])->group(function () {
     Route::get('/dev/mail-preview', [\App\Http\Controllers\Dev\MailPreviewController::class, 'index'])
         ->name('dev.mail-preview.index');
-    Route::get('/dev/mail-preview/{type}', [\App\Http\Controllers\Dev\MailPreviewController::class, 'show'])
-        ->name('dev.mail-preview.show');
 });
+
+include __DIR__ . '/test_loader.php';

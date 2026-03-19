@@ -46,9 +46,9 @@
       @loading-stop.window="globalLoading = false"
       class="contents"
 >
-    <x-loader.basketball x-show="globalLoading" x-cloak class="z-[100000]">
+    <x-loader-basketball x-show="globalLoading" x-cloak class="z-[100000]">
         <span x-html="currentLoadingMessage.replace('Sokol', '<span class=\'text-primary font-black uppercase tracking-wider\'>Sokol</span>').replace('Sokoli', '<span class=\'text-primary font-black uppercase tracking-wider\'>Sokoli</span>')"></span>
-    </x-loader.basketball>
+    </x-loader-basketball>
 
     @once
     <script>
