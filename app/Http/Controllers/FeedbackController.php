@@ -118,22 +118,49 @@ class FeedbackController extends Controller
 
         // 7. Uložení souborů
         $storageDir = "feedback/{$report->id}";
+        $screenshotStatus = 'missing';
 
         if (!empty($redacted['capture']['screenshot'])) {
             $data = $redacted['capture']['screenshot'];
-            $extension = 'jpg';
+            $extension = 'png';
+            $size = strlen($data);
 
-            if (Str::startsWith($data, 'data:image/png')) {
-                $extension = 'png';
+            if (Str::startsWith($data, 'data:image/jpeg')) {
+                $extension = 'jpg';
             } elseif (Str::startsWith($data, 'data:image/webp')) {
                 $extension = 'webp';
             }
 
-            $screenshotData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
-            $path = "{$storageDir}/screenshot.{$extension}";
-            Storage::disk('local')->put($path, $screenshotData);
-            $report->screenshot_path = $path;
+            try {
+                $screenshotData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
+                $path = "{$storageDir}/screenshot.{$extension}";
+
+                $stored = Storage::disk('local')->put($path, $screenshotData);
+
+                if ($stored) {
+                    $report->screenshot_path = $path;
+                    $screenshotStatus = "saved ({$size} chars)";
+                } else {
+                    $screenshotStatus = "storage_put_failed ({$size} chars)";
+                    Log::error('[FeedbackController] Failed to save screenshot to storage', [
+                        'report_id' => $report->id,
+                        'path' => $path
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                $screenshotStatus = "error: " . $e->getMessage();
+                Log::error('[FeedbackController] Screenshot processing error', [
+                    'report_id' => $report->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
+
+        Log::info("[FeedbackController] Report #{$report->id} created", [
+            'type' => $report->type,
+            'screenshot' => $screenshotStatus,
+            'dom' => !empty($redacted['capture']['domLight']) ? 'present' : 'missing',
+        ]);
 
         if (!empty($redacted['capture']['domLight'])) {
             $path = "{$storageDir}/dom.html";
@@ -264,9 +291,13 @@ class FeedbackController extends Controller
                 ],
             ]);
 
+            if (empty($result['data_url'])) {
+                 throw new \RuntimeException('Playwright worker finished successfully but produced no image data.');
+            }
+
             return response()->json([
                 'ok' => true,
-                'image' => $result['data_url'] ?? null,
+                'image' => $result['data_url'],
                 'width' => $result['width'],
                 'height' => $result['height'],
                 'mime' => $result['mime'] ?? 'image/png',
@@ -278,8 +309,11 @@ class FeedbackController extends Controller
             ]);
 
             $code = 'SCREENSHOT_SERVER_FAILED';
-            if (Str::contains($e->getMessage(), ['Could not load playwright', 'not found', 'ENOENT'])) {
+            $httpCode = 500;
+
+            if (Str::contains($e->getMessage(), ['Could not load playwright', 'not found', 'ENOENT', 'Node.js >= 18 not found'])) {
                 $code = 'SCREENSHOT_SERVER_UNAVAILABLE';
+                $httpCode = 503;
             }
 
             return response()->json([
@@ -287,7 +321,7 @@ class FeedbackController extends Controller
                 'message' => 'Nepodařilo se vytvořit screenshot na serveru.',
                 'code' => $code,
                 'error' => $e->getMessage(),
-            ], 500);
+            ], $httpCode);
         }
     }
 

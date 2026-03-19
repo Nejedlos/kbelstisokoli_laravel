@@ -25,6 +25,11 @@ class ScreenshotService
             throw new \RuntimeException('Playwright disabled by config');
         }
 
+        $node = $this->findCompatibleNode();
+        if (!$node) {
+             throw new \RuntimeException('Node.js >= 18 not found on the system. Required for Playwright.');
+        }
+
         $ttl = $options['ttl'] ?? 120; // seconds
         $selector = $options['selector'] ?? '#snapshot-root';
         $viewport = $options['viewport'] ?? config('feedback.screenshot.playwright.viewports.desktop', ['width' => 1728, 'height' => 919]);
@@ -54,26 +59,6 @@ class ScreenshotService
         $outAbs = $tempAbsDir . DIRECTORY_SEPARATOR . $filename;
 
         // 4) Run Node Playwright worker
-        $node = config('feedback.screenshot.playwright.node_path', 'node');
-
-        // Simple heuristic for common paths if 'node' is not found in PATH
-        if ($node === 'node' && !$this->canExecute($node)) {
-            $commonPaths = [
-                '/usr/local/bin/node',
-                '/opt/homebrew/bin/node',
-                '/usr/bin/node',
-                '/bin/node',
-                '/usr/local/sbin/node',
-                '/opt/node/bin/node'
-            ];
-            foreach ($commonPaths as $p) {
-                if (file_exists($p) && is_executable($p)) {
-                    $node = $p;
-                    break;
-                }
-            }
-        }
-
         $script = base_path(config('feedback.screenshot.playwright.script_path', 'resources/js/screenshot-worker.cjs'));
         $timeoutMs = (int) config('feedback.screenshot.playwright.timeout', 30000);
 
@@ -124,7 +109,11 @@ class ScreenshotService
             $env['PLAYWRIGHT_BROWSERS_PATH'] = $browsersPath;
         }
 
-        Log::info('[ScreenshotService] Launching Playwright worker', array_merge($logContext, ['timeout' => $timeoutSec]));
+        Log::info('[ScreenshotService] Launching Playwright worker', array_merge($logContext, [
+            'timeout' => $timeoutSec,
+            'command' => implode(' ', $args),
+            'node_path' => $nodePath
+        ]));
 
         $proc = new Process($args, base_path(), $env);
         $proc->setTimeout($timeoutSec);
@@ -167,6 +156,54 @@ class ScreenshotService
             'height' => $json['height'] ?? null,
             'path' => $outAbs,
         ];
+    }
+
+    protected function findCompatibleNode(): ?string
+    {
+        $configured = config('feedback.screenshot.playwright.node_path', 'node');
+
+        // Check if configured node is compatible
+        if ($this->isNodeCompatible($configured)) {
+            return $configured;
+        }
+
+        // Search for compatible node in common paths
+        $commonPaths = [
+            'node22', 'node20', 'node18', 'node', // Try PATH names first
+            '/usr/local/bin/node22', '/usr/local/bin/node20', '/usr/local/bin/node18',
+            '/usr/bin/node22', '/usr/bin/node20', '/usr/bin/node18',
+            '/opt/node22/bin/node', '/opt/node20/bin/node', '/opt/node18/bin/node',
+            '/usr/local/bin/node', '/usr/bin/node', '/bin/node',
+        ];
+
+        foreach ($commonPaths as $path) {
+            if ($this->isNodeCompatible($path)) {
+                Log::debug("[ScreenshotService] Found compatible Node.js binary: $path");
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    protected function isNodeCompatible(string $node): bool
+    {
+        try {
+            // Check if executable exists and get its version
+            $proc = new Process([$node, '-v']);
+            $proc->run();
+
+            if (!$proc->isSuccessful()) {
+                return false;
+            }
+
+            $versionStr = trim($proc->getOutput()); // v14.15.4 or v18.0.0
+            $versionNum = (int) str_replace('v', '', $versionStr);
+
+            return $versionNum >= 18;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     protected function canExecute(string $command): bool

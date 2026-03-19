@@ -273,14 +273,38 @@
     fi
 
     cd {{ $path }}
-
     git fetch origin main
     git reset --hard origin/main
     git clean -df
-    if [ -f ".git/gc.log" ]; then
-        rm .git/gc.log
+
+    # Try to find Node 18+ for building assets if needed
+    NODE_BIN_PATH=""
+    for n in node22 node20 node18 node; do
+        if which $n > /dev/null 2>&1; then
+            BIN=$(which $n)
+            VER=$($BIN -v 2>/dev/null | sed "s/v//")
+            if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
+                NODE_BIN_PATH=$BIN
+                break
+            fi
+        fi
+    done
+
+    if [ ! -z "$NODE_BIN_PATH" ]; then
+        echo "Found compatible Node.js: $NODE_BIN_PATH ($($NODE_BIN_PATH -v))"
+        mkdir -p .node_bin
+        ln -sf "$NODE_BIN_PATH" .node_bin/node
+        ln -sf "$(dirname $NODE_BIN_PATH)/npm" .node_bin/npm 2>/dev/null || ln -sf "$(which npm)" .node_bin/npm
+        export PATH="{{ $path }}/.node_bin:$PATH"
+        if [ ! -z "{{ $fontawesome_token }}" ]; then
+            export FONTAWESOME_TOKEN="{{ $fontawesome_token }}"
+        fi
+        echo "Running npm install and build..."
+        npm install --no-save
+        npm run build
+    else
+        echo "⚠️  Compatible Node.js (>=18) not found. Skipping npm build. Use local build and push manifest.json."
     fi
-    git prune
 
     echo "Ensuring storage and cache directories exist and are writable..."
     mkdir -p storage/framework/{sessions,views,cache}

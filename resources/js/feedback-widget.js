@@ -40,15 +40,19 @@ function registerKsFeedbackWidget() {
     console.log('[FB] Registering Alpine component...');
     const ScreenshotService = {
         logs: [],
-        addLog(msg) { this.logs.push(`[${new Date().toISOString().split('T')[1].split('.')[0]}] ${msg}`); },
+        addLog(msg) {
+            const formatted = `[${new Date().toISOString().split('T')[1].split('.')[0]}] ${msg}`;
+            this.logs.push(formatted);
+            console.log(`[FB] ${msg}`);
+        },
 
         async capture(options = {}) {
             const startTs = performance.now();
             this.logs = [];
-            this.addLog(`[JS] Capture start | strategy = ${options.strategy || 'auto'}`);
+            const strategy = options.strategy || window.KS_FEEDBACK_CONFIG?.strategy || 'auto';
+            this.addLog(`[JS] Capture start | strategy = ${strategy}`);
 
-            const config = window.KS_FEEDBACK_CONFIG || { strategy: 'playwright', playwright: { enabled: false }, endpoints: {} };
-            const strategy = options.strategy || config.strategy || 'playwright';
+            const config = window.KS_FEEDBACK_CONFIG || { strategy: 'auto', playwright: { enabled: false }, endpoints: {} };
             const targetSelector = options.targetSelector || 'body';
 
             let result = { ok: false, durationMs: 0, strategy: 'none', logs: this.logs };
@@ -71,7 +75,7 @@ function registerKsFeedbackWidget() {
                 }
 
                 // 2. Fallback to client-side only if server failed and allowed
-                if (!result.ok && (strategy === 'auto' || strategy === 'client')) {
+                if (!result.ok && (strategy === 'auto' || strategy === 'client' || strategy === 'playwright')) {
                     this.addLog('[JS] Attempting client-side fallback (html-to-image)');
                     const htiRes = await this.tryHtmlToImage(targetSelector);
                     if (htiRes.ok) {
@@ -152,7 +156,12 @@ function registerKsFeedbackWidget() {
                         continue;
                     }
 
-                    const rules = sheet.cssRules || sheet.rules;
+                    let rules;
+                    try {
+                        rules = sheet.cssRules || sheet.rules;
+                    } catch (e) {
+                        continue;
+                    }
                     if (!rules) continue;
 
                     let sheetCss = '';
@@ -203,10 +212,10 @@ function registerKsFeedbackWidget() {
                 const target = document.querySelector(selector) || document.body;
                 const canvas = await h2c(target, {
                     useCORS: true,
-                    allowTaint: true,
+                    allowTaint: false, // Changed to false for better security and to avoid CORS errors
                     logging: false,
                     scale: Math.min(window.devicePixelRatio || 1, 2),
-                    ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true',
+                    ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true' || el.classList.contains('ks-feedback-ignore'),
                     onclone: (clonedDoc) => {
                         this.sanitizeClonedDocument(clonedDoc);
                     },
@@ -223,22 +232,31 @@ function registerKsFeedbackWidget() {
             try {
                 const target = document.querySelector(selector) || document.body;
 
+                console.log('[FB] Generating client-side screenshot using html-to-image...');
                 // html-to-image takes options to filter elements
                 const options = {
                     filter: (node) => {
                         if (node.dataset && node.dataset.html2canvasIgnore === 'true') return false;
                         if (node.classList && node.classList.contains('ks-fb-root')) return false; // self protection
+                        if (node.classList && node.classList.contains('ks-feedback-ignore')) return false;
+                        if (node.classList && node.classList.contains('ks-fb-overlay')) return false;
+                        if (node.classList && node.classList.contains('ks-fab-trigger')) return false;
                         return true;
                     },
-                    pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-                    backgroundColor: window.getComputedStyle(document.body).backgroundColor || '#ffffff',
+                    pixelRatio: 1, // Zmenšeno pro rychlost a stabilitu na produkci
+                    backgroundColor: '#ffffff',
+                    skipFonts: true,
+                    fontEmbedCSS: '',
+                    timeout: 8000, // Zvýšeno na 8s
                 };
 
-                // html-to-image uses SVG foreignObject which is usually better with modern CSS,
-                // but we still sanitize just in case.
                 const dataUrl = await htmlToImage.toJpeg(target, options);
+                if (!dataUrl || dataUrl.length < 100) {
+                    throw new Error('Generated image is empty or too small');
+                }
                 return { ok: true, base64: dataUrl, mime: 'image/jpeg' };
             } catch (e) {
+                console.error('[FB] html-to-image failed:', e);
                 return { ok: false, error: { code: 'HTI_ERROR', message: e.message } };
             }
         },
@@ -688,10 +706,16 @@ function registerKsFeedbackWidget() {
                     console.log('[FB] Requesting server-side screenshot');
 
                     screenshotResult = await ScreenshotService.capture({
-                        strategy: config.strategy || 'playwright',
+                        strategy: config.strategy || 'auto',
                         targetSelector: 'body',
                         hideSelectorsBeforeCapture: ['#ks-fb-root', '.ks-fb-overlay', '.ks-fab-trigger']
                     });
+
+                    if (screenshotResult.ok) {
+                        console.log(`[FB] Screenshot captured successfully (${screenshotResult.strategy}) - size: ${screenshotResult.base64?.length || 0} chars`);
+                    } else {
+                        console.warn(`[FB] Screenshot failed: ${screenshotResult.error?.message || 'unknown error'}`, screenshotResult.error);
+                    }
                 }
 
                 if (this.options.screenshot && !screenshotResult.ok && isScreenshotRequired) {

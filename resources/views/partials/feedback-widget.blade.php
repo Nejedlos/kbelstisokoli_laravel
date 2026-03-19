@@ -200,9 +200,9 @@
          x-cloak
          class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[2147483646] flex items-center justify-center p-4">
         <div class="bg-white px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 max-w-sm w-full">
-            <div class="relative">
-                <div class="w-12 h-12 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin"></div>
-                <i class="fa-light fa-bug text-rose-600 absolute inset-0 flex items-center justify-center text-xl"></i>
+            <div class="relative w-12 h-12 flex items-center justify-center">
+                <div class="absolute inset-0 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin"></div>
+                <i class="fa-light fa-bug text-rose-600 text-xl leading-none"></i>
             </div>
             <div class="text-center">
                 <p class="font-bold text-slate-900 text-lg" x-text="

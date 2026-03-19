@@ -100,7 +100,10 @@
     "extra": {
         "laravel": {
             "dont-discover": [
-                "laravel/horizon"
+                "laravel/horizon",
+                "laravel/pail",
+                "laravel/dusk",
+                "laravel/sail"
             ]
         }
     },
