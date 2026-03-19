@@ -31,6 +31,7 @@ class SystemConsole extends Page
     protected string $view = 'filament.pages.system-console';
 
     public string $consoleOutput = '';
+    public string $output = '';
     public string $pollingInterval = '5s';
 
     public static function canAccess(): bool
@@ -107,7 +108,7 @@ class SystemConsole extends Page
 
             // 3. Tabulky k vyčištění
             $tablesToCheck = [
-                'new_external_import_logs' => 5000,
+                'external_import_logs' => 5000,
                 'activity_log' => 10000,
                 'sessions' => 1000,
                 'telescope_entries' => 5000,
@@ -780,7 +781,7 @@ class SystemConsole extends Page
             }
         }
 
-        $this->output .= "\n[$timestamp] > $command".(empty($selectedFlags) ? '' : ' '.implode(' ', $selectedFlags)).$valueStr."\n";
+        $this->safelyStream(content: "\n[$timestamp] > $command".(empty($selectedFlags) ? '' : ' '.implode(' ', $selectedFlags)).$valueStr."\n", replace: false);
 
         try {
             if ($type === 'artisan') {
@@ -851,7 +852,7 @@ class SystemConsole extends Page
                 ->send();
 
         } catch (\Throwable $e) {
-            $this->output .= "\nCHYBA: ".$e->getMessage();
+            $this->safelyStream(content: "\nCHYBA: ".$e->getMessage(), replace: false);
             Log::error('SystemConsole Error: '.$e->getMessage(), [
                 'command' => $command,
                 'type' => $type,
@@ -882,14 +883,14 @@ class SystemConsole extends Page
             }
         }
 
-        $this->output .= "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).$valueStr."\n";
-
+        $internalDebug = "";
         if (config('app.debug')) {
-            $this->output .= "[INTERNAL DEBUG] Memory Limit: " . ini_get('memory_limit') . "\n";
-            $this->output .= "[INTERNAL DEBUG] Time Limit: " . ini_get('max_execution_time') . "\n";
-            $this->output .= "[INTERNAL DEBUG] DB Connection: " . config('database.default') . "\n";
+            $internalDebug .= "[INTERNAL DEBUG] Memory Limit: " . ini_get('memory_limit') . "\n";
+            $internalDebug .= "[INTERNAL DEBUG] Time Limit: " . ini_get('max_execution_time') . "\n";
+            $internalDebug .= "[INTERNAL DEBUG] DB Connection: " . config('database.default') . "\n";
         }
-        $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).$valueStr."\n", replace: false);
+
+        $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).$valueStr."\n" . $internalDebug, replace: false);
 
         try {
             $parameters = ['--no-interaction' => true];
@@ -967,7 +968,6 @@ class SystemConsole extends Page
                     }
                 }
 
-                $this->output .= $output;
                 $this->safelyStream(content: $output, replace: false);
 
                 Notification::make()
@@ -986,7 +986,6 @@ class SystemConsole extends Page
             Artisan::call($command, $parameters, $outputBuffer);
             $result = $outputBuffer->fetch();
 
-            $this->output .= $result;
             $this->safelyStream(content: $result, replace: false);
 
             Notification::make()
@@ -997,10 +996,11 @@ class SystemConsole extends Page
             $errorMessage = $e->getMessage();
             $stackTrace = $e->getTraceAsString();
 
-            $this->output .= "\nFATAL ERROR: ".$errorMessage;
+            $fatalError = "\nFATAL ERROR: ".$errorMessage;
             if (config('app.debug')) {
-                $this->output .= "\n\nStack Trace:\n".substr($stackTrace, 0, 1000).'...';
+                $fatalError .= "\n\nStack Trace:\n".substr($stackTrace, 0, 1000).'...';
             }
+            $this->safelyStream(content: $fatalError, replace: false);
 
             Log::error('SystemConsole Internal Error: '.$errorMessage, [
                 'command' => $command,
@@ -1019,7 +1019,6 @@ class SystemConsole extends Page
     protected function runSystemCheck(): void
     {
         $timestamp = now()->format('H:i:s');
-        $this->output .= "\n[$timestamp] > System Check (Detailed Diagnostic)\n";
         $this->safelyStream(content: "\n[$timestamp] > System Check (Detailed Diagnostic)\n", replace: false);
 
         $out = "\n".str_repeat('=', 60)."\n";
@@ -1241,7 +1240,6 @@ class SystemConsole extends Page
         $out .= "5. Pokud shell selhává, použijte u Artisan příkazů volbu 'Internal Execution'.\n";
         $out .= str_repeat('=', 60)."\n";
 
-        $this->output .= $out;
         $this->safelyStream(content: $out, replace: false);
 
         Notification::make()
@@ -1296,6 +1294,16 @@ class SystemConsole extends Page
      */
     protected function safelyStream(string $content, bool $replace = false): void
     {
+        // Přidáme obsah do logu pro uchování stavu
+        // Odstraníme přímé zápisy do $this->output a $this->consoleOutput jinde v kódu
+        if ($replace) {
+            $this->consoleOutput = $content;
+            $this->output = $content;
+        } else {
+            $this->consoleOutput .= $content;
+            $this->output .= $content;
+        }
+
         try {
             // Livewire 3 stream() interně volá ComponentHookRegistry::getHook($this, SupportStreaming::class)
             // Pokud hook není nalezen (např. po vymazání/změně cache), HandlesStreaming trait
@@ -1336,7 +1344,6 @@ class SystemConsole extends Page
         $debug .= "[DEBUG] Prostředí: {$env}\n";
         $debug .= '[DEBUG] PHP limit: '.ini_get('max_execution_time')."s\n";
         $debug .= "[DEBUG] ------------------------------------------------------------\n";
-        $this->output .= $debug;
         $this->safelyStream(content: $debug, replace: false);
     }
 
@@ -1437,20 +1444,16 @@ class SystemConsole extends Page
             return str_contains($arg, ' ') ? escapeshellarg($arg) : $arg;
         }, $cmd));
 
-        $this->output .= "[RUNNING] {$cmdStr}\n\n";
         $this->safelyStream(content: "[RUNNING] {$cmdStr}\n\n", replace: false);
 
         $process->setTimeout(null);
 
         // Spuštění procesu a zachytávání výstupu
         $process->run(function ($type, $buffer) use ($cmd) {
-            $this->output .= $buffer;
-
             // Detekce chybějících modulů (lidsky srozumitelné)
             if (str_contains($buffer, 'Class "PDO" not found') || str_contains($buffer, 'token_get_all')) {
                 $warn = "\n[!!!] CHYBA: Tato binárka PHP ({$cmd[0]}) nemá aktivní PDO nebo Tokenizer.\n";
                 $warn .= "[!!!] Náprava: Zaškrtněte u příkazu 'Internal Execution' nebo nastavte funkční PHP v .env.\n";
-                $this->output .= $warn;
                 $this->safelyStream(content: $warn, replace: false);
             }
 
@@ -1461,7 +1464,6 @@ class SystemConsole extends Page
 
         $exitCode = $process->getExitCode();
         $statusMsg = "\n[FINISHED] Exit code: $exitCode ".($exitCode === 0 ? '(SUCCESS)' : '(FAILED)')."\n";
-        $this->output .= $statusMsg;
         $this->safelyStream(content: $statusMsg, replace: false);
     }
 
