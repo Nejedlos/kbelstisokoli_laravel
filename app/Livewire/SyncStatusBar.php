@@ -13,6 +13,7 @@ class SyncStatusBar extends Component
     public function render()
     {
         $runs = collect();
+        $pollingInterval = '10s'; // Výchozí dlouhý interval pro neaktivní stav
 
         if (Auth::check() && Auth::user()->can('manage_stats')) {
             $runs = ExternalImportRun::where('status', 'running')
@@ -25,10 +26,15 @@ class SyncStatusBar extends Component
                 })
                 ->orderByDesc('started_at')
                 ->get();
+
+            if ($runs->isNotEmpty()) {
+                $pollingInterval = '4s'; // Kratší interval při aktivním běhu
+            }
         }
 
         return view('livewire.sync-status-bar', [
             'runs' => $runs,
+            'pollingInterval' => $pollingInterval,
         ]);
     }
 

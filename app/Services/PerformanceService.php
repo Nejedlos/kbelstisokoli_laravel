@@ -51,15 +51,28 @@ class PerformanceService
 
         // Na produkci používáme primárně redis, fallback na file (pokud redis není dostupný/nastavený)
         // Cache::store('redis') je na Webglobe nejrychlejší pro sdílená data.
+        // Nicméně v případě, že se k Redisu nelze připojit (RedisException), musíme se tomu vyhnout
         $store = app()->isProduction() ? (config('cache.default') === 'redis' ? 'redis' : 'file') : 'database';
 
         try {
+            // Pokusíme se o přístup k cache s krátkým timeoutem (pokud by ovladač podporoval)
+            // nebo alespoň zachytíme RedisException hned při store() volání nebo remember()
             return $this->settings = Cache::store($store)->remember('performance_settings', 3600, function () {
                 return $this->fetchSettingsFromDb();
             });
         } catch (\Throwable $e) {
-            // Pokud cache selže (např. lock timeout), načteme to přímo z DB bez cachování v tomto requestu
-            // Tím předejdeme QueryException, která by shodila celou aplikaci
+            // Pokud cache selže (např. Redis Connection Refused), zkusíme to přes file, pokud to již nebyl file
+            if ($store !== 'file') {
+                try {
+                    return $this->settings = Cache::store('file')->remember('performance_settings', 3600, function () {
+                        return $this->fetchSettingsFromDb();
+                    });
+                } catch (\Throwable $e2) {
+                    // Ignorujeme i tento fail a jdeme do DB
+                }
+            }
+
+            // Pokud vše selže (např. lock timeout nebo DB nedostupná při fetch), načteme to přímo z DB bez cachování
             return $this->settings = $this->fetchSettingsFromDb();
         }
     }

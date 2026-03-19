@@ -1,4 +1,6 @@
 <x-filament-panels::page>
+    <div wire:poll.{{ $pollingInterval }}="refreshConsoleLogs"></div>
+
     {{-- KPI Diagnostika --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {{-- Artisan Procesy --}}
@@ -392,7 +394,7 @@
                     }
                 }"
                 x-init="
-                    $watch('$wire.output', value => {
+                    $watch('$wire.consoleOutput', value => {
                         const el = document.getElementById('console-output');
                         if (el) el.scrollTop = el.scrollHeight;
                     })
@@ -439,7 +441,7 @@
                             <div class="w-px bg-gray-800"></div>
                             <button
                                 type="button"
-                                wire:click="clearOutput"
+                                wire:click="clearConsoleLogs"
                                 class="p-2 hover:bg-gray-800 text-gray-500 hover:text-red-400 transition-colors"
                                 title="Vymazat konzoli"
                             >
@@ -458,9 +460,9 @@
                 <div
                     id="console-output"
                     class="p-6 text-[#c9d1d9] font-mono text-[11px] leading-[1.6] min-h-[500px] md:min-h-[600px] max-h-[80vh] overflow-y-auto whitespace-pre-wrap shadow-inner custom-scrollbar selection:bg-primary-500/40 selection:text-white"
-                    wire:stream="output"
+                    wire:stream="consoleOutput"
                 >
-                    @if(empty($output))
+                    @if(empty($consoleOutput))
                         <div class="flex flex-col items-center justify-center h-[400px] text-gray-700 select-none">
                             @php $bigTerminalIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::TERMINAL); @endphp
                             @if($bigTerminalIcon instanceof \Illuminate\Support\HtmlString)
@@ -477,7 +479,7 @@
                             </div>
                         </div>
                     @else
-                        {{ $output }}
+                        {{ $consoleOutput }}
                     @endif
                 </div>
             </div>

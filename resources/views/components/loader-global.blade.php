@@ -64,7 +64,7 @@
 
         document.addEventListener('livewire:init', () => {
             Livewire.hook('request', ({ respond, succeed, fail, options }) => {
-                // 1. Základní Livewire flagy pro tiché požadavky
+                // 1. Základní Livewire flagy pro tiché požadavky (včetně pollingu)
                 if (options.method === 'POLL' || options.silent || options.background) {
                     return;
                 }
@@ -73,17 +73,23 @@
                 const isUserAction = (Date.now() - window.lastUserInteraction) < 300; // Mírně zvýšený limit pro jistotu
                 const isNavigation = !!options.navigate;
 
-                // 3. Pokud nejde o akci uživatele ani navigaci, loader nepouštíme
-                if (!isUserAction && !isNavigation) {
+                // 3. Pojistka pro specifické background komponenty (např. dropdown notifikací nebo sync bar)
+                const componentName = (options.fingerprint && options.fingerprint.name) || options.name || '';
+                const isBackgroundComponent = [
+                    'member.notification-dropdown',
+                    'sync-status-bar',
+                    'sync-status-indicator'
+                ].includes(componentName) || (options.updates && options.updates.some(u => [
+                    'member.notification-dropdown',
+                    'sync-status-bar'
+                ].includes(u.name)));
+
+                if (isBackgroundComponent && !isUserAction) {
                     return;
                 }
 
-                // 4. Pojistka pro specifické background komponenty (např. dropdown notifikací)
-                const isNotificationComponent = (options.fingerprint && options.fingerprint.name === 'member.notification-dropdown') ||
-                                                (options.name === 'member.notification-dropdown') ||
-                                                (options.updates && options.updates.some(u => u.name === 'member.notification-dropdown'));
-
-                if (isNotificationComponent && !isUserAction) {
+                // 4. Pokud nejde o akci uživatele ani navigaci, loader nepouštíme
+                if (!isUserAction && !isNavigation) {
                     return;
                 }
 

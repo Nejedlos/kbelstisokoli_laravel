@@ -1,4 +1,4 @@
-<div wire:poll.3s @sync-started.window="$wire.$refresh()">
+<div wire:poll.{{ $pollingInterval }} @sync-started.window="$wire.$refresh()">
     @if($runs->isNotEmpty())
         <div x-data="{
                  collapsed: @entangle('isCollapsed'),

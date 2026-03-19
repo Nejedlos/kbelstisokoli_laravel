@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start" wire:poll.3s="refreshConsoleLogs">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start" wire:poll.{{ $pollingInterval }}="refreshConsoleLogs">
         {{-- Left Column: Content --}}
         <div class="space-y-8 w-full">
             <div class="grid grid-cols-2 gap-4">

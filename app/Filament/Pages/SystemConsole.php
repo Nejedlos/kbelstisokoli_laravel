@@ -30,7 +30,8 @@ class SystemConsole extends Page
 
     protected string $view = 'filament.pages.system-console';
 
-    public string $output = '';
+    public string $consoleOutput = '';
+    public string $pollingInterval = '5s';
 
     public static function canAccess(): bool
     {
@@ -1269,9 +1270,23 @@ class SystemConsole extends Page
         return ['pdo' => false, 'tokenizer' => false, 'json' => false];
     }
 
-    public function clearOutput(): void
+    public function refreshConsoleLogs(): void
     {
-        $this->output = '';
+        $newContent = \App\Services\Support\ConsoleService::getContent();
+        if ($this->consoleOutput !== $newContent) {
+            $this->consoleOutput = $newContent;
+            $this->dispatch('console-updated');
+            $this->pollingInterval = '3s'; // Zrychlíme při změně
+        } else {
+            $this->pollingInterval = '10s'; // Zpomalíme při klidu
+        }
+    }
+
+    public function clearConsoleLogs(): void
+    {
+        \App\Services\Support\ConsoleService::clear();
+        $this->consoleOutput = '';
+        Notification::make()->title('Console cleared')->success()->send();
     }
 
     /**
@@ -1285,10 +1300,10 @@ class SystemConsole extends Page
             // Livewire 3 stream() interně volá ComponentHookRegistry::getHook($this, SupportStreaming::class)
             // Pokud hook není nalezen (např. po vymazání/změně cache), HandlesStreaming trait
             // vyhodí chybu, protože se snaží volat metodu na null objektu (StreamManager::to()).
-            // Zde voláme stream() s parametry a pokud selže, tiše ignorujeme - výstup je stále v $this->output.
-            $this->stream(to: 'output', content: $content, replace: $replace);
+            // Zde voláme stream() s parametry a pokud selže, tiše ignorujeme - výstup je stále v $this->consoleOutput.
+            $this->stream(to: 'consoleOutput', content: $content, replace: $replace);
         } catch (\Throwable $e) {
-            // Ignorujeme chybu streamování, uživatel uvidí výstup po dokončení akce v $this->output.
+            // Ignorujeme chybu streamování, uživatel uvidí výstup po dokončení akce v $this->consoleOutput.
             Log::debug('SystemConsole: Streaming failed, likely due to cache change.', [
                 'error' => $e->getMessage()
             ]);

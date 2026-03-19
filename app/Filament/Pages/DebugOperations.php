@@ -40,23 +40,22 @@ class DebugOperations extends Page
     protected string $view = 'filament.pages.debug-operations';
 
     public string $consoleOutput = '';
-
-    public static function canAccess(): bool
-    {
-        return auth()->user()->can('manage_advanced_settings');
-    }
+    public string $pollingInterval = '5s';
 
     public function mount(): void
     {
-        $this->consoleOutput = ConsoleService::getContent();
+        $this->consoleOutput = \App\Services\Support\ConsoleService::getContent();
     }
 
     public function refreshConsoleLogs(): void
     {
-        $newContent = ConsoleService::getContent();
+        $newContent = \App\Services\Support\ConsoleService::getContent();
         if ($this->consoleOutput !== $newContent) {
             $this->consoleOutput = $newContent;
             $this->dispatch('console-updated');
+            $this->pollingInterval = '3s'; // Zrychlíme při změně
+        } else {
+            $this->pollingInterval = '10s'; // Zpomalíme při klidu
         }
     }
 

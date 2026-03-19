@@ -24,7 +24,18 @@ class AttendanceTracker extends Component
 
     public function getAttendableProperty(): ?Model
     {
-        return $this->attendableType::find($this->attendableId);
+        if (!$this->attendableType || !$this->attendableId) {
+            return null;
+        }
+
+        try {
+            if (!class_exists($this->attendableType)) {
+                return null;
+            }
+            return $this->attendableType::find($this->attendableId);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     public function getAttendancesProperty()
