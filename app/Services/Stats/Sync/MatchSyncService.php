@@ -112,7 +112,7 @@ class MatchSyncService
         if ($externalMatchId) {
             $matchesByExt = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'like', '%"external_id":"' . (string) $externalMatchId . '"%')
+                ->where('metadata->external_id', (string) $externalMatchId)
                 ->orderBy('id')
                 ->get();
 
@@ -121,13 +121,34 @@ class MatchSyncService
             } elseif ($matchesByExt->count() === 1) {
                 $match = $matchesByExt->first();
             }
+
+            // Pokud jsme stále nenašli, zkusíme najít zápas s tímto external_id KDEKOLIV v této sezóně (i pro jiný tým)
+            // To pomůže v případě, že se match identity key změnil tak drasticky, že se netrefil ani fallback.
+            // POZOR: Toto by mohlo najít zápas jiného našeho týmu ve stejné soutěži, proto kontrolujeme, zda existující match má našeho soupeře.
+            if (! $match) {
+                $globalMatch = BasketballMatch::where('season_id', $season->id)
+                    ->where('metadata->external_id', (string) $externalMatchId)
+                    ->first();
+
+                if ($globalMatch) {
+                    // Pokud je to zápas pro jiný tým, ale má stejné external_id, tak je to pravděpodobně ten samý zápas
+                    // a my ho chceme "převzít" pod náš tým, pokud náš tým v tom zápase skutečně figuruje.
+                    // Ale bezpečnější je ho jen zalogovat a pokračovat, pokud si nejsme jisti.
+                    \Log::info("MatchSync: Found match {$externalMatchId} under different team (ID {$globalMatch->team_id}), existing match ID: {$globalMatch->id}");
+
+                    // Pokud má stejný team_id jako my, tak ho použijeme (to by se ale mělo stát už v prvním dotazu)
+                    if ((int)$globalMatch->team_id === (int)$team->id) {
+                        $match = $globalMatch;
+                    }
+                }
+            }
         }
 
         // 2. Fallback na identity key (v rámci sezóny a týmu)
         if (! $match) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where('team_id', $team->id)
-                ->where('metadata', 'like', '%"match_identity_key":"' . (string) $matchIdentityKey . '"%')
+                ->where('metadata->match_identity_key', (string) $matchIdentityKey)
                 ->first();
         }
 
@@ -339,11 +360,11 @@ class MatchSyncService
     /**
      * Sloučí duplicitní zápasy se stejným external_id v rámci daného týmu a sezóny.
      */
-    protected function mergeDuplicatesByExternalId(Team $team, Season $season, string $externalId, ?ExternalImportRun $run = null): ?BasketballMatch
+    public function mergeDuplicatesByExternalId(Team $team, Season $season, string $externalId, ?ExternalImportRun $run = null): ?BasketballMatch
     {
         $dups = BasketballMatch::where('season_id', $season->id)
             ->where('team_id', $team->id)
-            ->where('metadata', 'like', '%"external_id":"' . $externalId . '"%')
+            ->where('metadata->external_id', $externalId)
             ->orderBy('id')
             ->get();
 

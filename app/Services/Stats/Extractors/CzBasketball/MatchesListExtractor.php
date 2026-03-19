@@ -194,6 +194,18 @@ class MatchesListExtractor implements StatExtractorInterface
         });
     }
 
+        // Odstranění duplicit podle external_match_id (prioritizujeme záznamy s datem a týmy)
+        $uniqueRows = collect($rows)
+            ->filter(fn($r) => !empty($r->values['external_match_id']))
+            ->sortByDesc(fn($r) => ($r->values['scheduled_at'] ? 1 : 0) + ($r->values['home_team'] !== 'Unknown' ? 1 : 0))
+            ->unique('values.external_match_id')
+            ->values()
+            ->all();
+
+        // Přidáme zpět ty, které nemají external_match_id (pokud nějaké jsou)
+        $noIdRows = collect($rows)->filter(fn($r) => empty($r->values['external_match_id']))->all();
+        $finalRows = array_merge($uniqueRows, $noIdRows);
+
         $dto = new NormalizedTableDTO(
             name: 'Zápasy',
             columns: [
@@ -203,7 +215,7 @@ class MatchesListExtractor implements StatExtractorInterface
                 'score' => 'Skóre',
                 'status' => 'Stav',
             ],
-            rows: $rows,
+            rows: $finalRows,
             metadata: [
                 'warnings' => $warnings,
             ]

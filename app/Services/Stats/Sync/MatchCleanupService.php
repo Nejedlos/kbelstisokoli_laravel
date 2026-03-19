@@ -24,17 +24,44 @@ class MatchCleanupService
             'attendances_moved' => 0,
         ];
 
-        // 1. Najdeme týmy a dny, kde je více než jeden zápas
-        $groups = BasketballMatch::select('team_id', 'season_id', 'is_home')
+        // 1. Najdeme zápasy se stejným external_id (nejsilnější vazba)
+        $extDuplicates = BasketballMatch::select('team_id', 'season_id', DB::raw('JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.external_id")) as ext_id'))
+            ->whereNotNull('metadata->external_id')
+            ->groupBy('team_id', 'season_id', 'ext_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        foreach ($extDuplicates as $dup) {
+            $matches = BasketballMatch::where('team_id', $dup->team_id)
+                ->where('season_id', $dup->season_id)
+                ->where('metadata->external_id', (string)$dup->ext_id)
+                ->orderBy('id')
+                ->get();
+
+            if ($matches->count() > 1) {
+                $stats['groups_found']++;
+                $mainMatch = $matches->first(fn($m) => !empty($m->metadata['boxscore_synced_at'] ?? null)) ?: $matches->first();
+                $toMerge = $matches->filter(fn($m) => $m->id !== $mainMatch->id);
+
+                foreach ($toMerge as $duplicate) {
+                    if (!$dryRun) {
+                        $this->mergeMatches($mainMatch, $duplicate);
+                    }
+                    $stats['matches_merged']++;
+                }
+            }
+        }
+
+        // 2. Najdeme týmy a dny, kde je více než jeden zápas (pro zápasy bez external_id)
+        $groups = BasketballMatch::select('team_id', 'season_id')
             ->selectRaw('DATE(scheduled_at) as match_date')
-            ->groupBy('team_id', 'season_id', 'is_home', 'match_date')
+            ->groupBy('team_id', 'season_id', 'match_date')
             ->havingRaw('COUNT(*) > 1')
             ->get();
 
         foreach ($groups as $group) {
             $matches = BasketballMatch::where('team_id', $group->team_id)
                 ->where('season_id', $group->season_id)
-                ->where('is_home', $group->is_home)
                 ->whereDate('scheduled_at', $group->match_date)
                 ->orderBy('scheduled_at')
                 ->get();
@@ -107,6 +134,16 @@ class MatchCleanupService
             // 2. Přesun statistik (pokud existují a hlavní je nemá)
             // Poznámka: V tomto projektu jsou statistiky vázány přes basketball_match_id v statistic_rows
             DB::table('statistic_rows')
+                ->where('basketball_match_id', $duplicate->id)
+                ->update(['basketball_match_id' => $main->id]);
+
+            // 2b. Přesun external_player_matches
+            DB::table('external_player_matches')
+                ->where('basketball_match_id', $duplicate->id)
+                ->update(['basketball_match_id' => $main->id]);
+
+            // 2c. Přesun predikcí
+            DB::table('match_predictions')
                 ->where('basketball_match_id', $duplicate->id)
                 ->update(['basketball_match_id' => $main->id]);
 
