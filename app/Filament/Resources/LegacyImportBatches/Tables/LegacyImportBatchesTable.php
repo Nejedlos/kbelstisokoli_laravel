@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\LegacyImportBatches\Tables;
 
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -60,7 +62,7 @@ class LegacyImportBatchesTable
                 EditAction::make(),
                 Action::make('cancel')
                     ->label('Zrušit')
-                    ->icon('fa-light fa-circle-xmark')
+                    ->icon(FilamentIcon::get(AppIcon::DEACTIVATE))
                     ->color('danger')
                     ->requiresConfirmation()
                     ->visible(fn ($record) => $record->status === 'running' || $record->status === 'queued')

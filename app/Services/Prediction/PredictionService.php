@@ -113,6 +113,10 @@ class PredictionService
                     $w5 * $this->logit($mutualProb);
         $finalProb = $this->invLogit($logitMix);
 
+        // Zmírnění extrémů (squashing) - sport není nikdy 100% jistý
+        // Mapujeme 0-1 na 0.05-0.95
+        $finalProb = 0.05 + ($finalProb * 0.90);
+
         // Confidence
         $confidence = 'low';
         $teamMatchesCount = BasketballMatch::where('team_id', $match->team_id)->where('season_id', $match->season_id)->whereNotNull('score_home')->count();
@@ -186,7 +190,7 @@ class PredictionService
         }
 
         return [
-            'delta' => max(-100, min(100, $delta)),
+            'delta' => max(-50, min(50, $delta)),
             'factors' => $factors,
             'source' => 'external_comparison'
         ];
@@ -206,7 +210,8 @@ class PredictionService
     private function sigmoid(float $x): float
     {
         // Simple mapping for delta to probability
-        return 1 / (1 + 10 ** (-$x / 400));
+        // Používáme 600 místo 400 pro méně extrémní pravděpodobnosti (více konzervativní odhad pro basketbal)
+        return 1 / (1 + 10 ** (-$x / 600));
     }
 
     private function generateExplanation(BasketballMatch $match, float $eloProb, array $formResult, array $rosterResult, array $previewResult, array $mutualResult): array

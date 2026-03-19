@@ -7,6 +7,8 @@ use App\Models\FinancialTariff;
 use App\Models\Season;
 use App\Models\User;
 use App\Models\UserSeasonConfig;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
@@ -31,7 +33,7 @@ class SeasonRenewal extends Page implements HasForms
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
-        return 'fal-arrows-rotate';
+        return FilamentIcon::get(AppIcon::REFRESH);
     }
 
     protected string $view = 'filament.pages.season-renewal';
@@ -101,7 +103,7 @@ class SeasonRenewal extends Page implements HasForms
                                     ->hintAction(
                                         Action::make('load_specific')
                                             ->label(__('admin.season_renewal.actions.load_specific'))
-                                            ->icon('fal-download')
+                                            ->icon(FilamentIcon::get(AppIcon::DOWNLOAD))
                                             ->color('primary')
                                             ->requiresConfirmation()
                                             ->modalHeading(__('admin.season_renewal.modals.load_specific_title'))
@@ -168,7 +170,7 @@ class SeasonRenewal extends Page implements HasForms
             Action::make('load_from_previous')
                 ->label(__('admin.season_renewal.actions.load_from_previous'))
                 ->color('gray')
-                ->icon('fal-download')
+                ->icon(FilamentIcon::get(AppIcon::DOWNLOAD))
                 ->requiresConfirmation()
                 ->modalHeading(__('admin.season_renewal.modals.load_from_previous_title'))
                 ->modalDescription(__('admin.season_renewal.modals.load_from_previous_desc'))

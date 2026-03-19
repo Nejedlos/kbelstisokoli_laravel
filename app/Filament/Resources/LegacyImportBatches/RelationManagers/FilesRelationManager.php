@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\LegacyImportBatches\RelationManagers;
 
 use App\Services\Stats\Legacy\Extractors\LegacyStatExtractor;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -108,7 +110,7 @@ class FilesRelationManager extends RelationManager
             ->recordActions([
                 Action::make('preview')
                     ->label('Náhled')
-                    ->icon('fa-light.fa-eye')
+                    ->icon(FilamentIcon::get(AppIcon::VIEW))
                     ->modalHeading('Náhled parsování souboru')
                     ->modalWidth('4xl')
                     ->modalSubmitAction(false)

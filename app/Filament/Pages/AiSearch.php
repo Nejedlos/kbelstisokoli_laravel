@@ -3,12 +3,17 @@
 namespace App\Filament\Pages;
 
 use App\Services\AiSearchService;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Pages\Page;
 use Illuminate\Http\Request;
 
 class AiSearch extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'fal-sparkles';
+    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        return FilamentIcon::get(AppIcon::AI);
+    }
 
     protected static ?string $navigationLabel = null;
 

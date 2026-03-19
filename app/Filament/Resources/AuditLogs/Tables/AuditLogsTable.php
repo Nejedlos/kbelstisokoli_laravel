@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\AuditLogs\Tables;
 
-use App\Support\IconHelper;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
@@ -43,15 +44,15 @@ class AuditLogsTable
                         'failed_login' => 'danger',
                         default => 'gray',
                     })
-                    ->icon(fn (string $state): string => match ($state) {
-                        'created' => IconHelper::get('plus'),
-                        'updated' => IconHelper::get('pen-to-square'),
-                        'deleted' => IconHelper::get('trash'),
-                        'login' => IconHelper::get('right-to-bracket'),
-                        'logout' => IconHelper::get('right-from-bracket'),
-                        'password_reset' => IconHelper::get('key'),
-                        'failed_login' => IconHelper::get('circle-exclamation'),
-                        default => IconHelper::get('circle-info'),
+                    ->icon(fn (string $state) => match ($state) {
+                        'created' => FilamentIcon::get(AppIcon::CREATE),
+                        'updated' => FilamentIcon::get(AppIcon::EDIT),
+                        'deleted' => FilamentIcon::get(AppIcon::DELETE),
+                        'login' => FilamentIcon::get(AppIcon::LOGIN),
+                        'logout' => FilamentIcon::get(AppIcon::LOGOUT),
+                        'password_reset' => FilamentIcon::get(AppIcon::PERMISSIONS),
+                        'failed_login' => FilamentIcon::get(AppIcon::WARNING),
+                        default => FilamentIcon::get(AppIcon::INFO),
                     })
                     ->formatStateUsing(fn (string $state): string => __("admin.resources.audit_log.actions.$state") ?? $state)
                     ->sortable(),

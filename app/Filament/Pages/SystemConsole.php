@@ -311,7 +311,7 @@ class SystemConsole extends Page
                     '--no-interaction' => __('admin/system-console.commands.ai_index.flags.no_interaction'),
                 ],
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('sparkles'),
+                'icon' => FilamentIcon::get(AppIcon::AI),
             ],
         ];
 
@@ -323,28 +323,28 @@ class SystemConsole extends Page
                     'desc' => __('admin/system-console.commands.deploy.desc'),
                     'type' => 'artisan',
                     'color' => 'success',
-                    'icon' => FilamentIcon::get('rocket'),
+                    'icon' => FilamentIcon::get(AppIcon::ROCKET),
                 ],
                 'app:sync' => [
                     'label' => __('admin/system-console.commands.sync.label'),
                     'desc' => __('admin/system-console.commands.sync.desc'),
                     'type' => 'artisan',
                     'color' => 'warning',
-                    'icon' => FilamentIcon::get('rotate'),
+                    'icon' => FilamentIcon::get(AppIcon::REFRESH),
                 ],
                 'app:local:prepare' => [
                     'label' => __('admin/system-console.commands.local_prepare.label'),
                     'desc' => __('admin/system-console.commands.local_prepare.desc'),
                     'type' => 'artisan',
                     'color' => 'info',
-                    'icon' => FilamentIcon::get('file-export'),
+                    'icon' => FilamentIcon::get(AppIcon::UPLOAD),
                 ],
                 'app:production:setup' => [
                     'label' => __('admin/system-console.commands.prod_setup.label'),
                     'desc' => __('admin/system-console.commands.prod_setup.desc'),
                     'type' => 'artisan',
                     'color' => 'gray',
-                    'icon' => FilamentIcon::get('gears'),
+                    'icon' => FilamentIcon::get(AppIcon::GEARS),
                 ],
             ];
         }
@@ -357,21 +357,21 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => ['--pro' => __('admin/system-console.commands.icons_sync.flags.pro')],
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('icons'),
+                'icon' => FilamentIcon::get(AppIcon::MEDIA_LIBRARY),
             ],
             'app:icons:doctor' => [
                 'label' => __('admin/system-console.commands.icons_doctor.label'),
                 'desc' => __('admin/system-console.commands.icons_doctor.desc'),
                 'type' => 'artisan',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('stethoscope'),
+                'icon' => FilamentIcon::get(AppIcon::STETHOSCOPE),
             ],
             'announcements:sync' => [
                 'label' => __('admin/system-console.commands.announcements_sync.label'),
                 'desc' => __('admin/system-console.commands.announcements_sync.desc'),
                 'type' => 'artisan',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('bullhorn'),
+                'icon' => FilamentIcon::get(AppIcon::ANNOUNCEMENTS),
             ],
             'finance:sync' => [
                 'label' => __('admin/system-console.commands.finance_sync.label'),
@@ -383,7 +383,7 @@ class SystemConsole extends Page
                     '--force' => __('admin/system-console.commands.finance_sync.flags.--force'),
                 ],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('money-bill-transfer'),
+                'icon' => FilamentIcon::get(AppIcon::FINANCE_PAYMENTS),
             ],
             'finance:cleanup' => [
                 'label' => __('admin/system-console.commands.finance_cleanup.label'),
@@ -393,7 +393,7 @@ class SystemConsole extends Page
                     '--force' => __('admin/system-console.commands.finance_cleanup.flags.--force'),
                 ],
                 'color' => 'danger',
-                'icon' => FilamentIcon::get('broom'),
+                'icon' => FilamentIcon::get(AppIcon::BROOM_WIDE),
             ],
             'stats:sync-players' => [
                 'label' => __('admin/system-console.commands.stats_sync_players.label'),
@@ -417,7 +417,7 @@ class SystemConsole extends Page
                     ],
                 ],
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('users'),
+                'icon' => FilamentIcon::get(AppIcon::USERS),
             ],
             'stats:sync-team-season' => [
                 'label' => __('admin/system-console.commands.stats_sync_team.label'),
@@ -441,7 +441,7 @@ class SystemConsole extends Page
                     ],
                 ],
                 'color' => 'info',
-                'icon' => FilamentIcon::get('basketball'),
+                'icon' => FilamentIcon::get(AppIcon::MATCHES),
             ],
             'stats:import' => [
                 'label' => __('admin/system-console.commands.stats_import.label'),
@@ -451,7 +451,17 @@ class SystemConsole extends Page
                     '--recent' => __('admin/system-console.commands.stats_import.flags.recent'),
                 ],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('chart-line'),
+                'icon' => FilamentIcon::get(AppIcon::DASHBOARD),
+            ],
+            'stats:predictions:recompute' => [
+                'label' => __('admin/system-console.commands.stats_predictions_recompute.label'),
+                'desc' => __('admin/system-console.commands.stats_predictions_recompute.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--all' => __('admin/system-console.commands.stats_predictions_recompute.flags.--all'),
+                ],
+                'color' => 'warning',
+                'icon' => FilamentIcon::get(AppIcon::AI),
             ],
         ];
 
@@ -466,7 +476,7 @@ class SystemConsole extends Page
                     '--users' => __('admin/system-console.commands.legacy_sync.flags.--users'),
                 ],
                 'color' => 'warning',
-                'icon' => new \Illuminate\Support\HtmlString('<i class="fa-light fa-database"></i>'),
+                'icon' => FilamentIcon::get(AppIcon::DATABASE),
             ],
             'app:attendance:sync' => [
                 'label' => __('admin/system-console.commands.legacy_attendance_sync.label'),
@@ -476,7 +486,7 @@ class SystemConsole extends Page
                     '--fresh' => __('admin/system-console.commands.legacy_attendance_sync.flags.--fresh'),
                 ],
                 'color' => 'info',
-                'icon' => new \Illuminate\Support\HtmlString('<i class="fa-light fa-calendar-check"></i>'),
+                'icon' => FilamentIcon::get(AppIcon::EVENTS),
             ],
         ];
 
@@ -487,7 +497,7 @@ class SystemConsole extends Page
                 'desc' => __('admin/system-console.commands.system_cleanup.desc'),
                 'type' => 'artisan',
                 'color' => 'danger',
-                'icon' => FilamentIcon::get('broom'),
+                'icon' => FilamentIcon::get(AppIcon::BROOM_WIDE),
             ],
             'finance:archive-old-charges' => [
                 'label' => __('admin/system-console.commands.finance_archive.label'),
@@ -497,7 +507,7 @@ class SystemConsole extends Page
                     '--dry-run' => __('admin/system-console.commands.finance_archive.flags.--dry-run'),
                 ],
                 'color' => 'warning',
-                'icon' => new \Illuminate\Support\HtmlString('<i class="fa-light fa-box-archive"></i>'),
+                'icon' => FilamentIcon::get(AppIcon::ARCHIVE),
             ],
             'audit:cleanup' => [
                 'label' => __('admin/system-console.commands.audit_cleanup.label'),
@@ -509,7 +519,7 @@ class SystemConsole extends Page
                     '--days=180' => __('admin/system-console.commands.audit_cleanup.flags.180'),
                 ],
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('clock-rotate-left'),
+                'icon' => FilamentIcon::get(AppIcon::AUDIT),
             ],
             'club:backfill-identifiers' => [
                 'label' => __('admin/system-console.commands.backfill_ids.label'),
@@ -517,14 +527,14 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => ['--regenerate-existing' => __('admin/system-console.commands.backfill_ids.flags.regenerate')],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('user-check'),
+                'icon' => FilamentIcon::get(AppIcon::ATTENDANCE),
             ],
             'rsvp:reminders' => [
                 'label' => __('admin/system-console.commands.rsvp_reminders.label'),
                 'desc' => __('admin/system-console.commands.rsvp_reminders.desc'),
                 'type' => 'artisan',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('bell'),
+                'icon' => FilamentIcon::get(AppIcon::BELL),
             ],
             'telescope:clear' => [
                 'label' => __('admin/system-console.commands.telescope_clear.label'),
@@ -534,7 +544,7 @@ class SystemConsole extends Page
                     '--all' => 'Smazat ÚPLNĚ VŠECHNY záznamy (nejen starší 24h)',
                 ],
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('trash'),
+                'icon' => FilamentIcon::get(AppIcon::TRASH),
             ],
         ];
 
@@ -549,7 +559,7 @@ class SystemConsole extends Page
                     '--seed' => __('admin/system-console.commands.migrate.flags.seed'),
                 ],
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('database'),
+                'icon' => FilamentIcon::get(AppIcon::DATABASE),
             ],
             'migrate:rollback' => [
                 'label' => __('admin/system-console.commands.migrate_rollback.label'),
@@ -560,7 +570,7 @@ class SystemConsole extends Page
                     '--step=1' => __('admin/system-console.commands.migrate_rollback.flags.step'),
                 ],
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('undo'),
+                'icon' => FilamentIcon::get(AppIcon::UNDO),
             ],
             'db:seed' => [
                 'label' => __('admin/system-console.commands.db_seed.label'),
@@ -573,7 +583,7 @@ class SystemConsole extends Page
                     'options' => array_combine($seeders, $seeders),
                 ],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('seedling'),
+                'icon' => FilamentIcon::get(AppIcon::SEEDLING),
             ],
             'app:seed' => [
                 'label' => __('admin/system-console.commands.app_seed.label'),
@@ -581,7 +591,7 @@ class SystemConsole extends Page
                 'type' => 'artisan',
                 'flags' => ['--fresh' => __('admin/system-console.commands.app_seed.flags.fresh')],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('seedling'),
+                'icon' => FilamentIcon::get(AppIcon::SEEDLING),
             ],
         ];
 
@@ -592,49 +602,49 @@ class SystemConsole extends Page
                 'desc' => __('admin/system-console.commands.optimize.desc'),
                 'type' => 'internal',
                 'color' => 'success',
-                'icon' => FilamentIcon::get('bolt'),
+                'icon' => FilamentIcon::get(AppIcon::BOLT),
             ],
             'optimize:clear' => [
                 'label' => __('admin/system-console.commands.optimize_clear.label'),
                 'desc' => __('admin/system-console.commands.optimize_clear.desc'),
                 'type' => 'internal',
                 'color' => 'danger',
-                'icon' => FilamentIcon::get('trash'),
+                'icon' => FilamentIcon::get(AppIcon::TRASH),
             ],
             'config:cache' => [
                 'label' => __('admin/system-console.commands.config_cache.label'),
                 'desc' => __('admin/system-console.commands.config_cache.desc'),
                 'type' => 'internal',
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('gear'),
+                'icon' => FilamentIcon::get(AppIcon::SETTINGS),
             ],
             'route:cache' => [
                 'label' => __('admin/system-console.commands.route_cache.label'),
                 'desc' => __('admin/system-console.commands.route_cache.desc'),
                 'type' => 'internal',
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('route'),
+                'icon' => FilamentIcon::get(AppIcon::ROUTE),
             ],
             'view:cache' => [
                 'label' => __('admin/system-console.commands.view_cache.label'),
                 'desc' => __('admin/system-console.commands.view_cache.desc'),
                 'type' => 'internal',
                 'color' => 'primary',
-                'icon' => FilamentIcon::get('eye'),
+                'icon' => FilamentIcon::get(AppIcon::VIEW),
             ],
             'storage:link' => [
                 'label' => __('admin/system-console.commands.storage_link.label'),
                 'desc' => __('admin/system-console.commands.storage_link.desc'),
                 'type' => 'internal',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('link'),
+                'icon' => FilamentIcon::get(AppIcon::LINK),
             ],
             'storage:repair' => [
                 'label' => __('admin/system-console.commands.storage_repair.label'),
                 'desc' => __('admin/system-console.commands.storage_repair.desc'),
                 'type' => 'internal',
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('wrench'),
+                'icon' => FilamentIcon::get(AppIcon::WRENCH),
             ],
         ];
 
@@ -649,21 +659,21 @@ class SystemConsole extends Page
                     '--optimize-autoloader' => __('admin/system-console.commands.composer_install.flags.optimize'),
                 ],
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('box-open'),
+                'icon' => FilamentIcon::get(AppIcon::PACKAGE),
             ],
             'npm install' => [
                 'label' => __('admin/system-console.commands.npm_install.label'),
                 'desc' => __('admin/system-console.commands.npm_install.desc'),
                 'type' => 'shell',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('download'),
+                'icon' => FilamentIcon::get(AppIcon::DOWNLOAD),
             ],
             'npm run build' => [
                 'label' => __('admin/system-console.commands.npm_build.label'),
                 'desc' => __('admin/system-console.commands.npm_build.desc'),
                 'type' => 'shell',
                 'color' => 'success',
-                'icon' => FilamentIcon::get('hammer'),
+                'icon' => FilamentIcon::get(AppIcon::HAMMER),
             ],
         ];
 
@@ -673,14 +683,14 @@ class SystemConsole extends Page
                 'desc' => __('admin/system-console.commands.git_status.desc'),
                 'type' => 'shell',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('code-branch'),
+                'icon' => FilamentIcon::get(AppIcon::BRANCH),
             ];
             $devTools['git pull'] = [
                 'label' => __('admin/system-console.commands.git_pull.label'),
                 'desc' => __('admin/system-console.commands.git_pull.desc'),
                 'type' => 'shell',
                 'color' => 'warning',
-                'icon' => FilamentIcon::get('cloud-download'),
+                'icon' => FilamentIcon::get(AppIcon::STAT_SOURCES),
             ];
         }
 
@@ -693,35 +703,35 @@ class SystemConsole extends Page
                 'desc' => 'Komplexní diagnostika serveru, binárek a oprávnění.',
                 'type' => 'artisan',
                 'color' => 'success',
-                'icon' => FilamentIcon::get('stethoscope'),
+                'icon' => FilamentIcon::get(AppIcon::STETHOSCOPE),
             ],
             'php:basic' => [
                 'label' => 'PHP: Základní info',
                 'desc' => 'Verze PHP, SAPI, uživatel a webová binárka.',
                 'type' => 'internal',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('info-circle'),
+                'icon' => FilamentIcon::get(AppIcon::INFO),
             ],
             'php:ini' => [
                 'label' => 'PHP: Konfigurace (INI)',
                 'desc' => 'Limity a omezení PHP (disable_functions, open_basedir).',
                 'type' => 'internal',
                 'color' => 'info',
-                'icon' => FilamentIcon::get('sliders'),
+                'icon' => FilamentIcon::get(AppIcon::SLIDERS),
             ],
             'php -v' => [
                 'label' => 'PHP CLI Version',
                 'desc' => 'Zobrazí verzi PHP v systémovém shellu.',
                 'type' => 'shell',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('php', 'fab'),
+                'icon' => FilamentIcon::get(AppIcon::PHP, 'fab'),
             ],
             'node -v' => [
                 'label' => 'Node Version',
                 'desc' => 'Zobrazí verzi Node.js na serveru.',
                 'type' => 'shell',
                 'color' => 'gray',
-                'icon' => FilamentIcon::get('node-js', 'fab'),
+                'icon' => FilamentIcon::get(AppIcon::NODE_JS, 'fab'),
             ],
         ];
 

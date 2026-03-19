@@ -58,15 +58,15 @@ class MutualMatchesCalculator
         // Výpočet delty:
         // Pokud jsme vyhráli vše, chceme bonus. Pokud jsme prohráli vše, chceme postih.
         // Win rate 0.5 = neutrální (0 delta).
-        // Max postih/bonus nastavíme na 100 Elo bodů.
-        // (winRate - 0.5) * 2 * 100
-        $delta = ($winRate - 0.5) * 2 * 100;
+        // Max postih/bonus nastavíme na 50 Elo bodů.
+        // (winRate - 0.5) * 2 * 50
+        $delta = ($winRate - 0.5) * 2 * 50;
 
-        // Přidáme vliv průměrného rozdílu skóre (max 50 Elo bodů)
-        $delta += max(-50, min(50, $avgDiff * 2));
+        // Přidáme vliv průměrného rozdílu skóre (max 30 Elo bodů)
+        $delta += max(-30, min(30, $avgDiff * 1.5));
 
         return [
-            'delta' => max(-150, min(150, $delta)),
+            'delta' => max(-80, min(80, $delta)),
             'wins' => $wins,
             'count' => $count,
             'avg_diff' => $avgDiff,

@@ -6,7 +6,12 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                        <x-filament::icon icon="fal-microchip" class="h-5 w-5" />
+                        @php $microchipIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::MICROCHIP); @endphp
+                        @if($microchipIcon instanceof \Illuminate\Support\HtmlString)
+                            {!! $microchipIcon !!}
+                        @else
+                            <x-filament::icon :icon="$microchipIcon" class="h-5 w-5" />
+                        @endif
                     </div>
                     <h3 class="font-bold text-sm tracking-tight">{{ __('admin/system-console.diagnostics.kpi.artisan_processes') }}</h3>
                 </div>
@@ -62,7 +67,12 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                        <x-filament::icon icon="fal-cloud-arrow-down" class="h-5 w-5" />
+                        @php $cloudIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::STAT_SOURCES); @endphp
+                        @if($cloudIcon instanceof \Illuminate\Support\HtmlString)
+                            {!! $cloudIcon !!}
+                        @else
+                            <x-filament::icon :icon="$cloudIcon" class="h-5 w-5" />
+                        @endif
                     </div>
                     <h3 class="font-bold text-sm tracking-tight">{{ __('admin/system-console.diagnostics.kpi.stuck_imports') }}</h3>
                 </div>
@@ -121,7 +131,12 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-purple-500/10 text-purple-500">
-                        <x-filament::icon icon="fal-broom-wide" class="h-5 w-5" />
+                        @php $broomIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::BROOM_WIDE); @endphp
+                        @if($broomIcon instanceof \Illuminate\Support\HtmlString)
+                            {!! $broomIcon !!}
+                        @else
+                            <x-filament::icon :icon="$broomIcon" class="h-5 w-5" />
+                        @endif
                     </div>
                     <h3 class="font-bold text-sm tracking-tight">{{ __('admin/system-console.diagnostics.kpi.table_cleanup') }}</h3>
                 </div>
@@ -186,7 +201,11 @@
                             >
                                 <div class="flex items-center gap-3 mb-3">
                                     <div class="shrink-0 p-2.5 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-400 group-hover:text-primary-500 group-hover:bg-primary-500/10 transition-all duration-300">
-                                        <x-filament::icon :icon="$config['icon']" class="h-4.5 w-4.5" />
+                                        @if($config['icon'] instanceof \Illuminate\Support\HtmlString)
+                                            {!! $config['icon'] !!}
+                                        @else
+                                            <x-filament::icon :icon="$config['icon']" class="h-4.5 w-4.5" />
+                                        @endif
                                     </div>
                                     <div class="min-w-0">
                                         <h3 class="font-bold text-[13.5px] tracking-tight leading-tight text-gray-900 dark:text-gray-100 truncate">{{ $config['label'] }}</h3>
@@ -334,7 +353,14 @@
                                     <div class="flex items-center justify-center gap-2">
                                         <template x-if="!loading">
                                             <div class="flex items-center gap-2">
-                                                <x-filament::icon icon="fal-play" class="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                                @php $playIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::PLAY); @endphp
+                                                @if($playIcon instanceof \Illuminate\Support\HtmlString)
+                                                    <span class="opacity-70 group-hover:opacity-100 transition-opacity">
+                                                        {!! $playIcon !!}
+                                                    </span>
+                                                @else
+                                                    <x-filament::icon :icon="$playIcon" class="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                                @endif
                                                 <span>{{ __('admin/system-console.ui.run') }}</span>
                                             </div>
                                         </template>
@@ -381,7 +407,14 @@
                             <div class="w-2.5 h-2.5 rounded-full bg-[#27c93f] opacity-80"></div>
                         </div>
                         <div class="flex items-center gap-2 ml-2">
-                            <x-filament::icon icon="fal-terminal" class="h-3 w-3 text-gray-600" />
+                            @php $terminalIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::TERMINAL); @endphp
+                            @if($terminalIcon instanceof \Illuminate\Support\HtmlString)
+                                <span class="text-gray-600">
+                                    {!! $terminalIcon !!}
+                                </span>
+                            @else
+                                <x-filament::icon :icon="$terminalIcon" class="h-3 w-3 text-gray-600" />
+                            @endif
                             <span class="text-[9px] text-gray-600 font-mono uppercase tracking-[0.2em] font-black">System Console</span>
                         </div>
                     </div>
@@ -396,7 +429,12 @@
                                 class="p-2 hover:bg-gray-800 text-gray-500 hover:text-white transition-colors"
                                 title="Zkopírovat vše"
                             >
-                                <x-filament::icon icon="fal-copy" class="h-3.5 w-3.5" />
+                                @php $copyIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::COPY); @endphp
+                                @if($copyIcon instanceof \Illuminate\Support\HtmlString)
+                                    {!! $copyIcon !!}
+                                @else
+                                    <x-filament::icon :icon="$copyIcon" class="h-3.5 w-3.5" />
+                                @endif
                             </button>
                             <div class="w-px bg-gray-800"></div>
                             <button
@@ -405,7 +443,12 @@
                                 class="p-2 hover:bg-gray-800 text-gray-500 hover:text-red-400 transition-colors"
                                 title="Vymazat konzoli"
                             >
-                                <x-filament::icon icon="fal-eraser" class="h-3.5 w-3.5" />
+                                @php $eraserIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::ERASER); @endphp
+                                @if($eraserIcon instanceof \Illuminate\Support\HtmlString)
+                                    {!! $eraserIcon !!}
+                                @else
+                                    <x-filament::icon :icon="$eraserIcon" class="h-3.5 w-3.5" />
+                                @endif
                             </button>
                         </div>
                     </div>
@@ -419,7 +462,14 @@
                 >
                     @if(empty($output))
                         <div class="flex flex-col items-center justify-center h-[400px] text-gray-700 select-none">
-                            <x-filament::icon icon="fal-terminal" class="h-12 w-12 mb-6 opacity-10" />
+                            @php $bigTerminalIcon = \App\Support\FilamentIcon::get(\App\Support\Icons\AppIcon::TERMINAL); @endphp
+                            @if($bigTerminalIcon instanceof \Illuminate\Support\HtmlString)
+                                <div class="h-12 w-12 mb-6 opacity-10 text-4xl flex items-center justify-center">
+                                    {!! $bigTerminalIcon !!}
+                                </div>
+                            @else
+                                <x-filament::icon :icon="$bigTerminalIcon" class="h-12 w-12 mb-6 opacity-10" />
+                            @endif
                             <span class="italic text-[11px] font-medium opacity-30 tracking-tight">Kbelští sokoli System Console [v1.0.0]</span>
                             <div class="mt-8 flex gap-2 items-center opacity-30 text-[11px]">
                                 <span class="px-2 py-0.5 rounded border border-gray-800 font-mono italic">admin@kbelsti-sokoli:~$</span>

@@ -44,6 +44,28 @@ enum AppIcon: string
     case GAUGE = 'gauge-high';
     case BUG = 'bug';
     case BOLT = 'bolt';
+    case MICROCHIP = 'microchip';
+    case BROOM_WIDE = 'broom-wide';
+    case DATABASE = 'database';
+    case ROCKET = 'rocket';
+    case HAMMER = 'hammer';
+    case STETHOSCOPE = 'stethoscope';
+    case GEARS = 'gears';
+    case ARCHIVE = 'box-archive';
+    case BELL = 'bell';
+    case UNDO = 'undo';
+    case SEEDLING = 'seedling';
+    case ROUTE = 'route';
+    case LINK = 'link';
+    case WRENCH = 'wrench';
+    case PACKAGE = 'box-open';
+    case BRANCH = 'code-branch';
+    case SLIDERS = 'sliders';
+    case PHP = 'php';
+    case NODE_JS = 'node-js';
+    case LOGIN = 'right-to-bracket';
+    case LOGOUT = 'right-from-bracket';
+    case WARNING = 'circle-exclamation';
     case TRASH_CAN_ARROW_UP = 'trash-can-arrow-up';
 
     // --- UI Akce a Stavy ---
@@ -64,7 +86,9 @@ enum AppIcon: string
     case UPLOAD = 'file-arrow-up';
     case TRASH = 'trash';
     case ERASER = 'eraser';
+    case DOWNLOAD = 'download';
     case COPY = 'copy';
+    case PLAY = 'play';
     case CODE = 'code';
     case TERMINAL = 'terminal';
     case PHOTO_FILM = 'photo-film';

@@ -116,6 +116,13 @@ return [
                 ],
             ],
         ],
+        'stats_predictions_recompute' => [
+            'label' => 'Statistiky: Předpovědi (Přepočet)',
+            'desc' => 'Přepočítá pravděpodobnosti výsledků pro nastávající zápasy.',
+            'flags' => [
+                '--all' => 'Přepočítat i minulost (všechny zápasy)',
+            ],
+        ],
         'system_cleanup' => [
             'label' => 'Systém: Údržba',
             'desc' => 'Maže staré systémové protokoly (cron logy) starší než 30 dní.',
