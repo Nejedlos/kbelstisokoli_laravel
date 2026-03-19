@@ -835,14 +835,14 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         }
 
         $candidates = $queryBuilder->where(function ($w) use ($q, $words) {
-            $w->whereRaw('LOWER(title) LIKE ?', ['%'.$q.'%'])
-                ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$q.'%'])
-                ->orWhereRaw('LOWER(keywords) LIKE ?', ['%'.$q.'%']);
+            $w->where('title', 'LIKE', '%'.$q.'%')
+                ->orWhere('content', 'LIKE', '%'.$q.'%')
+                ->orWhere('keywords', 'LIKE', '%'.$q.'%');
 
             // Fallback na jednotlivá slova pro lepší match v přirozeném jazyce
             foreach ($words as $word) {
-                $w->orWhereRaw('LOWER(title) LIKE ?', ['%'.$word.'%'])
-                    ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$word.'%']);
+                $w->orWhere('title', 'LIKE', '%'.$word.'%')
+                    ->orWhere('content', 'LIKE', '%'.$word.'%');
             }
         })
             ->limit(100)

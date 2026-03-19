@@ -62,8 +62,8 @@ class SyncMatchCommand extends Command
         $match = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
             ->where(function ($q) use ($matchExternalId) {
-                $q->where('metadata', 'LIKE', '%"external_id":"' . $matchExternalId . '"%')
-                  ->orWhere('metadata', 'LIKE', '%"season_external_match_id":"' . $matchExternalId . '"%');
+                $q->where('metadata->external_id', $matchExternalId)
+                  ->orWhere('metadata->season_external_match_id', $matchExternalId);
             })
             ->first();
 

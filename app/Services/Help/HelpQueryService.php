@@ -77,14 +77,14 @@ class HelpQueryService
     {
         if ($this->section === 'admin') {
             $query->where(function ($q) {
-                $q->where('metadata', 'LIKE', '%"section":"admin"%')
-                    ->orWhere('metadata', 'LIKE', '%"section":"both"%');
+                $q->where('metadata->section', 'admin')
+                    ->orWhere('metadata->section', 'both');
             });
         } elseif ($this->section === 'member') {
             $query->where(function ($q) {
-                $q->where('metadata', 'LIKE', '%"section":"member"%')
-                    ->orWhere('metadata', 'LIKE', '%"section":"both"%')
-                    ->orWhere('metadata', 'NOT LIKE', '%"section":%'); // Default je member
+                $q->where('metadata->section', 'member')
+                    ->orWhere('metadata->section', 'both')
+                    ->orWhereNull('metadata->section'); // Default je member
             });
         }
 
@@ -114,12 +114,12 @@ class HelpQueryService
                     })
                     ->where(function ($q) use ($section) {
                         if ($section === 'admin') {
-                            $q->where('help_articles.metadata', 'LIKE', '%"section":"admin"%')
-                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%');
+                            $q->where('help_articles.metadata->section', 'admin')
+                              ->orWhere('help_articles.metadata->section', 'both');
                         } elseif ($section === 'member') {
-                            $q->where('help_articles.metadata', 'LIKE', '%"section":"member"%')
-                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%')
-                              ->orWhere('help_articles.metadata', 'NOT LIKE', '%"section":%');
+                            $q->where('help_articles.metadata->section', 'member')
+                              ->orWhere('help_articles.metadata->section', 'both')
+                              ->orWhereNull('help_articles.metadata->section');
                         }
                     });
             });
@@ -131,8 +131,7 @@ class HelpQueryService
             $query->where(function ($q) use ($filteringRoles) {
                 $q->whereNull('audience_roles');
                 foreach ($filteringRoles as $role) {
-                    // Pouze LIKE kvůli kompatibilitě MariaDB na hostingu
-                    $q->orWhere('audience_roles', 'LIKE', '%"' . $role . '"%');
+                    $q->orWhereJsonContains('audience_roles', $role);
                 }
             });
         }

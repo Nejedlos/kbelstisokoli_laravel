@@ -24,10 +24,9 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
                   ->orWhere('type', 'like', 'documentation.%');
             })
             ->where(function ($q) use ($query) {
-                $queryLower = mb_strtolower($query);
-                $q->whereRaw('LOWER(title) LIKE ?', ["%{$queryLower}%"])
-                    ->orWhereRaw('LOWER(content) LIKE ?', ["%{$queryLower}%"])
-                    ->orWhereRaw('LOWER(keywords) LIKE ?', ["%{$queryLower}%"]);
+                $q->where('title', 'LIKE', "%{$query}%")
+                    ->orWhere('content', 'LIKE', "%{$query}%")
+                    ->orWhere('keywords', 'LIKE', "%{$query}%");
             })
             ->orderBy('title')
             ->limit(10)

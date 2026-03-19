@@ -663,7 +663,7 @@ class DebugOperations extends Page
                 })
                 ->where(function ($q) {
                     $q->whereNull('external_entity_mappings.internal_id')
-                        ->orWhere('users.metadata', 'LIKE', '%"is_ghost":true%');
+                        ->orWhere('users.metadata->is_ghost', true);
                 })
                 ->count();
 
@@ -697,7 +697,7 @@ class DebugOperations extends Page
             ->where('entity_type', 'player')
             ->count();
 
-        $syncedPlayers = \App\Models\PlayerProfile::where('metadata', 'LIKE', '%"last_sync_at":%')->count();
+        $syncedPlayers = \App\Models\PlayerProfile::whereNotNull('metadata->last_sync_at')->count();
 
         $lastSync = ExternalImportRun::where('run_type', 'player_detail')
             ->where('status', 'success')
@@ -831,7 +831,7 @@ class DebugOperations extends Page
 
     public function forceMatchSync(string $externalMatchId): void
     {
-        $match = BasketballMatch::where('metadata', 'LIKE', '%"external_id":"'.$externalMatchId.'"%')->first();
+        $match = BasketballMatch::where('metadata->external_id', $externalMatchId)->first();
 
         if (! $match) {
             Notification::make()->title('Zápas s externím ID '.$externalMatchId.' nebyl nalezen.')->danger()->send();

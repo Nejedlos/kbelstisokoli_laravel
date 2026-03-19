@@ -267,7 +267,8 @@ class PlayerStatsService
         $internal = $query->get();
 
         if ($internal->isNotEmpty()) {
-            return $internal->map(function ($row) {
+            // Seskupíme podle basketball_match_id, abychom eliminovali případné duplicity z joinu nebo chybných dat
+            return $internal->unique('basketball_match_id')->map(function ($row) {
                 $values = $row->values;
                 // Zajistíme přítomnost klíče efficiency pro grafy.
                 // Pokud chybí, pokusíme se ji vypočítat z dostupných metrik.
@@ -323,7 +324,13 @@ class PlayerStatsService
 
         // Eliminace duplicit: Pokud již máme pro stejný externí zápas interní data (StatisticRow),
         // externí záznam přeskočíme, abychom ho v grafu neměli 2x.
-        $internalExternalIds = $internal->pluck('match.metadata.external_id')->filter()->toArray();
+        $internalExternalIds = [];
+        if ($internal->isNotEmpty()) {
+            $internalExternalIds = $internal->map(function ($row) {
+                return (string)($row->match?->metadata['external_id'] ?? '');
+            })->filter()->toArray();
+        }
+
         if (!empty($internalExternalIds)) {
             $results = $results->filter(function ($match) use ($internalExternalIds) {
                 return !in_array((string)($match->external_match_id), $internalExternalIds);
@@ -573,7 +580,7 @@ class PlayerStatsService
             $internalQuery->where('team_id', $teamId);
         }
 
-        $internalRows = $internalQuery->get();
+        $internalRows = $internalQuery->get()->unique('basketball_match_id');
 
         if ($internalRows->isNotEmpty()) {
             return $this->aggregateFromStatisticRows($internalRows);
@@ -607,7 +614,9 @@ class PlayerStatsService
             });
         }
 
-        $externalMatches = $externalQuery->get();
+        $externalMatches = $externalQuery->get()->unique(function ($m) {
+            return $m->basketball_match_id ?: ($m->external_match_id ?: $m->id);
+        });
 
         // Filtrace v PHP (kvůli staré DB na produkci)
         if ($teamId && $externalMatches->isNotEmpty()) {

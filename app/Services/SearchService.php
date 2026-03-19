@@ -35,9 +35,9 @@ class SearchService
             $queryBuilder->whereRaw('MATCH(title, content) AGAINST(? IN NATURAL LANGUAGE MODE)', [$q]);
         } else {
             $queryBuilder->where(function ($w) use ($q) {
-                $w->whereRaw('LOWER(title) LIKE ?', ['%'.$q.'%'])
-                    ->orWhereRaw('LOWER(content) LIKE ?', ['%'.$q.'%'])
-                    ->orWhereRaw('LOWER(keywords) LIKE ?', ['%'.$q.'%']);
+                $w->where('title', 'LIKE', '%'.$q.'%')
+                    ->orWhere('content', 'LIKE', '%'.$q.'%')
+                    ->orWhere('keywords', 'LIKE', '%'.$q.'%');
             });
         }
 

@@ -643,15 +643,15 @@ class PlayerSyncService
         $venue = $this->ensureVenue($venueName);
 
         // 4. Najdeme nebo vytvoříme BasketballMatch
-        // Na Webglobe nepodporujeme JSON query, ale LIKE na metadata sloupec funguje jako fallback
+        // Vyhledávání zápasu podle externího ID v JSON metadatech
         $match = null;
         $extMatchId = (string) $extMatch->external_match_id;
 
         if ($extMatchId) {
             $match = BasketballMatch::where('season_id', $season->id)
                 ->where(function ($q) use ($extMatchId) {
-                    $q->where('metadata', 'LIKE', '%"external_id":"' . $extMatchId . '"%')
-                      ->orWhere('metadata', 'LIKE', '%"external_match_id":"' . $extMatchId . '"%');
+                    $q->where('metadata->external_id', $extMatchId)
+                      ->orWhere('metadata->external_match_id', $extMatchId);
                 })
                 ->first();
         }

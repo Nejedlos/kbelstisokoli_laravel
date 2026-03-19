@@ -34,7 +34,9 @@ class PostsTable
                     ->label('Kategorie')
                     ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
                         return $query->whereHas('category', function ($q) use ($search) {
-                            $q->where('name', 'LIKE', "%{$search}%");
+                            $locale = app()->getLocale();
+
+                            return $q->where("name->{$locale}", 'LIKE', "%{$search}%");
                         });
                     }),
 

@@ -50,8 +50,7 @@ class StatisticSyncService
         $query = StatisticRow::where($attributes);
 
         if ($contentHash) {
-            // LIKE pro kompatibilitu se staršími DB bez JSON funkcí
-            $query->where('source_metadata', 'like', '%"content_hash":"' . (string) $contentHash . '"%');
+            $query->where('source_metadata->content_hash', (string) $contentHash);
         }
 
         $statRow = $query->first();

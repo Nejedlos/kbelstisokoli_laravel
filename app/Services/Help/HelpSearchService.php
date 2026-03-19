@@ -74,33 +74,32 @@ class HelpSearchService
         $cacheKey = "help_search_{$section}_{$rolesHash}_{$locale}_" . md5($query) . "_{$limit}";
 
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($query, $limit, $locale, $filteringRoles) {
-            // Jednoduchý relevance ranking pomocí SQL (funguje v SQLite i MySQL)
+            // Relevance ranking pomocí SQL (nyní využíváme JSON vyhledávání)
             // Váhy: Title (10), Keywords (8), Purpose (5), Content (3)
-            // POZOR: Na produkci (Webglobe) nelze použít JSON_EXTRACT, proto používáme prostý LIKE na celý sloupec.
             return \DB::table('help_articles')
                 ->select(['id', 'slug', 'title', 'excerpt', 'metadata', 'audience_roles', 'is_featured', 'content', 'search_keywords'])
                 ->selectRaw("
-                    (CASE WHEN title LIKE ? THEN 10 ELSE 0 END +
-                     CASE WHEN search_keywords LIKE ? THEN 8 ELSE 0 END +
-                     CASE WHEN metadata LIKE ? THEN 5 ELSE 0 END +
-                     CASE WHEN content LIKE ? THEN 3 ELSE 0 END)
+                    (CASE WHEN title->>'$." . $locale . "' LIKE ? THEN 10 ELSE 0 END +
+                     CASE WHEN search_keywords->>'$." . $locale . "' LIKE ? THEN 8 ELSE 0 END +
+                     CASE WHEN metadata->>'$." . $locale . ".purpose' LIKE ? THEN 5 ELSE 0 END +
+                     CASE WHEN content->>'$." . $locale . "' LIKE ? THEN 3 ELSE 0 END)
                     AS relevance
                 ", [
-                    "%" . mb_strtolower($query) . "%",
-                    "%" . mb_strtolower($query) . "%",
-                    "%" . mb_strtolower($query) . "%",
-                    "%" . mb_strtolower($query) . "%",
+                    "%" . $query . "%",
+                    "%" . $query . "%",
+                    "%" . $query . "%",
+                    "%" . $query . "%",
                 ])
                 ->where('is_published', true)
                 ->where(function ($q) {
                     $q->whereNull('published_at')->orWhere('published_at', '<=', now());
                 })
-                ->where(function ($q) use ($query) {
-                    $term = "%" . mb_strtolower($query) . "%";
-                    $q->where('title', 'LIKE', $term)
-                        ->orWhere('search_keywords', 'LIKE', $term)
-                        ->orWhere('metadata', 'LIKE', $term)
-                        ->orWhere('content', 'LIKE', $term);
+                ->where(function ($q) use ($query, $locale) {
+                    $term = "%" . $query . "%";
+                    $q->where("title->{$locale}", 'LIKE', $term)
+                        ->orWhere("search_keywords->{$locale}", 'LIKE', $term)
+                        ->orWhere("metadata->{$locale}->purpose", 'LIKE', $term)
+                        ->orWhere("content->{$locale}", 'LIKE', $term);
                 })
                 ->where(function ($q) {
                     $this->applySectionFilter($q);
@@ -184,14 +183,14 @@ class HelpSearchService
 
         if ($this->section === 'admin') {
             $query->where(function ($q) {
-                $q->where('metadata', 'LIKE', '%"section":"admin"%')
-                    ->orWhere('metadata', 'LIKE', '%"section":"both"%');
+                $q->where('metadata->section', 'admin')
+                    ->orWhere('metadata->section', 'both');
             });
         } elseif ($this->section === 'member') {
             $query->where(function ($q) {
-                $q->where('metadata', 'LIKE', '%"section":"member"%')
-                    ->orWhere('metadata', 'LIKE', '%"section":"both"%')
-                    ->orWhere('metadata', 'NOT LIKE', '%"section":%'); // Default je member
+                $q->where('metadata->section', 'member')
+                    ->orWhere('metadata->section', 'both')
+                    ->orWhereNull('metadata->section'); // Default je member
             });
         }
 

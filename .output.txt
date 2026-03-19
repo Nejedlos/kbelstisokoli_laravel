@@ -1,215 +1,663 @@
-02-vyvoj-a-standardy    cs                      help
-04-navody               en                      help-rebuild
-docs/02-vyvoj-a-standardy:
-06-excesivni-synchronizace-dat.md       07-opravy-synchronizace-statistik.md
-06-screenshot-pipeline.md               08-lokalni-vyvoj-a-vykon.md
-docs/04-navody:
-04-tabulky-soutezi.md
-docs/cs:
-01-general              04-modules              07-manuals
-02-development          05-ai                   index.md
-03-administration       06-ops
-docs/cs/01-general:
-01-uvod.md                      04-konfigurace.md
-02-architektura.md              05-lokalizace.md
-03-struktura-projektu.md        06-nazvoslovi-tymu.md
-docs/cs/02-development:
-01-sprava-assetu.md                     10-error-reporting.md
-02-font-awesome.md                      10-errors-a-empty-states.md
-03-filament-icons.md                    11-responzivita.md
-04-loading-stavy.md                     12-performance-a-cache.md
-05-globalni-loader.md                   13-optimalizace-vykonu.md
-06-seedovani-dat.md                     14-seo-a-metadata.md
-07-idempotentni-migrace.md              15-json-sloupce-a-kompatibilita.md
-08-lokalizovane-radkovani.md            16-standardy-emailu.md
-09-antispamova-ochrana.md
-docs/cs/03-administration:
-01-auth-a-permissions.md        06-auth-ui.md
-01-zaklady-filamentu.md         06-dashboardy-obecne.md
-02-2fa-a-session.md             07-admin-dashboard.md
-02-lokalizace-menu.md           08-member-dashboard.md
-03-audit-a-redirecty.md         09-branding-clena.md
-03-prioritizace-menu.md         10-zpetna-vazba.md
-04-audit-log.md                 37-dokumentace-v-adminu.md
-04-search-a-navigace.md         email
-05-search-facelift.md           search.md
-05-system-a-redirecty.md
-docs/cs/03-administration/email:
-spf-dmarc.md
-docs/cs/04-modules:
-01-users-profiles       03-economy-module       05-external-data
-02-sports-module        04-web-cms
-docs/cs/04-modules/01-users-profiles:
-01-uzivatele.md                 15-dashboard-nudges.md
-12-synchronizace-avataru.md     16-slucovani-uzivatelu.md
-docs/cs/04-modules/02-sports-module:
-02-sportovni-modul.md                   04-klubove-souteze.md
-03-statistiky.md                        33-statistiky-ux-a-vizualizace.md
-docs/cs/04-modules/03-economy-module:
-04-ekonomicky-modul.md          12-ekonomika-fresh-sync.md
-docs/cs/04-modules/04-web-cms:
-05-media.md                             11-pozadavky-na-fotografie.md
-06-komunikace.md                        12-fotopool.md
-07-frontend-a-cms.md                    12-kontakni-formular-a-antispam.md
-08-homepage.md                          18-navrh-hero-obrazku.md
-09-vylepseni-homepage.md                19-sponzori-a-partneri.md
-10-footer.md                            36-partneri-a-loga.md
-docs/cs/04-modules/05-external-data:
-02-cbf-czbasketball
-10-extraktory-statistik.md
-11-back-to-top.md
-12-davkovy-import-fotografii.md
-12-optimalizace-nahravani-fotografii.md
-14-branding-seeder-a-nastaveni.md
-16-externi-statistiky-a-importy.md
-17-detailni-statistiky-hracu.md
-17-external-czbasketball-audit.md
-17-tymovy-branding.md
-18-external-mapping-season-aware.md
-19-external-import-runs.md
-20-external-fetcher-czbasketball.md
-21-external-extractors-czbasketball.md
-22-roster-synchronization.md
-23-external-ai-fallback.md
-24-external-persistence-and-aggregations.md
-25-external-sync-orchestration.md
-26-external-scheduler.md
-27-external-admin-tools.md
-28-external-stats-visuals.md
-29-external-robustness.md
-30-legacy-import-notes.md
-30-legacy-stats-import.md
-31-debug-panel.md
-32-cli-prikazy.md
-34-season-discover-backfill.md
-35-prod-rollout.md
-migration
-docs/cs/04-modules/05-external-data/02-cbf-czbasketball:
-ai-clipping-czbasketball.md     czbasketball-dom-rules.md
-ai-cnh-clipping.md
-docs/cs/04-modules/05-external-data/migration:
-01-analyza-stare-databaze.md    03-popis-seederu.md
-02-strategie-migrace.md         04-normalizace-sezon.md
-docs/cs/05-ai:
-01-ai-vyhledavani.md    03-ai-pouziti.md
-02-ai-nastaveni.md      04-predikce-zapasu.md
-docs/cs/06-ops:
-01-nasazeni.md                  05-nasazeni-synchronizace.md
-02-optimalizace-vykonu.md       06-audit-migrace-json-mysql8.md
-02-reseni-duplicit-zapasu.md    changes
-02-reseni-problemu.md           deployment
-03-hlaseni-chyb.md              fixes
-04-planovane-ulohy.md           ops
-docs/cs/06-ops/changes:
-2026-02-26-fix-controller-authorization.md
-2026-02-26-multiselect-teams-for-events.md
-2026-02-27-database-json-compatibility.md
-2026-02-27-fouc-icons-fix.md
-2026-02-27-matches-data-fix.md
-2026-02-27-matches-filters-enhancement.md
-2026-02-27-public-uploads-disk.md
-2026-02-28-fix-livewire-upload-timeout.md
-2026-02-28-member-admin-performance.md
-2026-02-28-performance-fix.md
-2026-02-28-two-factor-auth-fix.md
-2026-02-attendance-logic-refinement.md
-2026-02-homepage-optimization.md
-2026-02-impersonation-and-roles.md
-2026-02-navigation-reorganization.md
-2026-02-seo-admin-links.md
-2026-03-02-fix-avatar-payload-too-large.md
-2026-03-02-player-profile-translations.md
-2026-03-16-fix-competition-standings-json-type.md
-2026-03-19-club-event-public-default-false.md
-2026-03-attendance-ui-improvement.md
-2026-03-branding-contact-separation.md
-2026-03-performance-optimization.md
-docs/cs/06-ops/deployment:
-public-root.md
-docs/cs/06-ops/fixes:
-class-pail-service-provider-not-found.md
-fontawesome-icons-not-visible-in-admin.md
-laravel-subdomain-bootstrap-app-compatibility.md
-relative-links-in-user-menu.md
-vite-manifest-not-found-robust-patching.md
-vite-manifest-not-found-subdomain.md
-docs/cs/06-ops/ops:
-error-mail-throttle.md
-docs/cs/07-manuals:
-01-renderovani-html.md                  qa-howto.md
-02-detekce-404-a-presmerovani.md        qa-master-plan.md
-02-seo-manual.md                        qa-report.md
-prod-rollout-report.md                  seo
-docs/cs/07-manuals/seo:
-link-building.md
-docs/en:
-01-general      index.md
-docs/en/01-general:
-01-intro.md
-docs/help:
-cs
-docs/help/cs:
-01-sportovni-agenda     03-ekonomika            05-obsah-a-media
-01-uvod                 03-lide-a-clenove       05-system
-02-lide-a-clenove       04-ekonomika            08-system-a-udrzba
-02-sportovni-agenda     04-obsah-a-media        99-sprava-napovedy.md
-docs/help/cs/01-sportovni-agenda:
-01-zapas.md
-docs/help/cs/01-uvod:
-README.md
-docs/help/cs/02-lide-a-clenove:
-01-pridani-uzivatele.md
-docs/help/cs/02-sportovni-agenda:
-01-tymy.md      02-zapasy.md    03-treninky.md  README.md
-docs/help/cs/03-ekonomika:
-01-platby.md
-docs/help/cs/03-lide-a-clenove:
-01-uzivatele.md README.md
-docs/help/cs/04-ekonomika:
-02-platby.md    README.md
-docs/help/cs/04-obsah-a-media:
-01-clanky.md
-docs/help/cs/05-obsah-a-media:
-01-clanky.md    README.md
-docs/help/cs/05-system:
-01-nastaveni-klubu.md
-docs/help/cs/08-system-a-udrzba:
-01-role-a-opravneni.md  README.md
-docs/help-rebuild:
-01-audit-soucasneho-systemu.md          14-vyhledavani.md
-02-cilova-architektura.md               15-role-based-help.md
-03-informacni-architektura.md           16-navigace-a-breadcrumbs.md
-04-databazove-schema.md                 17-admin-sprava-help-obsahu.md
-05-finalni-model-a-seed-strategie.md    18-import-ze-stareho-markdownu.md
-06-migrace-poznamky.md                  19-feature-flag-a-prepnuti.md
-07-modely-a-vztahy.md                   20-cleanup-stareho-systemu.md
-07-opravy-a-stabilizace.md              21-testy-a-overeni.md
-08-service-layer.md                     22-performance-a-cache.md
-09-seed-infrastruktura.md               23-accessibility-a-citelnost.md
-10-obsahovy-standard-help-stranky.md    25-backlog-tvorby-obsahu.md
-11-fix-memory-admin-help.md             26-metodika-psani-jedne-help-stranky.md
-11-ux-navrh-help-centra.md              27-checklist-analyzy-sekce.md
-12-filament-help-page.md                28-workflow-pro-obsahovou-batch.md
-12-vysledek-ux-a-komponent.md           content-batches
-13-vizualni-system-help-centra.md
-docs/help-rebuild/content-batches:
-01-uvod-onboarding      04-finance              07-pokrocila-sprava
-02-lide-a-clenove       05-obsah-a-web
-03-sportovni-agenda     06-system-a-scenare
-docs/help-rebuild/content-batches/01-uvod-onboarding:
-01-ui-audit.md                  03-quick-actions-a-faq.md
-02-navrh-clanku.md              04-finální-obsah.md
-docs/help-rebuild/content-batches/02-lide-a-clenove:
-01-ui-audit.md          03-mapa-castych-akci.md
-02-navrh-clanku.md      04-finalni-obsah.md
-docs/help-rebuild/content-batches/03-sportovni-agenda:
-01-ui-audit.md          02-navrh-clanku.md      04-finalni-obsah.md
-docs/help-rebuild/content-batches/04-finance:
-01-ui-audit.md          03-mapa-castych-akci.md
-02-navrh-clanku.md      04-finalni-obsah.md
-docs/help-rebuild/content-batches/05-obsah-a-web:
-01-ui-audit.md          02-navrh-clanku.md      04-finalni-obsah.md
-docs/help-rebuild/content-batches/06-system-a-scenare:
-01-ui-audit.md          02-navrh-clanku.md      04-finalni-obsah.md
-docs/help-rebuild/content-batches/07-pokrocila-sprava:
-01-ui-audit.md          02-navrh-clanku.md      04-finalni-obsah.md
+Array
+(
+    [0] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => dochazka
+        )
+    [1] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => dochazka2
+        )
+    [2] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => dochazka_zaloha
+        )
+    [3] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => foto_fotky
+        )
+    [4] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => foto_galerie
+        )
+    [5] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => foto_komentare
+        )
+    [6] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => foto_poslkom
+        )
+    [7] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => foto_skupiny
+        )
+    [8] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => foto_stat
+        )
+    [9] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_ai_chunks
+        )
+    [10] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_ai_documents
+        )
+    [11] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_ai_request_logs
+        )
+    [12] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_ai_settings
+        )
+    [13] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_announcements
+        )
+    [14] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_attendances
+        )
+    [15] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_audit_logs
+        )
+    [16] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_basketball_match_team
+        )
+    [17] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_cache
+        )
+    [18] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_cache_locks
+        )
+    [19] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_charge_payment_allocations
+        )
+    [20] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_club_competition_entries
+        )
+    [21] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_club_competition_entry_team
+        )
+    [22] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_club_competitions
+        )
+    [23] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_club_event_team
+        )
+    [24] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_club_events
+        )
+    [25] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_coach_team
+        )
+    [26] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_competition_standings
+        )
+    [27] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_cron_logs
+        )
+    [28] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_cron_tasks
+        )
+    [29] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_entity_mappings
+        )
+    [30] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_import_logs
+        )
+    [31] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_import_runs
+        )
+    [32] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_player_matches
+        )
+    [33] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_player_stats
+        )
+    [34] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_stat_sources
+        )
+    [35] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_team_mappings
+        )
+    [36] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_external_team_season_configs
+        )
+    [37] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_failed_jobs
+        )
+    [38] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_feedback_reports
+        )
+    [39] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_finance_charges
+        )
+    [40] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_finance_payments
+        )
+    [41] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_financial_tariffs
+        )
+    [42] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_fine_templates
+        )
+    [43] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_galleries
+        )
+    [44] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_gallery_media
+        )
+    [45] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_help_article_related
+        )
+    [46] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_help_articles
+        )
+    [47] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_help_categories
+        )
+    [48] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_help_faqs
+        )
+    [49] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_help_quick_actions
+        )
+    [50] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_job_batches
+        )
+    [51] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_jobs
+        )
+    [52] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_leads
+        )
+    [53] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_legacy_import_batches
+        )
+    [54] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_legacy_import_files
+        )
+    [55] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_match_predictions
+        )
+    [56] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_matches
+        )
+    [57] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_media
+        )
+    [58] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_media_assets
+        )
+    [59] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_menu_items
+        )
+    [60] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_menus
+        )
+    [61] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_migrations
+        )
+    [62] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_model_has_permissions
+        )
+    [63] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_model_has_roles
+        )
+    [64] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_not_found_logs
+        )
+    [65] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_notifications
+        )
+    [66] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_opponent_merge_suggestions
+        )
+    [67] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_opponents
+        )
+    [68] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_page_blocks
+        )
+    [69] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_pages
+        )
+    [70] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_partners
+        )
+    [71] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_password_reset_tokens
+        )
+    [72] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_performance_test_results
+        )
+    [73] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_permissions
+        )
+    [74] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_personal_access_tokens
+        )
+    [75] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_photo_pool_media_asset
+        )
+    [76] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_photo_pool_team
+        )
+    [77] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_photo_pools
+        )
+    [78] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_player_profile_team
+        )
+    [79] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_player_profiles
+        )
+    [80] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_post_categories
+        )
+    [81] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_posts
+        )
+    [82] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_redirects
+        )
+    [83] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_role_has_permissions
+        )
+    [84] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_roles
+        )
+    [85] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_seasons
+        )
+    [86] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_seo_metadatas
+        )
+    [87] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_sessions
+        )
+    [88] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_settings
+        )
+    [89] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_statistic_row_team
+        )
+    [90] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_statistic_rows
+        )
+    [91] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_statistic_sets
+        )
+    [92] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_team_elo_ratings
+        )
+    [93] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_team_training
+        )
+    [94] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_teams
+        )
+    [95] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_telescope_entries
+        )
+    [96] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_telescope_entries_tags
+        )
+    [97] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_telescope_monitoring
+        )
+    [98] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_trainings
+        )
+    [99] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_user_consents
+        )
+    [100] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_user_relationships
+        )
+    [101] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_user_season_configs
+        )
+    [102] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_users
+        )
+    [103] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => new_venues
+        )
+    [104] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => registrace
+        )
+    [105] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => registrace2
+        )
+    [106] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => registrace_zaloha
+        )
+    [107] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_ankety
+        )
+    [108] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_backlinks
+        )
+    [109] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_clanky
+        )
+    [110] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_clanky_menu
+        )
+    [111] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_dokumenty
+        )
+    [112] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_hledana_slova
+        )
+    [113] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_imap_log
+        )
+    [114] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_kategorie
+        )
+    [115] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_komentare
+        )
+    [116] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_komentare_otazky
+        )
+    [117] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_komunikace
+        )
+    [118] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_logovani_sql
+        )
+    [119] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_menu
+        )
+    [120] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_nastaveni
+        )
+    [121] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_novinky
+        )
+    [122] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_online
+        )
+    [123] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_platby
+        )
+    [124] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_platici
+        )
+    [125] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_platici2
+        )
+    [126] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_pokuty
+        )
+    [127] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_poslkom
+        )
+    [128] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_pristupy
+        )
+    [129] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_realna_dochazka
+        )
+    [130] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_reports
+        )
+    [131] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_soupiska
+        )
+    [132] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_spatny_login
+        )
+    [133] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_statistika_textu
+        )
+    [134] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_teamy
+        )
+    [135] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_texty
+        )
+    [136] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_trophy
+        )
+    [137] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_users
+        )
+    [138] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_uziv_sablony
+        )
+    [139] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_vyhledavace
+        )
+    [140] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_vypocty_platby
+        )
+    [141] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_vypocty_pokuty
+        )
+    [142] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => web_vzkazy
+        )
+    [143] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_commentmeta
+        )
+    [144] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_comments
+        )
+    [145] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_e_events
+        )
+    [146] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_e_notes
+        )
+    [147] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_e_notes_users_relations
+        )
+    [148] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_e_submissions
+        )
+    [149] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_e_submissions_actions_log
+        )
+    [150] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_e_submissions_values
+        )
+    [151] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_links
+        )
+    [152] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_options
+        )
+    [153] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_postmeta
+        )
+    [154] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_posts
+        )
+    [155] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_term_relationships
+        )
+    [156] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_term_taxonomy
+        )
+    [157] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_termmeta
+        )
+    [158] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_terms
+        )
+    [159] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_usermeta
+        )
+    [160] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => wp_users
+        )
+    [161] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => zaloha_dochazka
+        )
+    [162] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => zapasy
+        )
+    [163] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => zapasy2
+        )
+    [164] => stdClass Object
+        (
+            [Tables_in_kbelstisokoli] => zapasy_zaloha
+        )
+)
