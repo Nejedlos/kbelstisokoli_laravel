@@ -3,8 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Models\ExternalImportRun;
+use App\Models\Season;
+use App\Models\Team;
+use App\Models\User;
 use App\Support\BinaryHelper;
 use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -267,14 +271,14 @@ class SystemConsole extends Page
         }
 
         // Týmy pro select
-        $teams = \App\Models\Team::orderBy('name')->get();
+        $teams = Team::orderBy('name')->get();
         $teamOptions = ['all' => __('admin/system-console.commands.stats_sync_team.selects.team.all')];
         foreach ($teams as $team) {
             $teamOptions[$team->slug] = $team->name;
         }
 
         // Sezóny pro select
-        $seasons = \App\Models\Season::orderBy('name', 'desc')->get();
+        $seasons = Season::orderBy('name', 'desc')->get();
         $seasonOptions = ['all' => __('admin/system-console.commands.stats_sync_team.selects.season.all')];
         foreach ($seasons as $season) {
             $seasonOptions[$season->name] = $season->name;
@@ -283,7 +287,7 @@ class SystemConsole extends Page
         // Uživatelé pro select (pouze ti s externím mapováním nebo všichni?)
         // Vzhledem k tomu, že stats:sync-players syncuje s cz.basketball, je dobré nabídnout ty, co mají mapping.
         // Ale user_id může být kdokoliv, kdo má profil.
-        $users = \App\Models\User::query()
+        $users = User::query()
             ->orderBy('id', 'desc')
             ->get()
             ->mapWithKeys(fn ($user) => [$user->id => ($user->last_name . ' ' . $user->first_name ?: $user->name) . " (#{$user->id})"])
@@ -407,7 +411,7 @@ class SystemConsole extends Page
                     [
                         'name' => '--team_id',
                         'label' => __('admin/system-console.commands.stats_sync_players.team_filter_label'),
-                        'options' => array_merge(['' => __('admin/system-console.commands.stats_sync_players.all_teams')], \App\Models\Team::orderBy('name')->pluck('name', 'id')->toArray()),
+                        'options' => array_merge(['' => __('admin/system-console.commands.stats_sync_players.all_teams')], Team::orderBy('name')->pluck('name', 'id')->toArray()),
                     ],
                     [
                         'name' => '--user_id',

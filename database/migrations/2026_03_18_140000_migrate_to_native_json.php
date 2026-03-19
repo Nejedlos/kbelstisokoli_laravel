@@ -148,7 +148,7 @@ return new class extends Migration
             if (Schema::hasTable($table)) {
                 Schema::table($table, function (Blueprint $tableGroup) use ($columns) {
                     foreach ($columns as $column) {
-                        $tableGroup->longText($column)->nullable()->change();
+                        $tableGroup->json($column)->nullable()->change();
                     }
                 });
             }
