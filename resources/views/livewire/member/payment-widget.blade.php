@@ -119,13 +119,48 @@
     </div>
 
     <script>
-        function downloadQRCode() {
+        async function downloadQRCode() {
             const img = document.getElementById('qr-code-img');
             if (!img) return;
 
+            const base64Data = img.src;
+            const fileName = 'ks-qr-platba.png';
+
+            // Zkusíme Web Share API pro mobilní zařízení (umožní "Uložit obrázek" do galerie)
+            if (navigator.share && navigator.canShare) {
+                try {
+                    // Synchronní převod base64 na File objekt (kvůli zachování "user activation" v Safari)
+                    const parts = base64Data.split(',');
+                    const mime = parts[0].match(/:(.*?);/)[1];
+                    const bstr = atob(parts[1]);
+                    let n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    while(n--){
+                        u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    const file = new File([u8arr], fileName, { type: mime });
+
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'QR Platba - Kbelští sokoli',
+                        });
+                        return; // Povedlo se přes share sheet
+                    }
+                } catch (error) {
+                    // Pokud uživatel akci zrušil, nebudeme stahovat soubor jako fallback
+                    if (error.name === 'AbortError') {
+                        console.log('Sdílení zrušeno uživatelem');
+                        return;
+                    }
+                    console.error('Chyba při sdílení QR kódu:', error);
+                }
+            }
+
+            // Fallback pro desktop nebo když share není podporován
             const link = document.createElement('a');
-            link.href = img.src;
-            link.download = 'ks-qr-platba.png';
+            link.href = base64Data;
+            link.download = fileName;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
