@@ -186,7 +186,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <div class="flex items-center gap-2 mr-3">
+                    <div class="flex items-center gap-2 mr-3" wire:ignore wire:key="topbar-left-actions">
                         @include("filament.components.language-switch")
                         @include("filament.components.standard-search")
                     </div>
@@ -198,7 +198,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <div class="flex items-center gap-2 ml-2">
+                    <div class="flex items-center gap-2 ml-2" wire:ignore wire:key="topbar-right-actions">
                         @include("filament.components.ai-search")
                         @include("filament.components.impersonate-select")
                     </div>

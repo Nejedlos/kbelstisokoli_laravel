@@ -93,7 +93,7 @@
                                     <td class="px-4 py-4 text-center font-bold text-slate-600 text-sm">{{ $row->gp }}</td>
                                     <td class="px-4 py-4 text-center font-bold text-emerald-600 text-sm">{{ $row->w }}</td>
                                     <td class="px-4 py-4 text-center font-bold text-rose-600 text-sm">{{ $row->l }}</td>
-                                    <td class="px-4 py-4 text-center font-medium text-slate-500 text-xs tracking-tighter">{{ $row->score }}</td>
+                                    <td class="px-4 py-4 text-center font-medium text-slate-500 text-xs tracking-tighter">{{ \App\Support\MatchResultHelper::formatScore($row->score) }}</td>
                                     <td class="px-6 py-4 text-center">
                                         <span class="text-sm font-black text-secondary">{{ $row->points }}</span>
                                     </td>

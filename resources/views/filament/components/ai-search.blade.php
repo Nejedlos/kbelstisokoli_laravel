@@ -1,4 +1,4 @@
-<div x-data="{ searchOpen: false, loading: false }" class="relative flex items-center">
+<div x-data="{ searchOpen: false, loading: false }" class="relative flex items-center" wire:ignore wire:key="ai-search-container">
     <x-loader-basketball x-show="loading" x-cloak class="z-[60]" />
 
     <!-- Desktop Trigger (Pill) -->
@@ -23,8 +23,8 @@
 
     <!-- AI Search Overlay -->
     <div x-show="searchOpen"
-         @click.away="searchOpen = false"
-         @keydown.escape.window="searchOpen = false"
+         @click.outside.stop="searchOpen = false"
+         @keydown.escape.window.stop="searchOpen = false"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -48,6 +48,9 @@
                 <input type="text"
                        name="q"
                        x-ref="searchInput"
+                       @keydown.escape.stop="searchOpen = false"
+                       @click.stop
+                       @mousedown.stop
                        placeholder="{{ __('search.ai_search_placeholder') }}"
                        class="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-xl pl-10 pr-12 py-3 text-sm text-gray-900 dark:text-white focus:border-primary focus:ring-0 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600">
                 <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform shadow-md shadow-primary/20">

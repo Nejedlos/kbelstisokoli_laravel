@@ -90,6 +90,9 @@ Schedule::command('stats:import --queue')->dailyAt('04:30');
 // Čištění duplicit (každý den ve 4:00)
 Schedule::command('stats:cleanup-duplicates')->dailyAt('04:00');
 
+// Synchronizace výchozích týmů členů (každou hodinu)
+Schedule::command('app:sync-member-default-teams')->hourly();
+
 // Měsíční hloubková (excesivní) synchronizace všech historických sezón týmů (1. v měsíci v 1:00)
 Schedule::call(function () {
     $configs = \App\Models\ExternalTeamSeasonConfig::where('is_enabled', true)->get();

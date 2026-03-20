@@ -78,13 +78,16 @@
                 const isBackgroundComponent = [
                     'member.notification-dropdown',
                     'sync-status-bar',
-                    'sync-status-indicator'
+                    'sync-status-indicator',
+                    'App\\Livewire\\SyncStatusBar'
                 ].includes(componentName) || (options.updates && options.updates.some(u => [
                     'member.notification-dropdown',
-                    'sync-status-bar'
+                    'sync-status-bar',
+                    'App\\Livewire\\SyncStatusBar'
                 ].includes(u.name)));
 
-                if (isBackgroundComponent && !isUserAction) {
+                // Background komponenty nikdy nespouštějí globální loader (mají vlastní indikaci)
+                if (isBackgroundComponent) {
                     return;
                 }
 

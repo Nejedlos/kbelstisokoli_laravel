@@ -78,12 +78,14 @@
                         <div class="flex flex-col items-center min-w-[150px]">
                             @if($match->status === 'finished' && ($match->score_home !== null || $match->score_away !== null))
                                 <div @class([
-                                    "text-6xl md:text-8xl font-black tabular-nums tracking-tighter leading-none mb-4",
+                                    "text-6xl md:text-8xl font-black tabular-nums tracking-tighter leading-none mb-4 flex items-center gap-6 md:gap-12",
                                     "text-emerald-400" => $match->is_win,
                                     "text-rose-400" => $match->is_loss,
                                     "text-white" => !$match->is_win && !$match->is_loss,
                                 ])>
-                                    {{ $match->score_home ?? 0 }}<span>:</span>{{ $match->score_away ?? 0 }}
+                                    <span>{{ $match->score_home ?? 0 }}</span>
+                                    <span class="opacity-30">:</span>
+                                    <span>{{ $match->score_away ?? 0 }}</span>
                                 </div>
                                 @if($match->is_win)
                                     <div class="mb-4 px-4 py-1 rounded-full bg-emerald-500 text-white text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-900/20 ring-4 ring-emerald-500/20">

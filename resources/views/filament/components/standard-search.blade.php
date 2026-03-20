@@ -1,4 +1,4 @@
-<div x-data="{ searchOpen: false }" class="relative flex items-center">
+<div x-data="{ searchOpen: false }" class="relative flex items-center" wire:ignore wire:key="standard-search-container">
     <!-- Desktop Trigger (Input-like) -->
     <div class="hidden lg:block relative group min-w-[280px] mr-1">
         <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400 group-hover:text-primary transition-colors">
@@ -20,8 +20,8 @@
 
     <!-- Search Dropdown/Overlay -->
     <div x-show="searchOpen"
-         @click.away="searchOpen = false"
-         @keydown.escape.window="searchOpen = false"
+         @click.outside.stop="searchOpen = false"
+         @keydown.escape.window.stop="searchOpen = false"
          x-init="$watch('searchOpen', value => { if (value) { $nextTick(() => { $el.querySelector('input[type=search]')?.focus() }) } })"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"

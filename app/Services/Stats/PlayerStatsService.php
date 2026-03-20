@@ -74,6 +74,11 @@ class PlayerStatsService
         // Přidáme externí data
         foreach ($externalStats as $row) {
             $seasonLabel = \App\Models\Season::normalizeName($row->season_label);
+
+            if ($seasonLabel === 'Neznámá sezóna') {
+                continue;
+            }
+
             if (! $historyData->has($seasonLabel)) {
                 $historyData->put($seasonLabel, [
                     'season' => $seasonLabel,
@@ -98,6 +103,11 @@ class PlayerStatsService
         // Přidáme interní data (pokud už tam nejsou pro danou sezónu, nebo je sloučíme)
         foreach ($internalStats as $row) {
             $seasonLabel = \App\Models\Season::normalizeName($row->season?->name ?? 'Neznámá sezóna');
+
+            if ($seasonLabel === 'Neznámá sezóna') {
+                continue;
+            }
+
             $values = $row->values;
 
             if (! $historyData->has($seasonLabel)) {

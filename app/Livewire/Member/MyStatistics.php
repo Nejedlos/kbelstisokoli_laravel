@@ -276,7 +276,7 @@ class MyStatistics extends Component
                     $externalStatsQuery->where(function ($q) use ($season) {
                         $q->where('season_label', $season->name)
                             ->orWhere('is_career_total', true);
-                    });
+                    })->where('season_label', '!=', 'Neznámá sezóna');
 
                     $externalMatchesQuery->where(function ($q) use ($season) {
                         // 1. Zápasy spárované s interním zápasem dané sezóny

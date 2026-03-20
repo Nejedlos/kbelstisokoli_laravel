@@ -26,7 +26,7 @@
         let url = '{{ route('admin.impersonate.start', ['userId' => 'USER_ID']) }}';
         window.location.href = url.replace('USER_ID', this.targetUser.id);
     }
-}" class="relative flex items-center">
+}" class="relative flex items-center" wire:ignore wire:key="impersonate-select-container">
 
     <!-- Trigger Button -->
     <button @click="searchOpen = !searchOpen; if(searchOpen) { search(); $nextTick(() => $refs.impersonateInput.focus()) }"
@@ -47,8 +47,8 @@
 
     <!-- Dropdown Overlay -->
     <div x-show="searchOpen"
-         @click.away="searchOpen = false"
-         @keydown.escape.window="searchOpen = false"
+         @click.outside.stop="searchOpen = false"
+         @keydown.escape.window.stop="searchOpen = false"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -65,6 +65,10 @@
                        x-ref="impersonateInput"
                        x-model="query"
                        @input.debounce.300ms="search()"
+                       @keydown.enter.stop.prevent="results.length > 0 && impersonate(results[0].id, results[0].text)"
+                       @keydown.escape.stop="searchOpen = false"
+                       @click.stop
+                       @mousedown.stop
                        placeholder="{{ __('Search') }}..."
                        class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg pl-8 pr-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-red-500/40 outline-none transition-all">
                 <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-gray-400">

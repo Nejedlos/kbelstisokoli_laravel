@@ -87,4 +87,30 @@ class MatchResultHelper
     {
         return (new self())->getResultForTeam($matchData, $teamName);
     }
+
+    /**
+     * Formátuje skóre pro přehlednější zobrazení.
+     * Odstraní tečky (tisícovky) a přidá mezery kolem dvojtečky.
+     */
+    public static function formatScore(string|int|null $score): string
+    {
+        if (is_null($score)) {
+            return '';
+        }
+
+        // Převedeme na string, pokud to není
+        $scoreStr = (string) $score;
+
+        // Odstraníme tečky (tisícovky)
+        $scoreStr = str_replace('.', '', $scoreStr);
+
+        // Pokud obsahuje dvojtečku, přidáme kolem ní mezery (pokud tam už nejsou)
+        if (str_contains($scoreStr, ':')) {
+            $parts = explode(':', $scoreStr);
+            $parts = array_map('trim', $parts);
+            return implode(' : ', $parts);
+        }
+
+        return $scoreStr;
+    }
 }
