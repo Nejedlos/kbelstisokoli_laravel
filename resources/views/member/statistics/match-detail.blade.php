@@ -119,11 +119,11 @@
 
                             {{-- Skóre (Centrální prvek) --}}
                             <div class="flex flex-col items-center group/score shrink-0 z-10 mx-2 md:mx-4">
-                                <div class="relative px-6 py-4 md:px-10 md:py-6 bg-white/10 rounded-[2rem] md:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex items-center gap-4 md:gap-8 transition-all duration-700 group-hover:bg-white/20 backdrop-blur-2xl group-hover:scale-105">
+                                <div class="relative px-6 py-4 md:px-10 md:py-6 bg-white/10 rounded-[2rem] md:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex items-center gap-8 md:gap-16 transition-all duration-700 group-hover:bg-white/20 backdrop-blur-2xl group-hover:scale-105">
                                     <div class="relative text-5xl md:text-7xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_home ?? 0 }}
                                     </div>
-                                    <div class="relative text-2xl md:text-4xl font-black text-white/40 select-none animate-pulse">:</div>
+                                    <div class="relative text-2xl md:text-4xl font-black text-white/40 select-none animate-pulse mx-2 md:mx-4">:</div>
                                     <div class="relative text-5xl md:text-7xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                                         {{ $match->score_away ?? 0 }}
                                     </div>
@@ -559,7 +559,7 @@
                                                     <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto relative z-10">
                                                         <div class="bg-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl shadow-inner border border-gray-100 shrink-0 flex-1 sm:flex-none text-center">
                                                             <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ $res['textColor'] }}">
-                                                                {{ $m['score_home'] }}<span class="mx-0.5 opacity-30">:</span>{{ $m['score_away'] }}
+                                                                {{ $m['score_home'] }}<span class="mx-2 opacity-30">:</span>{{ $m['score_away'] }}
                                                             </span>
                                                         </div>
                                                         @if(!empty($m['external_id']))
@@ -605,7 +605,7 @@
                                                     <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto relative z-10">
                                                         <div class="bg-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl shadow-inner border border-gray-100 shrink-0 flex-1 sm:flex-none text-center">
                                                             <span class="text-lg sm:text-base font-black tabular-nums tracking-tight {{ $res['textColor'] }}">
-                                                                {{ $m['score_home'] }}<span class="mx-0.5 opacity-30">:</span>{{ $m['score_away'] }}
+                                                                {{ $m['score_home'] }}<span class="mx-2 opacity-30">:</span>{{ $m['score_away'] }}
                                                             </span>
                                                         </div>
                                                         @if(!empty($m['external_id']))
@@ -721,11 +721,11 @@
                                     <div class="flex flex-col items-center justify-center p-4 sm:p-3 md:p-4 rounded-[2rem] border-2 {{ $qBg }} transition-all hover:bg-white hover:border-brand-100 hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden">
                                         <div class="absolute top-0 right-0 w-16 h-16 {{ $qDot }} rounded-full -mr-8 -mt-8"></div>
                                         <span class="relative inline-block text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 group-hover:text-brand-500 transition-colors whitespace-nowrap">{{ $loop->iteration }}. {{ __('matches.period') ?? 'čtvrtina' }}</span>
-                                        <div class="relative flex items-center gap-2 md:gap-3">
+                                        <div class="relative flex items-center gap-4 md:gap-6">
                                             <span class="text-3xl md:text-4xl font-black {{ $match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
                                                 {{ $qHome }}
                                             </span>
-                                            <span class="text-lg md:text-xl font-black text-gray-300">:</span>
+                                            <span class="text-lg md:text-xl font-black text-gray-300 mx-2">:</span>
                                             <span class="text-3xl md:text-4xl font-black {{ !$match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
                                                 {{ $qAway }}
                                             </span>

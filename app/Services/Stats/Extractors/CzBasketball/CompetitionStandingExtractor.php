@@ -51,8 +51,8 @@ class CompetitionStandingExtractor implements StatExtractorInterface
             $w = isset($headers['w']) ? trim($cells->eq($headers['w'])->text()) : 0;
             $l = isset($headers['l']) ? trim($cells->eq($headers['l'])->text()) : 0;
 
-            $scorePlus = isset($headers['score_plus']) ? trim($cells->eq($headers['score_plus'])->text()) : '';
-            $scoreMinus = isset($headers['score_minus']) ? trim($cells->eq($headers['score_minus'])->text()) : '';
+            $scorePlus = isset($headers['score_plus']) ? str_replace('.', '', trim($cells->eq($headers['score_plus'])->text())) : '';
+            $scoreMinus = isset($headers['score_minus']) ? str_replace('.', '', trim($cells->eq($headers['score_minus'])->text())) : '';
 
             $score = $scorePlus;
             if ($scoreMinus) {

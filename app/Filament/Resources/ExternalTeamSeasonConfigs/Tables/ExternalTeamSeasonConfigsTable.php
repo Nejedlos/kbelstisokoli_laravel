@@ -218,7 +218,7 @@ class ExternalTeamSeasonConfigsTable
                     ->schema([
                         TextEntry::make('date')->label('Datum'),
                         TextEntry::make('opponent')->label('Soupeř'),
-                        TextEntry::make('score')->label('Skóre'),
+                        TextEntry::make('score')->label('Skóre')->formatStateUsing(fn ($state) => \App\Support\MatchResultHelper::formatScore($state)),
                         TextEntry::make('ext_id')->label('Externí ID'),
                     ])
                     ->columns(4),

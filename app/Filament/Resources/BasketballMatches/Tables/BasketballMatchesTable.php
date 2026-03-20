@@ -52,7 +52,7 @@ class BasketballMatchesTable
                     ->sortable(),
                 TextColumn::make('score')
                     ->label(__('admin.resources.basketball_match.fields.score'))
-                    ->state(fn ($record) => in_array($record->status, ['finished', 'completed', 'played']) ? "{$record->score_home} : {$record->score_away}" : '-')
+                    ->state(fn ($record) => in_array($record->status, ['finished', 'completed', 'played']) ? \App\Support\MatchResultHelper::formatScore("{$record->score_home}:{$record->score_away}") : '-')
                     ->badge()
                     ->color(fn ($record): string => match (true) {
                         ! in_array($record->status, ['finished', 'completed', 'played']) => 'gray',

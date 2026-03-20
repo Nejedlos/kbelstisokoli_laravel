@@ -155,8 +155,10 @@
                 @if($isPlayed && $hasScore)
                     <div class="flex flex-col items-center sm:items-end">
                         <div class="flex items-center gap-2">
-                            <div class="text-3xl md:text-4xl font-black tabular-nums tracking-tighter {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-secondary') }}">
-                                {{ $match->score_home ?? 0 }} : {{ $match->score_away ?? 0 }}
+                            <div class="text-3xl md:text-4xl font-black tabular-nums tracking-tighter {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-secondary') }} flex items-center gap-2">
+                                <span>{{ $match->score_home ?? 0 }}</span>
+                                <span class="opacity-30">:</span>
+                                <span>{{ $match->score_away ?? 0 }}</span>
                             </div>
                         </div>
                         <span class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest mt-1 {{ $isWin ? 'text-success' : ($isLoss ? 'text-danger' : 'text-slate-400') }}">

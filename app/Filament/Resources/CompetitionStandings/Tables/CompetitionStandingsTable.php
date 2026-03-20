@@ -46,6 +46,7 @@ class CompetitionStandingsTable
                     ->sortable(),
                 TextColumn::make('score')
                     ->label('Skóre')
+                    ->formatStateUsing(fn ($state) => \App\Support\MatchResultHelper::formatScore($state))
                     ->sortable(),
                 TextColumn::make('points')
                     ->label('B')

@@ -704,8 +704,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                                 'date' => $date,
                                 'team_home' => $team1,
                                 'team_away' => $team2,
-                                'score_home' => $score1,
-                                'score_away' => $score2,
+                                'score_home' => str_replace('.', '', $score1),
+                                'score_away' => str_replace('.', '', $score2),
                                 'external_id' => $matchId,
                             ];
                         }
@@ -748,8 +748,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                         $scoreText = trim($scoreNode->text());
                         // Skóre je obvykle první dvě čísla
                         $scoreLines = array_values(array_filter(array_map('trim', explode("\n", strip_tags(str_replace(['</div>', '<div>', '<br>', '<br/>'], "\n", $scoreNode->html()))))));
-                        $scoreHome = $scoreLines[0] ?? '';
-                        $scoreAway = $scoreLines[1] ?? '';
+                        $scoreHome = str_replace('.', '', $scoreLines[0] ?? '');
+                        $scoreAway = str_replace('.', '', $scoreLines[1] ?? '');
 
                         $link = $tds->filter('a[href*="/zapas/"]')->first();
                         $matchId = null;
