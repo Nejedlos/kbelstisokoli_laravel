@@ -22,28 +22,34 @@ class TeamHeaderExtractor implements StatExtractorInterface
         $compLabel = $crawler->filterXPath("//*[normalize-space(.)='Soutěž']");
         if ($compLabel->count() > 0) {
             $compLabel->each(function (Crawler $labelNode) use (&$competition, &$competitionUrl) {
-                if ($competition) return;
+                if ($competition && $competitionUrl) return;
 
                 // Zkusíme najít hodnotu vedle (pokud je to v tabulce nebo seznamu)
                 $compValue = $labelNode->filterXPath("following::*[1]");
-                if ($compValue->count() > 0 && strlen(trim($compValue->text())) > 2) {
-                    $competition = trim($compValue->text());
-                    $compLink = $compValue->filter('a')->first();
-                    if ($compLink->count() > 0) {
-                        $competitionUrl = $compLink->attr('href');
+                if ($compValue->count() > 0) {
+                    $valText = trim($compValue->text());
+                    if (strlen($valText) > 2) {
+                        $competition = $valText;
+                        $compLink = $compValue->filter('a')->first();
+                        if ($compLink->count() > 0) {
+                            $competitionUrl = $compLink->attr('href');
+                        }
                     }
                 }
 
                 // Zkusíme najít hodnotu v sibling divu (pokud je to v mřížce divů)
-                if (!$competition || strlen($competition) < 3) {
+                if (!$competition || strlen($competition) < 3 || !$competitionUrl) {
                     $parent = $labelNode->closest('div');
                     if ($parent->count() > 0) {
                         $sibling = $parent->filterXPath("following-sibling::div[1]");
                         if ($sibling->count() > 0) {
-                            $competition = trim($sibling->text());
-                            $compLink = $sibling->filter('a')->first();
-                            if ($compLink->count() > 0) {
-                                $competitionUrl = $compLink->attr('href');
+                            $valText = trim($sibling->text());
+                            if (strlen($valText) > 2) {
+                                $competition = $valText;
+                                $compLink = $sibling->filter('a')->first();
+                                if ($compLink->count() > 0) {
+                                    $competitionUrl = $compLink->attr('href');
+                                }
                             }
                         }
                     }
