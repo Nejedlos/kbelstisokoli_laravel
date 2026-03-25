@@ -42,9 +42,9 @@ class CustomPathGenerator implements PathGenerator
         $uploadsRoot = trim(config('filesystems.uploads.dir', 'uploads'), '/');
         $modelName = class_basename($media->model_type);
 
-        // Zjednodušená cesta pro avatary uživatelů
+        // Zjednodušená cesta pro avatary uživatelů dle požadavku v Issue: uploads/user/...
         if ($modelName === 'User' && $media->collection_name === 'avatar') {
-            return "{$uploadsRoot}/avatars/{$media->model_id}";
+            return "{$uploadsRoot}/user/{$media->model_id}/avatar";
         }
 
         // Pro MediaAsset se snažíme najít, jestli nepatří do PhotoPoolu (pro lepší organizaci na disku)

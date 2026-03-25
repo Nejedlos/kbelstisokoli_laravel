@@ -13,28 +13,32 @@ $app = Application::configure(basePath: dirname(__DIR__))
     ->booting(function ($app) {
         // 1. Nastavení cest (Environment a Public) co nejdříve
         // Optimalizováno pro localhost a produkci (Webglobe)
+
+        // Nastavení cesty k .env (v public/ složce na produkci pro index.php)
         if (! $app->runningInConsole()) {
             $envPath = file_exists(base_path('.env')) ? base_path() : base_path('public');
             $app->useEnvironmentPath($envPath);
+        }
 
-            // Pokud již máme načtený .env v této fázi, nastavíme public_path
-            $publicPath = env('PROD_PUBLIC_PATH');
-            if (env('PUBLIC_PATH_MODE') !== 'external') {
-                $publicPath = null;
-            }
+        // Nastavení public_path - musí fungovat i v Console (pro importy, seedy, media library)
+        $publicPath = env('PROD_PUBLIC_PATH');
 
-            if (! $publicPath && isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
-                $publicPath = dirname($_SERVER['SCRIPT_FILENAME']);
-            }
+        if (env('PUBLIC_PATH_MODE') !== 'external') {
+            $publicPath = null;
+        }
 
-            if (! $publicPath) {
-                $publicPath = env('APP_PUBLIC_PATH');
-            }
+        if (! $publicPath && ! $app->runningInConsole() && isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) === 'index.php') {
+            $publicPath = dirname($_SERVER['SCRIPT_FILENAME']);
+        }
 
-            if ($publicPath) {
-                $app->usePublicPath($publicPath);
-                $app->instance('path.public', $publicPath);
-            }
+        if (! $publicPath) {
+            $publicPath = env('APP_PUBLIC_PATH');
+        }
+
+        if ($publicPath) {
+            $app->usePublicPath($publicPath);
+            $app->instance('path.public', $publicPath);
+            config(['filesystems.disks.public_path.root' => $publicPath]);
         }
     })
     ->withRouting(
