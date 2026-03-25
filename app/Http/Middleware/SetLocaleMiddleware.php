@@ -27,8 +27,11 @@ class SetLocaleMiddleware
             cookie()->queue(cookie()->forever('filament_language_switch_locale', $locale));
 
             // REDIRECT na čistou URL bez lang parametru (proti "traps" při zpětném odkazu a pro SEO)
-            $url = $request->fullUrlWithQuery(['lang' => null]);
-            return redirect($url);
+            // BYPASS pro priming cache a AJAX/API requesty
+            if (! $request->hasHeader('X-Prime-Cache') && ! $request->ajax()) {
+                $url = $request->fullUrlWithQuery(['lang' => null]);
+                return redirect($url);
+            }
         } else {
             // Jinak zkusíme session
             $locale = session('locale');

@@ -69,6 +69,18 @@ Artisan::command('telescope:clear {--all : Smazat úplně všechno}', function (
 })->purpose('Prune old telescope entries (keeps last 24h or clears all with --all)');
 
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Support\Facades\Event;
+
+// Pravidelný priming cache pro veřejný web (každé 3 hodiny)
+Schedule::command('page-cache:prime')->everyThreeHours()->onOneServer();
+
+// Hook pro smazání full-page cache při volání optimize:clear
+Event::listen(CommandFinished::class, function (CommandFinished $event) {
+    if ($event->command === 'optimize:clear') {
+        Artisan::call('page-cache:clear', [], $event->output);
+    }
+});
 
 // Automatická údržba Telescope (každý den ve 3:15) - ponechá jen posledních 24h
 Schedule::command('telescope:clear')->dailyAt('03:15');

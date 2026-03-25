@@ -638,15 +638,36 @@ class SystemConsole extends Page
             'optimize' => [
                 'label' => __('admin/system-console.commands.optimize.label'),
                 'desc' => __('admin/system-console.commands.optimize.desc'),
-                'type' => 'internal',
+                'type' => 'artisan',
+                'color' => 'success',
+                'icon' => FilamentIcon::get(AppIcon::BOLT),
+            ],
+            'optimize:cache' => [
+                'label' => __('admin/system-console.commands.optimize_cache.label'),
+                'desc' => __('admin/system-console.commands.optimize_cache.desc'),
+                'type' => 'artisan',
                 'color' => 'success',
                 'icon' => FilamentIcon::get(AppIcon::BOLT),
             ],
             'optimize:clear' => [
                 'label' => __('admin/system-console.commands.optimize_clear.label'),
                 'desc' => __('admin/system-console.commands.optimize_clear.desc'),
-                'type' => 'internal',
+                'type' => 'artisan',
                 'color' => 'danger',
+                'icon' => FilamentIcon::get(AppIcon::TRASH),
+            ],
+            'page-cache:prime' => [
+                'label' => __('admin/system-console.commands.page_cache_prime.label'),
+                'desc' => __('admin/system-console.commands.page_cache_prime.desc'),
+                'type' => 'artisan',
+                'color' => 'info',
+                'icon' => FilamentIcon::get(AppIcon::REFRESH),
+            ],
+            'page-cache:clear' => [
+                'label' => __('admin/system-console.commands.page_cache_clear.label'),
+                'desc' => __('admin/system-console.commands.page_cache_clear.desc'),
+                'type' => 'artisan',
+                'color' => 'warning',
                 'icon' => FilamentIcon::get(AppIcon::TRASH),
             ],
             'config:cache' => [

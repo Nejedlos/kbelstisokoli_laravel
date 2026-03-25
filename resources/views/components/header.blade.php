@@ -2,9 +2,9 @@
 
 @cacheFragment('fragment_header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 3600)
 <header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm">
-    <div class="container py-4 flex items-center justify-between gap-4">
+    <div class="container py-2.5 lg:py-4 flex items-center justify-between gap-3 lg:gap-4">
         <!-- Logo -->
-        <a href="{{ url('/') }}" @wireNavigate class="flex items-center gap-3 shrink-0">
+        <a href="{{ url('/') }}" @wireNavigate class="flex items-center gap-2.5 lg:gap-3 shrink-0">
             @php
                 $teamLogo = $branding['team_logo'] ?? null;
                 $isTeamLogoEnabled = $teamLogo['enabled_header'] ?? true;
@@ -15,19 +15,19 @@
                     <source srcset="{{ web_asset($teamLogo['paths']['mini'] ?? '', true) }}" type="image/webp">
                     <img src="{{ web_asset($teamLogo['paths']['mini'] ?? '', false) }}"
                          alt="Kbelští sokoli C & E logo"
-                         class="object-contain h-[32px] lg:h-[40px] w-auto"
+                         class="object-contain h-[26px] lg:h-[36px] xl:h-[40px] w-auto"
                          loading="eager"
                          fetchpriority="high"
                          id="header-team-logo"
                     >
                 </picture>
 @elseif($branding['logo_path'])
-                <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-12 w-auto">
+                <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-8 lg:h-12 w-auto">
             @endif
 
             <div class="hidden md:block opacity-80">
-                <span class="block font-display font-bold text-base leading-tight uppercase tracking-tight">{{ brand_text($branding['club_name']) }}</span>
-                <span class="block text-[10px] text-slate-400 font-medium tracking-widest uppercase leading-snug">{{ brand_text($branding['slogan']) }}</span>
+                <span class="block font-display font-bold text-sm lg:text-base leading-tight uppercase tracking-tight">{{ brand_text($branding['club_name']) }}</span>
+                <span class="block text-[9px] lg:text-[10px] text-slate-400 font-medium tracking-widest uppercase leading-snug">{{ brand_text($branding['slogan']) }}</span>
             </div>
         </a>
 
@@ -191,7 +191,7 @@
                 </a>
             @endauth
 
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-3 -mr-2 text-slate-700 hover:text-primary focus:outline-none transition-colors"
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 -mr-1 text-slate-700 hover:text-primary focus:outline-none transition-colors"
                     aria-label="{{ __('general.nav.toggle_menu') }}"
                     :aria-expanded="mobileMenuOpen">
                 <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>

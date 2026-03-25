@@ -168,7 +168,7 @@
     </header>
 
     {{-- Dynamický spacer pro kompenzaci výšky fixního menu --}}
-    <div class="h-[72px] lg:h-[80px]" :style="{ height: headerHeight + 'px' }"></div>
+    <div class="h-[56px] lg:h-[80px]" :style="{ height: headerHeight + 'px' }"></div>
 
     <x-loader-global />
 
