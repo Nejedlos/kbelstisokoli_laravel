@@ -20,6 +20,7 @@ class RecruitmentFormMail extends Mailable implements ShouldQueue
         public string $messageBody,
         public string $subjectText,
         public array $extraData = [],
+        public ?int $leadId = null,
     ) {}
 
     public function envelope(): Envelope
@@ -41,6 +42,7 @@ class RecruitmentFormMail extends Mailable implements ShouldQueue
                 'teamName' => $this->teamName,
                 'messageBody' => $this->messageBody,
                 'extraData' => $this->extraData,
+                'leadId' => $this->leadId,
             ],
         );
     }

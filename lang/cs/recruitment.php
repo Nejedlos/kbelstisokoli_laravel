@@ -106,5 +106,8 @@ return [
         'level' => 'Zkušenosti',
         'not_provided' => 'neuvedeno',
         'footer' => 'Tato zpráva byla odeslána z náborového formuláře webu Kbelští sokoli.',
+        'instructions_title' => 'Instrukce pro trenéra',
+        'instructions_text' => 'Tento zájemce byl automaticky uložen do administrace webu v sekci "Zájemci / Leady". Prosíme, ozvěte se mu co nejdříve (ideálně do 48 hodin) a domluvte si s ním zkušební trénink.',
+        'admin_link' => 'Zobrazit v administraci',
     ],
 ];

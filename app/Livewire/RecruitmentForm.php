@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Mail\RecruitmentFormMail;
+use App\Models\Lead;
 use App\Models\Setting;
 use App\Models\Team;
 use App\Services\RecaptchaV3;
@@ -100,11 +101,28 @@ class RecruitmentForm extends Component
 
         try {
             $team = Team::where('slug', $this->selectedTeam)->first();
-            $recipientEmail = $this->getRecipientEmail($team);
 
+            // 1. Uložit do databáze jako Lead
+            $lead = Lead::create([
+                'type' => 'recruitment',
+                'name' => $this->name,
+                'email' => $this->email,
+                'message' => $this->message,
+                'payload' => [
+                    'team_slug' => $this->selectedTeam,
+                    'team_name' => $team?->getTranslation('name', 'cs'),
+                    'height' => $this->height,
+                    'position' => $this->position,
+                    'level' => $this->level,
+                    'age' => $this->age,
+                ],
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+
+            // 2. Připravit e-mail
             $teamName = $team ? $team->getTranslation('name', app()->getLocale()) : strtoupper($this->selectedTeam);
-
-            Mail::to($recipientEmail)->send(new RecruitmentFormMail(
+            $mailable = new RecruitmentFormMail(
                 senderName: $this->name,
                 senderEmail: $this->email,
                 teamName: $teamName,
@@ -115,8 +133,15 @@ class RecruitmentForm extends Component
                     'position' => $this->position,
                     'level' => $this->level,
                     'age' => $this->age,
-                ]
-            ));
+                ],
+                leadId: $lead->id
+            );
+
+            // 3. Odeslat příjemcům (Admin + Trenéři)
+            $recipients = $this->getRecipients($team);
+            if (! empty($recipients)) {
+                Mail::to($recipients)->send($mailable);
+            }
 
             $this->success = true;
             $this->reset(['name', 'email', 'message', 'recaptchaToken', 'height', 'position', 'level', 'age']);
@@ -127,40 +152,45 @@ class RecruitmentForm extends Component
         }
     }
 
-    protected function getRecipientEmail(?Team $team): string
+    protected function getRecipients(?Team $team): array
     {
-        // 1. Trenér daného týmu (pokud má nastavený pivot email nebo email v profilu)
-        if ($team) {
-            $coach = $team->coaches()->first();
-            if ($coach) {
-                // Zkusíme pivot 'email'
-                if ($coach->pivot && $coach->pivot->email) {
-                    return $coach->pivot->email;
-                }
-                // Pak email uživatele
-                if ($coach->email) {
-                    return $coach->email;
-                }
-            }
-        }
+        $emails = [];
 
-        // 2. Admin email z nastavení
+        // 1. Admin e-maily
         $adminEmail = Setting::where('key', 'admin_contact_email')->value('value');
         if (! $adminEmail) {
             $adminEmail = Setting::where('key', 'contact_email')->value('value');
         }
 
         if ($adminEmail) {
-            // Setting je translatable, tak musíme vytáhnout řetězec
             if (is_array($adminEmail)) {
-                return $adminEmail[app()->getLocale()] ?? reset($adminEmail);
+                $emails[] = $adminEmail[app()->getLocale()] ?? reset($adminEmail);
+            } else {
+                $emails[] = (string) $adminEmail;
             }
-
-            return (string) $adminEmail;
         }
 
-        // 3. Fallback
-        return 'nejedlymi@gmail.com';
+        // 2. Trenéři týmu
+        if ($team) {
+            foreach ($team->coaches as $coach) {
+                // Pivot email
+                if ($coach->pivot && $coach->pivot->email) {
+                    $emails[] = $coach->pivot->email;
+                } elseif ($coach->email) {
+                    $emails[] = $coach->email;
+                }
+            }
+        }
+
+        // Unikátní a pročištěné e-maily
+        $emails = array_unique(array_filter($emails));
+
+        // Fallback pokud je pole prázdné
+        if (empty($emails)) {
+            $emails[] = 'nejedlymi@gmail.com';
+        }
+
+        return $emails;
     }
 
     public function render()

@@ -73,13 +73,11 @@ Systém nápovědy pokrývá (nebo má za cíl pokrýt) následující strukturu
 - **Kategorie novinek** (`PostCategoryResource`).
 - **Galerie** (`GalleryResource`): Fotoalba.
 - **Pool fotografií** (`PhotoPoolResource`): Hromadné nahrávání a AI zpracování fotek.
-- **Stránky** (`PageResource`): Statický obsah (O klubu, Historie atd.).
 - **Knihovna médií** (`MediaAssetResource`).
 
 ### E. Nastavení webu (Group: `web_settings`)
 - **Branding a vzhled** (`BrandingSettings` Page): Barvy, loga, fonty.
 - **AI Nastavení** (`AiSettings` Page): Klíče a parametry pro asistenty.
-- **Menu** (`MenuResource`): Navigace na frontend webu.
 
 ### F. Systém a údržba (Group: `system`)
 - **Role a Oprávnění** (`RoleResource`, `PermissionResource`).
