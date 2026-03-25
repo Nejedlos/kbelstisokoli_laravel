@@ -478,6 +478,7 @@ return [
     ],
     'is_me' => '(Já)',
     'currency_czk' => 'Kč',
+    'status_ok' => 'Uhrazeno',
     'external_stats' => [
         'title' => 'Historie a kariéra (cz.basketball)',
         'season_competition' => 'Sezóna / Soutěž',

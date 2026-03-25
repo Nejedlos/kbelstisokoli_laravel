@@ -536,12 +536,13 @@ class SystemConsole extends Page
                 'color' => 'danger',
                 'icon' => FilamentIcon::get(AppIcon::BROOM_WIDE),
             ],
-            'finance:archive-old-charges' => [
+            'app:finance-mark-past-seasons-paid' => [
                 'label' => __('admin/system-console.commands.finance_archive.label'),
                 'desc' => __('admin/system-console.commands.finance_archive.desc'),
                 'type' => 'artisan',
                 'flags' => [
                     '--dry-run' => __('admin/system-console.commands.finance_archive.flags.--dry-run'),
+                    '--force' => __('admin/system-console.commands.finance_sync.flags.--force'),
                 ],
                 'color' => 'warning',
                 'icon' => FilamentIcon::get(AppIcon::ARCHIVE),

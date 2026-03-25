@@ -37,27 +37,27 @@
                 </div>
             @else
                     <div class="flex flex-col gap-4">
-                    @foreach($openCharges as $charge)
-                        <div class="card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 border-l-4 {{ $charge->is_overdue ? 'border-l-danger' : 'border-l-primary' }}">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                    <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-100 text-slate-500">
-                                        {{ match($charge->charge_type) {
-                                            'membership_fee' => __('member.economy.charge_types.membership_fee'),
-                                            'camp_fee' => __('member.economy.charge_types.camp_fee'),
-                                            'tournament_fee' => __('member.economy.charge_types.tournament_fee'),
-                                            default => __('member.economy.charge_types.other')
-                                        } }}
-                                    </span>
-                                    @if($charge->is_overdue)
-                                        <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-danger-50 text-danger-600">{{ __('member.economy.overdue_badge') }}</span>
+                        @foreach($openCharges as $charge)
+                            <div class="card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 border-l-4 {{ $charge->is_overdue ? 'border-l-danger' : 'border-l-primary' }}">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                        <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-100 text-slate-500">
+                                            {{ match($charge->charge_type) {
+                                                'membership_fee' => __('member.economy.charge_types.membership_fee'),
+                                                'camp_fee' => __('member.economy.charge_types.camp_fee'),
+                                                'tournament_fee' => __('member.economy.charge_types.tournament_fee'),
+                                                default => __('member.economy.charge_types.other')
+                                            } }}
+                                        </span>
+                                        @if($charge->is_overdue)
+                                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-danger-50 text-danger-600">{{ __('member.economy.overdue_badge') }}</span>
+                                        @endif
+                                    </div>
+                                    <h4 class="font-black text-base sm:text-lg text-secondary leading-tight truncate tracking-tight">{{ $charge->title }}</h4>
+                                    @if($charge->due_date)
+                                        <p class="text-[11px] sm:text-xs text-slate-500 font-bold italic mt-1">{{ __('member.economy.due_date') }} <span class="text-secondary">{{ $charge->due_date->format('d. m. Y') }}</span></p>
                                     @endif
                                 </div>
-                                <h4 class="font-black text-base sm:text-lg text-secondary leading-tight truncate tracking-tight">{{ $charge->title }}</h4>
-                                @if($charge->due_date)
-                                    <p class="text-[11px] sm:text-xs text-slate-500 font-bold italic mt-1">{{ __('member.economy.due_date') }} <span class="text-secondary">{{ $charge->due_date->format('d. m. Y') }}</span></p>
-                                @endif
-                            </div>
 
                                 <div class="text-left md:text-right leading-none">
                                     <div class="text-xl sm:text-2xl font-black text-secondary">{{ number_format($charge->amount_remaining, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
@@ -65,13 +65,13 @@
                                         <div class="text-[9px] sm:text-[10px] font-black text-success uppercase tracking-widest mt-1">{{ __('member.economy.paid_amount') }} {{ number_format($charge->amount_paid, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
                                     @endif
                                 </div>
+
                                 <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
                                     <i class="fa-light fa-chevron-right text-[10px]"></i>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
             @endif
         </div>
 

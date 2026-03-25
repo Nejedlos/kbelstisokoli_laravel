@@ -70,16 +70,17 @@ Data byla zmigrována ze starého systému s následujícím mapováním:
 ### Archivace starých sezón
 Pro zajištění přehlednosti dlužných částek ve widgetu člena (PaymentWidget) je nutné po přechodu na novou sezónu archivovat staré neuzavřené předpisy. Uživatelé si nepřejí vidět staré dluhy z minulých let jako aktivní k úhradě.
 
-K tomuto účelu slouží příkaz:
+K tomuto účelu slouží příkaz (dostupný také v **Systémové konzoli** v administraci):
 ```bash
-php artisan finance:archive-old-charges
+php artisan app:finance-mark-past-seasons-paid
 ```
 
 **Funkcionalita:**
-- Identifikuje aktuálně aktivní sezónu (`Season::where('is_active', true)`).
-- Určí rozhodné datum (1. září roku, kdy aktivní sezóna začíná).
-- Všechny předpisy (`FinanceCharge`) typu `membership_fee`, které jsou navázány na neaktivní/starší sezóny, označí jako zaplacené (`status = 'paid'`).
-- Všechny ostatní předpisy (např. pokuty) s datem splatnosti starším než rozhodné datum rovněž označí jako zaplacené.
+- Identifikuje aktuálně aktivní sezónu.
+- Určí minulé sezóny (chronologicky před aktivní sezónou).
+- Všechny předpisy (`FinanceCharge`) typu `membership_fee`, které jsou navázány na konfiguraci uživatele v minulých sezónách, označí jako zaplacené (`status = 'paid'`).
+- Všechny ostatní předpisy (např. pokuty), jejichž datum splatnosti spadá do období minulých sezón, rovněž označí jako zaplacené.
 - Do interní poznámky předpisu se přidá záznam o automatické archivaci.
+- Podporuje přepínače `--dry-run` pro náhled změn a `--force` pro neinteraktivní běh.
 
 Tento proces je bezpečný a zachovává integritu dat, pouze mění stav starých "virtuálních" dluhů, aby nezatěžovaly aktuální přehledy člena.
