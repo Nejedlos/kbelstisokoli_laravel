@@ -2605,10 +2605,14 @@ class HelpArticleSeeder extends Seeder
                     // Fallback pokud soubor neexistuje
                     $translations['content'][$locale] = "Content for article `{$article['data']['slug']}` ({$locale}) is not yet available.";
                 }
+
+                // Automatické doplnění sekce do metadat (pro filtrování v HelpQueryService)
+                $section = in_array($article['category_slug'], ['uvod', 'clenska-sekce']) ? 'both' : 'admin';
+                $translations['metadata'][$locale]['section'] = $section;
             }
 
             // Upsert článku
-            $helpArticle = $this->upsertHelpItem(HelpArticle::class, $articleData, $translations);
+            $helpArticle = $this->upsertHelpItem(HelpArticle::class, $articleData, $translations, true);
 
             // Synchronizace FAQ (pokud není článek customizován)
             if (!$helpArticle->is_customized) {
