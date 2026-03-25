@@ -40,4 +40,6 @@ return [
     'location' => 'Location',
     'teams' => 'Teams',
     'all_teams' => 'All teams',
+    'today' => 'TODAY',
+    'upcoming_events_title' => 'Upcoming events',
 ];

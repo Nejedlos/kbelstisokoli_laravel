@@ -40,4 +40,6 @@ return [
     'location' => 'Místo konání',
     'teams' => 'Týmy',
     'all_teams' => 'Všechny týmy',
+    'today' => 'DNES',
+    'upcoming_events_title' => 'Nejbližší akce',
 ];

@@ -10,7 +10,13 @@ Pro dosažení moderního, sportovního a "clean sexy" vzhledu byly upraveny ná
     - Rozšířena podpora pro **více CTA tlačítek** (primární, sekundární, terciární textový link).
     - Přidán **mikrotext** pod tlačítky pro doplňující informace.
     - Přidána možnost vložit obrázek na pozadí přímo přes URL (pole `image_url`), nejen přes MediaAsset ID.
-    - Vylepšen vizuální styl (animace, přechody).
+    - **Novinka (Březen 2026):** Přidána sekce pro **nejbližší akce** (zápasy nebo klubové akce) nad tlačítky.
+        - Dynamicky načítá jednu nejbližší akci pro každý aktivní tým (C a E).
+        - Obsahuje datum, čas (nebo štítek "DNES"), název týmu, název akce/soupeře, místo konání a odkaz na detail.
+        - Vizuálně atraktivní rozložení ve sloupci s maximální šířkou pro zobrazení celých názvů zápasů.
+        - Glassmorphism design a animace na hover (glow, posun, rotace ikon).
+        - Aktivuje se polem `show_upcoming_events` v datech bloku.
+    - Vylepšen vizuální styl (animace, přechody, glassmorphism pro akce).
 
 - **Cards Grid block (`cards_grid.blade.php`):**
     - Přidána podpora pro **obrázky v kartách** (pole `image_url`).

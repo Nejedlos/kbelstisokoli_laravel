@@ -296,6 +296,7 @@ class CmsContentSeeder extends Seeder
                         'variant' => 'standard',
                         'alignment' => 'left',
                         'overlay' => true,
+                        'show_upcoming_events' => true,
                     ],
                 ],
                 [
@@ -464,6 +465,7 @@ class CmsContentSeeder extends Seeder
                         'variant' => 'standard',
                         'alignment' => 'left',
                         'overlay' => true,
+                        'show_upcoming_events' => true,
                     ],
                 ],
                 [
