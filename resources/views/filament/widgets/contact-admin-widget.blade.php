@@ -10,7 +10,7 @@
                         <h3 class="text-sm font-black uppercase tracking-tight text-gray-900 dark:text-white">
                             {{ __('admin/dashboard.contact_admin.title') }}
                         </h3>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Podpora systému</p>
+                        <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Podpora systému</p>
                     </div>
                 </div>
 
@@ -50,15 +50,15 @@
 
                 <form wire:submit.prevent="send" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="col-span-1">
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Vaše jméno</label>
+                        <label class="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Vaše jméno</label>
                         <input type="text" wire:model.defer="senderName" class="w-full border border-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all" placeholder="Jméno a příjmení">
                     </div>
                     <div class="col-span-1">
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Váš e‑mail</label>
+                        <label class="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Váš e‑mail</label>
                         <input type="email" wire:model.defer="senderEmail" class="w-full border border-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all" placeholder="email@domena.cz">
                     </div>
                     <div class="col-span-full">
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Zpráva pro administrátora</label>
+                        <label class="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Zpráva pro administrátora</label>
                         <textarea wire:model.defer="messageText" class="w-full border border-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-white rounded-xl px-4 py-2.5 text-sm min-h-[120px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all" placeholder="Popište prosím, s čím potřebujete pomoci..."></textarea>
                     </div>
                     <div class="col-span-full flex flex-wrap gap-3 pt-2">

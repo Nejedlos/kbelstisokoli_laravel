@@ -5,6 +5,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        <script>
+            /**
+             * VYNUCENÍ SVĚTLÉHO REŽIMU NA MOBILECH
+             * Na zařízeních s šířkou pod 1024px odstraňujeme třídu .dark.
+             */
+            (function() {
+                const forceLightOnMobile = () => {
+                    if (window.innerWidth < 1024) {
+                        document.documentElement.classList.remove('dark');
+                    }
+                };
+                forceLightOnMobile();
+                window.addEventListener('resize', forceLightOnMobile);
+            })();
+        </script>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

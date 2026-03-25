@@ -106,6 +106,21 @@ class AdminPanelProvider extends PanelProvider
                     {$favicons}
                     <script data-navigate-once>
                         /**
+                         * VYNUCENÍ SVĚTLÉHO REŽIMU NA MOBILECH
+                         * Na zařízeních s šířkou pod 1024px odstraňujeme třídu .dark.
+                         */
+                        (function() {
+                            const forceLightOnMobile = () => {
+                                if (window.innerWidth < 1024) {
+                                    document.documentElement.classList.remove('dark');
+                                }
+                            };
+                            forceLightOnMobile();
+                            window.addEventListener('resize', forceLightOnMobile);
+                            document.addEventListener('livewire:navigated', forceLightOnMobile);
+                        })();
+
+                        /**
                          * KRITICKÝ FIX: Globální potlačení Livewire 3 abort rejekcí v <head>.
                          * Tento skript zachytává \"prázdné\" rejekce, které Livewire 3 vyhazuje při přerušení
                          * asynchronního požadavku (např. při pollingu nebo navigaci).

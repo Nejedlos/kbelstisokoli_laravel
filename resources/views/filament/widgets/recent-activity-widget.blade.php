@@ -1,7 +1,7 @@
 <div class="fi-section rounded-club overflow-hidden border border-gray-200 bg-white dark:border-white/10 dark:bg-gray-900 shadow-sm">
     <div class="p-6">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 flex items-center gap-2">
+            <h3 class="text-[11px] sm:text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 flex items-center gap-2">
                 <i class="fa-light fa-clock-rotate-left text-primary-600"></i>
                 {{ __('admin/dashboard.recent_activity.title') }}
             </h3>
@@ -32,10 +32,10 @@
                             </div>
                         </div>
                         <div class="text-right shrink-0">
-                            <div class="text-[10px] font-black uppercase tracking-widest text-primary-600 dark:text-primary-400">
+                            <div class="text-[11px] sm:text-xs font-black uppercase tracking-widest text-primary-600 dark:text-primary-400">
                                 {{ optional($row->occurred_at ?: $row->created_at)->diffForHumans() }}
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            <div class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                 {{ $row->actor?->name ?? __('admin/dashboard.recent_activity.actor_system') }}
                             </div>
                         </div>

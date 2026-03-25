@@ -6,6 +6,23 @@
     @include('partials.favicons')
     <title>{{ $title ?? __('nav.member_section') }} | {{ $branding['club_name'] ?? 'Kbelští sokoli' }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        /**
+         * VYNUCENÍ SVĚTLÉHO REŽIMU NA MOBILECH
+         * Na zařízeních s šířkou pod 1024px (Tailwind lg breakpoint) odstraňujeme třídu .dark,
+         * aby web vypadal vždy světle, bez ohledu na systémové nastavení.
+         */
+        (function() {
+            const forceLightOnMobile = () => {
+                if (window.innerWidth < 1024) {
+                    document.documentElement.classList.remove('dark');
+                }
+            };
+            forceLightOnMobile();
+            window.addEventListener('resize', forceLightOnMobile);
+            document.addEventListener('livewire:navigated', forceLightOnMobile);
+        })();
+    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

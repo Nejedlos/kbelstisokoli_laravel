@@ -6,35 +6,35 @@
 
     <div class="mx-auto w-full space-y-8 py-8 max-w-7xl">
         {{-- Search & Hero Header --}}
-        <div class="relative overflow-hidden rounded-3xl bg-slate-900 shadow-xl p-6 sm:p-8 border border-white/5">
+        <div class="relative overflow-hidden rounded-3xl bg-slate-900 shadow-xl p-5 sm:p-8 border border-white/5">
             <div class="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-[80px] -mr-20 -mt-20"></div>
 
-            <div class="relative z-10 mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-                <div class="flex-1 text-left flex items-center gap-6">
+            <div class="relative z-10 mx-auto flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+                <div class="flex-1 text-left flex items-center gap-4 sm:gap-6">
                     @if(!$isLanding)
-                        <a href="{{ \App\Filament\Pages\Help::getUrl() }}" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary-400 hover:bg-primary-600 hover:text-white transition-all group">
+                        <a href="{{ \App\Filament\Pages\Help::getUrl() }}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary-400 hover:bg-primary-600 hover:text-white transition-all group">
                             <i class="fa-light fa-arrow-left transition-transform group-hover:-translate-x-1"></i>
                         </a>
                     @endif
                     <div class="space-y-1">
-                        <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                        <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-3">
                             {{ __('admin.navigation.pages.help') }}
                         </h2>
-                        <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">{{ __('admin.navigation.pages.help_info_center') }}</p>
+                        <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">{{ __('admin.navigation.pages.help_info_center') }}</p>
                     </div>
                 </div>
 
                 <div class="relative group max-w-md w-full">
                     <label for="help-search-input" class="sr-only">{{ __('admin.navigation.pages.help_search_placeholder') }}</label>
-                    <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                        <i class="fa-light fa-magnifying-glass text-slate-400 text-lg group-focus-within:text-primary-400 transition-colors"></i>
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <i class="fa-light fa-magnifying-glass text-slate-400 text-base sm:text-lg group-focus-within:text-primary-400 transition-colors"></i>
                     </div>
                     <input
                         type="search"
                         id="help-search-input"
                         wire:model.live.debounce.300ms="searchQuery"
                         placeholder="{{ __('admin.navigation.pages.help_search_placeholder') }}"
-                        class="block w-full pl-14 pr-12 py-4 bg-white/5 border border-white/10 rounded-2xl shadow-xl backdrop-blur-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 text-white placeholder-slate-500 transition-all text-base font-medium"
+                        class="block w-full pl-12 pr-10 py-3 sm:py-4 bg-white/5 border border-white/10 rounded-2xl shadow-xl backdrop-blur-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 text-white placeholder-slate-500 transition-all text-sm sm:text-base font-medium"
                     >
                     @if($searchQuery)
                          <button wire:click="$set('searchQuery', '')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition-colors">
@@ -49,11 +49,11 @@
             {{-- SEARCH_RESULTS_SECTION_START --}}
             <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div class="flex items-center justify-between px-4">
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">
-                        <i class="fa-light fa-magnifying-glass text-primary-600 bg-primary-50 p-3 rounded-2xl shadow-sm border border-primary-100"></i>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3 sm:gap-4">
+                        <i class="fa-light fa-magnifying-glass text-primary-600 bg-primary-50 p-2 sm:p-3 rounded-2xl shadow-sm border border-primary-100"></i>
                         {{ __('admin.navigation.pages.help_search_results_for') }} <span class="text-primary-600">"{{ $searchQuery }}"</span>
                     </h2>
-                    <button wire:click="$set('searchQuery', '')" class="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-bold text-sm">
+                    <button wire:click="$set('searchQuery', '')" class="group flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-bold text-xs sm:text-sm">
                         <i class="fa-light fa-xmark group-hover:rotate-90 transition-transform"></i>
                         {{ __('admin.navigation.pages.help_search_cancel') }}
                     </button>
@@ -90,10 +90,10 @@
                 <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <x-help.breadcrumbs :breadcrumbs="$articleData['breadcrumbs']" />
 
-                    <div class="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-                        <div class="flex items-center gap-8 relative z-10">
+                    <div class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 relative z-10">
                             <div @class([
-                                'w-24 h-24 rounded-3xl flex items-center justify-center text-4xl mb-0 shadow-sm border border-white/50 relative z-10',
+                                'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl sm:rounded-3xl flex items-center justify-center text-3xl sm:text-4xl mb-0 shadow-sm border border-white/50 relative z-10',
                                 'bg-orange-50 text-orange-600' => ($category->color ?? 'slate') === 'orange',
                                 'bg-sky-50 text-sky-600' => in_array($category->color ?? 'slate', ['blue', 'sky']),
                                 'bg-emerald-50 text-emerald-600' => in_array($category->color ?? 'slate', ['emerald', 'green']),
@@ -109,20 +109,20 @@
                                 <i class="fa-light {{ trim($iconClass) }} fa-fw"></i>
                             </div>
                             <div>
-                                <h1 class="text-4xl font-black text-slate-900 tracking-tight mb-2">{{ $article->title_str ?? $article->title }}</h1>
-                                <p class="text-slate-600 font-medium text-lg max-w-2xl">{{ $category->name_str ?? '' }}</p>
+                                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">{{ $article->title_str ?? $article->title }}</h1>
+                                <p class="text-slate-600 font-medium text-base sm:text-lg max-w-2xl">{{ $category->name_str ?? '' }}</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex flex-col lg:flex-row gap-12">
                         <main class="flex-1 min-w-0">
-                            <article class="bg-white rounded-3xl p-8 sm:p-16 shadow-2xl border border-slate-50 relative overflow-hidden">
+                            <article class="bg-white rounded-3xl p-6 sm:p-12 md:p-16 shadow-2xl border border-slate-50 relative overflow-hidden">
                                 {{-- Subtle Background Decor --}}
                                 <div class="absolute top-0 right-0 w-96 h-96 -mr-48 -mt-48 bg-primary-50/50 rounded-full blur-3xl opacity-50"></div>
 
                                 <div class="relative z-10">
-                                    <div class="prose prose-slate max-w-none prose-h2:text-3xl prose-h2:font-black prose-h2:tracking-tight prose-h2:mt-16 prose-h2:mb-8 prose-h3:text-2xl prose-h3:font-bold prose-h3:mt-12 prose-h3:mb-6 prose-p:text-slate-600 prose-p:leading-relaxed prose-p:text-lg prose-strong:text-slate-900 prose-li:text-slate-600 prose-img:rounded-3xl prose-img:shadow-xl">
+                                    <div class="prose prose-slate max-w-none prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:font-black prose-h2:tracking-tight prose-h2:mt-12 sm:prose-h2:mt-16 prose-h2:mb-6 sm:prose-h2:mb-8 prose-h3:text-xl sm:prose-h3:text-2xl prose-h3:font-bold prose-h3:mt-10 sm:prose-h3:mt-12 prose-h3:mb-4 sm:prose-h3:mb-6 prose-p:text-slate-600 prose-p:leading-relaxed prose-p:text-base sm:prose-p:text-lg prose-strong:text-slate-900 prose-li:text-slate-600 prose-img:rounded-3xl prose-img:shadow-xl">
                                         {!! $article->content_html ?? (method_exists($article, 'getParsedContent') ? $article->getParsedContent() : '') !!}
                                     </div>
 
