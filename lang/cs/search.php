@@ -30,4 +30,6 @@ return [
         'cleny' => 'Potřebuji resetovat heslo uživateli',
     ],
     'ai_admin_hint' => 'Tip: Zkuste popsat, co chcete udělat (např. "změnit barvy webu" nebo "přidat člena")',
+    'min_length_title' => 'Zkuste to trochu delší',
+    'min_length_text' => 'Pro vyhledávání prosím zadejte alespoň :min znaky.',
 ];

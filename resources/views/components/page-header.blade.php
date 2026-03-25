@@ -42,8 +42,18 @@
         @endif
 
         @if(!empty($breadcrumbs))
+            @php
+                if ($breadcrumbs instanceof \Illuminate\Support\Collection) {
+                    $breadcrumbsArray = [];
+                    foreach ($breadcrumbs as $breadcrumb) {
+                        $breadcrumbsArray[$breadcrumb->title] = $breadcrumb->url;
+                    }
+                } else {
+                    $breadcrumbsArray = $breadcrumbs;
+                }
+            @endphp
             <div class="mb-4 flex justify-{{ $alignment === 'center' ? 'center' : ($alignment === 'right' ? 'end' : 'start') }}">
-                <x-breadcrumbs :breadcrumbs="array_merge(['Úvod' => route('public.home')], $breadcrumbs)" variant="light" />
+                <x-breadcrumbs :breadcrumbs="array_merge([__('general.nav.home') => route('public.home')], $breadcrumbsArray)" variant="light" />
             </div>
         @endif
 

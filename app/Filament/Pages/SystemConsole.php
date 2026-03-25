@@ -1043,6 +1043,12 @@ class SystemConsole extends Page
                 ->title(__('admin/system-console.notifications.completed'))
                 ->success()
                 ->send();
+
+            // Pokud příkaz měnil integritu cache, vynutíme refresh stránky po krátkém zpoždění,
+            // aby Livewire dostal čerstvý snapshot a předešli jsme chybě "Undefined array key children"
+            if (in_array($command, ['optimize', 'optimize:cache', 'optimize:clear', 'page-cache:clear', 'cache:clear'])) {
+                $this->js('setTimeout(() => window.location.reload(), 2000)');
+            }
         } catch (\Throwable $e) {
             $errorMessage = $e->getMessage();
             $stackTrace = $e->getTraceAsString();

@@ -4,7 +4,7 @@
 
 @section('content')
     <x-page-header
-        :title="__('search.results_for') . ': ' . $query"
+        :title="__('search.results_for') . ($query ? ': ' . $query : '')"
         :breadcrumbs="$breadcrumbs ?? null"
         image="assets/img/hero/hero-search.webp"
     />
@@ -26,8 +26,14 @@
         </div>
     </div>
 
-    <div class="container py-8 md:py-16">
-        @if($results->isEmpty())
+    <div class="container py-8 md:py-16 min-h-[400px]">
+        @if(strlen($query) < 3)
+            <x-empty-state
+                :title="__('search.min_length_title', ['min' => 3])"
+                :subtitle="__('search.min_length_text')"
+                icon="fa-magnifying-glass"
+            />
+        @elseif($results->isEmpty())
             <x-empty-state
                 :title="__('search.no_results_title')"
                 :subtitle="__('search.no_results_text')"

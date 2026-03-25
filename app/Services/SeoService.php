@@ -98,19 +98,19 @@ class SeoService
             if ($path === '/' || $path === 'cs' || $path === 'en' || $path === '') {
                 $title = 'Kbelští sokoli – Basketbal Praha 9 (Letňany, Kbely)';
             } elseif (Str::contains($path, 'novinky') || Str::contains($path, 'news')) {
-                $title = __('nav.news');
+                $title = __('general.nav.news');
             } elseif (Str::contains($path, 'tymy') || Str::contains($path, 'teams')) {
-                $title = __('nav.teams');
+                $title = __('general.nav.teams');
             } elseif (Str::contains($path, 'galerie') || Str::contains($path, 'gallery')) {
-                $title = __('nav.gallery');
+                $title = __('general.nav.gallery');
             } elseif (Str::contains($path, 'zapasy') || Str::contains($path, 'matches')) {
-                $title = __('nav.matches');
+                $title = __('general.nav.matches');
             } elseif (Str::contains($path, 'treninky') || Str::contains($path, 'trainings')) {
-                $title = __('nav.trainings');
+                $title = __('general.nav.trainings');
             } elseif (Str::contains($path, 'kontakt') || Str::contains($path, 'contact')) {
-                $title = __('nav.contact');
+                $title = __('general.nav.contact');
             } elseif (Str::contains($path, 'vysledky-hledani') || Str::contains($path, 'search')) {
-                $title = __('nav.search_results') !== 'nav.search_results' ? __('nav.search_results') : 'Výsledky hledání';
+                $title = __('search.title');
             } elseif (Str::contains($path, 'mapa-webu') || Str::contains($path, 'sitemap')) {
                 $title = app()->getLocale() === 'cs' ? 'Mapa webu' : 'Sitemap';
             } else {

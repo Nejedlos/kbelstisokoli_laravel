@@ -30,7 +30,7 @@ class BreadcrumbService
 
     public function addHome(): self
     {
-        return $this->add(__('nav.home'), route('public.home'));
+        return $this->add(__('general.nav.home'), route('public.home'));
     }
 
     public function generateForPage(\App\Models\Page $page): self
@@ -44,7 +44,7 @@ class BreadcrumbService
     public function generateForPost(\App\Models\Post $post): self
     {
         $this->addHome();
-        $this->add(__('nav.news'), route('public.news.index'));
+        $this->add(__('general.nav.news'), route('public.news.index'));
 
         return $this->add($post->title);
     }

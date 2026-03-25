@@ -21,7 +21,7 @@ class NewsController extends Controller
             ->paginate(12);
 
         $page = \App\Models\Page::where('slug', 'novinky')->first();
-        $breadcrumbs = $breadcrumbService->addHome()->add(__('nav.news'))->get();
+        $breadcrumbs = $breadcrumbService->addHome()->add(__('general.nav.news'))->get();
 
         return view('public.news.index', compact('posts', 'page', 'breadcrumbs'));
     }

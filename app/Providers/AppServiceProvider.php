@@ -90,8 +90,15 @@ class AppServiceProvider extends ServiceProvider
         // Fix pro Webglobe: potlačení notice o tempnam fallbacku, která shazuje aplikaci na produkci
         // Tento handler registrujeme v boot() metodě, aby byl co nejvíce robustní a přežil Laravel bootstrap
         $previousHandler = set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$previousHandler) {
+            // Fix pro Webglobe: potlačení notice o tempnam fallbacku, která shazuje aplikaci na produkci
             if ($errno === E_NOTICE && (str_contains($errstr, 'tempnam()') && str_contains($errstr, 'temporary directory'))) {
                 return true; // Ignorovat tuto konkrétní notice
+            }
+
+            // Fix pro Livewire 3: potlačení chyby "Undefined array key children" při mazání/změně cache
+            // Tato chyba je neškodná a vyřeší se refreshem stránky, ale nesmí shodit celou aplikaci (Error Report)
+            if (str_contains($errstr, 'Undefined array key "children"') && str_contains($errfile, 'SupportNestingComponents.php')) {
+                return true;
             }
 
             return is_callable($previousHandler) ? $previousHandler($errno, $errstr, $errfile, $errline) : false;

@@ -30,4 +30,6 @@ return [
         'cleny' => 'I need to reset a user\'s password',
     ],
     'ai_admin_hint' => 'Tip: Try describing what you want to do (e.g., "change website colors" or "add a member")',
+    'min_length_title' => 'Try a longer search',
+    'min_length_text' => 'Please enter at least :min characters to search.',
 ];
