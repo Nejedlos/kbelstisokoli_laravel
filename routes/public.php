@@ -109,8 +109,8 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     })->name('about');
 
     // Novinky
-    Route::get('/novinky', [NewsController::class, 'index'])->name('posts.index');
-    Route::get('/novinky/{slug}', [NewsController::class, 'show'])->name('posts.show');
+    Route::get('/novinky', [NewsController::class, 'index'])->name('news.index');
+    Route::get('/novinky/{slug}', [NewsController::class, 'show'])->name('news.show');
 
     // Zápasy
     Route::get('/zapasy', [MatchController::class, 'index'])->name('matches.index');

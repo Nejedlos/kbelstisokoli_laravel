@@ -35,7 +35,7 @@
                 class="block-wrapper block-{{ $type }} {{ $customClass }}"
                 {!! $attributesString !!}
             >
-                @includeFirst(["public.blocks.{$type}", "public.blocks.fallback"], [
+                @includeFirst(["components.public.blocks.{$type}", "components.public.blocks.fallback"], [
                     'data' => $data,
                     'type' => $type,
                     'block' => $block,
@@ -43,7 +43,7 @@
                 ])
             </div>
         @elseif(!$type)
-            @include('public.blocks.fallback', ['data' => [], 'type' => 'unknown'])
+            @include('components.public.blocks.fallback', ['data' => [], 'type' => 'unknown'])
         @endif
     @empty
         <div class="container py-20 text-center text-slate-500">Zatím zde nejsou žádné bloky obsahu.</div>

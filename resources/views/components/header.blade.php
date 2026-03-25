@@ -101,8 +101,8 @@
             </a>
 
             {{-- Novinky --}}
-            <a href="{{ route('public.posts.index') }}" @wireNavigate
-               class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition py-2 {{ request()->routeIs('public.posts.*') ? 'text-primary border-b-2 border-primary' : '' }}">
+            <a href="{{ route('public.news.index') }}" @wireNavigate
+               class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition py-2 {{ request()->routeIs('public.news.*') ? 'text-primary border-b-2 border-primary' : '' }}">
                 {{ __('general.nav.news') }}
             </a>
 
@@ -299,8 +299,8 @@
                 </a>
 
                 {{-- Novinky --}}
-                <a href="{{ route('public.posts.index') }}" @wireNavigate
-                   class="block font-black uppercase text-xs tracking-widest py-4 px-4 border-b border-slate-50 hover:bg-slate-50 transition-colors {{ request()->routeIs('public.posts.*') ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
+                <a href="{{ route('public.news.index') }}" @wireNavigate
+                   class="block font-black uppercase text-xs tracking-widest py-4 px-4 border-b border-slate-50 hover:bg-slate-50 transition-colors {{ request()->routeIs('public.news.*') ? 'text-primary bg-primary/5' : 'text-slate-700' }}">
                     {{ __('general.nav.news') }}
                 </a>
 

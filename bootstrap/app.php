@@ -21,9 +21,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         // Nastavení public_path - musí fungovat i v Console (pro importy, seedy, media library)
+        // Zabezpečení pro localhost: pokud jsme v local prostředí a produkční cesta neexistuje, nulujeme ji
         $publicPath = env('PROD_PUBLIC_PATH');
 
-        if (env('PUBLIC_PATH_MODE') !== 'external') {
+        if (env('PUBLIC_PATH_MODE') !== 'external' || ! $publicPath) {
+            $publicPath = null;
+        } elseif (! file_exists($publicPath) && env('APP_ENV') === 'local') {
             $publicPath = null;
         }
 
@@ -33,6 +36,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         if (! $publicPath) {
             $publicPath = env('APP_PUBLIC_PATH');
+            // Zabezpečení pro localhost: pokud cesta neexistuje a jsme v local, nepoužívat ji
+            if ($publicPath && ! file_exists($publicPath) && env('APP_ENV') === 'local') {
+                $publicPath = null;
+            }
         }
 
         if ($publicPath) {

@@ -533,6 +533,21 @@ class CmsContentSeeder extends Seeder
                     ],
                 ],
                 [
+                    'type' => 'matches_listing',
+                    'data' => [
+                        'title' => 'Program a výsledky zápasů',
+                        'type' => 'upcoming',
+                        'limit' => 4,
+                    ],
+                ],
+                [
+                    'type' => 'quick_facts',
+                    'data' => [
+                        'title' => 'Kde nás najdete a kdy hrajeme',
+                        'alignment' => 'center',
+                    ],
+                ],
+                [
                     'type' => 'cta',
                     'data' => [
                         'style' => 'light',
@@ -699,6 +714,21 @@ class CmsContentSeeder extends Seeder
                         'subtitle' => 'News will be updated continuously.',
                         'limit' => 3,
                         'layout' => 'grid',
+                    ],
+                ],
+                [
+                    'type' => 'matches_listing',
+                    'data' => [
+                        'title' => 'Match schedule and results',
+                        'type' => 'upcoming',
+                        'limit' => 4,
+                    ],
+                ],
+                [
+                    'type' => 'quick_facts',
+                    'data' => [
+                        'title' => 'Where to find us & Match days',
+                        'alignment' => 'center',
                     ],
                 ],
                 [

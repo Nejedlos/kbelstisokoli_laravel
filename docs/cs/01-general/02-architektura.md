@@ -120,12 +120,12 @@ Aplikace je rozdělena do tří hlavních oblastí:
 11. **Vlastní HTML:** módy Safe Embed (všem) vs Raw HTML (pouze admin).
 
 ### Renderování (Frontend)
-- Komponenta `<x-page-blocks :blocks="$page->content" />` prochází pole bloků a inkluduje příslušné Blade šablony z `resources/views/public/blocks/`.
+- Komponenta `<x-page-blocks :blocks="$page->content" />` prochází pole bloků a inkluduje příslušné Blade šablony z `resources/views/components/public/blocks/`.
 - Každá šablona má přístup k proměnné `$data` obsahující payload bloku.
 
 ### Jak přidat nový typ bloku
 1. Přidejte metodu a registraci v `App\Services\Cms\BlockRegistry`.
-2. Vytvořte Blade šablonu v `resources/views/public/blocks/{slug}.blade.php`.
+2. Vytvořte Blade šablonu v `resources/views/components/public/blocks/{slug}.blade.php`.
 3. Spusťte `npm run build` (pokud měníte styly).
 
 ## 8. Sportovní modul
@@ -498,7 +498,7 @@ Cíl: Vytvořit konzistentní, hypermoderní a sportovní veřejný frontend ř�
 - Vstup: pole bloků (Filament Builder: `type` + `data`).
 - Renderer: `<x-page-blocks :blocks="$page->content" />` iteruje, respektuje `data.is_visible` a přidává `section-padding`.
 - Pokročilé nastavení (Expert): `custom_id`, `custom_class`, `custom_attributes` – atributy se přenesou do wrapperu bloku.
-- Fallback: `public.blocks.fallback` pro neznámé/nezpracované bloky (bez pádu aplikace).
+- Fallback: `components.public.blocks.fallback` pro neznámé/nezpracované bloky (bez pádu aplikace).
 
 ### 13.4 Napojení na global settings / branding
 - Konfigurace `config/branding.php` (bez seed obsahu), možnost napojit na env proměnné.
@@ -512,7 +512,7 @@ Cíl: Vytvořit konzistentní, hypermoderní a sportovní veřejný frontend ř�
 - Chybějící branding hodnoty nezpůsobí pád – části UI se skryjí.
 
 ### 13.6 Jak přidat nový frontend block renderer / komponentu
-1. Přidejte šablonu do `resources/views/public/blocks/{block}.blade.php` a držte se design systemu (container, section-padding, btn/card utilit).
+1. Přidejte šablonu do `resources/views/components/public/blocks/{block}.blade.php` a držte se design systemu (container, section-padding, btn/card utilit).
 2. Pokud je to nový typ, zaregistrujte ho v `App\Services\Cms\BlockRegistry` (admin Builder).
 3. Pro společné nadpisy použijte `<x-section-heading />`, pro prázdný stav `<x-empty-state />`.
 4. V případě potřeby doplňte tokeny do `resources/css/app.css` a spusťte build.

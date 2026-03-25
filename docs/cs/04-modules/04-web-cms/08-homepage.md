@@ -3,7 +3,7 @@
 Tento dokument shrnuje změny provedené na hlavní stránce projektu Kbelští sokoli v rámci úkolu pro redesign a aktualizaci obsahu.
 
 ## 1. Provedené změny v layoutu a blocích
-Pro dosažení moderního, sportovního a "clean sexy" vzhledu byly upraveny následující Blade šablony v `resources/views/public/blocks/`:
+Pro dosažení moderního, sportovního a "clean sexy" vzhledu byly upraveny následující Blade šablony v `resources/views/components/public/blocks/`:
 
 - **Hero block (`hero.blade.php`):**
     - Přidána podpora pro **eyebrow text** (overline) nad hlavním nadpisem.
@@ -67,7 +67,7 @@ V kódu jsou použity následující cesty k obrázkům (očekávané v `public/
 
 ## 6. Technická realizace
 Změny byly zavedeny pomocí:
-1. Úpravy Blade komponent v `resources/views/public/blocks/`.
+1. Úpravy Blade komponent v `resources/views/components/public/blocks/`.
 2. Aktualizace metody `getHomeBlocks()` a `seedPages()` v `database/seeders/CmsContentSeeder.php`.
 3. Spuštění seederu: `php artisan db:seed --class=CmsContentSeeder`.
 

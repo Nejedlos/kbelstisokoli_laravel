@@ -189,7 +189,7 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\StatisticRow::observe(\App\Observers\MatchPredictionObserver::class);
         }
 
-        \Illuminate\Support\Facades\View::composer(['layouts.*', 'errors.*', 'filament-panels::layout.*', 'filament-panels::pages.*'], function ($view) {
+        \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*', 'filament-panels::layout.*', 'filament-panels::pages.*'], function ($view) {
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
             static $cachedData = null;
             static $unreadCount = null;
@@ -198,7 +198,7 @@ class AppServiceProvider extends ServiceProvider
             $communicationService = app(\App\Services\Communication\CommunicationService::class);
 
             $viewName = $view->getName();
-            $audience = str_contains($viewName, 'member') ? 'member' : 'public';
+            $audience = (str_starts_with($viewName, 'member.') || str_contains($viewName, 'filament-panels::')) ? 'member' : 'public';
 
             if ($cachedData === null) {
                 $branding = $brandingService->getSettings();

@@ -1,0 +1,471 @@
+Forms           GlobalSearch    Pages           Resources       Widgets
+app/Filament/Forms:
+CmsForms.php
+app/Filament/GlobalSearch:
+AiGlobalSearchProvider.php
+app/Filament/Pages:
+AiSearch.php            DebugOperations.php     RecaptchaSettings.php
+AiSettings.php          Documentation.php       SeasonRenewal.php
+Auth                    EmailDebug.php          SystemConsole.php
+BrandingSettings.php    Help.php
+Dashboard.php           RealAttendance.php
+app/Filament/Pages/Auth:
+EmailVerificationPrompt.php     RequestPasswordReset.php
+Login.php                       ResetPassword.php
+app/Filament/Resources:
+Announcements                   MediaAssets
+AuditLogs                       Menus
+BasketballMatches               NotFoundLogs
+ClubCompetitions                OpponentMergeSuggestions
+ClubEvents                      Opponents
+CompetitionStandings            Pages
+CronLogs                        Partners
+CronTasks                       PerformanceTestResults
+ExternalEntityMappings          Permissions
+ExternalImportRuns              PhotoPools
+ExternalStatSources             PlayerProfiles
+ExternalTeamMappings            PostCategories
+ExternalTeamSeasonConfigs       Posts
+FeedbackReports                 Redirects
+FinanceCharges                  Roles
+FinancePayments                 Seasons
+FinancialTariffs                StatisticSets
+Galleries                       Teams
+HelpArticles                    Trainings
+HelpCategories                  UserSeasonConfigs
+Leads                           Users
+LegacyImportBatches
+app/Filament/Resources/Announcements:
+AnnouncementResource.php        Schemas
+Pages                           Tables
+app/Filament/Resources/Announcements/Pages:
+CreateAnnouncement.php  EditAnnouncement.php    ListAnnouncements.php
+app/Filament/Resources/Announcements/Schemas:
+AnnouncementForm.php
+app/Filament/Resources/Announcements/Tables:
+AnnouncementsTable.php
+app/Filament/Resources/AuditLogs:
+AuditLogResource.php    Schemas
+Pages                   Tables
+app/Filament/Resources/AuditLogs/Pages:
+ListAuditLogs.php       ViewAuditLog.php
+app/Filament/Resources/AuditLogs/Schemas:
+AuditLogForm.php
+app/Filament/Resources/AuditLogs/Tables:
+AuditLogsTable.php
+app/Filament/Resources/BasketballMatches:
+BasketballMatchResource.php     Schemas
+Pages                           Tables
+app/Filament/Resources/BasketballMatches/Pages:
+CreateBasketballMatch.php       ListBasketballMatches.php
+EditBasketballMatch.php
+app/Filament/Resources/BasketballMatches/Schemas:
+BasketballMatchForm.php
+app/Filament/Resources/BasketballMatches/Tables:
+BasketballMatchesTable.php
+app/Filament/Resources/ClubCompetitions:
+ClubCompetitionResource.php     Schemas
+Pages                           Tables
+RelationManagers                Widgets
+app/Filament/Resources/ClubCompetitions/Pages:
+CreateClubCompetition.php       ListClubCompetitions.php
+EditClubCompetition.php
+app/Filament/Resources/ClubCompetitions/RelationManagers:
+EntriesRelationManager.php
+app/Filament/Resources/ClubCompetitions/Schemas:
+ClubCompetitionForm.php
+app/Filament/Resources/ClubCompetitions/Tables:
+ClubCompetitionsTable.php
+app/Filament/Resources/ClubCompetitions/Widgets:
+CompetitionLeaderboardWidget.php
+app/Filament/Resources/ClubEvents:
+ClubEventResource.php   RelationManagers        Tables
+Pages                   Schemas
+app/Filament/Resources/ClubEvents/Pages:
+CreateClubEvent.php     EditClubEvent.php       ListClubEvents.php
+app/Filament/Resources/ClubEvents/RelationManagers:
+AttendancesRelationManager.php
+app/Filament/Resources/ClubEvents/Schemas:
+ClubEventForm.php
+app/Filament/Resources/ClubEvents/Tables:
+ClubEventsTable.php
+app/Filament/Resources/CompetitionStandings:
+CompetitionStandingResource.php Schemas
+Pages                           Tables
+app/Filament/Resources/CompetitionStandings/Pages:
+CreateCompetitionStanding.php   ListCompetitionStandings.php
+EditCompetitionStanding.php
+app/Filament/Resources/CompetitionStandings/Schemas:
+CompetitionStandingForm.php
+app/Filament/Resources/CompetitionStandings/Tables:
+CompetitionStandingsTable.php
+app/Filament/Resources/CronLogs:
+CronLogResource.php     Schemas
+Pages                   Tables
+app/Filament/Resources/CronLogs/Pages:
+CreateCronLog.php       ListCronLogs.php
+EditCronLog.php         ViewCronLog.php
+app/Filament/Resources/CronLogs/Schemas:
+CronLogForm.php
+app/Filament/Resources/CronLogs/Tables:
+CronLogsTable.php
+app/Filament/Resources/CronTasks:
+CronTaskResource.php    RelationManagers        Tables
+Pages                   Schemas
+app/Filament/Resources/CronTasks/Pages:
+CreateCronTask.php      EditCronTask.php        ListCronTasks.php
+app/Filament/Resources/CronTasks/RelationManagers:
+LogsRelationManager.php
+app/Filament/Resources/CronTasks/Schemas:
+CronTaskForm.php
+app/Filament/Resources/CronTasks/Tables:
+CronTasksTable.php
+app/Filament/Resources/ExternalEntityMappings:
+ExternalEntityMappingResource.php       Tables
+Pages                                   Widgets
+Schemas
+app/Filament/Resources/ExternalEntityMappings/Pages:
+CreateExternalEntityMapping.php ListExternalEntityMappings.php
+EditExternalEntityMapping.php
+app/Filament/Resources/ExternalEntityMappings/Schemas:
+ExternalEntityMappingForm.php
+app/Filament/Resources/ExternalEntityMappings/Tables:
+ExternalEntityMappingsTable.php
+app/Filament/Resources/ExternalEntityMappings/Widgets:
+ExternalMappingInfoWidget.php
+app/Filament/Resources/ExternalImportRuns:
+ExternalImportRunResource.php   Schemas
+Pages                           Tables
+RelationManagers
+app/Filament/Resources/ExternalImportRuns/Pages:
+CreateExternalImportRun.php     ListExternalImportRuns.php
+EditExternalImportRun.php       ViewExternalImportRun.php
+app/Filament/Resources/ExternalImportRuns/RelationManagers:
+LogsRelationManager.php
+app/Filament/Resources/ExternalImportRuns/Schemas:
+ExternalImportRunForm.php
+app/Filament/Resources/ExternalImportRuns/Tables:
+ExternalImportRunsTable.php
+app/Filament/Resources/ExternalStatSources:
+ExternalStatSourceResource.php  Schemas
+Pages                           Tables
+RelationManagers
+app/Filament/Resources/ExternalStatSources/Pages:
+CreateExternalStatSource.php    ListExternalStatSources.php
+EditExternalStatSource.php
+app/Filament/Resources/ExternalStatSources/RelationManagers:
+TeamMappingsRelationManager.php
+app/Filament/Resources/ExternalStatSources/Schemas:
+ExternalStatSourceForm.php
+app/Filament/Resources/ExternalStatSources/Tables:
+ExternalStatSourcesTable.php
+app/Filament/Resources/ExternalTeamMappings:
+ExternalTeamMappingResource.php Schemas
+Pages                           Tables
+app/Filament/Resources/ExternalTeamMappings/Pages:
+CreateExternalTeamMapping.php   ListExternalTeamMappings.php
+EditExternalTeamMapping.php
+app/Filament/Resources/ExternalTeamMappings/Schemas:
+ExternalTeamMappingForm.php
+app/Filament/Resources/ExternalTeamMappings/Tables:
+ExternalTeamMappingsTable.php
+app/Filament/Resources/ExternalTeamSeasonConfigs:
+ExternalTeamSeasonConfigResource.php    Schemas
+Pages                                   Tables
+app/Filament/Resources/ExternalTeamSeasonConfigs/Pages:
+CreateExternalTeamSeasonConfig.php      ListExternalTeamSeasonConfigs.php
+EditExternalTeamSeasonConfig.php
+app/Filament/Resources/ExternalTeamSeasonConfigs/Schemas:
+ExternalTeamSeasonConfigForm.php
+app/Filament/Resources/ExternalTeamSeasonConfigs/Tables:
+ExternalTeamSeasonConfigsTable.php
+app/Filament/Resources/FeedbackReports:
+FeedbackReportResource.php      Schemas
+Pages                           Tables
+app/Filament/Resources/FeedbackReports/Pages:
+CreateFeedbackReport.php        ListFeedbackReports.php
+EditFeedbackReport.php          ViewFeedbackReport.php
+app/Filament/Resources/FeedbackReports/Schemas:
+FeedbackReportForm.php
+app/Filament/Resources/FeedbackReports/Tables:
+FeedbackReportsTable.php
+app/Filament/Resources/FinanceCharges:
+FinanceChargeResource.php       Schemas
+Pages                           Tables
+RelationManagers
+app/Filament/Resources/FinanceCharges/Pages:
+CreateFinanceCharge.php EditFinanceCharge.php   ListFinanceCharges.php
+app/Filament/Resources/FinanceCharges/RelationManagers:
+AllocationsRelationManager.php
+app/Filament/Resources/FinanceCharges/Schemas:
+FinanceChargeForm.php
+app/Filament/Resources/FinanceCharges/Tables:
+FinanceChargesTable.php
+app/Filament/Resources/FinancePayments:
+FinancePaymentResource.php      Schemas
+Pages                           Tables
+RelationManagers
+app/Filament/Resources/FinancePayments/Pages:
+CreateFinancePayment.php        ListFinancePayments.php
+EditFinancePayment.php
+app/Filament/Resources/FinancePayments/RelationManagers:
+AllocationsRelationManager.php
+app/Filament/Resources/FinancePayments/Schemas:
+FinancePaymentForm.php
+app/Filament/Resources/FinancePayments/Tables:
+FinancePaymentsTable.php
+app/Filament/Resources/FinancialTariffs:
+FinancialTariffResource.php     Schemas
+Pages                           Tables
+app/Filament/Resources/FinancialTariffs/Pages:
+CreateFinancialTariff.php       ListFinancialTariffs.php
+EditFinancialTariff.php
+app/Filament/Resources/FinancialTariffs/Schemas:
+FinancialTariffForm.php
+app/Filament/Resources/FinancialTariffs/Tables:
+FinancialTariffsTable.php
+app/Filament/Resources/Galleries:
+GalleryResource.php     RelationManagers        Tables
+Pages                   Schemas
+app/Filament/Resources/Galleries/Pages:
+CreateGallery.php       EditGallery.php         ListGalleries.php
+app/Filament/Resources/Galleries/RelationManagers:
+MediaAssetsRelationManager.php
+app/Filament/Resources/Galleries/Schemas:
+GalleryForm.php
+app/Filament/Resources/Galleries/Tables:
+GalleriesTable.php
+app/Filament/Resources/HelpArticles:
+HelpArticleResource.php RelationManagers        Tables
+Pages                   Schemas
+app/Filament/Resources/HelpArticles/Pages:
+CreateHelpArticle.php   EditHelpArticle.php     ListHelpArticles.php
+app/Filament/Resources/HelpArticles/RelationManagers:
+FaqsRelationManager.php                 RelatedArticlesRelationManager.php
+QuickActionsRelationManager.php
+app/Filament/Resources/HelpArticles/Schemas:
+HelpArticleForm.php
+app/Filament/Resources/HelpArticles/Tables:
+HelpArticlesTable.php
+app/Filament/Resources/HelpCategories:
+HelpCategoryResource.php        Schemas
+Pages                           Tables
+app/Filament/Resources/HelpCategories/Pages:
+CreateHelpCategory.php  EditHelpCategory.php    ListHelpCategories.php
+app/Filament/Resources/HelpCategories/Schemas:
+HelpCategoryForm.php
+app/Filament/Resources/HelpCategories/Tables:
+HelpCategoriesTable.php
+app/Filament/Resources/Leads:
+LeadResource.php        Pages
+app/Filament/Resources/Leads/Pages:
+ManageLeads.php
+app/Filament/Resources/LegacyImportBatches:
+LegacyImportBatchResource.php   Schemas
+Pages                           Tables
+RelationManagers
+app/Filament/Resources/LegacyImportBatches/Pages:
+CreateLegacyImportBatch.php     ListLegacyImportBatches.php
+EditLegacyImportBatch.php       ViewLegacyImportBatch.php
+app/Filament/Resources/LegacyImportBatches/RelationManagers:
+FilesRelationManager.php
+app/Filament/Resources/LegacyImportBatches/Schemas:
+LegacyImportBatchForm.php
+app/Filament/Resources/LegacyImportBatches/Tables:
+LegacyImportBatchesTable.php
+app/Filament/Resources/MediaAssets:
+MediaAssetResource.php  Schemas
+Pages                   Tables
+app/Filament/Resources/MediaAssets/Pages:
+CreateMediaAsset.php    EditMediaAsset.php      ListMediaAssets.php
+app/Filament/Resources/MediaAssets/Schemas:
+MediaAssetForm.php
+app/Filament/Resources/MediaAssets/Tables:
+MediaAssetsTable.php
+app/Filament/Resources/Menus:
+MenuResource.php        RelationManagers        Tables
+Pages                   Schemas
+app/Filament/Resources/Menus/Pages:
+CreateMenu.php  EditMenu.php    ListMenus.php
+app/Filament/Resources/Menus/RelationManagers:
+ItemsRelationManager.php
+app/Filament/Resources/Menus/Schemas:
+MenuForm.php
+app/Filament/Resources/Menus/Tables:
+MenusTable.php
+app/Filament/Resources/NotFoundLogs:
+NotFoundLogResource.php Schemas
+Pages                   Tables
+app/Filament/Resources/NotFoundLogs/Pages:
+CreateNotFoundLog.php   EditNotFoundLog.php     ListNotFoundLogs.php
+app/Filament/Resources/NotFoundLogs/Schemas:
+NotFoundLogForm.php
+app/Filament/Resources/NotFoundLogs/Tables:
+NotFoundLogsTable.php
+app/Filament/Resources/OpponentMergeSuggestions:
+OpponentMergeSuggestionResource.php     Schemas
+Pages                                   Tables
+app/Filament/Resources/OpponentMergeSuggestions/Pages:
+CreateOpponentMergeSuggestion.php       ListOpponentMergeSuggestions.php
+EditOpponentMergeSuggestion.php
+app/Filament/Resources/OpponentMergeSuggestions/Schemas:
+OpponentMergeSuggestionForm.php
+app/Filament/Resources/OpponentMergeSuggestions/Tables:
+OpponentMergeSuggestionsTable.php
+app/Filament/Resources/Opponents:
+OpponentResource.php    Schemas                 Widgets
+Pages                   Tables
+app/Filament/Resources/Opponents/Pages:
+CreateOpponent.php      EditOpponent.php        ListOpponents.php
+app/Filament/Resources/Opponents/Schemas:
+OpponentForm.php
+app/Filament/Resources/Opponents/Tables:
+OpponentsTable.php
+app/Filament/Resources/Opponents/Widgets:
+OpponentMergeSuggestionsWidget.php
+app/Filament/Resources/Pages:
+PageResource.php        Schemas
+Pages                   Tables
+app/Filament/Resources/Pages/Pages:
+CreatePage.php  EditPage.php    ListPages.php
+app/Filament/Resources/Pages/Schemas:
+PageForm.php
+app/Filament/Resources/Pages/Tables:
+PagesTable.php
+app/Filament/Resources/Partners:
+Pages                   Schemas
+PartnerResource.php     Tables
+app/Filament/Resources/Partners/Pages:
+CreatePartner.php       EditPartner.php         ListPartners.php
+app/Filament/Resources/Partners/Schemas:
+PartnerForm.php
+app/Filament/Resources/Partners/Tables:
+PartnersTable.php
+app/Filament/Resources/PerformanceTestResults:
+Pages                                   Tables
+PerformanceTestResultResource.php       Widgets
+Schemas
+app/Filament/Resources/PerformanceTestResults/Pages:
+CreatePerformanceTestResult.php ListPerformanceTestResults.php
+EditPerformanceTestResult.php
+app/Filament/Resources/PerformanceTestResults/Schemas:
+PerformanceTestResultForm.php
+app/Filament/Resources/PerformanceTestResults/Tables:
+PerformanceTestResultsTable.php
+app/Filament/Resources/PerformanceTestResults/Widgets:
+PerformanceComparisonWidget.php
+app/Filament/Resources/Permissions:
+Pages                   PermissionResource.php
+app/Filament/Resources/Permissions/Pages:
+ListPermissions.php
+app/Filament/Resources/PhotoPools:
+Pages                   PhotoPoolResource.php   RelationManagers
+app/Filament/Resources/PhotoPools/Pages:
+CreatePhotoPool.php     EditPhotoPool.php       ListPhotoPools.php
+app/Filament/Resources/PhotoPools/RelationManagers:
+MediaAssetsRelationManager.php
+app/Filament/Resources/PlayerProfiles:
+Pages                           Schemas
+PlayerProfileResource.php       Tables
+app/Filament/Resources/PlayerProfiles/Pages:
+CreatePlayerProfile.php EditPlayerProfile.php   ListPlayerProfiles.php
+app/Filament/Resources/PlayerProfiles/Schemas:
+PlayerProfileForm.php
+app/Filament/Resources/PlayerProfiles/Tables:
+PlayerProfilesTable.php
+app/Filament/Resources/PostCategories:
+Pages                           PostCategoryResource.php
+app/Filament/Resources/PostCategories/Pages:
+ManagePostCategories.php
+app/Filament/Resources/Posts:
+Pages                   Schemas
+PostResource.php        Tables
+app/Filament/Resources/Posts/Pages:
+CreatePost.php  EditPost.php    ListPosts.php
+app/Filament/Resources/Posts/Schemas:
+PostForm.php
+app/Filament/Resources/Posts/Tables:
+PostsTable.php
+app/Filament/Resources/Redirects:
+Pages                   Schemas
+RedirectResource.php    Tables
+app/Filament/Resources/Redirects/Pages:
+CreateRedirect.php      EditRedirect.php        ListRedirects.php
+app/Filament/Resources/Redirects/Schemas:
+RedirectForm.php
+app/Filament/Resources/Redirects/Tables:
+RedirectsTable.php
+app/Filament/Resources/Roles:
+Pages                   RoleResource.php
+app/Filament/Resources/Roles/Pages:
+ListRoles.php
+app/Filament/Resources/Seasons:
+Pages                   SeasonResource.php
+Schemas                 Tables
+app/Filament/Resources/Seasons/Pages:
+CreateSeason.php        EditSeason.php          ListSeasons.php
+app/Filament/Resources/Seasons/Schemas:
+SeasonForm.php
+app/Filament/Resources/Seasons/Tables:
+SeasonsTable.php
+app/Filament/Resources/StatisticSets:
+Pages                           StatisticSetResource.php
+RelationManagers                Tables
+Schemas
+app/Filament/Resources/StatisticSets/Pages:
+CreateStatisticSet.php  EditStatisticSet.php    ListStatisticSets.php
+app/Filament/Resources/StatisticSets/RelationManagers:
+RowsRelationManager.php
+app/Filament/Resources/StatisticSets/Schemas:
+StatisticSetForm.php
+app/Filament/Resources/StatisticSets/Tables:
+StatisticSetsTable.php
+app/Filament/Resources/Teams:
+Pages                   Schemas                 TeamResource.php
+RelationManagers        Tables
+app/Filament/Resources/Teams/Pages:
+CreateTeam.php  EditTeam.php    ListTeams.php
+app/Filament/Resources/Teams/RelationManagers:
+CoachesRelationManager.php              PlayersRelationManager.php
+ExternalMappingsRelationManager.php
+app/Filament/Resources/Teams/Schemas:
+TeamForm.php
+app/Filament/Resources/Teams/Tables:
+TeamsTable.php
+app/Filament/Resources/Trainings:
+Pages                   Tables
+Schemas                 TrainingResource.php
+app/Filament/Resources/Trainings/Pages:
+CreateTraining.php      EditTraining.php        ListTrainings.php
+app/Filament/Resources/Trainings/Schemas:
+TrainingForm.php
+app/Filament/Resources/Trainings/Tables:
+TrainingsTable.php
+app/Filament/Resources/UserSeasonConfigs:
+Pages                           Tables
+Schemas                         UserSeasonConfigResource.php
+app/Filament/Resources/UserSeasonConfigs/Pages:
+CreateUserSeasonConfig.php      ListUserSeasonConfigs.php
+EditUserSeasonConfig.php
+app/Filament/Resources/UserSeasonConfigs/Schemas:
+UserSeasonConfigForm.php
+app/Filament/Resources/UserSeasonConfigs/Tables:
+UserSeasonConfigsTable.php
+app/Filament/Resources/Users:
+Pages                   Schemas                 UserResource.php
+RelationManagers        Tables
+app/Filament/Resources/Users/Pages:
+CreateUser.php  EditUser.php    ListUsers.php
+app/Filament/Resources/Users/RelationManagers:
+ChildrenRelationManager.php             PlayerProfilesRelationManager.php
+ConsentsRelationManager.php             UserSeasonConfigsRelationManager.php
+ParentsRelationManager.php
+app/Filament/Resources/Users/Schemas:
+UserForm.php
+app/Filament/Resources/Users/Tables:
+UsersTable.php
+app/Filament/Widgets:
+AdminKpiOverview.php            RecentActivityWidget.php
+ContactAdminWidget.php          SeasonRenewalWidget.php
+CronLogsTable.php               SystemHealthWidget.php
+FinanceOverview.php             WelcomeBannerWidget.php

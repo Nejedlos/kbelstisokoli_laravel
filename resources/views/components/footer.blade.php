@@ -114,7 +114,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.posts.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.posts.*') ? 'text-primary' : '' }}">
+                        <a href="{{ route('public.news.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.news.*') ? 'text-primary' : '' }}">
                             <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
                             <span class="font-medium">{{ __('general.nav.news') }}</span>
                         </a>

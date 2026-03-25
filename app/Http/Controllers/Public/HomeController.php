@@ -44,6 +44,10 @@ class HomeController extends Controller
             }
         }
 
-        return view('public.home');
+        return view('public.home', [
+            'homePage' => $homePage,
+            'branding' => $branding,
+            'branding_css' => $brandingService->getCssVariables(),
+        ]);
     }
 }

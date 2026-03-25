@@ -38,11 +38,10 @@ class MediaStorageTest extends TestCase
         // V tomto testu voláme addMedia přímo, takže se neaplikuje Filament naming,
         // ale náš PathGenerator by měl fungovat.
 
-        $year = now()->format('Y');
-        $month = now()->format('m');
-        $id = $media->id;
+        $assetId = $asset->id;
+        $mediaId = $media->uuid ?: $media->id;
 
-        $expectedPath = "default/{$year}/{$month}/{$id}/".$media->file_name;
+        $expectedPath = "uploads/defaults/{$media->id}/".$media->file_name;
 
         Storage::disk('media_public')->assertExists($expectedPath);
     }
@@ -83,9 +82,7 @@ class MediaStorageTest extends TestCase
 
         $this->assertEquals('novy-krasny-nazev.jpg', $media->file_name);
 
-        $year = now()->format('Y');
-        $month = now()->format('m');
-        $expectedPath = "default/{$year}/{$month}/{$media->id}/novy-krasny-nazev.jpg";
+        $expectedPath = "uploads/defaults/{$media->id}/novy-krasny-nazev.jpg";
 
         Storage::disk('media_public')->assertExists($expectedPath);
     }

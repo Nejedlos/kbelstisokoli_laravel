@@ -35,6 +35,7 @@ class BlockRegistry
             self::getContactInfoBlock(),
             self::getCustomHtmlBlock(),
             self::getStatsTableBlock(),
+            self::getQuickFactsBlock(),
         ];
     }
 
@@ -495,6 +496,28 @@ class BlockRegistry
                             ->label('Zobrazit odkaz na detail')
                             ->default(true),
                     ]),
+            ]));
+    }
+
+    protected static function getQuickFactsBlock(): Block
+    {
+        return Block::make('quick_facts')
+            ->label('Rychlá fakta (Kontakt, Hala)')
+            ->icon('heroicon-o-information-circle')
+            ->schema(self::withAdvancedSettings([
+                TextInput::make('title')
+                    ->label('Nadpis sekce')
+                    ->default('Kde nás najdete a kdy hrajeme'),
+                TextInput::make('subtitle')
+                    ->label('Podnadpis')
+                    ->default('Základní informace pro fanoušky i nové hráče.'),
+                Select::make('alignment')
+                    ->label('Zarovnání nadpisu')
+                    ->options([
+                        'left' => 'Vlevo',
+                        'center' => 'Na střed',
+                    ])
+                    ->default('center'),
             ]));
     }
 }

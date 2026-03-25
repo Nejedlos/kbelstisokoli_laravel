@@ -35,8 +35,8 @@ Změny se aplikují automaticky na základě atributu `lang` v tagu `<html>`, kt
 
 ## Související soubory
 - `resources/css/app.css`
-- `resources/views/public/blocks/hero.blade.php`
-- `resources/views/public/blocks/cta.blade.php`
+- `resources/views/components/public/blocks/hero.blade.php`
+- `resources/views/components/public/blocks/cta.blade.php`
 - `resources/views/components/footer.blade.php`
 - `resources/views/components/header.blade.php`
 - `resources/views/components/section-heading.blade.php`
