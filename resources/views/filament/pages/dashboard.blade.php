@@ -25,20 +25,20 @@
                         {{ __('admin/dashboard.welcome.text', ['active_players' => number_format($stats['players'], 0, ',', ' ')]) }}
                     </p>
 
-                    <div class="flex flex-wrap justify-center lg:justify-start gap-3 pt-4">
-                        <a href="{{ $actions['new_match'] }}" class="fi-btn fi-btn-color-primary fi-size-md relative inline-grid grid-flow-col items-center justify-center font-black uppercase tracking-widest outline-none transition duration-75 focus-visible:ring-2 rounded-xl py-3 px-5 sm:px-8 bg-primary-600 text-white hover:bg-primary-500 shadow-xl shadow-primary-900/20 text-xs sm:text-sm">
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 pt-4">
+                        <a href="{{ $actions['new_match'] }}" class="fi-btn fi-btn-color-primary fi-size-md relative grid w-full sm:w-auto grid-flow-col items-center justify-center font-black uppercase tracking-widest outline-none transition duration-75 focus-visible:ring-2 rounded-xl py-3 px-5 sm:px-8 bg-primary-600 text-white hover:bg-primary-500 shadow-xl shadow-primary-900/20 text-xs sm:text-sm">
                             <span class="flex items-center gap-2">
                                 <i class="fa-light fa-trophy-star fa-fw text-sm sm:text-base"></i>
                                 {{ __('admin/dashboard.welcome.quick_actions.new_match') }}
                             </span>
                         </a>
-                        <a href="{{ $actions['new_user'] }}" class="fi-btn fi-btn-color-gray fi-size-md relative inline-grid grid-flow-col items-center justify-center font-black uppercase tracking-widest outline-none transition duration-75 focus-visible:ring-2 rounded-xl py-3 px-5 sm:px-8 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/10 text-xs sm:text-sm">
+                        <a href="{{ $actions['new_user'] }}" class="fi-btn fi-btn-color-gray fi-size-md relative grid w-full sm:w-auto grid-flow-col items-center justify-center font-black uppercase tracking-widest outline-none transition duration-75 focus-visible:ring-2 rounded-xl py-3 px-5 sm:px-8 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/10 text-xs sm:text-sm">
                             <span class="flex items-center gap-2">
                                 <i class="fa-light fa-user-plus fa-fw text-sm sm:text-base"></i>
                                 {{ __('admin/dashboard.welcome.quick_actions.new_user') }}
                             </span>
                         </a>
-                        <a href="{{ $actions['new_training'] }}" class="fi-btn fi-btn-color-gray fi-size-md relative inline-grid grid-flow-col items-center justify-center font-black uppercase tracking-widest outline-none transition duration-75 focus-visible:ring-2 rounded-xl py-3 px-5 sm:px-8 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/10 text-xs sm:text-sm">
+                        <a href="{{ $actions['new_training'] }}" class="fi-btn fi-btn-color-gray fi-size-md relative grid w-full sm:w-auto grid-flow-col items-center justify-center font-black uppercase tracking-widest outline-none transition duration-75 focus-visible:ring-2 rounded-xl py-3 px-5 sm:px-8 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/10 text-xs sm:text-sm">
                             <span class="flex items-center gap-2">
                                 <i class="fa-light fa-clock fa-fw text-sm sm:text-base"></i>
                                 {{ __('admin/dashboard.welcome.quick_actions.new_training') }}

@@ -2,7 +2,10 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, shrink-to-fit=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>{{ $seo['title'] }}</title>
     <meta name="description" content="{{ $seo['description'] }}">
     <meta name="keywords" content="{{ $seo['keywords'] }}">
@@ -50,6 +53,8 @@
     @endif
 
     <!-- Fonts -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
@@ -87,11 +92,17 @@
     <meta property="og:locale" content="{{ $seo['og_locale'] }}">
     @if($seo['og_image'])
         <meta property="og:image" content="{{ $seo['og_image'] }}">
+        <meta property="og:image:width" content="{{ $seo['og_image_width'] }}">
+        <meta property="og:image:height" content="{{ $seo['og_image_height'] }}">
+        <meta property="og:image:alt" content="{{ $seo['twitter_image_alt'] }}">
     @endif
     <meta property="og:site_name" content="{{ $seo['site_name'] }}">
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="{{ $seo['twitter_card'] }}">
+    @if($seo['twitter_site'])
+        <meta name="twitter:site" content="{{ $seo['twitter_site'] }}">
+    @endif
     <meta name="twitter:title" content="{{ $seo['og_title'] }}">
     <meta name="twitter:description" content="{{ $seo['og_description'] }}">
     @if($seo['og_image'])
@@ -126,15 +137,6 @@
         })();
     </script>
     <style>{!! $branding_css !!}</style>
-    <style>
-        /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
-        .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
-            display: inline-block;
-            line-height: 1;
-            vertical-align: -0.125em;
-            opacity: 0;
-        }
-    </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @if(isset($head_code))
@@ -166,7 +168,7 @@
     </header>
 
     {{-- Dynamický spacer pro kompenzaci výšky fixního menu --}}
-    <div :style="{ height: headerHeight + 'px' }"></div>
+    <div class="h-[72px] lg:h-[80px]" :style="{ height: headerHeight + 'px' }"></div>
 
     <x-loader-global />
 

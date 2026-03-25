@@ -52,6 +52,20 @@ class SeoService
         $ogTitle = $seo->og_title ?? $seo->title ?? ($model->title ?? $siteName);
         $ogDescription = $seo->og_description ?? $seo->description ?? $description;
         $ogImage = $this->resolveOgImage($seo, $model, $settings);
+        $ogImageWidth = 1200;
+        $ogImageHeight = 630;
+
+        // Pokud máme lokální soubor, zkusíme zjistit rozměry
+        if ($ogImage && str_starts_with($ogImage, url('/'))) {
+            $path = public_path(parse_url($ogImage, PHP_URL_PATH));
+            if (file_exists($path)) {
+                $size = @getimagesize($path);
+                if ($size) {
+                    $ogImageWidth = $size[0];
+                    $ogImageHeight = $size[1];
+                }
+            }
+        }
 
         return [
             'title' => $title,
@@ -62,10 +76,13 @@ class SeoService
             'og_title' => $ogTitle,
             'og_description' => $ogDescription,
             'og_image' => $ogImage,
+            'og_image_width' => $ogImageWidth,
+            'og_image_height' => $ogImageHeight,
             'og_type' => $this->resolveOgType($model),
             'og_locale' => $this->resolveOgLocale(),
             'twitter_card' => $seo->twitter_card ?? 'summary_large_image',
             'twitter_image_alt' => $siteName,
+            'twitter_site' => $settings['socials']['twitter'] ?? null,
             'site_name' => $siteName,
             'structured_data' => $this->generateStructuredData($model, $seo, $settings),
         ];

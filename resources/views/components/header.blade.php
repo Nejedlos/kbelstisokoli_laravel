@@ -15,30 +15,13 @@
                     <source srcset="{{ web_asset($teamLogo['paths']['mini'] ?? '', true) }}" type="image/webp">
                     <img src="{{ web_asset($teamLogo['paths']['mini'] ?? '', false) }}"
                          alt="Kbelští sokoli C & E logo"
-                         class="object-contain"
-                         style="height: {{ $teamLogo['sizes']['header_mobile'] ?? 32 }}px; width: auto;"
-                         data-desktop-height="{{ $teamLogo['sizes']['header_desktop'] ?? 40 }}px"
-                         data-mobile-height="{{ $teamLogo['sizes']['header_mobile'] ?? 32 }}px"
+                         class="object-contain h-[32px] lg:h-[40px] w-auto"
+                         loading="eager"
+                         fetchpriority="high"
                          id="header-team-logo"
                     >
                 </picture>
-
-                <script>
-                    (function() {
-                        const logo = document.getElementById('header-team-logo');
-                        if (!logo) return;
-                        const updateLogoSize = () => {
-                            if (window.innerWidth >= 1024) {
-                                logo.style.height = logo.dataset.desktopHeight;
-                            } else {
-                                logo.style.height = logo.dataset.mobileHeight;
-                            }
-                        };
-                        window.addEventListener('resize', updateLogoSize);
-                        updateLogoSize();
-                    })();
-                </script>
-            @elseif($branding['logo_path'])
+@elseif($branding['logo_path'])
                 <img src="{{ web_asset($branding['logo_path']) }}" alt="{{ brand_text($branding['club_name']) }}" class="h-12 w-auto">
             @endif
 
@@ -65,7 +48,9 @@
 
             {{-- Program Dropdown --}}
             <div x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false" class="relative group py-2">
-                <button class="flex items-center gap-1.5 font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 group-hover:text-primary transition focus:outline-none">
+                <button class="flex items-center gap-1.5 font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 group-hover:text-primary transition focus:outline-none"
+                        :aria-expanded="open"
+                        aria-haspopup="true">
                     {{ __('general.nav.program') }}
                     <i class="fa-light fa-chevron-down text-[10px] transition-transform duration-300 group-hover:rotate-180"></i>
                 </button>
@@ -206,8 +191,9 @@
                 </a>
             @endauth
 
-            <!-- Mobile Toggle -->
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-3 -mr-2 text-slate-700 hover:text-primary focus:outline-none transition-colors" aria-label="Menu">
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-3 -mr-2 text-slate-700 hover:text-primary focus:outline-none transition-colors"
+                    aria-label="{{ __('general.nav.toggle_menu') }}"
+                    :aria-expanded="mobileMenuOpen">
                 <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
                 <i x-show="mobileMenuOpen" class="fa-light fa-xmark text-2xl"></i>
             </button>
