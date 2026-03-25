@@ -210,6 +210,32 @@
         echo "Building assets..."
         npm run build
 
+    echo "Ensuring storage and cache directories exist and are writable..."
+    mkdir -p storage/framework/{sessions,views,cache}
+    mkdir -p storage/framework/cache/data
+    mkdir -p storage/app/public
+    mkdir -p storage/app/livewire-tmp
+    mkdir -p storage/logs
+    chmod -R 777 storage bootstrap/cache || true
+
+    echo "Cleaning up cache..."
+    rm -f bootstrap/cache/*.php
+    {{ $php }} artisan config:clear
+    {{ $php }} artisan cache:clear
+
+    echo "Running idempotent database migrations..."
+    {{ $php }} artisan migrate --force
+
+    echo "Running application synchronization..."
+    {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
+
+    {{ $php }} artisan filament:optimize
+    {{ $php }} artisan livewire:publish --assets --force
+    {{ $php }} artisan livewire:discover
+    {{ $php }} artisan cache:clear
+    {{ $php }} artisan view:cache
+    {{ $php }} artisan optimize
+
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
         # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
@@ -229,31 +255,6 @@
             find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
         fi
     fi
-
-    echo "Ensuring storage and cache directories exist and are writable..."
-    mkdir -p storage/framework/{sessions,views,cache}
-    mkdir -p storage/framework/cache/data
-    mkdir -p storage/logs
-    chmod -R 777 storage bootstrap/cache || true
-
-    echo "Cleaning up cache..."
-    rm -f bootstrap/cache/*.php
-    {{ $php }} artisan config:clear
-    {{ $php }} artisan cache:clear
-
-    echo "Running idempotent database migrations..."
-    {{ $php }} artisan migrate --force
-
-    echo "Running application synchronization..."
-    {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
-
-    {{ $php }} artisan filament:clear-cached-components
-    {{ $php }} artisan livewire:publish --assets --force
-    {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
-
-    echo "Optimizing application..."
-    {{ $php }} artisan optimize
 
     if [ "{{ $noai }}" != "1" ]; then
         echo "Reindexing AI..."
@@ -309,6 +310,8 @@
     echo "Ensuring storage and cache directories exist and are writable..."
     mkdir -p storage/framework/{sessions,views,cache}
     mkdir -p storage/framework/cache/data
+    mkdir -p storage/app/public
+    mkdir -p storage/app/livewire-tmp
     mkdir -p storage/logs
     chmod -R 777 storage bootstrap/cache || true
 
@@ -327,11 +330,35 @@
     echo "Running application synchronization..."
     {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
 
-    {{ $php }} artisan filament:clear-cached-components
+    {{ $php }} artisan filament:optimize
     {{ $php }} artisan livewire:publish --assets --force
+    {{ $php }} artisan livewire:discover
     {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
+    {{ $php }} artisan view:cache
     {{ $php }} artisan optimize
+
+    # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
+    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+        # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
+        if [ ! -L "{{ $public_path }}" ]; then
+            cd {{ $path }}/public
+            # Najdeme všechny skutečné adresáře v public/
+            find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name "storage" | while read dir; do
+                dir_name=$(basename "$dir")
+                echo "Syncing $dir_name to custom public path: {{ $public_path }}/$dir_name"
+                if [ "$dir_name" != "uploads" ]; then
+                    rm -rf "{{ $public_path }}/$dir_name"
+                fi
+                mkdir -p "{{ $public_path }}/$dir_name"
+                # Kopírování obsahu včetně skrytých souborů
+                cp -rf "$dir_name"/. "{{ $public_path }}/$dir_name/"
+            done
+
+            # Také zkopírovat jednotlivé soubory v public/ (všechny, ne jen vybrané přípony)
+            echo "Syncing root files to custom public path..."
+            find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
+        fi
+    fi
 
     if [ "{{ $noai }}" != "1" ]; then
         echo "Reindexing AI..."
@@ -409,6 +436,8 @@
     echo "Ensuring storage and cache directories exist and are writable..."
     mkdir -p storage/framework/{sessions,views,cache}
     mkdir -p storage/framework/cache/data
+    mkdir -p storage/app/public
+    mkdir -p storage/app/livewire-tmp
     mkdir -p storage/logs
     chmod -R 777 storage bootstrap/cache || true
 
@@ -416,6 +445,16 @@
     rm -f bootstrap/cache/*.php
     {{ $php }} artisan config:clear
     {{ $php }} artisan cache:clear
+
+    cd {{ $path }}
+    {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
+
+    {{ $php }} artisan filament:optimize
+    {{ $php }} artisan livewire:publish --assets --force
+    {{ $php }} artisan livewire:discover
+    {{ $php }} artisan cache:clear
+    {{ $php }} artisan view:cache
+    {{ $php }} artisan optimize
 
     # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
@@ -438,33 +477,7 @@
             echo "Syncing root files to custom public path..."
             find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
         fi
-
-        echo "Patching entry points for absolute paths..."
-        echo "PD9waHAKJGJhc2UgPSAkYXJndlsxXTsKJHB1YmxpYyA9ICRhcmd2WzJdOwokZGVzdCA9ICIiOyBpZiAoaXNzZXQoJGFyZ3ZbM10pKSB7ICRkZXN0ID0gJGFyZ3ZbM107IH0KJGZpbGVzID0gYXJyYXlfdW5pcXVlKGFycmF5X2ZpbHRlcihbJGJhc2UgLiAiL3B1YmxpYy9pbmRleC5waHAiLCAkZGVzdF0pKTsKZm9yZWFjaCAoJGZpbGVzIGFzICRmKSB7CiAgICBpZiAoIWZpbGVfZXhpc3RzKCRmKSkgY29udGludWU7CiAgICAkYyA9IGZpbGVfZ2V0X2NvbnRlbnRzKCRmKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJEFQUF9CQVNFXFxzKj1cXHMqLio/Oy8iLCAiXCRBUFBfQkFTRSA9IFwiIiAuICRiYXNlIC4gIlwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvcmVxdWlyZVxccysuKj92ZW5kb3JcL2F1dG9sb2FkXFwucGhwLio/Oy8iLCAicmVxdWlyZSBcIiIgLiAkYmFzZSAuICIvdmVuZG9yL2F1dG9sb2FkLnBocFwiOyIsICRjKTsKICAgICRjID0gcHJlZ19yZXBsYWNlKCIvXFxcJGFwcC0+dXNlUHVibGljUGF0aFxcKC4qP1xcKTtcXHMqLyIsICIiLCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2RlZmluZVxcKFtcIiddTEFSQVZFTF9QVUJMSUNfUEFUSFtcIiddLio/XFwpO1xccyovIiwgIiIsICRjKTsKICAgICRyZXBsYWNlbWVudCA9ICJkZWZpbmUoXCJMQVJBVkVMX1BVQkxJQ19QQVRIXCIsIFwiIiAuICRwdWJsaWMgLiAiXCIpO1xuICAgICAgICAgICAgXCRhcHAgPSByZXF1aXJlX29uY2UgXCIiIC4gJGJhc2UgLiAiL2Jvb3RzdHJhcC9hcHAucGhwXCI7XG4gICAgICAgICAgICBcJGFwcC0+dXNlUHVibGljUGF0aChcIiIgLiAkcHVibGljIC4gIlwiKTsiOwogICAgJGMgPSBwcmVnX3JlcGxhY2UoIi9yZXF1aXJlX29uY2VcXHMrLio/Ym9vdHN0cmFwXC9hcHBcXC5waHAuKj8oW1wiJ118OykvIiwgJHJlcGxhY2VtZW50LCAkYyk7CiAgICAkYyA9IHByZWdfcmVwbGFjZSgiL2ZpbGVfZXhpc3RzXFwoXFxzKlxcXCRtYWludGVuYW5jZVxccyo9XFxzKi4qP3N0b3JhZ2VcL2ZyYW1ld29ya1wvbWFpbnRlbmFuY2VcXC5waHAuKj9cXCkvIiwgImZpbGVfZXhpc3RzKFwkbWFpbnRlbmFuY2UgPSBcIiIgLiAkYmFzZSAuICIvc3RvcmFnZS9mcmFtZXdvcmsvbWFpbnRlbmFuY2UucGhwXCIpIiwgJGMpOwogICAgZmlsZV9wdXRfY29udGVudHMoJGYsICRjKTsKfQo=" | base64 -d > patch_entrypoints.php
-        {{ $php }} patch_entrypoints.php "{{ $path }}" "{{ $target_public }}" "{{ $target_public }}/index.php"
-        rm patch_entrypoints.php
-        echo "✅ Entry points patched."
-
-        cd {{ $path }}
-        echo "Current directory after patching: $(pwd)"
-        ls -la artisan || echo "artisan not found!"
     fi
-
-    echo "Running idempotent database migrations..."
-    cd {{ $path }}
-    {{ $php }} artisan migrate --force
-
-    echo "Running application synchronization..."
-    cd {{ $path }}
-    {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
-
-    {{ $php }} artisan filament:clear-cached-components
-    {{ $php }} artisan livewire:publish --assets --force
-    {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
-
-    echo "Optimizing application..."
-    {{ $php }} artisan optimize
 
     if [ "{{ $noai }}" != "1" ]; then
         echo "Reindexing AI..."

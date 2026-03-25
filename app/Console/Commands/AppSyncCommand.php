@@ -105,6 +105,10 @@ class AppSyncCommand extends Command
             $this->call('announcements:sync');
         }
 
+        // Livewire discover
+        $this->info('Cachuji Livewire komponenty...');
+        $this->call('livewire:discover');
+
         // Finance
         if (class_exists(\App\Console\Commands\FinanceSyncCommand::class)) {
             $financeFlags = [];

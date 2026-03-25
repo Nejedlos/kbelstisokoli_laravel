@@ -18,7 +18,9 @@ class CmsContentSeeder extends Seeder
 
         // Vyčistit cache po seedování, aby se změny projevily hned
         try {
-            app(\App\Services\BrandingService::class)->clearCache();
+            if (app()->bound(\App\Services\BrandingService::class)) {
+                app(\App\Services\BrandingService::class)->clearCache();
+            }
         } catch (\Throwable $e) {
             // Ignorovat, pokud služba není dostupná
         }
@@ -160,7 +162,7 @@ class CmsContentSeeder extends Seeder
             [
                 'slug' => 'kontakt',
                 'title' => ['cs' => 'Kontakt', 'en' => 'Contact'],
-                'content' => [],
+                'content' => $this->getContactBlocks(),
                 'status' => 'published',
                 'is_visible' => true,
                 'seo' => [
@@ -173,10 +175,31 @@ class CmsContentSeeder extends Seeder
             $seoData = $pageData['seo'] ?? null;
             unset($pageData['seo']);
 
-            $page = Page::updateOrCreate(
-                ['slug' => $pageData['slug']],
-                $pageData
-            );
+            // Inteligentní updateOrCreate pro zachování obsahu, pokud už existuje
+            $page = Page::where('slug', $pageData['slug'])->first();
+
+            if ($page) {
+                // Pokud stránka existuje, nebudeme přepisovat 'content', pokud už tam něco je (včetně home)
+                // U home ale chceme aktualizovat hero blok
+                if ($pageData['slug'] === 'home') {
+                    $this->updateHomeHeroBlock($page);
+                }
+
+                // Pokud je content prázdný v databázi, ale v seederu máme data, tak je tam dáme (pro záchranu smazaných stránek)
+                if (empty($page->content) && !empty($pageData['content'])) {
+                    $page->update(['content' => $pageData['content']]);
+                }
+
+                // Aktualizovat aspoň metadata a SEO
+                $page->update([
+                    'title' => $pageData['title'],
+                    'status' => $pageData['status'] ?? 'published',
+                    'is_visible' => $pageData['is_visible'] ?? true,
+                ]);
+            } else {
+                // Pokud neexistuje, vytvoříme ji
+                $page = Page::create($pageData);
+            }
 
             if ($seoData) {
                 $page->seo()->updateOrCreate(
@@ -185,6 +208,77 @@ class CmsContentSeeder extends Seeder
                 );
             }
         }
+    }
+
+    protected function updateHomeHeroBlock(Page $page): void
+    {
+        $content = $page->content;
+        $updated = false;
+
+        if (empty($content)) {
+            $page->update(['content' => $this->getHomeBlocks()]);
+            return;
+        }
+
+        foreach ($content as &$block) {
+            if ($block['type'] === 'hero') {
+                if (!isset($block['data']['show_upcoming_events']) || $block['data']['show_upcoming_events'] != 1) {
+                    $block['data']['show_upcoming_events'] = 1;
+                    $updated = true;
+                }
+            }
+        }
+
+        if ($updated) {
+            $page->update(['content' => $content]);
+        }
+    }
+
+    protected function getContactBlocks(): array
+    {
+        // Pokusit se načíst URL mapy z nastavení
+        $mapUrl = Setting::where('key', 'venue_map_url')->first()?->value ?? '';
+
+        return [
+            'cs' => [
+                [
+                    'type' => 'contact_info',
+                    'data' => [
+                        'title' => 'Kontaktujte nás',
+                        'address' => 'RumcajsArena, Třinecká 650, Letňany',
+                        'email' => 'spanily@pro-nemo.cz',
+                        'phone' => '+420 602 285 447',
+                        'show_map' => false,
+                    ],
+                ],
+                [
+                    'type' => 'custom_html',
+                    'data' => [
+                        'title' => 'Kde nás najdete',
+                        'html' => '<div class="w-full h-[450px] rounded-2xl overflow-hidden shadow-lg mb-12"><iframe src="' . $mapUrl . '" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>',
+                    ],
+                ],
+            ],
+            'en' => [
+                [
+                    'type' => 'contact_info',
+                    'data' => [
+                        'title' => 'Contact Us',
+                        'address' => 'RumcajsArena, Třinecká 650, Letňany',
+                        'email' => 'spanily@pro-nemo.cz',
+                        'phone' => '+420 602 285 447',
+                        'show_map' => false,
+                    ],
+                ],
+                [
+                    'type' => 'custom_html',
+                    'data' => [
+                        'title' => 'Where to find us',
+                        'html' => '<div class="w-full h-[450px] rounded-2xl overflow-hidden shadow-lg mb-12"><iframe src="' . $mapUrl . '" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>',
+                    ],
+                ],
+            ],
+        ];
     }
 
     protected function seedMenus(): void
@@ -196,7 +290,7 @@ class CmsContentSeeder extends Seeder
         );
 
         // Vyčistit existující položky hlavního menu pro zamezení duplicitám
-        $headerMenu->items()->delete();
+        // $headerMenu->items()->delete(); // Zakomentováno pro záchranu menu, pokud si ho uživatel upravil
 
         $items = [
             ['label' => ['cs' => 'Domů', 'en' => 'Home'], 'url' => '/', 'sort' => 10],
@@ -206,9 +300,12 @@ class CmsContentSeeder extends Seeder
             ['label' => ['cs' => 'Zápasy', 'en' => 'Matches'], 'url' => '/zapasy', 'sort' => 50],
             ['label' => ['cs' => 'Nábor', 'en' => 'Join us'], 'url' => '/nabor', 'sort' => 60],
             ['label' => ['cs' => 'Kontakt', 'en' => 'Contact'], 'url' => '/kontakt', 'sort' => 70],
+            ['label' => ['cs' => 'Historie', 'en' => 'History'], 'url' => '/historie', 'sort' => 80],
+            ['label' => ['cs' => 'Galerie', 'en' => 'Gallery'], 'url' => '/galerie', 'sort' => 90],
         ];
 
         foreach ($items as $item) {
+            // Použijeme updateOrCreate bez smazání všeho, abychom neztratili uživatelské úpravy menu
             MenuItem::updateOrCreate(
                 ['menu_id' => $headerMenu->id, 'url' => $item['url']],
                 [
@@ -630,12 +727,24 @@ class CmsContentSeeder extends Seeder
                         'content' => '<h2>O nás</h2><p>Oddíl TJ Sokol Kbely Basketball vznikl s vizí vytvořit místo, kde se děti i dospělí mohou věnovat basketbalu na profesionální i rekreační úrovni. Naše týmy C a E tvoří letňanskou větev tohoto tradičního klubu.</p><h3>Naše hodnoty</h3><ul><li>Týmovost</li><li>Respekt</li><li>Vytrvalost</li><li>Radost</li></ul>',
                     ],
                 ],
+                [
+                    'type' => 'rich_text',
+                    'data' => [
+                        'content' => '<h2>Historie klubu</h2><p>Historie basketbalového oddílu TJ Sokol Kbely sahá hluboko do minulosti. Naše týmy navazují na bohatou tradici a snaží se o rozvoj basketbalu v pražských Letňanech a Kbelích. Více o naší cestě a dosažených úspěších najdete v této sekci.</p>',
+                    ],
+                ],
             ],
             'en' => [
                 [
                     'type' => 'rich_text',
                     'data' => [
                         'content' => '<h2>About Us</h2><p>Kbely Falcons were founded with a vision to create a place where children and adults can dedicate themselves to basketball on both professional and recreational levels.</p><h3>Our Values</h3><ul><li>Teamwork</li><li>Respect</li><li>Perseverance</li><li>Joy</li></ul>',
+                    ],
+                ],
+                [
+                    'type' => 'rich_text',
+                    'data' => [
+                        'content' => '<h2>Club History</h2><p>The history of the TJ Sokol Kbely basketball section goes deep into the past. Our teams follow a rich tradition and strive to develop basketball in Prague Letňany and Kbely.</p>',
                     ],
                 ],
             ],

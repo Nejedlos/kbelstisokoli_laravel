@@ -44,8 +44,6 @@ class HomeController extends Controller
             }
         }
 
-        return view('public.home', [
-            'page' => $homePage,
-        ]);
+        return view('public.home');
     }
 }

@@ -214,8 +214,6 @@ class AppServiceProvider extends ServiceProvider
                             'branding_css' => $brandingService->getCssVariables(),
                             'announcements_public' => $communicationService->getActiveAnnouncements('public'),
                             'announcements_member' => $communicationService->getActiveAnnouncements('member'),
-                            'footerMenu' => \App\Models\Menu::where('location', 'footer')->with('items')->first()?->items ?? collect(),
-                            'footerClubMenu' => \App\Models\Menu::where('location', 'footer_club')->with('items')->first()?->items ?? collect(),
                         ];
                     });
                 } catch (\Throwable $e) {
@@ -225,8 +223,6 @@ class AppServiceProvider extends ServiceProvider
                         'branding_css' => $brandingService->getCssVariables(),
                         'announcements_public' => $communicationService->getActiveAnnouncements('public'),
                         'announcements_member' => $communicationService->getActiveAnnouncements('member'),
-                        'footerMenu' => \App\Models\Menu::where('location', 'footer')->with('items')->first()?->items ?? collect(),
-                        'footerClubMenu' => \App\Models\Menu::where('location', 'footer_club')->with('items')->first()?->items ?? collect(),
                     ];
                 }
             }
@@ -234,12 +230,6 @@ class AppServiceProvider extends ServiceProvider
             $view->with('branding', $cachedData['branding']);
             $view->with('branding_css', $cachedData['branding_css']);
             $view->with('announcements', $cachedData["announcements_{$audience}"]);
-
-            // Menus for Public Footer
-            if ($audience === 'public') {
-                $view->with('footerMenu', $cachedData['footerMenu']);
-                $view->with('footerClubMenu', $cachedData['footerClubMenu']);
-            }
 
             // Přidání SEO metadat pro public layout, pokud už nejsou nastaveny
             if ($audience === 'public' && ! isset($view->seo)) {

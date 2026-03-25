@@ -1,34 +1,58 @@
 @extends('layouts.public')
 
 @section('content')
-    @if($page)
-        <x-page-blocks :blocks="$page->content ?? []" animate="true" />
-    @else
-        <div class="bg-secondary text-white py-20 md:py-32 relative overflow-hidden">
-            <div class="absolute inset-0 hero-mesh opacity-10"></div>
-            <div class="container relative z-10 text-center">
-                <h1 class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-tight leading-display">{{ __('general.home.welcome') }}</h1>
-                <p class="text-xl text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed text-balance">{{ __('general.home.no_content') }}</p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <a href="{{ route('public.teams.index') }}" class="btn btn-primary btn-glow px-10">
-                        {{ __('nav.team') }}
-                    </a>
-                    <a href="{{ route('login') }}" class="btn btn-outline-white px-10">
-                        {{ __('nav.member_section') }}
-                    </a>
-                </div>
-            </div>
-        </div>
+    {{-- Hero Sekce --}}
+    @php
+        $heroData = [
+            'eyebrow' => 'Sokol Kbely • C & E',
+            'headline' => "Více než jen\nbasketbal.",
+            'subheadline' => 'Hrajeme pro radost, bojujeme jako jeden tým. Přidej se k nám!',
+            'cta_label' => 'Chci se přidat',
+            'cta_url' => route('public.recruitment.index'),
+            'cta_secondary_label' => 'Naše týmy',
+            'cta_secondary_url' => route('public.teams.index'),
+            'show_upcoming_events' => true,
+            'variant' => 'standard',
+            'alignment' => 'left',
+            'overlay' => true,
+            'image_url' => 'assets/img/home/home-hero-mobile.jpg',
+        ];
+    @endphp
+    <x-public.blocks.hero :data="$heroData" />
 
-        <div class="section-padding bg-bg">
-            <div class="container">
-                <x-section-heading
-                    :title="__('general.quick_facts_title')"
-                    :subtitle="__('general.quick_facts_subtitle')"
-                    align="center"
-                />
-                <x-quick-facts :branding="$branding ?? []" />
-            </div>
+    {{-- Novinky --}}
+    <div class="section-padding bg-white">
+        <div class="container">
+            <x-section-heading
+                :title="__('general.nav.news')"
+                :subtitle="__('general.blocks.news_subtitle')"
+                align="left"
+            />
+            <x-public.blocks.news_listing :data="['limit' => 3, 'show_button' => true]" />
         </div>
-    @endif
+    </div>
+
+    {{-- Zápasy --}}
+    <div class="section-padding bg-slate-50 border-t border-slate-100">
+        <div class="container">
+            <x-section-heading
+                :title="__('general.nav.matches')"
+                :subtitle="__('general.blocks.matches_subtitle')"
+                align="center"
+            />
+            <x-public.blocks.matches_listing :data="['limit' => 4, 'show_button' => true]" />
+        </div>
+    </div>
+
+    {{-- Quick Facts --}}
+    <div class="section-padding bg-white border-t border-slate-100">
+        <div class="container">
+            <x-section-heading
+                :title="__('general.quick_facts_title')"
+                :subtitle="__('general.quick_facts_subtitle')"
+                align="center"
+            />
+            <x-quick-facts :branding="$branding ?? []" />
+        </div>
+    </div>
 @endsection

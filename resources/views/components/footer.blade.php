@@ -95,28 +95,50 @@
                     {{ __('footer.nav_title') }}
                 </h3>
                 <ul class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-4">
-                    @forelse($footerNav as $item)
-                        <li>
-                            <a href="{{ $item->url }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->url() === $item->url ? 'text-primary' : '' }}">
-                                <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
-                                <span class="font-medium">{{ $item->label }}</span>
-                            </a>
-                        </li>
-                    @empty
-                        {{-- Fallback na statickou navigaci z configu, pokud menu v DB není --}}
-                        @foreach(config('navigation.public', []) as $item)
-                            @if(isset($item['route']))
-                                <li>
-                                    <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ Route::has($item['route']) && request()->routeIs($item['route']) ? 'text-primary' : '' }}">
-                                        <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
-                                        <span class="font-medium">{{ __($item['title']) }}</span>
-                                    </a>
-                                </li>
-                            @endif
-                        @endforeach
-                    @endforelse
                     <li>
-                        <a href="{{ Route::has('public.search') ? route('public.search') : url('/hledat') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ Route::has('public.search') && request()->routeIs('public.search') ? 'text-primary' : '' }}">
+                        <a href="{{ url('/') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->is('/') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('general.nav.home') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('public.teams.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.teams.*') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('general.nav.teams') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('public.recruitment.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.recruitment.*') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('general.nav.recruitment') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('public.posts.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.posts.*') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('general.nav.news') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('public.galleries.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.galleries.*') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('general.nav.gallery') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('public.history.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.history.*') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('general.nav.history') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('public.contact.index') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.contact.*') ? 'text-primary' : '' }}">
+                            <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
+                            <span class="font-medium">{{ __('general.nav.contact') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('public.search') }}" @wireNavigate class="hover:text-primary transition-all flex items-center group {{ request()->routeIs('public.search') ? 'text-primary' : '' }}">
                             <i class="fa-light fa-chevron-right text-[10px] mr-0 opacity-0 group-hover:mr-3 group-hover:opacity-100 transition-all"></i>
                             <span class="font-medium">{{ __('Search') }}</span>
                         </a>
@@ -337,21 +359,21 @@
             </div>
 
             <div class="flex flex-wrap justify-center md:justify-end items-center gap-x-4 gap-y-4 sm:gap-x-8 sm:gap-y-6 md:gap-x-6 md:gap-y-4 w-full md:w-auto">
-                <a href="{{ Route::has('public.contact.index') ? route('public.contact.index') : url('/kontakt') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 justify-center sm:justify-start">
+                <a href="{{ route('public.contact.index') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center py-2 justify-center sm:justify-start">
                     <span class="w-1.5 h-1.5 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
-                    {{ __('Kontakt') }}
+                    {{ __('general.nav.contact') }}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full"></span>
 
-                <a href="{{ Route::has('login') ? route('login') : url('/login') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
+                <a href="{{ route('login') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
-                    {!! str_replace(' ', '&nbsp;', __('Členská sekce')) !!}
+                    {!! str_replace(' ', '&nbsp;', __('general.nav.member_section')) !!}
                 </a>
 
                 <span class="w-1 h-1 bg-slate-800 rounded-full"></span>
 
-                <a href="{{ Route::has('public.pages.show') ? route('public.pages.show', 'gdpr') : url('/gdpr') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
+                <a href="{{ url('/gdpr') }}" @wireNavigate class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
                     <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
                     {{ __('Ochrana soukromí') }}
                 </a>

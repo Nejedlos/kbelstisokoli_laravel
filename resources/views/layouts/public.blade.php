@@ -130,18 +130,28 @@
     <!-- Charts (ApexCharts) -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
 </head>
-<body class="min-h-screen flex flex-col bg-slate-50">
+<body class="min-h-screen flex flex-col bg-slate-50"
+      x-data="{ headerHeight: 0, scrolled: false }"
+      x-init="headerHeight = $refs.header.offsetHeight; $nextTick(() => headerHeight = $refs.header.offsetHeight)"
+      @resize.window="headerHeight = $refs.header.offsetHeight"
+      @scroll.window="scrolled = window.scrollY > 10">
     @if($gtmId = env('GTM_CONTAINER_ID'))
         <!-- Google Tag Manager (noscript) -->
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $gtmId }}"
                           height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- End Google Tag Manager (noscript) -->
     @endif
-    <x-announcement-bar :announcements="$announcements ?? []" />
-    <x-loader-global />
+    <header x-ref="header"
+            class="fixed top-0 left-0 w-full z-50 transition-all duration-300"
+            :class="{ 'shadow-xl shadow-slate-200/50': scrolled }">
+        <x-announcement-bar :announcements="$announcements ?? []" />
+        <x-header :branding="$branding ?? []" :navigation="config('navigation.public', [])" />
+    </header>
 
-    <!-- Header -->
-    <x-header :branding="$branding ?? []" :navigation="config('navigation.public', [])" />
+    {{-- Dynamický spacer pro kompenzaci výšky fixního menu --}}
+    <div :style="{ height: headerHeight + 'px' }"></div>
+
+    <x-loader-global />
 
     <!-- Content -->
     <main class="flex-1">

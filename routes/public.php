@@ -103,9 +103,14 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Úvod
     Route::get('/', HomeController::class)->name('home');
 
+    // O klubu
+    Route::get('/o-klubu', function () {
+        return view('public.about');
+    })->name('about');
+
     // Novinky
-    Route::get('/novinky', [NewsController::class, 'index'])->name('news.index');
-    Route::get('/novinky/{slug}', [NewsController::class, 'show'])->name('news.show');
+    Route::get('/novinky', [NewsController::class, 'index'])->name('posts.index');
+    Route::get('/novinky/{slug}', [NewsController::class, 'show'])->name('posts.show');
 
     // Zápasy
     Route::get('/zapasy', [MatchController::class, 'index'])->name('matches.index');
@@ -146,10 +151,9 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
 
     // Nábor – GET (statická landing page)
     Route::get('/nabor', function () {
-        $page = \App\Models\Page::where('slug', 'nabor')->first();
         $teams = \App\Models\Team::where('category', 'senior')->orderBy('slug')->get();
 
-        return view('public.recruitment', compact('page', 'teams'));
+        return view('public.recruitment', compact('teams'));
     })->name('recruitment.index');
 
     // Nábor – Samostatná stránka s formulářem
@@ -166,6 +170,11 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
 
     // Vyhledávání
     Route::get('/hledat', [\App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');
+
+    // GDPR
+    Route::get('/gdpr', function () {
+        return view('public.gdpr');
+    })->name('gdpr');
 
     // Robots.txt & Sitemap & LLMs
     Route::get('/robots.txt', function () {
