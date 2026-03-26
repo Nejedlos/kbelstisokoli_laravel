@@ -87,6 +87,14 @@ class InjectFeedbackWidget
         return $isTestHost;
     }
 
+    protected function getSourceArea(Request $request): string
+    {
+        $path = $request->getPathInfo();
+        if ($path === '/admin' || str_starts_with($path, '/admin/')) return 'admin';
+        if ($path === '/member' || str_starts_with($path, '/member/')) return 'member';
+        return 'public';
+    }
+
     protected function injectWidget(Request $request, Response $response): void
     {
         $content = $response->getContent();
@@ -123,11 +131,20 @@ class InjectFeedbackWidget
                 $renderParams['user_id'] = Auth::id();
             }
 
+            // Strategy logic
+            $strategy = config('feedback.screenshot.strategy', 'auto');
+            $area = $this->getSourceArea($request);
+            if (in_array($area, ['admin', 'member'])) {
+                $strategy = 'playwright';
+            }
+
             $cfg = [
-                'strategy' => config('feedback.screenshot.strategy', 'auto'),
+                'strategy' => $strategy,
+                'area' => $area, // Pro debug v JS
+                'isLocal' => app()->environment('local'),
                 'playwright' => [
                     'enabled' => config('feedback.screenshot.playwright.enabled', true),
-                    'timeout' => config('feedback.screenshot.playwright.timeout', 30000),
+                    'timeout' => (int) config('feedback.screenshot.playwright.timeout', 30000),
                     'renderUrl' => URL::temporarySignedRoute('screenshot.render', now()->addHours(24), $renderParams),
                 ],
                 'endpoints' => [

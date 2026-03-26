@@ -46,7 +46,27 @@ Pro renderování stránek, které vyžadují přihlášení (např. `/admin/das
 
 Tímto způsobem může externí Playwright služba (bez vlastních cookies) bezpečně renderovat dashboardy konkrétních uživatelů.
 
-## 7. Konfigurace (.env)
+## 7. Lokální testování (Local Render)
+Pro testování na `localhost` (kde externí NAS služba nemá přístup k vašemu počítači) systém podporuje lokální renderování pomocí balíčku `spatie/browsershot` (vyžaduje Node.js a Puppeteer/Chrome).
+
+**V prostředí `APP_ENV=local` se automaticky aktivuje `local` driver.**
+
+Konfigurace v `.env`:
+```env
+# driver: remote (NAS) nebo local (Browsershot)
+SCREENSHOT_DRIVER=local
+
+# Volitelně cesty k binárkám (pokud nejsou v PATH)
+# SCREENSHOT_CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+# SCREENSHOT_NODE_PATH="/usr/local/bin/node"
+```
+
+Systém v lokálním režimu:
+1. Vygeneruje snapshot token a uloží HTML do cache.
+2. Spustí lokální Puppeteer (`Browsershot`) nasměrovaný na lokální URL snapshotu.
+3. Vrátí screenshot jako `data:image/png;base64` úplně stejně jako NAS služba.
+
+## 8. Konfigurace (.env)
 ```env
 # Zapnutí/vypnutí systému
 SCREENSHOT_MODE_ENABLED=true

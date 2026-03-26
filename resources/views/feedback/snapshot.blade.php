@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Feedback Snapshot</title>
     @vite(['resources/css/app.css'])
+    <x-screenshot.styles />
     {!! $context['head'] ?? '' !!}
     <base href="{{ url('/') }}">
     <style>
@@ -37,5 +38,6 @@
     <div id="snapshot-root">
         {!! $dom !!}
     </div>
+    <x-screenshot.scripts />
 </body>
 </html>

@@ -245,7 +245,7 @@ class FeedbackController extends Controller
     {
         // Strategy gate
         $strategy = config('feedback.screenshot.strategy', 'auto');
-        $allow = in_array($strategy, ['auto', 'playwright'], true) && config('feedback.screenshot.playwright.enabled', true);
+        $allow = in_array($strategy, ['auto', 'playwright', 'local'], true) && config('feedback.screenshot.playwright.enabled', true);
 
         if (!$allow) {
             return response()->json([
@@ -255,7 +255,9 @@ class FeedbackController extends Controller
         }
 
         $validated = $request->validate([
-            'dom' => 'required|string',
+            'dom' => 'nullable|string',
+            'url' => 'nullable|string',
+            'isLocal' => 'nullable|boolean',
             'head' => 'nullable|string',
             'viewport' => 'nullable|array',
             'viewport.width' => 'nullable|integer|min:320|max:3840',
@@ -268,16 +270,23 @@ class FeedbackController extends Controller
             'htmlClass' => 'nullable|string',
         ]);
 
+        if (empty($validated['dom']) && empty($validated['url'])) {
+             return response()->json(['ok' => false, 'message' => 'DOM or URL must be provided.'], 422);
+        }
+
         Log::info('[FeedbackController] Server screenshot request accepted', [
             'user_id' => $request->user()?->id,
-            'dom_size' => strlen($validated['dom']),
+            'is_local' => $validated['isLocal'] ?? false,
+            'dom_size' => isset($validated['dom']) ? strlen($validated['dom']) : 0,
         ]);
 
         try {
             /** @var \App\Services\ScreenshotService $svc */
             $svc = app(\App\Services\ScreenshotService::class);
 
-            $result = $svc->captureViaPlaywrightFromDom($validated['dom'], [
+            $result = $svc->captureViaPlaywrightFromDom($validated['dom'] ?? '', [
+                'url' => $validated['url'] ?? null,
+                'isLocal' => $validated['isLocal'] ?? false,
                 'viewport' => $validated['viewport'] ?? config('feedback.screenshot.playwright.viewports.desktop', ['width' => 1728, 'height' => 919]),
                 'dpr' => $validated['dpr'] ?? 2,
                 'selector' => $validated['selector'] ?? '#snapshot-root',

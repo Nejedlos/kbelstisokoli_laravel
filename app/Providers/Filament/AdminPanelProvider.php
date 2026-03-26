@@ -302,6 +302,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\DetectScreenshotMode::class,
                 \App\Http\Middleware\InjectFeedbackWidget::class,
             ])
             ->authMiddleware([

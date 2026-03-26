@@ -34,8 +34,8 @@ class CheckTwoFactorTimeout
             return $next($request);
         }
 
-        // Pokud je impersonace aktivní, přeskakujeme kontrolu timeoutu 2FA
-        if ($request->session()->has('impersonated_by')) {
+        // Pokud je impersonace aktivní nebo jsme v screenshot režimu, přeskakujeme kontrolu timeoutu 2FA
+        if ($request->session()->has('impersonated_by') || \App\Support\ScreenshotMode::isActive()) {
             return $next($request);
         }
 

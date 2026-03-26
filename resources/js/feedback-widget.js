@@ -50,18 +50,24 @@ function registerKsFeedbackWidget() {
         async capture(options = {}) {
             const startTs = performance.now();
             this.logs = [];
-            // default priority for Webglobe: client-side first
-            const strategy = options.strategy || window.KS_FEEDBACK_CONFIG?.strategy || 'client';
-            this.addLog(`[JS] Capture start | strategy = ${strategy}`);
-
+            // Priority strategy: user options > global config > default 'client'
             const config = window.KS_FEEDBACK_CONFIG || { strategy: 'client', playwright: { enabled: false }, endpoints: {} };
-            const targetSelector = options.targetSelector || 'body';
+            const strategy = options.strategy || config.strategy || 'client';
 
+            this.addLog(`[JS] Capture start | area = ${config.area || 'unknown'} | strategy = ${strategy}`);
+
+            if (config.endpoints?.serverScreenshot) {
+                this.addLog(`[JS] Server endpoint detected: ${config.endpoints.serverScreenshot}`);
+            }
+
+            const targetSelector = options.targetSelector || 'body';
             let result = { ok: false, durationMs: 0, strategy: 'none', logs: this.logs };
 
             try {
-                // 1. Try Client Screenshot (dom-to-image-more) - Main Strategy for production compatibility
-                if (strategy === 'client' || strategy === 'auto') {
+                // 1. Try Client Screenshot (dom-to-image-more) - Skip if strategy is strictly 'playwright' or 'server'
+                const isStrictServer = strategy === 'playwright' || strategy === 'server' || strategy === 'local';
+
+                if (!isStrictServer && (strategy === 'client' || (strategy === 'auto' && !config.playwright?.enabled))) {
                     this.addLog('[JS] Attempting client-side capture (dom-to-image-more)');
                     const dtiRes = await this.tryDomToImageMore(targetSelector);
                     if (dtiRes.ok) {
@@ -69,6 +75,7 @@ function registerKsFeedbackWidget() {
                         result = { ...dtiRes, strategy: 'client-dom-to-image-more' };
                     } else {
                         this.addLog(`[JS] dom-to-image-more failed: ${dtiRes.error?.message || 'unknown'}`);
+                        result.error = dtiRes.error;
 
                         // Fallback to html2canvas if dom-to-image-more fails
                         this.addLog('[JS] Falling back to html2canvas');
@@ -78,20 +85,22 @@ function registerKsFeedbackWidget() {
                              result = { ...h2cRes, strategy: 'client-html2canvas' };
                         } else {
                              this.addLog(`[JS] html2canvas failed: ${h2cRes.error?.message || 'unknown'}`);
+                             result.error = h2cRes.error;
                         }
                     }
                 }
 
-                // 2. Try Server Screenshot (Playwright) - ONLY if client fails and it's allowed
-                if (!result.ok && (strategy === 'server' || strategy === 'playwright' || strategy === 'auto')) {
+                // 2. Try Server Screenshot (Playwright) - Priority for 'server', 'playwright', 'local', 'auto' (if enabled)
+                if (!result.ok && (strategy === 'server' || strategy === 'playwright' || strategy === 'local' || strategy === 'auto')) {
                     if (config.endpoints?.serverScreenshot) {
-                        this.addLog('[JS] Attempting server-side screenshot (Playwright) as fallback');
+                        this.addLog('[JS] Attempting server-side screenshot (Playwright)');
                         const serverRes = await this.tryServer(config.endpoints.serverScreenshot);
                         if (serverRes.ok) {
                             this.addLog('[JS] Server screenshot success');
                             result = { ...serverRes, strategy: 'server' };
                         } else {
                             this.addLog(`[JS] Server screenshot failed: ${serverRes.error?.message || 'unknown'}`);
+                            result.error = serverRes.error;
                         }
                     } else {
                         this.addLog('[JS] Server screenshot skipped (no endpoint or disabled)');
@@ -111,6 +120,31 @@ function registerKsFeedbackWidget() {
 
         async tryServer(endpoint) {
             try {
+                const config = window.KS_FEEDBACK_CONFIG || {};
+
+                // If on localhost, we can skip the DOM snapshot and just send the URL
+                // because the local driver (Browsershot) can access it directly.
+                // This satisfies the user requirement: "na localhost nebudu ale potřebovat ani to měnění těch css stylů"
+                if (config.isLocal) {
+                    this.addLog('[JS] Local mode detected: sending URL instead of full DOM snapshot');
+                    const res = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            url: window.location.href,
+                            isLocal: true,
+                            viewport: { width: window.innerWidth, height: window.innerHeight },
+                            dpr: Math.min(window.devicePixelRatio || 1, 2),
+                            fullPage: false,
+                        })
+                    });
+                    return await this.handleServerResponse(res);
+                }
+
                 // Server supports modern CSS, no need to sanitize!
                 const snap = this.buildDomSnapshot(false);
                 const res = await fetch(endpoint, {
@@ -132,19 +166,35 @@ function registerKsFeedbackWidget() {
                     })
                 });
 
-                if (!res.ok) {
-                    const errorData = await res.json().catch(() => ({}));
-                    return { ok: false, error: { code: errorData.code || 'HTTP_' + res.status, message: errorData.message || res.statusText } };
-                }
-
-                const out = await res.json();
-                if (out.ok && out.image) {
-                    return { ok: true, base64: out.image, width: out.width, height: out.height, mime: out.mime || 'image/png' };
-                }
-                return { ok: false, error: { code: out.code || 'SERVER_ERROR', message: out.message || 'Worker failed' } };
+                return await this.handleServerResponse(res);
             } catch (e) {
+                this.addLog(`[JS] tryServer fetch exception: ${e.message}`);
                 return { ok: false, error: { code: 'EXCEPTION', message: e.message } };
             }
+        },
+
+        async handleServerResponse(res) {
+            if (!res.ok) {
+                let errorMsg = res.statusText;
+                let errorCode = 'HTTP_' + res.status;
+                try {
+                    const errorData = await res.json();
+                    errorMsg = errorData.message || errorData.error || errorMsg;
+                    errorCode = errorData.code || errorCode;
+                    this.addLog(`[JS] Server error response: ${JSON.stringify(errorData)}`);
+                } catch (e) {
+                    this.addLog(`[JS] Could not parse server error JSON (Status: ${res.status})`);
+                }
+                return { ok: false, error: { code: errorCode, message: errorMsg } };
+            }
+
+            const out = await res.json();
+            this.addLog(`[JS] Server success response received, image size: ${out.image?.length || 0}`);
+
+            if (out.ok && out.image) {
+                return { ok: true, base64: out.image, width: out.width, height: out.height, mime: out.mime || 'image/png' };
+            }
+            return { ok: false, error: { code: out.code || 'SERVER_ERROR', message: out.message || 'Worker failed' } };
         },
 
         isSameOrigin(href) {
@@ -158,12 +208,22 @@ function registerKsFeedbackWidget() {
         },
 
         buildDomSnapshot(shouldSanitize = true) {
-            // Zachytit relevantní CSS
+            // Zachytit relevantní CSS a head tagy
             let consolidatedCss = '';
+            let extraHeadTags = '';
             const styleSheets = Array.from(document.styleSheets);
 
             for (let sheet of styleSheets) {
                 try {
+                    // Zachytíme <link> tagy pro server-side render
+                    if (!shouldSanitize && sheet.ownerNode && sheet.ownerNode.tagName === 'LINK') {
+                        const href = sheet.ownerNode.getAttribute('href');
+                        if (href) {
+                            const absHref = new URL(href, window.location.href).href;
+                            extraHeadTags += `<link rel="stylesheet" href="${absHref}">\n`;
+                        }
+                    }
+
                     if (sheet.href && !this.isSameOrigin(sheet.href)) {
                         continue;
                     }
@@ -191,7 +251,8 @@ function registerKsFeedbackWidget() {
             // Cache for potential reuse in fallback
             this._lastConsolidatedCss = consolidatedCss;
 
-            const headHtml = `<style class="ks-feedback-consolidated-css">${consolidatedCss}</style>`;
+            // Pro server-side snapshot (shouldSanitize === false) chceme i linky
+            const headHtml = extraHeadTags + `<style class="ks-feedback-consolidated-css">${consolidatedCss}</style>`;
 
             // Zachytit body klon
             const bodyClone = document.body.cloneNode(true);
@@ -539,6 +600,8 @@ function registerKsFeedbackWidget() {
         },
 
         safeStringify(obj, maxLen = 800) {
+            if (obj === undefined) return 'undefined';
+            if (obj === null) return 'null';
             try {
                 const cache = new Set();
                 let str = JSON.stringify(obj, (key, value) => {
@@ -547,14 +610,15 @@ function registerKsFeedbackWidget() {
                         cache.add(value);
                     }
                     if (value instanceof Error) {
-                        return { message: value.message, stack: value.stack?.substring(0, 2000) };
+                        return { message: value.message, stack: value.stack?.substring(0, 500), code: value.code };
                     }
                     return value;
                 });
+                if (!str) return String(obj);
                 if (str.length > maxLen) return str.substring(0, maxLen) + '... [truncated]';
                 return str;
             } catch (e) {
-                return '[unserializable]';
+                return '[unserializable: ' + e.message + ']';
             }
         },
 

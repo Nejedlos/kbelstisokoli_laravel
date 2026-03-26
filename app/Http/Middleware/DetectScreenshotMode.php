@@ -23,13 +23,19 @@ class DetectScreenshotMode
             $userId = $request->query('screenshot_user_id');
             ScreenshotMode::activate($userId);
 
+            \Illuminate\Support\Facades\Log::debug('[ScreenshotMode] Detected in request', [
+                'user_id' => $userId,
+                'url' => $request->fullUrl(),
+                'headers' => [
+                    'X-Screenshot-Token' => $request->hasHeader('X-Screenshot-Token') ? 'PRESENT' : 'MISSING',
+                    'X-Screenshot-Mode' => $request->header('X-Screenshot-Mode'),
+                ],
+            ]);
+
             // Zajištění absolutních URL pro assety
             URL::forceRootUrl(config('app.url'));
 
             // Autorizace impersonifikace:
-            // Musí existovat buď platná signatura v URL, nebo platný tajný interní token v hlavičce.
-            // Samotná hlavička X-Screenshot-Mode: 1 nebo query ?screenshot=1 aktivuje režim (CSS optimalizace),
-            // ale NEDOVOLUJE přihlášení uživatele bez důkazu autenticity.
             if ($userId) {
                 $internalToken = config('screenshot.internal_token');
                 $isAuthenticated = ($internalToken && $request->header('X-Screenshot-Token') === $internalToken)
@@ -38,11 +44,33 @@ class DetectScreenshotMode
                 if ($isAuthenticated) {
                     try {
                         // Přihlášení uživatele pro tento request (impersonifikace)
-                        // Funguje pro web i Filament sekce, pokud je StartSession middleware už zpracován.
-                        Auth::loginUsingId($userId);
+                        // Používáme explicitní guard, pokud jsme v adminu
+                        $guard = $request->is('admin*') ? 'web' : config('auth.defaults.guard', 'web');
+                        Auth::guard($guard)->loginUsingId($userId);
+
+                        // Nastavení session pro bypass 2FA a jiných kontrol
+                        if ($request->hasSession()) {
+                            $request->session()->put('impersonated_by', 'screenshot_system');
+                            $request->session()->put('auth.2fa_confirmed_at', now()->timestamp);
+                            $request->session()->save(); // Vynucení uložení pro aktuální request
+                            \Illuminate\Support\Facades\Log::debug('[ScreenshotMode] Session updated', [
+                                'session_id' => $request->session()->getId(),
+                            ]);
+                        }
+
+                        \Illuminate\Support\Facades\Log::info('[ScreenshotMode] User impersonated', [
+                            'user_id' => $userId,
+                            'auth_id' => Auth::id(),
+                        ]);
                     } catch (\Throwable $e) {
-                        // Tichý fail, pokud Auth systém ještě není inicializován
+                        \Illuminate\Support\Facades\Log::error('[ScreenshotMode] Impersonation failed', [
+                            'error' => $e->getMessage(),
+                        ]);
                     }
+                } else {
+                    \Illuminate\Support\Facades\Log::warning('[ScreenshotMode] User ID provided but not authenticated', [
+                        'user_id' => $userId,
+                    ]);
                 }
             }
         }

@@ -100,7 +100,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->withMiddleware(function (Middleware $middleware): void {
         // Globální middleware pro detekci screenshot režimu (musí být co nejdříve)
-        $middleware->prepend(\App\Http\Middleware\DetectScreenshotMode::class);
+        // Přesunuto do web group append pro správnou session a auth
+        // $middleware->prepend(\App\Http\Middleware\DetectScreenshotMode::class);
 
         // Vlastní middleware skupiny pro přehlednou správu přístupů
         // Pozn.: Skupina 'web' je již aplikována v bootstrappingu rout výše.
@@ -124,12 +125,23 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            \App\Http\Middleware\DetectScreenshotMode::class,
             \App\Http\Middleware\SetLocaleMiddleware::class,
             \App\Http\Middleware\FullPageCacheMiddleware::class,
             \App\Http\Middleware\AddRequestIdToResponse::class,
             \App\Http\Middleware\MinifyHtmlMiddleware::class,
             \App\Http\Middleware\InjectFeedbackWidget::class,
             \App\Http\Middleware\NotFoundLoggerMiddleware::class,
+        ]);
+
+        $middleware->priority([
+            \Illuminate\Session\Middleware\StartSession::class,
+            \App\Http\Middleware\DetectScreenshotMode::class,
+            \Illuminate\Auth\Middleware\Authenticate::class,
+            \Filament\Http\Middleware\Authenticate::class,
+            \Illuminate\Auth\Middleware\Authorize::class,
+            \App\Http\Middleware\EnsureTwoFactorEnabled::class,
+            \App\Http\Middleware\CheckTwoFactorTimeout::class,
         ]);
 
         $middleware->group('member', [

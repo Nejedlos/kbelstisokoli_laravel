@@ -7,28 +7,43 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Spatie\Browsershot\Browsershot;
 use Exception;
 
 class ScreenshotService
 {
+    protected ?string $driver;
     protected ?string $url;
     protected ?string $token;
     protected int $timeout;
+    protected array $browsershotConfig;
 
     public function __construct()
     {
+        $this->driver = config('services.screenshot.driver', 'remote');
         $this->url = config('services.screenshot.url');
         $this->token = config('services.screenshot.token');
         $this->timeout = (int) config('services.screenshot.timeout', 40);
+        $this->browsershotConfig = config('services.screenshot.browsershot', []);
+
+        // Pokud jsme na localu a nemáme nastavený driver, přepneme na local
+        if (app()->environment('local') && empty(env('SCREENSHOT_DRIVER'))) {
+            $this->driver = 'local';
+        }
     }
 
     /**
-     * Generate screenshot via remote Playwright service from provided DOM snippet using a secure snapshot route.
+     * Generate screenshot via remote Playwright service or local Browsershot from provided DOM snippet using a secure snapshot route.
      * Returns array: [ 'data_url' => string, 'width' => int, 'height' => int, 'mime' => 'image/png', 'path' => string|null ]
      */
     public function captureViaPlaywrightFromDom(string $dom, array $options = []): array
     {
-        $logContext = ['id' => Str::random(8)];
+        $logContext = ['id' => Str::random(8), 'driver' => $this->driver];
+
+        if ($this->driver === 'local') {
+            return $this->captureLocally($dom, $options);
+        }
+
         Log::info('[ScreenshotService] Starting remote capture from DOM', $logContext);
 
         if (empty($this->url) || empty($this->token)) {
@@ -90,11 +105,12 @@ class ScreenshotService
 
             Log::error('[ScreenshotService] Remote Screenshot API Error', array_merge($logContext, [
                 'status'  => $response->status(),
-                'message' => $response->json('message'),
+                'response' => $response->body(),
                 'url'     => $targetUrl
             ]));
 
-            throw new \RuntimeException('Remote Screenshot API Error: ' . ($response->json('message') ?? 'Unknown error'));
+            $errorMessage = $response->json('message') ?? $response->statusText() ?? 'Unknown API Error';
+            throw new \RuntimeException("Remote Screenshot API Error ({$response->status()}): {$errorMessage}");
 
         } catch (Exception $e) {
             Log::error('[ScreenshotService] Remote Screenshot Service Exception', array_merge($logContext, [
@@ -110,6 +126,15 @@ class ScreenshotService
      */
     public function capture(string $targetUrl, array $options = []): ?string
     {
+        if ($this->driver === 'local') {
+            $result = $this->captureLocally('', array_merge($options, ['url' => $targetUrl]));
+            if ($result && isset($result['data_url'])) {
+                // Převod zpět z base64 data_url na binární data
+                return base64_decode(explode(',', $result['data_url'])[1]);
+            }
+            return null;
+        }
+
         try {
             $response = Http::withToken($this->token)
                 ->timeout($this->timeout)
@@ -131,5 +156,141 @@ class ScreenshotService
             Log::error('[ScreenshotService] capture exception', ['error' => $e->getMessage()]);
             return null;
         }
+    }
+
+    /**
+     * Internal method to capture via local driver (using Playwright script).
+     */
+    protected function captureLocally(string $dom, array $options = []): array
+    {
+        $logContext = ['driver' => 'local'];
+        Log::info('[ScreenshotService] Starting local capture (Playwright JS)', $logContext);
+
+        try {
+            $viewport = $options['viewport'] ?? ['width' => 1280, 'height' => 720];
+            $targetUrl = $options['url'] ?? config('app.url');
+
+            // Autentizační hlavičky a query parametry
+            $userId = $options['context']['user_id'] ?? null;
+            $headers = [
+                'X-Screenshot-Mode' => '1',
+                'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+            ];
+
+            $token = config('screenshot.internal_token');
+            if ($token) {
+                $headers['X-Screenshot-Token'] = $token;
+            }
+
+            // Přidáme user_id do URL pro impersonifikaci
+            if ($userId) {
+                $parsed = parse_url($targetUrl);
+                $query = $parsed['query'] ?? '';
+                parse_str($query, $queryParams);
+                $queryParams['screenshot_user_id'] = $userId;
+                $queryParams['screenshot'] = '1';
+                $newQuery = http_build_query($queryParams);
+
+                $targetUrl = (isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '') .
+                             (isset($parsed['host']) ? $parsed['host'] : '') .
+                             (isset($parsed['port']) ? ':' . $parsed['port'] : '') .
+                             (isset($parsed['path']) ? $parsed['path'] : '') .
+                             ($newQuery ? '?' . $newQuery : '') .
+                             (isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '');
+            }
+
+            // Příprava argumentů pro JS script
+            $tempFile = storage_path('app/temp-screenshot-' . Str::random(10) . '.png');
+            $jsOptions = [
+                'width'          => (int) $viewport['width'],
+                'height'         => (int) $viewport['height'],
+                'executablePath' => $this->browsershotConfig['chrome_path'] ?? null,
+                'headers'        => $headers,
+                'selector'       => $options['selector'] ?? null,
+                'waitUntil'      => 'networkidle'
+            ];
+
+            $nodeBin = $this->browsershotConfig['node_path'] ?? 'node';
+            $scriptPath = app_path('Support/local-screenshot.cjs');
+
+            // Zajistíme, aby v PATH byly běžné cesty k node pro Mac (Homebrew atd.)
+            $nodeDir = is_executable($nodeBin) ? dirname($nodeBin) : '/opt/homebrew/bin';
+
+            $command = sprintf(
+                'PATH=$PATH:%s:/usr/local/bin NODE_PATH=%s %s %s %s %s %s 2>&1',
+                escapeshellarg($nodeDir),
+                escapeshellarg(base_path('node_modules')),
+                escapeshellarg($nodeBin),
+                escapeshellarg($scriptPath),
+                escapeshellarg($targetUrl),
+                escapeshellarg($tempFile),
+                escapeshellarg(json_encode($jsOptions))
+            );
+
+            Log::debug('[ScreenshotService] Executing local command', array_merge($logContext, ['command' => $command]));
+
+            $output = [];
+            $returnVar = 0;
+            exec($command, $output, $returnVar);
+
+            if ($returnVar !== 0 || !file_exists($tempFile)) {
+                $errorMsg = implode("\n", $output);
+                Log::error('[ScreenshotService] Local capture failed', array_merge($logContext, ['error' => $errorMsg]));
+                throw new \Exception("Local screenshot failed: " . $errorMsg);
+            }
+
+            $imageContent = file_get_contents($tempFile);
+            unlink($tempFile);
+
+            $base64 = base64_encode($imageContent);
+
+            return [
+                'data_url' => 'data:image/png;base64,' . $base64,
+                'mime' => 'image/png',
+                'width' => (int) $viewport['width'],
+                'height' => (int) $viewport['height'],
+                'path' => null,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[ScreenshotService] local capture exception', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Apply common Browsershot configurations.
+     */
+    protected function applyBrowsershotConfig(Browsershot $browsershot, array $options = []): void
+    {
+        $browsershot->windowSize($options['width'] ?? 1280, $options['height'] ?? 720);
+
+        if ($options['fullPage'] ?? false) {
+            $browsershot->fullPage();
+        }
+
+        if ($selector = ($options['selector'] ?? null)) {
+            $browsershot->select($selector);
+        }
+
+        if ($this->browsershotConfig['chrome_path'] ?? null) {
+            $browsershot->setChromePath($this->browsershotConfig['chrome_path']);
+        }
+
+        if ($this->browsershotConfig['node_path'] ?? null) {
+            $browsershot->setNodePath($this->browsershotConfig['node_path']);
+            // Přidáme cestu k node binárce do PATH, aby Browsershot mohl spustit node i npm
+            $nodeBinDir = dirname($this->browsershotConfig['node_path']);
+            $currentPath = getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin';
+            $browsershot->setIncludePath($nodeBinDir . PATH_SEPARATOR . '/opt/homebrew/bin' . PATH_SEPARATOR . '/usr/local/bin' . PATH_SEPARATOR . $currentPath);
+        }
+
+        if ($this->browsershotConfig['npm_path'] ?? null) {
+            $browsershot->setNpmPath($this->browsershotConfig['npm_path']);
+        }
+
+        $browsershot->noSandbox()
+            ->waitUntilNetworkIdle()
+            ->setOption('args', ['--disable-web-security', '--disable-setuid-sandbox']);
     }
 }

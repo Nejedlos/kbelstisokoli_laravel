@@ -47,9 +47,15 @@ return [
     ],
 
     'screenshot' => [
+        'driver'  => env('SCREENSHOT_DRIVER', 'remote'), // remote or local (browsershot)
         'url'     => env('SCREENSHOT_SERVICE_URL'),
         'token'   => env('SCREENSHOT_SERVICE_TOKEN'),
         'timeout' => (int) env('SCREENSHOT_SERVICE_TIMEOUT', 40),
+        'browsershot' => [
+            'chrome_path' => env('SCREENSHOT_CHROME_PATH'),
+            'node_path'   => env('SCREENSHOT_NODE_PATH'),
+            'npm_path'    => env('SCREENSHOT_NPM_PATH'),
+        ],
     ],
 
 ];
