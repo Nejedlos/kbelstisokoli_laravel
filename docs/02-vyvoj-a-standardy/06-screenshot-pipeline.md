@@ -3,22 +3,23 @@
 Tento dokument popisuje architekturu a provoz vícevrstvého řešení pro pořizování screenshotů ve feedback widgetu.
 
 ## Architektura
-1. Primární vrstva: server-side screenshot přes Playwright (Chromium, headless). Podporuje moderní CSS barvy (oklab, oklch).
+1. Primární vrstva: server-side screenshot přes vzdálenou službu (Synology NAS Kettnerka) běžící v Dockeru. Podporuje moderní CSS barvy (oklab, oklch) a nevyžaduje instalaci Chromia na webový server.
 2. Fallback #1: klientský screenshot přes html-to-image (využívá SVG foreignObject, velmi věrný render).
 3. Fallback #2: klientský screenshot přes html2canvas nad sanitizovaným klonem DOMu (poslední záchrana).
 4. Poslední fallback: bez screenshotu (odeslání reportu s DOM snapshotem a logy), aby akce nikdy neselhávala tvrdou chybou.
 
 ## Konfigurace
+- `config/services.php`
+  - `screenshot.url`: URL endpointu (např. `https://screenshot.kbelstisokoli.cz/screenshot`).
+  - `screenshot.token`: API token pro autorizaci.
+  - `screenshot.timeout`: timeout požadavku (vteřiny, default 40).
 - `config/feedback.php`
   - `screenshot.strategy`: `auto|playwright|html-to-image|html2canvas|none` (výchozí `auto`).
-  - `screenshot.playwright.enabled`: zapnutí/vypnutí server-side.
-  - `screenshot.playwright.timeout`: timeout v ms (default 30000).
-  - `screenshot.playwright.node_path`: binárka Node (default `node`).
-  - `screenshot.playwright.script_path`: `resources/js/screenshot-worker.cjs`.
+  - `screenshot.playwright.enabled`: zapnutí/vypnutí server-side screenshotování.
 
 ## Endpointy
-- `POST /feedback/screenshot` – přijme DOM snapshot a vrátí screenshot (base64) pořízený Playwrightem.
-- `GET /feedback/snapshot/{token}` – bezpečný jednorázový render DOMu pro Playwright (token je v cache, krátká expirace).
+- `POST /feedback/screenshot` – přijme DOM snapshot a zavolá externí ScreenshotService.
+- `GET /feedback/snapshot/{token}` – bezpečný jednorázový render DOMu pro ScreenshotService (token je v cache, krátká expirace). Tento endpoint musí být přístupný z IP adresy NASu.
 
 ## Frontend flow
 - `resources/js/feedback-widget.js`
@@ -31,22 +32,17 @@ Tento dokument popisuje architekturu a provoz vícevrstvého řešení pro poři
   - Záznam konzolových logů je stručný (prefix `[FB]`).
   - Trasy `/feedback` a `/feedback/screenshot` mají v `bootstrap/app.php` výjimku z CSRF ochrany pro maximální robustnost.
 
-## Playwright worker
-- Skript: `resources/js/screenshot-worker.cjs`
-- Spouštění: Symfony Process z PHP služby `App\Services\ScreenshotService`.
-- Parametry: `--url`, `--selector`, `--out`, `--width`, `--height`, `--dpr`, `--fullPage`.
+## Screenshot Service (Remote)
+- Služba běží na NASu Kettnerka v Dockeru (Playwright + Node.js API).
+- Implementováno v PHP službě `App\Services\ScreenshotService`.
+- Komunikace probíhá přes HTTPS s Bearer tokenem.
 
-## Instalace závislostí
-- Node 18+ (doporučeno LTS, v dev ověřeno s Node v25).
-- NPM balíčky: `npm install`
-- Playwright Chromium: `npm run playwright:install`
-- Build assetů: `npm run build`
-
-## Provoz na serveru
-- Zajistit dostupnost Node a Playwright (Chromium). Na některých hostinzích může být nutná separátní služba/runner.
-- Nastavit ENV:
-  - `FEEDBACK_SCREENSHOT_STRATEGY=auto` (prod)
-  - `FEEDBACK_PLAYWRIGHT_ENABLED=true|false` dle dostupnosti Node/Chromia
+## Instalace a nastavení (NAS)
+- Služba vyžaduje `API_TOKEN` a nastavení `ALLOWED_HOSTS`.
+- Na straně Laravelu stačí nastavit proměnné v `.env`:
+  - `SCREENSHOT_SERVICE_URL`
+  - `SCREENSHOT_SERVICE_TOKEN`
+  - `SCREENSHOT_SERVICE_TIMEOUT`
 
 ## Testování
 - Jednotkové testy: `tests/Unit/CssSanitizerTest.php`

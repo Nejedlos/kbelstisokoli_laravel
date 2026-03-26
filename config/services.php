@@ -46,4 +46,10 @@ return [
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
     ],
 
+    'screenshot' => [
+        'url'     => env('SCREENSHOT_SERVICE_URL'),
+        'token'   => env('SCREENSHOT_SERVICE_TOKEN'),
+        'timeout' => (int) env('SCREENSHOT_SERVICE_TIMEOUT', 40),
+    ],
+
 ];

@@ -15,44 +15,51 @@ class FeedbackDiagnosticCommand extends Command
 
     public function handle()
     {
-        $this->info('Starting Feedback System Diagnostic...');
+        $this->info('Starting Feedback System Diagnostic (Remote Service)...');
 
-        // 1. Check Node.js
-        $this->line('Checking Node.js...');
-        $node = config('feedback.screenshot.playwright.node_path', 'node');
-        $proc = new Process([$node, '-v']);
-        $proc->run();
-        if ($proc->isSuccessful()) {
-            $this->info('✓ Node.js version: ' . trim($proc->getOutput()));
+        // 1. Check Configuration
+        $this->line('Checking Configuration...');
+        $url = config('services.screenshot.url');
+        $token = config('services.screenshot.token');
+
+        if ($url) {
+            $this->info('✓ Screenshot Service URL: ' . $url);
         } else {
-            $this->error('✗ Node.js not found or not executable: ' . $node);
+            $this->error('✗ Screenshot Service URL NOT configured (SCREENSHOT_SERVICE_URL).');
         }
 
-        // 2. Check Playwright dependency
-        $this->line('Checking Playwright node_modules...');
-        if (file_exists(base_path('node_modules/playwright'))) {
-            $this->info('✓ playwright package found in node_modules.');
+        if ($token) {
+            $this->info('✓ Screenshot Service Token: ' . substr($token, 0, 8) . '...');
         } else {
-            $this->error('✗ playwright package NOT found in node_modules. Run npm install.');
+            $this->error('✗ Screenshot Service Token NOT configured (SCREENSHOT_SERVICE_TOKEN).');
         }
 
-        // 3. Check browsers
-        $this->line('Checking browsers...');
-        $env = [];
-        if ($browsersPath = config('feedback.screenshot.playwright.browsers_path')) {
-            $env['PLAYWRIGHT_BROWSERS_PATH'] = $browsersPath;
-        }
-        $proc = new Process([$node, '-e', 'require("playwright").chromium.launch()'], base_path(), $env);
-        $proc->run();
-        if ($proc->isSuccessful()) {
-            $this->info('✓ Playwright can launch Chromium.');
-        } else {
-            $this->error('✗ Playwright CANNOT launch Chromium.');
-            $this->error($proc->getErrorOutput());
-            $this->line('Suggestion: Run npx playwright install chromium');
+        // 2. Check Service Health (if URL exists)
+        if ($url) {
+            $this->line('Checking Remote Service Health...');
+            try {
+                // Assuming the service has a /health endpoint or we just check connectivity
+                $healthUrl = str_replace('/screenshot', '/health', $url);
+                $response = \Illuminate\Support\Facades\Http::get($healthUrl);
+
+                if ($response->successful()) {
+                    $this->info('✓ Remote service is UP and reachable.');
+                } else {
+                    $this->warn('! Remote service returned status: ' . $response->status());
+                    $this->line('Trying connectivity to the main URL...');
+                    $response = \Illuminate\Support\Facades\Http::withToken($token)->post($url, ['url' => 'https://google.com', 'width' => 10, 'height' => 10]);
+                    if ($response->status() !== 404 && $response->status() !== 500) {
+                        $this->info('✓ Remote service seems reachable (Status: ' . $response->status() . ')');
+                    } else {
+                        $this->error('✗ Remote service connectivity failed.');
+                    }
+                }
+            } catch (\Exception $e) {
+                $this->error('✗ Cannot reach remote service: ' . $e->getMessage());
+            }
         }
 
-        // 4. Check APP_URL and connectivity
+        // 3. Check APP_URL and connectivity
         $this->line('Checking APP_URL connectivity...');
         $appUrl = config('app.url');
         $this->line('APP_URL: ' . $appUrl);
@@ -61,29 +68,17 @@ class FeedbackDiagnosticCommand extends Command
         if ($proc->isSuccessful()) {
              $this->info('✓ Server can reach APP_URL via curl.');
         } else {
-             $this->warn('! Server might have trouble reaching itself at APP_URL. This may break server-side screenshots.');
+             $this->warn('! Server might have trouble reaching itself at APP_URL. The remote service MUST be able to reach this URL.');
         }
 
-        // 5. Check cache
-        $this->line('Checking Cache...');
+        // 4. Check cache
+        $this->line('Checking Cache (for DOM snapshot)...');
         $token = Str::random(10);
         Cache::put("diag_{$token}", 'test', 10);
         if (Cache::get("diag_{$token}") === 'test') {
             $this->info('✓ Cache is working.');
         } else {
             $this->error('✗ Cache is NOT working properly.');
-        }
-
-        // 6. Check storage
-        $this->line('Checking Storage permissions...');
-        $tempDir = storage_path('app/temp/screenshots');
-        if (!is_dir($tempDir)) {
-            @mkdir($tempDir, 0755, true);
-        }
-        if (is_writable($tempDir)) {
-            $this->info('✓ Storage temp dir is writable.');
-        } else {
-            $this->error('✗ Storage temp dir is NOT writable: ' . $tempDir);
         }
 
         $this->info('Diagnostic complete.');
