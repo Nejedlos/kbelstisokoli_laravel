@@ -60,6 +60,12 @@ class AdminPanelProvider extends PanelProvider
                 $brandingService = app(\App\Services\BrandingService::class);
                 $brandingVariables = $brandingService->getCssVariables();
 
+                // Screenshot mode support
+                $screenshotSupport = "";
+                if (class_exists(\App\Support\ScreenshotMode::class)) {
+                    $screenshotSupport = Blade::render('<x-screenshot.styles /><x-screenshot.scripts />');
+                }
+
                 // Pokud jsme na auth stránce, přidáme aliasy --brand-* (pro filament-auth.css)
                 $authAliases = '';
                 if ($isAuth) {
@@ -104,6 +110,7 @@ class AdminPanelProvider extends PanelProvider
 
                 return "
                     {$favicons}
+                    {$screenshotSupport}
                     <script data-navigate-once>
                         /**
                          * VYNUCENÍ SVĚTLÉHO REŽIMU NA MOBILECH

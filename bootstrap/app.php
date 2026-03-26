@@ -99,6 +99,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
         })->everyMinute();
     })
     ->withMiddleware(function (Middleware $middleware): void {
+        // Globální middleware pro detekci screenshot režimu (musí být co nejdříve)
+        $middleware->prepend(\App\Http\Middleware\DetectScreenshotMode::class);
+
         // Vlastní middleware skupiny pro přehlednou správu přístupů
         // Pozn.: Skupina 'web' je již aplikována v bootstrappingu rout výše.
         // alias pro kontrolu aktivního účtu

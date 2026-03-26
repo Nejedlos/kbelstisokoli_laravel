@@ -139,6 +139,9 @@
     <style>{!! $branding_css !!}</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <x-screenshot.styles />
+    <x-screenshot.scripts />
+
     @if(isset($head_code))
         {!! $head_code !!}
     @endif

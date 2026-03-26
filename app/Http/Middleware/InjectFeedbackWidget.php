@@ -122,6 +122,7 @@ class InjectFeedbackWidget
                 'playwright' => [
                     'enabled' => config('feedback.screenshot.playwright.enabled', true),
                     'timeout' => config('feedback.screenshot.playwright.timeout', 30000),
+                    'renderUrl' => route('screenshot.render'), // Nový globální endpoint
                 ],
                 'endpoints' => [
                     'serverScreenshot' => Route::has('feedback.screenshot') ? route('feedback.screenshot') : null,

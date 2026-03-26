@@ -24,6 +24,9 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        <x-screenshot.styles />
+        <x-screenshot.scripts />
+
         @livewireStyles
     </head>
     <body>

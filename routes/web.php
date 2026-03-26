@@ -101,3 +101,15 @@ Route::middleware(['web'])->group(function () {
         ->name('dev.mail-preview.index');
 });
 
+// --- Screenshot System ---
+Route::middleware(['web'])->group(function () {
+    // Globální endpoint pro renderování screenshotů (zabezpečený interním tokenem nebo auth)
+    Route::get('/system/screenshot/render', [\App\Http\Controllers\ScreenshotRenderController::class, 'render'])
+        ->name('screenshot.render');
+
+    // Virtuální route pro ověření podepsaných URL v middleware
+    Route::get('/system/screenshot/proxy/{target_path}', function() {
+        abort(404); // Tato trasa se nikdy reálně nevykoná, slouží jen pro generování/ověření signatury
+    })->name('screenshot.proxy')->where('target_path', '.*');
+});
+
