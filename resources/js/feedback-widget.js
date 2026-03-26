@@ -126,6 +126,9 @@ function registerKsFeedbackWidget() {
         },
 
         async tryServer(endpoint) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
             try {
                 const config = window.KS_FEEDBACK_CONFIG || {};
 
@@ -136,6 +139,7 @@ function registerKsFeedbackWidget() {
                     this.addLog('[JS] Local mode detected: sending URL instead of full DOM snapshot');
                     const res = await fetch(endpoint, {
                         method: 'POST',
+                        signal: controller.signal,
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
@@ -156,6 +160,7 @@ function registerKsFeedbackWidget() {
                 const snap = this.buildDomSnapshot(false);
                 const res = await fetch(endpoint, {
                     method: 'POST',
+                    signal: controller.signal,
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
@@ -175,8 +180,11 @@ function registerKsFeedbackWidget() {
 
                 return await this.handleServerResponse(res);
             } catch (e) {
-                this.addLog(`[JS] tryServer fetch exception: ${e.message}`);
-                return { ok: false, error: { code: 'EXCEPTION', message: e.message } };
+                const isAbort = e.name === 'AbortError';
+                this.addLog(`[JS] tryServer fetch ${isAbort ? 'TIMEOUT' : 'exception'}: ${e.message}`);
+                return { ok: false, error: { code: isAbort ? 'TIMEOUT' : 'EXCEPTION', message: e.message } };
+            } finally {
+                clearTimeout(timeoutId);
             }
         },
 
@@ -299,7 +307,7 @@ function registerKsFeedbackWidget() {
                     useCORS: true,
                     allowTaint: false, // Changed to false for better security and to avoid CORS errors
                     logging: false,
-                    scale: Math.min(window.devicePixelRatio || 1, 2),
+                    scale: 2, // Forced scale 2 for better quality
                     ignoreElements: (el) => el.dataset.html2canvasIgnore === 'true' || el.classList.contains('bugmask') || el.dataset.bugmask === 'true' || el.classList.contains('ks-feedback-ignore'),
                     onclone: (clonedDoc) => {
                         this.sanitizeClonedDocument(clonedDoc);
@@ -413,7 +421,8 @@ function registerKsFeedbackWidget() {
                 return { ok: true, base64: dataUrl, mime: 'image/jpeg' };
             } catch (e) {
                 console.error('[FB] dom-to-image-more failed:', e);
-                return { ok: false, error: { code: 'DTI_ERROR', message: e.message } };
+                const errorMsg = e instanceof Error ? e.message : (typeof e === 'string' ? e : JSON.stringify(e));
+                return { ok: false, error: { code: 'DTI_ERROR', message: errorMsg } };
             } finally {
                 // Obnovit styly
                 disabledLinks.forEach(link => link.disabled = false);

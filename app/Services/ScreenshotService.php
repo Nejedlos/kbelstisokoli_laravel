@@ -17,6 +17,7 @@ class ScreenshotService
     protected ?string $token;
     protected int $timeout;
     protected array $browsershotConfig;
+    protected ?string $wkhtmlPath;
 
     public function __construct()
     {
@@ -25,6 +26,7 @@ class ScreenshotService
         $this->token = config('services.screenshot.token');
         $this->timeout = (int) config('services.screenshot.timeout', 40);
         $this->browsershotConfig = config('services.screenshot.browsershot', []);
+        $this->wkhtmlPath = config('services.screenshot.wkhtml_path', env('SCREENSHOT_WKHTML_PATH', '/usr/local/bin/wkhtmltoimage'));
 
         // Pokud jsme na localu a nemáme nastavený driver, přepneme na local
         if (app()->environment('local') && empty(env('SCREENSHOT_DRIVER'))) {
@@ -88,7 +90,6 @@ class ScreenshotService
             $response = Http::withoutVerifying()
                 ->withToken($this->token)
                 ->timeout($this->timeout)
-                ->retry(2, 5000)
                 ->post($this->url, [
                     'url'      => $targetUrl,
                     'fullPage' => $fullPage,
@@ -117,21 +118,25 @@ class ScreenshotService
                 ];
             }
 
-            Log::error('[ScreenshotService] Remote Screenshot API Error', array_merge($logContext, [
+            Log::warning('[ScreenshotService] Remote Screenshot API Error, trying local fallback', array_merge($logContext, [
                 'status'  => $response->status(),
-                'response' => $response->body(),
                 'url'     => $targetUrl
             ]));
 
-            $errorMessage = $response->json('message') ?? $response->statusText() ?? 'Unknown API Error';
-            throw new \RuntimeException("Remote Screenshot API Error ({$response->status()}): {$errorMessage}");
-
         } catch (Exception $e) {
-            Log::error('[ScreenshotService] Remote Screenshot Service Exception', array_merge($logContext, [
+            Log::warning('[ScreenshotService] Remote Screenshot Service Exception, trying local fallback', array_merge($logContext, [
                 'error' => $e->getMessage(),
                 'url'   => $targetUrl
             ]));
-            throw $e;
+        }
+
+        // 4) Local Fallback (WkHtmlToImage or local Playwright)
+        try {
+            Log::info('[ScreenshotService] Attempting local fallback (wkhtmltoimage)', $logContext);
+            return $this->captureLocallyWithWkHtmlToImage($dom, $options);
+        } catch (Exception $localEx) {
+            Log::error('[ScreenshotService] Local fallback also failed', array_merge($logContext, ['error' => $localEx->getMessage()]));
+            throw $localEx;
         }
     }
 
@@ -196,6 +201,91 @@ class ScreenshotService
                 'url'   => $targetUrl
             ]);
             return null;
+        }
+    }
+
+    /**
+     * Internal method to capture via wkhtmltoimage binary.
+     */
+    protected function captureLocallyWithWkHtmlToImage(string $dom, array $options = []): array
+    {
+        $logContext = ['driver' => 'wkhtmltoimage'];
+
+        if (!is_executable($this->wkhtmlPath)) {
+            Log::error('[ScreenshotService] wkhtmltoimage not found or not executable', array_merge($logContext, ['path' => $this->wkhtmlPath]));
+            // Try to use captureLocally (Playwright) as last local hope
+            return $this->captureLocally($dom, $options);
+        }
+
+        try {
+            $viewport = $options['viewport'] ?? ['width' => 1280, 'height' => 720];
+            $tempHtml = storage_path('app/temp-screenshot-' . Str::random(10) . '.html');
+            $tempPng = storage_path('app/temp-screenshot-' . Str::random(10) . '.png');
+
+            // Přidáme základní HTML strukturu a head pokud chybí
+            $html = $dom;
+            if (!str_contains($dom, '<html')) {
+                $head = $options['context']['head'] ?? '';
+                $bodyClass = $options['context']['body_class'] ?? '';
+                $bodyStyle = $options['context']['body_style'] ?? '';
+                $htmlClass = $options['context']['html_class'] ?? '';
+
+                $html = "<!DOCTYPE html><html class=\"{$htmlClass}\"><head>{$head}</head><body class=\"{$bodyClass}\" style=\"{$bodyStyle}\"><div id=\"snapshot-root\">{$dom}</div></body></html>";
+            }
+
+            file_put_contents($tempHtml, $html);
+
+            $headers = $this->prepareHeaders($options);
+            $headerCmd = '';
+            foreach ($headers as $name => $value) {
+                $headerCmd .= ' --custom-header ' . escapeshellarg($name) . ' ' . escapeshellarg($value);
+            }
+
+            $command = sprintf(
+                '%s --quiet --width %d --height %d --disable-smart-width --quality 85 --format png %s %s %s 2>&1',
+                escapeshellarg($this->wkhtmlPath),
+                (int) $viewport['width'],
+                (int) $viewport['height'],
+                $headerCmd,
+                escapeshellarg($tempHtml),
+                escapeshellarg($tempPng)
+            );
+
+            Log::debug('[ScreenshotService] Executing wkhtmltoimage command', array_merge($logContext, ['command' => $command]));
+
+            $output = [];
+            $returnVar = 0;
+            exec($command, $output, $returnVar);
+
+            if ($returnVar !== 0 && $returnVar !== 1) { // 1 often just means warnings
+                $errorMsg = implode("\n", $output);
+                Log::warning('[ScreenshotService] wkhtmltoimage warnings/errors', array_merge($logContext, ['output' => $errorMsg]));
+            }
+
+            if (!file_exists($tempPng) || filesize($tempPng) < 100) {
+                 @unlink($tempHtml);
+                 @unlink($tempPng);
+                 throw new \Exception("wkhtmltoimage failed to produce image file.");
+            }
+
+            $imageContent = file_get_contents($tempPng);
+            @unlink($tempHtml);
+            @unlink($tempPng);
+
+            $base64 = base64_encode($imageContent);
+
+            return [
+                'data_url' => 'data:image/png;base64,' . $base64,
+                'mime' => 'image/png',
+                'width' => (int) $viewport['width'],
+                'height' => (int) $viewport['height'],
+                'path' => null,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[ScreenshotService] wkhtmltoimage exception', ['error' => $e->getMessage()]);
+            // Fallback to local Playwright if it fails (unlikely to work on Webglobe but good as fallback)
+            return $this->captureLocally($dom, $options);
         }
     }
 
