@@ -51,8 +51,8 @@ function registerKsFeedbackWidget() {
             const startTs = performance.now();
             this.logs = [];
             // Priority strategy: user options > global config > default 'client'
-            const config = window.KS_FEEDBACK_CONFIG || { strategy: 'client', playwright: { enabled: false }, endpoints: {} };
-            const strategy = options.strategy || config.strategy || 'client';
+            const config = window.KS_FEEDBACK_CONFIG || { strategy: 'auto', playwright: { enabled: false }, endpoints: {} };
+            const strategy = options.strategy || config.strategy || 'auto';
 
             this.addLog(`[JS] Capture start | area = ${config.area || 'unknown'} | strategy = ${strategy}`);
 
@@ -64,46 +64,53 @@ function registerKsFeedbackWidget() {
             let result = { ok: false, durationMs: 0, strategy: 'none', logs: this.logs };
 
             try {
-                // 1. Try Client Screenshot (dom-to-image-more) - Skip if strategy is strictly 'playwright' or 'server'
-                const isStrictServer = strategy === 'playwright' || strategy === 'server' || strategy === 'local';
+                // 1. Try Server Screenshot (Playwright/Remote)
+                // This is prioritized if strategy is 'server', 'playwright', 'local' or 'auto' (if enabled)
+                const shouldTryServer = strategy === 'server' || strategy === 'playwright' || strategy === 'local' ||
+                                       (strategy === 'auto' && config.playwright?.enabled);
 
-                if (!isStrictServer && (strategy === 'client' || (strategy === 'auto' && !config.playwright?.enabled))) {
+                if (shouldTryServer && config.endpoints?.serverScreenshot) {
+                    this.addLog('[JS] Attempting server-side screenshot (Playwright)');
+                    const serverRes = await this.tryServer(config.endpoints.serverScreenshot);
+                    if (serverRes.ok) {
+                        this.addLog('[JS] Server screenshot success');
+                        result = { ...serverRes, strategy: 'server' };
+                    } else {
+                        const errorMsg = serverRes.error?.message || 'unknown error';
+                        this.addLog(`[JS] Server screenshot failed: ${errorMsg}`);
+                        result.error = serverRes.error;
+                        // Fallback will continue if strategy is 'auto'
+                    }
+                }
+
+                // 2. Try Client Screenshot (dom-to-image-more)
+                // We try this if:
+                // - strategy is 'client' OR
+                // - strategy is 'auto' AND (server failed OR server was skipped)
+                const shouldTryClient = strategy === 'client' || (strategy === 'auto' && !result.ok);
+
+                if (shouldTryClient) {
                     this.addLog('[JS] Attempting client-side capture (dom-to-image-more)');
                     const dtiRes = await this.tryDomToImageMore(targetSelector);
                     if (dtiRes.ok) {
                         this.addLog('[JS] Client capture (dom-to-image-more) success');
                         result = { ...dtiRes, strategy: 'client-dom-to-image-more' };
                     } else {
-                        this.addLog(`[JS] dom-to-image-more failed: ${dtiRes.error?.message || 'unknown'}`);
+                        const errorMsg = dtiRes.error?.message || 'unknown error';
+                        this.addLog(`[JS] dom-to-image-more failed: ${errorMsg}`);
                         result.error = dtiRes.error;
 
-                        // Fallback to html2canvas if dom-to-image-more fails
+                        // Last fallback: html2canvas
                         this.addLog('[JS] Falling back to html2canvas');
                         const h2cRes = await this.tryHtml2Canvas(targetSelector);
                         if (h2cRes.ok) {
                              this.addLog('[JS] html2canvas fallback success');
                              result = { ...h2cRes, strategy: 'client-html2canvas' };
                         } else {
-                             this.addLog(`[JS] html2canvas failed: ${h2cRes.error?.message || 'unknown'}`);
+                             const h2cError = h2cRes.error?.message || 'unknown error';
+                             this.addLog(`[JS] html2canvas failed: ${h2cError}`);
                              result.error = h2cRes.error;
                         }
-                    }
-                }
-
-                // 2. Try Server Screenshot (Playwright) - Priority for 'server', 'playwright', 'local', 'auto' (if enabled)
-                if (!result.ok && (strategy === 'server' || strategy === 'playwright' || strategy === 'local' || strategy === 'auto')) {
-                    if (config.endpoints?.serverScreenshot) {
-                        this.addLog('[JS] Attempting server-side screenshot (Playwright)');
-                        const serverRes = await this.tryServer(config.endpoints.serverScreenshot);
-                        if (serverRes.ok) {
-                            this.addLog('[JS] Server screenshot success');
-                            result = { ...serverRes, strategy: 'server' };
-                        } else {
-                            this.addLog(`[JS] Server screenshot failed: ${serverRes.error?.message || 'unknown'}`);
-                            result.error = serverRes.error;
-                        }
-                    } else {
-                        this.addLog('[JS] Server screenshot skipped (no endpoint or disabled)');
                     }
                 }
 
@@ -175,15 +182,20 @@ function registerKsFeedbackWidget() {
 
         async handleServerResponse(res) {
             if (!res.ok) {
-                let errorMsg = res.statusText;
+                let errorMsg = res.statusText || 'unknown error';
                 let errorCode = 'HTTP_' + res.status;
                 try {
-                    const errorData = await res.json();
-                    errorMsg = errorData.message || errorData.error || errorMsg;
-                    errorCode = errorData.code || errorCode;
-                    this.addLog(`[JS] Server error response: ${JSON.stringify(errorData)}`);
+                    const text = await res.text();
+                    this.addLog(`[JS] Server raw error response (Status: ${res.status}): ${text.substring(0, 100)}`);
+                    try {
+                        const errorData = JSON.parse(text);
+                        errorMsg = errorData.message || errorData.error || errorMsg;
+                        errorCode = errorData.code || errorCode;
+                    } catch (e) {
+                        // Not JSON, use status text
+                    }
                 } catch (e) {
-                    this.addLog(`[JS] Could not parse server error JSON (Status: ${res.status})`);
+                    this.addLog(`[JS] Could not read server error response body (Status: ${res.status})`);
                 }
                 return { ok: false, error: { code: errorCode, message: errorMsg } };
             }
