@@ -73,6 +73,8 @@ class ScreenshotService
 
         // 3) Call remote service
         try {
+            $headers = $this->prepareHeaders($options);
+
             $response = Http::withToken($this->token)
                 ->timeout($this->timeout)
                 ->retry(2, 5000)
@@ -82,6 +84,7 @@ class ScreenshotService
                     'width'    => (int) $viewport['width'],
                     'height'   => (int) $viewport['height'],
                     'selector' => $selector,
+                    'headers'  => $headers,
                     'type'     => 'png',
                 ]);
 
@@ -136,6 +139,13 @@ class ScreenshotService
         }
 
         try {
+            $headers = $this->prepareHeaders($options);
+            $userId = $options['context']['user_id'] ?? null;
+
+            if ($userId) {
+                $targetUrl = $this->appendImpersonationParams($targetUrl, $userId);
+            }
+
             $response = Http::withToken($this->token)
                 ->timeout($this->timeout)
                 ->retry(2, 5000)
@@ -144,6 +154,7 @@ class ScreenshotService
                     'fullPage' => false,
                     'width'    => 1280,
                     'height'   => 720,
+                    'headers'  => $headers,
                     'type'     => 'png',
                 ], $options));
 
@@ -172,31 +183,11 @@ class ScreenshotService
 
             // Autentizační hlavičky a query parametry
             $userId = $options['context']['user_id'] ?? null;
-            $headers = [
-                'X-Screenshot-Mode' => '1',
-                'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
-            ];
-
-            $token = config('screenshot.internal_token');
-            if ($token) {
-                $headers['X-Screenshot-Token'] = $token;
-            }
+            $headers = $this->prepareHeaders($options);
 
             // Přidáme user_id do URL pro impersonifikaci
             if ($userId) {
-                $parsed = parse_url($targetUrl);
-                $query = $parsed['query'] ?? '';
-                parse_str($query, $queryParams);
-                $queryParams['screenshot_user_id'] = $userId;
-                $queryParams['screenshot'] = '1';
-                $newQuery = http_build_query($queryParams);
-
-                $targetUrl = (isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '') .
-                             (isset($parsed['host']) ? $parsed['host'] : '') .
-                             (isset($parsed['port']) ? ':' . $parsed['port'] : '') .
-                             (isset($parsed['path']) ? $parsed['path'] : '') .
-                             ($newQuery ? '?' . $newQuery : '') .
-                             (isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '');
+                $targetUrl = $this->appendImpersonationParams($targetUrl, $userId);
             }
 
             // Příprava argumentů pro JS script
@@ -256,6 +247,44 @@ class ScreenshotService
             Log::error('[ScreenshotService] local capture exception', ['error' => $e->getMessage()]);
             throw $e;
         }
+    }
+
+    /**
+     * Helper to prepare headers for screenshot request.
+     */
+    protected function prepareHeaders(array $options = []): array
+    {
+        $headers = [
+            'X-Screenshot-Mode' => '1',
+            'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        ];
+
+        $token = config('screenshot.internal_token');
+        if ($token) {
+            $headers['X-Screenshot-Token'] = $token;
+        }
+
+        return array_merge($headers, $options['headers'] ?? []);
+    }
+
+    /**
+     * Helper to append impersonation parameters to URL.
+     */
+    protected function appendImpersonationParams(string $url, $userId): string
+    {
+        $parsed = parse_url($url);
+        $query = $parsed['query'] ?? '';
+        parse_str($query, $queryParams);
+        $queryParams['screenshot_user_id'] = $userId;
+        $queryParams['screenshot'] = '1';
+        $newQuery = http_build_query($queryParams);
+
+        return (isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '') .
+               (isset($parsed['host']) ? $parsed['host'] : '') .
+               (isset($parsed['port']) ? ':' . $parsed['port'] : '') .
+               (isset($parsed['path']) ? $parsed['path'] : '') .
+               ($newQuery ? '?' . $newQuery : '') .
+               (isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '');
     }
 
     /**
