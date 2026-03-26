@@ -75,7 +75,8 @@ class ScreenshotService
         try {
             $headers = $this->prepareHeaders($options);
 
-            $response = Http::withToken($this->token)
+            $response = Http::withoutVerifying()
+                ->withToken($this->token)
                 ->timeout($this->timeout)
                 ->retry(2, 5000)
                 ->post($this->url, [
@@ -146,7 +147,8 @@ class ScreenshotService
                 $targetUrl = $this->appendImpersonationParams($targetUrl, $userId);
             }
 
-            $response = Http::withToken($this->token)
+            $response = Http::withoutVerifying()
+                ->withToken($this->token)
                 ->timeout($this->timeout)
                 ->retry(2, 5000)
                 ->post($this->url, array_merge([
