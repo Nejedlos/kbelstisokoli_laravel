@@ -34,6 +34,7 @@ class SystemConsole extends Page
     public string $consoleOutput = '';
     public string $output = '';
     public string $pollingInterval = '5s';
+    public bool $isExecuting = false;
 
     public static function canAccess(): bool
     {
@@ -266,7 +267,11 @@ class SystemConsole extends Page
                 ->label(__('admin/system-console.actions.system_check'))
                 ->icon('heroicon-m-magnifying-glass-circle')
                 ->color('info')
-                ->action(fn () => $this->runSystemCheck()),
+                ->action(function () {
+                    $this->isExecuting = true;
+                    $this->runSystemCheck();
+                    $this->isExecuting = false;
+                }),
         ];
     }
 
@@ -319,14 +324,19 @@ class SystemConsole extends Page
                     '--locale=all' => __('admin/system-console.commands.ai_index.flags.all'),
                     '--locale=cs' => __('admin/system-console.commands.ai_index.flags.cs'),
                     '--locale=en' => __('admin/system-console.commands.ai_index.flags.en'),
-                    '--section=frontend' => 'Sekce: Frontend',
-                    '--section=member' => 'Sekce: Member',
-                    '--section=admin' => 'Sekce: Admin',
+                    '--section=all' => 'Všechny sekce',
+                    '--section=frontend' => __('admin/system-console.commands.ai_index.flags.section_frontend'),
+                    '--section=member' => __('admin/system-console.commands.ai_index.flags.section_member'),
+                    '--section=admin' => __('admin/system-console.commands.ai_index.flags.section_admin'),
+                    '--section=documentation' => __('admin/system-console.commands.ai_index.flags.section_documentation'),
+                    '--section=help' => __('admin/system-console.commands.ai_index.flags.section_help'),
                     '--fresh' => __('admin/system-console.commands.ai_index.flags.fresh'),
                     '--enrich' => __('admin/system-console.commands.ai_index.flags.enrich'),
-                    '--no-ai' => 'Jen standardní hledání (bez AI)',
+                    '--no-ai' => __('admin/system-console.commands.ai_index.flags.no_ai'),
+                    '--force' => __('admin/system-console.commands.ai_index.flags.force'),
                     '--no-interaction' => __('admin/system-console.commands.ai_index.flags.no_interaction'),
                 ],
+                'can_be_internal' => true,
                 'color' => 'primary',
                 'icon' => FilamentIcon::get(AppIcon::AI),
             ],
@@ -920,6 +930,7 @@ class SystemConsole extends Page
 
     protected function runInternal(string $command, array $flags = [], ?string $selectName = null, mixed $selectValue = null): void
     {
+        $this->isExecuting = true;
         set_time_limit(0);
         @ini_set('memory_limit', '512M');
         @ignore_user_abort(true);
@@ -1047,9 +1058,12 @@ class SystemConsole extends Page
             // Pokud příkaz měnil integritu cache, vynutíme refresh stránky po krátkém zpoždění,
             // aby Livewire dostal čerstvý snapshot a předešli jsme chybě "Undefined array key children"
             if (in_array($command, ['optimize', 'optimize:cache', 'optimize:clear', 'page-cache:clear', 'cache:clear'])) {
-                $this->js('setTimeout(() => window.location.reload(), 2000)');
+                $this->js('setTimeout(() => window.location.reload(), 1000)');
             }
+
+            $this->isExecuting = false;
         } catch (\Throwable $e) {
+            $this->isExecuting = false;
             $errorMessage = $e->getMessage();
             $stackTrace = $e->getTraceAsString();
 

@@ -1,5 +1,7 @@
 <x-filament-panels::page>
-    <div wire:poll.{{ $pollingInterval }}="refreshConsoleLogs"></div>
+    @if(!$isExecuting)
+        <div wire:poll.{{ $pollingInterval }}="refreshConsoleLogs"></div>
+    @endif
 
     {{-- KPI Diagnostika --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

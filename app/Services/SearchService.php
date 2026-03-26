@@ -25,34 +25,51 @@ class SearchService
         $locale = app()->getLocale();
         $q = Str::lower($query);
 
-        // FULLTEXT vyhledávání v DB s filtrováním sekce
+        // Vyhledávání v DB s filtrováním sekce a jazyka
         $queryBuilder = AiDocument::query()
             ->where('locale', $locale)
             ->where('section', $section)
             ->where('is_active', true);
 
-        if (config('database.default') === 'mysql') {
-            $queryBuilder->whereRaw('MATCH(title, content) AGAINST(? IN NATURAL LANGUAGE MODE)', [$q]);
-        } else {
-            $queryBuilder->where(function ($w) use ($q) {
-                $w->where('title', 'LIKE', '%'.$q.'%')
-                    ->orWhere('content', 'LIKE', '%'.$q.'%')
-                    ->orWhere('keywords', 'LIKE', '%'.$q.'%');
-            });
-        }
-
-        $results = $queryBuilder->limit($limit)->get();
+        // Použijeme LIKE vyhledávání, protože FULLTEXT na produkci (Webglobe) může chybět
+        // nebo nemusí správně fungovat nad JSON sloupci v MariaDB.
+        $queryBuilder->where(function ($w) use ($q) {
+            $w->where('title', 'LIKE', '%'.$q.'%')
+                ->orWhere('content', 'LIKE', '%'.$q.'%')
+                ->orWhere('keywords', 'LIKE', '%'.$q.'%');
+        });
+        $results = $queryBuilder->orderByDesc('updated_at')->limit($limit)->get();
 
         return $results->map(function ($doc) {
+            // Lokalizace polí (protože jsou v DB uloženy jako JSON přes Eloquent cast)
+            $title = $this->getLocalizedValue($doc->title);
+            $content = $this->getLocalizedValue($doc->content);
+            $summary = $this->getLocalizedValue($doc->summary);
+
             return new SearchResult(
-                title: $doc->title,
-                snippet: $doc->summary ?: $this->makeSnippet($doc->content),
+                title: $title,
+                snippet: $summary ?: $this->makeSnippet($content),
                 url: $doc->url,
                 type: $this->getDocTypeLabel($doc->type),
                 image: $doc->metadata['image'] ?? null,
                 date: $doc->updated_at?->format('d.m.Y'),
             );
         });
+    }
+
+    private function getLocalizedValue(mixed $value): string
+    {
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (! is_array($value)) {
+            return '';
+        }
+
+        $locale = app()->getLocale();
+
+        return $value[$locale] ?? $value['cs'] ?? array_values($value)[0] ?? '';
     }
 
     protected function getDocTypeLabel(string $type): string
