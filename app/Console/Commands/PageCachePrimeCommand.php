@@ -41,13 +41,19 @@ class PageCachePrimeCommand extends Command
         $urls = $this->getPublicUrls();
         $this->info('Found ' . count($urls) . ' base public URLs to prime for ' . count($locales) . ' locales.');
 
-        foreach ($locales as $locale) {
-            $this->info("--- Priming for locale: $locale ---");
-            app()->setLocale($locale);
+        $originalLocale = app()->getLocale();
 
-            foreach ($urls as $url) {
-                $this->primeUrl($url, $locale);
+        try {
+            foreach ($locales as $locale) {
+                $this->info("--- Priming for locale: $locale ---");
+                app()->setLocale($locale);
+
+                foreach ($urls as $url) {
+                    $this->primeUrl($url, $locale);
+                }
             }
+        } finally {
+            app()->setLocale($originalLocale);
         }
 
         $this->info('Page cache priming finished.');

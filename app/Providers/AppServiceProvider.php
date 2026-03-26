@@ -101,6 +101,13 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
 
+            // Fix pro Livewire 3: potlačení chyby "Undefined array key locale" v SupportLocales.php
+            // K této chybě dochází v SupportLocales.php:11, když v memo chybí klíč locale.
+            // Typicky se to děje v SystemConsole při priming cache, kdy se mění locale v rámci requestu.
+            if (str_contains($errstr, 'Undefined array key "locale"') && str_contains($errfile, 'SupportLocales.php')) {
+                return true;
+            }
+
             return is_callable($previousHandler) ? $previousHandler($errno, $errstr, $errfile, $errline) : false;
         });
 
