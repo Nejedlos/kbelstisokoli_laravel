@@ -24,6 +24,12 @@
 @endphp
 
 <x-filament-panels::layout.base :livewire="$livewire">
+    @if (class_exists(\App\Support\ScreenshotMode::class))
+        <x-slot name="head">
+            <x-screenshot.styles />
+            <x-screenshot.scripts />
+        </x-slot>
+    @endif
     <x-loader-global title="Přihlášení" />
     <div class="ks-auth-page auth-gradient w-full min-h-dvh flex items-center justify-center py-6 px-4 md:px-6 lg:px-8 relative overflow-x-hidden"
          style="

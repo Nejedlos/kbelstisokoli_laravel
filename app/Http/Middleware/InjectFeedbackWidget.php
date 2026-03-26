@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class InjectFeedbackWidget
@@ -23,7 +24,7 @@ class InjectFeedbackWidget
             return $response;
         }
 
-        $this->injectWidget($response);
+        $this->injectWidget($request, $response);
 
         return $response;
     }
@@ -86,7 +87,7 @@ class InjectFeedbackWidget
         return $isTestHost;
     }
 
-    protected function injectWidget(Response $response): void
+    protected function injectWidget(Request $request, Response $response): void
     {
         $content = $response->getContent();
 
@@ -117,12 +118,17 @@ class InjectFeedbackWidget
                 return;
             }
 
+            $renderParams = ['url' => $request->fullUrl()];
+            if (Auth::check()) {
+                $renderParams['user_id'] = Auth::id();
+            }
+
             $cfg = [
                 'strategy' => config('feedback.screenshot.strategy', 'auto'),
                 'playwright' => [
                     'enabled' => config('feedback.screenshot.playwright.enabled', true),
                     'timeout' => config('feedback.screenshot.playwright.timeout', 30000),
-                    'renderUrl' => route('screenshot.render'), // Nový globální endpoint
+                    'renderUrl' => URL::temporarySignedRoute('screenshot.render', now()->addHours(24), $renderParams),
                 ],
                 'endpoints' => [
                     'serverScreenshot' => Route::has('feedback.screenshot') ? route('feedback.screenshot') : null,

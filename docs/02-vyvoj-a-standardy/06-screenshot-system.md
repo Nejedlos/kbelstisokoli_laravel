@@ -37,19 +37,29 @@ V screenshot režimu systém automaticky:
 - Přepne `loading="lazy"` u obrázků na `eager`.
 - Nastaví `window.__SCREENSHOT_READY__ = true` a atribut `data-screenshot-ready="1"` na `<html>` elementu, jakmile je stránka stabilní (načteny fonty, Livewire inicializován, uplynul delay).
 
-## 6. Konfigurace (.env)
+### 6. Bezpečná Impersonifikace (Member/Admin sekce)
+Pro renderování stránek, které vyžadují přihlášení (např. `/admin/dashboard` nebo `/member/dashboard`), systém podporuje bezpečnou impersonifikaci:
+1. **Předání uživatele:** Do screenshot render URL se přidá parametr `user_id`.
+2. **Podepsaný request:** Celá URL musí být podepsána (`temporarySignedRoute`), aby se zabránilo zneužití.
+3. **Interní autentizace:** `ScreenshotRenderController` ověří signaturu a dočasně přihlásí daného uživatele.
+4. **Předání do cílového requestu:** Při interním volání cílové stránky se předá `X-Screenshot-Token` (z `.env`), který povolí impersonifikaci i v cílovém middleware.
+
+Tímto způsobem může externí Playwright služba (bez vlastních cookies) bezpečně renderovat dashboardy konkrétních uživatelů.
+
+## 7. Konfigurace (.env)
 ```env
 # Zapnutí/vypnutí systému
 SCREENSHOT_MODE_ENABLED=true
 
-# Interní token pro komunikaci s NAS (volitelné)
+# Interní token pro komunikaci s NAS a autorizaci impersonifikace
+# Musí být nastaven, aby fungovala impersonifikace bez signatury pro interní requesty
 SCREENSHOT_INTERNAL_TOKEN=vas_tajny_token
 
 # Stabilizační delay v ms (výchozí 500)
 SCREENSHOT_STABILITY_DELAY=500
 ```
 
-## 7. Příklad použití (Playwright na NAS)
+## 8. Příklad použití (Playwright na NAS)
 Playwright služba by měla:
 1. Zavolat `/system/screenshot/render?url=/nejaka/stranka`.
 2. Vložit získané HTML do prohlížeče (nebo nechat Playwright otevřít tento endpoint přímo, pokud je autorizován).

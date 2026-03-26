@@ -58,6 +58,8 @@
         }
     </style>
     @vite(['resources/css/filament-auth.css', 'resources/js/app.js', 'resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])
+    <x-screenshot.styles />
+    <x-screenshot.scripts />
 
     @stack('head')
 </head>

@@ -7,13 +7,23 @@ use Illuminate\Http\Request;
 class ScreenshotMode
 {
     protected static bool $isActive = false;
+    protected static ?int $userId = null;
 
     /**
      * Aktivuje screenshot režim.
      */
-    public static function activate(): void
+    public static function activate(?int $userId = null): void
     {
         static::$isActive = true;
+        static::$userId = $userId;
+    }
+
+    /**
+     * Získá ID uživatele, pro kterého je režim aktivován.
+     */
+    public static function getUserId(): ?int
+    {
+        return static::$userId;
     }
 
     /**

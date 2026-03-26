@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Support\ScreenshotMode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -19,6 +20,7 @@ class ScreenshotRenderController extends Controller
     public function render(Request $request)
     {
         $targetUrl = $request->query('url');
+        $userId = $request->query('user_id'); // ID uživatele, pro kterého renderujeme (volitelné)
 
         if (!$targetUrl) {
             return response()->json(['error' => 'Missing url parameter'], 400);
@@ -29,14 +31,32 @@ class ScreenshotRenderController extends Controller
             return response()->json(['error' => 'Only internal URLs are allowed'], 403);
         }
 
-        // 2. Příprava URL se screenshot signálem
-        // Použijeme signed URL, aby cílová stránka (DetectScreenshotMode middleware) věděla, že má aktivovat režim
-        $screenshotUrl = $this->generateSignedScreenshotUrl($targetUrl);
+        // 2. Kontrola signatury (pro externí volání z NASu)
+        // Pokud request obsahuje user_id a target_path, musí být signatura platná,
+        // jinak se k cizím datům nikdo nedostane.
+        if ($userId && !$request->hasValidSignature()) {
+            return response()->json(['error' => 'Invalid or expired signature'], 401);
+        }
 
-        // 3. Interní request pro získání HTML
-        // Předáme cookies aktuálního requestu, aby byl zachován login uživatele (pokud volá admin přes feedback)
+        // Pokud jsme přihlášeni jako admin a chceme renderovat něčí stránku,
+        // nebo pokud NAS volá s platnou signaturou pro uživatele,
+        // dočasně se "přepneme" do kontextu toho uživatele.
+        if ($userId) {
+            Auth::loginUsingId($userId);
+        }
+
+        // 3. Příprava URL se screenshot signálem a ID uživatele
+        $screenshotUrl = $this->generateSignedScreenshotUrl($targetUrl, $userId);
+
+        // 4. Interní request pro získání HTML
+        // Předáme cookies aktuálního requestu (pokud je volá browser uživatele)
+        // A přidáme autorizační token pro impersonifikaci cílové stránky
         $response = Http::withCookies($request->cookies->all(), parse_url($screenshotUrl, PHP_URL_HOST))
-            ->withHeaders(['X-Screenshot-Mode' => '1'])
+            ->withHeaders([
+                'X-Screenshot-Mode' => '1',
+                'X-Screenshot-Token' => config('screenshot.internal_token'),
+                'User-Agent' => $request->userAgent() ?: 'Laravel Screenshot System',
+            ])
             ->get($screenshotUrl);
 
         if (!$response->successful()) {
@@ -49,7 +69,7 @@ class ScreenshotRenderController extends Controller
 
         $html = $response->body();
 
-        // 4. Post-processing HTML (ujistíme se, že assety jsou absolutní)
+        // 5. Post-processing HTML (ujistíme se, že assety jsou absolutní)
         $html = $this->fixAssetUrls($html);
 
         return response($html)
@@ -78,19 +98,26 @@ class ScreenshotRenderController extends Controller
     /**
      * Generuje podepsanou URL pro cílovou adresu.
      */
-    protected function generateSignedScreenshotUrl(string $url): string
+    protected function generateSignedScreenshotUrl(string $url, ?int $userId = null): string
     {
         // Převedeme na absolutní, pokud je relativní
         if (!Str::startsWith($url, 'http')) {
             $url = URL::to($url);
         }
 
+        $params = [
+            'target_path' => parse_url($url, PHP_URL_PATH),
+        ];
+
+        if ($userId) {
+            $params['screenshot_user_id'] = $userId;
+        }
+
         // Přidáme signaturu
-        // Protože URL::signedRoute pracuje s názvy rout, musíme to udělat manuálně přes URL generator
         return URL::temporarySignedRoute(
             'screenshot.proxy', // Virtuální route name
             now()->addMinutes(5),
-            ['target_path' => parse_url($url, PHP_URL_PATH)]
+            $params
         );
     }
 
