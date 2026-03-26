@@ -1,3 +1,4 @@
+@auth
     <div id="ks-fb-root"
          x-data="ksFeedbackWidget"
          x-init="init()"
@@ -216,3 +217,4 @@
 
     <!-- Dependencies (Bundled in feedback-widget.js) -->
 </div>
+@endauth

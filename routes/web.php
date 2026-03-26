@@ -55,7 +55,7 @@ Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'
 
 // Feedback systém
 Route::get('/feedback/widget', [\App\Http\Controllers\FeedbackController::class, 'renderWidget'])
-    ->middleware(['web'])
+    ->middleware(['web', 'auth'])
     ->name('feedback.widget');
 
 Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])

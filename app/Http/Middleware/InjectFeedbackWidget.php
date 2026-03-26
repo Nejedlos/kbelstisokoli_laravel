@@ -46,7 +46,12 @@ class InjectFeedbackWidget
             return false;
         }
 
-        // 2. Skip AJAX/JSON/Widget/Livewire requests
+        // 2. MUST be authenticated
+        if (!Auth::check()) {
+            return false;
+        }
+
+        // 3. Skip AJAX/JSON/Widget/Livewire requests
         if ($request->isXmlHttpRequest() ||
             $request->expectsJson() ||
             $request->hasHeader('X-Livewire') ||

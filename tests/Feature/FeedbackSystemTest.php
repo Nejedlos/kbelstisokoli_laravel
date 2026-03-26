@@ -28,12 +28,12 @@ class FeedbackSystemTest extends TestCase
         Storage::fake('local');
     }
 
-    public function test_guest_sees_widget_in_html_response_on_localhost(): void
+    public function test_guest_does_not_see_widget_in_html_response_on_localhost(): void
     {
-        // Localhost is considered a test host in InjectFeedbackWidget
+        // Localhost is considered a test host in InjectFeedbackWidget, but now we require auth
         $response = $this->get('/');
         $response->assertStatus(200);
-        $response->assertSee('ks-fb-loader');
+        $response->assertDontSee('ks-fb-loader');
     }
 
     public function test_auth_user_sees_widget_in_html_response(): void
@@ -64,13 +64,11 @@ class FeedbackSystemTest extends TestCase
         $response->assertSee('ks-fb-loader');
     }
 
-    public function test_widget_renders_successfully_for_guest(): void
+    public function test_widget_redirects_guest_to_login(): void
     {
         $response = $this->get('/feedback/widget');
-        // dump($response->content());
-
-        $response->assertStatus(200);
-        $response->assertSee('ks-feedback-system');
+        $response->assertStatus(302);
+        $response->assertRedirect('/login');
     }
 
     public function test_widget_renders_successfully_for_auth(): void
@@ -164,12 +162,8 @@ class FeedbackSystemTest extends TestCase
 
     public function test_rate_limit_works(): void
     {
-        // dd(config('feedback.limits.rate_limit'));
         Cache::flush();
         $user = User::factory()->create();
-
-        // Limity z configu mohou být v testech vysoké, pro test je snížíme
-        Config::set('feedback.limits.rate_limit', '3,1');
 
         $payload = [
             'type' => 'bug',
@@ -181,13 +175,13 @@ class FeedbackSystemTest extends TestCase
             ],
         ];
 
-        // Send 3 successful requests
-        for ($i = 1; $i <= 3; $i++) {
+        // Send many requests to hit the limit (default 10,1)
+        for ($i = 1; $i <= 10; $i++) {
             $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test $i"]))->assertStatus(200);
         }
 
-        // 4th should be throttled (429)
-        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test 4"]))->assertStatus(429);
+        // 11th should be throttled (429)
+        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test 11"]))->assertStatus(429);
     }
 
     public function test_duplicate_guard_works(): void
