@@ -75,6 +75,16 @@ class ScreenshotService
         try {
             $headers = $this->prepareHeaders($options);
 
+            Log::debug('[ScreenshotService] Calling remote API (Playwright)', [
+                'service_url' => $this->url,
+                'target_url' => $targetUrl,
+                'token_prefix' => substr($this->token, 0, 10) . '...',
+                'timeout' => $this->timeout,
+                'fullPage' => $fullPage,
+                'selector' => $selector,
+                'headers' => array_keys($headers), // Log only keys for security
+            ]);
+
             $response = Http::withoutVerifying()
                 ->withToken($this->token)
                 ->timeout($this->timeout)
@@ -147,6 +157,14 @@ class ScreenshotService
                 $targetUrl = $this->appendImpersonationParams($targetUrl, $userId);
             }
 
+            Log::debug('[ScreenshotService] Calling remote API (URL)', [
+                'service_url' => $this->url,
+                'target_url' => $targetUrl,
+                'token_prefix' => substr($this->token, 0, 10) . '...',
+                'timeout' => $this->timeout,
+                'headers' => array_keys($headers),
+            ]);
+
             $response = Http::withoutVerifying()
                 ->withToken($this->token)
                 ->timeout($this->timeout)
@@ -161,12 +179,22 @@ class ScreenshotService
                 ], $options));
 
             if ($response->successful()) {
+                Log::info('[ScreenshotService] Screenshot captured successfully via remote service (URL)');
                 return $response->body();
             }
 
+            Log::error('[ScreenshotService] Remote Screenshot API Error (URL)', [
+                'status'  => $response->status(),
+                'response' => $response->body(),
+                'url'     => $targetUrl
+            ]);
+
             return null;
         } catch (Exception $e) {
-            Log::error('[ScreenshotService] capture exception', ['error' => $e->getMessage()]);
+            Log::error('[ScreenshotService] Remote Screenshot Service Exception (URL)', [
+                'error' => $e->getMessage(),
+                'url'   => $targetUrl
+            ]);
             return null;
         }
     }
