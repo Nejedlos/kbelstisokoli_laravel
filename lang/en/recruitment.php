@@ -2,8 +2,8 @@
 
 return [
     'title' => 'Player Recruitment',
-    'subtitle' => 'Want to play for Kbely Falcons? We are looking for new players for our men\'s teams.',
-    'hero_headline' => 'Want to play for Kbely Falcons?',
+    'subtitle' => 'Want to play for Sokol Kbely? We are looking for new players for our men\'s teams.',
+    'hero_headline' => 'Want to play for Sokol Kbely?',
     'hero_subheadline' => 'We are looking for teammates for our C & E teams. Whether you are an experienced player or returning to basketball after a break, you will find a great group and quality competition here in Letňany.',
     'who_we_look_for' => 'Who are we looking for?',
     'steps_title' => 'How does the first contact work?',
@@ -105,6 +105,6 @@ return [
         'position' => 'Position',
         'level' => 'Experience',
         'not_provided' => 'not provided',
-        'footer' => 'This message was sent from the recruitment form on the Kbely Falcons website.',
+        'footer' => 'This message was sent from the recruitment form on the Sokol Kbely website.',
     ],
 ];

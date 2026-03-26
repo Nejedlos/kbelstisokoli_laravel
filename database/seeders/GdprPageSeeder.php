@@ -89,7 +89,7 @@ class GdprPageSeeder extends Seeder
                             'data' => [
                                 'variant' => 'standard',
                                 'headline' => 'We play fair with your data',
-                                'subheadline' => 'Privacy at the Falcons is simple – we treat your data with the same respect as our teammates. No fouls, just fair play.',
+                                'subheadline' => 'Privacy at the Sokol Kbely is simple – we treat your data with the same respect as our teammates. No fouls, just fair play.',
                                 'image_url' => 'assets/img/home/basketball-court-detail.jpg',
                                 'overlay' => true,
                                 'alignment' => 'left',
@@ -161,7 +161,7 @@ class GdprPageSeeder extends Seeder
             [
                 'title' => [
                     'cs' => 'Ochrana soukromí (GDPR) | Kbelští sokoli',
-                    'en' => 'Privacy Policy (GDPR) | Kbely Falcons',
+                    'en' => 'Privacy Policy (GDPR) | Sokol Kbely',
                 ],
                 'description' => [
                     'cs' => 'Zásady ochrany soukromí tohoto webu a našich mužských týmů.',

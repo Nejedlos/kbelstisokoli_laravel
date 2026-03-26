@@ -67,10 +67,10 @@
         <div class="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-center md:min-w-[120px] pb-4 md:pb-0 border-b md:border-b-0 md:border-r border-slate-100">
             <div class="flex flex-col">
                 <div class="text-secondary font-black text-2xl leading-none">
-                    {{ $match->scheduled_at->format('d. m.') }}
+                    {{ $match->scheduled_at->format(__('general.day_month_format')) }}
                 </div>
                 <div class="text-slate-500 font-bold uppercase tracking-widest text-xs mt-1">
-                    {{ $match->scheduled_at->format('H:i') }}
+                    {{ $match->scheduled_at->format(__('general.time_format')) }}
                 </div>
             </div>
             @if($match->match_type)

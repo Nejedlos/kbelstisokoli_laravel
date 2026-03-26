@@ -21,11 +21,11 @@
         @php
             $heroData = [
                 'eyebrow' => 'Sokol Kbely • C & E',
-                'headline' => "Více než jen\nbasketbal.",
-                'subheadline' => 'Hrajeme pro radost, bojujeme jako jeden tým. Přidej se k nám!',
-                'cta_label' => 'Chci se přidat',
+                'headline' => __('general.home_hero.headline') ?: "Více než jen\nbasketbal.",
+                'subheadline' => __('general.home_hero.subheadline') ?: 'Hrajeme pro radost, bojujeme jako jeden tým. Přidej se k nám!',
+                'cta_label' => __('general.home_hero.cta_label') ?: 'Chci se přidat',
                 'cta_url' => route('public.news.index'),
-                'cta_secondary_label' => 'Naše týmy',
+                'cta_secondary_label' => __('general.home_hero.cta_secondary_label') ?: 'Naše týmy',
                 'cta_secondary_url' => route('public.teams.index'),
                 'show_upcoming_events' => true,
                 'variant' => 'standard',

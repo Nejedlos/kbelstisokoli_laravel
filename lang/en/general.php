@@ -23,10 +23,16 @@ return [
         'no_news_desc' => 'News is being prepared for you.',
     ],
     'home' => [
-        'welcome' => 'Welcome to the Kbely Falcons website',
+        'welcome' => 'Welcome to the Sokol Kbely website',
         'no_content' => 'Homepage content has not been created in the administration yet.',
     ],
     'view_on_map' => 'View on map',
+    'view_more' => 'View more',
+    'common' => [
+        'view_more' => 'View more',
+        'view_all' => 'View all',
+        'share' => 'Share',
+    ],
     'send_email' => 'Send e-mail',
     'match_day_desc' => 'Usual time for home games in the gym.',
     'date_from' => 'From',
@@ -63,7 +69,7 @@ return [
     ],
     'recruitment' => [
         'eyebrow' => 'Join us',
-        'title' => 'Want to play for Kbely Falcons?',
+        'title' => 'Want to play for Sokol Kbely?',
         'subtitle' => 'We are looking for new players. Join a practice and meet the team.',
         'cta' => 'I want to join',
         'home_title' => "Join us\non the court",
@@ -87,4 +93,9 @@ return [
         'logout' => 'Logout',
         'user' => 'User',
     ],
+    'date_format' => 'M j, Y',
+    'date_time_format' => 'M j, Y H:i',
+    'time_format' => 'H:i',
+    'day_month_format' => 'M j',
+    'year_format' => 'Y',
 ];

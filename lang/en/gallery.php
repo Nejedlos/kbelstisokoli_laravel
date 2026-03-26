@@ -2,7 +2,7 @@
 
 return [
     'title' => 'Gallery',
-    'subtitle' => 'Take a look into the life of our Kbely Falcons club.',
+    'subtitle' => 'Take a look into the life of our Sokol Kbely club.',
     'breadcrumb' => 'Gallery',
 
     'random_title' => 'Random moments',

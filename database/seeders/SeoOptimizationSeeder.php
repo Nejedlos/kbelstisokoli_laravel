@@ -51,7 +51,7 @@ class SeoOptimizationSeeder extends Seeder
             'nabor' => [
                 'title' => [
                     'cs' => 'Nábor hráčů – Přidej se k Sokolům Kbely C nebo E',
-                    'en' => 'Join the Kbely Falcons – Recruitment Sokol Kbely C or E',
+                    'en' => 'Join the Sokol Kbely – Recruitment Sokol Kbely C or E',
                 ],
                 'description' => [
                     'cs' => 'Hledáme nové posily do našich týmů! Pokud hraješ basket a hledáš dobrou partu v Praze 9, přijď na trénink do RumcajsAreny.',
@@ -135,7 +135,7 @@ class SeoOptimizationSeeder extends Seeder
             'gdpr' => [
                 'title' => [
                     'cs' => 'Ochrana soukromí (GDPR) | Kbelští sokoli',
-                    'en' => 'Privacy Policy (GDPR) | Kbely Falcons',
+                    'en' => 'Privacy Policy (GDPR) | Sokol Kbely',
                 ],
                 'description' => [
                     'cs' => 'Jak nakládáme s vašimi údaji v rámci našich týmů. Hrajeme fair-play na palubovce i v soukromí.',
@@ -149,7 +149,7 @@ class SeoOptimizationSeeder extends Seeder
             'hledat' => [
                 'title' => [
                     'cs' => 'Vyhledávání | Kbelští sokoli',
-                    'en' => 'Search | Kbely Falcons',
+                    'en' => 'Search | Sokol Kbely',
                 ],
                 'description' => [
                     'cs' => 'Najděte informace o zápasech, hráčích nebo novinkách z našich basketbalových týmů Sokol Kbely C a E.',

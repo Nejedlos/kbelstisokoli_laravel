@@ -37,7 +37,7 @@ class PostSeeder extends Seeder
                 'date' => '2026-01-06',
                 'title' => [
                     'cs' => 'Start projektu: nový web pro Kbelští sokoli (Muži C & E)',
-                    'en' => 'Project Start: New Website for Kbely Falcons (Men C & E)',
+                    'en' => 'Project Start: New Website for Sokol Kbely (Men C & E)',
                 ],
                 'excerpt' => [
                     'cs' => 'Po novém roce jsme odstartovali plánování a definovali cíl: moderní web pro naše týmy Muži C a Muži E.',
@@ -75,7 +75,7 @@ class PostSeeder extends Seeder
                 ],
                 'content' => [
                     'cs' => '<p>Vybrali jsme moderní sportovní styl: navy + elektrická modrá + klubová červená, doplněné čistými neutrály pro maximální čitelnost. Barvy vycházejí z tradiční identity Sokolů, ale jsou upraveny pro digitální věk s důrazem na vysoký kontrast a dynamiku. Tato paleta se stane základem pro veškeré vizuály webu i sociálních sítí, čímž zajistíme konzistentní vystupování našich letňanských týmů.</p>',
-                    'en' => '<p>We chose a modern sports style: navy + electric blue + club red, complemented by clean neutrals for maximum readability. The colors are based on the traditional Falcons identity but are adjusted for the digital age with an emphasis on high contrast and dynamics. This palette will become the basis for all website visuals and social media, ensuring a consistent appearance for our Letňany teams.</p>',
+                    'en' => '<p>We chose a modern sports style: navy + electric blue + club red, complemented by clean neutrals for maximum readability. The colors are based on the traditional Sokol Kbely identity but are adjusted for the digital age with an emphasis on high contrast and dynamics. This palette will become the basis for all website visuals and social media, ensuring a consistent appearance for our Letňany teams.</p>',
                 ],
             ],
             [
@@ -255,7 +255,7 @@ class PostSeeder extends Seeder
                 ],
                 'content' => [
                     'cs' => '<p>Uzavřeli jsme první veřejnou verzi webu s moderní úvodní stránkou, jasným zaměřením na Muži C & E a přímým propojením na hlavní kbelský basket. Web je nyní plně funkční a připraven k ostrému provozu. Návštěvníci zde najdou vše od historie klubu až po aktuální kontakty. Tímto milníkem sice končí hlavní vývojová fáze, ale náš digitální domov budeme i nadále rozvíjet o nové funkce a čerstvý obsah ze života Sokolů v Letňanech.</p>',
-                    'en' => '<p>We have closed the first public version of the website with a modern homepage, a clear focus on Men C & E, and a direct connection to the main Kbely basketball. The website is now fully functional and ready for live operation. Visitors will find everything from the club\'s history to current contacts. While this milestone ends the main development phase, we will continue to develop our digital home with new features and fresh content from the life of the Falcons in Letňany.</p>',
+                    'en' => '<p>We have closed the first public version of the website with a modern homepage, a clear focus on Men C & E, and a direct connection to the main Kbely basketball. The website is now fully functional and ready for live operation. Visitors will find everything from the club\'s history to current contacts. While this milestone ends the main development phase, we will continue to develop our digital home with new features and fresh content from the life of the Sokol Kbely in Letňany.</p>',
                 ],
             ],
         ];

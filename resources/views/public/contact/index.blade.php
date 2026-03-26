@@ -193,7 +193,7 @@
                                     allowfullscreen=""
                                     loading="lazy"
                                     referrerpolicy="no-referrer-when-downgrade"
-                                    aria-label="{{ app()->getLocale() === 'cs' ? 'Mapa haly' : 'Gym map' }} – {{ $branding['venue']['name'] ?? '' }}">
+                                    aria-label="{{ __('general.gym_map') }} – {{ $branding['venue']['name'] ?? '' }}">
                             </iframe>
                         @else
                             <div class="flex items-center justify-center h-full text-slate-400 italic">

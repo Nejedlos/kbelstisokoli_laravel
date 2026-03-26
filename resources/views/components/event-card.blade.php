@@ -5,7 +5,7 @@
         <!-- Date Badge -->
         <div class="bg-slate-50 md:w-32 flex flex-col items-center justify-center py-6 border-b md:border-b-0 md:border-r border-slate-100 group-hover:bg-primary/5 transition-colors">
             <span class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">{{ $event->starts_at->translatedFormat('M') }}</span>
-            <span class="text-3xl font-black text-secondary group-hover:text-primary transition-colors">{{ $event->starts_at->format('d') }}</span>
+            <span class="text-3xl font-black text-secondary group-hover:text-primary transition-colors">{{ $event->starts_at->day }}</span>
             <span class="text-[10px] font-bold text-slate-500 mt-1">{{ $event->starts_at->translatedFormat('l') }}</span>
         </div>
 
@@ -32,7 +32,7 @@
             <div class="flex flex-wrap items-center gap-y-2 gap-x-6 text-slate-500 text-sm">
                 <div class="flex items-center gap-2">
                     <i class="fa-light fa-clock text-primary"></i>
-                    <span>{{ $event->starts_at->format('H:i') }} @if($event->ends_at) — {{ $event->ends_at->format('H:i') }} @endif</span>
+                    <span>{{ $event->starts_at->format(__('general.time_format')) }} @if($event->ends_at) — {{ $event->ends_at->format(__('general.time_format')) }} @endif</span>
                 </div>
 
                 @if($event->location)

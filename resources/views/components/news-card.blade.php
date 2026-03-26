@@ -37,7 +37,7 @@
             <div class="flex items-center text-[11px] font-bold uppercase tracking-widest text-slate-400">
                 <i class="fa-light fa-calendar-days mr-2"></i>
                 <time datetime="{{ $post->publish_at?->toW3cString() ?? $post->created_at->toW3cString() }}">
-                    {{ ($post->publish_at ?? $post->created_at)->format('d. m. Y') }}
+                    {{ ($post->publish_at ?? $post->created_at)->format(__('general.date_format')) }}
                 </time>
             </div>
         </div>

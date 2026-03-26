@@ -128,4 +128,6 @@ return [
             'since' => 'Since 2022',
         ],
     ],
+    'view_on_cz_basketball' => 'on cz.basketball',
+    'community_quote' => 'Kbely basketball is not just about the results on the board, but about the people who have formed one large sports family for generations.',
 ];

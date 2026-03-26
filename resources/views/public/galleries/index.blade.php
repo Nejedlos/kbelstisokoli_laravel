@@ -77,9 +77,9 @@
                                     <div class="absolute top-4 right-4">
                                         <span class="px-3 py-1 bg-secondary/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
                                             @if($pool->event_date?->day === 1 && $pool->event_date?->month === 1)
-                                                {{ $pool->event_date?->format('Y') }}
+                                                {{ $pool->event_date?->format(__('general.year_format')) }}
                                             @else
-                                                {{ $pool->event_date?->format('d. m. Y') }}
+                                                {{ $pool->event_date?->format(__('general.date_format')) }}
                                             @endif
                                         </span>
                                     </div>
@@ -135,7 +135,7 @@
                                     @endif
                                     <div class="absolute top-4 left-4">
                                         <span class="px-3 py-1 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-full shadow-lg">
-                                            {{ $gallery->media_assets_count ?: $gallery->mediaAssets->count() }} fotek
+                                            {{ $gallery->media_assets_count ?: $gallery->mediaAssets->count() }} {{ __('gallery.photos') }}
                                         </span>
                                     </div>
                                 </div>

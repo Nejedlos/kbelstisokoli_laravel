@@ -117,4 +117,6 @@ return [
             'link' => 'https://www.basketkbely.cz/druzstva',
         ],
     ],
+    'view_on_cz_basketball' => 'na cz.basketball',
+    'community_quote' => 'Kbelský basketbal není jen o výsledcích na tabuli, ale o lidech, kteří tvoří jednu velkou sportovní rodinu už po generace.',
 ];

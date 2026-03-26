@@ -31,11 +31,11 @@ class CmsContentSeeder extends Seeder
         $settings = [
             'club_name' => [
                 'cs' => 'Sokol Kbely',
-                'en' => 'Kbely Falcons',
+                'en' => 'Sokol Kbely',
             ],
             'club_short_name' => [
                 'cs' => 'Sokoli',
-                'en' => 'Falcons',
+                'en' => 'Sokol Kbely',
             ],
             'slogan' => [
                 'cs' => 'Více než jen basketbal.',
@@ -70,11 +70,11 @@ class CmsContentSeeder extends Seeder
             'contact_email' => 'spanily@pro-nemo.cz',
             'footer_text' => [
                 'cs' => '© '.date('Y').' TJ Sokol Kbely C & E. Všechna práva vyhrazena.',
-                'en' => '© '.date('Y').' Basketball club Kbely Falcons. All rights reserved.',
+                'en' => '© '.date('Y').' Basketball club Sokol Kbely. All rights reserved.',
             ],
             'seo_description' => [
                 'cs' => 'Oficiální web basketbalového oddílu TJ Sokol Kbely Basketball. Informace o týmech C a E, trénincích, zápasech a náborech v Letňanech.',
-                'en' => 'Official website of the Kbely Falcons basketball club. Information about teams, trainings, matches and recruitment for children and adults in Prague 9.',
+                'en' => 'Official website of the Sokol Kbely basketball club. Information about teams, trainings, matches and recruitment for children and adults in Prague 9.',
             ],
             'seo_title_suffix' => ' | Sokol Kbely',
         ];
@@ -99,11 +99,11 @@ class CmsContentSeeder extends Seeder
                 'seo' => [
                     'title' => [
                         'cs' => 'Basketbal Letňany – Sokol Kbely C & E',
-                        'en' => 'Basketball Letňany & Kbely – Teams C & E | Kbely Falcons',
+                        'en' => 'Basketball Letňany & Kbely – Teams C & E | Sokol Kbely',
                     ],
                     'description' => [
                         'cs' => 'Oficiální web basketbalových týmů Sokol Kbely C & E (TJ Sokol Kbely Basketball). Hrajeme v Letňanech. Aktuální výsledky, tréninky a nábor nových hráčů.',
-                        'en' => 'Official website of basketball teams Kbely Falcons C & E (TJ Sokol Kbely). We play in Letňany. Match results, trainings and recruitment.',
+                        'en' => 'Official website of basketball teams Sokol Kbely C & E (TJ Sokol Kbely). We play in Letňany. Match results, trainings and recruitment.',
                     ],
                 ],
             ],
@@ -114,8 +114,8 @@ class CmsContentSeeder extends Seeder
                 'status' => 'published',
                 'is_visible' => true,
                 'seo' => [
-                    'title' => ['cs' => 'O klubu | Kbelští sokoli', 'en' => 'About Club | Kbely Falcons'],
-                    'description' => ['cs' => 'Historie a vize basketbalového klubu Kbelští sokoli.', 'en' => 'History and vision of the Kbely Falcons basketball club.'],
+                    'title' => ['cs' => 'O klubu | Kbelští sokoli', 'en' => 'About Club | Sokol Kbely'],
+                    'description' => ['cs' => 'Historie a vize basketbalového klubu Kbelští sokoli.', 'en' => 'History and vision of the Sokol Kbely basketball club.'],
                 ],
             ],
             [
@@ -126,7 +126,7 @@ class CmsContentSeeder extends Seeder
                 'is_visible' => true,
                 'seo' => [
                     'title' => ['cs' => 'Nábor basketbal Letňany – Sokol Kbely C & E', 'en' => 'Basketball Recruitment Letňany – Sokol Kbely C & E'],
-                    'description' => ['cs' => 'Přijď si zahrát basketbal do Letňan! Týmy Kbelští sokoli C & E hledají nové spoluhráče. Tréninky v RumcajsAreně.', 'en' => 'Come play basketball in Letňany! Kbely Falcons C & E teams are looking for new teammates. Trainings in RumcajsArena.'],
+                    'description' => ['cs' => 'Přijď si zahrát basketbal do Letňan! Týmy Kbelští sokoli C & E hledají nové spoluhráče. Tréninky v RumcajsAreně.', 'en' => 'Come play basketball in Letňany! Sokol Kbely C & E teams are looking for new teammates. Trainings in RumcajsArena.'],
                 ],
             ],
             [
@@ -136,7 +136,7 @@ class CmsContentSeeder extends Seeder
                 'status' => 'published',
                 'is_visible' => true,
                 'seo' => [
-                    'title' => ['cs' => 'Rozpis tréninků | Kbelští sokoli', 'en' => 'Training Schedule | Kbely Falcons'],
+                    'title' => ['cs' => 'Rozpis tréninků | Kbelští sokoli', 'en' => 'Training Schedule | Sokol Kbely'],
                 ],
             ],
             [
@@ -146,7 +146,7 @@ class CmsContentSeeder extends Seeder
                 'status' => 'published',
                 'is_visible' => true,
                 'seo' => [
-                    'title' => ['cs' => 'Rozpis a výsledky zápasů | Kbelští sokoli', 'en' => 'Match Schedule & Results | Kbely Falcons'],
+                    'title' => ['cs' => 'Rozpis a výsledky zápasů | Kbelští sokoli', 'en' => 'Match Schedule & Results | Sokol Kbely'],
                 ],
             ],
             [
@@ -156,7 +156,7 @@ class CmsContentSeeder extends Seeder
                 'status' => 'published',
                 'is_visible' => true,
                 'seo' => [
-                    'title' => ['cs' => 'Naše týmy | Kbelští sokoli', 'en' => 'Our Teams | Kbely Falcons'],
+                    'title' => ['cs' => 'Naše týmy | Kbelští sokoli', 'en' => 'Our Teams | Sokol Kbely'],
                 ],
             ],
             [
@@ -166,7 +166,7 @@ class CmsContentSeeder extends Seeder
                 'status' => 'published',
                 'is_visible' => true,
                 'seo' => [
-                    'title' => ['cs' => 'Kontaktujte nás | Kbelští sokoli', 'en' => 'Contact Us | Kbely Falcons'],
+                    'title' => ['cs' => 'Kontaktujte nás | Kbelští sokoli', 'en' => 'Contact Us | Sokol Kbely'],
                 ],
             ],
         ];
@@ -586,7 +586,7 @@ class CmsContentSeeder extends Seeder
                         'style' => 'outline',
                         'alignment' => 'left',
                         'title' => 'This website belongs to teams C & E',
-                        'text' => 'Kbely Falcons C & E are part of the wider TJ Sokol Kbely Basketbal club. Our website focuses on teams C and E – their matches, team life and community in Letňany.',
+                        'text' => 'Sokol Kbely C & E are part of the wider TJ Sokol Kbely Basketbal club. Our website focuses on teams C and E – their matches, team life and community in Letňany.',
                         'button_text' => 'Our Teams (C & E)',
                         'button_url' => '/tymy',
                         'secondary_button_text' => 'Other Recruitments (Youth & Elite)',
@@ -768,7 +768,7 @@ class CmsContentSeeder extends Seeder
                 [
                     'type' => 'rich_text',
                     'data' => [
-                        'content' => '<h2>About Us</h2><p>Kbely Falcons were founded with a vision to create a place where children and adults can dedicate themselves to basketball on both professional and recreational levels.</p><h3>Our Values</h3><ul><li>Teamwork</li><li>Respect</li><li>Perseverance</li><li>Joy</li></ul>',
+                        'content' => '<h2>About Us</h2><p>Sokol Kbely were founded with a vision to create a place where children and adults can dedicate themselves to basketball on both professional and recreational levels.</p><h3>Our Values</h3><ul><li>Teamwork</li><li>Respect</li><li>Perseverance</li><li>Joy</li></ul>',
                     ],
                 ],
                 [

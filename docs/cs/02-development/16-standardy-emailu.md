@@ -6,7 +6,7 @@ Tento dokument definuje pravidla pro formátování předmětů e-mailů odesíl
 
 - **Zákaz hranatých závorek:** Nikdy nepoužívejte `[]` pro označení systému nebo kategorie (např. `[KS FEEDBACK]` je špatně).
 - **Oddělovač:** Jako hlavní oddělovač mezi kategorií/brandem a konkrétním tématem používáme svislou čáru s mezerami ` | `.
-- **Branding:** Pokud je v předmětu název klubu, píšeme jej přirozeně (např. `Kbelští sokoli | ...` nebo `Kbely Falcons | ...`).
+- **Branding:** Pokud je v předmětu název klubu, píšeme jej přirozeně (např. `Kbelští sokoli | ...` nebo `Sokol Kbely | ...`).
 - **Lidský jazyk:** Předměty by měly znít jako od člověka, nikoliv jako systémový log.
 
 ## 2. Příklady formátování

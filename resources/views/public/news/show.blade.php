@@ -15,7 +15,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        {{ ($post->publish_at ?? $post->created_at)->format('d. m. Y') }}
+                        {{ ($post->publish_at ?? $post->created_at)->format(__('general.date_format')) }}
                     </div>
                     @if($post->category)
                         <div class="flex items-center">
@@ -44,7 +44,7 @@
 
                     {{-- Placeholder pro social sharing --}}
                     <div class="flex items-center space-x-4">
-                        <span class="text-xs font-black uppercase tracking-widest text-slate-400">{{ app()->getLocale() === 'cs' ? 'Sdílet:' : 'Share:' }}</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-slate-400">{{ __('general.common.share') }}:</span>
                         <div class="flex space-x-2">
                             <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition-colors cursor-pointer">F</div>
                             <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition-colors cursor-pointer">X</div>

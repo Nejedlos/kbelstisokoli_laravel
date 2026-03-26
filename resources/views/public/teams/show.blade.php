@@ -4,10 +4,10 @@
     <x-page-header
         :title="$team->name"
         :subtitle="match($team->slug) {
-            'muzi-a' => 'Vlajková loď klubu (2. liga skupina A)',
-            'muzi-b' => 'Zkušený tým (Pražský přebor A)',
-            'muzi-c' => 'Soutěžní tým s ambicemi (Pražský přebor B)',
-            'muzi-e' => 'Tým se skvělou partou (3. třída B)',
+            'muzi-a' => __('teams.detail.muzi_a_subtitle'),
+            'muzi-b' => __('teams.detail.muzi_b_subtitle'),
+            'muzi-c' => __('teams.detail.muzi_c_subtitle'),
+            'muzi-e' => __('teams.detail.muzi_e_subtitle'),
             default => $team->name
         }"
         :breadcrumbs="[__('teams.breadcrumbs') => route('public.teams.index'), $team->name => null]"
@@ -92,7 +92,7 @@
                                 </div>
                                 <div>
                                     <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.recruitment_status') }}</span>
-                                    <span class="badge badge-success uppercase tracking-widest text-[10px]">{{ app()->getLocale() === 'cs' ? 'Otevřen' : 'Open' }}</span>
+                                    <span class="badge badge-success uppercase tracking-widest text-[10px]">{{ __('teams.detail.status_open') }}</span>
                                 </div>
                             </div>
 
@@ -102,7 +102,7 @@
                                 </div>
                                 <div>
                                     <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.training_time') }}</span>
-                                    <span class="font-bold text-secondary">{{ app()->getLocale() === 'cs' ? 'Dle rozpisu v hale' : 'According to gym schedule' }}</span>
+                                    <span class="font-bold text-secondary">{{ __('teams.detail.training_schedule') }}</span>
                                 </div>
                             </div>
 
@@ -113,7 +113,7 @@
                                             <i class="fa-light fa-user-tie text-primary"></i>
                                         </div>
                                         <div>
-                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ app()->getLocale() === 'cs' ? 'Trenér' : 'Coach' }}</span>
+                                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.coach') }}</span>
                                             <span class="font-bold text-secondary">{{ $coach->name }}</span>
                                         </div>
                                     </div>
@@ -124,7 +124,7 @@
                                                 <i class="fa-light fa-phone text-primary"></i>
                                             </div>
                                             <div>
-                                                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ app()->getLocale() === 'cs' ? 'Telefon' : 'Phone' }}</span>
+                                                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.phone') }}</span>
                                                 <a href="tel:{{ str_replace(' ', '', $coach->phone) }}" class="font-bold text-secondary hover:text-primary transition-colors">{{ $coach->phone }}</a>
                                             </div>
                                         </div>
@@ -136,7 +136,7 @@
                                                 <i class="fa-light fa-envelope text-primary"></i>
                                             </div>
                                             <div>
-                                                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ app()->getLocale() === 'cs' ? 'E-mail' : 'Email' }}</span>
+                                                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.email') }}</span>
                                                 <a href="mailto:{{ $coach->pivot->email ?: $coach->email }}" class="font-bold text-secondary hover:text-primary transition-colors break-all text-sm">{{ $coach->pivot->email ?: $coach->email }}</a>
                                             </div>
                                         </div>
@@ -149,7 +149,7 @@
                                     </div>
                                     <div>
                                         <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.contact') }}</span>
-                                        <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="font-bold text-primary hover:underline">{{ app()->getLocale() === 'cs' ? 'Náborový kontakt' : 'Recruitment contact' }}</a>
+                                        <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="font-bold text-primary hover:underline">{{ __('teams.detail.recruitment_contact') }}</a>
                                     </div>
                                 </div>
                             @endif
@@ -174,7 +174,7 @@
         <div class="container text-center">
             <x-section-heading
                 title="{{ __('teams.detail.gallery') }}"
-                :subtitle="app()->getLocale() === 'cs' ? 'Nahlédněte do života našeho týmu na hřišti i mimo něj.' : 'Take a look at the life of our team on and off the court.'"
+                :subtitle="__('teams.detail.gallery_subtitle')"
                 alignment="center"
             />
 
@@ -203,7 +203,7 @@
                 </div>
                 <div class="mt-12">
                     <a href="{{ route('public.galleries.index') }}" class="btn btn-outline border-slate-200 hover:border-primary">
-                        <i class="fa-light fa-images mr-2"></i> {{ app()->getLocale() === 'cs' ? 'Zobrazit všechny galerie' : 'View all galleries' }}
+                        <i class="fa-light fa-images mr-2"></i> {{ __('teams.detail.view_all_galleries') }}
                     </a>
                 </div>
             @else
@@ -223,11 +223,11 @@
         <div class="container">
             <div class="flex flex-col md:flex-row items-center justify-between gap-8 text-white text-center md:text-left">
                 <div>
-                    <h2 class="text-3xl font-black uppercase tracking-tight mb-2">{{ app()->getLocale() === 'cs' ? 'Chceš se stát součástí týmu' : 'Want to become part of the team' }} {{ $team->name }}?</h2>
-                    <p class="text-white/80">{{ app()->getLocale() === 'cs' ? 'Ozvěte se nám a domluvíme se na prvním tréninku.' : 'Contact us and we will arrange the first training.' }}</p>
+                    <h2 class="text-3xl font-black uppercase tracking-tight mb-2">{{ __('teams.detail.join_team_title', ['team' => $team->name]) }}</h2>
+                    <p class="text-white/80">{{ __('teams.detail.join_team_desc') }}</p>
                 </div>
                 <a href="{{ route('public.recruitment.join', ['team' => $team->slug]) }}" class="btn bg-white text-primary hover:bg-secondary hover:text-white btn-lg">
-                    {{ app()->getLocale() === 'cs' ? 'Chci se přidat' : 'I want to join' }}
+                    {{ __('teams.detail.cta_join') }}
                 </a>
             </div>
         </div>

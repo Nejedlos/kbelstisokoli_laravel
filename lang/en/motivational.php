@@ -17,7 +17,7 @@ return [
         'low' => [
             "Remember, David also defeated Goliath. Basketball is played on the court, not in the spreadsheets!",
             "Statistics are just numbers. You won't find heart and fighting spirit in the data.",
-            "The harder the battle, the sweeter the victory. Let's show them the strength of the Falcons!",
+            "The harder the battle, the sweeter the victory. Let's show them the strength of the Sokol Kbely!",
             "Every favorite falls eventually. Why not today against us?",
             "We like the role of the outsider. We can only surprise them!",
             "Victory is not about who has more points in the Elo rating, but who leaves more strength on the floor.",
@@ -35,7 +35,7 @@ return [
             "Defense will be the key. If we stop them, victory won't pass us by.",
             "It will be a fight for every meter, but we are ready!",
             "100% focus from the first to the last minute.",
-            "Team performance will decide today. One for all, all for the Falcons!",
+            "Team performance will decide today. One for all, all for the Sokol Kbely!",
             "Believing in yourself is half the success. The other half is hard work on the court."
         ],
         'high' => [
@@ -58,7 +58,7 @@ return [
     ],
     'post_match' => [
         'win' => [
-            'Falcons on the court, joy in the heart. Great winning performance from the whole team!',
+            'Sokol Kbely on the court, joy in the heart. Great winning performance from the whole team!',
             'Fighting spirit, commitment, and team spirit – these are our winning boys.',
             'The statistics speak clearly: our guys put their hearts into it and fought for the win.',
             'Every point counts, every player is a hero. Great job and a well-deserved victory!',
@@ -72,7 +72,7 @@ return [
             "It didn't work out today, but we didn't lack fighting spirit. Next time we will be stronger!",
             "Every match is a lesson. Today we learned and we will go into the next one with a clear head.",
             "The heart was on the floor, but luck favored the opponent this time.",
-            "The loss hurts, but our journey continues. Falcons never give up!",
+            "The loss hurts, but our journey continues. Sokol Kbely never give up!",
             "Today we encountered a strong opponent. We respect the result and keep working.",
             "The result is not according to our expectations, but the team spirit remains unbroken.",
             "Even after a storm, the sun comes out. We fell today, but we'll get up again tomorrow!",

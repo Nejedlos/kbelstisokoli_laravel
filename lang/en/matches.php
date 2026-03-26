@@ -109,7 +109,7 @@ return [
         'Fans were our sixth player!',
         'Controlled the game from start to finish.',
         'Heart and hustle made the difference.',
-        'That\'s how the Falcons play!',
+        'That\'s how the Sokol Kbely play!',
         'Opponent had no chance.',
         'Masterclass performance by the whole squad.',
         'Celebrations in the locker room!',
@@ -167,7 +167,7 @@ return [
         'Believe in the process and the team.',
         'Shots didn\'t fall today.',
         'Must learn from our mistakes.',
-        'Falcons never fold their wings.',
+        'Sokol Kbely never fold their wings.',
         'Tomorrow is a new day and a new practice.',
         'This result won\'t stop us.',
         'Even the best have off days.',
@@ -197,7 +197,7 @@ return [
     ],
     'win_badges' => [
         'Winning Team', 'Great Form', 'Dominance', 'Team Spirit', 'Heart',
-        'Top Performance', 'Unbeatable', 'Winning Streak', 'Court Masters', 'Falcons Power',
+        'Top Performance', 'Unbeatable', 'Winning Streak', 'Court Masters', 'Sokol Kbely Power',
     ],
     'loss_badges' => [
         'Experience', 'Hustle', 'Better Next Time', 'Lesson', 'Motivation',

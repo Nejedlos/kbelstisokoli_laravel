@@ -33,11 +33,11 @@
                                         <div class="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-md transition-all">
                                             <div class="bg-white shadow-sm text-secondary p-3 rounded-xl text-center min-w-[70px] border border-slate-100 group-hover:bg-primary group-hover:text-white transition-colors">
                                                 <div class="text-[10px] font-black uppercase tracking-widest opacity-60">{{ $training->starts_at->translatedFormat('M') }}</div>
-                                                <div class="text-2xl font-black leading-none">{{ $training->starts_at->format('d') }}</div>
+                                                <div class="text-2xl font-black leading-none">{{ $training->starts_at->day }}</div>
                                             </div>
                                             <div>
                                                 <div class="font-black text-secondary uppercase tracking-tight">
-                                                    {{ $training->starts_at->format('H:i') }} - {{ $training->ends_at->format('H:i') }}
+                                                    {{ $training->starts_at->format(__('general.time_format')) }} - {{ $training->ends_at->format(__('general.time_format')) }}
                                                 </div>
                                                 <div class="text-sm text-slate-500 flex items-center mt-1">
                                                     <i class="fa-light fa-location-dot mr-2 text-primary opacity-70"></i>
@@ -111,7 +111,7 @@
                                     allowfullscreen=""
                                     loading="lazy"
                                     referrerpolicy="no-referrer-when-downgrade"
-                                    aria-label="{{ app()->getLocale() === 'cs' ? 'Mapa haly' : 'Gym map' }} – {{ $branding['venue']['name'] ?? '' }}">
+                                    aria-label="{{ __('general.gym_map') }} – {{ $branding['venue']['name'] ?? '' }}">
                             </iframe>
                         @else
                             <div class="flex items-center justify-center h-full text-slate-400 italic">

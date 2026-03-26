@@ -50,9 +50,9 @@
                                 <div>
                                     <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">{{ __('general.time') }}</div>
                                     <div class="font-bold text-secondary">
-                                        {{ $event->starts_at->format('H:i') }}
+                                        {{ $event->starts_at->format(__('general.time_format')) }}
                                         @if($event->ends_at)
-                                            — {{ $event->ends_at->format('H:i') }}
+                                            — {{ $event->ends_at->format(__('general.time_format')) }}
                                         @endif
                                     </div>
                                 </div>

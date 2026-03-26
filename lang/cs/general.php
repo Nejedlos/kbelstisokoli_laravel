@@ -27,6 +27,12 @@ return [
         'no_content' => 'Obsah úvodní stránky zatím nebyl vytvořen v administraci.',
     ],
     'view_on_map' => 'Zobrazit na mapě',
+    'view_more' => 'Zobrazit více',
+    'common' => [
+        'view_more' => 'Zobrazit více',
+        'view_all' => 'Zobrazit vše',
+        'share' => 'Sdílet',
+    ],
     'send_email' => 'Poslat e-mail',
     'match_day_desc' => 'Obvyklý čas domácích utkání v hale.',
     'date_from' => 'Od',
@@ -87,4 +93,9 @@ return [
         'logout' => 'Odhlásit se',
         'user' => 'Uživatel',
     ],
+    'date_format' => 'd. m. Y',
+    'date_time_format' => 'd. m. Y H:i',
+    'time_format' => 'H:i',
+    'day_month_format' => 'd. m.',
+    'year_format' => 'Y',
 ];
