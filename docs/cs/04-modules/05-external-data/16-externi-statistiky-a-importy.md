@@ -147,10 +147,13 @@ Aplikace využívá hybridní model plánování úloh:
 2. **Database Scheduler (`CronTask` model):** Umožňuje administrátorům spravovat úlohy přímo z Filamentu.
 
 #### Klíčové úlohy a frekvence:
-- **Baseline Sync (`stats:import`):** Spouští se 1x denně (ve 3:30 / 4:30), stahuje soupisky a všechny zápasy sezóny.
-- **Recent Sync (`stats:import --recent`):** Spouští se **každou hodinu** (24/7). Stahuje detaily zápasů z posledních 3 dnů. Pokud zápasu chybí boxscore (statistiky), zkouší se stažení každou hodinu, dokud není boxscore k dispozici.
+- **Baseline Sync (`stats:import`):** Spouští se 1x denně (ve 3:30 / 4:30), stahuje soupisky a všechny zápasy sezóny pro týmy povolené v `ExternalTeamSeasonConfig`.
+- **Recent Sync (`stats:import --recent`):** Spouští se **každou hodinu** (24/7). Stahuje detaily zápasů z posledních 7 dnů. Pokud zápasu chybí boxscore (statistiky), zkouší se stažení každou hodinu. U nedávných zápasů se automaticky vynucuje hloubková (`excesive`) synchronizace, aby se statistiky hráčů načetly ihned.
 - **Recompute Stats (`stats:recompute`):** Spouští se **každou hodinu** (v 15. minutě), aby se projevily změny ve statistikách v sezónních průměrech hráčů.
-- **Player History Sync (`stats:sync-players`):** Denně ve 4:00 (aktuální sezóna) a týdně ve 2:00 (hloubková historie).
+- **Recompute Elo (`stats:elo:recompute`):** Spouští se **každou hodinu** (ve 20. minutě) pro aktualizaci týmových hodnocení.
+- **Recompute Predictions (`stats:predictions:recompute`):** Spouští se **každou hodinu** (ve 30. minutě) pro aktualizaci pravděpodobností budoucích zápasů.
+- **Sync Standings (`stats:sync-standings`):** Spouští se **každou hodinu** (ve 45. minutě) pro aktuální ligové tabulky.
+- **Player Sync (`stats:sync-players`):** Probíhá **2x denně** (ve 4:00 a 16:00) pro aktualizaci fotek a kariérní historie hráčů.
 
 ---
 

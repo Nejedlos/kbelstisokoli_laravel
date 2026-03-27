@@ -65,11 +65,22 @@ class RecomputeStatsCommand extends Command
             }
             $teams->push($team);
         } else {
-            $teamSlugs = config('external_sources.czbasketball.teams', []);
-            $teams = Team::whereIn('slug', $teamSlugs)->get();
+            // 1. Prioritně bereme týmy z ExternalTeamSeasonConfig (databázové nastavení)
+            $configs = \App\Models\ExternalTeamSeasonConfig::where('season_id', $season->id)
+                ->where('is_enabled', true)
+                ->with('team')
+                ->get();
+
+            $teams = $configs->pluck('team');
+
+            // 2. Fallback na hardcoded slugy z konfigurace (pokud nic v DB není)
+            if ($teams->isEmpty()) {
+                $teamSlugs = config('external_sources.czbasketball.teams', []);
+                $teams = Team::whereIn('slug', $teamSlugs)->get();
+            }
 
             if ($teams->isEmpty()) {
-                $this->warn('V konfiguraci nejsou definovány žádné sledované týmy k přepočtu.');
+                $this->warn('Nejsou definovány žádné sledované týmy k přepočtu (ani v DB, ani v configu).');
             }
         }
 

@@ -16,10 +16,13 @@ Tento dokument obsahuje detailní seznam zranitelností nalezených během stati
 | 8 | Chybějící Policies u citlivých modelů | **MEDIUM** | Nalezeno |
 | 9 | SSRF v Screenshot Proxy | **MEDIUM** | Nalezeno |
 | 10 | Neautorizovaná Impersonifikace v Screenshot Proxy | **HIGH** | Nalezeno |
-| 11 | [ADMIN] Bypass autorizace na custom stránkách | **HIGH** | Nalezeno |
-| 12 | [ADMIN] Privilege Escalation v UserForm (Roles) | **CRITICAL** | Nalezeno |
-| 13 | [ADMIN] Systemická absence Laravel Policies | **HIGH** | Nalezeno |
-| 14 | [ADMIN] Neautorizované akce v UserForm | **MEDIUM** | Nalezeno |
+| 11 | [ADMIN] Bypass autorizace na custom stránkách | **HIGH** | **VYŘEŠENO** |
+| 12 | [ADMIN] Privilege Escalation v UserForm (Roles) | **CRITICAL** | **VYŘEŠENO** |
+| 13 | [ADMIN] Systemická absence Laravel Policies | **HIGH** | **VYŘEŠENO** |
+| 14 | [ADMIN] Neautorizované akce v UserForm | **MEDIUM** | **VYŘEŠENO** |
+| 15 | [ADMIN] Neautorizované Bulk/Header akce v UsersTable | **HIGH** | **VYŘEŠENO** |
+| 16 | [ADMIN] Absence Policies pro finanční konfigurace | **HIGH** | **VYŘEŠENO** |
+| 17 | [ADMIN] Neomezený přístup k Media Assetům | **MEDIUM** | **VYŘEŠENO** |
 
 ---
 
@@ -132,3 +135,21 @@ protected function highlight(string $text, string $query): string
 - **Nález:** Akce `toggle_active_record` (aktivace/deaktivace účtu) v `getSummaryCard` (resp. u pole `is_active_status`) postrádá metodu `authorize()` nebo `visible()`.
 - **Dopad:** Uživatel s přístupem k zobrazení/editaci uživatele může deaktivovat administrátory nebo jiné klíčové uživatele.
 - **Doporučení:** Přidat autorizační kontrolu k akci, aby ji mohl provádět pouze uživatel s oprávněním `manage_users`.
+
+## 15. [ADMIN] Neautorizované Bulk/Header akce v UsersTable [HIGH]
+- **Soubor:** `app/Filament/Resources/Users/Tables/UsersTable.php`
+- **Nález:** Akce `mergeAllGhosts` (header) a `mergeAutomatically` (bulk) nebyly chráněny autorizací.
+- **Dopad:** Uživatel s přístupem k seznamu uživatelů mohl spustit destruktivní hromadné slučování uživatelských účtů.
+- **Doporučení:** Přidat `visible(fn () => auth()->user()->hasRole('admin'))`.
+
+## 16. [ADMIN] Absence Policies pro finanční konfigurace [HIGH]
+- **Soubor:** `app/Models/UserSeasonConfig.php`
+- **Nález:** Model pro správu platebních tarifů a počátečních zůstatků uživatelů postrádal Laravel Policy.
+- **Dopad:** Riziko neoprávněné změny finančních parametrů uživatelů (např. odpuštění poplatků) kýmkoli s přístupem k modulu uživatelů.
+- **Doporučení:** Implementovat `UserSeasonConfigPolicy` s restrikcí na `manage_economy`.
+
+## 17. [ADMIN] Neomezený přístup k Media Assetům [MEDIUM]
+- **Soubor:** `app/Models/MediaAsset.php`
+- **Nález:** Absence Policy pro knihovnu médií.
+- **Dopad:** Jakýkoli uživatel s přístupem do administrace mohl spravovat (mazat, nahrávat) globální mediální soubory.
+- **Doporučení:** Implementovat `MediaAssetPolicy` vyžadující `manage_content` pro zápis.

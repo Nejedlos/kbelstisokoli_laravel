@@ -24,7 +24,8 @@ class MediaAssetForm
                         SpatieMediaLibraryFileUpload::make('file')
                             ->label('Nahrát soubor')
                             ->collection('default')
-                            ->image()
+                            ->acceptedFileTypes(['image/*', 'application/pdf'])
+                            ->maxSize(10240) // 10MB limit
                             // Dynamický disk podle úrovně přístupu
                             ->disk(fn ($get) => $get('access_level') === 'public' ? config('filesystems.uploads.disk') : 'media_private')
                             // Čištění názvu souboru při nahrávání

@@ -90,8 +90,8 @@ Schedule::call(fn() => Artisan::call('seo:generate-sitemap'))->dailyAt('03:00');
 // Automatická obnova sezóny - 31. srpna ve 23:55
 Schedule::call(fn() => Artisan::call('season:renew'))->cron('55 23 31 8 *');
 
-// Synchronizace hráčů (denní pro aktuální sezónu)
-Schedule::call(fn() => Artisan::call('stats:sync-players'))->dailyAt('04:00');
+// Synchronizace hráčů (2x denně pro aktuální sezónu)
+Schedule::call(fn() => Artisan::call('stats:sync-players'))->twiceDaily(4, 16);
 
 // Hloubková (excesivní) synchronizace historie hráčů - každou neděli ve 02:00
 Schedule::call(fn() => Artisan::call('stats:sync-players', ['--excesive' => true]))->weeklyOn(0, '02:00');
@@ -104,6 +104,15 @@ Schedule::call(fn() => Artisan::call('stats:import', ['--recent' => true]))->hou
 
 // Pravidelný přepočet statistik po synchronizaci (každou hodinu v 15. minutě)
 Schedule::call(fn() => Artisan::call('stats:recompute'))->hourlyAt(15);
+
+// Přepočet Elo ratingů (každou hodinu ve 20. minutě)
+Schedule::call(fn() => Artisan::call('stats:elo:recompute'))->hourlyAt(20);
+
+// Přepočet předpovědí (každou hodinu ve 30. minutě)
+Schedule::call(fn() => Artisan::call('stats:predictions:recompute'))->hourlyAt(30);
+
+// Synchronizace ligových tabulek (každou hodinu ve 45. minutě)
+Schedule::call(fn() => Artisan::call('stats:sync-standings'))->hourlyAt(45);
 
 // Čištění duplicit (každý den ve 4:00)
 Schedule::call(fn() => Artisan::call('stats:cleanup-duplicates'))->dailyAt('04:00');

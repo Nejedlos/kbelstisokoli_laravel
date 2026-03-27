@@ -204,6 +204,7 @@ class UsersTable
                         ->modalHeading(__('user.actions.merge_title'))
                         ->modalDescription(__('user.actions.merge_desc'))
                         ->modalSubmitActionLabel(__('user.actions.merge_submit'))
+                        ->visible(fn () => auth()->user()?->can('manage_users') && auth()->user()?->hasRole('admin'))
                         ->action(function ($record, array $data, \App\Services\Users\UserMergeService $service) {
                             $targetUser = \App\Models\User::findOrFail($data['target_user_id']);
                             $service->merge($record, $targetUser);
@@ -217,7 +218,7 @@ class UsersTable
                         ->label(__('user.actions.sync_external'))
                         ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
-                        ->visible(fn ($record) => $record->externalMappings->where('source_key', 'czbasketball')->isNotEmpty())
+                        ->visible(fn ($record) => auth()->user()?->can('manage_users') && $record->externalMappings->where('source_key', 'czbasketball')->isNotEmpty())
                         ->action(function ($record, \App\Services\Stats\Sync\PlayerSyncService $service) {
                             $result = $service->syncPlayer($record);
 
@@ -244,6 +245,7 @@ class UsersTable
                     ->color('warning')
                     ->requiresConfirmation()
                     ->modalDescription(__('user.actions.merge_ghosts_desc'))
+                    ->visible(fn () => auth()->user()?->hasRole('admin'))
                     ->action(function (\App\Services\Users\UserMergeService $service) {
                         // Musíme pracovat s query, abychom se vyhnuli problémům s pamětí u velkého množství uživatelů
                         // Ale pro začátek stačí filter na kolekci, pokud jich není tisíce
@@ -283,6 +285,7 @@ class UsersTable
                         ->modalHeading(__('user.actions.merge_bulk_title'))
                         ->modalDescription(__('user.actions.merge_bulk_desc'))
                         ->modalSubmitActionLabel(__('user.actions.merge_bulk_submit'))
+                        ->visible(fn () => auth()->user()?->hasRole('admin'))
                         ->action(function (Collection $records, \App\Services\Users\UserMergeService $service) {
                             $mergedCount = 0;
                             $skippedCount = 0;

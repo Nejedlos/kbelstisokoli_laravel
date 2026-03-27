@@ -42,11 +42,22 @@ class StatsImportCommand extends Command
             return self::FAILURE;
         }
 
-        $teamSlugs = \Illuminate\Support\Facades\Config::get('external_sources.czbasketball.teams', []);
-        $teams = \App\Models\Team::whereIn('slug', $teamSlugs)->get();
+        // 1. Prioritně bereme týmy z ExternalTeamSeasonConfig (databázové nastavení)
+        $configs = \App\Models\ExternalTeamSeasonConfig::where('season_id', $activeSeason->id)
+            ->where('is_enabled', true)
+            ->with('team')
+            ->get();
+
+        $teams = $configs->pluck('team');
+
+        // 2. Fallback na hardcoded slugy z konfigurace (pokud nic v DB není)
+        if ($teams->isEmpty()) {
+            $teamSlugs = \Illuminate\Support\Facades\Config::get('external_sources.czbasketball.teams', []);
+            $teams = \App\Models\Team::whereIn('slug', $teamSlugs)->get();
+        }
 
         if ($teams->isEmpty()) {
-            $this->warn('V konfiguraci nejsou definovány žádné týmy k synchronizaci.');
+            $this->warn('Nejsou definovány žádné týmy k synchronizaci (ani v DB, ani v configu).');
             return self::SUCCESS;
         }
 

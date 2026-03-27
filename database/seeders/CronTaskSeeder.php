@@ -29,7 +29,7 @@ class CronTaskSeeder extends Seeder
             [
                 'name' => 'Synchronizace detailů hráčů (Hluboká)',
                 'command' => 'stats:sync-players',
-                'expression' => '0 5 * * *', // Každý den v 5:00
+                'expression' => '0 4,16 * * *', // 2x denně (4:00 a 16:00)
                 'description' => 'Hloubková synchronizace profilových údajů hráčů (fotky, historie kariéry) z cz.basketball.',
                 'priority' => 5,
             ],
@@ -52,6 +52,27 @@ class CronTaskSeeder extends Seeder
                 'command' => 'stats:recompute',
                 'expression' => '15 * * * *', // Každou hodinu (vždy 15min po synchronizaci)
                 'description' => 'Přepočítá vypočtené ukazatele (průměry, součty) pro hráče a týmy v aktivní sezóně.',
+                'priority' => 15,
+            ],
+            [
+                'name' => 'Přepočet Elo ratingů',
+                'command' => 'stats:elo:recompute',
+                'expression' => '20 * * * *', // Každou hodinu (po přepočtu statistik)
+                'description' => 'Přepočítá Elo ratingy týmů na základě výsledků zápasů.',
+                'priority' => 12,
+            ],
+            [
+                'name' => 'Přepočet předpovědí',
+                'command' => 'stats:predictions:recompute',
+                'expression' => '30 * * * *', // Každou hodinu (po Elo ratingu)
+                'description' => 'Aktualizuje pravděpodobnosti výhry pro budoucí zápasy.',
+                'priority' => 10,
+            ],
+            [
+                'name' => 'Synchronizace ligových tabulek',
+                'command' => 'stats:sync-standings',
+                'expression' => '45 * * * *', // Každou hodinu
+                'description' => 'Stáhne aktuální tabulky soutěží pro aktivní sezónu.',
                 'priority' => 15,
             ],
             [
