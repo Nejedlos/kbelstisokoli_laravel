@@ -36,7 +36,7 @@
 </head>
 <body class="{{ $context['body_class'] ?? '' }}" style="{{ $context['body_style'] ?? '' }}">
     <div id="snapshot-root">
-        {!! $dom !!}
+        {!! preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $dom) !!}
     </div>
     <x-screenshot.scripts />
 </body>

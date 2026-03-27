@@ -13,7 +13,7 @@ Při hromadném nahrávání velkého množství fotografií (až 200) do PhotoP
     - Zvýšen `max_upload_time` z 5 na 20 minut.
     - Explicitně nastaven disk pro dočasné nahrávání na `local` (s fallbackem na env).
     - Zvýšen limit velikosti souboru v Livewire pravidlech na 100 MB (`max:102400`), aby neblokoval validaci v konkrétních resourcích.
-- **`.env.example` & `.env.production`**:
+- **`.env.example` & lokální `.env.production`**:
     - Přidána proměnná `LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=local`.
 
 ## Doporučení pro produkci

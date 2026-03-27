@@ -10,7 +10,7 @@ Byla zavedena jednotná a robustní strategie pro ukládání souborů (uploadů
 - Přidán helper `web_asset($path)` v `app/Helpers/media.php` pro bezpečné generování veřejných URL (zohledňuje nové umístění i zpětnou kompatibilitu se starými soubory v `storage/`).
 - Aktualizovány Blade šablony a poskytovatelé tak, aby používali `web_asset()` místo pevného `asset('storage/...')`.
 - `FileUpload` komponenty (Branding) přepnuty na `->disk(config('filesystems.uploads.disk'))`.
-- Upravena `.env`, `.env.production` a `.env.example` – `UPLOADS_DISK=public_path` a přidána `MEDIA_DISK=public_path`.
+- Upravena `.env`, `.env.example` a lokální `.env.production` – `UPLOADS_DISK=public_path` a přidána `MEDIA_DISK=public_path`.
 
 ## Co je potřeba po deploy
 1. `php artisan optimize:clear`
@@ -28,7 +28,7 @@ Pokud nasazujete přes Envoy, stačí spustit `php artisan envoy run deploy` neb
 - Lokál: `.env`
   - `UPLOADS_DISK=public_path`
   - `MEDIA_DISK=public_path`
-- Produkce: `.env.production` (případně `public/.env` dle Envoy)
+- Produkce: `.env` (nastavená ručně na serveru nebo synchronizovaná selektivně)
   - `UPLOADS_DISK=public_path`
   - `MEDIA_DISK=public_path`
   - `APP_PUBLIC_PATH="/absolutni/cesta/k/verejne/slozce"` (na Webglobe nastavena)

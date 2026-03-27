@@ -28,6 +28,10 @@ class ScreenshotRenderController extends Controller
 
         // 1. Validace cílové URL (musí být interní)
         if (!$this->isInternalUrl($targetUrl)) {
+            \Illuminate\Support\Facades\Log::warning('[ScreenshotProxy] Blocked external URL attempt', [
+                'url' => $targetUrl,
+                'ip' => $request->ip()
+            ]);
             return response()->json(['error' => 'Only internal URLs are allowed'], 403);
         }
 
@@ -42,6 +46,11 @@ class ScreenshotRenderController extends Controller
         // nebo pokud NAS volá s platnou signaturou pro uživatele,
         // dočasně se "přepneme" do kontextu toho uživatele.
         if ($userId) {
+            \Illuminate\Support\Facades\Log::info('[ScreenshotProxy] Impersonating user for rendering', [
+                'user_id' => $userId,
+                'target_url' => $targetUrl,
+                'ip' => $request->ip()
+            ]);
             Auth::loginUsingId($userId);
         }
 
@@ -83,16 +92,17 @@ class ScreenshotRenderController extends Controller
     protected function isInternalUrl(string $url): bool
     {
         $appUrl = config('app.url');
-        $parsedApp = parse_url($appUrl);
-        $parsedTarget = parse_url($url);
 
-        // Pokud je to relativní cesta
-        if (!isset($parsedTarget['host'])) {
+        // Povolit pouze pokud URL začíná na APP_URL nebo je to relativní cesta (která ale nezačíná na //)
+        if (Str::startsWith($url, $appUrl)) {
             return true;
         }
 
-        // Pokud je to absolutní URL, musí odpovídat hostiteli
-        return $parsedTarget['host'] === $parsedApp['host'];
+        if (Str::startsWith($url, '/') && !Str::startsWith($url, '//')) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

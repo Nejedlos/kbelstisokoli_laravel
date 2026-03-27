@@ -9,7 +9,7 @@ Tento dokument popisuje nastavení projektu pro provoz s veřejným adresářem 
 
 ## Konfigurace prostředí (.env)
 
-Pro aktivaci tohoto režimu jsou v `.env` (nebo v `.env.production`) klíčové tyto proměnné:
+Pro aktivaci tohoto režimu jsou v `.env` na serveru klíčové tyto proměnné:
 
 ```env
 # Mód veřejné cesty: 'default' (místní /public) nebo 'external' (vzdálená složka)

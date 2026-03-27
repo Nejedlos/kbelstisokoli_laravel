@@ -20,6 +20,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
             $app->useEnvironmentPath($envPath);
         }
 
+        // Fix pro správnou PHP binárku na produkci (pro Scheduler a subprocesy)
+        if (env('APP_ENV') === 'production' && $php = env('PROD_PHP_BINARY')) {
+            putenv("PHP_BINARY=$php");
+        }
+
         // Nastavení public_path - musí fungovat i v Console (pro importy, seedy, media library)
         // Zabezpečení pro localhost: pokud jsme v local prostředí a produkční cesta neexistuje, nulujeme ji
         $publicPath = env('PROD_PUBLIC_PATH');
@@ -160,10 +165,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->validateCsrfTokens(except: [
-            'feedback',
-            'feedback/*',
-            '*/feedback',
-            '*/feedback/*',
+            // Feedback widget v aplikaci používá standardní CSRF
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

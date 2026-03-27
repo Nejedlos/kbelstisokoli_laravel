@@ -2,9 +2,9 @@
 
 Tento dokument slouží jako podrobný seznam míst, která je nutné upravit při přechodu z `LONGTEXT` (emulovaný JSON) na nativní `JSON` typ v MySQL 8. Přechod umožní přesnější vyhledávání (pouze v konkrétním jazyce) a lepší výkon.
 
-## 1. Konfigurace prostředí (.env.production)
+## 1. Konfigurace prostředí (Lokální .env.production)
 
-Změnit parametry pro správnou detekci MySQL 8 a vypnutí MariaDB režimu:
+Změnit parametry pro správnou detekci MySQL 8 a vypnutí MariaDB režimu v lokálním souboru `.env.production` (soubor je spravován offline a na produkci se nepřenáší):
 
 - [ ] `DB_VERSION=8.0` (místo `10.3.0`)
 - [ ] `DB_MARIADB=false` (místo `true`)
