@@ -721,12 +721,12 @@
                                     <div class="flex flex-col items-center justify-center p-4 sm:p-3 md:p-4 rounded-[2rem] border-2 {{ $qBg }} transition-all hover:bg-white hover:border-brand-100 hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden">
                                         <div class="absolute top-0 right-0 w-16 h-16 {{ $qDot }} rounded-full -mr-8 -mt-8"></div>
                                         <span class="relative inline-block text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 group-hover:text-brand-500 transition-colors whitespace-nowrap">{{ $loop->iteration }}. {{ __('matches.period') ?? 'čtvrtina' }}</span>
-                                        <div class="relative flex items-center gap-4 md:gap-6">
-                                            <span class="text-3xl md:text-4xl font-black {{ $match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
+                                        <div class="relative flex items-center gap-2 md:gap-3">
+                                            <span class="text-2xl md:text-3xl font-black {{ $match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
                                                 {{ $qHome }}
                                             </span>
-                                            <span class="text-lg md:text-xl font-black text-gray-300 mx-2">:</span>
-                                            <span class="text-3xl md:text-4xl font-black {{ !$match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
+                                            <span class="text-lg md:text-xl font-black text-gray-300">:</span>
+                                            <span class="text-2xl md:text-3xl font-black {{ !$match->is_home ? $qText : 'text-gray-900' }} tabular-nums">
                                                 {{ $qAway }}
                                             </span>
                                         </div>
