@@ -50,6 +50,7 @@ Tento dokument zaznamenává opravy a vylepšení v procesu synchronizace statis
 ### Řešení
 - **Inteligentní retry pro boxscore (`ExternalStatsSyncService.php`):** Snížen interval přeskakování u zápasů, kterým chybí boxscore a jsou v 3-denním "recent" okně, z 24 hodin na **1 hodinu**. Systém se tak pokusí stáhnout statistiky každou hodinu, dokud se neobjeví, a až poté přejde na 24h cyklus údržby.
 - **Zvýšení frekvence (`CronTaskSeeder.php`, `routes/console.php`):** Prioritní synchronizace (`stats:import --recent`) a následný přepočet statistik (`stats:recompute`) nyní běží **každou hodinu po celý den (24/7)**.
+- **Automatická excesivní synchronizace pro nové zápasy:** Pokud nedávný zápas (v okně `recent_match_days`) ještě nemá stažený boxscore, systém pro něj automaticky vynutí `excesive` režim. Tím se zajistí stažení statistik hráčů ihned s prvním dostupným výsledkem, aniž by bylo nutné pouštět hloubkovou synchronizaci ručně.
 - **Oprava kombinace `recent` + `excesive`:** Opravena logika, která dříve při použití hloubkové synchronizace (`excesive`) ignorovala omezení na nedávné zápasy (`recent`). Nyní lze cíleně vynutit hloubkovou synchronizaci pouze pro nedávné zápasy.
 
 ### Dopad

@@ -12,7 +12,7 @@ class FinancePaymentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('access_admin');
+        return $user->can('manage_economy');
     }
 
     /**
@@ -20,7 +20,7 @@ class FinancePaymentPolicy
      */
     public function view(User $user, FinancePayment $financePayment): bool
     {
-        return $user->can('access_admin');
+        return $user->can('manage_economy');
     }
 
     /**

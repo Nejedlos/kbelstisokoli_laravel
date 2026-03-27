@@ -577,6 +577,7 @@ class UserForm
                                             ->icon(fn ($record) => $record?->is_active ? \App\Support\IconHelper::get(\App\Support\IconHelper::DEACTIVATE) : \App\Support\IconHelper::get(\App\Support\IconHelper::ACTIVATE))
                                             ->color(fn ($record) => $record?->is_active ? 'danger' : 'success')
                                             ->requiresConfirmation()
+                                            ->visible(fn () => auth()->user()?->can('manage_users'))
                                             ->modalHeading(fn ($record) => $record?->is_active ? 'Deaktivovat účet?' : 'Aktivovat účet?')
                                             ->modalDescription('Změna stavu aktivity účtu má okamžitý vliv na možnost uživatele přihlásit se do systému.')
                                             ->action(function ($record) {
@@ -647,7 +648,9 @@ class UserForm
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->display_name)
                             ->multiple()
                             ->preload()
-                            ->searchable(),
+                            ->searchable()
+                            ->visible(fn () => auth()->user()?->hasRole('admin'))
+                            ->disabled(fn () => !auth()->user()?->hasRole('admin')),
                         Textarea::make('admin_note')
                             ->label(__('user.fields.admin_note'))
                             ->rows(5),

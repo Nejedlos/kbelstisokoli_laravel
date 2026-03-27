@@ -6,6 +6,11 @@ use Filament\Widgets\Widget;
 
 class SystemHealthWidget extends Widget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     protected string $view = 'filament.widgets.system-health-widget';
 
     protected int|string|array $columnSpan = 'full';

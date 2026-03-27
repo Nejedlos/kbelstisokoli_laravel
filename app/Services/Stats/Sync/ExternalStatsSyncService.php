@@ -565,6 +565,8 @@ class ExternalStatsSyncService
                 break;
             }
 
+            $matchOptions = $options;
+
             if (! $force) {
                 $lastSynced = $match->metadata['last_synced_at'] ?? null;
                 $hasBoxscore = isset($match->metadata['boxscore_synced_at']);
@@ -573,6 +575,13 @@ class ExternalStatsSyncService
                 // aby se statistiky objevily co nejdříve po jejich zveřejnění na zdroji.
                 $recentDays = config('external_sources.czbasketball.limits.recent_match_days', 3);
                 $isRecentlyScheduled = $match->scheduled_at && $match->scheduled_at->gt(now()->subDays($recentDays));
+
+                // Pokud zápas nemá boxscore a je nedávný, automaticky vynutíme excesivní synchronizaci (i bez flagu v options),
+                // aby se statistiky stáhly hned s prvním dostupným boxscorem.
+                if (! $hasBoxscore && $isRecentlyScheduled) {
+                    $matchOptions['excesive'] = true;
+                }
+
                 $syncInterval = (!$hasBoxscore && $isRecentlyScheduled) ? now()->subHour() : now()->subDay();
 
                 if ($lastSynced && \Illuminate\Support\Carbon::parse($lastSynced)->gt($syncInterval)) {
@@ -582,7 +591,7 @@ class ExternalStatsSyncService
             }
 
             ConsoleService::log("    - Plánuji detail zápasu: ID {$match->id} ($matchExtId)", 'debug');
-            $job = SyncMatchDetailJob::dispatch($match->id, $options);
+            $job = SyncMatchDetailJob::dispatch($match->id, $matchOptions);
 
             // Pokud používáme sync frontu, přidáme malou pauzu, aby se ulevilo CPU a API
             if (config('queue.default') === 'sync' || env('QUEUE_CONNECTION') === 'sync') {

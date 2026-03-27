@@ -39,6 +39,11 @@ class DebugOperations extends Page
 
     protected string $view = 'filament.pages.debug-operations';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     public string $consoleOutput = '';
     public string $pollingInterval = '5s';
 

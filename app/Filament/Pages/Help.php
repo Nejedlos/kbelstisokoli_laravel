@@ -176,6 +176,11 @@ class Help extends Page
         ');
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('access_admin') ?? false;
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->check();

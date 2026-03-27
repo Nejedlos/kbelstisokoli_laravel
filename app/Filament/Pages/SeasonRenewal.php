@@ -38,6 +38,11 @@ class SeasonRenewal extends Page implements HasForms
 
     protected string $view = 'filament.pages.season-renewal';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_advanced_settings');
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.navigation.groups.system');

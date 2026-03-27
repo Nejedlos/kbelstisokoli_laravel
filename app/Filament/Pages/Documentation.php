@@ -14,6 +14,11 @@ class Documentation extends Page
 {
     protected string $view = 'filament.pages.documentation';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasRole('super_admin') || auth()->user()?->can('access_admin');
+    }
+
     protected static ?string $title = 'Dokumentace';
 
     protected static ?string $navigationLabel = 'Dokumentace';

@@ -13,6 +13,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class AdminKpiOverview extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()->can('access_admin');
+    }
+
     protected static ?int $sort = -190;
 
     protected int|string|array $columnSpan = [
