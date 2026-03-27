@@ -15,9 +15,17 @@ class MediaDownloadController extends Controller
         $media = Media::where('uuid', $uuid)->firstOrFail();
         $model = $media->model;
 
-        // Kontrola oprávnění u MediaAsset
+        if (!$model) {
+            abort(403, 'Média bez přiřazeného modelu nelze stahovat.');
+        }
+
+        // Kontrola oprávnění u MediaAsset (starší systém s access_level)
         if ($model instanceof \App\Models\MediaAsset) {
             $this->authorizeAccess($model);
+        } else {
+            // Generická autorizace pro ostatní modely (User, FinancePayment atd.)
+            // Pokud model nemá definovanou policy, Laravel standardně přístup zamítne (403).
+            $this->authorize('view', $model);
         }
 
         if (! file_exists($media->getPath())) {

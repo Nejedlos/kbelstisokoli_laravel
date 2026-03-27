@@ -43,22 +43,19 @@ class DetectScreenshotMode
 
                 if ($isAuthenticated) {
                     try {
-                        // Přihlášení uživatele pro tento request (impersonifikace)
-                        // Používáme explicitní guard, pokud jsme v adminu
+                        // Přihlášení uživatele POUZE PRO TENTO JEDEN REQUEST (jednorázová impersonifikace)
+                        // Nepoužíváme loginUsingId, protože by se to trvale uložilo do session uživatele.
                         $guard = $request->is('admin*') ? 'web' : config('auth.defaults.guard', 'web');
-                        Auth::guard($guard)->loginUsingId($userId);
+                        Auth::guard($guard)->onceUsingId($userId);
 
-                        // Nastavení session pro bypass 2FA a jiných kontrol
+                        // Pokud potřebujeme v tomto requestu přistupovat k datům chráněným 2FA,
+                        // můžeme dočasně nastavit bypass v kontejneru nebo v session (ale jen in-memory).
                         if ($request->hasSession()) {
-                            $request->session()->put('impersonated_by', 'screenshot_system');
-                            $request->session()->put('auth.2fa_confirmed_at', now()->timestamp);
-                            $request->session()->save(); // Vynucení uložení pro aktuální request
-                            \Illuminate\Support\Facades\Log::debug('[ScreenshotMode] Session updated', [
-                                'session_id' => $request->session()->getId(),
-                            ]);
+                            $request->session()->flash('impersonated_by', 'screenshot_system');
+                            $request->session()->flash('auth.2fa_confirmed_at', now()->timestamp);
                         }
 
-                        \Illuminate\Support\Facades\Log::info('[ScreenshotMode] User impersonated', [
+                        \Illuminate\Support\Facades\Log::info('[ScreenshotMode] User impersonated (once)', [
                             'user_id' => $userId,
                             'auth_id' => Auth::id(),
                         ]);

@@ -178,6 +178,11 @@ class AvatarModal extends Component
             return;
         }
 
+        // Validace souborů hned po nahrání (před generováním preview)
+        $this->validate([
+            'avatarFile.*' => ['image', 'max:10240'], // Max 10MB
+        ]);
+
         // Pokud je nahráváno jako systémový avatar a je vybráno více souborů, neřešíme ořez (automatický resize)
         if ($this->uploadAsSystem && is_array($this->avatarFile) && count($this->avatarFile) > 1) {
             $this->previewUrl = null; // Náhled u hromadného importu neřešíme (nebo jen indikaci)
@@ -246,7 +251,7 @@ class AvatarModal extends Component
     public function deleteAvatar()
     {
         $user = \App\Models\User::find($this->userId) ?: auth()->user();
-        if ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin()) {
+        if (! $user || ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin())) {
             abort(403);
         }
         $user->clearMediaCollection('avatar');
@@ -293,7 +298,7 @@ class AvatarModal extends Component
         }
 
         $user = \App\Models\User::find($this->userId) ?: auth()->user();
-        if ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin()) {
+        if (! $user || ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin())) {
             abort(403);
         }
 
@@ -306,7 +311,7 @@ class AvatarModal extends Component
         $decodedImage = base64_decode($imageData[1]);
         $tempPath = 'temp/'.$this->userId.'_avatar_'.time().'.webp';
         Storage::disk('local')->put($tempPath, $decodedImage);
-        $fullPath = storage_path('app/private/'.$tempPath);
+        $fullPath = Storage::disk('local')->path($tempPath);
 
         $user->addMedia($fullPath)
             ->usingFileName('avatar-'.time().'.webp')

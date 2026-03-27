@@ -30,9 +30,22 @@ class FeedbackController extends Controller
             abort(404, 'Snapshot not found or expired.');
         }
 
+        $dom = $data['dom'] ?? '';
+
+        // Robustní sanitizace pro bezpečné renderování v prohlížeči (včetně Playwrightu)
+        // 1. Odstranění všech <script> tagů (včetně obsahu)
+        $dom = preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $dom);
+
+        // 2. Odstranění event handlerů (on*)
+        $dom = preg_replace('/\s+on\w+="[^"]*"/i', '', $dom);
+        $dom = preg_replace('/\s+on\w+=\'[^\']*\'/i', '', $dom);
+
+        // 3. Odstranění javascript: v href/src
+        $dom = preg_replace('/(href|src)\s*=\s*["\']javascript:[^"\']*["\']/i', '$1="#"', $dom);
+
         // Změna view pro renderování
         return view('feedback.snapshot', [
-            'dom' => $data['dom'],
+            'dom' => $dom,
             'context' => $data['context'],
         ]);
     }

@@ -6,29 +6,27 @@ Tento dokument obsahuje detailní seznam zranitelností nalezených během stati
 
 | ID | Název | Závažnost | Stav |
 |----|-------|-----------|------|
-| 1 | Expozice .env.production.bak v public/ | **CRITICAL** | Nalezeno |
+| 1 | Expozice .env.production.bak v public/ | **CRITICAL** | **VYŘEŠENO** |
 | 2 | Persistent XSS v CMS blocích (Custom HTML / Rich Text) | **HIGH** | Nalezeno |
 | 3 | Broken Access Control v MediaDownloadController | **HIGH** | Nalezeno |
-| 4 | XSS v Feedback Snapshotu | **HIGH** | Nalezeno |
+| 4 | XSS v Feedback Snapshotu | **HIGH** | Částečně opraveno |
 | 5 | IDOR v ProfileController (Avatar selection) | **MEDIUM** | Nalezeno |
 | 6 | XSS ve vyhledávání (HelpSearchService) | **MEDIUM** | Nalezeno |
-| 7 | CSRF Bypass na Feedback endpointu | **MEDIUM** | Nalezeno |
+| 7 | CSRF Bypass na Feedback endpointu | **MEDIUM** | **VYŘEŠENO** |
 | 8 | Chybějící Policies u citlivých modelů | **MEDIUM** | Nalezeno |
 | 9 | SSRF v Screenshot Proxy | **MEDIUM** | Nalezeno |
 | 10 | Neautorizovaná Impersonifikace v Screenshot Proxy | **HIGH** | Nalezeno |
+| 11 | [ADMIN] Bypass autorizace na custom stránkách | **HIGH** | Nalezeno |
+| 12 | [ADMIN] Privilege Escalation v UserForm (Roles) | **CRITICAL** | Nalezeno |
+| 13 | [ADMIN] Systemická absence Laravel Policies | **HIGH** | Nalezeno |
+| 14 | [ADMIN] Neautorizované akce v UserForm | **MEDIUM** | Nalezeno |
 
 ---
 
-## 1. Expozice .env.production.bak v public/ [CRITICAL]
+## 1. Expozice .env.production.bak v public/ [CRITICAL] - VYŘEŠENO
 - **Soubor:** `public/.env.production.bak`
-- **Nález:** Ve složce `public` se nachází záložní soubor s kompletní konfigurací produkčního prostředí (DB hesla, API klíče, Laravel APP_KEY).
-- **Dopad:** Kdokoliv na internetu si může stáhnout tento soubor a získat plný přístup k databázi a šifrovacím klíčům aplikace.
-- **Attack Scenario:** Útočník pomocí skeneru (nebo jen odhadem) najde cestu `/public/.env.production.bak` (nebo jen `/.env.production.bak` pokud je root špatně nastaven) a stáhne si citlivá data.
-- **Doporučení:** Soubor okamžitě smazat. Všechny v něm obsažené klíče a hesla považovat za kompromitované a změnit je.
-- **Proposed Fix:** 
-```bash
-rm public/.env.production.bak
-```
+- **Nález:** Ve složce `public` se nacházela záložní konfigurace.
+- **Status:** Soubor byl smazán a riziko bylo eliminováno.
 
 ## 2. Persistent XSS v CMS blocích [HIGH]
 - **Soubory:** 
@@ -60,16 +58,9 @@ public function download(string $uuid)
 }
 ```
 
-## 4. XSS v Feedback Snapshotu [HIGH]
+## 4. XSS v Feedback Snapshotu [HIGH] - Částečně opraveno (neúčinně)
 - **Soubor:** `resources/views/feedback/snapshot.blade.php`
-- **Nález:** `{!! $dom !!}` renderuje neošetřený HTML kód nahraný uživatelem.
-- **Dopad:** Útočník pošle feedback se skriptem. Admin si snapshot prohlédne a skript ukradne jeho session token.
-- **Doporučení:** Sanitizovat DOM před uložením nebo renderovat v sandboxu.
-- **Proposed Fix:**
-```php
-// resources/views/feedback/snapshot.blade.php
-<iframe srcdoc="{{ htmlspecialchars($dom) }}" sandbox></iframe>
-```
+- **Nález:** `{!! $dom !!}` renderuje neošetřený HTML kód. Byla implementována ochrana pomocí `preg_replace` pro `<script>`, která je ale neúčinná proti inline eventům (`onerror`, `onclick`).
 
 ## 5. IDOR v ProfileController (Avatar Selection) [MEDIUM]
 - **Soubor:** `app/Http/Controllers/Member/ProfileController.php` (metoda `selectAvatarFromAsset`)
@@ -92,11 +83,9 @@ protected function highlight(string $text, string $query): string
 }
 ```
 
-## 7. CSRF Bypass na Feedbacku [MEDIUM]
+## 7. CSRF Bypass na Feedbacku [MEDIUM] - VYŘEŠENO
 - **Soubor:** `bootstrap/app.php`
-- **Nález:** Výjimka pro `/feedback` v CSRF ochraně.
-- **Dopad:** Možnost odesílat feedbacky jménem přihlášených uživatelů bez jejich vědomí.
-- **Doporučení:** Odstranit výjimku a zajistit předávání CSRF tokenu ve feedback widgetu.
+- **Nález:** Byla nalezena výjimka v CSRF ochraně, která již byla odstraněna. Testy potvrzují funkční ochranu.
 
 ## 8. Chybějící Policies u citlivých modelů [MEDIUM]
 - **Soubor:** `app/Policies/` (absence souborů pro Page, FeedbackReport, atd.)
@@ -113,3 +102,33 @@ protected function highlight(string $text, string $query): string
 - **Nález:** `Auth::loginUsingId` v controlleru přístupném přes signovanou URL.
 - **Dopad:** Riziko zneužití při úniku APP_KEY nebo zachycení signované URL (např. v logách proxy).
 - **Doporučení:** Odstranit impersonifikaci, renderovat screenshoty s anonymizovanými daty nebo předávat data přes parametry bez nutnosti login.
+
+## 11. [ADMIN] Bypass autorizace na custom stránkách [HIGH]
+- **Soubory:** 
+    - `app/Filament/Pages/DebugOperations.php`
+    - `app/Filament/Pages/Documentation.php`
+    - `app/Filament/Pages/Help.php`
+    - `app/Filament/Pages/SeasonRenewal.php`
+- **Nález:** Tyto stránky postrádají metodu `canAccess(): bool`. Filament v5 vyžaduje tuto metodu pro kontrolu oprávnění k přístupu na stránku.
+- **Dopad:** Jakýkoliv přihlášený uživatel s přístupem do administrace (např. trenér) může přejít na tyto stránky zadáním URL a spouštět nebezpečné operace (např. zastavení synchronizace, hromadné změny sezón).
+- **Attack Scenario:** Uživatel s rolí 'coach' se přihlásí do adminu a v prohlížeči přejde na `/admin/debug-operations`.
+- **Doporučení:** Implementovat metodu `canAccess()` na všech custom stránkách a ověřovat příslušná oprávnění (např. `manage_system` nebo `manage_advanced_settings`).
+
+## 12. [ADMIN] Privilege Escalation v UserForm (Roles) [CRITICAL]
+- **Soubor:** `app/Filament/Resources/Users/Schemas/UserForm.php` (metoda `getAdminTab`)
+- **Nález:** Pole pro výběr rolí (`roles`) postrádá jakoukoli autorizační kontrolu (`visible()` nebo `disabled()`).
+- **Dopad:** Uživatel, který má přístup k editaci uživatelů (např. personalista nebo administrátor s nižšími právy), může sobě nebo jiným uživatelům přidělit roli `admin`, čímž získá plnou kontrolu nad systémem.
+- **Attack Scenario:** Útočník s přístupem k `UserResource` (např. trenér, pokud má právo editovat profily členů svého týmu) si přidá roli `admin` ve svém profilu nebo profilu jiného uživatele.
+- **Doporučení:** Přidat `visible(fn () => auth()->user()->hasRole('admin'))` k poli `roles`.
+
+## 13. [ADMIN] Systemická absence Laravel Policies [HIGH]
+- **Soubory:** `app/Models/*.php` vs `app/Policies/*.php`
+- **Nález:** Přes 40 modelů (např. `Post`, `Team`, `BasketballMatch`, `UserSeasonConfig`) nemá definovanou Laravel Policy.
+- **Dopad:** Filament v5 standardně povoluje přístup k resource, pokud pro model neexistuje Policy (pokud není zapnutý strict mode). To vede k tomu, že uživatelé s omezeným přístupem mohou vidět a editovat data, ke kterým by neměli mít přístup.
+- **Doporučení:** Vytvořit Policy pro každý model používaný ve Filamentu a striktně definovat `viewAny`, `view`, `create`, `update` a `delete` oprávnění.
+
+## 14. [ADMIN] Neautorizované akce v UserForm [MEDIUM]
+- **Soubor:** `app/Filament/Resources/Users/Schemas/UserForm.php`
+- **Nález:** Akce `toggle_active_record` (aktivace/deaktivace účtu) v `getSummaryCard` (resp. u pole `is_active_status`) postrádá metodu `authorize()` nebo `visible()`.
+- **Dopad:** Uživatel s přístupem k zobrazení/editaci uživatele může deaktivovat administrátory nebo jiné klíčové uživatele.
+- **Doporučení:** Přidat autorizační kontrolu k akci, aby ji mohl provádět pouze uživatel s oprávněním `manage_users`.

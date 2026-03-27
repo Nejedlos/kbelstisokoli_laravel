@@ -16,8 +16,8 @@ Tento dokument mapuje hlavní vstupní body, privilegované části systému a c
 - **URL:** `/`, `/o-klubu`, `/tym/...`, `/zapas/...` atd.
 - **Rizika:** 
     - SQL Injection v parametrech URL (např. slugy, ID).
-    - Open Redirect v `LanguageController` při přepínání jazyků.
-    - SSRF přes `ScreenshotRenderController` (pokud je dostupný veřejně se signaturou).
+    - Open Redirect v `LanguageController` při přepínání jazyků (parametr `previous_url` je rekonstruován z parse_url).
+    - SSRF přes `ScreenshotRenderController` (zabezpečeno `isInternalUrl`, ale citlivé na bypass typu `//127.0.0.1`).
 
 ### 2.2 Členská sekce (Member Section)
 - **Prefix:** `/clenska-sekce`
@@ -44,13 +44,15 @@ Tento dokument mapuje hlavní vstupní body, privilegované části systému a c
 ### 2.4 Zpětná vazba a Feedback (Kritické)
 - **URL:** `/feedback`, `/feedback/screenshot`, `/feedback/snapshot/{token}`
 - **Vlastnosti:** 
-    - Částečné výjimky z CSRF (dříve ošetřeno, vyžaduje opětovnou kontrolu).
+    - Částečné výjimky z CSRF (dříve ošetřeno v `bootstrap/app.php`, vyžaduje opětovnou kontrolu po změnách v Laravel 12).
     - **Server-side Screenshoty:** Využití Playwright (`ScreenshotService`) pro generování screenshotů z uživatelského DOMu. 
+    - **Impersonifikace pro render:** `ScreenshotRenderController` využívá `Auth::loginUsingId($userId)` pro získání kontextu uživatele při renderování stránky pro screenshot (vysoké riziko při úniku signované URL).
     - **Rizika:** XSS (vstříknutí skriptu do snapshotu), SSRF (donucení serveru navštívit interní URL), RCE (zranitelnost v Node.js/Playwright workeru).
 
 ### 2.5 Systémové a API endpointy
 - **Cron/Schedule:** `/system/schedule/{token}`, `/system/cron/run` (chráněno tokeny v konfiguraci).
-- **Média:** `/media/download/{uuid}` (chráněno logikou `MediaDownloadController` a `access_level`).
+- **Média:** `/media/download/{uuid}` (chráněno logikou `MediaDownloadController` a `access_level`). 
+    - *Poznámka:* Kontrola oprávnění probíhá pouze pro model `MediaAsset`, ostatní modely jsou v aktuální verzi `MediaDownloadController` nekontrolované (potenciální IDOR).
 - **API:** `/api/user` (Sanctum auth).
 
 ## 3. Privilegované části a Trust Boundaries
@@ -61,7 +63,8 @@ Tento dokument mapuje hlavní vstupní body, privilegované části systému a c
 ## 4. Datové toky a citlivé operace
 1. **User Uploads:** Livewire (`AvatarModal`) -> Dočasné uložení -> Ořez -> Media Library -> S3/Local Storage.
 2. **Feedback Flow:** Uživatel -> DOM Snapshot -> Server (`FeedbackController`) -> Playwright Worker -> PNG Screenshot -> Uložení -> Admin náhled.
-3. **External Sync:** Admin -> `PlayerSyncService` -> Externí API -> Aktualizace DB (Basketball stats).
+3. **Impersonation Flow:** Admin -> `ImpersonateController` -> `session()->invalidate()` -> `Auth::login($userToImpersonate)` -> `session()->put('impersonated_by', $adminId)`. 
+4. **External Sync:** Admin -> `PlayerSyncService` -> Externí API -> Aktualizace DB (Basketball stats).
 
 ## 5. Seznam oblastí s nejvyšší prioritou auditu
 

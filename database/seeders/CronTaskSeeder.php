@@ -43,14 +43,14 @@ class CronTaskSeeder extends Seeder
             [
                 'name' => 'Synchronizace statistik (Průběžná - prioritní)',
                 'command' => 'stats:import --recent',
-                'expression' => '15 */2 * * *', // Každé 2 hodiny
+                'expression' => '0 * * * *', // Každou hodinu
                 'description' => 'Prioritní synchronizace nedávných a právě probíhajících zápasů pro všechny týmy.',
                 'priority' => 25,
             ],
             [
                 'name' => 'Přepočet sezónních statistik',
                 'command' => 'stats:recompute',
-                'expression' => '45 */2 * * *', // Každé 2 hodiny (vždy 30min po synchronizaci)
+                'expression' => '15 * * * *', // Každou hodinu (vždy 15min po synchronizaci)
                 'description' => 'Přepočítá vypočtené ukazatele (průměry, součty) pro hráče a týmy v aktivní sezóně.',
                 'priority' => 15,
             ],

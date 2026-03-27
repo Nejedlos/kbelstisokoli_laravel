@@ -39,3 +39,19 @@ Tento dokument zaznamenává opravy a vylepšení v procesu synchronizace statis
 - Hromadná synchronizace je nyní mnohem robustnější a dojde do konce i při občasných výpadcích externího zdroje.
 - Uživatel má lepší kontrolu nad běžícími procesy díky vizualizaci celkového progresu a možnosti selektivního přeskakování.
 - Snížení zátěže na frontu díky rychlejšímu odbavování neúspěšných požadavků.
+
+## 3. Zrychlení synchronizace statistik (Březen 2026)
+
+### Problém
+- **Pomalé zveřejňování statistik:** Statistiky (boxscore) na `cz.basketball` se často objevují až několik hodin po odehrání zápasu.
+- **Dlouhý interval synchronizace:** Původní `recent` synchronizace běžela jen každé 2 hodiny a navíc v PHP přeskakovala zápasy, které byly jednou staženy (i když neúplně), na celých 24 hodin. To způsobovalo, že se statistiky na webu objevily až druhý den ráno.
+- **Omezené časové okno:** Synchronizace v `routes/console.php` byla omezena pouze na 8:00 - 23:00, což mohlo způsobit zpoždění u pozdních večerních zápasů.
+
+### Řešení
+- **Inteligentní retry pro boxscore (`ExternalStatsSyncService.php`):** Snížen interval přeskakování u zápasů, kterým chybí boxscore a jsou v 3-denním "recent" okně, z 24 hodin na **1 hodinu**. Systém se tak pokusí stáhnout statistiky každou hodinu, dokud se neobjeví, a až poté přejde na 24h cyklus údržby.
+- **Zvýšení frekvence (`CronTaskSeeder.php`, `routes/console.php`):** Prioritní synchronizace (`stats:import --recent`) a následný přepočet statistik (`stats:recompute`) nyní běží **každou hodinu po celý den (24/7)**.
+- **Oprava kombinace `recent` + `excesive`:** Opravena logika, která dříve při použití hloubkové synchronizace (`excesive`) ignorovala omezení na nedávné zápasy (`recent`). Nyní lze cíleně vynutit hloubkovou synchronizaci pouze pro nedávné zápasy.
+
+### Dopad
+- Statistiky se na webu objeví maximálně s hodinovým zpožděním od jejich publikace na zdrojovém serveru, bez nutnosti čekat na ranní baseline synchronizaci.
+- Zvýšená čerstvost dat pro uživatele v členské sekci bez zbytečného přetěžování externího serveru (díky selektivnímu zkrácení retry intervalu jen pro chybějící data).

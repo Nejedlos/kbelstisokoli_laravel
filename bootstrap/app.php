@@ -130,6 +130,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
             \App\Http\Middleware\DetectScreenshotMode::class,
             \App\Http\Middleware\SetLocaleMiddleware::class,
             \App\Http\Middleware\FullPageCacheMiddleware::class,

@@ -73,7 +73,7 @@ use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\Event;
 
 // Pravidelný priming cache pro veřejný web (každé 3 hodiny)
-Schedule::call(fn() => Artisan::call('page-cache:prime'))->everyThreeHours()->onOneServer();
+Schedule::call(fn() => Artisan::call('page-cache:prime'))->name('page-cache:prime')->everyThreeHours()->onOneServer();
 
 // Hook pro smazání full-page cache při volání optimize:clear
 Event::listen(CommandFinished::class, function (CommandFinished $event) {
@@ -99,8 +99,11 @@ Schedule::call(fn() => Artisan::call('stats:sync-players', ['--excesive' => true
 // Pravidelná synchronizace všech týmů v aktivní sezóně (denně v 4:30)
 Schedule::call(fn() => Artisan::call('stats:import', ['--queue' => true]))->dailyAt('04:30');
 
-// Častější synchronizace nedávných zápasů (každou hodinu od 8:00 do 23:00) pro čerstvé výsledky
-Schedule::call(fn() => Artisan::call('stats:import', ['--recent' => true]))->hourly()->between('8:00', '23:00');
+// Častější synchronizace nedávných zápasů (každou hodinu) pro čerstvé výsledky a statistiky
+Schedule::call(fn() => Artisan::call('stats:import', ['--recent' => true]))->hourly();
+
+// Pravidelný přepočet statistik po synchronizaci (každou hodinu v 15. minutě)
+Schedule::call(fn() => Artisan::call('stats:recompute'))->hourlyAt(15);
 
 // Čištění duplicit (každý den ve 4:00)
 Schedule::call(fn() => Artisan::call('stats:cleanup-duplicates'))->dailyAt('04:00');

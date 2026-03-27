@@ -140,6 +140,20 @@ Tento dokument slouží jako detailní technická specifikace pro implementaci s
 
 ---
 
+### 1.4 Plánování a Scheduler
+
+Aplikace využívá hybridní model plánování úloh:
+1. **Hardcoded Scheduler (`routes/console.php`):** Pro základní systémové úlohy.
+2. **Database Scheduler (`CronTask` model):** Umožňuje administrátorům spravovat úlohy přímo z Filamentu.
+
+#### Klíčové úlohy a frekvence:
+- **Baseline Sync (`stats:import`):** Spouští se 1x denně (ve 3:30 / 4:30), stahuje soupisky a všechny zápasy sezóny.
+- **Recent Sync (`stats:import --recent`):** Spouští se **každou hodinu** (24/7). Stahuje detaily zápasů z posledních 3 dnů. Pokud zápasu chybí boxscore (statistiky), zkouší se stažení každou hodinu, dokud není boxscore k dispozici.
+- **Recompute Stats (`stats:recompute`):** Spouští se **každou hodinu** (v 15. minutě), aby se projevily změny ve statistikách v sezónních průměrech hráčů.
+- **Player History Sync (`stats:sync-players`):** Denně ve 4:00 (aktuální sezóna) a týdně ve 2:00 (hloubková historie).
+
+---
+
 ## 2. Architektura Importní Pipeline (AI Ingest)
 
 Systém je navržen pro automatizované stahování a normalizaci dat pomocí AI.

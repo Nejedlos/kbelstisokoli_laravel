@@ -513,7 +513,7 @@ class ExternalStatsSyncService
             $defaultLimit = 1000; // Prakticky bez limitu pro jednu sezónu
         }
         $limit = $options['maxMatchDetails'] ?? $options['limit'] ?? $defaultLimit;
-        $recentOnly = ($options['recentOnly'] ?? false) && !$excesive;
+        $recentOnly = ($options['recentOnly'] ?? false);
 
         ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').", recentOnly=".($recentOnly ? 'true' : 'false').", excesive=".($excesive ? 'true' : 'false'), 'debug');
 
@@ -567,8 +567,16 @@ class ExternalStatsSyncService
 
             if (! $force) {
                 $lastSynced = $match->metadata['last_synced_at'] ?? null;
-                if ($lastSynced && \Illuminate\Support\Carbon::parse($lastSynced)->gt(now()->subDay())) {
-                    ConsoleService::log("    - Zápas {$match->id} ($matchExtId) přeskočen (naposledy synchronizováno: $lastSynced)", 'debug');
+                $hasBoxscore = isset($match->metadata['boxscore_synced_at']);
+
+                // Pro čerstvé zápasy (např. do 7 dnů od odehrání) bez statistik chceme zkoušet častěji (každou hodinu)
+                // aby se statistiky objevily co nejdříve po jejich zveřejnění na zdroji.
+                $recentDays = config('external_sources.czbasketball.limits.recent_match_days', 3);
+                $isRecentlyScheduled = $match->scheduled_at && $match->scheduled_at->gt(now()->subDays($recentDays));
+                $syncInterval = (!$hasBoxscore && $isRecentlyScheduled) ? now()->subHour() : now()->subDay();
+
+                if ($lastSynced && \Illuminate\Support\Carbon::parse($lastSynced)->gt($syncInterval)) {
+                    ConsoleService::log("    - Zápas {$match->id} ($matchExtId) přeskočen (naposledy synchronizováno: $lastSynced, interval: " . ($isRecentlyScheduled && !$hasBoxscore ? '1h' : '24h') . ")", 'debug');
                     continue;
                 }
             }

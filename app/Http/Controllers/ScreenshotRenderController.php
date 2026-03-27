@@ -42,18 +42,6 @@ class ScreenshotRenderController extends Controller
             return response()->json(['error' => 'Invalid or expired signature'], 401);
         }
 
-        // Pokud jsme přihlášeni jako admin a chceme renderovat něčí stránku,
-        // nebo pokud NAS volá s platnou signaturou pro uživatele,
-        // dočasně se "přepneme" do kontextu toho uživatele.
-        if ($userId) {
-            \Illuminate\Support\Facades\Log::info('[ScreenshotProxy] Impersonating user for rendering', [
-                'user_id' => $userId,
-                'target_url' => $targetUrl,
-                'ip' => $request->ip()
-            ]);
-            Auth::loginUsingId($userId);
-        }
-
         // 3. Příprava URL se screenshot signálem a ID uživatele
         $screenshotUrl = $this->generateSignedScreenshotUrl($targetUrl, $userId);
 

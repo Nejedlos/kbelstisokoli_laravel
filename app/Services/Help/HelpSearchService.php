@@ -161,16 +161,19 @@ class HelpSearchService
     }
 
     /**
-     * Zvýrazní hledaný výraz v textu.
+     * Zvýrazní hledaný výraz v textu a zajistí bezpečné escapování.
      */
     protected function highlight(string $text, string $query): string
     {
-        if (empty($query)) return $text;
+        if (empty($query)) return e($text);
+
+        $escapedText = e($text);
+        $escapedQuery = e($query);
 
         return preg_replace(
-            '/(' . preg_quote($query, '/') . ')/i',
+            '/(' . preg_quote($escapedQuery, '/') . ')/i',
             '<mark class="bg-primary-100 text-primary-900 px-1 rounded-sm">$1</mark>',
-            $text
+            $escapedText
         );
     }
 

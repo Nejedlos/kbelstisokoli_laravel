@@ -15,6 +15,6 @@
         'prose-slate' => $style !== 'dark',
         'prose-invert' => $style === 'dark',
     ])>
-        {!! $content !!}
+        {!! \App\Support\HtmlSanitizer::clean($content ?? '', false) !!}
     </div>
 </section>
