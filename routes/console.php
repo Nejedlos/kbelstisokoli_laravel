@@ -73,7 +73,7 @@ use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\Event;
 
 // Pravidelný priming cache pro veřejný web (každé 3 hodiny)
-Schedule::command('page-cache:prime')->everyThreeHours()->onOneServer();
+Schedule::call(fn() => Artisan::call('page-cache:prime'))->everyThreeHours()->onOneServer();
 
 // Hook pro smazání full-page cache při volání optimize:clear
 Event::listen(CommandFinished::class, function (CommandFinished $event) {
@@ -83,30 +83,30 @@ Event::listen(CommandFinished::class, function (CommandFinished $event) {
 });
 
 // Automatická údržba Telescope (každý den ve 3:15) - ponechá jen posledních 24h
-Schedule::command('telescope:clear')->dailyAt('03:15');
+Schedule::call(fn() => Artisan::call('telescope:clear'))->dailyAt('03:15');
 
-Schedule::command('seo:generate-sitemap')->dailyAt('03:00');
+Schedule::call(fn() => Artisan::call('seo:generate-sitemap'))->dailyAt('03:00');
 
 // Automatická obnova sezóny - 31. srpna ve 23:55
-Schedule::command('season:renew')->cron('55 23 31 8 *');
+Schedule::call(fn() => Artisan::call('season:renew'))->cron('55 23 31 8 *');
 
 // Synchronizace hráčů (denní pro aktuální sezónu)
-Schedule::command('stats:sync-players')->dailyAt('04:00');
+Schedule::call(fn() => Artisan::call('stats:sync-players'))->dailyAt('04:00');
 
 // Hloubková (excesivní) synchronizace historie hráčů - každou neděli ve 02:00
-Schedule::command('stats:sync-players --excesive')->weeklyOn(0, '02:00');
+Schedule::call(fn() => Artisan::call('stats:sync-players', ['--excesive' => true]))->weeklyOn(0, '02:00');
 
 // Pravidelná synchronizace všech týmů v aktivní sezóně (denně v 4:30)
-Schedule::command('stats:import --queue')->dailyAt('04:30');
+Schedule::call(fn() => Artisan::call('stats:import', ['--queue' => true]))->dailyAt('04:30');
 
 // Častější synchronizace nedávných zápasů (každou hodinu od 8:00 do 23:00) pro čerstvé výsledky
-Schedule::command('stats:import --recent')->hourly()->between('8:00', '23:00');
+Schedule::call(fn() => Artisan::call('stats:import', ['--recent' => true]))->hourly()->between('8:00', '23:00');
 
 // Čištění duplicit (každý den ve 4:00)
-Schedule::command('stats:cleanup-duplicates')->dailyAt('04:00');
+Schedule::call(fn() => Artisan::call('stats:cleanup-duplicates'))->dailyAt('04:00');
 
 // Synchronizace výchozích týmů členů (každou hodinu)
-Schedule::command('app:sync-member-default-teams')->hourly();
+Schedule::call(fn() => Artisan::call('app:sync-member-default-teams'))->hourly();
 
 // Měsíční hloubková (excesivní) synchronizace všech historických sezón týmů (1. v měsíci v 1:00)
 Schedule::call(function () {
