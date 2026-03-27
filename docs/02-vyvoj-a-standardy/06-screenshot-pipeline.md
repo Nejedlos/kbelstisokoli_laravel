@@ -37,6 +37,13 @@ Tento dokument popisuje architekturu a provoz vícevrstvého řešení pro poři
 - Implementováno v PHP službě `App\Services\ScreenshotService`.
 - Komunikace probíhá přes HTTPS s Bearer tokenem.
 
+## Zabezpečení a síťové nastavení
+Pro maximální bezpečnost doporučujeme omezit přístup na port 443 na straně Synology NASu:
+1. **Port Forwarding (Router):** Port 443 TCP musí být přesměrován na lokální IP adresu NASu.
+2. **Firewall (Synology DSM):** V sekci `Ovládací panel > Zabezpečení > Firewall` doporučujeme vytvořit pravidlo pro port 443, které povolí přístup pouze z IP adresy hostingu Webglobe (`62.109.154.162`).
+3. **SSL Certifikát:** Služba na NASu musí mít platný SSL certifikát (např. Let's Encrypt přes Synology), aby spojení bylo šifrované a bezpečné.
+4. **API Token:** Veškeré požadavky musí obsahovat `Authorization: Bearer <token>`, jinak budou odmítnuty (401).
+
 ## Instalace a nastavení (NAS)
 - Služba vyžaduje `API_TOKEN` a nastavení `ALLOWED_HOSTS`.
 - Na straně Laravelu stačí nastavit proměnné v `.env`:

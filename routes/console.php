@@ -99,6 +99,9 @@ Schedule::command('stats:sync-players --excesive')->weeklyOn(0, '02:00');
 // Pravidelná synchronizace všech týmů v aktivní sezóně (denně v 4:30)
 Schedule::command('stats:import --queue')->dailyAt('04:30');
 
+// Častější synchronizace nedávných zápasů (každou hodinu od 8:00 do 23:00) pro čerstvé výsledky
+Schedule::command('stats:import --recent')->hourly()->between('8:00', '23:00');
+
 // Čištění duplicit (každý den ve 4:00)
 Schedule::command('stats:cleanup-duplicates')->dailyAt('04:00');
 

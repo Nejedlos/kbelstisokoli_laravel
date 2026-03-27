@@ -164,8 +164,8 @@ class MatchesListExtractor implements StatExtractorInterface
 
             if (! $isFuture && $score && preg_match('/\d+\s*:\s*\d+/', $score)) {
                 $status = 'finished';
-            } elseif ($scheduledAt && $scheduledAt->isPast()) {
-                // Pokud je v minulosti, považujeme ho za odehraný, i když skóre chybí (bude staženo z detailu)
+            } elseif ($scheduledAt && $scheduledAt->copy()->addHours(2)->isPast()) {
+                // Pokud je v minulosti (více než 2 hodiny po začátku), považujeme ho za odehraný, i když skóre chybí (bude staženo z detailu)
                 $status = 'finished';
             }
 

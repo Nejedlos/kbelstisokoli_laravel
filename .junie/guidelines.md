@@ -60,6 +60,7 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
     2. Na produkci se změny stahují pomocí `git pull` (přes SSH).
     3. Následně se spouští podpůrné příkazy (`composer install`, `npm install`, `npm run build`, `php artisan migrate`).
 - **Automatizace:** Pro nasazení používáme **Laravel Envoy** (viz `Envoy.blade.php`).
+- **Zákaz Expect skriptů:** Pro práci s produkcí nikdy nepoužívejte `.exp` (Expect) soubory. Všechny operace provádějte jednotlivými SSH příkazy (např. `ssh ... "command"`).
 
 ## 8. Správa assetů (Vite, CSS, JS)
 - **Konfigurace:** Všechny nové vstupní body (entrypoints) musí být přidány do `vite.config.js`.
