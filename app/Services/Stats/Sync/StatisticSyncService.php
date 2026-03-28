@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Stats\DTO\NormalizedTableDTO;
 use App\Services\Support\ConsoleService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StatisticSyncService
 {
@@ -85,9 +86,15 @@ class StatisticSyncService
             return;
         }
 
-        $count = StatisticRow::where('statistic_set_id', $set->id)
-            ->where('basketball_match_id', $match->id)
-            ->delete();
+        // PŘIDÁNO: Používáme retry(3) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
+        $count = retry(3, function () use ($set, $match) {
+            return StatisticRow::where('statistic_set_id', $set->id)
+                ->where('basketball_match_id', $match->id)
+                ->delete();
+        }, 100, function ($e) {
+            Log::warning("clearMatchBoxscore retry due to error 1615 (or other): " . $e->getMessage());
+            return $e instanceof \Illuminate\Database\QueryException;
+        });
 
         if ($run && $count > 0) {
             $run->addLog('deleted', null, null, null, "FRESH mode: Smazáno $count existujících řádků statistik pro zápas.");
@@ -352,9 +359,15 @@ class StatisticSyncService
         }
 
         // NEJDŘÍVE: Smažeme všechny stávající sumáře pro tuto sezónu, abychom odstranili případné sirotky a duplicity.
-        StatisticRow::where('statistic_set_id', $summarySet->id)
-            ->where('season_id', $seasonId)
-            ->delete();
+        // PŘIDÁNO: Používáme retry(3) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
+        retry(3, function () use ($summarySet, $seasonId) {
+            StatisticRow::where('statistic_set_id', $summarySet->id)
+                ->where('season_id', $seasonId)
+                ->delete();
+        }, 100, function ($e) {
+            Log::warning("recomputePlayerSummaries delete retry due to error 1615 (or other): " . $e->getMessage());
+            return $e instanceof \Illuminate\Database\QueryException;
+        });
 
         // Najdeme všechny hráče, kteří mají záznam v boxscoru pro tuto sezónu
         $playerIds = StatisticRow::where('statistic_set_id', $boxscoreSet->id)

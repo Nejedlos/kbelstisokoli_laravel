@@ -304,10 +304,16 @@ class PlayerSyncService
                 if (count($parts) === 2) {
                     $startYear = $parts[0];
                     $endYear = $parts[1];
-                    ExternalPlayerMatch::where('user_id', $user->id)
-                        ->where('source_key', 'czbasketball')
-                        ->whereBetween('match_date', ["{$startYear}-08-01", "{$endYear}-07-31"])
-                        ->delete();
+                    // PŘIDÁNO: Používáme retry(3) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
+                    retry(3, function () use ($user, $startYear, $endYear) {
+                        ExternalPlayerMatch::where('user_id', $user->id)
+                            ->where('source_key', 'czbasketball')
+                            ->whereBetween('match_date', ["{$startYear}-08-01", "{$endYear}-07-31"])
+                            ->delete();
+                    }, 100, function ($e) {
+                        Log::warning("PlayerSyncService delete retry due to error 1615 (or other): " . $e->getMessage());
+                        return $e instanceof \Illuminate\Database\QueryException;
+                    });
                 }
             }
 
