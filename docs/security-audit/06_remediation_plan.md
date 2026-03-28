@@ -6,15 +6,15 @@ Tento dokument definuje konkrétní kroky pro odstranění bezpečnostních zran
 
 | ID | Název | Závažnost | Stav | Priorita |
 |----|-------|-----------|------|----------|
-| R1 | Bezpečnostní hlavičky (Clickjacking) | **MEDIUM** | Plánováno | Vysoká |
-| R2 | XSS v Feedback Snapshotu (Robustní sanitizace) | **HIGH** | Plánováno | Kritická |
-| R3 | Broken Access Control v Media Download | **HIGH** | Plánováno | Vysoká |
-| R4 | Persistent XSS v CMS blocích (Purifier) | **HIGH** | Plánováno | Vysoká |
-| R5 | Zabezpečení Screenshot Proxy (SSRF & Impersonace) | **HIGH** | Plánováno | Vysoká |
-| R6 | XSS ve vyhledávání (HelpSearchService) | **MEDIUM** | Plánováno | Střední |
-| R7 | IDOR v Avatar Selection | **MEDIUM** | Plánováno | Střední |
-| R8 | Doplnění chybějících Policies | **MEDIUM** | Plánováno | Střední |
-| R9 | Rate Limiting na citlivé endpointy | **LOW** | Plánováno | Nízká |
+| R1 | Bezpečnostní hlavičky (Clickjacking) | **MEDIUM** | Hotovo | Vysoká |
+| R2 | XSS v Feedback Snapshotu (Robustní sanitizace) | **HIGH** | Hotovo | Kritická |
+| R3 | Broken Access Control v Media Download | **HIGH** | Hotovo | Vysoká |
+| R4 | Persistent XSS v CMS blocích (Purifier) | **HIGH** | Hotovo | Vysoká |
+| R5 | Zabezpečení Screenshot Proxy (SSRF & Impersonace) | **HIGH** | Hotovo | Vysoká |
+| R6 | XSS ve vyhledávání (HelpSearchService) | **MEDIUM** | Hotovo | Střední |
+| R7 | IDOR v Avatar Selection | **MEDIUM** | Hotovo | Střední |
+| R8 | Doplnění chybějících Policies | **MEDIUM** | Hotovo | Střední |
+| R9 | Rate Limiting na citlivé endpointy | **LOW** | Hotovo | Nízká |
 
 ---
 
