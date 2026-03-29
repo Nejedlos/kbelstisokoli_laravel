@@ -103,6 +103,7 @@ return [
         'step_2_desc' => 'We will arrange a trial training where we can mutually see if the team fits you.',
         'step_3_title' => 'Become a Falcon',
         'step_3_desc' => 'If we fit together both in play and personally, we will handle the registration and you can jump into the games.',
+        'standings' => 'Competition Standings',
     ],
 
     'categories' => [

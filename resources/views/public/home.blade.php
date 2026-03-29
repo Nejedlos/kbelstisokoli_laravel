@@ -1,31 +1,23 @@
 @extends('layouts.public')
 
 @section('content')
-    {{-- Dynamický obsah z CMS --}}
+    {{-- 1. Hero Sekce (Vždy nahoře) --}}
     @if(isset($homePage) && !empty($homePage->content))
-        {{-- Dekorační prvky na pozadí pro desktop --}}
-        <div class="hidden lg:block fixed left-4 top-1/2 -rotate-90 text-[10px] font-black tracking-[0.5em] opacity-20 uppercase pointer-events-none select-none z-0">
-            Est. 1921 • Kbely Basketball • Sokol Kbely
-        </div>
-
-        <x-page-blocks :blocks="$homePage->content" />
+        @php
+            $heroBlock = collect($homePage->content)->firstWhere('type', 'hero');
+        @endphp
+        @if($heroBlock)
+            <x-page-blocks :blocks="[$heroBlock]" />
+        @endif
     @else
-        {{-- Fallback: Původní fixní struktura (pro případ, že není v DB žádná homepage) --}}
-
-        {{-- Dekorační prvky na pozadí pro desktop --}}
-        <div class="hidden lg:block fixed left-4 top-1/2 -rotate-90 text-[10px] font-black tracking-[0.5em] opacity-20 uppercase pointer-events-none select-none z-0">
-            Est. 1921 • Kbely Basketball • Sokol Kbely
-        </div>
-
-        {{-- Hero Sekce --}}
         @php
             $heroData = [
-                'eyebrow' => 'Sokol Kbely • C & E',
-                'headline' => __('general.home_hero.headline') ?: "Více než jen\nbasketbal.",
-                'subheadline' => __('general.home_hero.subheadline') ?: 'Hrajeme pro radost, bojujeme jako jeden tým. Přidej se k nám!',
-                'cta_label' => __('general.home_hero.cta_label') ?: 'Chci se přidat',
+                'eyebrow' => __('general.home_hero.eyebrow'),
+                'headline' => __('general.home_hero.headline'),
+                'subheadline' => __('general.home_hero.subheadline'),
+                'cta_label' => __('general.home_hero.cta_label'),
                 'cta_url' => route('public.news.index'),
-                'cta_secondary_label' => __('general.home_hero.cta_secondary_label') ?: 'Naše týmy',
+                'cta_secondary_label' => __('general.home_hero.cta_secondary_label'),
                 'cta_secondary_url' => route('public.teams.index'),
                 'show_upcoming_events' => true,
                 'variant' => 'standard',
@@ -35,9 +27,54 @@
             ];
         @endphp
         <x-public.blocks.hero :data="$heroData" />
+    @endif
 
-        {{-- Partner Strip --}}
-        <x-partner-strip />
+    {{-- 3. Tabulky soutěží (Vždy viditelné, hodně nahoře) --}}
+    <div class="section-padding bg-white relative overflow-hidden border-b border-slate-100">
+        <div class="container">
+            <x-section-heading
+                :title="__('general.standings_title') ?? 'Tabulky soutěží'"
+                :subtitle="__('general.standings_subtitle') ?? 'Jak si vedou naše týmy v aktuální sezóně'"
+                align="center"
+            />
+            <div class="max-w-4xl mx-auto">
+                @livewire('public.standings-table', ['showFilters' => false, 'limit' => 5])
+
+                <div class="mt-12 text-center">
+                    <a href="{{ route('public.teams.index') }}" class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-secondary text-white font-black uppercase tracking-widest text-xs hover:bg-primary hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95">
+                        {{ __('general.view_all_teams') ?? 'Prohlédnout všechny týmy' }}
+                        <i class="fa-light fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- 4. Quick Facts (Základní informace - Vždy viditelné) --}}
+    <div class="section-padding bg-slate-50 border-t border-slate-100 relative">
+        {{-- Decoration --}}
+        <div class="absolute bottom-0 left-0 w-64 h-64 opacity-5 pointer-events-none">
+            <i class="fa-light fa-basketball text-[15rem] -translate-x-1/2 translate-y-1/2"></i>
+        </div>
+
+        <div class="container relative z-10">
+            <x-section-heading
+                :title="__('general.quick_facts_subtitle')"
+                :subtitle="__('general.quick_facts_title')"
+                align="center"
+            />
+            <x-quick-facts :branding="$branding ?? []" />
+        </div>
+    </div>
+
+    {{-- 5. Dynamický obsah z CMS (Zbytek bloků kromě Hero) nebo Fallback --}}
+    @if(isset($homePage) && !empty($homePage->content))
+        @php
+            $otherBlocks = collect($homePage->content)->reject(fn($b) => $b['type'] === 'hero')->values()->all();
+        @endphp
+        <x-page-blocks :blocks="$otherBlocks" />
+    @else
+        {{-- Fallback: Původní fixní struktura (zbytek) --}}
 
         {{-- Impact Stats --}}
         <x-public.blocks.impact_stats :data="[
@@ -47,9 +84,6 @@
 
         {{-- Novinky --}}
         <div class="section-padding bg-white relative overflow-hidden">
-            {{-- Decoration --}}
-            <div class="absolute top-0 right-0 w-1/3 h-full bg-slate-50 -skew-x-12 translate-x-1/2 pointer-events-none z-0"></div>
-
             <div class="container relative z-10">
                 <x-section-heading
                     :title="__('general.nav.news')"
@@ -64,8 +98,8 @@
         <x-public.blocks.featured_split :data="[
             'alignment' => 'left',
             'image_url' => 'assets/img/home/recruitment-split.jpg',
-            'title' => __('general.recruitment.home_title'),
-            'subtitle' => __('general.recruitment.home_subtitle')
+            'title' => __('general.recruitment.funnel_title'),
+            'subtitle' => __('general.recruitment.funnel_subtitle')
         ]" />
 
         {{-- Zápasy --}}
@@ -80,26 +114,6 @@
                     </p>
                 </div>
                 <x-public.blocks.matches_listing :data="['limit' => 4, 'show_button' => true]" />
-            </div>
-        </div>
-
-        {{-- Social Mosaic --}}
-        <x-public.blocks.social_mosaic :data="[]" />
-
-        {{-- Quick Facts --}}
-        <div class="section-padding bg-slate-50 border-t border-slate-100 relative">
-             {{-- Decoration --}}
-            <div class="absolute bottom-0 left-0 w-64 h-64 opacity-5 pointer-events-none">
-                <i class="fa-light fa-basketball text-[15rem] -translate-x-1/2 translate-y-1/2"></i>
-            </div>
-
-            <div class="container relative z-10">
-                <x-section-heading
-                    :title="__('general.quick_facts_title')"
-                    :subtitle="__('general.quick_facts_subtitle')"
-                    align="center"
-                />
-                <x-quick-facts :branding="$branding ?? []" />
             </div>
         </div>
     @endif

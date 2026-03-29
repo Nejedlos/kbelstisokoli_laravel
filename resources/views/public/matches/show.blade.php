@@ -184,7 +184,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        {{ $match->location ?? 'Místo neuvedeno' }}
+                        {{ $match->location ?? __('matches.location_not_specified') }}
                     </div>
                     <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,7 +208,7 @@
                     @if($match->notes_public)
                         <section class="card p-8">
                             <h2 class="text-2xl font-black uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
-                                {{ app()->getLocale() === 'cs' ? 'Informace k zápasu' : 'Match information' }}
+                                {{ __('matches.match_info') }}
                             </h2>
                             <div class="prose prose-slate max-w-none prose-headings:font-display prose-headings:uppercase prose-headings:tracking-tight prose-a:text-primary">
                                 {!! nl2br(e($match->notes_public)) !!}
@@ -234,7 +234,7 @@
 
                     <section class="card p-8 border-t-4 transition-colors duration-1000" style="border-top-color: {{ $colorHsl ?? '#f1f5f9' }}">
                         <h2 class="text-2xl font-black uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
-                            {{ $isPlayed ? (app()->getLocale() === 'cs' ? 'Reportáž ze zápasu' : 'Match report') : (app()->getLocale() === 'cs' ? 'Předzápasová analýza' : 'Pre-match analysis') }}
+                            {{ $isPlayed ? __('matches.match_report') : __('matches.pre_match_analysis') }}
                         </h2>
 
                         @if($prediction)
@@ -384,7 +384,7 @@
                                 <div class="space-y-6">
                                     <h4 class="text-xs font-black uppercase tracking-widest text-secondary flex items-center gap-2">
                                         <i class="fa-light fa-trophy text-primary"></i>
-                                        Nejlepší střelci zápasu
+                                        {{ __('matches.best_scorers') }}
                                     </h4>
                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         @foreach($sortedRows->take(3) as $row)
@@ -407,7 +407,7 @@
                                                     {{ $row->row_label }}
                                                 </div>
                                                 <div class="text-primary font-black text-lg">
-                                                    {{ $row->values['pts'] ?? 0 }} <span class="text-[10px] uppercase tracking-tighter">bodů</span>
+                                                    {{ $row->values['pts'] ?? 0 }} <span class="text-[10px] uppercase tracking-tighter">{{ __('matches.pts_suffix') }}</span>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -423,22 +423,22 @@
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
                                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
                                         <div class="text-2xl font-black text-secondary">{{ $totalPoints }}</div>
-                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Týmové body</div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">{{ __('matches.team_points') }}</div>
                                     </div>
                                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
                                         <div class="text-2xl font-black text-secondary">{{ $totalThrees }}</div>
-                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Trojky týmu</div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">{{ __('matches.team_threes') }}</div>
                                     </div>
                                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center col-span-2 sm:col-span-1">
                                         <div class="text-2xl font-black text-secondary">{{ $scorersCount }}</div>
-                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Hráčů skórovalo</div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">{{ __('matches.players_scored') }}</div>
                                     </div>
                                 </div>
                             </div>
                         @else
                             <x-empty-state
-                                :title="$isPlayed ? (app()->getLocale() === 'cs' ? 'Reportáž připravujeme' : 'Report in preparation') : (app()->getLocale() === 'cs' ? 'Analýza se připravuje' : 'Analysis in preparation')"
-                                :subtitle="$isPlayed ? (app()->getLocale() === 'cs' ? 'Podrobné statistiky a komentář k zápasu budou doplněny co nejdříve po jeho skončení.' : 'Detailed statistics and match commentary will be added as soon as possible after the game.') : (app()->getLocale() === 'cs' ? 'Předzápasová predikce a motivační hlášky budou k dispozici brzy.' : 'Pre-match prediction and motivational quotes will be available soon.')"
+                                :title="$isPlayed ? __('matches.report_preparing') : __('matches.analysis_preparing')"
+                                :subtitle="$isPlayed ? __('matches.report_preparing_desc') : __('matches.analysis_preparing_desc')"
                             />
                         @endif
                     </section>
@@ -460,6 +460,20 @@
                                     <span>{{ $match->jerseys_info }}</span>
                                 </li>
                             </ul>
+                        </aside>
+                    @endif
+
+                    @if($match->competition_url)
+                        <aside class="space-y-4">
+                            <h3 class="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 px-2">
+                                {{ __('matches.standings_widget_title') ?? 'Aktuální tabulka' }}
+                            </h3>
+                            @livewire('public.standings-table', [
+                                'competitionUrl' => $match->competition_url,
+                                'showFilters' => false,
+                                'compact' => true,
+                                'limit' => 5
+                            ])
                         </aside>
                     @endif
 
@@ -503,7 +517,7 @@
 
                     <!-- Back Link -->
                     <a href="{{ route('public.matches.index') }}" class="btn btn-outline-primary w-full py-4 uppercase tracking-widest font-black text-sm">
-                        &larr; {{ app()->getLocale() === 'cs' ? 'Zpět na seznam zápasů' : 'Back to match list' }}
+                        &larr; {{ __('matches.back_to_list') }}
                     </a>
                 </div>
             </div>

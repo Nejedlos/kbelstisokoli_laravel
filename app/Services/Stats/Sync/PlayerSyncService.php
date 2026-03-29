@@ -249,6 +249,9 @@ class PlayerSyncService
      */
     public function syncExcesiveHistory(User $user, array $seasons, ?ExternalImportRun $run, array $options = []): int
     {
+        // Vypnutí query logu pro úsporu paměti
+        DB::connection()->disableQueryLog();
+
         $mapping = $user->externalMappings()->where('source_key', 'czbasketball')->first();
         if (!$mapping) return 0;
 

@@ -231,4 +231,34 @@ class BasketballMatch extends Model
             ? 'Bílá (Světlá)'
             : 'Tmavá';
     }
+
+    /**
+     * Vrátí URL soutěže pro aktuální zápas na základě konfigurace týmu v sezóně.
+     */
+    public function getCompetitionUrlAttribute(): ?string
+    {
+        if (!$this->season_id) {
+            return null;
+        }
+
+        // 1. Priorita: team_id na zápase
+        if ($this->team_id) {
+            $url = ExternalTeamSeasonConfig::where('team_id', $this->team_id)
+                ->where('season_id', $this->season_id)
+                ->value('competition_url');
+
+            if ($url) return $url;
+        }
+
+        // 2. Priorita: První tým z vazby teams()
+        $teamIds = $this->teams->pluck('id')->toArray();
+        if (!empty($teamIds)) {
+            return ExternalTeamSeasonConfig::whereIn('team_id', $teamIds)
+                ->where('season_id', $this->season_id)
+                ->whereNotNull('competition_url')
+                ->value('competition_url');
+        }
+
+        return null;
+    }
 }

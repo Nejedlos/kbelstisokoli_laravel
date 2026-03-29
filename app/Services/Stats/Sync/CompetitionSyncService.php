@@ -68,7 +68,7 @@ class CompetitionSyncService
             $standingExtractor = app(CompetitionStandingExtractor::class);
             $standingResult = $standingExtractor->extract($html);
 
-            $this->saveFullStandings($standingResult['data']->rows, $season, $url);
+            $this->saveFullStandings($standingResult['data']->rows, $season, $url, null, $standingResult['data']->name);
             $run->finish(['status' => 'success']);
         } catch (\Exception $e) {
             $run->fail($e);
@@ -102,7 +102,7 @@ class CompetitionSyncService
             $standingData = $standingResult['data'];
 
             // 1b. Uložit kompletní tabulku pořadí
-            $this->saveFullStandings($standingData->rows, $season, $config->competition_url, $config);
+            $this->saveFullStandings($standingData->rows, $season, $config->competition_url, $config, $standingData->name);
 
             // 2. Extrakce rozpisu (Schedule)
             $scheduleExtractor = app(CompetitionScheduleExtractor::class);
@@ -234,13 +234,20 @@ class CompetitionSyncService
     /**
      * Uloží kompletní tabulku pořadí soutěže.
      */
-    protected function saveFullStandings(array $rows, Season $season, string $url, ?ExternalTeamSeasonConfig $config = null): void
+    protected function saveFullStandings(array $rows, Season $season, string $url, ?ExternalTeamSeasonConfig $config = null, ?string $extractedCompetitionName = null): void
     {
-        $competitionName = $config ? ($config->competition_label ?: ($config->metadata['competition'] ?? null)) : null;
+        $competitionName = $extractedCompetitionName;
 
-        // Pokud nemáme název ze zadaného configu, zkusíme najít jakýkoliv jiný config pro tuto URL
-        if (!$competitionName) {
-            $otherConfig = ExternalTeamSeasonConfig::where('competition_url', $url)->whereNotNull('competition_label')->first();
+        if (!$competitionName || $competitionName === 'Competition Standing') {
+            $competitionName = $config ? ($config->competition_label ?: ($config->metadata['competition'] ?? null)) : null;
+        }
+
+        // Pokud stále nemáme název nebo je to ten defaultní "Základní informace", zkusíme najít jakýkoliv jiný config pro tuto URL
+        if (!$competitionName || $competitionName === 'Základní informace') {
+            $otherConfig = ExternalTeamSeasonConfig::where('competition_url', $url)
+                ->whereNotNull('competition_label')
+                ->where('competition_label', '!=', 'Základní informace')
+                ->first();
             if ($otherConfig) {
                 $competitionName = $otherConfig->competition_label;
             }

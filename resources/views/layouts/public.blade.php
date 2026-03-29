@@ -137,6 +137,7 @@
         })();
     </script>
     <style>{!! $branding_css !!}</style>
+    @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <x-screenshot.styles />
@@ -187,6 +188,7 @@
 
     <livewire:sync-status-bar />
 
+    @livewireScripts
     @if(isset($footer_code))
         {!! $footer_code !!}
     @endif

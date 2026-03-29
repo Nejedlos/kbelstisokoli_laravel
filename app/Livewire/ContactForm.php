@@ -21,7 +21,7 @@ class ContactForm extends Component
 
     public string $email = '';
 
-    public string $subject = 'Zpráva z webu';
+    public string $subject = '';
 
     public string $message = '';
 
@@ -48,9 +48,10 @@ class ContactForm extends Component
     {
         $this->toEncoded = $to;
         $this->toEmail = EmailObfuscator::decode($to) ?? '';
+        $this->subject = __('contact.default_subject');
 
         if (empty($this->toEmail)) {
-            $this->errorMessage = 'Neplatný příjemce e-mailu.';
+            $this->errorMessage = __('contact.error_invalid_recipient');
         }
     }
 
@@ -74,7 +75,7 @@ class ContactForm extends Component
         }
 
         if (empty($this->toEmail)) {
-            $this->errorMessage = 'Příjemce e-mailu není nastaven.';
+            $this->errorMessage = __('contact.error_no_recipient');
 
             return;
         }
@@ -106,7 +107,7 @@ class ContactForm extends Component
 
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Chyba při odesílání kontaktního formuláře: '.$e->getMessage());
-            $this->errorMessage = 'Při odesílání e-mailu došlo k chybě. Zkuste to prosím později.';
+            $this->errorMessage = __('contact.error_sending_failed');
         }
     }
 

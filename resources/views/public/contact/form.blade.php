@@ -2,9 +2,9 @@
 
 @section('content')
     <x-page-header
-        title="Napište nám"
-        subtitle="Váš vzkaz doručíme správné osobě"
-        :breadcrumbs="['Kontakt' => route('public.contact.index'), 'Napište nám' => null]"
+        :title="__('contact.form_title')"
+        :subtitle="__('contact.form_subtitle')"
+        :breadcrumbs="[__('contact.breadcrumbs') => route('public.contact.index'), __('contact.form_title') => null]"
         image="assets/img/hero/hero-contact.webp"
     />
 
@@ -27,9 +27,9 @@
                         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-6 ring-8 ring-primary/5">
                             <i class="fa-light fa-comments-question text-3xl"></i>
                         </div>
-                        <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-3">Kontaktní formulář</h2>
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-secondary mb-3">{{ __('contact.form_heading') }}</h2>
                         <p class="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
-                            Vyplňte prosím níže uvedené údaje a my se vám ozveme co nejdříve to bude možné.
+                            {{ __('contact.form_desc') }}
                         </p>
                     </div>
 
@@ -38,9 +38,9 @@
 
                 <div class="mt-16 text-center">
                     <div class="inline-flex items-center gap-2 px-6 py-3 bg-white rounded-full border border-slate-100 shadow-sm text-sm text-slate-500">
-                        <span>Potřebujete poradit s něčím jiným?</span>
+                        <span>{{ __('contact.form_help') }}</span>
                         <a href="{{ route('public.contact.index') }}" class="text-primary font-black uppercase tracking-widest text-[11px] hover:text-secondary transition-colors ml-2">
-                            Zpět na kontakty
+                            {{ __('contact.back_to_contacts') }}
                             <i class="fa-light fa-arrow-right ml-1"></i>
                         </a>
                     </div>

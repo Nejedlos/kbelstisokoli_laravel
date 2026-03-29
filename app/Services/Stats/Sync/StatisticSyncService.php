@@ -113,7 +113,11 @@ class StatisticSyncService
             throw new \Exception('Statistic set for boxscore not found.');
         }
 
-        DB::transaction(function () use ($match, $data, $set, $run) {
+        // Vypnutí query logu pro úsporu paměti při hromadných operacích
+        DB::connection()->disableQueryLog();
+
+        // PŘIDÁNO: Menší transakce pro metadata
+        DB::transaction(function () use ($match, $data) {
             $isOurTeam = true;
             $currentTeamId = $match->team_id;
 
@@ -141,48 +145,47 @@ class StatisticSyncService
                     'metadata' => json_encode($matchMetadata)
                 ]);
             }
+        });
 
-            // Zkusíme detekovat, zda je to tabulka našeho týmu nebo soupeře
-            $teamNameValue = $match->team->getTranslation('name', 'cs') ?: ($match->team->name ?: '');
-            if (is_array($teamNameValue)) {
-                $teamNameValue = $teamNameValue['cs'] ?? ($teamNameValue['en'] ?? (reset($teamNameValue) ?: ''));
+        $isOurTeam = true;
+        // Znovu detekujeme, zda je to náš tým (pro logiku řádků)
+        $teamNameValue = $match->team->getTranslation('name', 'cs') ?: ($match->team->name ?: '');
+        if (is_array($teamNameValue)) {
+            $teamNameValue = $teamNameValue['cs'] ?? ($teamNameValue['en'] ?? (reset($teamNameValue) ?: ''));
+        }
+
+        $possibleOurNames = [
+            $this->normalizeForComparison($teamNameValue),
+        ];
+
+        $externalName = \App\Models\ExternalTeamSeasonConfig::where('team_id', $match->team_id)
+            ->where('season_id', $match->season_id)
+            ->value('team_name_in_source');
+
+        if ($externalName) {
+            $possibleOurNames[] = $this->normalizeForComparison($externalName);
+        }
+
+        $tableTeamName = $this->normalizeForComparison($data->name);
+        $matched = false;
+        foreach ($possibleOurNames as $ourName) {
+            if (str_contains($tableTeamName, $ourName) || str_contains($ourName, $tableTeamName)) {
+                $matched = true;
+                break;
             }
+        }
 
-            $possibleOurNames = [
-                $this->normalizeForComparison($teamNameValue),
-            ];
-
-            // Přidáme název z externí konfigurace, pokud existuje
-            $externalName = \App\Models\ExternalTeamSeasonConfig::where('team_id', $match->team_id)
-                ->where('season_id', $match->season_id)
-                ->value('team_name_in_source');
-
-            if ($externalName) {
-                $possibleOurNames[] = $this->normalizeForComparison($externalName);
+        if (! $matched) {
+            if (! str_contains(mb_strtolower($data->name), mb_strtolower($teamNameValue)) &&
+                (! $externalName || ! str_contains(mb_strtolower($data->name), mb_strtolower($externalName)))) {
+                $isOurTeam = false;
             }
+        }
 
-            $tableTeamName = $this->normalizeForComparison($data->name);
-            $matched = false;
-            foreach ($possibleOurNames as $ourName) {
-                if (str_contains($tableTeamName, $ourName) || str_contains($ourName, $tableTeamName)) {
-                    $matched = true;
-                    break;
-                }
-            }
-
-            if (! $matched) {
-                // Poslední šance: pokud je v tabulce jméno našeho týmu jako podřetězec bez normalizace
-                if (! str_contains(mb_strtolower($data->name), mb_strtolower($teamNameValue)) &&
-                    (! $externalName || ! str_contains(mb_strtolower($data->name), mb_strtolower($externalName)))) {
-                    $isOurTeam = false;
-                    $currentTeamId = null;
-                }
-            }
-
-            // Pokud je to soupeř, uložíme ho jako jeden záznam do metadat zápasu a nevytváříme řádky
-            if (! $isOurTeam) {
-                // Znovu načteme, protože se mohla metadata změnit v předchozím kroku (header atd.)
-                $freshMatch = DB::table('matches')->where('id', $match->id)->first();
+        // Pokud je to soupeř, uložíme ho do metadat
+        if (! $isOurTeam) {
+            DB::transaction(function () use ($match, $data) {
+                $freshMatch = DB::table('matches')->where('id', $match->id)->lockForUpdate()->first();
                 $metaRaw = $freshMatch->metadata;
                 $matchMetadata = is_array($metaRaw) ? $metaRaw : (json_decode($metaRaw ?? '[]', true) ?: []);
                 $matchMetadata['opponent_boxscore'] = $data->toArray();
@@ -190,29 +193,26 @@ class StatisticSyncService
                 DB::table('matches')->where('id', $match->id)->update([
                     'metadata' => json_encode($matchMetadata)
                 ]);
+            });
+            return;
+        }
 
-                return;
-            }
-
-            foreach ($data->rows as $row) {
+        // Pro náš tým synchronizujeme řádky - každý řádek v samostatné transakci pro odolnost
+        foreach ($data->rows as $row) {
+            DB::transaction(function () use ($match, $row, $set, $run, $isOurTeam) {
                 $externalPlayerId = $row->metadata['external_player_id'] ?? $row->playerId;
                 $playerName = $row->rowLabel;
 
-                // Párování hráče (jen pro náš tým má smysl hledat internal_id)
-                $playerId = $isOurTeam ? $this->findInternalPlayerId($externalPlayerId, $match->season_id, 'czbasketball') : null;
+                // Párování hráče
+                $playerId = $this->findInternalPlayerId($externalPlayerId, $match->season_id, 'czbasketball');
 
-                // Pokud jsme v našem týmu a hráče jsme nenašli, ale máme externalId, zkusíme ho vytvořit jako ghosta
-                if ($isOurTeam && ! $playerId && $externalPlayerId && $playerName) {
+                // Ghost hráč creation logic
+                if (! $playerId && $externalPlayerId && $playerName) {
                     $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $match->team_id)
                         ->where('season_id', $match->season_id)
                         ->first();
 
                     if ($config) {
-                        // Využijeme RosterSyncService pro vytvoření uživatele/mappingu
-                        $rosterService = app(\App\Services\Stats\Sync\RosterSyncService::class);
-                        // Reflection/hack abychom se dostali k chráněné metodě nebo prostě zkusíme veřejné rozhraní pokud existuje
-                        // RosterSyncService::findOrCreateUserForExternalPlayer je protected.
-                        // Ale můžeme zkusit najít mapping přímo zde.
                         $user = $this->ensureUserExists($externalPlayerId, $playerName, $config);
                         $playerId = $user->id;
                     }
@@ -221,17 +221,11 @@ class StatisticSyncService
                 $attributes = [
                     'statistic_set_id' => $set->id,
                     'basketball_match_id' => $match->id,
-                    'team_id' => $isOurTeam ? $match->team_id : null, // Pro soupeře necháváme null nebo ID soupeře?
+                    'team_id' => $match->team_id,
                     'player_id' => $playerId,
                 ];
 
-                // Pokud je to soupeř, zkusíme najít ID soupeře
-                if (! $isOurTeam && $match->opponent_id) {
-                     $attributes['opponent_id'] = $match->opponent_id;
-                }
-
                 $rowValues = $row->values;
-                // Doplnění chybějící efektivity (VAL) z dostupných boxscore metrik
                 if (!isset($rowValues['efficiency']) && !isset($rowValues['valuation'])) {
                     $rowValues['efficiency'] = $this->calculateEfficiencyFromValues($rowValues);
                 }
@@ -245,13 +239,9 @@ class StatisticSyncService
                         'match_external_id' => $match->metadata['external_id'] ?? null,
                         'player_external_id' => $externalPlayerId,
                         'scraped_at' => now()->toDateTimeString(),
-                        'is_opponent' => ! $isOurTeam,
+                        'is_opponent' => false,
                     ]),
                 ];
-
-                // Pokud známe player_id, row_label už není v DB striktně nutný pro unikátnost, ale pro zobrazení je super ho mít
-                // Unikátnost v DB je (statistic_set_id, basketball_match_id, player_id, team_id, opponent_id, season_id)
-                // Pokud player_id je null, pak se bere row_label (v některých verzích migrace).
 
                 $statRow = StatisticRow::where($attributes);
                 if (! $playerId) {
@@ -271,7 +261,7 @@ class StatisticSyncService
                     }
                 }
 
-                if ($isOurTeam && $playerId) {
+                if ($playerId) {
                     // Generování automatických pokut za TH
                     try {
                         app(\App\Services\Finance\FinanceAutomationService::class)->processThFines($statRow);
@@ -290,13 +280,13 @@ class StatisticSyncService
                         matchInfo: [
                             'match_date' => $match->date,
                             'competition_label' => $match->metadata['match_header']['competition'] ?? $match->metadata['competition_label'] ?? null,
-                            'opponent_name' => $matchMetadata['match_header']['opponent'] ?? null,
+                            'opponent_name' => $match->metadata['match_header']['opponent'] ?? null,
                             'source_key' => 'czbasketball',
                         ]
                     );
                 }
-            }
-        });
+            });
+        }
 
         $this->recomputePlayerSummaries($match->season_id);
         $this->recomputeTeamSummary($match->season_id, $match->team_id);
@@ -386,43 +376,55 @@ class StatisticSyncService
 
         // Přepočítáme souhrny per hráč (za celou sezónu napříč týmy)
         foreach ($playerIds as $playerId) {
-            $rows = StatisticRow::where('statistic_set_id', $boxscoreSet->id)
-                ->where('season_id', $seasonId)
-                ->where('player_id', $playerId)
-                ->get();
+            // Použijeme menší transakci pro každého hráče a jeho týmy, aby se uvolnila paměť a zámky
+            DB::transaction(function () use ($playerId, $boxscoreSet, $summarySet, $seasonId) {
+                $rows = StatisticRow::where('statistic_set_id', $boxscoreSet->id)
+                    ->where('season_id', $seasonId)
+                    ->where('player_id', $playerId)
+                    ->get();
 
-            // Vytvoříme souhrny per hráč (za celou sezónu napříč týmy)
-            $summaryData = $this->aggregateRows($rows);
+                if ($rows->isEmpty()) {
+                    return;
+                }
 
-            StatisticRow::create([
-                'statistic_set_id' => $summarySet->id,
-                'player_id' => $playerId,
-                'season_id' => $seasonId,
-                'team_id' => null, // Globální souhrn pro sezónu
-                'values' => $summaryData,
-                'source_metadata' => [
-                    'last_computed_at' => now()->toDateTimeString(),
-                    'source' => 'aggregation_global',
-                ],
-            ]);
-
-            // PŘIDÁNO: Přepočítáme souhrny i pro jednotlivé týmy (kvůli rankingům v rámci týmu)
-            $teamIds = $rows->pluck('team_id')->unique()->filter();
-            foreach ($teamIds as $teamId) {
-                $teamRows = $rows->where('team_id', $teamId);
-                $teamSummaryData = $this->aggregateRows($teamRows);
+                // Vytvoříme souhrny per hráč (za celou sezónu napříč týmy)
+                $summaryData = $this->aggregateRows($rows);
 
                 StatisticRow::create([
                     'statistic_set_id' => $summarySet->id,
                     'player_id' => $playerId,
                     'season_id' => $seasonId,
-                    'team_id' => $teamId,
-                    'values' => $teamSummaryData,
+                    'team_id' => null, // Globální souhrn pro sezónu
+                    'values' => $summaryData,
                     'source_metadata' => [
                         'last_computed_at' => now()->toDateTimeString(),
-                        'source' => 'aggregation_team',
+                        'source' => 'aggregation_global',
                     ],
                 ]);
+
+                // PŘIDÁNO: Přepočítáme souhrny i pro jednotlivé týmy (kvůli rankingům v rámci týmu)
+                $teamIds = $rows->pluck('team_id')->unique()->filter();
+                foreach ($teamIds as $teamId) {
+                    $teamRows = $rows->where('team_id', $teamId);
+                    $teamSummaryData = $this->aggregateRows($teamRows);
+
+                    StatisticRow::create([
+                        'statistic_set_id' => $summarySet->id,
+                        'player_id' => $playerId,
+                        'season_id' => $seasonId,
+                        'team_id' => $teamId,
+                        'values' => $teamSummaryData,
+                        'source_metadata' => [
+                            'last_computed_at' => now()->toDateTimeString(),
+                            'source' => 'aggregation_team',
+                        ],
+                    ]);
+                }
+            });
+
+            // Pravidelné promazání query logu a garbage collection při dlouhém cyklu
+            if ($playerId % 10 === 0) {
+                gc_collect_cycles();
             }
         }
         ConsoleService::log("    - Hotovo ($count hráčů).", 'success');

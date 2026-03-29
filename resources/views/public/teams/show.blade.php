@@ -37,7 +37,7 @@
                     </ul>
 
                     <h3 class="text-2xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.how_to_join') }}</h3>
-                    <div class="space-y-6">
+                    <div class="space-y-6 mb-12">
                         <div class="flex gap-4">
                             <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black flex-shrink-0">1</div>
                             <div>
@@ -60,6 +60,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <h3 class="text-2xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.standings') ?? 'Tabulka soutěže' }}</h3>
+                    <div class="mb-12">
+                        @livewire('public.standings-table', ['teamId' => $team->id, 'showFilters' => false, 'compact' => true])
+                    </div>
                 </div>
 
                 {{-- Pravý sloupec - Info panel --}}
@@ -75,13 +80,7 @@
                                 <div>
                                     <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">{{ __('teams.detail.competition') }}</span>
                                     <span class="font-bold text-secondary">
-                                        {{ match($team->slug) {
-                                            'muzi-a' => '2. liga (skupina A)',
-                                            'muzi-b' => 'Pražský přebor A',
-                                            'muzi-c' => 'Pražský přebor B',
-                                            'muzi-e' => '3. třída B',
-                                            default => ''
-                                        } }}
+                                        {{ __('teams.detail.' . str_replace('-', '_', $team->slug) . '_comp') }}
                                     </span>
                                 </div>
                             </div>

@@ -27,6 +27,11 @@ class CompetitionStandingExtractor implements StatExtractorInterface
             ];
         }
 
+        // Extrakce názvu soutěže z H1
+        $competitionName = $crawler->filter('h1.article-title')->count() > 0
+            ? trim($crawler->filter('h1.article-title')->text())
+            : 'Soutěž';
+
         // Zjistíme indexy sloupců z hlavičky
         $headers = [];
         $table->filter('thead th')->each(function (Crawler $th, $i) use (&$headers) {
@@ -75,7 +80,7 @@ class CompetitionStandingExtractor implements StatExtractorInterface
         });
 
         return [
-            'data' => new NormalizedTableDTO('Competition Standing', [], $rows),
+            'data' => new NormalizedTableDTO($competitionName, ['competition_name' => $competitionName], $rows),
             'fragment_html' => $table->outerHtml(),
         ];
     }

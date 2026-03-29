@@ -197,12 +197,15 @@ return [
     */
 
     'attributes' => [
+        'name' => 'Name',
         'email' => 'Email Address',
+        'subject' => 'Subject',
+        'message' => 'Message',
+        'attachment' => 'Attachment',
         'password' => 'Password',
         'password_confirmation' => 'Password Confirmation',
         'phone' => 'Phone Number',
         'phone_secondary' => 'Secondary Phone',
         'emergency_contact_phone' => 'Emergency Contact (phone)',
     ],
-
 ];

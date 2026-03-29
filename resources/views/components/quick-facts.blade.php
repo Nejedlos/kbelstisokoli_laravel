@@ -15,10 +15,11 @@
                 {{ $branding['venue']['street'] }}, {{ $branding['venue']['city'] }}
             </div>
             @if($branding['venue']['map_url'] ?? null)
-                <a href="{{ $branding['venue']['map_url'] }}" target="_blank" rel="noopener" class="text-xs font-black uppercase text-primary hover:text-secondary flex items-center group/link">
-                    {{ __('general.view_on_map') }}
-                    <i class="fa-light fa-arrow-up-right ml-1.5 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5"></i>
-                </a>
+                <x-public.map-modal
+                    :url="$branding['venue']['map_url']"
+                    :name="$branding['venue']['name'] ?? ''"
+                    :address="($branding['venue']['street'] ?? '') . ', ' . ($branding['venue']['city'] ?? '')"
+                />
             @endif
         </div>
     @endif

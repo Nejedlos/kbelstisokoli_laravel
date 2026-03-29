@@ -163,12 +163,15 @@ return [
     */
 
     'attributes' => [
+        'name' => 'Jméno',
         'email' => 'E-mailová adresa',
+        'subject' => 'Předmět',
+        'message' => 'Zpráva',
+        'attachment' => 'Příloha',
         'password' => 'Heslo',
         'password_confirmation' => 'Potvrzení hesla',
         'phone' => 'Telefonní číslo',
         'phone_secondary' => 'Druhý telefon',
         'emergency_contact_phone' => 'Nouzový kontakt (telefon)',
     ],
-
 ];

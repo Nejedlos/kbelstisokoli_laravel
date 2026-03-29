@@ -103,6 +103,7 @@ return [
         'step_2_desc' => 'Domluvíme se na zkušebním tréninku, kde si vzájemně vyzkoušíme, zda ti tým sedne.',
         'step_3_title' => 'Staň se Sokolem',
         'step_3_desc' => 'Pokud si sedneme herně i lidsky, vyřídíme registraci a můžeš naskočit do zápasů.',
+        'standings' => 'Tabulka soutěže',
     ],
 
     'categories' => [

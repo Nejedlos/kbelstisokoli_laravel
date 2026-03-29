@@ -65,9 +65,9 @@ class BrandingSeeder extends Seeder
             'bank_name' => 'Partners banka a.s.',
 
             // Hlavní hala a hrací termíny
-            'venue_name' => 'RumcajsArena',
+            'venue_name' => 'Sportovní hala ZŠ Letňany (RumcajsArena)',
             'venue_street' => 'Třinecká 650',
-            'venue_city' => 'Letňany',
+            'venue_city' => '199 00 Praha - Letňany',
             'venue_gps' => "50°8'2.97\"N, 14°30'37.31\"E",
             'venue_map_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2557.423791906335!2d14.508026677153266!3d50.134503371533754!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470bed3fb2d307c7%3A0x80b9ba0fd7daac96!2zVMWZaW5lY2vDoSA2NTAsIDE5OSAwMCBMZXTFiGFueQ!5e0!3m2!1scs!2scz!4v1772030905282!5m2!1scs!2scz',
             'match_day' => 'Středa 19:15 nebo 20:15',
