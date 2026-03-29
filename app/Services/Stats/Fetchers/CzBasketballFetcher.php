@@ -22,17 +22,24 @@ class CzBasketballFetcher implements StatFetcherInterface
     /**
      * Timeout v sekundách.
      */
-    protected int $timeout = 15;
+    protected int $timeout;
 
     /**
      * Počet pokusů o stažení.
      */
-    protected int $retryCount = 2;
+    protected int $retryCount;
 
     /**
      * Prodleva mezi pokusy v milisekundách (exponenciální backoff).
      */
-    protected int $retryDelay = 1000;
+    protected int $retryDelay;
+
+    public function __construct()
+    {
+        $this->timeout = config('external_sources.czbasketball.fetcher.timeout', 30);
+        $this->retryCount = config('external_sources.czbasketball.fetcher.retry_count', 3);
+        $this->retryDelay = config('external_sources.czbasketball.fetcher.retry_delay', 1500);
+    }
 
     /**
      * Nastaví aktuální běh pro účely logování a snapshotů.
