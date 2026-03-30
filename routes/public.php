@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 
 // Cron / Plánovač (HTTP spuštění)
 Route::get('/system/schedule/{token}', function (string $token) {
+    // Pro delší úlohy (např. synchronizace statistik) zvýšíme časový limit na 5 minut
+    set_time_limit(300);
+
     if (empty(config('app.schedule_token')) || $token !== config('app.schedule_token')) {
         abort(403, 'Neplatný token.');
     }

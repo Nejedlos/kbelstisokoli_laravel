@@ -36,9 +36,9 @@ class CzBasketballFetcher implements StatFetcherInterface
 
     public function __construct()
     {
-        $this->timeout = config('external_sources.czbasketball.fetcher.timeout', 30);
+        $this->timeout = config('external_sources.czbasketball.fetcher.timeout', 60);
         $this->retryCount = config('external_sources.czbasketball.fetcher.retry_count', 3);
-        $this->retryDelay = config('external_sources.czbasketball.fetcher.retry_delay', 1500);
+        $this->retryDelay = config('external_sources.czbasketball.fetcher.retry_delay', 3000);
     }
 
     /**
@@ -54,8 +54,12 @@ class CzBasketballFetcher implements StatFetcherInterface
     /**
      * Stáhne obsah z dané URL.
      */
-    public function fetch(string $url): string
+    public function fetch(string $url, ?ExternalImportRun $run = null): string
     {
+        if ($run) {
+            $this->setCurrentRun($run);
+        }
+
         Log::info("CzBasketballFetcher: Stahuji URL: {$url}");
 
         try {
