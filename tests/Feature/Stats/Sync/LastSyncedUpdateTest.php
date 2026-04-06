@@ -13,6 +13,8 @@ use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Sync\RosterSyncService;
 use App\Services\Stats\Sync\MatchSyncService;
 use App\Services\Stats\Sync\StatisticSyncService;
+use App\Services\Stats\Sync\PlayerSyncService;
+use App\Services\Stats\Sync\CompetitionSyncService;
 use App\Services\Stats\Contracts\StatNormalizerInterface;
 
 class LastSyncedUpdateTest extends TestCase
@@ -43,13 +45,17 @@ class LastSyncedUpdateTest extends TestCase
         $matchSyncService = Mockery::mock(MatchSyncService::class);
         $statisticSyncService = Mockery::mock(StatisticSyncService::class);
         $normalizer = Mockery::mock(StatNormalizerInterface::class);
+        $playerSyncService = Mockery::mock(PlayerSyncService::class);
+        $competitionSyncService = Mockery::mock(CompetitionSyncService::class);
 
         $partialService = Mockery::mock(ExternalStatsSyncService::class, [
             $fetcher,
             $rosterSyncService,
             $matchSyncService,
             $statisticSyncService,
-            $normalizer
+            $normalizer,
+            $playerSyncService,
+            $competitionSyncService
         ])->makePartial()->shouldAllowMockingProtectedMethods();
 
         $partialService->shouldReceive('syncRoster')->once();
@@ -87,13 +93,17 @@ class LastSyncedUpdateTest extends TestCase
         $matchSyncService = Mockery::mock(MatchSyncService::class);
         $statisticSyncService = Mockery::mock(StatisticSyncService::class);
         $normalizer = Mockery::mock(StatNormalizerInterface::class);
+        $playerSyncService = Mockery::mock(PlayerSyncService::class);
+        $competitionSyncService = Mockery::mock(CompetitionSyncService::class);
 
         $partialService = Mockery::mock(ExternalStatsSyncService::class, [
             $fetcher,
             $rosterSyncService,
             $matchSyncService,
             $statisticSyncService,
-            $normalizer
+            $normalizer,
+            $playerSyncService,
+            $competitionSyncService
         ])->makePartial()->shouldAllowMockingProtectedMethods();
 
         $partialService->shouldReceive('syncRoster')->once()->andThrow(new \Exception('Test Error Roster'));

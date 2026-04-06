@@ -92,10 +92,11 @@ class AuthAccessTest extends TestCase
         $user = $this->createMember();
         $this->actingAs($user);
 
-        $this->post(route('logout'))->assertRedirect('/');
+        $this->post(route('logout'))->assertRedirect(route('logout.success'));
 
         $this->assertGuest();
-        $this->get(route('member.dashboard'))->assertRedirect(route('login'));
+        // Dashboard je pod /clenska-sekce a vrací 401 shot-clock view
+        $this->get(route('member.dashboard'))->assertStatus(401);
     }
 
     /**
@@ -143,7 +144,7 @@ class AuthAccessTest extends TestCase
         // Middleware 'active' odhlásí uživatele a přesměruje na login s chybou
         $response = $this->get(route('member.dashboard'));
         $response->assertRedirect(route('login'));
-        $response->assertSessionHasErrors(['email' => 'Účet je deaktivován. Kontaktujte správce.']);
+        $response->assertSessionHasErrors(['email' => 'Váš účet byl deaktivován. Kontaktujte prosím správce.']);
         $this->assertGuest();
     }
 }

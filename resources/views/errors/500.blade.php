@@ -66,7 +66,7 @@
                 </button>
             </div>
 
-            <pre id="report-content" class="hidden bg-slate-900 text-slate-300 p-6 rounded-xl overflow-auto text-xs leading-relaxed max-h-[400px]"><code>{{ json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+            <pre id="report-content" class="hidden bg-slate-900 text-slate-300 p-6 rounded-xl overflow-auto text-xs leading-relaxed max-h-[400px]"><code>{{ json_encode($report ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
             <pre id="trace-content" class="hidden bg-slate-900 text-slate-300 p-6 rounded-xl overflow-auto text-xs leading-relaxed mt-4 max-h-[400px]"><code>{{ $report['exception']['trace'] ?? '' }}</code></pre>
         </div>
     </div>
