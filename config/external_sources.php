@@ -18,9 +18,10 @@ return [
 
         // Nastavení pro stahování (fetcher)
         'fetcher' => [
-            'timeout' => env('CZBASKETBALL_FETCH_TIMEOUT', 60), // Zvýšeno z 45 na 60
+            'timeout' => env('CZBASKETBALL_FETCH_TIMEOUT', 90), // Zvýšeno z 60 na 90
+            'connect_timeout' => env('CZBASKETBALL_CONNECT_TIMEOUT', 30),
             'retry_count' => env('CZBASKETBALL_FETCH_RETRY_COUNT', 3),
-            'retry_delay' => env('CZBASKETBALL_FETCH_RETRY_DELAY', 3000), // Zvýšeno z 2000 na 3000 ms
+            'retry_delay' => env('CZBASKETBALL_FETCH_RETRY_DELAY', 3000),
         ],
 
         // Výchozí limity pro jeden běh synchronizace

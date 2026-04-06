@@ -141,7 +141,12 @@ class StatsImportCommand extends Command
                 $count++;
                 $mainRun->updateProgress($count, $totalWork, "Tým: {$team->name}");
 
-                $syncService->syncTeamSeason($team->id, $activeSeason->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
+                try {
+                    $syncService->syncTeamSeason($team->id, $activeSeason->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
+                } catch (\Exception $e) {
+                    $logSection->writeln("<fg=red>Chyba u týmu {$team->name}: {$e->getMessage()}</>");
+                    \Illuminate\Support\Facades\Log::error("StatsImportCommand: Chyba u týmu {$team->name}: ".$e->getMessage());
+                }
 
                 $bar->advance();
 

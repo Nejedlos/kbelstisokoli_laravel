@@ -20,9 +20,14 @@ class CzBasketballFetcher implements StatFetcherInterface
     protected string $userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
     /**
-     * Timeout v sekundách.
+     * Timeout v sekundách (celkový).
      */
     protected int $timeout;
+
+    /**
+     * Timeout pro připojení v sekundách.
+     */
+    protected int $connectTimeout;
 
     /**
      * Počet pokusů o stažení.
@@ -36,7 +41,8 @@ class CzBasketballFetcher implements StatFetcherInterface
 
     public function __construct()
     {
-        $this->timeout = config('external_sources.czbasketball.fetcher.timeout', 60);
+        $this->timeout = config('external_sources.czbasketball.fetcher.timeout', 90);
+        $this->connectTimeout = config('external_sources.czbasketball.fetcher.connect_timeout', 30);
         $this->retryCount = config('external_sources.czbasketball.fetcher.retry_count', 3);
         $this->retryDelay = config('external_sources.czbasketball.fetcher.retry_delay', 3000);
     }
@@ -67,6 +73,7 @@ class CzBasketballFetcher implements StatFetcherInterface
                 'User-Agent' => $this->userAgent,
             ])
                 ->timeout($this->timeout)
+                ->connectTimeout($this->connectTimeout)
                 ->retry($this->retryCount, $this->retryDelay, function (\Exception $exception, $request) {
                     Log::warning("CzBasketballFetcher: Pokus o stažení selhal, zkouším znovu. Chyba: {$exception->getMessage()}");
 
@@ -75,6 +82,9 @@ class CzBasketballFetcher implements StatFetcherInterface
                 ->withOptions([
                     'allow_redirects' => true,
                     'verify' => false,
+                    'curl' => [
+                        CURLOPT_SSL_SESSIONID_CACHE => false,
+                    ]
                 ])
                 ->get($url);
 

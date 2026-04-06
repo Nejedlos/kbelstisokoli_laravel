@@ -13,9 +13,10 @@ Tento dokument popisuje implementaci `StatFetcherInterface` pro web `cz.basketba
 Fetcher je navržen tak, aby spolehlivě stahoval data i při občasných výpadcích nebo pokusech o blokování botů:
 
 - **User-Agent:** Nastaven na moderní prohlížeč (Chrome/Mac), aby se předešlo blokování na základě hlaviček.
-- **Timeout:** 30 sekund pro zvládnutí pomalejších odpovědí ze serveru asociace.
+- **Timeout:** 90 sekund (celkový) a 30 sekund (připojení) pro zvládnutí pomalejších odpovědí ze serveru asociace nebo problémů se SSL handshakem.
 - **Retries:** 3 pokusy o stažení při selhání (např. timeout nebo 5xx error).
-- **Backoff:** Využívá exponenciální backoff (1s, 2s, 4s) mezi pokusy, aby nedošlo k přetížení cílového serveru.
+- **Backoff:** Využívá exponenciální backoff (3s, 6s, 12s) mezi pokusy, aby nedošlo k přetížení cílového serveru.
+- **SSL Robustnost:** Využívá `CURLOPT_SSL_SESSIONID_CACHE => false` pro prevenci SSL timeoutů na některých hostinzích (např. Webglobe).
 - **Redirects:** Automaticky následuje přesměrování (včetně subdomén jako `smo.cz.basketball`).
 
 ## 3. Snapshoty a Audit
