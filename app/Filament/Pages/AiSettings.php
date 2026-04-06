@@ -93,7 +93,6 @@ class AiSettings extends Page implements HasForms
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->statePath('data')
             ->components([
                 Tabs::make('Settings')
                     ->tabs([

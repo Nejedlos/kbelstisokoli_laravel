@@ -6,6 +6,7 @@ use App\Mail\ContactFormMail;
 use App\Services\RecaptchaV3;
 use App\Support\EmailObfuscator;
 use Illuminate\Support\Facades\Mail;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -17,6 +18,13 @@ class ContactForm extends Component
 
     public string $toEmail = '';
 
+    #[Validate([
+        'name' => 'required|string|min:2|max:255',
+        'email' => 'required|email|max:255',
+        'subject' => 'required|string|max:255',
+        'message' => 'required|string|min:10',
+        'attachment' => 'nullable|file|max:10240', // 10MB
+    ])]
     public string $name = '';
 
     public string $email = '';
@@ -33,16 +41,6 @@ class ContactForm extends Component
 
     public ?string $errorMessage = null;
 
-    protected function rules(): array
-    {
-        return [
-            'name' => 'required|string|min:2|max:255',
-            'email' => 'required|email|max:255',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string|min:10',
-            'attachment' => 'nullable|file|max:10240', // 10MB
-        ];
-    }
 
     public function mount(string $to = ''): void
     {

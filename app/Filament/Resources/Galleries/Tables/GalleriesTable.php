@@ -58,10 +58,10 @@ class GalleriesTable
                 TernaryFilter::make('is_visible')
                     ->label('Viditelnost'),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

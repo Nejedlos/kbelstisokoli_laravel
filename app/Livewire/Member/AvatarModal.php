@@ -6,6 +6,7 @@ use App\Models\MediaAsset;
 use App\Support\Media\VirtualAvatarAsset;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -33,10 +34,6 @@ class AvatarModal extends Component
 
     public $userId;
 
-    protected $listeners = [
-        'openAvatarModal' => 'open',
-        'deleteAvatar' => 'confirmDelete',
-    ];
 
     public function mount($userId = null)
     {
@@ -195,6 +192,7 @@ class AvatarModal extends Component
         $this->previewUrl = $file->temporaryUrl();
     }
 
+    #[On('openAvatarModal')]
     public function open($userId = null)
     {
         if ($userId) {
@@ -209,36 +207,7 @@ class AvatarModal extends Component
         $this->reset('avatarFile', 'cropData', 'previewUrl');
     }
 
-    public function close()
-    {
-        $this->isOpen = false;
-        $this->confirmingDelete = false;
-        $this->confirmingSystemDelete = null;
-    }
-
-    public function confirmSystemDelete($id)
-    {
-        if (! auth()->user()?->canAccessAdmin()) {
-            return;
-        }
-        $this->confirmingSystemDelete = $id;
-    }
-
-    public function deleteSystemAvatar()
-    {
-        if (! auth()->user()?->canAccessAdmin() || ! $this->confirmingSystemDelete) {
-            return;
-        }
-
-        $path = public_path('uploads/defaults/'.$this->confirmingSystemDelete);
-        if (is_dir($path)) {
-            File::deleteDirectory($path);
-        }
-
-        $this->confirmingSystemDelete = null;
-        session()->flash('status', __('member.profile.avatar.admin.flash.system_deleted'));
-    }
-
+    #[On('deleteAvatar')]
     public function confirmDelete($userId = null)
     {
         if ($userId) {

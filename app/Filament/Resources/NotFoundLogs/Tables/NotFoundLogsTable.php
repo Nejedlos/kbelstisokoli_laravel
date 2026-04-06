@@ -83,7 +83,7 @@ class NotFoundLogsTable
                 TernaryFilter::make('is_ignored')
                     ->label('Ignorováno'),
             ])
-            ->recordActions([
+            ->actions([
                 ActionGroup::make([
                     Action::make('create_redirect')
                         ->label('Vytvořit přesměrování')
@@ -165,7 +165,7 @@ class NotFoundLogsTable
                     DeleteAction::make(),
                 ]),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

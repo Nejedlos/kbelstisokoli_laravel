@@ -99,13 +99,13 @@ class AllocationsRelationManager extends RelationManager
                     ->label('Přiřadit k předpisu')
                     ->after(fn ($record) => app(FinanceService::class)->syncChargeStatus($record->charge)),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make()
                     ->after(fn ($record) => app(FinanceService::class)->syncChargeStatus($record->charge)),
                 DeleteAction::make()
                     ->after(fn ($record) => app(FinanceService::class)->syncChargeStatus($record->charge)),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->after(fn ($records) => $records->each(fn ($r) => app(FinanceService::class)->syncChargeStatus($r->charge))),

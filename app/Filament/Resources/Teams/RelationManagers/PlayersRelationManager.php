@@ -147,7 +147,7 @@ class PlayersRelationManager extends RelationManager
                         }
                     }),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('edit_user')
                     ->label(__('user.actions.edit_user'))
                     ->icon(IconHelper::render(IconHelper::USER))
@@ -203,7 +203,7 @@ class PlayersRelationManager extends RelationManager
                         }
                     }),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
                         ->label(__('admin.resources.team.actions.detach_selected'))

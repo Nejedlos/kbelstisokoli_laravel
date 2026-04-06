@@ -90,7 +90,7 @@ class FinanceChargesTable
                         'other' => 'Ostatní',
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 \Filament\Actions\Action::make('waive')
                     ->label('Prominout')
                     ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CANCEL))
@@ -104,7 +104,7 @@ class FinanceChargesTable
                     ->color('warning'),
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -37,7 +37,7 @@ class SeasonsTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('initialize_configs')
                     ->label('Inicializovat konfigurace')
                     ->icon(IconHelper::get(IconHelper::COPY))
@@ -80,7 +80,7 @@ class SeasonsTable
                     ->color('warning'),
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

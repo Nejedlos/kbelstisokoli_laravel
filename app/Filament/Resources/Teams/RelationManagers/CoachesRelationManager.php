@@ -91,7 +91,7 @@ class CoachesRelationManager extends RelationManager
                             ->dehydrateStateUsing(fn ($state) => $state ? str_replace(' ', '', $state) : $state),
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make()
                     ->label(__('admin.resources.team.actions.edit_coach_contact'))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
@@ -117,7 +117,7 @@ class CoachesRelationManager extends RelationManager
                     ->icon(IconHelper::render(IconHelper::TRASH))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters')),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
                         ->label(__('admin.resources.team.actions.detach_selected')),

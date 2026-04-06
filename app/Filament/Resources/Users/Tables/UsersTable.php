@@ -154,7 +154,7 @@ class UsersTable
                             ->havingRaw('COUNT(*) > 1');
                     })),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('viewDuplicates')
                     ->label(__('user.actions.view_duplicates'))
                     ->icon(new HtmlString('<i class="fa-light fa-users-viewfinder"></i>'))

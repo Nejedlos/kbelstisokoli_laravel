@@ -120,7 +120,7 @@ class BasketballMatchesTable
                         'postponed' => __('admin.resources.basketball_match.statuses.postponed'),
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
             ->bulkActions([

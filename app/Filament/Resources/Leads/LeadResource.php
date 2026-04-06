@@ -66,13 +66,13 @@ class LeadResource extends Resource
             ->filters([
                 TrashedFilter::make(),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),

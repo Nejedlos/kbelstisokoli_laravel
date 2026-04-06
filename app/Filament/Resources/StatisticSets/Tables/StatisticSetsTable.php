@@ -82,10 +82,10 @@ class StatisticSetsTable
                         'archived' => 'Archivováno',
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

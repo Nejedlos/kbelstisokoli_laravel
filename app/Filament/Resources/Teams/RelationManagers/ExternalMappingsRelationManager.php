@@ -72,7 +72,7 @@ class ExternalMappingsRelationManager extends RelationManager
                     ->label('Přidat externí mapování')
                     ->icon(new HtmlString(IconHelper::render(IconHelper::CREATE))),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('go_to_source')
                     ->label('Upravit ve zdroji')
                     ->icon(new HtmlString(IconHelper::render(AppIcon::GLOBE)))
@@ -85,7 +85,7 @@ class ExternalMappingsRelationManager extends RelationManager
                 DeleteAction::make()
                     ->icon(new HtmlString(IconHelper::render(IconHelper::DELETE))),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

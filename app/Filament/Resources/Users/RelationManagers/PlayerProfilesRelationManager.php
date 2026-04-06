@@ -218,11 +218,11 @@ class PlayerProfilesRelationManager extends RelationManager
                     })
                     ->visible(fn () => $this->getOwnerRecord()->activePlayerProfile !== null),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

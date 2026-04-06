@@ -76,10 +76,10 @@ class RedirectsTable
                         'prefix' => 'Začíná na',
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

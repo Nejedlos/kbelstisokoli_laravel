@@ -81,10 +81,10 @@ class MediaAssetsTable
                         'private' => 'Soukromé',
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

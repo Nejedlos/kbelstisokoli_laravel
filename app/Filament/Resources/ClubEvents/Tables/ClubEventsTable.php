@@ -81,10 +81,10 @@ class ClubEventsTable
                 TernaryFilter::make('is_public')
                     ->label('Veřejnost'),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

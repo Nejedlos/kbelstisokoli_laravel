@@ -71,14 +71,14 @@ class LogsRelationManager extends RelationManager
             ->headerActions([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('view_output')
                     ->label('Zobrazit výstup')
                     ->modalHeading('Výstup úlohy')
                     ->modalContent(fn ($record) => view('filament.components.cron-output', ['record' => $record]))
                     ->modalSubmitAction(false),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

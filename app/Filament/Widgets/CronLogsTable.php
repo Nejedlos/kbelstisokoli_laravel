@@ -72,7 +72,7 @@ class CronLogsTable extends TableWidget
             ->headerActions([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('view_output')
                     ->label('Zobrazit detail')
                     ->icon(IconHelper::get(IconHelper::VIEW))
@@ -80,7 +80,7 @@ class CronLogsTable extends TableWidget
                     ->modalContent(fn (CronLog $record) => view('filament.components.cron-output', ['record' => $record]))
                     ->modalSubmitAction(false),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

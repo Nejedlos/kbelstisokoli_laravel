@@ -49,11 +49,11 @@ class UserSeasonConfigsTable
                     ->label(__('admin.resources.user_season_config.fields.tariff'))
                     ->relationship('tariff', 'name'),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

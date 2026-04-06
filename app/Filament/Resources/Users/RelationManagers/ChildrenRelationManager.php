@@ -86,12 +86,12 @@ class ChildrenRelationManager extends RelationManager
                             ->options(CommunicationChannel::class),
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
                 DetachAction::make(),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make(),
                     DeleteBulkAction::make(),

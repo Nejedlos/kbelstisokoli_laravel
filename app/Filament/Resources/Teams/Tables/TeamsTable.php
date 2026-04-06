@@ -70,7 +70,7 @@ class TeamsTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 ActionGroup::make([
                     Action::make('view_public')
                         ->label(__('admin.resources.team.actions.view_public'))
@@ -90,7 +90,7 @@ class TeamsTable
                         ->icon(IconHelper::render(IconHelper::TRASH)),
                 ]),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label(__('user.actions.delete_selected')),

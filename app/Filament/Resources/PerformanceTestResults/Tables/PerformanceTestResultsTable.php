@@ -82,10 +82,10 @@ class PerformanceTestResultsTable
                         'ultra' => 'Ultra',
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 //
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

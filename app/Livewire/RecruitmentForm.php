@@ -10,25 +10,34 @@ use App\Services\RecaptchaV3;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class RecruitmentForm extends Component
 {
+    #[Validate]
     public string $name = '';
 
+    #[Validate]
     public string $email = '';
 
     #[Url(as: 'team')]
+    #[Validate]
     public string $selectedTeam = 'muzi-c'; // Výchozí tým
 
+    #[Validate]
     public ?int $height = null;
 
+    #[Validate]
     public string $position = '';
 
+    #[Validate]
     public string $level = '';
 
+    #[Validate]
     public ?int $age = null;
 
+    #[Validate]
     public string $message = '';
 
     public ?string $recaptchaToken = null;
@@ -37,7 +46,7 @@ class RecruitmentForm extends Component
 
     public ?string $errorMessage = null;
 
-    protected function rules(): array
+    public function rules(): array
     {
         return [
             'name' => 'required|string|min:2|max:255',

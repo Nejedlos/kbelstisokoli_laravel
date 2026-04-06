@@ -90,13 +90,13 @@ class LogsRelationManager extends RelationManager
             ])
             ->headerActions([
             ])
-            ->recordActions([
+            ->actions([
                 ViewAction::make()
                     ->icon(new HtmlString('<i class="fa-light fa-eye"></i>')),
                 DeleteAction::make()
                     ->icon(new HtmlString('<i class="fa-light fa-trash"></i>')),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

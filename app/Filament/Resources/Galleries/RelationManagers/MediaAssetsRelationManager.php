@@ -104,11 +104,11 @@ class MediaAssetsRelationManager extends RelationManager
                     ])
                     ->preloadRecordSelect(),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
                 DetachAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make(),
                 ]),

@@ -47,10 +47,10 @@ class RelatedArticlesRelationManager extends RelationManager
                 AttachAction::make()
                     ->preloadRecordSelect(),
             ])
-            ->recordActions([
+            ->actions([
                 DetachAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make(),
                 ]),

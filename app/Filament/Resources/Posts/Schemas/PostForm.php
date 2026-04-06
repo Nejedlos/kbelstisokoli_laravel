@@ -3,6 +3,11 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Filament\Forms\CmsForms;
+use Filament\Forms\Components\Tabs\Tab;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Schema;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -10,10 +15,6 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
 class PostForm
@@ -46,7 +47,7 @@ class PostForm
 
                                 Tabs::make('Language Versions')
                                     ->tabs([
-                                        Tabs\Tab::make('Čeština')
+                                                                Tabs\Tab::make('Čeština')
                                             ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
                                             ->schema([
                                                 TextInput::make('title.cs')
@@ -65,7 +66,7 @@ class PostForm
                                                     ->columnSpanFull(),
                                             ]),
 
-                                        Tabs\Tab::make('English')
+                                                                Tabs\Tab::make('English')
                                             ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
                                             ->schema([
                                                 TextInput::make('title.en')
@@ -86,7 +87,7 @@ class PostForm
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Publikace a média')
+                                                Tabs\Tab::make('Publikace a média')
                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PHOTO_FILM))
                             ->schema([
                                 Section::make('Stav publikace')

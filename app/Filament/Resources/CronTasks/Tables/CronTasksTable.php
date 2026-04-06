@@ -55,7 +55,7 @@ class CronTasksTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('run_now')
                     ->label('Spustit nyní')
                     ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PLAY))
@@ -70,7 +70,7 @@ class CronTasksTable
                     }),
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

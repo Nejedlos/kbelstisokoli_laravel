@@ -93,13 +93,13 @@ class AllocationsRelationManager extends RelationManager
                     ->label('Přiřadit platbu')
                     ->after(fn () => app(FinanceService::class)->syncChargeStatus($this->getOwnerRecord())),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make()
                     ->after(fn () => app(FinanceService::class)->syncChargeStatus($this->getOwnerRecord())),
                 DeleteAction::make()
                     ->after(fn () => app(FinanceService::class)->syncChargeStatus($this->getOwnerRecord())),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->after(fn () => app(FinanceService::class)->syncChargeStatus($this->getOwnerRecord())),

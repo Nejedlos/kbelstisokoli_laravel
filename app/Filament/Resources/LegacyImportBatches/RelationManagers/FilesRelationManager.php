@@ -107,7 +107,7 @@ class FilesRelationManager extends RelationManager
             ->headerActions([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('preview')
                     ->label('Náhled')
                     ->icon(FilamentIcon::get(AppIcon::VIEW))
@@ -121,7 +121,7 @@ class FilesRelationManager extends RelationManager
                 ViewAction::make(),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

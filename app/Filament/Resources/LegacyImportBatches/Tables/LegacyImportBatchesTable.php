@@ -57,7 +57,7 @@ class LegacyImportBatchesTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 ViewAction::make(),
                 EditAction::make(),
                 Action::make('cancel')
@@ -74,7 +74,7 @@ class LegacyImportBatchesTable
                             ->send();
                     }),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -158,8 +157,15 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
 
-        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-            $switch->visible(false);
+        // LanguageSwitch configuration updated for v5
+        \BezhanSalleh\LanguageSwitch\LanguageSwitch::configureUsing(function (\BezhanSalleh\LanguageSwitch\LanguageSwitch $switch) {
+            $switch
+                ->locales(['cs', 'en'])
+                ->visible(
+                    outsidePanels: true,
+                    insidePanels: false,
+                )
+                ->outsidePanelsRenderHook(\Filament\View\PanelsRenderHook::BODY_START);
         });
 
         // Registrace Performance Observeru pro automatické mazání cache (pouze pokud neběžíme v konzoli a není to static asset)

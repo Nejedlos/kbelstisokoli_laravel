@@ -76,7 +76,7 @@ class ExternalTeamSeasonConfigsTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('sync')
                     ->label('Sync')
                     ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))

@@ -102,11 +102,11 @@ class ExternalImportRunsTable
                     ->label(__('admin.resources.external_import_run.fields.season'))
                     ->relationship('season', 'name'),
             ])
-            ->recordActions([
+            ->actions([
                 ViewAction::make()
                     ->url(fn ($record) => "/admin/external-import-runs/{$record->id}"),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

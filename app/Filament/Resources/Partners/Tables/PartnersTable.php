@@ -83,10 +83,10 @@ class PartnersTable
                 TernaryFilter::make('is_active')
                     ->label('Pouze aktivní'),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

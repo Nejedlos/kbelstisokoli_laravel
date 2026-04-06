@@ -135,7 +135,7 @@ class EntriesRelationManager extends RelationManager
                     ->modalHeading(__('admin.resources.club_competition.entry_fields.new_entry_modal'))
                     ->after(fn ($livewire) => $livewire->dispatch('refreshLeaderboard')),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make()
                     ->icon(new HtmlString(IconHelper::render(AppIcon::EDIT)))
                     ->after(fn ($livewire) => $livewire->dispatch('refreshLeaderboard')),
@@ -143,7 +143,7 @@ class EntriesRelationManager extends RelationManager
                     ->icon(new HtmlString(IconHelper::render(AppIcon::DELETE)))
                     ->after(fn ($livewire) => $livewire->dispatch('refreshLeaderboard')),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->after(fn ($livewire) => $livewire->dispatch('refreshLeaderboard')),

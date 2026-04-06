@@ -57,10 +57,10 @@ class PlayerProfilesTable
                 TernaryFilter::make('is_active')
                     ->label('Aktivní status'),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

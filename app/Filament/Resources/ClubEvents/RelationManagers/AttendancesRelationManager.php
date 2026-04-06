@@ -178,12 +178,12 @@ class AttendancesRelationManager extends RelationManager
                 CreateAction::make()
                     ->label(__('admin.resources.attendance.actions.add_member')),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
                 DeleteAction::make()
                     ->label(__('user.actions.delete')),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

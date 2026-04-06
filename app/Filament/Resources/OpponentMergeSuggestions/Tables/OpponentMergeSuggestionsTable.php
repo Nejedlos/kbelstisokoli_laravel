@@ -66,7 +66,7 @@ class OpponentMergeSuggestionsTable
                     ])
                     ->default('pending'),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('accept')
                     ->label(__('admin.resources.opponent_merge_suggestion.actions.accept'))
                     ->icon(FilamentIcon::get(AppIcon::ACTIVATE))
@@ -117,7 +117,7 @@ class OpponentMergeSuggestionsTable
                             ->send();
                     }),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -59,7 +59,7 @@ class CronLogsTable
                         'running' => 'Běží',
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('view_output')
                     ->label('Zobrazit výstup')
                     ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::VIEW))
@@ -68,7 +68,7 @@ class CronLogsTable
                     ->modalSubmitAction(false),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
