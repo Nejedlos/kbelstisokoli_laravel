@@ -186,18 +186,25 @@ class PlayerSyncService
     /**
      * Synchronizuje fotografii do Media Library.
      */
-    public function syncPhoto(User $user, string $photoUrl): void
+    public function syncPhoto(User $user, string $photoUrl, bool $force = false): void
     {
         try {
             // Dekódování HTML entit (často se objevuje &amp; v URL z crawleru)
             $photoUrl = html_entity_decode($photoUrl);
 
             // Kontrola, zda už fotku v portfoliu nemá (podle původního URL)
-            $alreadyHas = $user->getMedia('player_photos')->contains(function (Media $media) use ($photoUrl) {
+            $existingMedia = $user->getMedia('player_photos')->filter(function (Media $media) use ($photoUrl) {
                 return $media->getCustomProperty('source_url') === $photoUrl;
             });
 
-            if (!$alreadyHas) {
+            $alreadyHas = $existingMedia->isNotEmpty();
+
+            if (!$alreadyHas || $force) {
+                // Pokud vynucujeme a už existuje, smažeme starou verzi se stejným URL
+                if ($force && $alreadyHas) {
+                    $existingMedia->each->delete();
+                }
+
                 // Musíme ošetřit název souboru, protože cz.basketball používá min.php?...,
                 // což MediaLibrary odmítá jako PHP soubor.
                 $fileName = 'player_' . $user->id . '_' . md5($photoUrl) . '.jpg';
