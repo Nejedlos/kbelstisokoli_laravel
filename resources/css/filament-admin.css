@@ -607,6 +607,26 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
 }
 
 /* ==========================
+   Průhledné pozadí pro náhledy hráčů (v administraci)
+   ========================== */
+.player-photos-preview .filepond--image-preview,
+.player-photos-preview .filepond--item-panel {
+    background-color: transparent !important;
+}
+
+.player-photos-preview .filepond--image-preview-overlay {
+    display: none !important;
+}
+
+.player-photos-preview .filepond--panel-root {
+    background-color: rgba(var(--gray-50-rgb, 249, 250, 251), 0.5) !important;
+}
+
+.dark .player-photos-preview .filepond--panel-root {
+    background-color: rgba(var(--gray-900-rgb, 17, 24, 39), 0.2) !important;
+}
+
+/* ==========================
    Dokumentace (Markdown)
    ========================== */
 @layer components {

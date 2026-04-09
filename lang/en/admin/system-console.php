@@ -93,6 +93,24 @@ return [
                 'recent' => 'Recent only',
             ],
         ],
+        'sync_player_photos' => [
+            'label' => 'Statistics: Photos (Sync)',
+            'desc' => 'Bulk synchronization and downloading of player photos (including opponents) from all teams and seasons.',
+            'flags' => [
+                'force' => 'Force refresh (Ignore cache)',
+                'matches' => 'Including matches (Opponents)',
+            ],
+            'selects' => [
+                'team' => [
+                    'label' => 'Select Team',
+                    'all' => '--- All Teams ---',
+                ],
+                'season' => [
+                    'label' => 'Select Season',
+                    'all' => '--- All Seasons ---',
+                ],
+            ],
+        ],
         'stats_sync_players' => [
             'label' => 'Statistics: Players (Sync)',
             'desc' => 'Synchronization of a specific player or all club members.',

@@ -35,6 +35,7 @@ return [
         'consents_desc' => 'Správa udělených souhlasů (GDPR, fotografie, atd.).',
         'player_photos' => 'Hráčské fotografie',
         'player_photos_desc' => 'Portrétní a akční fotografie hráče pro web a soupisky.',
+        'player_photos_hint' => 'Pořadí určuje primární fotografii pro soupisku – první je primární. Fotografie stažené ze synchronizace jsou označeny rokem sezóny.',
     ],
     'fields' => [
         'first_name' => 'Jméno',

@@ -183,9 +183,26 @@
                                                 @endif
 
                                                 <div class="relative flex-shrink-0">
-                                                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-white shadow-md group-hover:scale-110 transition-transform duration-500 border border-white">
-                                                        @if(!empty($player['photo_url']))
-                                                            <img src="{{ $player['photo_url'] }}" alt="{{ $player['name'] }}" class="w-full h-full object-cover">
+                                                    @php
+                                                        $pPhotoUrl = $player['photo_url'] ?? null;
+                                                        $pExtId = $player['external_id'] ?? null;
+
+                                                        // Zkusíme najít lokální fotku soupeře na disku
+                                                        if (!empty($pExtId)) {
+                                                            $oppPath = config('filesystems.uploads.dir', 'uploads') . '/opponents/' . $pExtId . '.jpg';
+                                                            $disk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads.disk', 'public_path'));
+                                                            if ($disk->exists($oppPath)) {
+                                                                $pPhotoUrl = asset($oppPath);
+                                                            }
+                                                        }
+                                                    @endphp
+
+                                                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-white shadow-md group-hover:scale-110 transition-transform duration-500 border border-white relative">
+                                                        @if(!empty($pPhotoUrl))
+                                                            <img src="{{ $pPhotoUrl }}" alt="{{ $player['name'] }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                            <div class="hidden w-full h-full items-center justify-center bg-slate-100 text-slate-300">
+                                                                <i class="fa-light fa-user text-xl"></i>
+                                                            </div>
                                                         @else
                                                             <div class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
                                                                 <i class="fa-light fa-user text-xl"></i>

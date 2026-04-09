@@ -335,7 +335,7 @@
                                     wire:loading.attr="disabled"
                                     x-on:click="
                                         loading = true;
-                                        if (['stats:sync-players', 'stats:sync-team-season', 'stats:import'].includes('{{ $cmdKey }}')) {
+                                        if (['stats:sync-players', 'stats:sync-team-season', 'stats:import', 'app:sync-player-photos'].includes('{{ $cmdKey }}')) {
                                             setTimeout(() => $dispatch('sync-started'), 500);
                                         }
                                         $wire.run('{{ $cmdKey }}', '{{ $config['type'] }}', flags, '{{ $config['select']['name'] ?? ($config['input']['name'] ?? '') }}', selectValue || inputValues, useInternal)

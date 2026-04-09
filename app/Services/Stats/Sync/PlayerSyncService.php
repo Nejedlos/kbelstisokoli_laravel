@@ -14,8 +14,10 @@ use App\Models\User;
 use App\Models\Venue;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\PlayerDetailExtractor;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class PlayerSyncService
@@ -106,7 +108,10 @@ class PlayerSyncService
                 if ($parentRun) {
                     $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Stahování fotografie)");
                 }
-                $this->syncPhoto($user, $data['photo_url']);
+                $this->syncPhoto($user, $data['photo_url'], false, [
+                    'season_id' => $seasonId,
+                    'added_from' => 'player_detail_sync'
+                ]);
             }
 
             // 3. Detailní statistiky do nové tabulky external_player_stats
@@ -186,7 +191,7 @@ class PlayerSyncService
     /**
      * Synchronizuje fotografii do Media Library.
      */
-    public function syncPhoto(User $user, string $photoUrl, bool $force = false): void
+    public function syncPhoto(User $user, string $photoUrl, bool $force = false, array $context = []): void
     {
         try {
             // Dekódování HTML entit (často se objevuje &amp; v URL z crawleru)
@@ -205,25 +210,191 @@ class PlayerSyncService
                     $existingMedia->each->delete();
                 }
 
-                // Musíme ošetřit název souboru, protože cz.basketball používá min.php?...,
-                // což MediaLibrary odmítá jako PHP soubor.
+                // Pokud URL obsahuje min.php a parametr file, zkusíme přímo ten soubor
+                $directUrl = null;
+                if (str_contains($photoUrl, 'min.php') && str_contains($photoUrl, 'file=')) {
+                    parse_str(parse_url($photoUrl, PHP_URL_QUERY), $query);
+                    if (!empty($query['file'])) {
+                        $directUrl = $query['file'];
+                        if (str_starts_with($directUrl, 'http://cbf.cz')) {
+                            $directUrl = str_replace('http://cbf.cz', 'https://cbf.cz', $directUrl);
+                        }
+                    }
+                }
+
                 $fileName = 'player_' . $user->id . '_' . md5($photoUrl) . '.jpg';
+                $urlsToTry = array_filter([$directUrl, $photoUrl]);
+                $success = false;
 
-                // Pokud je URL z cz.basketball min.php, zkusíme jí dát rozumný User-Agent
-                // a případně ošetřit parametry, pokud by DefaultDownloader selhával.
-                $user->addMediaFromUrl($photoUrl)
-                    ->usingFileName($fileName)
-                    ->withCustomProperties([
-                        'source_url' => $photoUrl,
-                        'added_from' => 'player_detail_sync',
-                        'synced_at' => now()->toDateTimeString()
-                    ])
-                    ->toMediaCollection('player_photos');
+                $customProperties = [
+                    'source_url' => $photoUrl,
+                    'actual_url' => $urlsToTry[0] ?? $photoUrl,
+                    'added_from' => $context['added_from'] ?? 'player_detail_sync',
+                    'synced_at' => now()->toDateTimeString(),
+                ];
 
-                Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$photoUrl}");
+                if (isset($context['season_id'])) {
+                    $customProperties['season_id'] = (int) $context['season_id'];
+                }
+                if (isset($context['team_id'])) {
+                    $customProperties['team_id'] = (int) $context['team_id'];
+                }
+
+                foreach ($urlsToTry as $url) {
+                    try {
+                        $user->addMediaFromUrl($url)
+                            ->usingFileName($fileName)
+                            ->withCustomProperties($customProperties)
+                            ->toMediaCollection('player_photos');
+
+                        $success = true;
+                        Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$url}");
+                        break;
+                    } catch (\Exception $e) {
+                        Log::debug("PlayerSyncService: Pokus o stažení z {$url} selhal: " . $e->getMessage());
+                    }
+                }
+
+                if (!$success) {
+                    // Poslední pokus: zkusit dotažení z detailu, pokud máme mapping
+                    $mapping = $user->externalMappings()->where('source_key', 'czbasketball')->first();
+                    if ($mapping && $mapping->external_id) {
+                        $this->syncPhotoFromDetail($user, $mapping->external_id, $force, $context);
+                    }
+                }
             }
         } catch (\Exception $e) {
-            Log::warning("PlayerSyncService: Nepodařilo se stáhnout fotografii pro {$user->display_name} ({$photoUrl}): " . $e->getMessage());
+            Log::warning("PlayerSyncService: Nepodařilo se synchronizovat fotografii pro {$user->display_name} ({$photoUrl}): " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Zkusí najít a stáhnout fotku uživatele z jeho detailní stránky na cz.basketball.
+     */
+    protected function syncPhotoFromDetail(User $user, string $externalId, bool $force = false, array $context = []): void
+    {
+        try {
+            $url = "https://cz.basketball/hrac/{$externalId}";
+            $html = $this->fetcher->fetch($url);
+            $result = $this->extractor->extract($html);
+            $photoUrl = $result['data']['photo_url'] ?? null;
+
+            if ($photoUrl) {
+                $photoUrl = html_entity_decode($photoUrl);
+                $fileName = 'player_' . $user->id . '_' . md5($photoUrl) . '.jpg';
+
+                $customProperties = [
+                    'source_url' => $photoUrl,
+                    'added_from' => $context['added_from'] ?? 'player_detail_sync_fallback',
+                    'synced_at' => now()->toDateTimeString()
+                ];
+
+                if (isset($context['season_id'])) {
+                    $customProperties['season_id'] = (int) $context['season_id'];
+                }
+                if (isset($context['team_id'])) {
+                    $customProperties['team_id'] = (int) $context['team_id'];
+                }
+
+                $user->addMediaFromUrl($photoUrl)
+                    ->usingFileName($fileName)
+                    ->withCustomProperties($customProperties)
+                    ->toMediaCollection('player_photos');
+
+                Log::info("PlayerSyncService: Stažena fotografie hráče {$user->display_name} Z DETAILU (ExtID: {$externalId})");
+            }
+        } catch (\Exception $e) {
+            Log::debug("PlayerSyncService: Selhal pokus o dotažení fotky hráče {$user->display_name} z detailu: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Synchronizuje fotografii soupeře přímo na disk (bez ghost uživatele).
+     */
+    public function syncOpponentPhoto(string $externalId, string $photoUrl, bool $force = false): void
+    {
+        try {
+            $photoUrl = html_entity_decode($photoUrl);
+
+            // Pokud URL obsahuje min.php a parametr file, zkusíme přímo ten soubor (pokud min.php selhává)
+            $directUrl = null;
+            if (str_contains($photoUrl, 'min.php') && str_contains($photoUrl, 'file=')) {
+                parse_str(parse_url($photoUrl, PHP_URL_QUERY), $query);
+                if (!empty($query['file'])) {
+                    $directUrl = $query['file'];
+                    // Zajistíme HTTPS
+                    if (str_starts_with($directUrl, 'http://cbf.cz')) {
+                        $directUrl = str_replace('http://cbf.cz', 'https://cbf.cz', $directUrl);
+                    }
+                }
+            }
+
+            // Konfigurace cesty
+            $diskName = config("filesystems.uploads.disk", "public_path");
+            $baseDir = config("filesystems.uploads.dir", "uploads");
+            $dir = $baseDir . "/opponents";
+            $fileName = $externalId . ".jpg";
+            $path = $dir . "/" . $fileName;
+
+            if ($force || ! Storage::disk($diskName)->exists($path) || Storage::disk($diskName)->size($path) === 0) {
+                // Zkusíme nejprve přímou URL (pokud ji máme), bývá spolehlivější než min.php
+                $urlsToTry = array_filter([$directUrl, $photoUrl]);
+                $success = false;
+
+                foreach ($urlsToTry as $url) {
+                    $response = Http::withHeaders([
+                        "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    ])->get($url);
+
+                    if ($response->successful()) {
+                        Storage::disk($diskName)->put($path, $response->body());
+                        Log::info("PlayerSyncService: Stažena fotografie soupeře (ExtID: {$externalId}) z {$url}");
+                        $success = true;
+                        break;
+                    }
+                }
+
+                if (!$success) {
+                    // Fallback na detail hráče
+                    Log::debug("PlayerSyncService: Selhalo stahování pro ExtID: {$externalId}, zkouším detail hráče...");
+                    $this->syncOpponentPhotoFromDetail($externalId, $force);
+                }
+            } else {
+                Log::debug("PlayerSyncService: Fotografie soupeře (ExtID: {$externalId}) již existuje v {$path}");
+            }
+        } catch (\Exception $e) {
+            Log::warning("PlayerSyncService: Chyba při stahování fotky soupeře (ExtID: {$externalId}): " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Zkusí najít a stáhnout fotku soupeře z jeho detailní stránky.
+     */
+    protected function syncOpponentPhotoFromDetail(string $externalId, bool $force = false): void
+    {
+        try {
+            $url = "https://cz.basketball/hrac/{$externalId}";
+            $html = $this->fetcher->fetch($url);
+            $result = $this->extractor->extract($html);
+            $photoUrl = $result['data']['photo_url'] ?? null;
+
+            if ($photoUrl) {
+                $photoUrl = html_entity_decode($photoUrl);
+                $diskName = config("filesystems.uploads.disk", "public_path");
+                $baseDir = config("filesystems.uploads.dir", "uploads");
+                $path = $baseDir . "/opponents/" . $externalId . ".jpg";
+
+                $response = Http::withHeaders([
+                    "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                ])->get($photoUrl);
+
+                if ($response->successful()) {
+                    Storage::disk($diskName)->put($path, $response->body());
+                    Log::info("PlayerSyncService: Stažena fotografie soupeře Z DETAILU (ExtID: {$externalId}) do {$path}");
+                }
+            }
+        } catch (\Exception $e) {
+            Log::debug("PlayerSyncService: Selhal pokus o dotažení fotky soupeře z detailu (ExtID: {$externalId}): " . $e->getMessage());
         }
     }
 

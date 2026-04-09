@@ -531,9 +531,9 @@ class UserForm
                                             ->imageEditor()
                                             ->hiddenLabel()
                                             ->disk(config('filesystems.uploads.disk'))
-                                            ->helperText('Pořadí určuje primární fotografii pro soupisku – první je primární.')
-                                            ->panelLayout('grid')
-                                            ->responsiveImages(),
+                                            ->helperText(__('user.sections.player_photos_hint'))
+                                            ->extraAttributes(['class' => 'player-photos-preview'])
+                                            ->panelLayout('grid'),
                                     ]),
                             ])
                             ->visible(fn ($get) => $get('player_profile_active')),

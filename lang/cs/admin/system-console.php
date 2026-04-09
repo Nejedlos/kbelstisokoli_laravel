@@ -93,6 +93,24 @@ return [
                 'recent' => 'Pouze nedávné (Recent)',
             ],
         ],
+        'sync_player_photos' => [
+            'label' => 'Statistiky: Fotky (Sync)',
+            'desc' => 'Hromadná synchronizace a dotažení fotografií hráčů (i soupeřů) ze všech týmů a sezón.',
+            'flags' => [
+                'force' => 'Vynutit refresh (Ignore cache)',
+                'matches' => 'Včetně zápasů (Soupeři)',
+            ],
+            'selects' => [
+                'team' => [
+                    'label' => 'Výběr týmu',
+                    'all' => '--- Všechny týmy ---',
+                ],
+                'season' => [
+                    'label' => 'Výběr sezóny',
+                    'all' => '--- Všechny sezóny ---',
+                ],
+            ],
+        ],
         'stats_sync_players' => [
             'label' => 'Statistiky: Hráči (Sync)',
             'desc' => 'Synchronizace konkrétního hráče nebo všech členů klubu.',

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\ExternalTeamSeasonConfig;
+use App\Models\ExternalImportRun;
 use App\Models\Season;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
@@ -68,12 +69,33 @@ class AppSyncPlayerPhotosCommand extends Command
 
         $this->info("Zahajuji stahování fotek pro {$configs->count()} konfigurací...");
 
+        $mainRun = ExternalImportRun::start(
+            'czbasketball',
+            $this->option('season_id') ?? Season::where('is_active', true)->first()?->id ?? 0,
+            $this->option('team_id'),
+            'photo_sync_command',
+            null
+        );
+        $mainRun->update(['total_count' => $configs->count()]);
+
         $force = $this->option('force');
         $delay = (int) $this->option('delay');
         $playerDelay = max(0, (int) $this->option('per-player-delay-ms'));
         $syncMatches = $this->option('matches');
 
-        foreach ($configs as $config) {
+        $bar = $this->output->createProgressBar($configs->count());
+        $bar->start();
+
+        foreach ($configs as $index => $config) {
+            // Kontrola zrušení
+            if ($mainRun->refresh()->status === 'cancelled') {
+                $this->warn('Synchronizace byla zrušena uživatelem.');
+                break;
+            }
+
+            $mainRun->updateProgress($index + 1, $configs->count(), "Tým: {$config->team->name}");
+
+            $this->newLine();
             $this->info("Zpracovávám: {$config->team->name} ({$config->season->name})");
 
             // --- 1. Synchronizace ze soupisek ---
@@ -89,8 +111,12 @@ class AppSyncPlayerPhotosCommand extends Command
             }
 
             $this->refreshState();
+            $bar->advance();
         }
 
+        $bar->finish();
+        $mainRun->finish();
+        $this->newLine();
         $this->info("Hotovo.");
         return 0;
     }
@@ -135,7 +161,11 @@ class AppSyncPlayerPhotosCommand extends Command
 
                 $user = $rosterSyncService->findOrCreateUserForExternalPlayer($extId, $name, $config);
                 if ($user) {
-                    $playerSyncService->syncPhoto($user, $photoUrl, $force);
+                    $playerSyncService->syncPhoto($user, $photoUrl, $force, [
+                        'season_id' => $config->season_id,
+                        'team_id' => $config->team_id,
+                        'added_from' => 'command_roster_sync'
+                    ]);
                     $count++;
                     if ($playerDelay > 0) usleep($playerDelay * 1000);
                 }
@@ -160,30 +190,57 @@ class AppSyncPlayerPhotosCommand extends Command
             $bestPlayers = $match->metadata['best_players_external'] ?? $match->metadata['best_players'] ?? [];
             if (empty($bestPlayers)) continue;
 
+            $matchLabel = "Zápas #{$match->id}";
+            if (isset($match->metadata['match_number'])) {
+                $matchLabel .= " (č. {$match->metadata['match_number']})";
+            }
+            $this->info("    - {$matchLabel}");
+
             foreach ($bestPlayers as $category => $data) {
                 if (!is_array($data)) continue;
 
-                $toProcess = [];
-                if (isset($data['home']) && is_array($data['home'])) $toProcess[] = $data['home'];
-                if (isset($data['away']) && is_array($data['away'])) $toProcess[] = $data['away'];
+                // Určíme, která strana je naše a která soupeřova
+                // $match->is_home: true = home je náš, false = away je náš
+                if (isset($data['home']) && is_array($data['home'])) {
+                    $playerData = $data['home'];
+                    $isOur = $match->is_home;
+                    $this->processMatchPlayer($playerData, $isOur, $config, $playerSyncService, $rosterSyncService, $force, $playerDelay, $count);
+                }
 
-                foreach ($toProcess as $playerData) {
-                    $extId = $playerData['external_id'] ?? null;
-                    $name = $playerData['name'] ?? null;
-                    $photoUrl = $playerData['photo_url'] ?? null;
-
-                    if (!$extId || !$name || !$photoUrl) continue;
-
-                    $user = $rosterSyncService->findOrCreateUserForExternalPlayer($extId, $name, $config);
-                    if ($user) {
-                        $playerSyncService->syncPhoto($user, $photoUrl, $force);
-                        $count++;
-                        if ($playerDelay > 0) usleep($playerDelay * 1000);
-                    }
+                if (isset($data['away']) && is_array($data['away'])) {
+                    $playerData = $data['away'];
+                    $isOur = !$match->is_home;
+                    $this->processMatchPlayer($playerData, $isOur, $config, $playerSyncService, $rosterSyncService, $force, $playerDelay, $count);
                 }
             }
         }
         $this->info("    - Staženo/ověřeno {$count} fotek z nejlepších hráčů zápasů.");
+    }
+
+    protected function processMatchPlayer($playerData, $isOur, $config, $playerSyncService, $rosterSyncService, $force, $playerDelay, &$count)
+    {
+        $extId = $playerData['external_id'] ?? null;
+        $name = $playerData['name'] ?? null;
+        $photoUrl = $playerData['photo_url'] ?? null;
+
+        if (!$extId || !$name || !$photoUrl) return;
+
+        if ($isOur) {
+            $user = $rosterSyncService->findOrCreateUserForExternalPlayer($extId, $name, $config);
+            if ($user) {
+                $playerSyncService->syncPhoto($user, $photoUrl, $force, [
+                    'season_id' => $config->season_id,
+                    'team_id' => $config->team_id,
+                    'added_from' => 'command_match_sync'
+                ]);
+                $count++;
+            }
+        } else {
+            $playerSyncService->syncOpponentPhoto($extId, $photoUrl, $force);
+            $count++;
+        }
+
+        if ($playerDelay > 0) usleep($playerDelay * 1000);
     }
 
     /**

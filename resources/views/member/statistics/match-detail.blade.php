@@ -463,8 +463,16 @@
                                                             }
 
                                                             $playerPhotoUrl = $players[$side]['photo_url'] ?? null;
-                                                            if ($localUser && $localUser->hasMedia('player_photos')) {
-                                                                $playerPhotoUrl = $localUser->getFirstMediaUrl('player_photos');
+                                                            if ($localUser) {
+                                                                $playerPhotoUrl = $localUser->getPlayerPhotoUrl($match->season_id) ?? $playerPhotoUrl;
+                                                            } elseif (!empty($extId)) {
+                                                                // Fallback pro soupeře (i pro naše bez media) - kontrola v uploads/opponents/
+                                                                $disk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads.disk', 'public_path'));
+                                                                $oppPath = config('filesystems.uploads.dir', 'uploads') . '/opponents/' . $extId . '.jpg';
+
+                                                                if ($disk->exists($oppPath)) {
+                                                                    $playerPhotoUrl = asset($oppPath);
+                                                                }
                                                             }
                                                         @endphp
                                                         <div class="group relative flex items-center gap-4 p-2 rounded-[2rem] {{ $cardBg }} border-2 transition-all hover:shadow-2xl hover:bg-white hover:-translate-y-1 overflow-hidden">
@@ -473,9 +481,12 @@
                                                             @endif
 
                                                             <div class="relative flex-shrink-0">
-                                                                <div class="w-16 h-16 rounded-2xl overflow-hidden bg-white shadow-md group-hover:scale-110 transition-transform duration-500 border border-white">
+                                                                <div class="w-16 h-16 rounded-2xl overflow-hidden bg-white shadow-md group-hover:scale-110 transition-transform duration-500 border border-white relative">
                                                                     @if(!empty($playerPhotoUrl))
-                                                                        <img src="{{ $playerPhotoUrl }}" alt="{{ $players[$side]['name'] }}" class="w-full h-full object-cover">
+                                                                        <img src="{{ $playerPhotoUrl }}" alt="{{ $players[$side]['name'] }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                                        <div class="hidden w-full h-full items-center justify-center text-gray-200">
+                                                                            <i class="fa-light fa-user text-3xl"></i>
+                                                                        </div>
                                                                     @else
                                                                         <div class="w-full h-full flex items-center justify-center text-gray-200">
                                                                             <i class="fa-light fa-user text-3xl"></i>

@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -67,6 +68,11 @@ class PlayersRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('user.name')
             ->columns([
+                ImageColumn::make('user.player_photo')
+                    ->label('')
+                    ->circular()
+                    ->defaultImageUrl(fn ($record) => $record->user?->getAvatarUrl('thumb'))
+                    ->getStateUsing(fn ($record) => $record->user?->getPlayerPhotoUrl($record->pivot->season_id ?? null)),
                 TextColumn::make('user.name')
                     ->label(__('user.fields.full_name'))
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(

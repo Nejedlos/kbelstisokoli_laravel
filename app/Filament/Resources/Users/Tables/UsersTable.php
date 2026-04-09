@@ -43,6 +43,12 @@ class UsersTable
                 ])
             )
             ->columns([
+                SpatieMediaLibraryImageColumn::make('player_photos')
+                    ->label('')
+                    ->collection('player_photos')
+                    ->circular()
+                    ->getStateUsing(fn ($record) => $record->getMedia('player_photos')->sortByDesc('id')->first())
+                    ->toggleable(isToggledHiddenByDefault: true),
                 SpatieMediaLibraryImageColumn::make('avatar')
                     ->label(__('user.fields.avatar'))
                     ->collection('avatar')

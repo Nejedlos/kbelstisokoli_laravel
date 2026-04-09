@@ -500,6 +500,29 @@ class SystemConsole extends Page
                 'color' => 'gray',
                 'icon' => FilamentIcon::get(AppIcon::DASHBOARD),
             ],
+            'app:sync-player-photos' => [
+                'label' => __('admin/system-console.commands.sync_player_photos.label'),
+                'desc' => __('admin/system-console.commands.sync_player_photos.desc'),
+                'type' => 'artisan',
+                'flags' => [
+                    '--force' => __('admin/system-console.commands.sync_player_photos.flags.force'),
+                    '--matches' => __('admin/system-console.commands.sync_player_photos.flags.matches'),
+                ],
+                'selects' => [
+                    [
+                        'name' => '--team_id',
+                        'label' => __('admin/system-console.commands.sync_player_photos.selects.team.label'),
+                        'options' => $teamOptions,
+                    ],
+                    [
+                        'name' => '--season_id',
+                        'label' => __('admin/system-console.commands.sync_player_photos.selects.season.label'),
+                        'options' => $seasonOptions,
+                    ],
+                ],
+                'color' => 'success',
+                'icon' => FilamentIcon::get(AppIcon::MEDIA_LIBRARY),
+            ],
             'stats:predictions:recompute' => [
                 'label' => __('admin/system-console.commands.stats_predictions_recompute.label'),
                 'desc' => __('admin/system-console.commands.stats_predictions_recompute.desc'),

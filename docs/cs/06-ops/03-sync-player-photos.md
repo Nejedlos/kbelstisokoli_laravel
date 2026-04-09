@@ -17,9 +17,19 @@ php artisan app:sync-player-photos [--team_id=] [--season_id=] [--force] [--dela
 - `--batch-size=` – zpracuje pouze prvních N konfigurací (užitečné pro testování).
 - `--matches` – projde i sekce "Nejlepší hráči" ve všech odehraných zápasech daného týmu a sezóny (stáhne fotky i pro soupeře).
 
+## Vylepšená stabilita stahování (v1.2)
+Příkaz a podkladová služba `PlayerSyncService` nyní obsahují robustní mechanismus pro stahování fotek z `cz.basketball`:
+1. **Metadata:** Při stahování se k fotografii ukládá `season_id` a `team_id`. To umožňuje zobrazovat v detailech zápasů dobové fotografie (např. hráče jako dítě v sezóně 2015).
+2. **Prioritizace:** Frontend (`match-detail.blade.php`) a administrace se pokouší najít fotografii pro konkrétní sezónu. Pokud není nalezena, použije se nejnovější dostupná.
+3. **Přímé stahování:** Pokud selže standardní endpoint `min.php` (často vrací 404 pro starší fotky), systém se pokusí stáhnout soubor přímo z `cbf.cz`.
+4. **Fallback na detail:** Pokud ani přímý odkaz nefunguje, systém navštíví profilovou stránku hráče a extrahuje aktuální URL fotky odtud.
+5. **Ošetření chyb:** Chyba při stahování jedné fotky (např. 404) nezastaví celý proces synchronizace. Všechny neúspěchy jsou zaznamenány v logu.
+6. **Průběh:** Příkaz nyní zobrazuje Progress Bar pro přehled o celkovém postupu přes všechny týmy.
+
 ## Chování
 - Základem je soupisková stránka `team_season_url`. Pokud řádek soupisky obsahuje obrázek, stáhne se přímo tento zdroj.
-- Pokud je aktivní příznak `--matches`, příkaz projde všechny zápasy v databázi pro daný tým a sezónu, vytáhne z jejich metadat nejlepší hráče (včetně soupeřů), vytvoří jim "ghost" profily a stáhne jejich fotografie.
+- Pokud je aktivní příznak `--matches`, příkaz projde všechny zápasy v databázi pro daný tým a sezónu, vytáhne z jejich metadat nejlepší hráče (včetně soupeřů) a stáhne jejich fotografie přímo na disk do `uploads/opponents`.
+- U našich hráčů se při `--matches` nadále vytvářejí/hledají "ghost" profily a fotka se ukládá do MediaLibrary. U soupeřů se v databázi nic nevytváří.
 - Pokud řádek soupisky fotku neobsahuje, příkaz spadne na fallback: načte detail hráče `https://cz.basketball/hrac/{externalId}` a pokusí se získat `photo_url` tam.
 - Bez `--force`:
   - Fotka se uloží pouze pokud pro stejné `source_url` ještě není v kolekci `player_photos` u daného uživatele.
