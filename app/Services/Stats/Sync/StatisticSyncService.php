@@ -86,12 +86,12 @@ class StatisticSyncService
             return;
         }
 
-        // PŘIDÁNO: Používáme retry(3) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
-        $count = retry(3, function () use ($set, $match) {
+        // PŘIDÁNO: Používáme retry(5) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
+        $count = retry(5, function () use ($set, $match) {
             return StatisticRow::where('statistic_set_id', $set->id)
                 ->where('basketball_match_id', $match->id)
                 ->delete();
-        }, 100, function ($e) {
+        }, 200, function ($e) {
             Log::warning("clearMatchBoxscore retry due to error 1615 (or other): " . $e->getMessage());
             return $e instanceof \Illuminate\Database\QueryException;
         });
@@ -349,12 +349,12 @@ class StatisticSyncService
         }
 
         // NEJDŘÍVE: Smažeme všechny stávající sumáře pro tuto sezónu, abychom odstranili případné sirotky a duplicity.
-        // PŘIDÁNO: Používáme retry(3) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
-        retry(3, function () use ($summarySet, $seasonId) {
+        // PŘIDÁNO: Používáme retry(5) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
+        retry(5, function () use ($summarySet, $seasonId) {
             StatisticRow::where('statistic_set_id', $summarySet->id)
                 ->where('season_id', $seasonId)
                 ->delete();
-        }, 100, function ($e) {
+        }, 200, function ($e) {
             Log::warning("recomputePlayerSummaries delete retry due to error 1615 (or other): " . $e->getMessage());
             return $e instanceof \Illuminate\Database\QueryException;
         });

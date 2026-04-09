@@ -170,6 +170,9 @@ Navíc je bootstrap aplikace v `bootstrap/app.php` zabezpečen tak, aby selhán�
 5. **Node.js & NPM:** Pro buildování assetů přímo na serveru (pro `app:deploy`). **Při použití metody FTP Sync (bod 3) není na serveru potřeba.**
 
 ## Postup nasazení (Manuální přes SSH - příklad pro PHP 8.4)
+
+> Aktuální informace pro **upgrade na Laravel 13** naleznete v samostatném dokumentu: [02-upgrade-laravel-13.md](02-upgrade-laravel-13.md).
+
 Pokud chcete nasadit novou verzi ručně, připojte se přes SSH a proveďte (postup je optimalizován pro **Fish shell**, který Webglobe používá):
 
 ```bash

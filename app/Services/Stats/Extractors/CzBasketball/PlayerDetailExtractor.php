@@ -334,7 +334,8 @@ class PlayerDetailExtractor implements StatExtractorInterface
                     }
                     $row['team_name'] = $val;
                 } elseif ($header === 'games_played') {
-                    $row['games_played'] = $this->extractInt($val);
+                    $extracted = $this->extractInt($val);
+                    $row['games_played'] = $extracted ?? 0; // Default na 0, pokud je to např. pomlčka v řádku s průměry
                 } elseif (in_array($header, ['two_points', 'three_points', 'free_throws'])) {
                     // Může být "2.1/3.1" nebo jen "12.5"
                     if (str_contains($val, '/')) {
