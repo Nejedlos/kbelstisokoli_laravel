@@ -122,11 +122,14 @@ class RosterSyncService
         });
     }
 
-    public function findOrCreateUserForExternalPlayer(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
+    public function findOrCreateUserForExternalPlayer(string $externalId, string $name, ?ExternalTeamSeasonConfig $config = null, ?string $sourceKey = 'czbasketball', ?int $seasonId = null): User
     {
+        $sourceKey = $config ? $config->source_key : $sourceKey;
+        $seasonId = $config ? $config->season_id : $seasonId;
+
         // A. Hledat přes ExternalEntityMapping (již dříve spárovaní hráči v libovolné sezóně)
         $mapping = ExternalEntityMapping::where([
-            'source_key' => $config->source_key,
+            'source_key' => $sourceKey,
             'entity_type' => 'player',
             'external_id' => $externalId,
         ])->first();
@@ -139,7 +142,7 @@ class RosterSyncService
         $profile = PlayerProfile::where('license_number', $externalId)->first();
         if ($profile) {
             $user = $profile->user;
-            $this->createMapping($user, $externalId, $config);
+            $this->createMapping($user, $externalId, $config, $sourceKey, $seasonId);
 
             return $user;
         }
@@ -148,13 +151,13 @@ class RosterSyncService
         // Zkusíme najít reálného uživatele se stejným jménem, abychom předešli duplicitám (ghostům)
         $userByName = $this->findUserByName($name);
         if ($userByName) {
-            $this->createMapping($userByName, $externalId, $config);
+            $this->createMapping($userByName, $externalId, $config, $sourceKey, $seasonId);
 
             return $userByName;
         }
 
         // D. Vytvořit "Ghost" uživatele
-        return $this->createGhostUser($externalId, $name, $config);
+        return $this->createGhostUser($externalId, $name, $config, $sourceKey, $seasonId);
     }
 
     /**
@@ -196,15 +199,17 @@ class RosterSyncService
         return null;
     }
 
-    protected function createGhostUser(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
+    protected function createGhostUser(string $externalId, string $name, ?ExternalTeamSeasonConfig $config = null, ?string $sourceKey = 'czbasketball', ?int $seasonId = null): User
     {
+        $sourceKey = $config ? $config->source_key : $sourceKey;
+
         // Rozdělení jména
         $parts = explode(' ', $name);
         $firstName = $parts[0] ?? 'Ghost';
         $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : 'Player';
 
         // Placeholder email: ghost_{externalId}@{domain}
-        $email = "ghost_{$config->source_key}_{$externalId}@kbelstisokoli.cz";
+        $email = "ghost_{$sourceKey}_{$externalId}@kbelstisokoli.cz";
 
         $user = User::create([
             'name' => $name,
@@ -216,21 +221,24 @@ class RosterSyncService
             'metadata' => [
                 'is_ghost' => true,
                 'external_id' => $externalId,
-                'source' => $config->source_key,
+                'source' => $sourceKey,
                 'created_at_sync' => now()->toDateTimeString(),
             ],
         ]);
 
-        $this->createMapping($user, $externalId, $config);
+        $this->createMapping($user, $externalId, $config, $sourceKey, $seasonId);
 
         return $user;
     }
 
-    protected function createMapping(User $user, string $externalId, ExternalTeamSeasonConfig $config): void
+    protected function createMapping(User $user, string $externalId, ?ExternalTeamSeasonConfig $config = null, ?string $sourceKey = 'czbasketball', ?int $seasonId = null): void
     {
+        $sourceKey = $config ? $config->source_key : $sourceKey;
+        $seasonId = $config ? $config->season_id : $seasonId;
+
         ExternalEntityMapping::updateOrCreate([
-            'source_key' => $config->source_key,
-            'season_id' => $config->season_id,
+            'source_key' => $sourceKey,
+            'season_id' => $seasonId,
             'entity_type' => 'player',
             'external_id' => $externalId,
         ], [

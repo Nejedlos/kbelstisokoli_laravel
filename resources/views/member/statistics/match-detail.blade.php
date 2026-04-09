@@ -357,27 +357,46 @@
                             $bestPlayers = $match->metadata['best_players_external'] ?? $match->metadata['best_players'] ?? [];
 
                             // Před-načtení lokálních uživatelů pro zobrazení jejich fotografií místo externích URL
-                            $bestPlayerUsers = collect();
+                            $bestPlayerUsersByExtId = collect();
+                            $bestPlayerUsersByName = collect();
+
                             if (!empty($bestPlayers)) {
                                 $extIds = [];
+                                $names = [];
                                 foreach ($bestPlayers as $category => $players) {
                                     if (is_array($players)) {
                                         foreach (['home', 'away'] as $side) {
                                             if (!empty($players[$side]['external_id'])) {
                                                 $extIds[] = (string) $players[$side]['external_id'];
                                             }
+                                            if (!empty($players[$side]['name'])) {
+                                                $names[] = $players[$side]['name'];
+                                            }
                                         }
                                     }
                                 }
+
                                 if (!empty($extIds)) {
-                                    $bestPlayerUsers = \App\Models\User::whereHas('externalMappings', function ($q) use ($extIds) {
+                                    $usersWithMapping = \App\Models\User::whereHas('externalMappings', function ($q) use ($extIds) {
                                             $q->where('source_key', 'czbasketball')->whereIn('external_id', array_unique($extIds));
                                         })
                                         ->with(['media', 'externalMappings'])
+                                        ->get();
+
+                                    foreach ($usersWithMapping as $u) {
+                                        $mapping = $u->externalMappings->where('source_key', 'czbasketball')->first();
+                                        if ($mapping) {
+                                            $bestPlayerUsersByExtId[$mapping->external_id] = $u;
+                                        }
+                                    }
+                                }
+
+                                // Fallback: načtení uživatelů podle jména pro ty, kteří nebyli nalezeni přes mapping
+                                if (!empty($names)) {
+                                    $bestPlayerUsersByName = \App\Models\User::whereIn('name', array_unique($names))
+                                        ->with(['media'])
                                         ->get()
-                                        ->keyBy(function ($user) {
-                                            return $user->externalMappings->where('source_key', 'czbasketball')->first()->external_id;
-                                        });
+                                        ->keyBy('name');
                                 }
                             }
                         @endphp
@@ -435,7 +454,14 @@
 
                                                             // Získání lokální fotografie
                                                             $extId = $players[$side]['external_id'] ?? null;
-                                                            $localUser = $extId ? ($bestPlayerUsers[$extId] ?? null) : null;
+                                                            $playerName = $players[$side]['name'] ?? null;
+                                                            $localUser = $extId ? ($bestPlayerUsersByExtId[$extId] ?? null) : null;
+
+                                                            // Fallback na jméno, pokud mapping selhal
+                                                            if (!$localUser && $playerName) {
+                                                                $localUser = $bestPlayerUsersByName[$playerName] ?? null;
+                                                            }
+
                                                             $playerPhotoUrl = $players[$side]['photo_url'] ?? null;
                                                             if ($localUser && $localUser->hasMedia('player_photos')) {
                                                                 $playerPhotoUrl = $localUser->getFirstMediaUrl('player_photos');
