@@ -23,6 +23,7 @@ Zlepšit použitelnost stránky `Admin → Competition Standings`:
 - Akce „Synchronizovat“ používá `CompetitionSyncService`:
   - Pro konkrétní tým volá opakovaně `syncStandingsOnly($url, $season)` nad URL soutěží daného týmu v sezóně.
   - Pro všechny týmy volá `syncAllStandings($season)`.
+- Opraven jmenný prostor pro `Tab` na `Filament\Schemas\Components\Tabs\Tab`, který je vyžadován v aktuální verzi Filamentu.
 
 ## Generátory (Artisan/Filament)
 - V tomto úkolu nebyly použity žádné generátory. Neproběhly žádné interaktivní příkazy.
