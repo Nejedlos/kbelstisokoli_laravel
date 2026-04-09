@@ -109,6 +109,11 @@ class RosterSyncService
                     $user->update(['member_default_team_id' => $config->team_id]);
                 }
 
+                // 3. Synchronizace fotografie (pokud je v DTO)
+                if (!empty($row->values['photo_url'])) {
+                    $this->playerSyncService->syncPhoto($user, $row->values['photo_url']);
+                }
+
                 $importedCount++;
             }
 
@@ -117,7 +122,7 @@ class RosterSyncService
         });
     }
 
-    protected function findOrCreateUserForExternalPlayer(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
+    public function findOrCreateUserForExternalPlayer(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
     {
         // A. Hledat přes ExternalEntityMapping (již dříve spárovaní hráči v libovolné sezóně)
         $mapping = ExternalEntityMapping::where([

@@ -308,12 +308,9 @@ class StatisticSyncService
             return User::findOrFail($mapping->internal_id);
         }
 
-        // Pokud neexistuje, použijeme RosterSyncService (přes reflexi abychom nemuseli duplikovat logiku)
-        $rosterService = app(\App\Services\Stats\Sync\RosterSyncService::class);
-        $method = new \ReflectionMethod($rosterService, 'findOrCreateUserForExternalPlayer');
-        $method->setAccessible(true);
-
-        return $method->invoke($rosterService, $externalId, $name, $config);
+        // Použijeme RosterSyncService pro vytvoření (původně přes reflexi, nyní public)
+        return app(\App\Services\Stats\Sync\RosterSyncService::class)
+            ->findOrCreateUserForExternalPlayer($externalId, $name, $config);
     }
 
     /**

@@ -883,36 +883,70 @@ class ExternalStatsSyncService
      */
     protected function processBestPlayerPhotos(array $bestPlayers, ExternalImportRun $run): void
     {
-        foreach ($bestPlayers as $playerData) {
-            $extId = $playerData['external_id'] ?? null;
-            $photoUrl = $playerData['photo_url'] ?? null;
+        $config = ExternalTeamSeasonConfig::where('team_id', $run->team_id)
+            ->where('season_id', $run->season_id)
+            ->first();
 
-            if (!$extId || !$photoUrl) {
+        if (!$config) {
+            return;
+        }
+
+        // Extrahujeme všechny hráče z kategorizované struktury
+        $playersToProcess = [];
+        foreach ($bestPlayers as $category => $data) {
+            if (!is_array($data)) {
                 continue;
             }
 
-            // Hledáme uživatele podle externího ID (mapování v external_mappings)
-            $user = \App\Models\User::whereHas('externalMappings', function ($q) use ($extId) {
-                $q->where('source_key', 'czbasketball')
-                  ->where('external_id', $extId);
-            })->first();
+            // Varianta 1: Kategorizované (home/away)
+            if (isset($data['home']) && is_array($data['home'])) {
+                $playersToProcess[] = $data['home'];
+            }
+            if (isset($data['away']) && is_array($data['away'])) {
+                $playersToProcess[] = $data['away'];
+            }
 
-            if (!$user) {
-                // Zkusíme najít podle jména, pokud je to náš tým (Kbely)
-                if (str_contains(mb_strtolower($playerData['team'] ?? ''), 'kbely')) {
-                    $nameParts = explode(' ', (string) ($playerData['name'] ?? ''));
-                    if (count($nameParts) >= 2) {
-                        $user = \App\Models\User::where('last_name', 'like', (string) $nameParts[count($nameParts)-1])
-                            ->where('first_name', 'like', (string) $nameParts[0])
-                            ->first();
+            // Varianta 2: Pole hráčů (např. General)
+            if (empty($data['home']) && empty($data['away']) && !isset($data['external_id'])) {
+                foreach ($data as $item) {
+                    if (is_array($item) && isset($item['external_id'])) {
+                        $playersToProcess[] = $item;
                     }
                 }
             }
 
-            if ($user) {
-                // Pokud je to náš hráč, synchronizujeme alespoň tuto fotografii
-                // Hloubková synchronizace detailu (historie atd.) se provádí samostatně
-                $this->playerSyncService->syncPhoto($user, $photoUrl);
+            // Varianta 3: Samotný hráč (pokud by to bylo plocho)
+            if (isset($data['external_id'])) {
+                $playersToProcess[] = $data;
+            }
+        }
+
+        // Odstranění duplicit (podle external_id)
+        $uniquePlayers = [];
+        foreach ($playersToProcess as $p) {
+            if (!empty($p['external_id'])) {
+                $uniquePlayers[$p['external_id']] = $p;
+            }
+        }
+
+        foreach ($uniquePlayers as $extId => $playerData) {
+            $photoUrl = $playerData['photo_url'] ?? null;
+            $name = $playerData['name'] ?? null;
+
+            if (!$photoUrl || !$name) {
+                continue;
+            }
+
+            try {
+                // Zajistíme existenci uživatele (i pro soupeře, vytvoříme ghosta)
+                $user = $this->rosterSyncService->findOrCreateUserForExternalPlayer($extId, $name, $config);
+
+                if ($user) {
+                    // Synchronizujeme fotografii
+                    $this->playerSyncService->syncPhoto($user, $photoUrl);
+                }
+            } catch (\Exception $e) {
+                Log::warning("ExternalStatsSyncService: Nepodařilo se zpracovat fotografii nejlepšího hráče {$name}: " . $e->getMessage());
             }
         }
     }

@@ -50,8 +50,18 @@ class TeamRosterExtractor implements StatExtractorInterface
                 return;
             }
 
-            // Najdeme odkaz na hráče pro získání ID
+            // Najdeme odkaz na hráče pro získání ID a případnou fotku
             $playerLink = $tr->filter('a[href*="/hrac/"]')->first();
+            $photoImg = $tr->filter('img[src*="/min.php"], img[src*="/watermark/"], .img-fluid, .rounded')->first();
+            $photoUrl = null;
+
+            if ($photoImg->count() > 0) {
+                $photoUrl = $photoImg->attr('src');
+                if ($photoUrl && !str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, 'data:')) {
+                    $photoUrl = 'https://cz.basketball' . (str_starts_with($photoUrl, '/') ? '' : '/') . $photoUrl;
+                }
+            }
+
             $playerId = null;
             $playerName = null;
             $jerseyNumber = null;
@@ -123,6 +133,7 @@ class TeamRosterExtractor implements StatExtractorInterface
                         'weight' => $weight,
                         'birth_year' => $birthYear,
                         'nationality' => $nationality,
+                        'photo_url' => $photoUrl,
                     ]),
                     playerId: $playerId ? (int) $playerId : null,
                     metadata: array_filter([

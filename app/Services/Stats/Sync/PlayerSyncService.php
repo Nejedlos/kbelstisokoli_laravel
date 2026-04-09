@@ -189,7 +189,10 @@ class PlayerSyncService
     public function syncPhoto(User $user, string $photoUrl): void
     {
         try {
-            // Kontrola, zda už fotku v portfoliu nemá
+            // Dekódování HTML entit (často se objevuje &amp; v URL z crawleru)
+            $photoUrl = html_entity_decode($photoUrl);
+
+            // Kontrola, zda už fotku v portfoliu nemá (podle původního URL)
             $alreadyHas = $user->getMedia('player_photos')->contains(function (Media $media) use ($photoUrl) {
                 return $media->getCustomProperty('source_url') === $photoUrl;
             });
@@ -199,6 +202,8 @@ class PlayerSyncService
                 // což MediaLibrary odmítá jako PHP soubor.
                 $fileName = 'player_' . $user->id . '_' . md5($photoUrl) . '.jpg';
 
+                // Pokud je URL z cz.basketball min.php, zkusíme jí dát rozumný User-Agent
+                // a případně ošetřit parametry, pokud by DefaultDownloader selhával.
                 $user->addMediaFromUrl($photoUrl)
                     ->usingFileName($fileName)
                     ->withCustomProperties([
@@ -208,10 +213,10 @@ class PlayerSyncService
                     ])
                     ->toMediaCollection('player_photos');
 
-                Log::info("PlayerSyncService: Added new photo to player {$user->display_name} from {$photoUrl}");
+                Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$photoUrl}");
             }
         } catch (\Exception $e) {
-            Log::warning("PlayerSyncService: Failed to download photo for {$user->display_name}: " . $e->getMessage());
+            Log::warning("PlayerSyncService: Nepodařilo se stáhnout fotografii pro {$user->display_name} ({$photoUrl}): " . $e->getMessage());
         }
     }
 

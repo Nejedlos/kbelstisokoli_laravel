@@ -355,6 +355,31 @@
 
                         @php
                             $bestPlayers = $match->metadata['best_players_external'] ?? $match->metadata['best_players'] ?? [];
+
+                            // Před-načtení lokálních uživatelů pro zobrazení jejich fotografií místo externích URL
+                            $bestPlayerUsers = collect();
+                            if (!empty($bestPlayers)) {
+                                $extIds = [];
+                                foreach ($bestPlayers as $category => $players) {
+                                    if (is_array($players)) {
+                                        foreach (['home', 'away'] as $side) {
+                                            if (!empty($players[$side]['external_id'])) {
+                                                $extIds[] = (string) $players[$side]['external_id'];
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!empty($extIds)) {
+                                    $bestPlayerUsers = \App\Models\User::whereHas('externalMappings', function ($q) use ($extIds) {
+                                            $q->where('source_key', 'czbasketball')->whereIn('external_id', array_unique($extIds));
+                                        })
+                                        ->with(['media', 'externalMappings'])
+                                        ->get()
+                                        ->keyBy(function ($user) {
+                                            return $user->externalMappings->where('source_key', 'czbasketball')->first()->external_id;
+                                        });
+                                }
+                            }
                         @endphp
 
                         @if(!empty($bestPlayers))
@@ -407,6 +432,14 @@
                                                                 $crownClass = 'bg-rose-400';
                                                                 $valColor = 'text-rose-600';
                                                             }
+
+                                                            // Získání lokální fotografie
+                                                            $extId = $players[$side]['external_id'] ?? null;
+                                                            $localUser = $extId ? ($bestPlayerUsers[$extId] ?? null) : null;
+                                                            $playerPhotoUrl = $players[$side]['photo_url'] ?? null;
+                                                            if ($localUser && $localUser->hasMedia('player_photos')) {
+                                                                $playerPhotoUrl = $localUser->getFirstMediaUrl('player_photos');
+                                                            }
                                                         @endphp
                                                         <div class="group relative flex items-center gap-4 p-2 rounded-[2rem] {{ $cardBg }} border-2 transition-all hover:shadow-2xl hover:bg-white hover:-translate-y-1 overflow-hidden">
                                                             @if($sideWinner || ($isOur && !$hasScore))
@@ -415,8 +448,8 @@
 
                                                             <div class="relative flex-shrink-0">
                                                                 <div class="w-16 h-16 rounded-2xl overflow-hidden bg-white shadow-md group-hover:scale-110 transition-transform duration-500 border border-white">
-                                                                    @if(!empty($players[$side]['photo_url']))
-                                                                        <img src="{{ $players[$side]['photo_url'] }}" alt="{{ $players[$side]['name'] }}" class="w-full h-full object-cover">
+                                                                    @if(!empty($playerPhotoUrl))
+                                                                        <img src="{{ $playerPhotoUrl }}" alt="{{ $players[$side]['name'] }}" class="w-full h-full object-cover">
                                                                     @else
                                                                         <div class="w-full h-full flex items-center justify-center text-gray-200">
                                                                             <i class="fa-light fa-user text-3xl"></i>
