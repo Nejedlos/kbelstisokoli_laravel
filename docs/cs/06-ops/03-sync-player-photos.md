@@ -2,15 +2,21 @@
 
 Tento nástroj stáhne a uloží fotografie hráčů bez synchronizace statistik. Umí projít všechny povolené týmy a jejich sezóny z `ExternalTeamSeasonConfig`, případně lze omezit pouze na vybraný tým/sezónu. Respektuje rate‑limit a podporuje přepsání existujících fotek.
 
+**Novinka (v1.3):** Pokud pro zadaný tým a sezónu neexistuje v databázi žádná konfigurace (`ExternalTeamSeasonConfig`), ale tým má v systému mapování pro `czbasketball`, systém se pokusí tuto konfiguraci **automaticky vytvořit** a pokračovat v synchronizaci.
+
 ## Příkaz
 
 ```bash
-php artisan app:sync-player-photos [--team_id=] [--season_id=] [--force] [--delay=] [--per-player-delay-ms=] [--batch-size=] [--matches] -n
+php artisan app:sync-player-photos [team] [season] [--force] [--delay=] [--per-player-delay-ms=] [--batch-size=] [--matches] -n
 ```
 
-### Parametry
-- `--team_id=` – interní ID týmu v aplikaci; pokud není zadáno, projdou se všechny povolené týmy.
-- `--season_id=` – interní ID sezóny; pokud není zadáno, projdou se všechny povolené sezóny týmu.
+### Argumenty (Volitelné)
+- `team` – Slug týmu (např. `muzi-e`) nebo interní ID; pokud není zadáno, projdou se všechny povolené konfigurace.
+- `season` – Název sezóny (např. `2025/2026`) nebo interní ID; pokud není zadáno, projdou se všechny povolené sezóny týmu.
+
+### Parametry (Volitelné)
+- `--team_id=` – *Zastaralé* (použijte argument); interní ID týmu.
+- `--season_id=` – *Zastaralé* (použijte argument); interní ID sezóny.
 - `--force` – stáhne a přepíše fotky i tam, kde už byla tato konkrétní `source_url` uložena.
 - `--delay=` – pauza mezi konfiguracemi tým×sezóna v sekundách (default 1s).
 - `--per-player-delay-ms=` – pauza mezi hráči v milisekundách (default 200ms).

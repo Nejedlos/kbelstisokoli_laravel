@@ -242,14 +242,27 @@ class PlayerSyncService
 
                 foreach ($urlsToTry as $url) {
                     try {
-                        $user->addMediaFromUrl($url)
-                            ->usingFileName($fileName)
-                            ->withCustomProperties($customProperties)
-                            ->toMediaCollection('player_photos');
+                        Log::debug("PlayerSyncService: Zahajuji stahování fotografie pro {$user->display_name} z {$url}");
 
-                        $success = true;
-                        Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$url}");
-                        break;
+                        $response = Http::timeout(12)
+                            ->connectTimeout(5)
+                            ->withHeaders([
+                                'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                            ])
+                            ->get($url);
+
+                        if ($response->successful() && !empty($response->body())) {
+                            $user->addMediaFromString($response->body())
+                                ->usingFileName($fileName)
+                                ->withCustomProperties($customProperties)
+                                ->toMediaCollection('player_photos');
+
+                            $success = true;
+                            Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$url}");
+                            break;
+                        } else {
+                            Log::debug("PlayerSyncService: Pokus o stažení z {$url} selhal (Status: {$response->status()})");
+                        }
                     } catch (\Exception $e) {
                         Log::debug("PlayerSyncService: Pokus o stažení z {$url} selhal: " . $e->getMessage());
                     }
@@ -296,12 +309,25 @@ class PlayerSyncService
                     $customProperties['team_id'] = (int) $context['team_id'];
                 }
 
-                $user->addMediaFromUrl($photoUrl)
-                    ->usingFileName($fileName)
-                    ->withCustomProperties($customProperties)
-                    ->toMediaCollection('player_photos');
+                Log::debug("PlayerSyncService: Zahajuji stahování fotografie pro {$user->display_name} Z DETAILU z {$photoUrl}");
 
-                Log::info("PlayerSyncService: Stažena fotografie hráče {$user->display_name} Z DETAILU (ExtID: {$externalId})");
+                $response = Http::timeout(12)
+                    ->connectTimeout(5)
+                    ->withHeaders([
+                        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                    ])
+                    ->get($photoUrl);
+
+                if ($response->successful() && !empty($response->body())) {
+                    $user->addMediaFromString($response->body())
+                        ->usingFileName($fileName)
+                        ->withCustomProperties($customProperties)
+                        ->toMediaCollection('player_photos');
+
+                    Log::info("PlayerSyncService: Stažena fotografie hráče {$user->display_name} Z DETAILU (ExtID: {$externalId})");
+                } else {
+                    Log::debug("PlayerSyncService: Pokus o stažení fotky hráče {$user->display_name} z detailu selhal (Status: {$response->status()})");
+                }
             }
         } catch (\Exception $e) {
             Log::debug("PlayerSyncService: Selhal pokus o dotažení fotky hráče {$user->display_name} z detailu: " . $e->getMessage());
@@ -342,9 +368,11 @@ class PlayerSyncService
                 $success = false;
 
                 foreach ($urlsToTry as $url) {
-                    $response = Http::withHeaders([
-                        "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                    ])->get($url);
+                    $response = Http::timeout(12)
+                        ->connectTimeout(5)
+                        ->withHeaders([
+                            "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        ])->get($url);
 
                     if ($response->successful()) {
                         Storage::disk($diskName)->put($path, $response->body());
@@ -384,9 +412,11 @@ class PlayerSyncService
                 $baseDir = config("filesystems.uploads.dir", "uploads");
                 $path = $baseDir . "/opponents/" . $externalId . ".jpg";
 
-                $response = Http::withHeaders([
-                    "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                ])->get($photoUrl);
+                $response = Http::timeout(12)
+                    ->connectTimeout(5)
+                    ->withHeaders([
+                        "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    ])->get($photoUrl);
 
                 if ($response->successful()) {
                     Storage::disk($diskName)->put($path, $response->body());

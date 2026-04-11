@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\ExternalImportRun;
 use App\Models\Season;
+use App\Models\Team;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use App\Services\Stats\Extractors\CzBasketball\PlayerDetailExtractor;
@@ -21,8 +22,10 @@ class AppSyncPlayerPhotosCommand extends Command
      * @var string
      */
     protected $signature = 'app:sync-player-photos
-                            {--team_id= : Synchronizovat pouze konkrétní tým (interní ID)}
-                            {--season_id= : Synchronizovat pouze konkrétní sezónu (interní ID)}
+                            {team? : Slug týmu (např. muzi-e) nebo interní ID}
+                            {season? : Název sezóny (např. 2025/2026) nebo interní ID}
+                            {--team_id= : Synchronizovat pouze konkrétní tým (interní ID) - DEPRECATED: použijte argument}
+                            {--season_id= : Synchronizovat pouze konkrétní sezónu (interní ID) - DEPRECATED: použijte argument}
                             {--force : Vynutit stažení i pokud už fotka existuje}
                             {--delay=1 : Pauza mezi týmy v sekundách}
                             {--per-player-delay-ms=200 : Pauza mezi hráči v milisekundách}
@@ -46,33 +49,96 @@ class AppSyncPlayerPhotosCommand extends Command
         RosterSyncService $rosterSyncService,
         StatFetcherInterface $fetcher
     ) {
-        $query = ExternalTeamSeasonConfig::query()->where('is_enabled', true);
+        $teamInput = $this->argument('team') ?? $this->option('team_id');
+        $seasonInput = $this->argument('season') ?? $this->option('season_id');
 
-        if ($teamId = $this->option('team_id')) {
-            $query->where('team_id', $teamId);
+        $query = ExternalTeamSeasonConfig::query();
+
+        $team = null;
+        $season = null;
+
+        if ($teamInput) {
+            $team = Team::where('id', $teamInput)->orWhere('slug', $teamInput)->first();
+            if ($team) {
+                $query->where('team_id', $team->id);
+            } else {
+                $this->error("Tým '{$teamInput}' nebyl nalezen.");
+                return 0;
+            }
         }
 
-        if ($seasonId = $this->option('season_id')) {
-            $query->where('season_id', $seasonId);
+        if ($seasonInput) {
+            $season = Season::where('id', $seasonInput)->orWhere('name', $seasonInput)->first();
+            if ($season) {
+                $query->where('season_id', $season->id);
+            } else {
+                $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
+                return 0;
+            }
         }
 
-        if ($limit = $this->option('batch-size')) {
-            $query->limit((int) $limit);
+        if (!$teamInput && !$seasonInput) {
+            $query->where('is_enabled', true);
         }
 
         $configs = $query->with(['team', 'season'])->get();
 
         if ($configs->isEmpty()) {
-            $this->warn('Nenalezeny žádné povolené konfigurace týmů/sezón.');
-            return 0;
+            if ($team && $season) {
+                // Pokus o automatickou konfiguraci, pokud máme mapování týmu
+                $this->info("Hledám mapování pro tým {$team->name} a sezónu {$season->name}...");
+                $mapping = $team->externalMappings()->where('source_key', 'czbasketball')->first();
+
+                if ($mapping && $mapping->external_team_id) {
+                    $year = (int) substr($season->name, 0, 4);
+                    if ($year < 2000) {
+                        $year = date('Y');
+                    }
+
+                    $url = "https://cz.basketball/team/{$mapping->external_team_id}?sezona={$year}";
+                    $matchesUrl = "https://cz.basketball/team/{$mapping->external_team_id}/zapasyliste?sezona={$year}";
+
+                    $this->info("Vytvářím automatickou (dočasnou) konfiguraci s URL: {$url}");
+
+                    $config = ExternalTeamSeasonConfig::create([
+                        'source_key' => 'czbasketball',
+                        'team_id' => $team->id,
+                        'season_id' => $season->id,
+                        'external_team_id' => $mapping->external_team_id,
+                        'external_season_year' => $year,
+                        'team_season_url' => $url,
+                        'matches_list_url' => $matchesUrl,
+                        'competition_url' => '',
+                        'competition_label' => '',
+                        'team_name_in_source' => $team->name,
+                        'is_enabled' => true,
+                        'metadata' => [
+                            'auto_created' => true,
+                            'created_at_sync' => now()->toDateTimeString(),
+                        ],
+                    ]);
+
+                    $configs = collect([$config->load(['team', 'season'])]);
+                } else {
+                    $this->warn('Nenalezeny žádné povolené konfigurace týmů/sezón a ani mapování pro automatické vytvoření.');
+                    return 0;
+                }
+            } else {
+                $this->warn('Nenalezeny žádné povolené konfigurace týmů/sezón.');
+                return 0;
+            }
+        }
+
+        if ($limit = $this->option('batch-size')) {
+            $configs = $configs->take((int) $limit);
         }
 
         $this->info("Zahajuji stahování fotek pro {$configs->count()} konfigurací...");
 
         $mainRun = ExternalImportRun::start(
             'czbasketball',
-            $this->option('season_id') ?? Season::where('is_active', true)->first()?->id ?? 0,
-            $this->option('team_id'),
+            $season?->id ?? $this->option('season_id') ?? Season::where('is_active', true)->first()?->id ?? 0,
+            $team?->id ?? $this->option('team_id'),
             'photo_sync_command',
             null
         );
