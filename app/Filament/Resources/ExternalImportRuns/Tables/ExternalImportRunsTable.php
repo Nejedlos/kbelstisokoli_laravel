@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ExternalImportRuns\Tables;
 
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
@@ -105,6 +106,20 @@ class ExternalImportRunsTable
             ->actions([
                 ViewAction::make()
                     ->url(fn ($record) => "/admin/external-import-runs/{$record->id}"),
+                Action::make('cancel')
+                    ->label(__('admin.resources.external_import_run.actions.cancel'))
+                    ->icon(FilamentIcon::get(AppIcon::CANCEL))
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'running')
+                    ->action(fn ($record) => $record->cancel()),
+                Action::make('markAsStuck')
+                    ->label(__('admin.resources.external_import_run.actions.mark_as_stuck'))
+                    ->icon(FilamentIcon::get(AppIcon::WARNING))
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'running')
+                    ->action(fn ($record) => $record->markAsStuck()),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

@@ -268,6 +268,8 @@ return [
             'actions' => [
                 'copy_error' => 'Kopírovat chybu',
                 'copied' => 'Zkopírováno!',
+                'cancel' => 'Zrušit běh',
+                'mark_as_stuck' => 'Označit jako zaseknuté',
             ],
         ],
         'external_team_mapping' => [

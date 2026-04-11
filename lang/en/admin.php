@@ -114,6 +114,8 @@ return [
             'actions' => [
                 'copy_error' => 'Copy error',
                 'copied' => 'Copied!',
+                'cancel' => 'Cancel run',
+                'mark_as_stuck' => 'Mark as stuck',
             ],
         ],
         'external_entity_mapping' => [
