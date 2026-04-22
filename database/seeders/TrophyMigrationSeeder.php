@@ -33,7 +33,7 @@ class TrophyMigrationSeeder extends Seeder
         $entries = ClubCompetitionEntry::all();
 
         try {
-            $oldTrophies = DB::connection('old_mysql')->table($oldDb.'.web_trophy')->get();
+            $oldTrophies = DB::connection('old_mysql')->table('web_trophy')->get();
 
             foreach ($oldTrophies as $ot) {
                 // Odhad sezóny podle data

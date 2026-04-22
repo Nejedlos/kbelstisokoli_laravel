@@ -48,7 +48,7 @@ class EventMigrationSeeder extends Seeder
         $this->command->info('Načítám zápasy a tréninky ze staré DB...');
 
         try {
-            $oldEvents = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.zapasy')->get();
+            $oldEvents = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('zapasy')->get();
             $seasons = \App\Models\Season::all()->keyBy('name');
             $teamC = \App\Models\Team::where('slug', 'muzi-c')->first();
             $teamE = \App\Models\Team::where('slug', 'muzi-e')->first();

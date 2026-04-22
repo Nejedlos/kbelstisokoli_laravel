@@ -63,6 +63,10 @@ class RecomputeEloRatings extends Command
             $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
             $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);
 
+            if (!$oppKey) {
+                continue;
+            }
+
             if (!isset($eloRatings[$seasonId][$teamKey])) {
                 $eloRatings[$seasonId][$teamKey] = TeamEloRating::where('season_id', $seasonId)->where('team_key', $teamKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
             }

@@ -52,8 +52,8 @@ class MemberMigrationSeeder extends Seeder
 
         // Načtení dat ze staré databáze
         try {
-            $registrace = DB::connection('old_mysql')->table($oldDb.'.registrace')->get();
-            $soupiska = DB::connection('old_mysql')->table($oldDb.'.web_soupiska')->get()->keyBy(function ($item) {
+            $registrace = DB::connection('old_mysql')->table('registrace')->get();
+            $soupiska = DB::connection('old_mysql')->table('web_soupiska')->get()->keyBy(function ($item) {
                 return trim($item->jmeno);
             });
             // Načtení existujících uživatelů do paměti pro zamezení JSON dotazům

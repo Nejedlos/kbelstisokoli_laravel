@@ -26,14 +26,12 @@ class SeasonMigrationSeeder extends Seeder
 
             $tables = ['zapasy', 'dochazka', 'web_realna_dochazka', 'web_platici'];
             foreach ($tables as $table) {
-                if (\Illuminate\Support\Facades\Schema::hasTable($oldDb.'.'.$table)) {
-                    $names = \Illuminate\Support\Facades\DB::table($oldDb.'.'.$table)
-                        ->select('sezona')
-                        ->distinct()
-                        ->pluck('sezona')
-                        ->filter();
-                    $seasons = $seasons->merge($names);
-                }
+                $names = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($table)
+                    ->select('sezona')
+                    ->distinct()
+                    ->pluck('sezona')
+                    ->filter();
+                $seasons = $seasons->merge($names);
             }
 
             $uniqueSeasons = $seasons->unique()->sort()->values();

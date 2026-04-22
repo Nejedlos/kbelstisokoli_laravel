@@ -23,7 +23,7 @@ class FineTemplateSeeder extends Seeder
         $this->command->info('Migruji šablony pokut ze staré DB...');
 
         try {
-            $oldFineTypes = DB::connection('old_mysql')->table($oldDb.'.web_vypocty_pokuty')->get();
+            $oldFineTypes = DB::connection('old_mysql')->table('web_vypocty_pokuty')->get();
 
             $existingAll = FineTemplate::all();
 

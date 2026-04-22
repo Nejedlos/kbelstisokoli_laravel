@@ -52,17 +52,23 @@ class AttendanceMigrationSeeder extends Seeder
                 return $legacyId ? [(int) $legacyId => $training] : [];
             });
 
+            $clubEvents = \App\Models\ClubEvent::all()->mapWithKeys(function ($event) {
+                $legacyId = $event->metadata['legacy_z_id'] ?? null;
+
+                return $legacyId ? [(int) $legacyId => $event] : [];
+            });
+
             // 2.5 Mapování plátců (pro reálnou docházku)
-            $platiciToRid = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')
+            $platiciToRid = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_platici')
                 ->select('id', 'r_id')
                 ->get()
                 ->pluck('r_id', 'id');
 
             // 3. Migrace docházky (tabulka dochazka)
-            $this->migrateRsvp($oldDb, $usersById, $matches, $trainings);
+            $this->migrateRsvp($oldDb, $usersById, $matches, $trainings, $clubEvents);
 
             // 4. Migrace reality (tabulka web_realna_dochazka)
-            $this->migrateActualAttendance($oldDb, $usersById, $usersByName, $matches, $trainings, $platiciToRid);
+            $this->migrateActualAttendance($oldDb, $usersById, $usersByName, $matches, $trainings, $clubEvents, $platiciToRid);
 
             $this->command->info('Migrace docházky dokončena.');
 
@@ -72,10 +78,10 @@ class AttendanceMigrationSeeder extends Seeder
         }
     }
 
-    protected function migrateRsvp($oldDb, $usersById, $matches, $trainings)
+    protected function migrateRsvp($oldDb, $usersById, $matches, $trainings, $clubEvents)
     {
         $this->command->info('Migruji docházku (plánovanou)...');
-        $query = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.dochazka');
+        $query = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('dochazka');
         $total = $query->count();
 
         $bar = $this->command->getOutput()->createProgressBar($total);
@@ -83,7 +89,7 @@ class AttendanceMigrationSeeder extends Seeder
 
         \Illuminate\Support\Facades\DB::disableQueryLog();
 
-        $query->orderBy('id')->chunk(1000, function ($rsvps) use ($usersById, $matches, $trainings, $bar) {
+        $query->orderBy('id')->chunk(1000, function ($rsvps) use ($usersById, $matches, $trainings, $clubEvents, $bar) {
             $batch = [];
             $now = now();
 
@@ -95,7 +101,7 @@ class AttendanceMigrationSeeder extends Seeder
                     continue;
                 }
 
-                $event = $matches->get($rsvp->id_zap) ?: $trainings->get($rsvp->id_zap);
+                $event = $matches->get($rsvp->id_zap) ?: ($trainings->get($rsvp->id_zap) ?: $clubEvents->get($rsvp->id_zap));
                 if (! $event) {
                     $bar->advance();
 
@@ -127,9 +133,13 @@ class AttendanceMigrationSeeder extends Seeder
 
             if (! empty($batch)) {
                 try {
-                    \Illuminate\Support\Facades\DB::table('attendances')->insertOrIgnore($batch);
+                    \Illuminate\Support\Facades\DB::table('attendances')->upsert(
+                        $batch,
+                        ['user_id', 'attendable_id', 'attendable_type'],
+                        ['planned_status', 'note', 'responded_at', 'updated_at']
+                    );
                 } catch (\Exception $e) {
-                    $this->command->error('Chyba při insertu dávky: '.$e->getMessage());
+                    $this->command->error('Chyba při upsertu dávky: '.$e->getMessage());
                 }
             }
 
@@ -141,16 +151,16 @@ class AttendanceMigrationSeeder extends Seeder
         $this->command->info('');
     }
 
-    protected function migrateActualAttendance($oldDb, $usersById, $usersByName, $matches, $trainings, $platiciToRid)
+    protected function migrateActualAttendance($oldDb, $usersById, $usersByName, $matches, $trainings, $clubEvents, $platiciToRid)
     {
         $this->command->info('Migruji reálnou docházku (zápisy trenéra)...');
-        $oldActual = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_realna_dochazka')->get();
+        $oldActual = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_realna_dochazka')->get();
 
         $bar = $this->command->getOutput()->createProgressBar($oldActual->count());
         $bar->start();
 
         foreach ($oldActual as $actual) {
-            $event = $matches->get($actual->zap_id) ?: $trainings->get($actual->zap_id);
+            $event = $matches->get($actual->zap_id) ?: ($trainings->get($actual->zap_id) ?: $clubEvents->get($actual->zap_id));
             if (! $event) {
                 $bar->advance();
 

@@ -35,8 +35,12 @@ class TeamEloRating extends Model
     /**
      * Get team key for opponent.
      */
-    public static function getOpponentKey(int $opponentId): string
+    public static function getOpponentKey(?int $opponentId): ?string
     {
+        if ($opponentId === null) {
+            return null;
+        }
+
         return "opp_{$opponentId}";
     }
 }

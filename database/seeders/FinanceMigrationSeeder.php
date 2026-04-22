@@ -86,7 +86,7 @@ class FinanceMigrationSeeder extends Seeder
     protected function migrateTariffs($oldDb)
     {
         $this->command->info('Migruji finanční tarify...');
-        $oldTariffs = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_vypocty_platby')->get();
+        $oldTariffs = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_vypocty_platby')->get();
 
         $existingAll = \App\Models\FinancialTariff::all();
 
@@ -112,7 +112,7 @@ class FinanceMigrationSeeder extends Seeder
     protected function migrateUserSeasonConfigs($oldDb, $usersByLegacyId, $seasonsByName, $tariffsByLegacyId)
     {
         $this->command->info('Migruji sezónní konfigurace uživatelů...');
-        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')->get();
+        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_platici')->get();
 
         foreach ($payers as $payer) {
             $user = $usersByLegacyId->get($payer->r_id);
@@ -200,10 +200,10 @@ class FinanceMigrationSeeder extends Seeder
     protected function migrateFines($oldDb, $usersByLegacyId, $fineTemplatesByLegacyId = null)
     {
         $this->command->info('Vytvářím předpisy z pokut...');
-        $fines = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_pokuty')->get();
+        $fines = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_pokuty')->get();
 
         // Potřebujeme propojit p_id zpět na uživatele přes web_platici
-        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')->get()->keyBy('id');
+        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_platici')->get()->keyBy('id');
 
         $existingFines = \App\Models\FinanceCharge::where('charge_type', 'fine')
             ->get()
@@ -260,8 +260,8 @@ class FinanceMigrationSeeder extends Seeder
     protected function migratePayments($oldDb, $usersByLegacyId)
     {
         $this->command->info('Migruji skutečné platby...');
-        $payments = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platby')->get();
-        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($oldDb.'.web_platici')->get()->keyBy('id');
+        $payments = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_platby')->get();
+        $payers = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_platici')->get()->keyBy('id');
 
         $existingPayments = \App\Models\FinancePayment::all()->keyBy(fn ($p) => $p->metadata['legacy_pay_id'] ?? null)->forget(null);
 

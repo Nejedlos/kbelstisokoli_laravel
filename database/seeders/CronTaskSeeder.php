@@ -124,6 +124,13 @@ class CronTaskSeeder extends Seeder
                 'description' => 'Promaže staré záznamy v Laravel Telescope (ponechá posledních 24 hodin).',
                 'priority' => -15,
             ],
+            [
+                'name' => 'Synchronizace z legacy systému (docházka, zápasy, tréninky)',
+                'command' => 'app:attendance:sync',
+                'expression' => '*/30 * * * *', // Každých 30 minut
+                'description' => 'Synchronizuje nově přidané zápasy, tréninky a změny v docházce ze starého webu.',
+                'priority' => 15,
+            ],
         ];
 
         foreach ($tasks as $task) {
