@@ -5,6 +5,7 @@ return [
     'public' => [
         ['title' => 'nav.home', 'route' => 'public.home'],
         ['title' => 'nav.teams', 'route' => 'public.teams.index'],
+        ['title' => 'nav.roster', 'route' => 'public.teams.roster'],
         [
             'title' => 'nav.program',
             'children' => [

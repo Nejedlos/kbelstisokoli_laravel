@@ -121,6 +121,7 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
 
     // Týmy (plural hlavní přehled)
     Route::get('/tymy', [TeamController::class, 'index'])->name('teams.index');
+    Route::get('/tymy/soupisky', [TeamController::class, 'roster'])->name('teams.roster');
     Route::get('/tymy/{slug}', [TeamController::class, 'show'])->name('teams.show');
 
     // Zpětná kompatibilita: /tym -> 301 redirect na /tymy

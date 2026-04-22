@@ -10,6 +10,12 @@ return [
     'other_title' => 'Others',
     'view_detail' => 'View team detail',
     'roster' => 'Go to roster',
+    'roster_title' => 'Team Rosters',
+    'roster_subtitle' => 'Players on the official roster for the current season.',
+    'roster_breadcrumbs' => 'Rosters',
+    'roster_player_name' => 'Player',
+    'roster_player_number' => 'Number',
+    'roster_player_position' => 'Position',
     'empty' => 'No teams yet. We are currently preparing rosters for the new season.',
     'breadcrumbs' => 'Teams',
 

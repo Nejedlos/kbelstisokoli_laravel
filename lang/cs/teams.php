@@ -10,6 +10,12 @@ return [
     'other_title' => 'Ostatní',
     'view_detail' => 'Zobrazit detail týmu',
     'roster' => 'Přejít na soupisku',
+    'roster_title' => 'Soupisky týmů',
+    'roster_subtitle' => 'Hráči na oficiální soupisce pro aktuální sezónu.',
+    'roster_breadcrumbs' => 'Soupisky',
+    'roster_player_name' => 'Hráč',
+    'roster_player_number' => 'Číslo',
+    'roster_player_position' => 'Pozice',
     'empty' => 'Zatím žádné týmy. Aktuálně připravujeme soupisky pro novou sezónu.',
     'breadcrumbs' => 'Týmy',
 
