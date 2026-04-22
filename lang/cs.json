@@ -198,5 +198,9 @@
     "search.ai_tips.omluva": "Omluva z tréninku",
     "search.ai_tips.zapas": "Další zápas",
     "search.ai_tips.platba": "QR kód k platbě",
-    "search.ai_tips.heslo": "Změna hesla"
+    "search.ai_tips.heslo": "Změna hesla",
+    "ai.resource.member.resource": "Členská sekce",
+    "ai.resource.admin.resource": "Administrace",
+    "ai.resource.documentation.resource": "Dokumentace",
+    "ai.resource.frontend.resource": "Veřejný web"
 }

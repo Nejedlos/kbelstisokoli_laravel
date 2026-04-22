@@ -150,11 +150,19 @@ class AiSearchService
             ? 'Následuje lokální kontext ze stránek projektu (výběr nejrelevantnějších úryvků):'
             : 'Below is the local context from the project pages (selected relevant snippets):';
 
-        $chunks = $sources->map(function ($doc, $i) {
+        $chunks = $sources->map(function ($doc, $i) use ($locale) {
+            $typeLabel = match ($doc->type) {
+                'member.resource' => $locale === 'cs' ? 'Členská sekce' : 'Member Section',
+                'admin.resource' => $locale === 'cs' ? 'Administrace' : 'Administration',
+                'documentation.resource' => $locale === 'cs' ? 'Dokumentace' : 'Documentation',
+                'frontend.resource' => $locale === 'cs' ? 'Veřejný web' : 'Public Web',
+                default => $doc->type,
+            };
+
             $snippet = $doc->summary ? 'Shrnutí: '.$doc->summary."\nObsah: ".Str::limit($doc->content, 600) : Str::limit($doc->content, 800);
             $urlInfo = $doc->url ? ' (URL: '.$doc->url.')' : '';
 
-            return ($i + 1).') ['.$doc->type.'] '.$doc->title.$urlInfo."\n".$snippet;
+            return ($i + 1).') ['.$typeLabel.'] '.$doc->title.$urlInfo."\n".$snippet;
         })->implode("\n\n");
 
         return $intro."\n\n".$chunks;

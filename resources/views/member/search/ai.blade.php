@@ -1,6 +1,26 @@
 @extends('layouts.member')
 
 @section('content')
+@php
+    $typeMapping = [
+        'member.resource' => [
+            'label' => __('ai.resource.member.resource'),
+            'icon' => 'fa-user-group',
+        ],
+        'admin.resource' => [
+            'label' => __('ai.resource.admin.resource'),
+            'icon' => 'fa-gear',
+        ],
+        'documentation.resource' => [
+            'label' => __('ai.resource.documentation.resource'),
+            'icon' => 'fa-book',
+        ],
+        'frontend.resource' => [
+            'label' => __('ai.resource.frontend.resource'),
+            'icon' => 'fa-globe',
+        ],
+    ];
+@endphp
 <div class="container-fluid px-4 py-8">
     <div class="max-w-4xl mx-auto">
         <header class="mb-8">
@@ -55,16 +75,22 @@
                     @else
                         <ul class="grid gap-2">
                             @foreach($sources as $doc)
+                                @php
+                                    $mapped = $typeMapping[$doc->type] ?? [
+                                        'label' => $doc->type,
+                                        'icon' => 'fa-file-lines',
+                                    ];
+                                @endphp
                                 <li class="flex items-start gap-3 bg-white rounded-lg p-3 border border-slate-100">
                                     <div class="w-7 h-7 rounded bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
-                                        <i class="fa-light fa-file-lines text-[13px]"></i>
+                                        <i class="fa-light {{ $mapped['icon'] }} text-[13px]"></i>
                                     </div>
                                     <div class="min-w-0">
                                         <div class="text-[12px] font-bold text-slate-800">
                                             {{ $doc->title }}
                                         </div>
                                         <div class="text-[10px] text-slate-400 uppercase font-black">
-                                            {{ $doc->type }}
+                                            {{ $mapped['label'] }}
                                         </div>
                                         @if($doc->url)
                                             <a href="{{ $doc->url }}" class="mt-1 inline-flex items-center text-[10px] text-primary font-bold hover:underline">

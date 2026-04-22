@@ -223,5 +223,9 @@
     "Historie": "History",
     "Galerie": "Gallery",
     "Nábor": "Recruitment",
-    "Partneři": "Partners"
+    "Partneři": "Partners",
+    "ai.resource.member.resource": "Member Section",
+    "ai.resource.admin.resource": "Administration",
+    "ai.resource.documentation.resource": "Documentation",
+    "ai.resource.frontend.resource": "Public Web"
 }
