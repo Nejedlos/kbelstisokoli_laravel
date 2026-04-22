@@ -126,9 +126,9 @@ class CronTaskSeeder extends Seeder
             ],
             [
                 'name' => 'Synchronizace z legacy systému (docházka, zápasy, tréninky)',
-                'command' => 'app:attendance:sync',
-                'expression' => '*/30 * * * *', // Každých 30 minut
-                'description' => 'Synchronizuje nově přidané zápasy, tréninky a změny v docházce ze starého webu.',
+                'command' => 'app:legacy:sync',
+                'expression' => '*/15 * * * *', // Každých 15 minut
+                'description' => 'Pravidelná synchronizace zápasů, tréninků a změn v docházce ze starého webu.',
                 'priority' => 15,
             ],
         ];

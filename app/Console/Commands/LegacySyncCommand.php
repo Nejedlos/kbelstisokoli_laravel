@@ -14,14 +14,15 @@ class LegacySyncCommand extends Command
      */
     protected $signature = 'app:legacy:sync
                             {--fresh : Před importem vymaže data v cílových tabulkách (mimo uživatelů, pokud není řečeno jinak)}
-                            {--users : Povolí synchronizaci uživatelských účtů (ve výchozím stavu vypnuto)}';
+                            {--users : Povolí synchronizaci uživatelských účtů (ve výchozím stavu vypnuto)}
+                            {--all : Spustí kompletní synchronizaci včetně členů a financí}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Import dat z původní (legacy) databáze do nového systému.';
+    protected $description = 'Import dat z původní (legacy) databáze do nového systému (ve výchozím stavu pouze zápasy a docházka).';
 
     /**
      * Execute the console command.
@@ -30,8 +31,13 @@ class LegacySyncCommand extends Command
     {
         $fresh = $this->option('fresh');
         $users = $this->option('users');
+        $all = $this->option('all');
 
         $this->info('Spouštím synchronizaci dat z legacy systému...');
+
+        if ($all) {
+            $this->warn('Režim ALL: Bude provedena kompletní synchronizace včetně členů a financí.');
+        }
 
         if ($fresh) {
             $this->warn('Režim FRESH: Data v cílových tabulkách budou před importem smazána.');
@@ -46,11 +52,18 @@ class LegacySyncCommand extends Command
         config(['app.seed_fresh' => $fresh]);
 
         $seeders = [
-            \Database\Seeders\MemberMigrationSeeder::class,
             \Database\Seeders\EventMigrationSeeder::class,
             \Database\Seeders\AttendanceMigrationSeeder::class,
-            \Database\Seeders\FinanceMigrationSeeder::class,
         ];
+
+        if ($all) {
+            $seeders = [
+                \Database\Seeders\MemberMigrationSeeder::class,
+                \Database\Seeders\EventMigrationSeeder::class,
+                \Database\Seeders\AttendanceMigrationSeeder::class,
+                \Database\Seeders\FinanceMigrationSeeder::class,
+            ];
+        }
 
         foreach ($seeders as $seeder) {
             $this->info("Spouštím seeder: {$seeder}");
