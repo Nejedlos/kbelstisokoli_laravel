@@ -67,8 +67,8 @@
                     </div>
 
                     @if($team->rosterPlayers->isNotEmpty())
-                        <h2 class="text-3xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.roster') }}</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 mb-12">
+                        <h2 class="text-2xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.roster') }}</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-12">
                             @foreach($team->rosterPlayers as $playerProfile)
                                 @php
                                     $user = $playerProfile->user;
@@ -81,37 +81,37 @@
                                                  alt="{{ $user->name }}"
                                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                         @else
-                                            <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 p-8">
-                                                <i class="fa-light fa-user fa-5x mb-4 opacity-20"></i>
-                                                <span class="text-xs uppercase font-bold tracking-widest opacity-40">Photo pending</span>
+                                            <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 p-6">
+                                                <i class="fa-light fa-user fa-3x mb-3 opacity-20"></i>
+                                                <span class="text-[9px] uppercase font-bold tracking-widest opacity-40">Photo pending</span>
                                             </div>
                                         @endif
 
                                         @if($playerProfile->jersey_number)
-                                            <div class="absolute top-4 right-4 w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg border border-slate-100">
-                                                <span class="text-xl font-black text-secondary">#{{ $playerProfile->jersey_number }}</span>
+                                            <div class="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg border border-slate-100">
+                                                <span class="text-base font-black text-secondary">#{{ $playerProfile->jersey_number }}</span>
                                             </div>
                                         @endif
 
                                         @if($playerProfile->position)
-                                            <div class="absolute bottom-4 left-4">
-                                                <span class="badge badge-primary uppercase text-[10px] tracking-widest px-2 py-1 shadow-md">
+                                            <div class="absolute bottom-3 left-3">
+                                                <span class="badge badge-primary uppercase text-[9px] tracking-widest px-2 py-0.5 shadow-md">
                                                     {{ $playerProfile->position->value }}
                                                 </span>
                                             </div>
                                         @endif
                                     </div>
-                                    <div class="p-5 bg-white">
-                                        <h3 class="text-lg font-black uppercase leading-tight group-hover:text-primary transition-colors mb-1">
+                                    <div class="p-4 bg-white">
+                                        <h3 class="text-base font-black uppercase leading-tight group-hover:text-primary transition-colors mb-0.5">
                                             {{ $user->last_name }}
                                         </h3>
-                                        <p class="text-sm font-bold text-slate-500 uppercase tracking-wide">
+                                        <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
                                             {{ $user->first_name }}
                                         </p>
 
                                         @if($playerProfile->height_cm || $playerProfile->position)
-                                            <div class="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between text-[11px] uppercase tracking-wider font-bold text-slate-400">
-                                                <div class="flex items-center gap-1.5">
+                                            <div class="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                                                <div class="flex items-center gap-1">
                                                     <i class="fa-light fa-arrows-up-down text-primary"></i>
                                                     <span>{{ $playerProfile->height_cm ? $playerProfile->height_cm . ' cm' : '---' }}</span>
                                                 </div>
