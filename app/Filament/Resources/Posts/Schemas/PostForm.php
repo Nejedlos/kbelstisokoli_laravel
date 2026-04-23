@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Filament\Forms\CmsForms;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
@@ -16,6 +16,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class PostForm
 {
@@ -25,7 +27,7 @@ class PostForm
             ->components([
                 Tabs::make('Post Tabs')
                     ->tabs([
-                        Tabs\Tab::make('Obsah')
+                        Tab::make('Obsah')
                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAGES))
                             ->schema([
                                 Section::make('Základní informace')
@@ -47,7 +49,7 @@ class PostForm
 
                                 Tabs::make('Language Versions')
                                     ->tabs([
-                                                                Tabs\Tab::make('Čeština')
+                                        Tab::make('Čeština')
                                             ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
                                             ->schema([
                                                 TextInput::make('title.cs')
@@ -66,7 +68,7 @@ class PostForm
                                                     ->columnSpanFull(),
                                             ]),
 
-                                                                Tabs\Tab::make('English')
+                                        Tab::make('English')
                                             ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
                                             ->schema([
                                                 TextInput::make('title.en')
@@ -87,7 +89,7 @@ class PostForm
                                     ]),
                             ]),
 
-                                                Tabs\Tab::make('Publikace a média')
+                        Tab::make('Publikace a média')
                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PHOTO_FILM))
                             ->schema([
                                 Section::make('Stav publikace')
@@ -121,36 +123,55 @@ class PostForm
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
-                                            ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku. Automaticky bude optimalizován a převeden na formát WebP.')
+                                            ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku. Po nahrání bude automaticky zmenšen a článek bude uložen.')
                                             ->collection('featured_image')
-                                            ->disk(config('filesystems.uploads.disk')) // Veřejný prostor pro články
+                                            ->disk('media_public') // Veřejný prostor pro články (konzistentní s modelem Post)
                                             ->image()
-                                            ->webp()
                                             ->imageResizeMode('cover')
                                             ->imageResizeTargetWidth('1920')
                                             ->imageResizeTargetHeight('1080')
-                                            ->extraAttributes([
-                                                'onchange' => "window.dispatchEvent(new CustomEvent('loading-start'))",
-                                            ])
+                                            ->live()
+                                            ->afterStateUpdated(function ($livewire, $state) {
+                                                if ($state && method_exists($livewire, 'save')) {
+                                                    try {
+                                                        $livewire->save();
+                                                    } catch (\Throwable $e) {
+                                                        Log::error('Autosave error: ' . $e->getMessage(), [
+                                                            'exception' => get_class($e),
+                                                            'file' => $e->getFile(),
+                                                            'line' => $e->getLine(),
+                                                        ]);
+                                                        throw $e;
+                                                    }
+                                                }
+                                            })
                                             ->getUploadedFileNameForStorageUsing(function ($file, $get) {
                                                 $title = $get('title');
-                                                $ext = 'webp';
-                                                if ($title && isset($title['cs'])) {
-                                                    return \Illuminate\Support\Str::slug($title['cs']).'.'.$ext;
+                                                $ext = $file->getClientOriginalExtension();
+
+                                                $slugBase = null;
+                                                if (is_array($title) && !empty($title['cs'])) {
+                                                    $slugBase = $title['cs'];
+                                                } elseif (is_string($title) && !empty($title)) {
+                                                    $slugBase = $title;
                                                 }
 
-                                                return \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$ext;
+                                                if ($slugBase) {
+                                                    return Str::slug($slugBase) . '.' . $ext;
+                                                }
+
+                                                return Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
                                             }),
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('SEO')
+                        Tab::make('SEO')
                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SEO))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
-                        Tabs\Tab::make('Vývojář')
+                        Tab::make('Vývojář')
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
                             ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CODE))
                             ->schema([

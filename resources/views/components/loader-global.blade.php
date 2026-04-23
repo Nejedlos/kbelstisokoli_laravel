@@ -56,21 +56,64 @@
         if (typeof window.lastUserInteraction === 'undefined') {
             window.lastUserInteraction = 0;
             ['mousedown', 'keydown', 'submit', 'change', 'click', 'touchstart'].forEach(type => {
-                window.addEventListener(type, () => {
+                window.addEventListener(type, (e) => {
                     window.lastUserInteraction = Date.now();
+
+                    // Okamžité spuštění loaderu při výběru souboru (pokrývá i čas pro client-side resize)
+                    if (type === 'change' && e.target && e.target.type === 'file' && e.target.files && e.target.files.length > 0) {
+                        window.dispatchEvent(new CustomEvent('loading-start'));
+                    }
                 }, true);
+            });
+
+            // Globální zachytávání unhandled promise rejections pro Livewire 3 (zrušené requesty)
+            window.addEventListener('unhandledrejection', event => {
+                const error = event.reason;
+                if (error && typeof error === 'object' && 'status' in error && error.status === null) {
+                    event.preventDefault();
+                }
             });
         }
 
         document.addEventListener('livewire:init', () => {
+            // Zachytávání Livewire 3 upload eventů pro globální loader
+            window.activeUploads = 0;
+            window.lastUploadFinish = 0;
+
+            window.addEventListener('livewire:upload-start', () => {
+                window.activeUploads++;
+                window.dispatchEvent(new CustomEvent('loading-start'));
+            });
+
+            window.addEventListener('livewire:upload-finish', () => {
+                window.activeUploads = Math.max(0, window.activeUploads - 1);
+                window.lastUploadFinish = Date.now();
+
+                // Pokud ještě dobíhají jiné uploady, nic neděláme
+                if (window.activeUploads > 0) return;
+
+                // Malá prodleva před vypnutím loaderu (dává prostor pro následný autosave request)
+                setTimeout(() => {
+                    if (window.activeUploads === 0) {
+                        window.dispatchEvent(new CustomEvent('loading-stop'));
+                    }
+                }, 250);
+            });
+
+            window.addEventListener('livewire:upload-error', () => {
+                window.activeUploads = Math.max(0, window.activeUploads - 1);
+                window.dispatchEvent(new CustomEvent('loading-stop'));
+            });
+
             Livewire.hook('request', ({ respond, succeed, fail, options }) => {
                 // 1. Základní Livewire flagy pro tiché požadavky (včetně pollingu)
                 if (options.method === 'POLL' || options.silent || options.background) {
                     return;
                 }
 
-                // 2. Detekce, zda požadavek vyvolal uživatel nebo jde o navigaci
-                const isUserAction = (Date.now() - window.lastUserInteraction) < 300; // Mírně zvýšený limit pro jistotu
+                // 2. Detekce, zda požadavek vyvolal uživatel, jde o navigaci, nebo následuje po uploadu (autosave)
+                const isAfterUpload = (Date.now() - window.lastUploadFinish) < 1000;
+                const isUserAction = (Date.now() - window.lastUserInteraction) < 300 || isAfterUpload;
                 const isNavigation = !!options.navigate;
 
                 // 3. Pojistka pro specifické background komponenty (např. dropdown notifikací nebo sync bar)
@@ -114,7 +157,9 @@
                 respond(stopLoading);
                 succeed(stopLoading);
                 fail((error) => {
-                    if (error && typeof error === 'object' && 'status' in error && error.status === null && ('body' in error && error.body === null || 'json' in error)) {
+                    const isCancelled = error && typeof error === 'object' && error.status === null;
+
+                    if (isCancelled) {
                         // Suppress background abort errors
                     } else {
                         console.error('[Livewire] Global Loader Error Catch:', error);

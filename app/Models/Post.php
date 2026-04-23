@@ -7,6 +7,8 @@ use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -40,15 +42,21 @@ class Post extends Model implements HasMedia
     {
         // Automatické přejmenování fyzického souboru při změně titulku článku pro SEO
         static::updating(function (Post $post) {
-            if ($post->isDirty('title')) {
-                foreach ($post->getMedia('featured_image') as $media) {
-                    $title = $post->getTranslation('title', 'cs') ?: $post->title;
-                    $newFileName = \Illuminate\Support\Str::slug($title).'.webp';
-                    if ($media->file_name !== $newFileName) {
-                        $media->file_name = $newFileName;
-                        $media->save();
+            try {
+                if ($post->isDirty('title')) {
+                    foreach ($post->getMedia('featured_image') as $media) {
+                        $title = $post->getTranslation('title', 'cs') ?: $post->title;
+                        if (empty($title)) continue;
+
+                        $newFileName = Str::slug($title).'.'.$media->extension;
+                        if ($media->file_name !== $newFileName) {
+                            $media->file_name = $newFileName;
+                            $media->save();
+                        }
                     }
                 }
+            } catch (\Throwable $e) {
+                Log::error('Post model updating hook error: ' . $e->getMessage());
             }
         });
     }

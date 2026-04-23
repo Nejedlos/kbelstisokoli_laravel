@@ -99,8 +99,8 @@ class BrandingService
                 'email' => $dbSettings['contact_email'] ?? null,
             ],
             'maintenance_mode' => filter_var($dbSettings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            'maintenance_title' => $dbSettings['maintenance_title'] ?? __('Trenér právě kreslí vítěznou taktiku pro náš nový web.'),
-            'maintenance_text' => $dbSettings['maintenance_text'] ?? __('Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!'),
+            'maintenance_title' => $dbSettings['maintenance_title'] ?? 'Trenér právě kreslí vítěznou taktiku pro náš nový web.',
+            'maintenance_text' => $dbSettings['maintenance_text'] ?? 'Vzali jsme si oddechový čas, abychom do nového webu dostali všechny ty smeče a trojky, které si zasloužíte. Dejte nám chvilku na střídačce, brzy se vrátíme do hry v plné sestavě!',
             'admin_contact' => [
                 'email' => $dbSettings['admin_contact_email'] ?? null,
                 'name' => $dbSettings['admin_contact_name'] ?? null,
