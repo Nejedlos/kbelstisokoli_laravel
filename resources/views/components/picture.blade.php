@@ -12,12 +12,24 @@
 ])
 
 @php
-    $getImageVariants = function($path) {
+    $appUrl = config('app.url');
+
+    $getImageVariants = function($path) use ($appUrl) {
         $defaultWebp = 'assets/img/home/basketball-court-detail.webp';
         $defaultJpg = 'assets/img/home/basketball-court-detail.jpg';
 
         if (!$path) {
             return ['webp' => $defaultWebp, 'img' => $defaultJpg];
+        }
+
+        // Pokud jde o absolutní URL, zkusíme ji převést na relativní cestu k public_path
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            if (str_starts_with($path, $appUrl)) {
+                $path = str_replace($appUrl, '', $path);
+            } else {
+                // Pokud směřuje jinam, vracíme ji přímo bez variant
+                return ['webp' => null, 'img' => $path];
+            }
         }
 
         $cleanPath = ltrim($path, '/');
@@ -55,14 +67,24 @@
 
     $mSrc = $mobileSrc;
     if (!$mSrc && $src) {
-        $pi = pathinfo(ltrim($src, '/'));
-        $baseMobile = ($pi['dirname'] !== '.' ? $pi['dirname'] . '/' : '') . $pi['filename'] . '-mobile';
-        // Zkontrolujeme, zda existuje jakákoliv verze mobilního obrázku
-        if (file_exists(public_path($baseMobile . '.webp')) ||
-            file_exists(public_path($baseMobile . '.jpg')) ||
-            file_exists(public_path($baseMobile . '.jpeg')) ||
-            (isset($pi['extension']) && file_exists(public_path($baseMobile . '.' . $pi['extension'])))) {
-            $mSrc = $baseMobile . '.' . ($pi['extension'] ?? 'jpg');
+        // Normalizujeme src pro výpočet mobileSrc
+        $normalizedSrc = $src;
+        if (str_starts_with($normalizedSrc, 'http://') || str_starts_with($normalizedSrc, 'https://')) {
+            if (str_starts_with($normalizedSrc, $appUrl)) {
+                $normalizedSrc = str_replace($appUrl, '', $normalizedSrc);
+            }
+        }
+
+        if (!str_starts_with($normalizedSrc, 'http')) {
+            $pi = pathinfo(ltrim($normalizedSrc, '/'));
+            $baseMobile = ($pi['dirname'] !== '.' ? $pi['dirname'] . '/' : '') . ($pi['filename'] ?? '') . '-mobile';
+            // Zkontrolujeme, zda existuje jakákoliv verze mobilního obrázku
+            if (file_exists(public_path($baseMobile . '.webp')) ||
+                file_exists(public_path($baseMobile . '.jpg')) ||
+                file_exists(public_path($baseMobile . '.jpeg')) ||
+                (isset($pi['extension']) && file_exists(public_path($baseMobile . '.' . $pi['extension'])))) {
+                $mSrc = $baseMobile . '.' . ($pi['extension'] ?? 'jpg');
+            }
         }
     }
 
