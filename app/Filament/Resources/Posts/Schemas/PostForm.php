@@ -121,15 +121,22 @@ class PostForm
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
-                                            ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku.')
+                                            ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku. Automaticky bude optimalizován a převeden na formát WebP.')
                                             ->collection('featured_image')
                                             ->disk(config('filesystems.uploads.disk')) // Veřejný prostor pro články
                                             ->image()
+                                            ->webp()
+                                            ->imageResizeMode('cover')
+                                            ->imageResizeTargetWidth('1920')
+                                            ->imageResizeTargetHeight('1080')
+                                            ->extraAttributes([
+                                                'onchange' => "window.dispatchEvent(new CustomEvent('loading-start'))",
+                                            ])
                                             ->getUploadedFileNameForStorageUsing(function ($file, $get) {
                                                 $title = $get('title');
-                                                $ext = $file->getClientOriginalExtension();
-                                                if ($title) {
-                                                    return \Illuminate\Support\Str::slug($title).'.'.$ext;
+                                                $ext = 'webp';
+                                                if ($title && isset($title['cs'])) {
+                                                    return \Illuminate\Support\Str::slug($title['cs']).'.'.$ext;
                                                 }
 
                                                 return \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$ext;

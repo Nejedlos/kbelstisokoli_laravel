@@ -42,7 +42,8 @@ class Post extends Model implements HasMedia
         static::updating(function (Post $post) {
             if ($post->isDirty('title')) {
                 foreach ($post->getMedia('featured_image') as $media) {
-                    $newFileName = \Illuminate\Support\Str::slug($post->title).'.'.$media->extension;
+                    $title = $post->getTranslation('title', 'cs') ?: $post->title;
+                    $newFileName = \Illuminate\Support\Str::slug($title).'.webp';
                     if ($media->file_name !== $newFileName) {
                         $media->file_name = $newFileName;
                         $media->save();
