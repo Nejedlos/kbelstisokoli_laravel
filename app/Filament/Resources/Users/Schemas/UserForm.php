@@ -529,6 +529,8 @@ class UserForm
                                             ->multiple()
                                             ->reorderable()
                                             ->imageEditor()
+                                            ->maxSize(102400) // 100MB
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
                                             ->hiddenLabel()
                                             ->disk(config('filesystems.uploads.disk'))
                                             ->helperText(__('user.sections.player_photos_hint'))

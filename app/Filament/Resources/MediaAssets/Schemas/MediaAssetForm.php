@@ -25,7 +25,7 @@ class MediaAssetForm
                             ->label('Nahrát soubor')
                             ->collection('default')
                             ->acceptedFileTypes(['image/*', 'application/pdf'])
-                            ->maxSize(10240) // 10MB limit
+                            ->maxSize(102400) // 100MB limit
                             // Dynamický disk podle úrovně přístupu
                             ->disk(fn ($get) => $get('access_level') === 'public' ? config('filesystems.uploads.disk') : 'media_private')
                             // Čištění názvu souboru při nahrávání

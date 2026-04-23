@@ -123,28 +123,13 @@ class PostForm
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
-                                            ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku. Po nahrání bude automaticky zmenšen a článek bude uložen.')
+                                            ->helperText('Tento obrázek se zobrazí v seznamu novinek a v záhlaví článku. Optimalizace proběhne automaticky po uložení celého formuláře.')
                                             ->collection('featured_image')
                                             ->disk('media_public') // Veřejný prostor pro články (konzistentní s modelem Post)
                                             ->image()
-                                            ->imageResizeMode('cover')
-                                            ->imageResizeTargetWidth('1920')
-                                            ->imageResizeTargetHeight('1080')
-                                            ->live()
-                                            ->afterStateUpdated(function ($livewire, $state) {
-                                                if ($state && method_exists($livewire, 'save')) {
-                                                    try {
-                                                        $livewire->save();
-                                                    } catch (\Throwable $e) {
-                                                        Log::error('Autosave error: ' . $e->getMessage(), [
-                                                            'exception' => get_class($e),
-                                                            'file' => $e->getFile(),
-                                                            'line' => $e->getLine(),
-                                                        ]);
-                                                        throw $e;
-                                                    }
-                                                }
-                                            })
+                                            ->maxSize(102400) // 100MB
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
+                                            ->responsiveImages()
                                             ->getUploadedFileNameForStorageUsing(function ($file, $get) {
                                                 $title = $get('title');
                                                 $ext = $file->getClientOriginalExtension();

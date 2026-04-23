@@ -86,6 +86,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Zvýšení paměťového limitu pro administrativu (zpracování velkých obrázků)
+        if (request()->is('admin*')) {
+            @ini_set('memory_limit', '512M');
+        }
+
         // Fix pro Webglobe: potlačení notice o tempnam fallbacku, která shazuje aplikaci na produkci
         // Tento handler registrujeme v boot() metodě, aby byl co nejvíce robustní a přežil Laravel bootstrap
         $previousHandler = set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$previousHandler) {

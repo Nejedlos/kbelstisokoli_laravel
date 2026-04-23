@@ -2,12 +2,7 @@
 @php
     $news = \App\Models\Post::where('is_visible', true)
         ->where('status', 'published')
-        ->where(function ($query) {
-            $query->whereNull('publish_at')
-                ->orWhere('publish_at', '<=', now());
-        })
-        ->orderBy('publish_at', 'desc')
-        ->orderBy('created_at', 'desc')
+        ->orderByRaw('COALESCE(publish_at, created_at) DESC')
         ->take($data['limit'] ?? 3)
         ->get();
 @endphp

@@ -68,7 +68,8 @@ class Post extends Model implements HasMedia
     {
         $this->addMediaCollection('featured_image')
             ->useDisk('media_public') // Obrázky článků jsou veřejné
-            ->singleFile();
+            ->singleFile()
+            ->withResponsiveImages();
     }
 
     /**
@@ -80,13 +81,22 @@ class Post extends Model implements HasMedia
             ->width(400)
             ->height(300)
             ->format('webp')
-            ->sharpen(10);
+            ->sharpen(10)
+            ->nonQueued();
 
         $this->addMediaConversion('large')
             ->width(1200)
             ->height(800)
             ->format('webp')
-            ->sharpen(10);
+            ->sharpen(10)
+            ->nonQueued();
+
+        $this->addMediaConversion('optimized')
+            ->width(1920)
+            ->height(1080)
+            ->format('jpg')
+            ->quality(80)
+            ->nonQueued();
     }
 
     /**
