@@ -64,6 +64,13 @@
             }, true);
         });
 
+        // Tlumení tichých Livewire chyb (zrušené požadavky)
+        window.addEventListener('unhandledrejection', event => {
+            if (event.reason && typeof event.reason === 'object' && event.reason.status === null) {
+                event.preventDefault();
+            }
+        });
+
         // Livewire integration
         document.addEventListener('livewire:init', () => {
             window.activeUploads = 0;
