@@ -25,14 +25,18 @@ foreach ($usersWithPhotos as $user) {
     $mediaItems = $user->getMedia('player_photos');
     foreach ($mediaItems as $media) {
         $path = $media->getPath();
+        $rosterPath = $media->getPath('roster');
         $url = $media->getUrl();
         $exists = file_exists($path);
+        $rosterExists = file_exists($rosterPath);
         echo "  - Media ID: {$media->id}\n";
         echo "    Cesta: {$path}\n";
+        echo "    Cesta (roster): {$rosterPath}\n";
         echo "    URL:   {$url}\n";
         echo "    Existuje na disku: " . ($exists ? 'ANO' : 'NE') . "\n";
+        echo "    Existuje (roster): " . ($rosterExists ? 'ANO' : 'NE') . "\n";
 
-        if (!$exists) {
+        if (!$exists && !$rosterExists) {
             // Zkusíme se podívat, jestli není v defaultním public_path aplikace
             $relative = str_replace(public_path(), '', $path);
             $alternativePath = base_path('public' . $relative);
