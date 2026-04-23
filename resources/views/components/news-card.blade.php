@@ -9,7 +9,7 @@
     </div>
 
     @php
-        $featuredImageUrl = $post->getFirstMediaUrl('featured_image');
+        $featuredImageUrl = $post->getFirstMediaUrl('featured_image', 'large');
         // Zpětná kompatibilita pro staré záznamy, které mají cestu přímo ve sloupci
         if (!$featuredImageUrl && $post->featured_image) {
             $featuredImageUrl = 'storage/' . $post->featured_image;

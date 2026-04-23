@@ -3,7 +3,7 @@
 @section('content')
     <article>
         @php
-            $featuredImageUrl = $post->getFirstMediaUrl('featured_image');
+            $featuredImageUrl = $post->getFirstMediaUrl('featured_image', 'large');
             if (!$featuredImageUrl && $post->featured_image) {
                 $featuredImageUrl = 'storage/' . $post->featured_image;
             }
