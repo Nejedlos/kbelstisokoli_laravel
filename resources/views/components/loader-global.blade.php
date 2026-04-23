@@ -78,7 +78,24 @@
         document.addEventListener('livewire:init', () => {
             // Zachytávání Livewire 3 upload eventů pro globální loader
             window.activeUploads = 0;
+            window.activeRequests = 0;
             window.lastUploadFinish = 0;
+
+            // Sjednocená funkce pro vypnutí loaderu s kontrolou všech aktivních procesů
+            window.checkAndStopLoader = function() {
+                if (window.activeUploads > 0 || window.activeRequests > 0) {
+                    return;
+                }
+
+                // Malá prodleva před vypnutím loaderu
+                // 1. Dává prostor pro následný autosave request po uploadu
+                // 2. Zajišťuje, že uživatel stihne vnímat 100% progresu v UI
+                setTimeout(() => {
+                    if (window.activeUploads === 0 && window.activeRequests === 0) {
+                        window.dispatchEvent(new CustomEvent('loading-stop'));
+                    }
+                }, 600);
+            };
 
             window.addEventListener('livewire:upload-start', () => {
                 window.activeUploads++;
@@ -88,21 +105,12 @@
             window.addEventListener('livewire:upload-finish', () => {
                 window.activeUploads = Math.max(0, window.activeUploads - 1);
                 window.lastUploadFinish = Date.now();
-
-                // Pokud ještě dobíhají jiné uploady, nic neděláme
-                if (window.activeUploads > 0) return;
-
-                // Malá prodleva před vypnutím loaderu (dává prostor pro následný autosave request)
-                setTimeout(() => {
-                    if (window.activeUploads === 0) {
-                        window.dispatchEvent(new CustomEvent('loading-stop'));
-                    }
-                }, 250);
+                window.checkAndStopLoader();
             });
 
             window.addEventListener('livewire:upload-error', () => {
                 window.activeUploads = Math.max(0, window.activeUploads - 1);
-                window.dispatchEvent(new CustomEvent('loading-stop'));
+                window.checkAndStopLoader();
             });
 
             Livewire.hook('request', ({ respond, succeed, fail, options }) => {
@@ -149,13 +157,20 @@
                     return;
                 }
 
+                window.activeRequests++;
                 window.dispatchEvent(new CustomEvent('loading-start'));
 
-                const stopLoading = () => window.dispatchEvent(new CustomEvent('loading-stop'));
+                let finished = false;
+                const stopRequest = () => {
+                    if (finished) return;
+                    finished = true;
+                    window.activeRequests = Math.max(0, window.activeRequests - 1);
+                    window.checkAndStopLoader();
+                };
 
                 // Livewire 3 hook callbacks
-                respond(stopLoading);
-                succeed(stopLoading);
+                // Respond voláme jen pro označení, že data dorazila, ale loader vypínáme až v succeed (po DOM update)
+                succeed(stopRequest);
                 fail((error) => {
                     const isCancelled = error && typeof error === 'object' && error.status === null;
 
@@ -164,7 +179,7 @@
                     } else {
                         console.error('[Livewire] Global Loader Error Catch:', error);
                     }
-                    stopLoading();
+                    stopRequest();
                 });
             });
         });
@@ -175,6 +190,8 @@
 
         // Pokud navigace skončí dříve, než se stihne vyvolat beforeunload (rychlé SPA navigace)
         document.addEventListener('livewire:navigated', () => {
+            window.activeUploads = 0;
+            window.activeRequests = 0;
             window.dispatchEvent(new CustomEvent('loading-stop'));
         });
     </script>
