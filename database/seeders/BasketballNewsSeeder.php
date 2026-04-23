@@ -117,6 +117,22 @@ class BasketballNewsSeeder extends Seeder
                     'en' => '<p>Fans in Charlotte experienced a night they won\'t forget. In a dramatic NBA play-in, their team edged out the Miami Heat 127:126 after overtime. A last-second shot decided the victory, unleashing indescribable euphoria in the arena. This result moves Charlotte closer to the gates of the playoffs themselves.</p>',
                 ],
             ],
+            [
+                'date' => '2025-05-01',
+                'category_id' => $generalCategory->id,
+                'title' => [
+                    'cs' => 'Spouštíme nový web Kbelští sokoli!',
+                    'en' => 'Launching the new Kbelští sokoli website!',
+                ],
+                'excerpt' => [
+                    'cs' => 'Vítejte na našem novém webu, který přináší moderní design a lepší přehled o dění v klubu.',
+                    'en' => 'Welcome to our new website, featuring a modern design and a better overview of club activities.',
+                ],
+                'content' => [
+                    'cs' => '<p>S radostí vám oznamujeme, že jsme dnes spustili zcela nové webové stránky našeho klubu Kbelští sokoli. Naším cílem bylo vytvořit přehledné a moderní místo, kde fanoušci i členové najdou vše potřebné na jednom místě.</p><p>Co nového na webu najdete?</p><ul><li>Aktuální výsledky a tabulky všech našich týmů.</li><li>Přehledný kalendář nadcházejících zápasů a akcí.</li><li>Jednoduchou správu členských profilů a příspěvků.</li><li>Pravivelné novinky z klubového života i světa basketbalu.</li></ul><p>Doufáme, že se vám nový web bude líbit a stane se vaším hlavním zdrojem informací o našich sokolech. Sportu zdar a basketbalu zvláště!</p>',
+                    'en' => '<p>We are excited to announce that we have launched the brand new website of our club, Kbelští sokoli. Our goal was to create a clear and modern space where fans and members can find everything they need in one place.</p><p>What\'s new on the website?</p><ul><li>Up-to-date results and tables for all our teams.</li><li>A clear calendar of upcoming matches and events.</li><li>Simple management of member profiles and fees.</li><li>Regular news from club life and the world of basketball.</li></ul><p>We hope you enjoy the new website and that it becomes your primary source of information about our falcons. Go Falcons!</p>',
+                ],
+            ],
         ];
 
         foreach ($newsData as $item) {
