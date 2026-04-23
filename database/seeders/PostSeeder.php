@@ -25,237 +25,108 @@ class PostSeeder extends Seeder
             ]
         );
 
-        $devCategory = PostCategory::updateOrCreate(
-            ['slug' => 'vyvoj'],
+        $matchCategory = PostCategory::updateOrCreate(
+            ['slug' => 'zápasy'],
             [
-                'name' => ['cs' => 'Vývoj webu', 'en' => 'Web Development'],
+                'name' => ['cs' => 'Zápasy', 'en' => 'Matches'],
             ]
         );
 
         $newsData = [
             [
-                'date' => '2026-01-06',
+                'date' => '2026-04-22',
+                'category_id' => $matchCategory->id,
                 'title' => [
-                    'cs' => 'Start projektu: nový web pro Kbelští sokoli (Muži C & E)',
-                    'en' => 'Project Start: New Website for Sokol Kbely (Men C & E)',
+                    'cs' => 'A-tým ovládl derby proti Čakovicím!',
+                    'en' => 'A-team dominated the derby against Čakovice!',
                 ],
                 'excerpt' => [
-                    'cs' => 'Po novém roce jsme odstartovali plánování a definovali cíl: moderní web pro naše týmy Muži C a Muži E.',
-                    'en' => 'After the New Year, we started planning and defined the goal: a modern website for our Men C and Men E teams.',
+                    'cs' => 'V zaplněné kbelské hale naši muži nedali soupeři šanci a zvítězili přesvědčivě 84:62.',
+                    'en' => 'In a packed Kbely arena, our men left no chance for the opponent and won convincingly 84:62.',
                 ],
                 'content' => [
-                    'cs' => '<p>Po novém roce jsme odstartovali plánování a definovali cíl: moderní web pro naše týmy Muži C a Muži E, s návazností na širší kbelský basket. Naším záměrem je vytvořit digitální prostor, který bude plně reflektovat potřeby našich hráčů i fanoušků v Letňanech. První fáze zahrnuje definici technologií (Laravel 12, Filament PHP 5) a sběr požadavků na funkčnost, jako je správa týmů a členská sekce.</p>',
-                    'en' => '<p>After the New Year, we started planning and defined the goal: a modern website for our Men C and Men E teams, with connections to the wider Kbely basketball community. Our intention is to create a digital space that will fully reflect the needs of our players and fans in Letňany. The first phase includes defining the technologies (Laravel 12, Filament PHP 5) and gathering functional requirements, such as team management and a member section.</p>',
+                    'cs' => '<p>Kbelská sportovní hala zažila bouřlivou atmosféru. V tradičním derby proti Čakovicím předvedli naši muži koncentrovaný výkon od první minuty. Skvělá obrana a rychlé protiútoky dělaly soupeři značné problémy. Nejlepším střelcem utkání byl s 22 body kapitán týmu. Děkujeme všem fanouškům za fantastickou podporu!</p>',
+                    'en' => '<p>The Kbely sports hall experienced a stormy atmosphere. In the traditional derby against Čakovice, our men showed a concentrated performance from the first minute. Great defense and fast breaks caused significant problems for the opponent. The top scorer of the match was the team captain with 22 points. Thanks to all fans for the fantastic support!</p>',
                 ],
             ],
             [
-                'date' => '2026-01-09',
+                'date' => '2026-04-20',
+                'category_id' => $matchCategory->id,
                 'title' => [
-                    'cs' => 'Informační architektura a mapa stránek',
-                    'en' => 'Information Architecture and Sitemap',
+                    'cs' => 'U17 vezou cenný skalp z palubovky soupeře',
+                    'en' => 'U17 take a valuable scalp from the opponent\'s court',
                 ],
                 'excerpt' => [
-                    'cs' => 'Rozkreslili jsme základní strukturu webu a připravili logiku pro pozdější napojení dynamických dat.',
-                    'en' => 'We have outlined the basic structure of the website and prepared the logic for later connection of dynamic data.',
+                    'cs' => 'Naši kadeti vybojovali v dramatické koncovce vítězství o jediný koš na horké půdě v Brandýse.',
+                    'en' => 'Our cadets fought out a victory by a single basket in a dramatic ending on the hot court in Brandýs.',
                 ],
                 'content' => [
-                    'cs' => '<p>Rozkreslili jsme základní strukturu webu (Úvod, Novinky, Zápasy, Tým, Tréninky, Historie, Kontakt) a připravili logiku pro pozdější napojení dynamických dat. Pečlivě jsme promysleli uživatelskou cestu, aby návštěvník našel nejdůležitější informace (jako je čas příštího zápasu nebo tréninku) na jedno kliknutí. Součástí této fáze byla i definice databázového schématu pro moduly zápasů a soupisek.</p>',
-                    'en' => '<p>We have outlined the basic structure of the website (Home, News, Matches, Team, Trainings, History, Contact) and prepared the logic for later connection of dynamic data. We carefully thought through the user journey so that a visitor can find the most important information (such as the time of the next match or practice) in one click. This phase also included defining the database schema for the match modules and rosters.</p>',
+                    'cs' => '<p>Zápas jako na houpačce! Naši kluci z kategorie U17 ukázali v Brandýse neuvěřitelnou bojovnost. Přestože v polovině třetí čtvrtiny prohrávali o 12 bodů, dokázali skóre otočit. Rozhodující koš padl 5 sekund před koncem utkání. Tato výhra nás posouvá na průběžné třetí místo v tabulce.</p>',
+                    'en' => '<p>A roller-coaster match! Our U17 boys showed incredible fighting spirit in Brandýs. Although they were losing by 12 points in the middle of the third quarter, they managed to turn the score around. The decisive basket was scored 5 seconds before the end of the match. This win moves us to the temporary third place in the standings.</p>',
                 ],
             ],
             [
-                'date' => '2026-01-13',
+                'date' => '2026-04-18',
+                'category_id' => $generalCategory->id,
                 'title' => [
-                    'cs' => 'Branding a barevná paleta',
-                    'en' => 'Branding and Color Palette',
+                    'cs' => 'Hledáme nové posily! Nábor dětí ročníků 2015–2017',
+                    'en' => 'Looking for new reinforcements! Recruitment of children born 2015–2017',
                 ],
                 'excerpt' => [
-                    'cs' => 'Vybrali jsme moderní sportovní styl: navy + elektrická modrá + klubová červená.',
-                    'en' => 'We chose a modern sports style: navy + electric blue + club red.',
+                    'cs' => 'Chceš se stát součástí kbelské basketbalové rodiny? Přijď na náš náborový trénink!',
+                    'en' => 'Do you want to become part of the Kbely basketball family? Come to our recruitment training!',
                 ],
                 'content' => [
-                    'cs' => '<p>Vybrali jsme moderní sportovní styl: navy + elektrická modrá + klubová červená, doplněné čistými neutrály pro maximální čitelnost. Barvy vycházejí z tradiční identity Sokolů, ale jsou upraveny pro digitální věk s důrazem na vysoký kontrast a dynamiku. Tato paleta se stane základem pro veškeré vizuály webu i sociálních sítí, čímž zajistíme konzistentní vystupování našich letňanských týmů.</p>',
-                    'en' => '<p>We chose a modern sports style: navy + electric blue + club red, complemented by clean neutrals for maximum readability. The colors are based on the traditional Sokol Kbely identity but are adjusted for the digital age with an emphasis on high contrast and dynamics. This palette will become the basis for all website visuals and social media, ensuring a consistent appearance for our Letňany teams.</p>',
+                    'cs' => '<p>Basketbalový klub Kbelští sokoli otevírá své brány novým talentům. Hledáme kluky i holky ročníků 2015 až 2017, kteří mají chuť se hýbat, učit se novým věcem a najít si partu skvělých kamarádů. Tréninky probíhají pod vedením zkušených trenérů každé úterý a čtvrtek v naší hale.</p>',
+                    'en' => '<p>The Kbelští sokoli basketball club opens its doors to new talents. We are looking for boys and girls born between 2015 and 2017 who want to move, learn new things, and find a group of great friends. Training sessions take place under the guidance of experienced coaches every Tuesday and Thursday in our hall.</p>',
                 ],
             ],
             [
-                'date' => '2026-01-16',
+                'date' => '2026-04-15',
+                'category_id' => $matchCategory->id,
                 'title' => [
-                    'cs' => 'Design systém a UI standardy',
-                    'en' => 'Design System and UI Standards',
+                    'cs' => 'B-tým potvrdil roli favorita a upevnil si 2. místo',
+                    'en' => 'B-team confirmed favorite role and strengthened 2nd place',
                 ],
                 'excerpt' => [
-                    'cs' => 'Nastavili jsme jednotný vzhled tlačítek, karet, typografie a rozestupů pro konzistentní zážitek.',
-                    'en' => 'We set a uniform look for buttons, cards, typography, and spacing for a consistent experience.',
+                    'cs' => 'Rezerva Sokolů si poradila s hostujícím celkem a nadále útočí na čelo soutěže.',
+                    'en' => 'The Falcons\' reserve dealt with the visiting team and continues to attack the top of the competition.',
                 ],
                 'content' => [
-                    'cs' => '<p>Nastavili jsme jednotný vzhled tlačítek, karet, typografie a rozestupů, aby web působil konzistentně na všech stránkách i blocích. Používáme moderní bezpatkové písmo, které je dobře čitelné i na mobilních zařízeních během rychlého sledování výsledků na cestě ze zápasu. Design systém obsahuje i definice pro stavy prvků, jako jsou loadiery a hover efekty, což zvyšuje profesionální dojem z celé aplikace.</p>',
-                    'en' => '<p>We set a uniform look for buttons, cards, typography, and spacing so the website looks consistent across all pages and blocks. We use a modern sans-serif font that is easy to read even on mobile devices while quickly checking results on the way from a game. The design system also includes definitions for element states such as loaders and hover effects, which increases the professional impression of the entire application.</p>',
+                    'cs' => '<p>Naše "béčko" pokračuje ve vítězné vlně. V domácím utkání proti nepříjemnému soupeři z Neratovic dominovalo zejména v podkošovém prostoru. Trenér mohl v druhé polovině zápasu prostřídat celou lavičku a dát šanci i mladším hráčům, kteří se rozhodně neztratili.</p>',
+                    'en' => '<p>Our "B-team" continues its winning streak. In the home match against a tough opponent from Neratovice, they dominated especially in the paint. The coach was able to rotate the entire bench in the second half of the match and give a chance to younger players, who certainly didn\'t get lost.</p>',
                 ],
             ],
             [
-                'date' => '2026-01-20',
+                'date' => '2026-04-12',
+                'category_id' => $matchCategory->id,
                 'title' => [
-                    'cs' => 'Page Builder: skládání stránek z bloků',
-                    'en' => 'Page Builder: Building Pages from Blocks',
+                    'cs' => 'Minižáci U11 na svém prvním velkém turnaji',
+                    'en' => 'Mini-basketball players U11 at their first big tournament',
                 ],
                 'excerpt' => [
-                    'cs' => 'Spustili jsme blokový systém, díky kterému lze stránky skládat bez programování.',
-                    'en' => 'We launched a block system that allows pages to be assembled without programming.',
+                    'cs' => 'Naši nejmladší reprezentanti si užili víkend plný basketbalu v Lounech.',
+                    'en' => 'Our youngest representatives enjoyed a weekend full of basketball in Louny.',
                 ],
                 'content' => [
-                    'cs' => '<p>Spustili jsme blokový systém, díky kterému lze stránky skládat bez programování – jednoduše a bezpečně i pro laiky v administraci. Redaktoři nyní mohou využívat předpřipravené komponenty jako Hero sekce, Výzvy k akci (CTA) nebo Galerie, a vytvářet tak vizuálně atraktivní podstránky během několika minut. Tento modulární přístup nám umožní rychle reagovat na potřeby klubu a flexibilně rozšiřovat obsah webu.</p>',
-                    'en' => '<p>We launched a block system that allows pages to be assembled without programming – simply and safely even for laypeople in the administration. Editors can now use pre-prepared components such as Hero sections, Calls to Action (CTA), or Galleries, creating visually attractive subpages in minutes. This modular approach will allow us to react quickly to the club\'s needs and flexibly expand the website\'s content.</p>',
+                    'cs' => '<p>Kategorie U11 vyrazila na svůj první mimopražský turnaj. I když o výsledky šlo až v druhé řadě, naši malí sokolíci ukázali, že se nebojí žádného soupeře. Odvážejí si nejen cenné zkušenosti, ale hlavně spoustu zážitků a radost z prvních vstřelených košů v soutěžních zápasech.</p>',
+                    'en' => '<p>The U11 category set off for its first tournament outside Prague. Although results were secondary, our little Falcons showed that they are not afraid of any opponent. They take away not only valuable experience but especially many memories and the joy of the first baskets scored in competitive matches.</p>',
                 ],
             ],
             [
-                'date' => '2026-01-24',
+                'date' => '2025-05-01',
+                'category_id' => $generalCategory->id,
                 'title' => [
-                    'cs' => 'Admin sekce: základní správa obsahu a modulů',
-                    'en' => 'Admin Section: Basic Content and Module Management',
+                    'cs' => 'Spouštíme nový web Kbelští sokoli!',
+                    'en' => 'Launching the new Kbelští sokoli website!',
                 ],
                 'excerpt' => [
-                    'cs' => 'Připravili jsme administrační část pro správu stránek a menu pro dlouhodobou udržitelnost.',
-                    'en' => 'We prepared the administrative part for managing pages and menus for long-term sustainability.',
+                    'cs' => 'Vítejte na našem novém webu, který přináší moderní design a lepší přehled o dění v klubu.',
+                    'en' => 'Welcome to our new website, featuring a modern design and a better overview of club activities.',
                 ],
                 'content' => [
-                    'cs' => '<p>Připravili jsme administrační část pro správu stránek, menu a základních modulů, aby šel web dlouhodobě udržovat bez zásahů do kódu. Využili jsme sílu frameworku Filament PHP k vytvoření přehledného rozhraní, které zahrnuje i auditní logy změn. Správci tak mají plnou kontrolu nad strukturou navigace, nahráváním dokumentů i publikací aktualit, což výrazně šetří čas při běžné údržbě webu.</p>',
-                    'en' => '<p>We prepared the administrative part for managing pages, menus, and basic modules so the website can be maintained long-term without code intervention. We used the power of the Filament PHP framework to create a clear interface that also includes audit logs of changes. Administrators thus have full control over the navigation structure, uploading documents, and publishing news, which significantly saves time during routine website maintenance.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-01-28',
-                'title' => [
-                    'cs' => 'CZ/EN: příprava na bilingvní web',
-                    'en' => 'CZ/EN: Preparing for a Bilingual Website',
-                ],
-                'excerpt' => [
-                    'cs' => 'Zavedli jsme podporu češtiny a angličtiny pro správu textů a obsahových bloků v obou jazycích.',
-                    'en' => 'We introduced support for Czech and English for managing texts and content blocks in both languages.',
-                ],
-                'content' => [
-                    'cs' => '<p>Zavedli jsme podporu češtiny a angličtiny tak, aby šly spravovat texty a obsahové bloky v obou jazycích. Vzhledem k mezinárodnímu charakteru basketbalové komunity v Praze považujeme dvojjazyčnost za klíčovou. Systém nyní automaticky detekuje preferovaný jazyk prohlížeče a nabízí uživateli možnost přepnutí v navigaci. Lokalizace se týká nejen statických textů, ale i dynamického obsahu v databázi díky balíčku laravel-translatable.</p>',
-                    'en' => '<p>We introduced support for Czech and English so that texts and content blocks can be managed in both languages. Given the international nature of the basketball community in Prague, we consider bilingualism to be key. The system now automatically detects the preferred browser language and offers the user the option to switch in the navigation. Localization applies not only to static texts but also to dynamic content in the database thanks to the laravel-translatable package.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-02-02',
-                'title' => [
-                    'cs' => 'Členská sekce: přihlášení a přístupové role',
-                    'en' => 'Member Section: Login and Access Roles',
-                ],
-                'excerpt' => [
-                    'cs' => 'Rozběhli jsme chráněnou část pro hráče a trenéry s přesným nastavením oprávnění.',
-                    'en' => 'We launched a protected section for players and coaches with precise permission settings.',
-                ],
-                'content' => [
-                    'cs' => '<p>Rozběhli jsme chráněnou část pro hráče a trenéry – tak, aby každý viděl přesně to, co potřebuje, a nic navíc. Členská sekce využívá bezpečné autentizační mechanismy a umožňuje hráčům přístup k interním informacím, ke kterým se běžný návštěvník nedostane. Trenéři mají k dispozici rozšířené nástroje pro správu týmu, zatímco členové mohou spravovat svůj profil a sledovat svou historii v klubu.</p>',
-                    'en' => '<p>We launched a protected section for players and coaches – so that everyone sees exactly what they need and nothing more. The member section uses secure authentication mechanisms and allows players access to internal information that a regular visitor cannot reach. Coaches have extended team management tools at their disposal, while members can manage their profiles and track their history in the club.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-02-06',
-                'title' => [
-                    'cs' => 'Docházkový systém a účast na akcích',
-                    'en' => 'Attendance system and participation',
-                ],
-                'excerpt' => [
-                    'cs' => 'Přidali jsme systém potvrzování účasti na tréninky, zápasy i klubové akce.',
-                    'en' => 'We added a system for confirming attendance at practices, matches, and club events.',
-                ],
-                'content' => [
-                    'cs' => '<p>Přidali jsme systém potvrzování účasti (confirmed/declined/pending/maybe), který se dá později napojit na reálné kalendáře a eventy. Hráči nyní mohou snadno označit svou přítomnost na nadcházejícím tréninku nebo zápasu přímo ze svého mobilu. Trenéři díky tomu získávají okamžitý přehled o soupisce pro daný den, což výrazně usnadňuje plánování tréninkových jednotek a logistiku zápasů v Pražském přeboru.</p>',
-                    'en' => '<p>We added an attendance confirmation system (confirmed/declined/pending/maybe), which can later be connected to real calendars and events. Players can now easily mark their presence at an upcoming practice or match directly from their mobile. Thanks to this, coaches get an immediate overview of the roster for the given day, which significantly simplifies the planning of training sessions and match logistics in the Prague Championship.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-02-10',
-                'title' => [
-                    'cs' => 'Statistiky: struktura pro tabulky a budoucí importy',
-                    'en' => 'Statistics: Structure for Tables and Future Imports',
-                ],
-                'excerpt' => [
-                    'cs' => 'Připravili jsme základ pro týmové i hráčské statistiky a soutěžní tabulky.',
-                    'en' => 'We prepared the basis for team and player statistics and competition tables.',
-                ],
-                'content' => [
-                    'cs' => '<p>Připravili jsme základ pro týmové i hráčské statistiky a soutěžní tabulky – ruční zadávání i budoucí automatický import. Datový model je navržen tak, aby dokázal pojmout širokou škálu metrik od bodů a doskoků až po procentuální úspěšnost střelby. Tyto informace budou klíčové pro budování historické paměti klubu a pro motivaci hráčů v rámci týmů C i E, kteří budou moci sledovat své osobní rekordy napříč sezónami.</p>',
-                    'en' => '<p>We prepared the basis for team and player statistics and competition tables – manual entry and future automatic import. The data model is designed to accommodate a wide range of metrics from points and rebounds to shooting percentage success. This information will be key to building the club\'s historical memory and for motivating players within teams C and E, who will be able to track their personal records across seasons.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-02-14',
-                'title' => [
-                    'cs' => 'Média a galerie: základ pro fotky a dokumenty',
-                    'en' => 'Media and Gallery: Basis for Photos and Documents',
-                ],
-                'excerpt' => [
-                    'cs' => 'Zavedli jsme centrální správu obrázků a galerií pro jednotný vizuální standard.',
-                    'en' => 'We introduced central management of images and galleries for a uniform visual standard.',
-                ],
-                'content' => [
-                    'cs' => '<p>Zavedli jsme centrální správu obrázků a galerií, aby šly používat napříč bloky a stránkami a web měl pořád stejný vizuální standard. Systém automaticky generuje náhledy v různých velikostech, což zajišťuje rychlé načítání stránek bez ztráty kvality. Správci mohou snadno nahrávat fotografie ze zápasů v Letňanech a třídit je do alb, která jsou následně prezentována fanouškům v moderním gridovém rozložení s funkcí lightboxu.</p>',
-                    'en' => '<p>We introduced central management of images and galleries so they can be used across blocks and pages while maintaining the same visual standard. The system automatically generates thumbnails in different sizes, ensuring fast page loading without loss of quality. Administrators can easily upload photos from matches in Letňany and sort them into albums, which are then presented to fans in a modern grid layout with lightbox functionality.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-02-18',
-                'title' => [
-                    'cs' => 'SEO vrstva: metadata, OpenGraph a strukturovaná data',
-                    'en' => 'SEO Layer: Metadata, OpenGraph, and Structured Data',
-                ],
-                'excerpt' => [
-                    'cs' => 'Nastavili jsme SEO tagy tak, aby byl web dobře sdílitelný a připravený pro vyhledávače.',
-                    'en' => 'We set SEO tags so that the website is easily shareable and prepared for search engines.',
-                ],
-                'content' => [
-                    'cs' => '<p>Nastavili jsme title/description, OG tagy a základní strukturovaná data tak, aby web byl dobře sdílitelný a připravený pro vyhledávače. Každá stránka i novinka má nyní unikátní metadata, která pomáhají robotům Google a Seznamu správně indexovat náš obsah. OpenGraph tagy pak zajišťují, že při sdílení odkazu na Facebooku nebo X se zobrazí atraktivní náhledový obrázek s jasným titulkem, což zvyšuje proklik na web z externích zdrojů.</p>',
-                    'en' => '<p>We set title/description, OG tags, and basic structured data so that the website is easily shareable and prepared for search engines. Every page and news item now has unique metadata that helps Google and Seznam robots correctly index our content. OpenGraph tags then ensure that when a link is shared on Facebook or X, an attractive preview image with a clear title is displayed, increasing click-through rates from external sources.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-02-22',
-                'title' => [
-                    'cs' => 'Formuláře: kontakt a nábor (lead workflow)',
-                    'en' => 'Forms: Contact and Recruitment (Lead Workflow)',
-                ],
-                'excerpt' => [
-                    'cs' => 'Přidali jsme veřejné formuláře a admin přehled pro zpracování zpráv od zájemců.',
-                    'en' => 'We added public forms and an admin overview for processing messages from interested parties.',
-                ],
-                'content' => [
-                    'cs' => '<p>Přidali jsme veřejné formuláře a admin přehled pro zpracování zpráv, včetně ochrany proti spamu a připravených notifikací. Nový náborový formulář umožňuje zájemcům o hru v týmech C nebo E zaslat své údaje přímo vedení týmu. Všechny požadavky jsou ukládány do centrální databáze, kde je trenéři mohou spravovat, měnit jejich stav a odpovídat na ně, čímž zajišťujeme, že žádný potenciální talent nezapadne v e-mailové schránce.</p>',
-                    'en' => '<p>We added public forms and an admin overview for processing messages, including spam protection and prepared notifications. The new recruitment form allows those interested in playing for teams C or E to send their data directly to the team leadership. All requests are stored in a central database where coaches can manage them, change their status, and reply, ensuring no potential talent gets lost in an inbox.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-02-26',
-                'title' => [
-                    'cs' => 'Testy a provozní stabilita: ověření rolí a přístupů',
-                    'en' => 'Tests and Operational Stability: Verifying Roles and Access',
-                ],
-                'excerpt' => [
-                    'cs' => 'Prošli jsme klíčové scénáře a doladili redirecty pro spolehlivý provoz.',
-                    'en' => 'We went through key scenarios and fine-tuned redirects for reliable operation.',
-                ],
-                'content' => [
-                    'cs' => '<p>Prošli jsme klíčové scénáře (guest/member/admin), doladili redirecty a připravili kontrolní kroky pro spolehlivý provoz. V rámci testování jsme se zaměřili na bezpečnostní aspekty členské sekce a ověřili, že všechny formuláře správně ukládají data i při nekorektním vyplnění. Tato fáze "vychytávání much" je nezbytná pro zajištění bezproblémového spuštění a dobrého prvního dojmu u všech uživatelů webu.</p>',
-                    'en' => '<p>We went through key scenarios (guest/member/admin), fine-tuned redirects, and prepared control steps for reliable operation. During testing, we focused on the security aspects of the member section and verified that all forms correctly save data even when incorrectly filled. This "bug-hunting" phase is essential to ensure a smooth launch and a good first impression for all website users.</p>',
-                ],
-            ],
-            [
-                'date' => '2026-03-03',
-                'title' => [
-                    'cs' => 'Dokončení první verze: moderní homepage a připravený obsah',
-                    'en' => 'Completion of Version 1: Modern Homepage and Ready Content',
-                ],
-                'excerpt' => [
-                    'cs' => 'Uzavřeli jsme první veřejnou verzi webu s moderní úvodní stránkou zaměřenou na Muži C & E.',
-                    'en' => 'We have closed the first public version of the website with a modern homepage focused on Men C & E.',
-                ],
-                'content' => [
-                    'cs' => '<p>Uzavřeli jsme první veřejnou verzi webu s moderní úvodní stránkou, jasným zaměřením na Muži C & E a přímým propojením na hlavní kbelský basket. Web je nyní plně funkční a připraven k ostrému provozu. Návštěvníci zde najdou vše od historie klubu až po aktuální kontakty. Tímto milníkem sice končí hlavní vývojová fáze, ale náš digitální domov budeme i nadále rozvíjet o nové funkce a čerstvý obsah ze života Sokolů v Letňanech.</p>',
-                    'en' => '<p>We have closed the first public version of the website with a modern homepage, a clear focus on Men C & E, and a direct connection to the main Kbely basketball. The website is now fully functional and ready for live operation. Visitors will find everything from the club\'s history to current contacts. While this milestone ends the main development phase, we will continue to develop our digital home with new features and fresh content from the life of the Sokol Kbely in Letňany.</p>',
+                    'cs' => '<p>S radostí vám oznamujeme, že jsme dnes spustili zcela nové webové stránky našeho klubu Kbelští sokoli. Naším cílem bylo vytvořit přehledné a moderní místo, kde fanoušci i členové najdou vše potřebné na jednom místě.</p><p>Co nového na webu najdete?</p><ul><li>Aktuální výsledky a tabulky všech našich týmů.</li><li>Přehledný kalendář nadcházejících zápasů a akcí.</li><li>Jednoduchou správu členských profilů a příspěvků.</li><li>Pravidelné novinky z klubového života i světa basketbalu.</li></ul><p>Doufáme, že se vám nový web bude líbit a stane se vaším hlavním zdrojem informací o našich sokolech. Sportu zdar a basketbalu zvláště!</p>',
+                    'en' => '<p>We are excited to announce that we have launched the brand new website of our club, Kbelští sokoli. Our goal was to create a clear and modern space where fans and members can find everything they need in one place.</p><p>What\'s new on the website?</p><ul><li>Up-to-date results and tables for all our teams.</li><li>A clear calendar of upcoming matches and events.</li><li>Simple management of member profiles and fees.</li><li>Regular news from club life and the world of basketball.</li></ul><p>We hope you enjoy the new website and that it becomes your primary source of information about our falcons. Go Falcons!</p>',
                 ],
             ],
         ];
@@ -266,7 +137,7 @@ class PostSeeder extends Seeder
             Post::updateOrCreate(
                 ['slug' => Str::slug($item['title']['cs'])],
                 [
-                    'category_id' => $devCategory->id,
+                    'category_id' => $item['category_id'] ?? $generalCategory->id,
                     'title' => $item['title'],
                     'excerpt' => $item['excerpt'],
                     'content' => $item['content'],
