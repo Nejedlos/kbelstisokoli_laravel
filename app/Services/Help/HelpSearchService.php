@@ -98,7 +98,7 @@ class HelpSearchService
                     $term = "%" . $query . "%";
                     $q->where("title->{$locale}", 'LIKE', $term)
                         ->orWhere("search_keywords->{$locale}", 'LIKE', $term)
-                        ->orWhere("metadata->{$locale}->purpose", 'LIKE', $term)
+                        ->orWhere('metadata', 'LIKE', $term)
                         ->orWhere("content->{$locale}", 'LIKE', $term);
                 })
                 ->where(function ($q) {
@@ -186,14 +186,17 @@ class HelpSearchService
 
         if ($this->section === 'admin') {
             $query->where(function ($q) {
-                $q->where('metadata->section', 'admin')
-                    ->orWhere('metadata->section', 'both');
+                $q->where('metadata', 'LIKE', '%"section":"admin"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%');
             });
         } elseif ($this->section === 'member') {
             $query->where(function ($q) {
-                $q->where('metadata->section', 'member')
-                    ->orWhere('metadata->section', 'both')
-                    ->orWhereNull('metadata->section'); // Default je member
+                $q->where('metadata', 'LIKE', '%"section":"member"%')
+                    ->orWhere('metadata', 'LIKE', '%"section":"both"%')
+                    ->orWhere(function($sq) {
+                        $sq->whereNull('metadata')
+                           ->orWhere('metadata', 'NOT LIKE', '%"section":%');
+                    });
             });
         }
 
@@ -201,12 +204,7 @@ class HelpSearchService
             $query->where(function ($inner) use ($filteringRoles) {
                 $inner->whereNull('audience_roles');
                 foreach ($filteringRoles as $role) {
-                    // SQLite v testech má problém s whereJsonContains v subquery
-                    if (config('database.default') === 'sqlite') {
-                        $inner->orWhere('audience_roles', 'LIKE', '%"' . $role . '"%');
-                    } else {
-                        $inner->orWhereJsonContains('audience_roles', $role);
-                    }
+                    $inner->orWhere('audience_roles', 'LIKE', '%"' . $role . '"%');
                 }
             });
         }

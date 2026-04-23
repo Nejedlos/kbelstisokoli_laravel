@@ -81,7 +81,7 @@ class HelpArticleForm
                                     ->components([
                                         Select::make('category_id')
                                             ->label(__('admin.resources.help_article.fields.category'))
-                                            ->relationship('category', 'name->cs')
+                                            ->relationship('category', 'name')
                                             ->searchable()
                                             ->required(),
                                         TextInput::make('slug')

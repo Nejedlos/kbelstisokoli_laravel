@@ -46,14 +46,20 @@ class CleanupExternalStats extends Command
         $files = Storage::disk('local')->allFiles('external/czbasketball');
         $deletedFiles = 0;
 
+        // Načteme cesty k snapshotům, které chceme zachovat (z neúspěšných běhů)
+        $importantSnapshotPaths = ExternalImportRun::whereIn('status', ['failed', 'partial_failed'])
+            ->get()
+            ->map(fn($run) => $run->metadata['snapshot_path'] ?? null)
+            ->filter()
+            ->unique()
+            ->toArray();
+
         foreach ($files as $file) {
             $lastModified = Carbon::createFromTimestamp(Storage::disk('local')->lastModified($file));
 
             if ($lastModified->lt($cutoffDate)) {
                 // Je to staré, ale je to poslední fail?
-                $isImportant = ExternalImportRun::whereIn('status', ['failed', 'partial_failed'])
-                    ->where('metadata->snapshot_path', $file)
-                    ->exists();
+                $isImportant = in_array($file, $importantSnapshotPaths);
 
                 if (! $isImportant) {
                     Storage::disk('local')->delete($file);

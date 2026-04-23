@@ -21,18 +21,17 @@ class StatsCleanupDuplicatesCommand extends Command
         $this->info('Vyhledávám duplicitní zápasy...');
 
         // Najdeme external_ids, která se vyskytují vícekrát pro stejný tým a sezónu
-        // Používáme JSON extrakci pro MySQL
-        $duplicates = DB::table('matches')
-            ->select(
-                'team_id',
-                'season_id',
-                DB::raw('JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.external_id")) as external_id'),
-                DB::raw('COUNT(*) as count')
-            )
-            ->whereNotNull(DB::raw('JSON_EXTRACT(metadata, "$.external_id")'))
-            ->groupBy('team_id', 'season_id', 'external_id')
-            ->having('count', '>', 1)
-            ->get();
+        $duplicates = BasketballMatch::all()
+            ->filter(fn($m) => !empty($m->metadata['external_id']))
+            ->groupBy(fn($m) => $m->team_id . '_' . $m->season_id . '_' . $m->metadata['external_id'])
+            ->filter(fn($group) => $group->count() > 1)
+            ->map(fn($group) => (object)[
+                'team_id' => $group->first()->team_id,
+                'season_id' => $group->first()->season_id,
+                'external_id' => $group->first()->metadata['external_id'],
+                'count' => $group->count(),
+                'ids' => $group->pluck('id')->toArray()
+            ]);
 
         if ($duplicates->isEmpty()) {
             $this->info('Nenalezeny žádné duplicity.');
@@ -45,12 +44,7 @@ class StatsCleanupDuplicatesCommand extends Command
             $this->line("Zpracovávám external_id: {$dup->external_id} (tým {$dup->team_id}, sezóna {$dup->season_id}, počet: {$dup->count})");
 
             if ($dryRun) {
-                $matchIds = BasketballMatch::where('team_id', $dup->team_id)
-                    ->where('season_id', $dup->season_id)
-                    ->where('metadata->external_id', $dup->external_id)
-                    ->pluck('id')
-                    ->toArray();
-                $this->info("  -> [DRY RUN] Sloučil bych zápasy: " . implode(', ', $matchIds));
+                $this->info("  -> [DRY RUN] Sloučil bych zápasy: " . implode(', ', $dup->ids));
                 continue;
             }
 

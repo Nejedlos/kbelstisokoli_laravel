@@ -373,8 +373,8 @@ class FinanceAutomationService
         $incidentKey = $data['metadata']['incident_key'] ?? null;
 
         if ($incidentKey) {
-            // Hledáme v metadata (JSON v DB)
-            $exists = FinanceCharge::where('metadata->incident_key', $incidentKey)->exists();
+            // Hledáme v metadata (JSON v DB) bez použití JSON operátoru pro kompatibilitu
+            $exists = FinanceCharge::where('metadata', 'LIKE', '%"incident_key":"' . $incidentKey . '"%')->exists();
             if ($exists) {
                 return null;
             }

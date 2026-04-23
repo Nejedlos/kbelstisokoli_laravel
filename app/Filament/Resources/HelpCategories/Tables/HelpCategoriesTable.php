@@ -22,11 +22,10 @@ class HelpCategoriesTable
                     ->label(__('admin.resources.help_category.fields.name_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
-                        return $query->where('name->cs', 'like', "%{$search}%")
-                            ->orWhere('name->en', 'like', "%{$search}%");
+                        return $query->where('name', 'like', "%{$search}%");
                     })
                     ->sortable(query: function ($query, string $direction) {
-                        return $query->orderBy('name->cs', $direction);
+                        return $query->orderBy('name', $direction);
                     }),
 
                 TextColumn::make('slug')
@@ -103,7 +102,7 @@ class HelpCategoriesTable
                         }
                         return $query->where(function ($q) use ($data) {
                             foreach ($data['values'] as $value) {
-                                $q->orWhereJsonContains('audience_roles', $value);
+                                $q->orWhere('audience_roles', 'LIKE', '%"' . $value . '"%');
                             }
                         });
                     }),

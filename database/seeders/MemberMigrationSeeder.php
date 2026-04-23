@@ -35,7 +35,7 @@ class MemberMigrationSeeder extends Seeder
             // Smažeme pouze ty, kteří mají legacy metadata nebo nejsou admini
             // Pozor na integritu, PlayerProfile má cizí klíč na User.
             \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
-            \App\Models\PlayerProfile::whereNotNull('metadata->legacy_r_id')->delete();
+            \App\Models\PlayerProfile::all()->filter(fn($p) => isset($p->metadata['legacy_r_id']))->each->delete();
             // User::where('metadata', 'LIKE', '%"legacy_r_id"%')->delete(); // Raději nebudeme mazat uživatele úplně, jen profily.
             \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
         }

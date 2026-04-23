@@ -60,8 +60,7 @@ class FaqsRelationManager extends RelationManager
                     ->label(__('admin.resources.help_faq.fields.question_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
-                        return $query->where('question->cs', 'like', "%{$search}%")
-                            ->orWhere('question->en', 'like', "%{$search}%");
+                        return $query->where('question', 'like', "%{$search}%");
                     }),
                 TextColumn::make('sort_order')
                     ->label(__('admin.resources.help_faq.fields.sort_order'))

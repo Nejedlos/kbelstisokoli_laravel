@@ -72,8 +72,7 @@ class QuickActionsRelationManager extends RelationManager
                     ->label(__('admin.resources.help_quick_action.fields.title_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
-                        return $query->where('title->cs', 'like', "%{$search}%")
-                            ->orWhere('title->en', 'like', "%{$search}%");
+                        return $query->where('title', 'like', "%{$search}%");
                     }),
                 TextColumn::make('icon')
                     ->label(__('admin.resources.help_quick_action.fields.icon'))

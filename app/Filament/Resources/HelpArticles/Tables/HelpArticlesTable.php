@@ -20,11 +20,10 @@ class HelpArticlesTable
                     ->label(__('admin.resources.help_article.fields.title_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
-                        return $query->where('title->cs', 'like', "%{$search}%")
-                            ->orWhere('title->en', 'like', "%{$search}%");
+                        return $query->where('title', 'like', "%{$search}%");
                     })
                     ->sortable(query: function ($query, string $direction) {
-                        return $query->orderBy('title->cs', $direction);
+                        return $query->orderBy('title', $direction);
                     }),
 
                 TextColumn::make('category.name')
@@ -77,7 +76,7 @@ class HelpArticlesTable
             ->filters([
                 SelectFilter::make('category_id')
                     ->label(__('admin.resources.help_article.fields.category'))
-                    ->relationship('category', 'name->cs')
+                    ->relationship('category', 'name')
                     ->searchable(),
                 SelectFilter::make('is_published')
                     ->label(__('admin.resources.help_article.fields.is_published'))
@@ -101,7 +100,7 @@ class HelpArticlesTable
                         }
                         return $query->where(function ($q) use ($data) {
                             foreach ($data['values'] as $value) {
-                                $q->orWhereJsonContains('audience_roles', $value);
+                                $q->orWhere('audience_roles', 'LIKE', '%"' . $value . '"%');
                             }
                         });
                     }),

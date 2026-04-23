@@ -25,30 +25,23 @@ class MatchCleanupService
         ];
 
         // 1. Najdeme zápasy se stejným external_id (nejsilnější vazba)
-        $extDuplicates = BasketballMatch::select('team_id', 'season_id', DB::raw('JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.external_id")) as ext_id'))
-            ->whereNotNull('metadata->external_id')
-            ->groupBy('team_id', 'season_id', 'ext_id')
-            ->havingRaw('COUNT(*) > 1')
-            ->get();
+        $allMatchesWithExtId = BasketballMatch::all()
+            ->filter(fn($m) => !empty($m->metadata['external_id']));
 
-        foreach ($extDuplicates as $dup) {
-            $matches = BasketballMatch::where('team_id', $dup->team_id)
-                ->where('season_id', $dup->season_id)
-                ->where('metadata->external_id', (string)$dup->ext_id)
-                ->orderBy('id')
-                ->get();
+        $groups = $allMatchesWithExtId->groupBy(function($m) {
+            return $m->team_id . '_' . $m->season_id . '_' . $m->metadata['external_id'];
+        })->filter(fn($group) => $group->count() > 1);
 
-            if ($matches->count() > 1) {
-                $stats['groups_found']++;
-                $mainMatch = $matches->first(fn($m) => !empty($m->metadata['boxscore_synced_at'] ?? null)) ?: $matches->first();
-                $toMerge = $matches->filter(fn($m) => $m->id !== $mainMatch->id);
+        foreach ($groups as $matches) {
+            $stats['groups_found']++;
+            $mainMatch = $matches->first(fn($m) => !empty($m->metadata['boxscore_synced_at'] ?? null)) ?: $matches->first();
+            $toMerge = $matches->filter(fn($m) => $m->id !== $mainMatch->id);
 
-                foreach ($toMerge as $duplicate) {
-                    if (!$dryRun) {
-                        $this->mergeMatches($mainMatch, $duplicate);
-                    }
-                    $stats['matches_merged']++;
+            foreach ($toMerge as $duplicate) {
+                if (!$dryRun) {
+                    $this->mergeMatches($mainMatch, $duplicate);
                 }
+                $stats['matches_merged']++;
             }
         }
 

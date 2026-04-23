@@ -38,7 +38,7 @@ class HelpCategoryForm
                             ->components([
                                 Select::make('parent_id')
                                     ->label(__('admin.resources.help_category.fields.parent'))
-                                    ->relationship('parent', 'name->cs')
+                                    ->relationship('parent', 'name')
                                     ->searchable()
                                     ->placeholder('Vyberte nadřazenou kategorii...')
                                     ->default(null),

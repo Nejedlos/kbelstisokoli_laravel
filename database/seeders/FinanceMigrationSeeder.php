@@ -23,10 +23,10 @@ class FinanceMigrationSeeder extends Seeder
         if ($isFresh) {
             $this->command->warn('Režim FRESH: Mažu existující finanční data...');
             \App\Models\ChargePaymentAllocation::truncate();
-            \App\Models\FinancePayment::whereNotNull('metadata->legacy_pay_id')->delete();
-            \App\Models\FinanceCharge::whereNotNull('metadata->legacy_fine_id')->orWhereNotNull('metadata->legacy_p_id')->delete();
-            \App\Models\UserSeasonConfig::whereNotNull('metadata->legacy_id')->delete();
-            \App\Models\FinancialTariff::whereNotNull('metadata->legacy_id')->delete();
+            \App\Models\FinancePayment::all()->filter(fn($p) => isset($p->metadata['legacy_pay_id']))->each->delete();
+            \App\Models\FinanceCharge::all()->filter(fn($c) => isset($c->metadata['legacy_fine_id']) || isset($c->metadata['legacy_p_id']))->each->delete();
+            \App\Models\UserSeasonConfig::all()->filter(fn($c) => isset($c->metadata['legacy_id']))->each->delete();
+            \App\Models\FinancialTariff::all()->filter(fn($t) => isset($t->metadata['legacy_id']))->each->delete();
         }
 
         $this->command->info('Migruji finanční data ze staré DB...');

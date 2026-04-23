@@ -45,11 +45,11 @@ class PartnerForm
                                         TextInput::make('slug.cs')
                                             ->label('Slug (CZ)')
                                             ->required()
-                                            ->unique('partners', 'slug->cs', ignoreRecord: true),
+                                            ->unique('partners', 'slug', ignoreRecord: true),
                                         TextInput::make('slug.en')
                                             ->label('Slug (EN)')
                                             ->required()
-                                            ->unique('partners', 'slug->en', ignoreRecord: true),
+                                            ->unique('partners', 'slug', ignoreRecord: true),
                                     ]),
 
                                 Select::make('type')

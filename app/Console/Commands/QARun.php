@@ -233,7 +233,7 @@ class QARun extends Command
         $batch->refresh();
         $this->line("✅ Legacy import dokončen. Stav: {$batch->status}, Úspěšně: {$batch->success_files}, Chyba: {$batch->failed_files}");
 
-        $statRows = StatisticRow::where('source_metadata->source_type', 'legacy')->count();
+        $statRows = StatisticRow::where('source_metadata', 'LIKE', '%"source_type":"legacy"%')->count();
         $this->line("✅ Celkem naimportováno legacy statistik: $statRows");
     }
 
@@ -278,8 +278,8 @@ class QARun extends Command
         $report .= 'Celkem sezón: '.Season::count()."\n";
         $report .= 'Celkem týmů: '.Team::count()."\n";
         $report .= 'Celkem zápasů: '.BasketballMatch::count()."\n";
-        $report .= 'Externí statistiky (řádky): '.StatisticRow::where('source_metadata->source', 'czbasketball')->count()."\n";
-        $report .= 'Legacy statistiky (řádky): '.StatisticRow::where('source_metadata->source_type', 'legacy')->count()."\n";
+        $report .= 'Externí statistiky (řádky): '.StatisticRow::where('source_metadata', 'LIKE', '%"source":"czbasketball"%')->count()."\n";
+        $report .= 'Legacy statistiky (řádky): '.StatisticRow::where('source_metadata', 'LIKE', '%"source_type":"legacy"%')->count()."\n";
         $report .= 'Unmatched hráči: '.\App\Models\ExternalEntityMapping::where('entity_type', 'player')->whereNull('internal_id')->count()."\n";
 
         $this->info($report);

@@ -132,8 +132,8 @@ class ProcessLegacyImportFileJob implements ShouldQueue
                     // Smazat staré řádky pro stejný set, sezónu a soubor
                     StatisticRow::where('statistic_set_id', $statSet->id)
                         ->where('season_id', $season->id)
-                        ->where('source_metadata->original_filename', $file->original_filename)
-                        ->where('source_metadata->table_type', $tableDto->type)
+                        ->where('source_metadata', 'LIKE', '%"original_filename":"' . $file->original_filename . '"%')
+                        ->where('source_metadata', 'LIKE', '%"table_type":"' . $tableDto->type . '"%')
                         ->delete();
 
                     foreach ($tableDto->rows as $row) {

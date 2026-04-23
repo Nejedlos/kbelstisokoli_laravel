@@ -26,14 +26,13 @@ class RelatedArticlesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('title->cs')
+            ->recordTitleAttribute('title')
             ->columns([
                 TextColumn::make('title')
                     ->label(__('admin.resources.help_article.fields.title_cs'))
                     ->formatStateUsing(fn ($state) => $state['cs'] ?? '')
                     ->searchable(query: function ($query, string $search) {
-                        return $query->where('title->cs', 'like', "%{$search}%")
-                            ->orWhere('title->en', 'like', "%{$search}%");
+                        return $query->where('title', 'like', "%{$search}%");
                     }),
                 TextColumn::make('category.name')
                     ->label(__('admin.resources.help_article.fields.category'))

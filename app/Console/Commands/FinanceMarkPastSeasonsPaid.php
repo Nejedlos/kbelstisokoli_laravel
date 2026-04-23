@@ -64,34 +64,22 @@ class FinanceMarkPastSeasonsPaid extends Command
         $pastSeasonIds = $pastSeasons->pluck('id')->toArray();
 
         // 1. Předpisy typu membership_fee propojené přes user_season_configs
-        $membershipChargesQuery = FinanceCharge::where('status', '!=', 'paid')
+        $configIds = UserSeasonConfig::whereIn('season_id', $pastSeasonIds)->pluck('id')->toArray();
+
+        $allUnpaidMembershipCharges = FinanceCharge::where('status', '!=', 'paid')
             ->where('status', '!=', 'cancelled')
             ->where('charge_type', 'membership_fee')
-            ->whereIn('user_id', function ($query) use ($pastSeasonIds) {
-                $query->select('user_id')
-                    ->from('user_season_configs')
-                    ->whereIn('season_id', $pastSeasonIds);
-            })
-            ->whereRaw("json_extract(metadata, '$.season_config_id') IN (SELECT id FROM user_season_configs WHERE season_id IN (" . implode(',', $pastSeasonIds) . "))");
+            ->get();
 
-        // Pozor: sqlite syntax pro json_extract se může lišit, v Laravelu je lepší použít ->whereJsonIn
-        // Ale season_config_id je v metadata, tak zkusíme standardní Laravel whereJsonIn
+        $membershipChargeIdsToUpdate = $allUnpaidMembershipCharges->filter(function ($charge) use ($configIds) {
+            $chargeConfigId = $charge->metadata['season_config_id'] ?? null;
+            return $chargeConfigId && in_array($chargeConfigId, $configIds);
+        })->pluck('id')->toArray();
 
-        $membershipCharges = FinanceCharge::where('status', '!=', 'paid')
-            ->where('status', '!=', 'cancelled')
-            ->where('charge_type', 'membership_fee')
-            ->where(function ($query) use ($pastSeasonIds) {
-                // Najdeme předpisy, které mají v metadata.season_config_id ID konfigurace, která patří do minulé sezóny
-                $configIds = UserSeasonConfig::whereIn('season_id', $pastSeasonIds)->pluck('id')->toArray();
-                if (empty($configIds)) {
-                    $query->whereRaw('1=0');
-                } else {
-                    $query->whereIn('metadata->season_config_id', $configIds);
-                }
-            });
-
-        $countMembership = $membershipCharges->count();
+        $countMembership = count($membershipChargeIdsToUpdate);
         $this->info("Nalezeno {$countMembership} neuhrazených členských příspěvků v minulých sezónách.");
+
+        // ... (zbytek logiky zůstává podobný, ale použijeme IDs)
 
         // 2. Předpisy (včetně pokut), které spadají do minulých sezón podle due_date
         // Pro každou minulou sezónu určíme rozsah dat
@@ -111,9 +99,7 @@ class FinanceMarkPastSeasonsPaid extends Command
                 ->where('status', '!=', 'cancelled')
                 ->whereBetween('due_date', [$start, $end])
                 // Abychom nepočítali dvakrát ty membership_fee, které jsme už našli přes config
-                ->where(function($q) use ($membershipCharges) {
-                     $q->where('charge_type', '!=', 'membership_fee');
-                })
+                ->where('charge_type', '!=', 'membership_fee')
                 ->get();
 
             $otherChargesToUpdate = $otherChargesToUpdate->concat($charges);
@@ -134,13 +120,15 @@ class FinanceMarkPastSeasonsPaid extends Command
         } else {
             $this->info("Aktualizuji {$totalCount} předpisů...");
 
-            DB::transaction(function () use ($membershipCharges, $otherChargesToUpdate) {
+            DB::transaction(function () use ($membershipChargeIdsToUpdate, $otherChargesToUpdate) {
                 $note = "\n[ARCHIVACE] Automaticky zaplaceno - archivace staré sezóny (Junie)";
 
-                $membershipCharges->update([
-                    'status' => 'paid',
-                    'notes_internal' => DB::raw("CONCAT(COALESCE(notes_internal, ''), '$note')")
-                ]);
+                if (!empty($membershipChargeIdsToUpdate)) {
+                    FinanceCharge::whereIn('id', $membershipChargeIdsToUpdate)->update([
+                        'status' => 'paid',
+                        'notes_internal' => DB::raw("CONCAT(COALESCE(notes_internal, ''), '$note')")
+                    ]);
+                }
 
                 foreach ($otherChargesToUpdate as $charge) {
                     $charge->update([
