@@ -197,9 +197,10 @@ class PlayerSyncService
             // Dekódování HTML entit (často se objevuje &amp; v URL z crawleru)
             $photoUrl = html_entity_decode($photoUrl);
 
-            // Kontrola, zda už fotku v portfoliu nemá (podle původního URL)
+            // Kontrola, zda už fotku v portfoliu má (podle původního URL)
             $existingMedia = $user->getMedia('player_photos')->filter(function (Media $media) use ($photoUrl) {
-                return $media->getCustomProperty('source_url') === $photoUrl;
+                // Musí souhlasit URL a soubor musí fyzicky existovat (pro případ nekonzistence na produkci)
+                return $media->getCustomProperty('source_url') === $photoUrl && file_exists($media->getPath());
             });
 
             $alreadyHas = $existingMedia->isNotEmpty();
