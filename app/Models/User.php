@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\MediaLibrary\HasMedia;
@@ -332,28 +333,46 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
      */
     public function getPlayerPhotoUrl(?int $seasonId = null): ?string
     {
-        $media = $this->getMedia('player_photos');
+        $cacheKey = "user_{$this->id}_player_photo_url_" . ($seasonId ?: 'latest');
 
-        if ($media->isEmpty()) {
-            return null;
-        }
+        return Cache::remember($cacheKey, now()->addDay(), function () use ($seasonId) {
+            $media = $this->getMedia('player_photos');
 
-        // 1. Pokus o fotku ze specifické sezóny
-        if ($seasonId) {
-            $seasonMedia = $media->first(function ($item) use ($seasonId) {
-                return (int) $item->getCustomProperty('season_id') === (int) $seasonId;
-            });
-
-            if ($seasonMedia) {
-                return $seasonMedia->getUrl();
+            if ($media->isEmpty()) {
+                return null;
             }
-        }
 
-        // 2. Pokus o nejnovější fotku (podle ID média, což obvykle odpovídá času přidání)
-        // Seřadíme sestupně podle ID a vezmeme první
-        $latestMedia = $media->sortByDesc('id')->first();
+            // 1. Pokus o fotku ze specifické sezóny
+            if ($seasonId) {
+                $seasonMedia = $media->first(function ($item) use ($seasonId) {
+                    return (int) $item->getCustomProperty('season_id') === (int) $seasonId;
+                });
 
-        return $latestMedia?->getUrl();
+                if ($seasonMedia) {
+                    if (file_exists($seasonMedia->getPath('roster'))) {
+                        return $seasonMedia->getUrl('roster');
+                    }
+                    if (file_exists($seasonMedia->getPath())) {
+                        return $seasonMedia->getUrl();
+                    }
+                }
+            }
+
+            // 2. Pokus o nejnovější fotku (podle ID média)
+            // Filtrujeme pouze ty, které existují na disku (preferujeme konverzi roster)
+            $latestMedia = $media->sortByDesc('id')->first();
+
+            if ($latestMedia) {
+                if (file_exists($latestMedia->getPath('roster'))) {
+                    return $latestMedia->getUrl('roster');
+                }
+                if (file_exists($latestMedia->getPath())) {
+                    return $latestMedia->getUrl();
+                }
+            }
+
+            return null;
+        });
     }
 
     public function getAvatarUrl(string $conversion = ''): string

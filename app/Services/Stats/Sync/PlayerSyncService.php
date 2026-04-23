@@ -257,6 +257,12 @@ class PlayerSyncService
                                 ->withCustomProperties($customProperties)
                                 ->toMediaCollection('player_photos');
 
+                            // Invalidace cache pro fotku hráče
+                            \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_latest");
+                            if (isset($customProperties['season_id'])) {
+                                \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_" . $customProperties['season_id']);
+                            }
+
                             $success = true;
                             Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$url}");
                             break;
@@ -323,6 +329,12 @@ class PlayerSyncService
                         ->usingFileName($fileName)
                         ->withCustomProperties($customProperties)
                         ->toMediaCollection('player_photos');
+
+                    // Invalidace cache pro fotku hráče
+                    \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_latest");
+                    if (isset($customProperties['season_id'])) {
+                        \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_" . $customProperties['season_id']);
+                    }
 
                     Log::info("PlayerSyncService: Stažena fotografie hráče {$user->display_name} Z DETAILU (ExtID: {$externalId})");
                 } else {

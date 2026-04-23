@@ -111,6 +111,7 @@ return [
         'step_3_title' => 'Staň se Sokolem',
         'step_3_desc' => 'Pokud si sedneme herně i lidsky, vyřídíme registraci a můžeš naskočit do zápasů.',
         'standings' => 'Tabulka soutěže',
+        'photo_pending' => 'Fotka se připravuje',
     ],
 
     'categories' => [

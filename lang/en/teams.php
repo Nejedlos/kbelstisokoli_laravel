@@ -111,6 +111,7 @@ return [
         'step_3_title' => 'Become a Falcon',
         'step_3_desc' => 'If we fit together both in play and personally, we will handle the registration and you can jump into the games.',
         'standings' => 'Competition Standings',
+        'photo_pending' => 'Photo pending',
     ],
 
     'categories' => [

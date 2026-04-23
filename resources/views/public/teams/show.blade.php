@@ -76,16 +76,7 @@
                                 @endphp
                                 <div class="card group overflow-hidden border-b-4 border-slate-200 hover:border-primary transition-all duration-300">
                                     <div class="relative aspect-[3/4] overflow-hidden bg-slate-100">
-                                        @if($photoUrl)
-                                            <img src="{{ $photoUrl }}"
-                                                 alt="{{ $user->name }}"
-                                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                                        @else
-                                            <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 p-6">
-                                                <i class="fa-light fa-user fa-3x mb-3 opacity-20"></i>
-                                                <span class="text-[9px] uppercase font-bold tracking-widest opacity-40">Photo pending</span>
-                                            </div>
-                                        @endif
+                                        <x-player-photo :user="$user" :photo-url="$photoUrl" size="md" />
 
                                         @if($playerProfile->jersey_number)
                                             <div class="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg border border-slate-100">
