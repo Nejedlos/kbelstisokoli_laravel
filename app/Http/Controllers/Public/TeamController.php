@@ -51,8 +51,14 @@ class TeamController extends Controller
     public function show(string $slug): View
     {
         $team = \App\Models\Team::where('slug', $slug)
-            ->with(['coaches', 'seo'])
+            ->with(['coaches', 'seo', 'rosterPlayers.user'])
             ->firstOrFail();
+
+        // Seřadíme hráče podle příjmení uživatele
+        $sortedRoster = $team->rosterPlayers->sortBy(function ($profile) {
+            return $profile->user->last_name ?? '';
+        });
+        $team->setRelation('rosterPlayers', $sortedRoster);
 
         $randomPhotos = \App\Support\PhotoGallery::getRandomPhotos(8, $team->id);
 

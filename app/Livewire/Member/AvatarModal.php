@@ -236,6 +236,12 @@ class AvatarModal extends Component
         session()->flash('status', __('member.profile.avatar.flash.deleted'));
     }
 
+    public function close()
+    {
+        $this->isOpen = false;
+        $this->reset('avatarFile', 'cropData', 'previewUrl');
+    }
+
     protected function getInitials($name)
     {
         $words = explode(' ', $name);

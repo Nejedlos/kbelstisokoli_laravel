@@ -20,6 +20,7 @@ return [
     'breadcrumbs' => 'Teams',
 
     'detail' => [
+        'roster' => 'Team Roster',
         'about' => 'About the Team',
         'info' => 'Quick Info',
         'competition' => 'Competition',

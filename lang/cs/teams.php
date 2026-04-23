@@ -20,6 +20,7 @@ return [
     'breadcrumbs' => 'Týmy',
 
     'detail' => [
+        'roster' => 'Soupiska týmu',
         'about' => 'O týmu',
         'info' => 'Rychlé info',
         'competition' => 'Soutěž',
