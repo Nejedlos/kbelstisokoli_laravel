@@ -135,16 +135,12 @@ class PostForm
                                                 if ($state && method_exists($livewire, 'save')) {
                                                     try {
                                                         $livewire->save();
-                                                        // Explicitní oznámení frontendu, že uložení po uploadu je kompletní
-                                                        $livewire->dispatch('autosave-finished');
                                                     } catch (\Throwable $e) {
                                                         Log::error('Autosave error: ' . $e->getMessage(), [
                                                             'exception' => get_class($e),
                                                             'file' => $e->getFile(),
                                                             'line' => $e->getLine(),
                                                         ]);
-                                                        // I při chybě musíme poslat signál k ukončení loaderu, aby nezůstal viset
-                                                        $livewire->dispatch('autosave-finished');
                                                         throw $e;
                                                     }
                                                 }

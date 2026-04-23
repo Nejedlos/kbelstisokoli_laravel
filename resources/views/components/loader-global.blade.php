@@ -58,9 +58,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.store('loader', {
                 isVisible: false,
-                activeUploads: 0,
                 activeRequests: 0,
-                expectingFinalRequest: false,
                 safetyTimer: null,
                 stopTimer: null,
 
@@ -76,20 +74,18 @@
                 stop(force = false) {
                     if (force) {
                         this.isVisible = false;
-                        this.activeUploads = 0;
                         this.activeRequests = 0;
-                        this.expectingFinalRequest = false;
                         if (this.safetyTimer) clearTimeout(this.safetyTimer);
                         return;
                     }
 
-                    if (this.activeUploads > 0 || this.activeRequests > 0 || this.expectingFinalRequest) {
+                    if (this.activeRequests > 0) {
                         return;
                     }
 
                     if (this.stopTimer) clearTimeout(this.stopTimer);
                     this.stopTimer = setTimeout(() => {
-                        if (this.activeUploads === 0 && this.activeRequests === 0 && !this.expectingFinalRequest) {
+                        if (this.activeRequests === 0) {
                             this.isVisible = false;
                             if (this.safetyTimer) clearTimeout(this.safetyTimer);
                         }
@@ -103,9 +99,6 @@
         ['mousedown', 'keydown', 'submit', 'change', 'click', 'touchstart'].forEach(type => {
             window.addEventListener(type, (e) => {
                 window.lastUserInteraction = Date.now();
-                if (type === 'change' && e.target && e.target.type === 'file' && e.target.files && e.target.files.length > 0) {
-                    if (window.Alpine) Alpine.store('loader').start();
-                }
             }, true);
         });
 
@@ -119,43 +112,14 @@
         document.addEventListener('livewire:init', () => {
             const loader = Alpine.store('loader');
 
-            window.addEventListener('autosave-finished', () => {
-                loader.stop(true);
-            });
-
-            window.addEventListener('livewire:upload-start', () => {
-                loader.activeUploads++;
-                loader.start();
-            });
-
-            window.addEventListener('livewire:upload-finish', () => {
-                loader.activeUploads = Math.max(0, loader.activeUploads - 1);
-                loader.expectingFinalRequest = true;
-
-                // Pokud do 1s nezačne žádný request, flag zrušíme (pro Create stránky)
-                setTimeout(() => {
-                    if (loader.activeRequests === 0 && loader.expectingFinalRequest) {
-                        loader.expectingFinalRequest = false;
-                        loader.stop();
-                    }
-                }, 1000);
-
-                loader.stop();
-            });
-
-            window.addEventListener('livewire:upload-error', () => {
-                loader.activeUploads = Math.max(0, loader.activeUploads - 1);
-                loader.stop(true);
-            });
-
             Livewire.hook('request', ({ respond, succeed, fail, options }) => {
                 if (options.method === 'POLL' || options.silent || options.background) return;
 
                 const isUserAction = (Date.now() - window.lastUserInteraction) < 1000;
                 const isNavigation = !!options.navigate;
 
-                // Pokud už loader běží, držíme ho i automatickými requesty (např. po-uploadový state update)
-                const shouldTrack = isUserAction || isNavigation || loader.isVisible;
+                // Sledujeme pouze navigaci nebo explicitní uživatelskou akci (uložení, smazání atd.)
+                const shouldTrack = isUserAction || isNavigation;
 
                 if (!shouldTrack) return;
 

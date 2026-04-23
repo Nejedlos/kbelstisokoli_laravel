@@ -19,8 +19,8 @@ Při nahrávání hlavního náhledového obrázku dochází k automatickému zp
 4.  **Zpětná kompatibilita:** Pokud dojde ke změně titulku článku, fyzický soubor je na serveru automaticky přejmenován, aby odpovídal novému titulku (důležité pro SEO).
 
 ## 4. Uživatelské rozhraní
-- **Globální loader:** Během nahrávání a ukládání obrázku se v administraci zobrazuje globální basketbalový loader. Je implementován tak, aby pokrýval i čas pro přípravu souboru (resize u klienta) a následné automatické uložení, čímž je dosaženo plynulého uživatelského zážitku.
-- **Automatické uložení (Autosave):** Po dokončení nahrávání obrázku se článek **automaticky uloží** do databáze. Redaktor nemusí ručně klikat na tlačítko "Uložit změny" jen kvůli nahrání fotky. Proces je chráněn logováním pro případné debugování na straně serveru.
+- **Indikace nahrávání:** Během nahrávání obrázku se v administraci zobrazuje standardní indikátor v poli pro nahrávání (indikátor FilePond). Globální loader byl z procesu nahrávání odstraněn pro lepší plynulost a stabilitu uživatelského rozhraní.
+- **Automatické uložení (Autosave):** Po dokončení nahrávání obrázku se článek **automaticky uloží** do databáze. Redaktor nemusí ručně klikat na tlačítko "Uložit změny" jen kvůli nahrání fotky. Proces je na pozadí chráněn logováním pro případné debugování na straně serveru.
 
 ## 5. Technické poznámky (Filament v5)
 - Pro správnou funkci autosave je u pole `featured_image` zapnuta direktiva `live()`, která zajistí synchronizaci stavu před samotným uložením.
