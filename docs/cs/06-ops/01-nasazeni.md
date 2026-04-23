@@ -162,6 +162,50 @@ Navíc je bootstrap aplikace v `bootstrap/app.php` zabezpečen tak, aby selhán�
 
 ---
 
+## Robustní nasazení (Rsync + SSH Reset) - DOPORUČENO PŘI POTÍŽÍCH
+
+Tento postup je nejspolehlivější v situaci, kdy na serveru dochází ke konfliktům v Gitu (např. po diagnostických testech) nebo když verze Node.js na serveru nepodporuje sestavení assetů (Vite v7 vyžaduje Node 20+, Webglobe má často v18).
+
+### 1. Příprava lokálně (Váš počítač)
+Ujistěte se, že jste na správné větvi, máte vše commitnuto a pushnuto.
+
+```bash
+# Sestavení assetů
+npm run build
+
+# Přenos assetů na produkci (včetně promazání starých)
+# Synchronizujeme do funkčního adresáře (pro PHP) i do veřejného adresáře (pro Nginx)
+rsync -avz --delete -e 'ssh -p 20001' public/build/ ssh-588875@dw191.webglobe.com:/home/html/kbelstisokoli.cz/public_html/secret/public/build/
+rsync -avz --delete -e 'ssh -p 20001' public/build/ ssh-588875@dw191.webglobe.com:/home/html/kbelstisokoli.cz/public_html/subdomains/new/build/
+
+# Volitelně synchronizace dalších statických assetů
+rsync -avz --delete -e 'ssh -p 20001' public/assets/ ssh-588875@dw191.webglobe.com:/home/html/kbelstisokoli.cz/public_html/secret/public/assets/
+rsync -avz --delete -e 'ssh -p 20001' public/assets/ ssh-588875@dw191.webglobe.com:/home/html/kbelstisokoli.cz/public_html/subdomains/new/assets/
+```
+
+### 2. Aktualizace kódu na serveru (SSH)
+Tento krok vynutí čistý stav aplikace podle repozitáře a zahodí případné lokální změny/testy na serveru.
+
+```bash
+ssh -p 20001 ssh-588875@dw191.webglobe.com
+
+# Přejít do funkčního adresáře
+cd /home/html/kbelstisokoli.cz/public_html/secret
+
+# Vynucení čistého stavu z Gitu
+git fetch origin
+git reset --hard origin/chore/upgrade-laravel-13-ai-native  # Nahraďte vaší větví (main / chore/...)
+git clean -fd  # Smaže nepoužívané soubory vytvořené na serveru
+
+# Optimalizace aplikace (používat vždy php8.4)
+php8.4 artisan filament:optimize
+php8.4 artisan optimize
+php8.4 artisan view:clear
+php8.4 artisan cache:clear
+```
+
+---
+
 ## Předpoklady na serveru (Webglobe)
 1. **PHP:** Verze 8.4+ (včetně JIT optimalizací).
 2. **SSH Přístup:** Povoleno v administraci Webglobe (nutné pro příkazy `app:deploy` i `app:sync`).
