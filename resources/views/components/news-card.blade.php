@@ -8,10 +8,18 @@
         <i class="fa-light fa-basketball text-8xl"></i>
     </div>
 
-    @if($post->featured_image)
+    @php
+        $featuredImageUrl = $post->getFirstMediaUrl('featured_image');
+        // Zpětná kompatibilita pro staré záznamy, které mají cestu přímo ve sloupci
+        if (!$featuredImageUrl && $post->featured_image) {
+            $featuredImageUrl = 'storage/' . $post->featured_image;
+        }
+    @endphp
+
+    @if($featuredImageUrl)
         <div class="aspect-[16/10] overflow-hidden relative">
             <x-picture
-                :src="'storage/' . $post->featured_image"
+                :src="$featuredImageUrl"
                 :alt="$post->title"
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"

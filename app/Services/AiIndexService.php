@@ -773,6 +773,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $onProgress("Frontend Post: {$title} [{$status}, {$size} chars]");
             }
 
+            $image = $post->getFirstMediaUrl('featured_image') ?: $post->featured_image;
             $this->updateOrCreateDocument([
                 'type' => 'frontend.resource',
                 'source' => 'post:'.$post->id,
@@ -781,9 +782,9 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 'locale' => $locale,
                 'content' => $content,
                 'metadata' => [
-                    'image' => $post->featured_image,
+                    'image' => $image,
                 ],
-                'checksum' => hash('sha256', $content.$url.$title.$post->featured_image),
+                'checksum' => hash('sha256', $content.$url.$title.$image),
             ], $force);
             $count++;
         }

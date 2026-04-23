@@ -2,9 +2,15 @@
 
 @section('content')
     <article>
+        @php
+            $featuredImageUrl = $post->getFirstMediaUrl('featured_image');
+            if (!$featuredImageUrl && $post->featured_image) {
+                $featuredImageUrl = 'storage/' . $post->featured_image;
+            }
+        @endphp
         <x-page-header
             :title="$post->title"
-            :image="$post->featured_image ? 'storage/' . $post->featured_image : null"
+            :image="$featuredImageUrl"
             :breadcrumbs="[__('news.breadcrumbs') => route('public.news.index'), $post->title => null]"
         />
 

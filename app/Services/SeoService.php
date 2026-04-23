@@ -187,6 +187,13 @@ class SeoService
             return web_asset($seo->og_image);
         }
 
+        if ($model instanceof \Spatie\MediaLibrary\HasMedia) {
+            $mediaUrl = $model->getFirstMediaUrl('featured_image');
+            if ($mediaUrl) {
+                return web_asset($mediaUrl);
+            }
+        }
+
         if ($model && isset($model->featured_image) && $model->featured_image) {
             return web_asset($model->featured_image);
         }
@@ -276,11 +283,12 @@ class SeoService
 
         // Article if post
         if ($model instanceof \App\Models\Post) {
+            $ogImage = $this->resolveOgImage($seo, $model, $settings);
             $article = [
                 '@context' => 'https://schema.org',
                 '@type' => 'NewsArticle',
                 'headline' => $model->title,
-                'image' => $model->featured_image ? [web_asset($model->featured_image)] : null,
+                'image' => $ogImage ? [$ogImage] : null,
                 'datePublished' => $model->publish_at?->toIso8601String() ?? $model->created_at->toIso8601String(),
                 'dateModified' => $model->updated_at->toIso8601String(),
                 'author' => [
