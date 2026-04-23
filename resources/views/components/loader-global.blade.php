@@ -110,9 +110,10 @@
         });
 
         document.addEventListener('livewire:init', () => {
-            const loader = Alpine.store('loader');
-
             Livewire.hook('request', ({ respond, succeed, fail, options }) => {
+                const loader = window.Alpine ? Alpine.store('loader') : null;
+                if (!loader) return;
+
                 if (options.method === 'POLL' || options.silent || options.background) return;
 
                 const isUserAction = (Date.now() - window.lastUserInteraction) < 1000;
