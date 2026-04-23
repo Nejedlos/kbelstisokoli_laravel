@@ -81,8 +81,14 @@
             window.activeRequests = 0;
             window.lastUploadFinish = 0;
 
+            // Debugging (pouze v developmentu nebo pokud je zapnutý debug v localStorage)
+            const debugLoading = localStorage.getItem('debug_loading') === 'true';
+            const log = (...args) => { if (debugLoading) console.log('[Loader]', ...args); };
+
             // Sjednocená funkce pro vypnutí loaderu s kontrolou všech aktivních procesů
             window.checkAndStopLoader = function() {
+                log('Checking stop:', { uploads: window.activeUploads, requests: window.activeRequests });
+
                 if (window.activeUploads > 0 || window.activeRequests > 0) {
                     return;
                 }
@@ -92,24 +98,41 @@
                 // 2. Zajišťuje, že uživatel stihne vnímat 100% progresu v UI
                 setTimeout(() => {
                     if (window.activeUploads === 0 && window.activeRequests === 0) {
+                        log('Stopping loader');
                         window.dispatchEvent(new CustomEvent('loading-stop'));
                     }
                 }, 600);
             };
 
+            // Naslouchání na explicitní dokončení autosavu
+            window.addEventListener('autosave-finished', () => {
+                log('Autosave finished event received');
+                // Vynutíme kontrolu a případné shození loaderu po krátké pauze,
+                // aby se stihly zpracovat případné poslední DOM updates
+                setTimeout(() => {
+                    if (window.activeUploads === 0) {
+                        window.activeRequests = 0;
+                    }
+                    window.checkAndStopLoader();
+                }, 100);
+            });
+
             window.addEventListener('livewire:upload-start', () => {
                 window.activeUploads++;
+                log('Upload start:', window.activeUploads);
                 window.dispatchEvent(new CustomEvent('loading-start'));
             });
 
             window.addEventListener('livewire:upload-finish', () => {
                 window.activeUploads = Math.max(0, window.activeUploads - 1);
                 window.lastUploadFinish = Date.now();
+                log('Upload finish:', window.activeUploads);
                 window.checkAndStopLoader();
             });
 
             window.addEventListener('livewire:upload-error', () => {
                 window.activeUploads = Math.max(0, window.activeUploads - 1);
+                log('Upload error:', window.activeUploads);
                 window.checkAndStopLoader();
             });
 
@@ -120,24 +143,19 @@
                 }
 
                 // 2. Detekce, zda požadavek vyvolal uživatel, jde o navigaci, nebo následuje po uploadu (autosave)
-                const isAfterUpload = (Date.now() - window.lastUploadFinish) < 1000;
-                const isUserAction = (Date.now() - window.lastUserInteraction) < 300 || isAfterUpload;
+                const isAfterUpload = (Date.now() - window.lastUploadFinish) < 1500; // Zvýšeno na 1.5s pro jistotu
+                const isUserAction = (Date.now() - window.lastUserInteraction) < 500 || isAfterUpload;
                 const isNavigation = !!options.navigate;
 
-                // 3. Pojistka pro specifické background komponenty (např. dropdown notifikací nebo sync bar)
+                // 3. Pojistka pro specifické background komponenty
                 const componentName = (options.fingerprint && options.fingerprint.name) || options.name || '';
                 const isBackgroundComponent = [
                     'member.notification-dropdown',
                     'sync-status-bar',
                     'sync-status-indicator',
                     'App\\Livewire\\SyncStatusBar'
-                ].includes(componentName) || (options.updates && options.updates.some(u => [
-                    'member.notification-dropdown',
-                    'sync-status-bar',
-                    'App\\Livewire\\SyncStatusBar'
-                ].includes(u.name)));
+                ].includes(componentName);
 
-                // Background komponenty nikdy nespouštějí globální loader (mají vlastní indikaci)
                 if (isBackgroundComponent) {
                     return;
                 }
@@ -147,16 +165,7 @@
                     return;
                 }
 
-                // 5. Ignorujeme stránky s vlastním terminálem nebo specifickou indikací (System Console, AI Search)
-                // Povolujeme pouze navigaci NA tyto stránky (aby se loader ukázal při kliknutí v menu),
-                // ale při akcích PŘÍMO NA STRÁNCE (isNavigation === false) jej vypínáme.
-                const isCustomIndicatorPage = window.location.pathname.includes('/system-console')
-                    || window.location.pathname.includes('/ai-search');
-
-                if (isCustomIndicatorPage && !isNavigation) {
-                    return;
-                }
-
+                log('Request start:', componentName);
                 window.activeRequests++;
                 window.dispatchEvent(new CustomEvent('loading-start'));
 
@@ -165,18 +174,15 @@
                     if (finished) return;
                     finished = true;
                     window.activeRequests = Math.max(0, window.activeRequests - 1);
+                    log('Request stop:', { component: componentName, remaining: window.activeRequests });
                     window.checkAndStopLoader();
                 };
 
                 // Livewire 3 hook callbacks
-                // Respond voláme jen pro označení, že data dorazila, ale loader vypínáme až v succeed (po DOM update)
                 succeed(stopRequest);
                 fail((error) => {
                     const isCancelled = error && typeof error === 'object' && error.status === null;
-
-                    if (isCancelled) {
-                        // Suppress background abort errors
-                    } else {
+                    if (!isCancelled) {
                         console.error('[Livewire] Global Loader Error Catch:', error);
                     }
                     stopRequest();
