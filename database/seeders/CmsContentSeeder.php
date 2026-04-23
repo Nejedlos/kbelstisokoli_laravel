@@ -355,7 +355,7 @@ class CmsContentSeeder extends Seeder
         $footerClubItems = [
             ['label' => ['cs' => 'Muži C', 'en' => 'Men C'], 'url' => '/tymy/muzi-c', 'sort' => 10],
             ['label' => ['cs' => 'Muži E', 'en' => 'Men E'], 'url' => '/tymy/muzi-e', 'sort' => 20],
-            ['label' => ['cs' => 'Hlavní web TJ Sokol Kbely Basketbal', 'en' => 'Main Club Website'], 'url' => 'https://www.basketkbely.cz/', 'sort' => 30, 'is_external' => true],
+            ['label' => ['cs' => 'TJ Sokol Kbely Basketball', 'en' => 'TJ Sokol Kbely Basketball'], 'url' => 'https://www.basketkbely.cz/', 'sort' => 30, 'is_external' => true],
             ['label' => ['cs' => 'Nábor mládeže / Začni hrát', 'en' => 'Youth Recruitment'], 'url' => 'https://www.basketkbely.cz/zacnihrat', 'sort' => 40, 'is_external' => true],
             ['label' => ['cs' => 'Družstva (A, B, D a mládež)', 'en' => 'Teams (A, B, D & Youth)'], 'url' => 'https://www.basketkbely.cz/druzstva', 'sort' => 50, 'is_external' => true],
         ];

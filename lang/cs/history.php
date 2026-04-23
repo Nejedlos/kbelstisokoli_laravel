@@ -42,7 +42,7 @@ return [
         ],
         'today' => [
             'title' => 'Současnost: Týmy oddílu',
-            'content' => 'Kbelský basketbalový oddíl v současné době disponuje širokou základnou. Elitní týmy A, B a D hrají pod hlavičkou TJ Sokol Kbely Basketbal na hlavním webu, zatímco náš web se specializuje na komunitu kolem týmů C a E v Letňanech.',
+            'content' => 'Kbelský basketbalový oddíl v současné době disponuje širokou základnou. Elitní týmy A, B a D hrají pod hlavičkou TJ Sokol Kbely Basketball na hlavním webu, zatímco náš web se specializuje na komunitu kolem týmů C a E v Letňanech.',
         ],
     ],
 

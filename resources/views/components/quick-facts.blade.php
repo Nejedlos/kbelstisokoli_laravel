@@ -78,7 +78,7 @@
         </div>
         <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-2">{{ __('general.main_club') }}</h4>
         <div class="font-bold text-lg mb-1 leading-tight tracking-tight">
-            {{ $branding['club_name'] ?? 'TJ Sokol Kbely' }}
+            {{ __('general.main_club_name') }}
         </div>
         <div class="text-xs text-slate-400 mb-4">{{ __('general.youth_recruitment') }}</div>
         <a href="{{ $branding['main_club_url'] ?? 'https://www.basketkbely.cz/' }}" target="_blank" rel="noopener" class="text-xs font-black uppercase text-primary hover:text-white flex items-center group/link">
