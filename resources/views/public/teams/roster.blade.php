@@ -45,8 +45,8 @@
                                     $user = $playerProfile->user;
                                     $photoUrl = $user->getPlayerPhotoUrl();
                                 @endphp
-                                <div class="card group overflow-hidden border-b-4 border-slate-200 hover:border-primary transition-all duration-300">
-                                    <div class="relative aspect-[3/4] overflow-hidden bg-slate-100">
+                                <div class="card group flex flex-col h-full overflow-hidden border-b-4 border-slate-200 hover:border-primary transition-all duration-300">
+                                    <div class="relative w-full aspect-[3/4] overflow-hidden bg-slate-100 shrink-0">
                                         <x-player-photo :user="$user" :photo-url="$photoUrl" size="lg" />
 
                                         @if($playerProfile->jersey_number)
@@ -63,7 +63,7 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <div class="p-5 bg-white">
+                                    <div class="p-5 bg-white flex-grow">
                                         <h3 class="text-lg font-black uppercase leading-tight group-hover:text-primary transition-colors mb-1">
                                             {{ $user->last_name }}
                                         </h3>

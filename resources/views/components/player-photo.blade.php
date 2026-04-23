@@ -1,7 +1,7 @@
 @props([
     'user',
     'photoUrl' => null,
-    'class' => 'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105',
+    'class' => 'w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105',
     'size' => 'lg'
 ])
 
@@ -21,7 +21,7 @@
     };
 @endphp
 
-<div {{ $attributes->merge(['class' => 'relative w-full h-full bg-slate-100 flex items-center justify-center overflow-hidden']) }}>
+<div {{ $attributes->merge(['class' => 'relative w-full h-full bg-slate-100 flex items-start justify-center overflow-hidden']) }}>
     @if($photoUrl)
         <img src="{{ $photoUrl }}"
              alt="{{ $user->display_name }}"
