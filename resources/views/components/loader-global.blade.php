@@ -32,116 +32,120 @@
 @endphp
 
 <div x-data="{
-          globalLoading: false,
-          loadingMessages: {{ json_encode($loadingMessages) }},
           currentLoadingMessage: '',
           updateLoadingMessage() {
-              const msg = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
+              const messages = {{ json_encode($loadingMessages) }};
+              const msg = messages[Math.floor(Math.random() * messages.length)];
               this.currentLoadingMessage = msg.replace(':title', '{{ $displayTitle }}');
           }
       }"
       x-init="
           updateLoadingMessage();
-          window.addEventListener('loading-start', () => { globalLoading = true; updateLoadingMessage(); });
-          window.addEventListener('loading-stop', () => { globalLoading = false; });
+          $watch('$store.loader.isVisible', value => {
+              if (value) updateLoadingMessage();
+          });
       "
+      @loading-start.window="$store.loader.start()"
+      @loading-stop.window="$store.loader.stop(true)"
       class="contents"
 >
-    <x-loader-basketball x-show="globalLoading" x-cloak class="z-[100000]">
+    <x-loader-basketball x-show="$store.loader.isVisible" x-cloak class="z-[100000]">
         <span x-html="currentLoadingMessage.replace('Sokol', '<span class=\'text-primary font-black uppercase tracking-wider\'>Sokol</span>').replace('Sokoli', '<span class=\'text-primary font-black uppercase tracking-wider\'>Sokoli</span>')"></span>
     </x-loader-basketball>
 
     @once
     <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('loader', {
+                isVisible: false,
+                activeUploads: 0,
+                activeRequests: 0,
+                expectingFinalRequest: false,
+                safetyTimer: null,
+                stopTimer: null,
+
+                start() {
+                    this.isVisible = true;
+                    if (this.stopTimer) clearTimeout(this.stopTimer);
+
+                    // Safety timeout - po 60s loader vypneme (prevence "zaseknutí")
+                    if (this.safetyTimer) clearTimeout(this.safetyTimer);
+                    this.safetyTimer = setTimeout(() => this.stop(true), 60000);
+                },
+
+                stop(force = false) {
+                    if (force) {
+                        this.isVisible = false;
+                        this.activeUploads = 0;
+                        this.activeRequests = 0;
+                        this.expectingFinalRequest = false;
+                        if (this.safetyTimer) clearTimeout(this.safetyTimer);
+                        return;
+                    }
+
+                    if (this.activeUploads > 0 || this.activeRequests > 0 || this.expectingFinalRequest) {
+                        return;
+                    }
+
+                    if (this.stopTimer) clearTimeout(this.stopTimer);
+                    this.stopTimer = setTimeout(() => {
+                        if (this.activeUploads === 0 && this.activeRequests === 0 && !this.expectingFinalRequest) {
+                            this.isVisible = false;
+                            if (this.safetyTimer) clearTimeout(this.safetyTimer);
+                        }
+                    }, 400); // Rychlejší odezva
+                }
+            });
+        });
+
         // Detekce uživatelské interakce
         window.lastUserInteraction = window.lastUserInteraction || 0;
         ['mousedown', 'keydown', 'submit', 'change', 'click', 'touchstart'].forEach(type => {
             window.addEventListener(type, (e) => {
                 window.lastUserInteraction = Date.now();
                 if (type === 'change' && e.target && e.target.type === 'file' && e.target.files && e.target.files.length > 0) {
-                    window.dispatchEvent(new CustomEvent('loading-start'));
+                    if (window.Alpine) Alpine.store('loader').start();
                 }
             }, true);
         });
 
-        // Tlumení tichých Livewire chyb (zrušené požadavky)
+        // Tlumení tichých Livewire chyb
         window.addEventListener('unhandledrejection', event => {
             if (event.reason && typeof event.reason === 'object' && event.reason.status === null) {
                 event.preventDefault();
             }
         });
 
-        // Livewire integration
         document.addEventListener('livewire:init', () => {
-            window.activeUploads = 0;
-            window.activeRequests = 0;
-            window.lastUploadFinish = 0;
-            window.expectingFinalRequest = false;
-            window.loaderSafetyTimeout = null;
+            const loader = Alpine.store('loader');
 
-            const debugLoading = localStorage.getItem('debug_loading') === 'true';
-            const log = (...args) => { if (debugLoading) console.log('[Loader]', ...args); };
-
-            window.checkAndStopLoader = function(force = false) {
-                log('Checking stop:', { uploads: window.activeUploads, requests: window.activeRequests, force, expecting: window.expectingFinalRequest });
-
-                if (!force && (window.activeUploads > 0 || window.activeRequests > 0 || window.expectingFinalRequest)) {
-                    return;
-                }
-
-                // Malá prodleva pro UI a řetězené akce
-                setTimeout(() => {
-                    if (force || (window.activeUploads === 0 && window.activeRequests === 0)) {
-                        log('Stopping loader now');
-                        window.dispatchEvent(new CustomEvent('loading-stop'));
-                        window.expectingFinalRequest = false;
-                        if (window.loaderSafetyTimeout) clearTimeout(window.loaderSafetyTimeout);
-                    }
-                }, 500);
-            };
-
-            // Event ze serveru po autosavu
             window.addEventListener('autosave-finished', () => {
-                log('Autosave finished signal received');
-                window.expectingFinalRequest = false;
-                window.activeRequests = 0; // Agresivní reset pro jistotu
-                window.checkAndStopLoader(true);
+                loader.stop(true);
             });
 
             window.addEventListener('livewire:upload-start', () => {
-                window.activeUploads++;
-                log('Upload started', window.activeUploads);
-                window.dispatchEvent(new CustomEvent('loading-start'));
-
-                // Safety timeout - pokud se nic nestane do 2 minut (velké soubory), loader vypneme
-                if (window.loaderSafetyTimeout) clearTimeout(window.loaderSafetyTimeout);
-                window.loaderSafetyTimeout = setTimeout(() => {
-                    log('Safety timeout hit');
-                    window.checkAndStopLoader(true);
-                }, 120000);
+                loader.activeUploads++;
+                loader.start();
             });
 
             window.addEventListener('livewire:upload-finish', () => {
-                window.activeUploads = Math.max(0, window.activeUploads - 1);
-                window.lastUploadFinish = Date.now();
-                window.expectingFinalRequest = true; // Budeme čekat na následný autosave request
-                log('Upload finished, expecting final request');
+                loader.activeUploads = Math.max(0, loader.activeUploads - 1);
+                loader.expectingFinalRequest = true;
 
-                // Pokud do 2 sekund nezačne žádný request, flag zrušíme
+                // Pokud do 1s nezačne žádný request, flag zrušíme (pro Create stránky)
                 setTimeout(() => {
-                    if (window.activeRequests === 0 && window.expectingFinalRequest) {
-                        log('No final request started, clearing flag');
-                        window.expectingFinalRequest = false;
-                        window.checkAndStopLoader();
+                    if (loader.activeRequests === 0 && loader.expectingFinalRequest) {
+                        loader.expectingFinalRequest = false;
+                        loader.stop();
                     }
-                }, 2000);
+                }, 1000);
 
-                window.checkAndStopLoader();
+                loader.stop();
             });
 
             window.addEventListener('livewire:upload-error', () => {
-                window.activeUploads = Math.max(0, window.activeUploads - 1);
-                window.checkAndStopLoader(true);
+                loader.activeUploads = Math.max(0, loader.activeUploads - 1);
+                loader.stop(true);
             });
 
             Livewire.hook('request', ({ respond, succeed, fail, options }) => {
@@ -149,33 +153,30 @@
 
                 const isUserAction = (Date.now() - window.lastUserInteraction) < 1000;
                 const isNavigation = !!options.navigate;
-                const shouldShow = isUserAction || isNavigation || window.expectingFinalRequest || window.activeUploads > 0;
 
-                if (!shouldShow) return;
+                // Pokud už loader běží, držíme ho i automatickými requesty (např. po-uploadový state update)
+                const shouldTrack = isUserAction || isNavigation || loader.isVisible;
 
-                window.activeRequests++;
-                log('Request started', { active: window.activeRequests, expecting: window.expectingFinalRequest });
-                window.dispatchEvent(new CustomEvent('loading-start'));
+                if (!shouldTrack) return;
+
+                loader.activeRequests++;
+                loader.start();
 
                 let finished = false;
-                const stopRequest = () => {
+                const done = () => {
                     if (finished) return;
                     finished = true;
-                    window.activeRequests = Math.max(0, window.activeRequests - 1);
-                    log('Request finished', window.activeRequests);
-                    window.checkAndStopLoader();
+                    loader.activeRequests = Math.max(0, loader.activeRequests - 1);
+                    loader.stop();
                 };
 
-                succeed(stopRequest);
-                fail(() => { stopRequest(); });
+                succeed(done);
+                fail(done);
             });
         });
 
         document.addEventListener('livewire:navigated', () => {
-            window.activeUploads = 0;
-            window.activeRequests = 0;
-            window.expectingFinalRequest = false;
-            window.dispatchEvent(new CustomEvent('loading-stop'));
+            if (window.Alpine) Alpine.store('loader').stop(true);
         });
     </script>
     @endonce
