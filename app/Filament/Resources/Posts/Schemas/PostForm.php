@@ -143,6 +143,8 @@ class PostForm
                                                             'file' => $e->getFile(),
                                                             'line' => $e->getLine(),
                                                         ]);
+                                                        // I při chybě musíme poslat signál k ukončení loaderu, aby nezůstal viset
+                                                        $livewire->dispatch('autosave-finished');
                                                         throw $e;
                                                     }
                                                 }
