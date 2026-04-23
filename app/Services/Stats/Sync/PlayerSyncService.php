@@ -252,7 +252,7 @@ class PlayerSyncService
                             ->get($url);
 
                         if ($response->successful() && !empty($response->body())) {
-                            $user->addMediaFromString($response->body())
+                            $media = $user->addMediaFromString($response->body())
                                 ->usingFileName($fileName)
                                 ->withCustomProperties($customProperties)
                                 ->toMediaCollection('player_photos');
@@ -264,7 +264,8 @@ class PlayerSyncService
                             }
 
                             $success = true;
-                            Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$url}");
+                            $savedPath = $media->getPath();
+                            Log::info("PlayerSyncService: Přidána nová fotografie k hráči {$user->display_name} z {$url}. Uloženo do: {$savedPath}");
                             break;
                         } else {
                             Log::debug("PlayerSyncService: Pokus o stažení z {$url} selhal (Status: {$response->status()})");
@@ -325,7 +326,7 @@ class PlayerSyncService
                     ->get($photoUrl);
 
                 if ($response->successful() && !empty($response->body())) {
-                    $user->addMediaFromString($response->body())
+                    $media = $user->addMediaFromString($response->body())
                         ->usingFileName($fileName)
                         ->withCustomProperties($customProperties)
                         ->toMediaCollection('player_photos');
@@ -336,7 +337,8 @@ class PlayerSyncService
                         \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_" . $customProperties['season_id']);
                     }
 
-                    Log::info("PlayerSyncService: Stažena fotografie hráče {$user->display_name} Z DETAILU (ExtID: {$externalId})");
+                    $savedPath = $media->getPath();
+                    Log::info("PlayerSyncService: Stažena fotografie hráče {$user->display_name} Z DETAILU (ExtID: {$externalId}). Uloženo do: {$savedPath}");
                 } else {
                     Log::debug("PlayerSyncService: Pokus o stažení fotky hráče {$user->display_name} z detailu selhal (Status: {$response->status()})");
                 }

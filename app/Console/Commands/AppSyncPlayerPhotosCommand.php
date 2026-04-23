@@ -183,7 +183,8 @@ class AppSyncPlayerPhotosCommand extends Command
         $bar->finish();
         $mainRun->finish();
         $this->newLine();
-        $this->info("Hotovo.");
+        $this->info("Hotovo. Logy naleznete v storage/logs/laravel.log");
+        $this->info("Tip: Pokud na produkci chybí fotky, prověřte cestu: " . public_path('uploads'));
         return 0;
     }
 
