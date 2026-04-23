@@ -311,7 +311,7 @@
 
         @if($footerPartners->isNotEmpty())
             <div class="container pb-12 pt-8 border-t border-white/5">
-                <div class="flex flex-col md:flex-row items-center md:justify-start gap-8 md:gap-16">
+                <div class="flex flex-col md:flex-row items-center md:justify-start gap-8 md:gap-16" data-footer-fix="container">
                     <div class="text-center md:text-left">
                         <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1 leading-none">
                             {{ __('partners.footer_label') }}
@@ -320,7 +320,7 @@
                             {{ __('partners.footer_subtitle') }}
                         </div>
                     </div>
-                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-8 md:gap-12">
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-8 md:gap-12" data-footer-fix="logos">
                         @foreach($footerPartners as $partner)
                             <a href="{{ $partner->website_url ?? '#' }}"
                                @if($partner->opened_in_new_tab) target="_blank" rel="noopener noreferrer" @endif
