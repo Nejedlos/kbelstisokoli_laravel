@@ -117,6 +117,9 @@ Schedule::call(fn() => Artisan::call('stats:sync-standings'))->hourlyAt(45);
 // Čištění duplicit (každý den ve 4:00)
 Schedule::call(fn() => Artisan::call('stats:cleanup-duplicates'))->dailyAt('04:00');
 
+// Generování týdenní AI aktuality (každé pondělí v 8:00)
+Schedule::call(fn() => Artisan::call('app:news:generate-weekly'))->weeklyOn(1, '08:00');
+
 // Synchronizace výchozích týmů členů (každou hodinu)
 Schedule::call(fn() => Artisan::call('app:sync-member-default-teams'))->hourly();
 
