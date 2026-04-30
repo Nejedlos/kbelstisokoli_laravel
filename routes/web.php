@@ -113,3 +113,7 @@ Route::middleware(['web'])->group(function () {
     })->name('screenshot.proxy')->where('target_path', '.*');
 });
 
+
+
+// --- Redirects ze starého webu ---
+require __DIR__.'/redirects.php';
