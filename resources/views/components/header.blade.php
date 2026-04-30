@@ -1,10 +1,34 @@
 @props(['branding', 'navigation'])
 
-@cacheFragment('fragment_header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 3600)
-<header x-data="{ mobileMenuOpen: false, searchOpen: false }" class="bg-white shadow-sm">
-    <div class="container py-2.5 lg:py-4 flex items-center justify-between gap-3 lg:gap-4">
+{{-- @cacheFragment('fragment_header_'.app()->getLocale().'_'.(auth()->check() ? auth()->id() : 'guest').'_'.md5(request()->fullUrl()), 3600) --}}
+<header x-data="{
+    mobileMenuOpen: false,
+    searchOpen: false,
+    isNavOverflowing: window.innerWidth < 1280,
+    navWidth: 0,
+    checkOverflow() {
+        if (!this.$refs.desktopNav || !this.$refs.headerContainer) return;
+
+        // Změříme šířku navigace (pokud ještě nevíme)
+        if (this.navWidth === 0 || window.innerWidth > 1280) {
+            const ghost = this.$refs.ghostNav;
+            this.navWidth = ghost ? ghost.offsetWidth : 0;
+        }
+
+        const containerWidth = this.$refs.headerContainer.offsetWidth;
+        const logoWidth = this.$refs.logo.offsetWidth;
+        const actionsWidth = this.$refs.actions.offsetWidth;
+        const buffer = 80; // Rezerva pro mezery a jistotu
+
+        this.isNavOverflowing = (logoWidth + this.navWidth + actionsWidth + buffer) > containerWidth || window.innerWidth < 1280;
+    }
+}"
+x-init="checkOverflow(); $nextTick(() => checkOverflow())"
+@resize.window.debounce.50ms="checkOverflow()"
+class="bg-white shadow-sm overflow-visible">
+    <div x-ref="headerContainer" class="container py-2.5 lg:py-4 flex items-center justify-between gap-3 lg:gap-4 relative">
         <!-- Logo -->
-        <a href="{{ url('/') }}" @wireNavigate class="flex items-center gap-2.5 lg:gap-3 shrink-0">
+        <a x-ref="logo" href="{{ url('/') }}" @wireNavigate class="flex items-center gap-2.5 lg:gap-3 shrink-0">
             @php
                 $teamLogo = $branding['team_logo'] ?? null;
                 $isTeamLogoEnabled = $teamLogo['enabled_header'] ?? true;
@@ -33,7 +57,9 @@
 
         <!-- Desktop Navigation -->
         @if(!($branding['maintenance_mode'] ?? false))
-        <nav class="hidden xl:flex items-center gap-x-3 2xl:gap-x-10">
+        <nav x-ref="desktopNav"
+             class="items-center gap-x-3 2xl:gap-x-10 transition-opacity duration-300 hidden xl:flex"
+             :class="isNavOverflowing ? '!hidden' : '!flex'">
             {{-- Úvod --}}
             <a href="{{ url('/') }}" @wireNavigate
                class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition py-2 {{ request()->is('/') ? 'text-primary border-b-2 border-primary' : '' }}">
@@ -111,8 +137,15 @@
         </nav>
         @endif
 
+        <!-- Ghost Nav for measurement -->
+        <nav x-ref="ghostNav" class="invisible absolute flex items-center gap-x-3 2xl:gap-x-10 pointer-events-none whitespace-nowrap opacity-0" aria-hidden="true">
+            @foreach(['home', 'teams', 'program', 'recruitment', 'news', 'gallery', 'history', 'contact'] as $item)
+                <span class="font-bold uppercase text-sm px-2">{{ $item }}</span>
+            @endforeach
+        </nav>
+
         <!-- Right Side / CTA -->
-        <div class="flex items-center gap-2 sm:gap-4">
+        <div x-ref="actions" class="flex items-center gap-2 sm:gap-4 shrink-0">
             <!-- Search Toggle -->
             <button @click="searchOpen = !searchOpen" class="p-2 text-slate-700 hover:text-primary focus:outline-none transition-colors" title="{{ __('search.title') }}">
                 <i class="fa-light fa-magnifying-glass text-xl"></i>
@@ -191,7 +224,9 @@
                 </a>
             @endauth
 
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="xl:hidden p-2 -mr-1 text-slate-700 hover:text-primary focus:outline-none transition-colors"
+            <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="p-2 -mr-1 text-slate-700 hover:text-primary focus:outline-none transition-colors xl:hidden"
+                    :class="isNavOverflowing ? '!block' : '!hidden'"
                     aria-label="{{ __('general.nav.toggle_menu') }}"
                     :aria-expanded="mobileMenuOpen">
                 <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
@@ -231,7 +266,7 @@
 
     <!-- Mobile Menu Shell -->
     @if(!($branding['maintenance_mode'] ?? false))
-    <div x-show="mobileMenuOpen"
+    <div x-show="mobileMenuOpen && isNavOverflowing"
          x-cloak
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 -translate-y-10"
@@ -239,7 +274,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-10"
-         class="xl:hidden bg-white border-t border-slate-100 py-6 absolute w-full shadow-2xl z-40 max-h-[85vh] overflow-y-auto">
+         class="bg-white border-t border-slate-100 py-6 absolute w-full shadow-2xl z-40 max-h-[85vh] overflow-y-auto">
          <div class="container pb-8">
             <div class="flex flex-col gap-1">
                 {{-- Úvod --}}
@@ -316,4 +351,4 @@
     </div>
     @endif
 </header>
-@endCacheFragment
+{{-- @endCacheFragment --}}
