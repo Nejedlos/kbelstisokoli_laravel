@@ -4,6 +4,7 @@ namespace App\Notifications\Auth;
 
 use Illuminate\Auth\Notifications\ResetPassword as BaseNotification;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Log;
 
 class ResetPasswordNotification extends BaseNotification
 {
@@ -12,6 +13,12 @@ class ResetPasswordNotification extends BaseNotification
      */
     public function toMail($notifiable): MailMessage
     {
+        Log::channel('single')->info('DEBUG_MAIL: Preparing ResetPassword email', [
+            'user_id' => $notifiable->id,
+            'email' => $notifiable->email,
+            'url' => $this->resetUrl($notifiable),
+        ]);
+
         return (new MailMessage)
             ->subject(__('email_reset_subject'))
             ->greeting(__('email_reset_heading'))

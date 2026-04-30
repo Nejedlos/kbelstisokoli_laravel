@@ -47,6 +47,25 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // You may also register events manually using Event::listen(...)
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Mail\Events\MessageSending::class,
+            function ($event) {
+                \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Sending email', [
+                    'to' => $event->message->getTo(),
+                    'subject' => $event->message->getSubject(),
+                ]);
+            }
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Mail\Events\MessageSent::class,
+            function ($event) {
+                \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Email sent successfully', [
+                    'to' => $event->message->getTo(),
+                    'subject' => $event->message->getSubject(),
+                    'sent_at' => now()->toDateTimeString(),
+                ]);
+            }
+        );
     }
 }

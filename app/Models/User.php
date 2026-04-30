@@ -459,6 +459,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
      */
     public function sendPasswordResetNotification($token): void
     {
+        \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Password reset requested for user', [
+            'user_id' => $this->id,
+            'email' => $this->email,
+        ]);
+
         $this->notify(new ResetPasswordNotification($token));
     }
 }
