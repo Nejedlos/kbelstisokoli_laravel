@@ -8,9 +8,9 @@
 @endphp
 
 <section class="relative overflow-hidden bg-white">
-    <div class="flex flex-col md:flex-row min-h-[500px]">
+    <div class="flex flex-col lg:flex-row min-h-[500px]">
         {{-- Image Side --}}
-        <div class="w-full md:w-1/2 relative min-h-[400px] md:min-h-0 {{ $alignment === 'right' ? 'md:order-last' : '' }}">
+        <div class="w-full lg:w-1/2 relative min-h-[400px] lg:min-h-0 {{ $alignment === 'right' ? 'lg:order-last' : '' }}">
             <img src="{{ asset($image_url) }}" alt="{{ $title }}" class="absolute inset-0 w-full h-full object-cover">
             {{-- Overlay Decoration --}}
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
@@ -20,7 +20,7 @@
         </div>
 
         {{-- Content Side --}}
-        <div class="w-full md:w-1/2 flex items-center bg-slate-50 section-padding">
+        <div class="w-full lg:w-1/2 flex items-center bg-slate-50 section-padding">
             <div class="container-narrow px-8 md:px-16">
                 <div class="mb-8">
                     <span class="inline-block text-primary font-bold uppercase tracking-widest text-[11px] mb-4 py-1 px-3 bg-primary/5 rounded-full border border-primary/10">

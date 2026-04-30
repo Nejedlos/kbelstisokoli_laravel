@@ -33,7 +33,7 @@
 
         <!-- Desktop Navigation -->
         @if(!($branding['maintenance_mode'] ?? false))
-        <nav class="hidden lg:flex items-center gap-x-8 xl:gap-10">
+        <nav class="hidden xl:flex items-center gap-x-3 2xl:gap-x-10">
             {{-- Úvod --}}
             <a href="{{ url('/') }}" @wireNavigate
                class="font-bold uppercase text-[11px] xl:text-sm tracking-wide text-slate-700 hover:text-primary transition py-2 {{ request()->is('/') ? 'text-primary border-b-2 border-primary' : '' }}">
@@ -191,7 +191,7 @@
                 </a>
             @endauth
 
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 -mr-1 text-slate-700 hover:text-primary focus:outline-none transition-colors"
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="xl:hidden p-2 -mr-1 text-slate-700 hover:text-primary focus:outline-none transition-colors"
                     aria-label="{{ __('general.nav.toggle_menu') }}"
                     :aria-expanded="mobileMenuOpen">
                 <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
@@ -239,7 +239,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-10"
-         class="lg:hidden bg-white border-t border-slate-100 py-6 absolute w-full shadow-2xl z-40 max-h-[85vh] overflow-y-auto">
+         class="xl:hidden bg-white border-t border-slate-100 py-6 absolute w-full shadow-2xl z-40 max-h-[85vh] overflow-y-auto">
          <div class="container pb-8">
             <div class="flex flex-col gap-1">
                 {{-- Úvod --}}

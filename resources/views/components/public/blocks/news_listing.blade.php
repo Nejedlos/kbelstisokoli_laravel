@@ -12,7 +12,7 @@
         <x-section-heading :title="($data['title'] ?? __('news.title'))" :subtitle="($data['subtitle'] ?? __('news.subtitle'))" align="center" />
 
         @if($news->isNotEmpty())
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($news as $post)
                     <x-news-card :post="$post" />
                 @endforeach
