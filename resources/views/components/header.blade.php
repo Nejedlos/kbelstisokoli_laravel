@@ -139,9 +139,17 @@ class="bg-white shadow-sm overflow-visible">
 
         <!-- Ghost Nav for measurement -->
         <nav x-ref="ghostNav" class="invisible absolute flex items-center gap-x-3 2xl:gap-x-10 pointer-events-none whitespace-nowrap opacity-0" aria-hidden="true">
-            @foreach(['home', 'teams', 'program', 'recruitment', 'news', 'gallery', 'history', 'contact'] as $item)
-                <span class="font-bold uppercase text-sm px-2">{{ $item }}</span>
-            @endforeach
+            <span class="font-bold uppercase text-sm">{{ __('general.nav.home') }}</span>
+            <span class="font-bold uppercase text-sm">{{ __('general.nav.teams') }}</span>
+            <span class="font-bold uppercase text-sm">
+                {{ __('general.nav.program') }}
+                <i class="fa-light fa-chevron-down text-[10px] ml-1.5"></i>
+            </span>
+            <span class="font-bold uppercase text-sm">{{ __('general.nav.recruitment') }}</span>
+            <span class="font-bold uppercase text-sm">{{ __('general.nav.news') }}</span>
+            <span class="font-bold uppercase text-sm">{{ __('general.nav.gallery') }}</span>
+            <span class="font-bold uppercase text-sm">{{ __('general.nav.history') }}</span>
+            <span class="font-bold uppercase text-sm">{{ __('general.nav.contact') }}</span>
         </nav>
 
         <!-- Right Side / CTA -->

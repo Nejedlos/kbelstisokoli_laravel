@@ -170,6 +170,28 @@ class UsersTable
                     ]))
                     ->visible(fn ($record) => $record->duplicates_count > 0),
                 ActionGroup::make([
+                    Action::make('sendPasswordReset')
+                        ->label(__('admin.resources.user.actions.send_password_reset'))
+                        ->icon(new HtmlString('<i class="fa-light fa-key"></i>'))
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            $status = Password::broker()->sendResetLink(['email' => $record->email]);
+
+                            if ($status === Password::RESET_LINK_SENT) {
+                                FilamentNotification::make()
+                                    ->title(__('admin.resources.user.notifications.password_reset_sent'))
+                                    ->success()
+                                    ->send();
+                            } else {
+                                FilamentNotification::make()
+                                    ->title(__('admin.resources.user.notifications.password_reset_error'))
+                                    ->body(__($status))
+                                    ->danger()
+                                    ->send();
+                            }
+                        })
+                        ->visible(fn ($record) => $record->is_active),
                     Action::make('sendInvitation')
                         ->label(__('user.actions.send_invitation'))
                         ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAPER_PLANE))

@@ -107,6 +107,7 @@ class EmailDebug extends Page
         return [
             Action::make('sendTestMail')
                 ->label(__('admin.email_debug.actions.send_test'))
+                ->icon(new HtmlString('<i class="fa-light fa-paper-plane"></i>'))
                 ->color('info')
                 ->form([
                     TextInput::make('email')
@@ -143,6 +144,7 @@ class EmailDebug extends Page
 
             Action::make('sendErrorReport')
                 ->label(__('admin.email_debug.actions.send_error'))
+                ->icon(new HtmlString('<i class="fa-light fa-bug"></i>'))
                 ->color('danger')
                 ->requiresConfirmation()
                 ->modalHeading('Odeslat simulovaný report chyby 500')

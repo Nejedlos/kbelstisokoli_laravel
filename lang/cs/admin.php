@@ -592,6 +592,13 @@ return [
         'user' => [
             'label' => 'Uživatel',
             'plural_label' => 'Uživatelé',
+            'actions' => [
+                'send_password_reset' => 'Poslat nové heslo',
+            ],
+            'notifications' => [
+                'password_reset_sent' => 'Odkaz pro reset hesla byl odeslán uživateli.',
+                'password_reset_error' => 'Chyba při odesílání odkazu pro reset hesla.',
+            ],
         ],
         'help_category' => [
             'label' => 'Kategorie nápovědy',

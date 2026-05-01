@@ -363,6 +363,12 @@
                             <span class="text-gray-500 uppercase tracking-widest font-bold">Připojení:</span>
                             <span class="font-mono text-gray-900 dark:text-gray-300">{{ $dbInfo['connection'] }}</span>
                         </div>
+                        <div class="pt-2 border-t border-gray-100 dark:border-white/5">
+                            <a href="{{ route('filament.admin.pages.email-debug') }}" class="text-[10px] font-bold text-primary-600 uppercase hover:underline flex items-center gap-2">
+                                <i class="fa-light fa-envelope-open"></i>
+                                Ladění a testování emailů
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

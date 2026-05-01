@@ -187,6 +187,13 @@ return [
             'tabs' => [
                 'title' => 'User Management',
             ],
+            'actions' => [
+                'send_password_reset' => 'Send Reset Password',
+            ],
+            'notifications' => [
+                'password_reset_sent' => 'Password reset link has been sent to the user.',
+                'password_reset_error' => 'Error sending password reset link.',
+            ],
         ],
         'announcement' => [
             'label' => 'Announcement',
