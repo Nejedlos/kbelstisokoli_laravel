@@ -36,3 +36,13 @@ remote_fix.exp
 Homestead.json
 Homestead.yaml
 Thumbs.db
+production_main.env
+*.html
+*.txt
+*.png
+diagnose_db.php
+test_db_live.php
+check_config.php
+cron-proxy.php
+deploy_elo_fix.sh
+production_tail_large.log
