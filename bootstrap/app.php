@@ -197,6 +197,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Odeslání e-mailu s chybou na produkci (vynechá 4xx chyby)
         $exceptions->report(function (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('App Exception: ' . $e->getMessage(), [
+                'exception' => $e,
+                'url' => request()?->fullUrl(),
+            ]);
+
             try {
                 $reportEnvs = config('mail.error_reporting.environments', ['production']);
                 if (! in_array(app()->environment(), $reportEnvs)) {

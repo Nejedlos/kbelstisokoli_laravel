@@ -150,8 +150,9 @@ class UsersTable
                     ->label(__('user.filters.duplicates'))
                     ->indicator(__('user.filters.duplicates_indicator'))
                     ->query(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->whereIn('name', function ($sub) {
+                        $userModel = new \App\Models\User;
                         $sub->select('name')
-                            ->from('users')
+                            ->from($userModel->getTable())
                             ->groupBy('name')
                             ->havingRaw('COUNT(*) > 1');
                     })),
