@@ -38,7 +38,7 @@ class UsersTable
                 ->with(['externalMappings', 'roles', 'playerProfile.primaryTeam'])
                 ->select("{$userTable}.*")
                 ->addSelect(['duplicates_count' => \App\Models\User::query()
-                    ->from("{$userTable} as u2")
+                    ->from('users', 'u2')
                     ->selectRaw('COUNT(*)')
                     ->whereColumn('u2.name', "{$userTable}.name")
                     ->whereColumn('u2.id', '!=', "{$userTable}.id"),
@@ -157,7 +157,7 @@ class UsersTable
                     ->indicator(__('user.filters.duplicates_indicator'))
                     ->query(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->whereIn('name', function ($sub) {
                         $sub->select('name')
-                            ->from((new \App\Models\User)->getTable())
+                            ->from('users')
                             ->groupBy('name')
                             ->havingRaw('COUNT(*) > 1');
                     })),
