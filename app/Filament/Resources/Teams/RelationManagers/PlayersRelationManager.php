@@ -27,12 +27,9 @@ class PlayersRelationManager extends RelationManager
 
     protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        $playerTable = $query->getModel()->getTable();
-        $userTable = (new \App\Models\User)->getTable();
-
         return $query->with(['user', 'user.externalMappings'])
-            ->where("{$playerTable}.is_active", true)
-            ->whereHas('user', fn ($q) => $q->where("{$userTable}.is_active", true));
+            ->where("player_profiles.is_active", true)
+            ->whereHas('user', fn ($q) => $q->where("users.is_active", true));
     }
 
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
@@ -109,13 +106,10 @@ class PlayersRelationManager extends RelationManager
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
                     ->recordSelectOptionsQuery(function (\Illuminate\Database\Eloquent\Builder $query) {
-                        $userTable = (new \App\Models\User)->getTable();
-                        $playerTable = $query->getModel()->getTable();
-
                         return $query
-                            ->join($userTable, "{$playerTable}.user_id", '=', "{$userTable}.id")
-                            ->select("{$playerTable}.*", "{$userTable}.name as user_name_title")
-                            ->orderBy("{$userTable}.name");
+                            ->join('users', "player_profiles.user_id", '=', "users.id")
+                            ->select("player_profiles.*", "users.name as user_name_title")
+                            ->orderBy("users.name");
                     })
                     ->recordTitleAttribute('user.name')
                     ->recordSelectSearchColumns(['user.name'])

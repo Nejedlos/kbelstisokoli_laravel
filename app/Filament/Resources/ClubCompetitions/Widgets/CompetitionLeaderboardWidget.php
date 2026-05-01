@@ -30,23 +30,34 @@ class CompetitionLeaderboardWidget extends Widget
             ];
         }
 
-        $tableName = (new ClubCompetitionEntry)->getTable();
-        $usersTable = (new \App\Models\User)->getTable();
-
-        // Debug log to terminal if possible, but let's just make it work
         $entries = ClubCompetitionEntry::query()
             ->where("club_competition_id", $this->ownerRecord->id)
-            ->leftJoin($usersTable, "{$usersTable}.id", '=', "player_id")
+            ->leftJoin('users', "users.id", '=', "player_id")
             ->select(
                 "player_id",
                 "label",
-                "{$usersTable}.name as user_name",
-                DB::raw("SUM(value) as total_value"),
-                DB::raw("RANK() OVER (ORDER BY SUM(value) DESC) as competition_rank")
+                "users.name as user_name",
+                DB::raw("SUM(value) as total_value")
             )
-            ->groupBy("player_id", "label", "{$usersTable}.name")
+            ->groupBy("player_id", "label", "users.name")
             ->orderBy('total_value', 'desc')
             ->get();
+
+        // Výpočet ranku v PHP (MySQL 5.5 nepodporuje RANK() OVER)
+        $rank = 0;
+        $prevValue = null;
+        $count = 0;
+
+        $entries = $entries->map(function ($entry) use (&$rank, &$prevValue, &$count) {
+            $count++;
+            if ($prevValue === null || $entry->total_value < $prevValue) {
+                $rank = $count;
+            }
+            $entry->competition_rank = $rank;
+            $prevValue = $entry->total_value;
+
+            return $entry;
+        });
 
         return [
             'entries' => $entries,

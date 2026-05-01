@@ -196,7 +196,7 @@ class Dashboard extends BaseDashboard
 
         $dbInfo = [
             'database' => config('database.connections.'.config('database.default').'.database'),
-            'table' => (new \App\Models\User)->getTable(),
+            'table' => 'users',
             'prefix' => config('database.connections.'.config('database.default').'.prefix'),
             'connection' => config('database.default'),
         ];

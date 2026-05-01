@@ -39,15 +39,15 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
-        Log::debug('UsersTable: configure start');
+        UserDebug::log('UsersTable: configure start');
         $userModel = new User;
         $userTable = $userModel->getTable();
 
-        return $table
+        $result = $table
             ->striped()
             ->modifyQueryUsing(fn ($query) => $query
                 ->with(['externalMappings', 'roles', 'playerProfile.primaryTeam'])
-                ->select("{$userTable}.*")
+                ->select($query->getModel()->getTable() . '.*')
             )
             ->columns([
                 SpatieMediaLibraryImageColumn::make('player_photos')
@@ -158,9 +158,8 @@ class UsersTable
                     ->label(__('user.filters.duplicates'))
                     ->indicator(__('user.filters.duplicates_indicator'))
                     ->query(fn (Builder $query) => $query->whereIn('name', function ($sub) {
-                        $userModel = new User;
                         $sub->select('name')
-                            ->from($userModel->getTable())
+                            ->from('users')
                             ->groupBy('name')
                             ->havingRaw('COUNT(*) > 1');
                     })),
@@ -406,8 +405,8 @@ class UsersTable
                 ]),
             ]);
 
-        Log::debug('UsersTable: configure end');
+        UserDebug::log('UsersTable: configure end');
 
-        return $table;
+        return $result;
     }
 }

@@ -45,39 +45,40 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        \Illuminate\Support\Facades\Log::debug('UserResource: getEloquentQuery start');
+        UserDebug::log('UserResource: getEloquentQuery start');
         $query = parent::getEloquentQuery()
             ->with(['roles', 'playerProfile', 'playerProfile.primaryTeam']);
-        \Illuminate\Support\Facades\Log::debug('UserResource: getEloquentQuery end');
+        UserDebug::log('UserResource: getEloquentQuery end');
 
         return $query;
     }
 
     public static function form(Schema $schema): Schema
     {
-        \Illuminate\Support\Facades\Log::debug('UserResource: form configuration');
-        return UserForm::configure($schema);
+        UserDebug::log('UserResource: form configuration start');
+        $result = UserForm::configure($schema);
+        UserDebug::log('UserResource: form configuration end');
+        return $result;
     }
 
     public static function table(Table $table): Table
     {
-        \Illuminate\Support\Facades\Log::debug('UserResource: table configuration');
-        return UsersTable::configure($table);
+        UserDebug::log('UserResource: table configuration start');
+        $result = UsersTable::configure($table);
+        UserDebug::log('UserResource: table configuration end');
+        return $result;
     }
 
     public static function getRelations(): array
     {
-        \Illuminate\Support\Facades\Log::debug('UserResource: getRelations start');
-        $relations = [
+        UserDebug::log('UserResource: getRelations');
+        return [
             RelationManagers\UserSeasonConfigsRelationManager::class,
             RelationManagers\PlayerProfilesRelationManager::class,
             RelationManagers\ParentsRelationManager::class,
             RelationManagers\ChildrenRelationManager::class,
             RelationManagers\ConsentsRelationManager::class,
         ];
-        \Illuminate\Support\Facades\Log::debug('UserResource: getRelations end');
-
-        return $relations;
     }
 
     public static function getPages(): array

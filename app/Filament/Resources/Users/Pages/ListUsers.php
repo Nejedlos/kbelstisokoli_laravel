@@ -12,9 +12,9 @@ class ListUsers extends ListRecords
 
     public function mount(): void
     {
-        \Illuminate\Support\Facades\Log::debug('ListUsers: mount start');
+        \App\Filament\Resources\Users\UserDebug::log('ListUsers: mount start');
         parent::mount();
-        \Illuminate\Support\Facades\Log::debug('ListUsers: mount end');
+        \App\Filament\Resources\Users\UserDebug::log('ListUsers: mount end');
     }
 
     protected function getHeaderActions(): array
