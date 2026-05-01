@@ -48,6 +48,14 @@ class EmailDebug extends Page
     {
         $config = config('mail.mailers.smtp');
 
+        // GIT info
+        $gitHash = 'unknown';
+        try {
+            $gitHash = trim(shell_exec('git log -1 --format=%h'));
+            $gitDate = trim(shell_exec('git log -1 --format=%cd --date=iso'));
+            $gitHash = $gitHash . " (" . $gitDate . ")";
+        } catch (\Throwable $e) {}
+
         // Mask password
         if (isset($config['password'])) {
             $len = strlen($config['password']);
@@ -57,6 +65,8 @@ class EmailDebug extends Page
         }
 
         return [
+            'App Version' => '1.0.0',
+            'Git Commit' => $gitHash,
             'Mailer' => config('mail.default'),
             'Host' => $config['host'] ?? '-',
             'Port' => $config['port'] ?? '-',

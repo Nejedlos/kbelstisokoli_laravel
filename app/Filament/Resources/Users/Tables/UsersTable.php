@@ -19,6 +19,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use App\Mail\TestMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\HtmlString;
@@ -60,7 +62,7 @@ class UsersTable
                     ->label(__('user.fields.first_name').' '.__('user.fields.last_name'))
                     ->description(fn ($record) => $record->email)
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
-                        ($record->duplicates_count > 0
+                        (isset($record->duplicates_count) && $record->duplicates_count > 0
                             ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="'.__('user.warnings.duplicates', ['count' => $record->duplicates_count]).'"></i> '
                             : '').
                         ($record->isGhost()
@@ -170,6 +172,28 @@ class UsersTable
                     ]))
                     ->visible(fn ($record) => $record->duplicates_count > 0),
                 ActionGroup::make([
+                    Action::make('sendTestEmail')
+                        ->label(__('admin.email_debug.actions.send_test'))
+                        ->icon(new HtmlString('<i class="fa-light fa-paper-plane"></i>'))
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            try {
+                                Mail::to($record->email)->send(new TestMail("Toto je testovací e-mail odeslaný z administrace uživatelů pro ověření doručitelnosti na adresu {$record->email}."));
+
+                                FilamentNotification::make()
+                                    ->title(__('admin.email_debug.notifications.sent') . ' (' . $record->email . ')')
+                                    ->success()
+                                    ->send();
+                            } catch (\Throwable $e) {
+                                FilamentNotification::make()
+                                    ->title(__('admin.email_debug.notifications.error'))
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                            }
+                        }),
                     Action::make('sendPasswordReset')
                         ->label(__('admin.resources.user.actions.send_password_reset'))
                         ->icon(new HtmlString('<i class="fa-light fa-key"></i>'))

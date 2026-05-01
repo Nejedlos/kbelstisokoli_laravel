@@ -55,6 +55,8 @@ class EventServiceProvider extends ServiceProvider
                 $bcc = array_map(fn($address) => $address->toString(), $event->message->getBcc());
 
                 \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Sending email', [
+                    'mailer' => config('mail.default'),
+                    'host' => config('mail.mailers.'.config('mail.default').'.host') ?? 'n/a',
                     'to' => $to,
                     'cc' => $cc,
                     'bcc' => $bcc,

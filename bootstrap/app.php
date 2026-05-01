@@ -11,14 +11,8 @@ use Illuminate\Support\Facades\Schema;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->booting(function ($app) {
-        // 1. Nastavení cest (Environment a Public) co nejdříve
+        // 1. Nastavení cest (Environment a Public) - část logiky závislá na env()
         // Optimalizováno pro localhost a produkci (Webglobe)
-
-        // Nastavení cesty k .env (v public/ složce na produkci pro index.php)
-        if (! $app->runningInConsole()) {
-            $envPath = file_exists(base_path('.env')) ? base_path() : base_path('public');
-            $app->useEnvironmentPath($envPath);
-        }
 
         // Fix pro správnou PHP binárku na produkci (pro Scheduler a subprocesy)
         if (app()->runningInConsole() && env('APP_ENV') === 'production' && $php = env('PROD_PHP_BINARY')) {
@@ -368,5 +362,17 @@ $app = Application::configure(basePath: dirname(__DIR__))
             return response()->view('errors.500', ['report' => $report], 500);
         });
     })->create();
+
+/*
+|--------------------------------------------------------------------------
+| Nastavení cesty k .env souboru (Fix pro Webglobe a Laravel 13)
+|--------------------------------------------------------------------------
+| V Laravelu 13 (bez cache) se LoadEnvironmentVariables spouští hned při
+| bootstrapování, proto musíme cestu k .env nastavit dříve než v booting callbacku.
+*/
+if (! $app->runningInConsole()) {
+    $envPath = file_exists($app->basePath('.env')) ? $app->basePath() : $app->basePath('public');
+    $app->useEnvironmentPath($envPath);
+}
 
 return $app;
