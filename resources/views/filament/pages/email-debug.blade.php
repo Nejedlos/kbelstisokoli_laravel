@@ -29,8 +29,15 @@
                 <ul>
                     <li>Zda je v <code>.env</code> správně <code>MAIL_MAILER=smtp</code>.</li>
                     <li>Zda jsou u portu 465 použity uvozovky u hesla a <code>MAIL_ENCRYPTION=ssl</code>.</li>
-                    <li>Zda hostitel <code>mail.webglobe.cz</code> odpovídá vaší variantě hostingu.</li>
+                    <li>Zda hostitel <code>mail.webglobe.cz</code> (nebo jiný) odpovídá vašemu hostingu.</li>
                 </ul>
+                <p class="mt-4">
+                    <i class="fa-light fa-circle-info text-primary-600 mr-1"></i>
+                    <strong>Vysvětlení logů:</strong> Pokud v logu níže vidíte <code>DEBUG_MAIL: Email sent successfully</code>, znamená to, že náš systém úspěšně předal e-mail SMTP serveru (Webglobe).
+                </p>
+                <p>
+                    Pokud přesto e-mail nedorazil (zejména na @seznam.cz nebo @centrum.cz), problém je pravděpodobně v doručitelnosti (např. chybějící SPF/DKIM záznamy v DNS nebo blokace na straně příjemce).
+                </p>
                 <p class="mt-4 text-warning-600 font-bold">
                     <i class="fa-light fa-triangle-exclamation mr-1"></i>
                     Důležité: Po každé změně v .env na produkci musíte spustit <code>php artisan config:cache</code>.

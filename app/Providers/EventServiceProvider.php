@@ -50,8 +50,14 @@ class EventServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Event::listen(
             \Illuminate\Mail\Events\MessageSending::class,
             function ($event) {
+                $to = array_map(fn($address) => $address->toString(), $event->message->getTo());
+                $cc = array_map(fn($address) => $address->toString(), $event->message->getCc());
+                $bcc = array_map(fn($address) => $address->toString(), $event->message->getBcc());
+
                 \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Sending email', [
-                    'to' => $event->message->getTo(),
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                     'subject' => $event->message->getSubject(),
                 ]);
             }
@@ -60,8 +66,10 @@ class EventServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Event::listen(
             \Illuminate\Mail\Events\MessageSent::class,
             function ($event) {
+                $to = array_map(fn($address) => $address->toString(), $event->message->getTo());
+
                 \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Email sent successfully', [
-                    'to' => $event->message->getTo(),
+                    'to' => $to,
                     'subject' => $event->message->getSubject(),
                     'sent_at' => now()->toDateTimeString(),
                 ]);
