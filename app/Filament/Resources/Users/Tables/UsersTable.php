@@ -47,7 +47,7 @@ class UsersTable
             ->striped()
             ->modifyQueryUsing(fn ($query) => $query
                 ->with(['externalMappings', 'roles', 'playerProfile.primaryTeam'])
-                ->select($query->getModel()->getTable() . '.*')
+                ->select("users.*")
             )
             ->columns([
                 SpatieMediaLibraryImageColumn::make('player_photos')
