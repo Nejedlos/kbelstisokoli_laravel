@@ -200,7 +200,19 @@ class UsersTable
                         ->color('warning')
                         ->requiresConfirmation()
                         ->action(function ($record) {
+                            \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Admin triggered password reset', [
+                                'user_id' => $record->id,
+                                'email' => $record->email,
+                            ]);
+
                             $status = Password::broker()->sendResetLink(['email' => $record->email]);
+
+                            \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Password reset broker result', [
+                                'user_id' => $record->id,
+                                'email' => $record->email,
+                                'status' => $status,
+                                'status_translated' => __($status),
+                            ]);
 
                             if ($status === Password::RESET_LINK_SENT) {
                                 FilamentNotification::make()

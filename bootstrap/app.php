@@ -14,6 +14,13 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // 1. Nastavení cest (Environment a Public) - část logiky závislá na env()
         // Optimalizováno pro localhost a produkci (Webglobe)
 
+        // Fix pro Laravel 13: Zajistit načtení .env co nejdříve, pokud není v cache
+        if (! $app->configurationIsCached()) {
+            $base = $app->basePath();
+            $envPath = file_exists($base.'/.env') ? $base : $base.'/public';
+            $app->useEnvironmentPath($envPath);
+        }
+
         // Fix pro správnou PHP binárku na produkci (pro Scheduler a subprocesy)
         if (app()->runningInConsole() && env('APP_ENV') === 'production' && $php = env('PROD_PHP_BINARY')) {
             putenv("PHP_BINARY=$php");
@@ -45,6 +52,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
             $app->usePublicPath($publicPath);
             $app->instance('path.public', $publicPath);
             config(['filesystems.disks.public_path.root' => $publicPath]);
+        }
+
+        // Vynucení HTTPS na produkci pro stabilní generování assetů (Vite, asset(), ...)
+        // Důležité po optimize:clear, kdy se spoléháme na dynamickou detekci URL
+        if (env('APP_ENV') === 'production') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
         }
     })
     ->withRouting(
@@ -133,6 +146,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\InjectFeedbackWidget::class,
             \App\Http\Middleware\NotFoundLoggerMiddleware::class,
         ]);
+
+        $middleware->trustProxies(at: '*');
 
         $middleware->priority([
             \Illuminate\Session\Middleware\StartSession::class,
@@ -362,17 +377,5 @@ $app = Application::configure(basePath: dirname(__DIR__))
             return response()->view('errors.500', ['report' => $report], 500);
         });
     })->create();
-
-/*
-|--------------------------------------------------------------------------
-| Nastavení cesty k .env souboru (Fix pro Webglobe a Laravel 13)
-|--------------------------------------------------------------------------
-| V Laravelu 13 (bez cache) se LoadEnvironmentVariables spouští hned při
-| bootstrapování, proto musíme cestu k .env nastavit dříve než v booting callbacku.
-*/
-if (! $app->runningInConsole()) {
-    $envPath = file_exists($app->basePath('.env')) ? $app->basePath() : $app->basePath('public');
-    $app->useEnvironmentPath($envPath);
-}
 
 return $app;

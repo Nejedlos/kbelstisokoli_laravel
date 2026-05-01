@@ -75,6 +75,14 @@ class AppServiceProvider extends ServiceProvider
                         return $fallback;
                     }
 
+                    // Fallback 2: Zkusíme cestu z .env (PROD_PUBLIC_PATH)
+                    if ($prodPath = env('PROD_PUBLIC_PATH')) {
+                        $fallbackProd = rtrim($prodPath, '/').'/'.$buildDirectory.'/manifest.json';
+                        if (file_exists($fallbackProd)) {
+                            return $fallbackProd;
+                        }
+                    }
+
                     return $path;
                 }
             };

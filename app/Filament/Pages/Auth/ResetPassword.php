@@ -37,20 +37,9 @@ class ResetPassword extends BaseResetPassword
         $data['email'] = $this->email;
         $data['token'] = $this->token;
 
-        $hasPanelAccess = true;
-
         $status = Password::broker(Filament::getAuthPasswordBroker())->reset(
             $this->getCredentialsFromFormData($data),
-            function (CanResetPassword|Model|Authenticatable $user) use ($data, &$hasPanelAccess): void {
-                if (
-                    ($user instanceof FilamentUser) &&
-                    (! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
-                ) {
-                    $hasPanelAccess = false;
-
-                    return;
-                }
-
+            function (CanResetPassword|Model|Authenticatable $user) use ($data): void {
                 $user->forceFill([
                     $user->getAuthPasswordName() => Hash::make($data['password']),
                     $user->getRememberTokenName() => Str::random(60),
@@ -59,10 +48,6 @@ class ResetPassword extends BaseResetPassword
                 event(new PasswordReset($user));
             }
         );
-
-        if ($hasPanelAccess === false) {
-            $status = Password::INVALID_USER;
-        }
 
         if ($status === Password::PASSWORD_RESET) {
             session()->flash('status', __($status));

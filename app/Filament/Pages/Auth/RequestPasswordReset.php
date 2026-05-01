@@ -32,13 +32,6 @@ class RequestPasswordReset extends BaseRequestPasswordReset
         $status = Password::broker(Filament::getAuthPasswordBroker())->sendResetLink(
             $this->getCredentialsFromFormData($data),
             function (CanResetPassword $user, string $token): void {
-                if (
-                    ($user instanceof FilamentUser) &&
-                    (! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
-                ) {
-                    return;
-                }
-
                 if (! method_exists($user, 'notify')) {
                     $userClass = $user::class;
 
