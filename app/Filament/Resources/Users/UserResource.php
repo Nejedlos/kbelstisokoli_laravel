@@ -73,11 +73,11 @@ class UserResource extends Resource
     {
         UserDebug::log('UserResource: getRelations');
         return [
-            RelationManagers\UserSeasonConfigsRelationManager::class,
-            RelationManagers\PlayerProfilesRelationManager::class,
-            RelationManagers\ParentsRelationManager::class,
-            RelationManagers\ChildrenRelationManager::class,
-            RelationManagers\ConsentsRelationManager::class,
+            // RelationManagers\UserSeasonConfigsRelationManager::class,
+            // RelationManagers\PlayerProfilesRelationManager::class,
+            // RelationManagers\ParentsRelationManager::class,
+            // RelationManagers\ChildrenRelationManager::class,
+            // RelationManagers\ConsentsRelationManager::class,
         ];
     }
 

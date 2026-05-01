@@ -39,7 +39,7 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
-        UserDebug::log('UsersTable: configure start');
+        \App\Filament\Resources\Users\UserDebug::log('UsersTable: configure start');
         $userModel = new User;
         $userTable = $userModel->getTable();
 
@@ -405,7 +405,7 @@ class UsersTable
                 ]),
             ]);
 
-        UserDebug::log('UsersTable: configure end');
+        \App\Filament\Resources\Users\UserDebug::log('UsersTable: configure end');
 
         return $result;
     }
