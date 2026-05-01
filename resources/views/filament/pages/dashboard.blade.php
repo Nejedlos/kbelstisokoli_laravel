@@ -343,6 +343,28 @@
                         </a>
                      </div>
                 </div>
+
+                {{-- DB Info Card --}}
+                <div class="rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/5 shadow-sm p-6">
+                    <h4 class="font-black text-gray-900 dark:text-white uppercase tracking-tight text-[10px] sm:text-xs flex items-center gap-2 mb-4">
+                        <i class="fa-light fa-database text-primary-600"></i>
+                        {{ __('Systémové informace') }}
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-[10px] sm:text-xs">
+                            <span class="text-gray-500 uppercase tracking-widest font-bold">Databáze:</span>
+                            <span class="font-mono text-gray-900 dark:text-gray-300">{{ $dbInfo['database'] }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] sm:text-xs">
+                            <span class="text-gray-500 uppercase tracking-widest font-bold">Tabulka uživatelů:</span>
+                            <span class="font-mono text-gray-900 dark:text-gray-300">{{ $dbInfo['prefix'] }}{{ $dbInfo['table'] }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] sm:text-xs">
+                            <span class="text-gray-500 uppercase tracking-widest font-bold">Připojení:</span>
+                            <span class="font-mono text-gray-900 dark:text-gray-300">{{ $dbInfo['connection'] }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>

@@ -194,6 +194,13 @@ class Dashboard extends BaseDashboard
             ->limit(2)
             ->get();
 
+        $dbInfo = [
+            'database' => config('database.connections.'.config('database.default').'.database'),
+            'table' => (new \App\Models\User)->getTable(),
+            'prefix' => config('database.connections.'.config('database.default').'.prefix'),
+            'connection' => config('database.default'),
+        ];
+
         return [
             'userName' => $userName,
             'stats' => $stats,
@@ -206,6 +213,7 @@ class Dashboard extends BaseDashboard
             'actions' => $actions,
             'isNejedly' => $user?->email === 'nejedlymi@gmail.com',
             'debug' => $debug,
+            'dbInfo' => $dbInfo,
         ];
     }
 
