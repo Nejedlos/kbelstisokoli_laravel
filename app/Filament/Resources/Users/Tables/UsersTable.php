@@ -6,6 +6,8 @@ use App\Enums\Gender;
 use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
 use App\Notifications\UserInvitationNotification;
+use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -37,12 +39,6 @@ class UsersTable
             ->modifyQueryUsing(fn ($query) => $query
                 ->with(['externalMappings', 'roles', 'playerProfile.primaryTeam'])
                 ->select("{$userTable}.*")
-                ->addSelect(['duplicates_count' => \App\Models\User::query()
-                    ->from('users', 'u2')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn('u2.name', "{$userTable}.name")
-                    ->whereColumn('u2.id', '!=', "{$userTable}.id"),
-                ])
             )
             ->columns([
                 SpatieMediaLibraryImageColumn::make('player_photos')
@@ -62,15 +58,12 @@ class UsersTable
                     ->label(__('user.fields.first_name').' '.__('user.fields.last_name'))
                     ->description(fn ($record) => $record->email)
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
-                        (isset($record->duplicates_count) && $record->duplicates_count > 0
-                            ? '<i class="fa-light fa-circle-exclamation fa-fw text-warning mr-1" title="'.__('user.warnings.duplicates', ['count' => $record->duplicates_count]).'"></i> '
-                            : '').
                         ($record->isGhost()
-                            ? '<i class="fa-light fa-ghost fa-fw text-gray-400 mr-1" title="'.__('user.warnings.ghost').'"></i> '
+                            ? IconHelper::render(AppIcon::NOT_FOUND, 'fal')->toHtml() . ' '
                             : '').
                         ($record->externalMappings->isNotEmpty()
-                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="'.__('user.warnings.external_sync').'"></i> '
-                            : '').e($state).($record->duplicates_count > 0 ? ' <span class="text-xs text-warning">('.__('user.warnings.duplicates_simple', ['count' => $record->duplicates_count]).')</span>' : '')
+                            ? IconHelper::render(AppIcon::STAT_SOURCES, 'fal')->toHtml() . ' '
+                            : '').e($state)
                     ))
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
                     ->sortable(),
@@ -234,7 +227,7 @@ class UsersTable
                         ->color('info')
                         ->requiresConfirmation()
                         ->action(function ($record) {
-                            $token = Password::createToken($record);
+                            $token = Password::broker()->createToken($record);
                             $record->notify(new UserInvitationNotification($token));
 
                             FilamentNotification::make()

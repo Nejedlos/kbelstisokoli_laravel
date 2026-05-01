@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Providers\Filament;
-
 use App\Filament\Pages\Auth\EmailVerificationPrompt;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RequestPasswordReset;
@@ -25,12 +23,10 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-
 class AdminPanelProvider extends PanelProvider
 {
     // Pozn.: Hooky a assety registrujeme přímo na panelu v metodě panel(),
     // aby se spolehlivě vykreslily i na auth stránkách.
-
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -47,7 +43,6 @@ class AdminPanelProvider extends PanelProvider
                 $entrypoints = $isAuth
                     ? ['resources/css/filament-auth.css']
                     : ['resources/css/filament-admin.css'];
-
                 $cropper = '';
                 if (auth()->check() && ! $isAuth) {
                     $cropper = "
@@ -55,24 +50,20 @@ class AdminPanelProvider extends PanelProvider
                         <script src='/assets/vendor/cropper.min.js'></script>
                     ";
                 }
-
                 // Branding service vrací --color-brand-* tokens a RGB varianty
                 $brandingService = app(\App\Services\BrandingService::class);
                 $brandingVariables = $brandingService->getCssVariables();
-
                 // Screenshot mode support
                 $screenshotSupport = "";
                 if (class_exists(\App\Support\ScreenshotMode::class)) {
                     $screenshotSupport = Blade::render('<x-screenshot.styles /><x-screenshot.scripts />');
                 }
-
                 // Pokud jsme na auth stránce, přidáme aliasy --brand-* (pro filament-auth.css)
                 $authAliases = '';
                 if ($isAuth) {
                     $settings = $brandingService->getSettings();
                     $colors = $settings['colors'];
                     $colorsRgb = $settings['colors_rgb'];
-
                     $authAliases = '
                         :root {
                             --brand-navy: '.($colors['navy'] ?? '#0b1f3a').';
@@ -83,7 +74,6 @@ class AdminPanelProvider extends PanelProvider
                             --brand-red-rgb: '.($colorsRgb['red'] ?? '225, 29, 72').';
                             --brand-red-hover: '.($colors['red_hover'] ?? '#be123c').';
                             --brand-white: #ffffff;
-
                             /* UI tokens pro auth */
                             --ui-text: rgba(255, 255, 255, 0.92);
                             --ui-text-muted: rgba(255, 255, 255, 0.65);
@@ -96,20 +86,17 @@ class AdminPanelProvider extends PanelProvider
                         }
                     ';
                 }
-
                 // Optimalizovaný výstup bez Blade::render pro zrychlení requestu
                 $viteAssets = app(\Illuminate\Foundation\Vite::class)->__invoke($entrypoints)->toHtml();
                 if ($isAuth) {
                     $viteAssets .= app(\Illuminate\Foundation\Vite::class)->__invoke(['resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])->toHtml();
                 }
-
                 $favicons = '';
                 try {
                     if (app()->bound('translator')) {
                         $favicons = view('partials.favicons', ['includeMain' => false])->render();
                     }
                 } catch (\Throwable $e) {}
-
                 return "
                     {$favicons}
                     {$screenshotSupport}
@@ -128,7 +115,6 @@ class AdminPanelProvider extends PanelProvider
                             window.addEventListener('resize', forceLightOnMobile);
                             document.addEventListener('livewire:navigated', forceLightOnMobile);
                         })();
-
                         /**
                          * KRITICKÝ FIX: Globální potlačení Livewire 3 abort rejekcí v <head>.
                          * Tento skript zachytává \"prázdné\" rejekce, které Livewire 3 vyhazuje při přerušení
@@ -138,7 +124,6 @@ class AdminPanelProvider extends PanelProvider
                          */
                         (function() {
                             if (window.livewireAbortHandlerInitialized) return;
-
                             var suppress = function(e) {
                                 var r = e.reason;
                                 // Livewire 3 abort objekt: { status: null, body: null, json: null, errors: null }
@@ -185,7 +170,6 @@ class AdminPanelProvider extends PanelProvider
                 if (! auth()->check() || request()->routeIs('filament.admin.auth.*')) {
                     return '';
                 }
-
                 // Renderování přes Blade::render pro správnou inicializaci Livewire a komponent
                 return Blade::render('
                     <x-loader-global title="Administrace" />
@@ -198,7 +182,6 @@ class AdminPanelProvider extends PanelProvider
                 if (! auth()->check() || request()->routeIs('filament.admin.auth.*')) {
                     return '';
                 }
-
                 return Blade::render('
                     <x-back-to-top />
                     <livewire:member.avatar-modal />
@@ -208,7 +191,6 @@ class AdminPanelProvider extends PanelProvider
                 if (! auth()->check()) {
                     return '';
                 }
-
                 return Blade::render('
                     <div class="flex items-center gap-2 mr-3" wire:ignore wire:key="topbar-left-actions">
                         @include("filament.components.standard-search")
@@ -219,7 +201,6 @@ class AdminPanelProvider extends PanelProvider
                 if (! auth()->check()) {
                     return '';
                 }
-
                 return Blade::render('
                     <div class="flex items-center gap-2 ml-2" wire:ignore wire:key="topbar-right-actions">
                         @include("filament.components.language-switch")
@@ -235,7 +216,6 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(function() {
                 $branding = app(BrandingService::class)->getSettings();
                 $logoUrl = web_asset($branding['team_logo']['paths']['velke'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.png', false);
-
                 return new HtmlString('
                     <div class="flex items-center gap-2 sm:gap-3 group">
                         <div class="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 transition-all group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/5 border border-slate-100">

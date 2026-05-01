@@ -490,6 +490,12 @@ class PlayerSyncService
         $skippedSeasons = 0;
 
         foreach ($seasons as $season) {
+            // Validace formátu sezóny (musí být YYYY/YY nebo aspoň začínat číslem)
+            if (!preg_match('/^\d{4}/', $season)) {
+                \App\Services\Support\ConsoleService::log("  - Přeskakuji neplatný název sezóny: $season", 'warning');
+                continue;
+            }
+
             // Kontrola zrušení (u rodiče i aktuálního běhu)
             if (($parentRun && ($parentRun->isCancelled() || $parentRun->status === 'skipped')) ||
                 ($run && ($run->isCancelled() || $run->status === 'skipped'))) {

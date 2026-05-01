@@ -51,7 +51,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
         // Extrakce dostupných sezón z tabulky kariéry
         $seasons = [];
         foreach ($stats as $stat) {
-            if (!empty($stat['season_label']) && !in_array($stat['season_label'], $seasons)) {
+            if (!empty($stat['season_label']) && !($stat['is_career_total'] ?? false) && !in_array($stat['season_label'], $seasons)) {
                 $seasons[] = $stat['season_label'];
             }
         }
