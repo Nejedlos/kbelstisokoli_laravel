@@ -5,7 +5,11 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Enums\Gender;
 use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
+use App\Mail\TestMail;
+use App\Models\User;
 use App\Notifications\UserInvitationNotification;
+use App\Services\Stats\Sync\PlayerSyncService;
+use App\Services\Users\UserMergeService;
 use App\Support\IconHelper;
 use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
@@ -14,16 +18,20 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use App\Mail\TestMail;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\HtmlString;
 
@@ -31,8 +39,8 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
-        \Illuminate\Support\Facades\Log::debug('UsersTable: configure start');
-        $userModel = new \App\Models\User;
+        Log::debug('UsersTable: configure start');
+        $userModel = new User;
         $userTable = $userModel->getTable();
 
         return $table
@@ -60,10 +68,10 @@ class UsersTable
                     ->description(fn ($record) => $record->email)
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->isGhost()
-                            ? IconHelper::render(AppIcon::NOT_FOUND, 'fal')->toHtml() . ' '
+                            ? IconHelper::render(AppIcon::NOT_FOUND, 'fal')->toHtml().' '
                             : '').
                         ($record->externalMappings->isNotEmpty()
-                            ? IconHelper::render(AppIcon::STAT_SOURCES, 'fal')->toHtml() . ' '
+                            ? IconHelper::render(AppIcon::STAT_SOURCES, 'fal')->toHtml().' '
                             : '').e($state)
                     ))
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
@@ -146,11 +154,11 @@ class UsersTable
                 SelectFilter::make('gender')
                     ->label(__('user.fields.gender'))
                     ->options(Gender::class),
-                \Filament\Tables\Filters\Filter::make('duplicates')
+                Filter::make('duplicates')
                     ->label(__('user.filters.duplicates'))
                     ->indicator(__('user.filters.duplicates_indicator'))
-                    ->query(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->whereIn('name', function ($sub) {
-                        $userModel = new \App\Models\User;
+                    ->query(fn (Builder $query) => $query->whereIn('name', function ($sub) {
+                        $userModel = new User;
                         $sub->select('name')
                             ->from($userModel->getTable())
                             ->groupBy('name')
@@ -169,7 +177,7 @@ class UsersTable
                                 Mail::to($record->email)->send(new TestMail("Toto je testovací e-mail odeslaný z administrace uživatelů pro ověření doručitelnosti na adresu {$record->email}."));
 
                                 FilamentNotification::make()
-                                    ->title(__('admin.email_debug.notifications.sent') . ' (' . $record->email . ')')
+                                    ->title(__('admin.email_debug.notifications.sent').' ('.$record->email.')')
                                     ->success()
                                     ->send();
                             } catch (\Throwable $e) {
@@ -187,14 +195,14 @@ class UsersTable
                         ->color('warning')
                         ->requiresConfirmation()
                         ->action(function ($record) {
-                            \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Admin triggered password reset', [
+                            Log::channel('single')->info('DEBUG_MAIL: Admin triggered password reset', [
                                 'user_id' => $record->id,
                                 'email' => $record->email,
                             ]);
 
                             $status = Password::broker()->sendResetLink(['email' => $record->email]);
 
-                            \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Password reset broker result', [
+                            Log::channel('single')->info('DEBUG_MAIL: Password reset broker result', [
                                 'user_id' => $record->id,
                                 'email' => $record->email,
                                 'status' => $status,
@@ -217,7 +225,7 @@ class UsersTable
                         ->visible(fn ($record) => $record->is_active),
                     Action::make('sendInvitation')
                         ->label(__('user.actions.send_invitation'))
-                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAPER_PLANE))
+                        ->icon(IconHelper::get(IconHelper::PAPER_PLANE))
                         ->color('info')
                         ->requiresConfirmation()
                         ->action(function ($record) {
@@ -232,7 +240,7 @@ class UsersTable
                         ->visible(fn ($record) => $record->is_active && ! $record->onboarding_completed_at),
                     Action::make('impersonate')
                         ->label(__('user.actions.impersonate'))
-                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMPERSONATE))
+                        ->icon(IconHelper::get(IconHelper::IMPERSONATE))
                         ->color('warning')
                         ->requiresConfirmation(fn ($record) => __('user.actions.impersonate_confirm').$record->name.'?')
                         ->url(fn ($record) => route('admin.impersonate.start', ['userId' => $record->id]))
@@ -242,9 +250,9 @@ class UsersTable
                         ->icon(new HtmlString('<i class="fa-light fa-object-group"></i>'))
                         ->color('warning')
                         ->form([
-                            \Filament\Forms\Components\Select::make('target_user_id')
+                            Select::make('target_user_id')
                                 ->label(__('user.actions.merge_target'))
-                                ->options(fn ($record) => \App\Models\User::where('id', '!=', $record->id)
+                                ->options(fn ($record) => User::where('id', '!=', $record->id)
                                     ->orderBy('name')
                                     ->pluck('name', 'id'))
                                 ->searchable()
@@ -256,8 +264,8 @@ class UsersTable
                         ->modalDescription(__('user.actions.merge_desc'))
                         ->modalSubmitActionLabel(__('user.actions.merge_submit'))
                         ->visible(fn () => auth()->user()?->can('manage_users') && auth()->user()?->hasRole('admin'))
-                        ->action(function ($record, array $data, \App\Services\Users\UserMergeService $service) {
-                            $targetUser = \App\Models\User::findOrFail($data['target_user_id']);
+                        ->action(function ($record, array $data, UserMergeService $service) {
+                            $targetUser = User::findOrFail($data['target_user_id']);
                             $service->merge($record, $targetUser);
 
                             FilamentNotification::make()
@@ -270,7 +278,7 @@ class UsersTable
                         ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
                         ->visible(fn ($record) => auth()->user()?->can('manage_users') && $record->externalMappings->where('source_key', 'czbasketball')->isNotEmpty())
-                        ->action(function ($record, \App\Services\Stats\Sync\PlayerSyncService $service) {
+                        ->action(function ($record, PlayerSyncService $service) {
                             $result = $service->syncPlayer($record);
 
                             if ($result) {
@@ -292,15 +300,15 @@ class UsersTable
             ->headerActions([
                 Action::make('mergeAllGhosts')
                     ->label(__('user.actions.merge_ghosts'))
-                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-object-group"></i>'))
+                    ->icon(new HtmlString('<i class="fa-light fa-object-group"></i>'))
                     ->color('warning')
                     ->requiresConfirmation()
                     ->modalDescription(__('user.actions.merge_ghosts_desc'))
                     ->visible(fn () => auth()->user()?->hasRole('admin'))
-                    ->action(function (\App\Services\Users\UserMergeService $service) {
+                    ->action(function (UserMergeService $service) {
                         // Musíme pracovat s query, abychom se vyhnuli problémům s pamětí u velkého množství uživatelů
                         // Ale pro začátek stačí filter na kolekci, pokud jich není tisíce
-                        $ghosts = \App\Models\User::all()->filter(fn ($u) => $u->isGhost());
+                        $ghosts = User::all()->filter(fn ($u) => $u->isGhost());
                         $mergedCount = 0;
 
                         foreach ($ghosts as $ghost) {
@@ -312,13 +320,13 @@ class UsersTable
                         }
 
                         if ($mergedCount > 0) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->success()
                                 ->title(__('user.notifications.bulk_merge_success'))
                                 ->body(__('user.notifications.bulk_merge_body', ['count' => $mergedCount]))
                                 ->send();
                         } else {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->info()
                                 ->title(__('user.notifications.bulk_merge_none'))
                                 ->send();
@@ -337,7 +345,7 @@ class UsersTable
                         ->modalDescription(__('user.actions.merge_bulk_desc'))
                         ->modalSubmitActionLabel(__('user.actions.merge_bulk_submit'))
                         ->visible(fn () => auth()->user()?->hasRole('admin'))
-                        ->action(function (Collection $records, \App\Services\Users\UserMergeService $service) {
+                        ->action(function (Collection $records, UserMergeService $service) {
                             $mergedCount = 0;
                             $skippedCount = 0;
 
@@ -369,7 +377,7 @@ class UsersTable
                         ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
                         ->requiresConfirmation()
-                        ->action(function (Collection $records, \App\Services\Stats\Sync\PlayerSyncService $service) {
+                        ->action(function (Collection $records, PlayerSyncService $service) {
                             $successCount = 0;
                             foreach ($records as $record) {
                                 if ($service->syncPlayer($record)) {
@@ -385,20 +393,20 @@ class UsersTable
                         }),
                     BulkAction::make('activate')
                         ->label(__('user.actions.activate_selected'))
-                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::ACTIVATE))
+                        ->icon(IconHelper::get(IconHelper::ACTIVATE))
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => true])),
                     BulkAction::make('deactivate')
                         ->label(__('user.actions.deactivate_selected'))
-                        ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::DEACTIVATE))
+                        ->icon(IconHelper::get(IconHelper::DEACTIVATE))
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false])),
                 ]),
             ]);
 
-        \Illuminate\Support\Facades\Log::debug('UsersTable: configure end');
+        Log::debug('UsersTable: configure end');
 
         return $table;
     }

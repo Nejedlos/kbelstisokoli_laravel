@@ -1,13 +1,46 @@
 <?php
 
+use App\Http\Middleware\AddRequestIdToResponse;
+use App\Http\Middleware\CheckTwoFactorTimeout;
+use App\Http\Middleware\DetectScreenshotMode;
+use App\Http\Middleware\EnsureTwoFactorEnabled;
+use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\FullPageCacheMiddleware;
+use App\Http\Middleware\InjectFeedbackWidget;
+use App\Http\Middleware\MinifyHtmlMiddleware;
+use App\Http\Middleware\NotFoundLoggerMiddleware;
+use App\Http\Middleware\PerformanceProfilingMiddleware;
+use App\Http\Middleware\PublicMaintenanceMiddleware;
+use App\Http\Middleware\RedirectMiddleware;
+use App\Http\Middleware\SecurityHeadersMiddleware;
+use App\Http\Middleware\SetLocaleMiddleware;
 use App\Jobs\RunCronTaskJob;
+use App\Mail\ErrorMail;
 use App\Models\CronTask;
+use App\Support\AuthRedirect;
+use App\Support\ErrorMailThrottle;
+use Filament\Http\Middleware\SetUpPanel;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->booting(function ($app) {
@@ -57,7 +90,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // Vynucení HTTPS na produkci pro stabilní generování assetů (Vite, asset(), ...)
         // Důležité po optimize:clear, kdy se spoléháme na dynamickou detekci URL
         if (env('APP_ENV') === 'production') {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+            URL::forceScheme('https');
         }
     })
     ->withRouting(
@@ -97,7 +130,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                         ->withoutOverlapping();
                 });
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Tichý fail, pokud DB není připravena
         }
 
@@ -107,7 +140,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         |--------------------------------------------------------------------------
         */
         $schedule->call(function () {
-            \Illuminate\Support\Facades\Cache::put('scheduler_heartbeat', now());
+            Cache::put('scheduler_heartbeat', now());
         })->everyMinute();
     })
     ->withMiddleware(function (Middleware $middleware): void {
@@ -119,44 +152,44 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // Pozn.: Skupina 'web' je již aplikována v bootstrappingu rout výše.
         // alias pro kontrolu aktivního účtu
         $middleware->alias([
-            'panel' => \Filament\Http\Middleware\SetUpPanel::class,
-            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
-            'public.maintenance' => \App\Http\Middleware\PublicMaintenanceMiddleware::class,
-            '2fa.required' => \App\Http\Middleware\EnsureTwoFactorEnabled::class,
-            '2fa.timeout' => \App\Http\Middleware\CheckTwoFactorTimeout::class,
-            'minify.html' => \App\Http\Middleware\MinifyHtmlMiddleware::class,
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'redirects' => \App\Http\Middleware\RedirectMiddleware::class,
-            'not_found_logger' => \App\Http\Middleware\NotFoundLoggerMiddleware::class,
+            'panel' => SetUpPanel::class,
+            'active' => EnsureUserIsActive::class,
+            'public.maintenance' => PublicMaintenanceMiddleware::class,
+            '2fa.required' => EnsureTwoFactorEnabled::class,
+            '2fa.timeout' => CheckTwoFactorTimeout::class,
+            'minify.html' => MinifyHtmlMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'redirects' => RedirectMiddleware::class,
+            'not_found_logger' => NotFoundLoggerMiddleware::class,
         ]);
 
         $middleware->web(prepend: [
-            \App\Http\Middleware\PerformanceProfilingMiddleware::class,
+            PerformanceProfilingMiddleware::class,
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\SecurityHeadersMiddleware::class,
-            \App\Http\Middleware\DetectScreenshotMode::class,
-            \App\Http\Middleware\SetLocaleMiddleware::class,
-            \App\Http\Middleware\FullPageCacheMiddleware::class,
-            \App\Http\Middleware\AddRequestIdToResponse::class,
-            \App\Http\Middleware\MinifyHtmlMiddleware::class,
-            \App\Http\Middleware\InjectFeedbackWidget::class,
-            \App\Http\Middleware\NotFoundLoggerMiddleware::class,
+            SecurityHeadersMiddleware::class,
+            DetectScreenshotMode::class,
+            SetLocaleMiddleware::class,
+            FullPageCacheMiddleware::class,
+            AddRequestIdToResponse::class,
+            MinifyHtmlMiddleware::class,
+            InjectFeedbackWidget::class,
+            NotFoundLoggerMiddleware::class,
         ]);
 
         $middleware->trustProxies(at: '*');
 
         $middleware->priority([
-            \Illuminate\Session\Middleware\StartSession::class,
-            \App\Http\Middleware\DetectScreenshotMode::class,
-            \Illuminate\Auth\Middleware\Authenticate::class,
-            \Filament\Http\Middleware\Authenticate::class,
-            \Illuminate\Auth\Middleware\Authorize::class,
-            \App\Http\Middleware\EnsureTwoFactorEnabled::class,
-            \App\Http\Middleware\CheckTwoFactorTimeout::class,
+            StartSession::class,
+            DetectScreenshotMode::class,
+            Authenticate::class,
+            Filament\Http\Middleware\Authenticate::class,
+            Authorize::class,
+            EnsureTwoFactorEnabled::class,
+            CheckTwoFactorTimeout::class,
         ]);
 
         $middleware->group('member', [
@@ -179,25 +212,25 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('admin*') || $request->is('clenska-sekce*')) {
                 // Před zobrazením 401 chybové stránky uložíme současnou URL,
                 // aby se sem uživatel mohl po přihlášení vrátit.
-                \App\Support\AuthRedirect::storeIntendedUrl($request->fullUrl());
+                AuthRedirect::storeIntendedUrl($request->fullUrl());
 
                 return response()->view('errors.shot-clock', [], 401);
             }
         });
 
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (HttpException $e, Request $request) {
             if ($e->getStatusCode() === 419 && $request->is('logout')) {
                 return redirect()->to('/');
             }
         });
 
         // Odeslání e-mailu s chybou na produkci (vynechá 4xx chyby)
-        $exceptions->report(function (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('App Exception: ' . $e->getMessage(), [
+        $exceptions->report(function (Throwable $e) {
+            Log::error('App Exception: '.$e->getMessage(), [
                 'exception' => $e,
                 'url' => request()?->fullUrl(),
             ]);
@@ -208,7 +241,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     return;
                 }
 
-                if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $e->getStatusCode() < 500) {
+                if ($e instanceof HttpExceptionInterface && $e->getStatusCode() < 500) {
                     return; // nehlásíme 4xx
                 }
 
@@ -237,15 +270,15 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
                 $user = null;
                 try {
-                    if (\Illuminate\Support\Facades\Auth::check()) {
-                        $u = \Illuminate\Support\Facades\Auth::user();
+                    if (Auth::check()) {
+                        $u = Auth::user();
                         $user = [
                             'id' => $u->id ?? null,
                             'email' => $u->email ?? null,
                             'name' => $u->name ?? null,
                         ];
                     }
-                } catch (\Throwable $ignored) {
+                } catch (Throwable $ignored) {
                 }
 
                 $report = [
@@ -284,34 +317,34 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
                 if ($to) {
                     // Kontrola throttling / deduplikace chybových e-mailů
-                    if (\App\Support\ErrorMailThrottle::shouldThrottle($e, $request ? $request->fullUrl() : null)) {
+                    if (ErrorMailThrottle::shouldThrottle($e, $request ? $request->fullUrl() : null)) {
                         return;
                     }
 
-                    \Illuminate\Support\Facades\Mail::to($to)
-                        ->send((new \App\Mail\ErrorMail($report))->from($from, config('mail.from.name')));
+                    Mail::to($to)
+                        ->send((new ErrorMail($report))->from($from, config('mail.from.name')));
                 }
-            } catch (\Throwable $ignored) {
+            } catch (Throwable $ignored) {
                 // Zaloggujeme selhání odeslání chybového e-mailu pro následnou diagnostiku
                 try {
-                    \Illuminate\Support\Facades\Log::error('Error report email failed', [
+                    Log::error('Error report email failed', [
                         'message' => $ignored->getMessage(),
                         'exception' => get_class($ignored),
                     ]);
-                } catch (\Throwable $e2) {
+                } catch (Throwable $e2) {
                 }
             }
         });
 
         // Vlastní 500 stránka s kopírovatelnými debug informacemi (bez citlivých dat)
-        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if (! app()->environment('production')) {
                 return null; // nezasahujeme mimo produkci
             }
 
             // Pokud je to chyba 419 (CSRF token mismatch), vracíme null, aby proběhlo standardní ošetření
             // (pokud není request na logout, což už je ošetřeno výše)
-            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $e->getStatusCode() === 419) {
+            if ($e instanceof HttpExceptionInterface && $e->getStatusCode() === 419) {
                 // Pokud je uživatel přihlášen, zkusíme mu zachovat session tím, že ho jen přesměrujeme zpět s hláškou
                 if ($request->user()) {
                     return redirect()->back()->withErrors(['error' => __('Platnost relace vypršela, zkuste akci zopakovat.')]);
@@ -326,7 +359,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
 
             // Pouze pro neošetřené chyby 500+
-            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $e->getStatusCode() < 500) {
+            if ($e instanceof HttpExceptionInterface && $e->getStatusCode() < 500) {
                 return null;
             }
 
