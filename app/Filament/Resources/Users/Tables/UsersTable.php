@@ -31,6 +31,7 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
+        \Illuminate\Support\Facades\Log::debug('UsersTable: configure start');
         $userModel = new \App\Models\User;
         $userTable = $userModel->getTable();
 
@@ -156,14 +157,6 @@ class UsersTable
                     })),
             ])
             ->actions([
-                Action::make('viewDuplicates')
-                    ->label(__('user.actions.view_duplicates'))
-                    ->icon(new HtmlString('<i class="fa-light fa-users-viewfinder"></i>'))
-                    ->color('info')
-                    ->url(fn ($record) => route('filament.admin.resources.users.index', [
-                        'tableSearch' => $record->name,
-                    ]))
-                    ->visible(fn ($record) => $record->duplicates_count > 0),
                 ActionGroup::make([
                     Action::make('sendTestEmail')
                         ->label(__('admin.email_debug.actions.send_test'))
@@ -403,5 +396,9 @@ class UsersTable
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false])),
                 ]),
             ]);
+
+        \Illuminate\Support\Facades\Log::debug('UsersTable: configure end');
+
+        return $table;
     }
 }

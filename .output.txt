@@ -1,296 +1,214 @@
-<?php
-namespace App\Providers\Filament;
-use App\Filament\Pages\Auth\EmailVerificationPrompt;
-use App\Filament\Pages\Auth\Login;
-use App\Filament\Pages\Auth\RequestPasswordReset;
-use App\Filament\Pages\Auth\ResetPassword;
-use App\Filament\Pages\Dashboard;
-use App\Services\BrandingService;
-use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
-use Filament\Panel;
-use Filament\PanelProvider;
-use Filament\Support\Assets\Css;
-use Filament\Support\Colors\Color;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-class AdminPanelProvider extends PanelProvider
-{
-    // Pozn.: Hooky a assety registrujeme přímo na panelu v metodě panel(),
-    // aby se spolehlivě vykreslily i na auth stránkách.
-    public function panel(Panel $panel): Panel
-    {
-        return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->spa() // Zapnutí SPA navigace (wire:navigate) pro bleskovou administraci
-            ->colors(fn () => app(BrandingService::class)->getSettings()['colors'])
-            ->darkMode(false)
-            // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
-            ->renderHook('panels::head.end', function (): string {
-                // Podle toho, zda jsme na auth stránkách nebo v adminu, zvolíme správný CSS entrypoint
-                $isAuth = request()->routeIs('filament.admin.auth.*');
-                $entrypoints = $isAuth
-                    ? ['resources/css/filament-auth.css']
-                    : ['resources/css/filament-admin.css'];
-                $cropper = '';
-                if (auth()->check() && ! $isAuth) {
-                    $cropper = "
-                        <link rel='stylesheet' href='/assets/vendor/cropper.min.css' />
-                        <script src='/assets/vendor/cropper.min.js'></script>
-                    ";
-                }
-                // Branding service vrací --color-brand-* tokens a RGB varianty
-                $brandingService = app(\App\Services\BrandingService::class);
-                $brandingVariables = $brandingService->getCssVariables();
-                // Screenshot mode support
-                $screenshotSupport = "";
-                if (class_exists(\App\Support\ScreenshotMode::class)) {
-                    $screenshotSupport = Blade::render('<x-screenshot.styles /><x-screenshot.scripts />');
-                }
-                // Pokud jsme na auth stránce, přidáme aliasy --brand-* (pro filament-auth.css)
-                $authAliases = '';
-                if ($isAuth) {
-                    $settings = $brandingService->getSettings();
-                    $colors = $settings['colors'];
-                    $colorsRgb = $settings['colors_rgb'];
-                    $authAliases = '
-                        :root {
-                            --brand-navy: '.($colors['navy'] ?? '#0b1f3a').';
-                            --brand-navy-rgb: '.($colorsRgb['navy'] ?? '11, 31, 58').';
-                            --brand-blue: '.($colors['blue'] ?? '#2563eb').';
-                            --brand-blue-rgb: '.($colorsRgb['blue'] ?? '37, 99, 235').';
-                            --brand-red: '.($colors['red'] ?? '#e11d48').';
-                            --brand-red-rgb: '.($colorsRgb['red'] ?? '225, 29, 72').';
-                            --brand-red-hover: '.($colors['red_hover'] ?? '#be123c').';
-                            --brand-white: #ffffff;
-                            /* UI tokens pro auth */
-                            --ui-text: rgba(255, 255, 255, 0.92);
-                            --ui-text-muted: rgba(255, 255, 255, 0.65);
-                            --ui-border: rgba(255, 255, 255, 0.18);
-                            --ui-surface: rgba(255, 255, 255, 0.80);
-                            --ui-surface-elevated: rgba(255, 255, 255, 0.90);
-                            --ui-success: #22c55e;
-                            --ui-danger: #ef4444;
-                            --ui-warning: #f59e0b;
-                        }
-                    ';
-                }
-                // Optimalizovaný výstup bez Blade::render pro zrychlení requestu
-                $viteAssets = app(\Illuminate\Foundation\Vite::class)->__invoke($entrypoints)->toHtml();
-                if ($isAuth) {
-                    $viteAssets .= app(\Illuminate\Foundation\Vite::class)->__invoke(['resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])->toHtml();
-                }
-                $favicons = '';
-                try {
-                    if (app()->bound('translator')) {
-                        $favicons = view('partials.favicons', ['includeMain' => false])->render();
-                    }
-                } catch (\Throwable $e) {}
-                return "
-                    {$favicons}
-                    {$screenshotSupport}
-                    <script data-navigate-once>
-                        /**
-                         * VYNUCENÍ SVĚTLÉHO REŽIMU NA MOBILECH
-                         * Na zařízeních s šířkou pod 1024px odstraňujeme třídu .dark.
-                         */
-                        (function() {
-                            const forceLightOnMobile = () => {
-                                if (window.innerWidth < 1024) {
-                                    document.documentElement.classList.remove('dark');
-                                }
-                            };
-                            forceLightOnMobile();
-                            window.addEventListener('resize', forceLightOnMobile);
-                            document.addEventListener('livewire:navigated', forceLightOnMobile);
-                        })();
-                        /**
-                         * KRITICKÝ FIX: Globální potlačení Livewire 3 abort rejekcí v <head>.
-                         * Tento skript zachytává \"prázdné\" rejekce, které Livewire 3 vyhazuje při přerušení
-                         * asynchronního požadavku (např. při pollingu nebo navigaci).
-                         *
-                         * Používáme data-navigate-once, aby se listener v SPA mode nepřidával duplicitně.
-                         */
-                        (function() {
-                            if (window.livewireAbortHandlerInitialized) return;
-                            var suppress = function(e) {
-                                var r = e.reason;
-                                // Livewire 3 abort objekt: { status: null, body: null, json: null, errors: null }
-                                // Rejekce může být i undefined/null při navigaci.
-                                var isLivewireAbort = !r || (
-                                    typeof r === 'object' &&
-                                    'status' in r && r.status === null &&
-                                    ('body' in r || 'json' in r || 'errors' in r)
-                                );
-                                if (isLivewireAbort) {
-                                    e.preventDefault();
-                                    e.stopImmediatePropagation();
-                                }
-                            };
-                            window.addEventListener('unhandledrejection', suppress, true);
-                            window.livewireAbortHandlerInitialized = true;
-                        })();
-                    </script>
-                    <link rel='preconnect' href='https://fonts.googleapis.com'>
-                    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-                    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&display=swap' media='print' onload=\"this.media='all'\">
-                    <style>
-                        {$brandingVariables}
-                        {$authAliases}
-                        :root {
-                            --font-family: 'Instrument Sans', sans-serif;
-                        }
-                        /* Stabilizace ikon pro zamezení FOUC (problikávání velkých glyfů) */
-                        .fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
-                            display: inline-block;
-                            width: 1.25em;
-                            height: 1em;
-                            line-height: 1;
-                            vertical-align: -0.125em;
-                            overflow: hidden;
-                            opacity: 0;
-                        }
-                    </style>
-                    {$cropper}
-                    {$viteAssets}
-                ";
-            })
-            ->renderHook('panels::body.start', function (): string {
-                if (! auth()->check() || request()->routeIs('filament.admin.auth.*')) {
-                    return '';
-                }
-                // Renderování přes Blade::render pro správnou inicializaci Livewire a komponent
-                return Blade::render('
-                    <x-loader-global title="Administrace" />
-                    <x-impersonation-banner />
-                    <x-impersonation-notification />
-                    <livewire:sync-status-bar />
-                ');
-            })
-            ->renderHook('panels::body.end', function (): string {
-                if (! auth()->check() || request()->routeIs('filament.admin.auth.*')) {
-                    return '';
-                }
-                return Blade::render('
-                    <x-back-to-top />
-                    <livewire:member.avatar-modal />
-                ');
-            })
-            ->renderHook('panels::global-search.before', function (): string {
-                if (! auth()->check()) {
-                    return '';
-                }
-                return Blade::render('
-                    <div class="flex items-center gap-2 mr-3" wire:ignore wire:key="topbar-left-actions">
-                        @include("filament.components.standard-search")
-                    </div>
-                ');
-            })
-            ->renderHook('panels::global-search.after', function (): string {
-                if (! auth()->check()) {
-                    return '';
-                }
-                return Blade::render('
-                    <div class="flex items-center gap-2 ml-2" wire:ignore wire:key="topbar-right-actions">
-                        @include("filament.components.language-switch")
-                        @include("filament.components.ai-search")
-                        @include("filament.components.impersonate-select")
-                    </div>
-                ');
-            })
-            ->login(Login::class)
-            ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
-            ->emailVerification(EmailVerificationPrompt::class)
-            ->brandName(fn() => app(BrandingService::class)->getSettings()['club_name'])
-            ->brandLogo(function() {
-                $branding = app(BrandingService::class)->getSettings();
-                $logoUrl = web_asset($branding['team_logo']['paths']['velke'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.png', false);
-                return new HtmlString('
-                    <div class="flex items-center gap-2 sm:gap-3 group">
-                        <div class="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 transition-all group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/5 border border-slate-100">
-                            <img src="'.$logoUrl.'" class="max-w-full max-h-full object-contain" alt="">
-                        </div>
-                        <div class="flex flex-col leading-tight">
-                            <span class="text-[12px] sm:text-sm font-black uppercase tracking-tight text-secondary group-hover:text-primary transition-colors">'.$branding['club_short_name'].'</span>
-                            <span class="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-slate-400 font-bold group-hover:text-slate-600 transition-colors">Administrace</span>
-                        </div>
-                    </div>
-                ');
-            })
-            ->favicon(fn() => web_asset(app(BrandingService::class)->getSettings()['team_logo']['paths']['mini'] ?? '/favicon.ico', false))
-            ->userMenuItems([
-                'member_section' => MenuItem::make()
-                    ->label(fn () => __('admin.navigation.pages.member_section'))
-                    ->url(fn () => route('member.dashboard'))
-                    ->icon(new HtmlString('<i class="fa-light fa-users-viewfinder fa-fw"></i>')),
-                'public_web' => MenuItem::make()
-                    ->label(fn () => __('admin.navigation.pages.public_web'))
-                    ->url(fn () => route('public.home'))
-                    ->icon(new HtmlString('<i class="fa-light fa-globe fa-fw"></i>')),
-            ])
-            ->colors(fn() => [
-                'primary' => Color::hex(app(BrandingService::class)->getSettings()['colors']['red'] ?? '#e11d48'),
-                'gray' => Color::Slate,
-            ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->pages([
-                Dashboard::class,
-                \App\Filament\Pages\RealAttendance::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->navigationGroups([
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.sports_agenda')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.users_and_people')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.finance')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.content_and_media')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.web_settings')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data'))
-                    ->collapsed(),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.system'))
-                    ->collapsed(),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.documentation')),
-            ])
-            ->widgets([
-                // Widgets are now integrated into the custom Dashboard page view
-            ])
-            ->middleware([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                \App\Http\Middleware\SetLocaleMiddleware::class,
-                AuthenticateSession::class,
-                ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
-                SubstituteBindings::class,
-                DisableBladeIconComponents::class,
-                DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\DetectScreenshotMode::class,
-                \App\Http\Middleware\InjectFeedbackWidget::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
-                \App\Http\Middleware\EnsureTwoFactorEnabled::class,
-                \App\Http\Middleware\CheckTwoFactorTimeout::class,
-            ]);
-    }
-}
+app/Filament/Resources
+app/Filament/Resources/NotFoundLogs
+app/Filament/Resources/NotFoundLogs/Tables
+app/Filament/Resources/NotFoundLogs/NotFoundLogResource.php
+app/Filament/Resources/NotFoundLogs/Schemas
+app/Filament/Resources/NotFoundLogs/Pages
+app/Filament/Resources/MediaAssets
+app/Filament/Resources/MediaAssets/Tables
+app/Filament/Resources/MediaAssets/Schemas
+app/Filament/Resources/MediaAssets/MediaAssetResource.php
+app/Filament/Resources/MediaAssets/Pages
+app/Filament/Resources/ExternalTeamSeasonConfigs
+app/Filament/Resources/ExternalTeamSeasonConfigs/Tables
+app/Filament/Resources/ExternalTeamSeasonConfigs/ExternalTeamSeasonConfigResource.php
+app/Filament/Resources/ExternalTeamSeasonConfigs/Schemas
+app/Filament/Resources/ExternalTeamSeasonConfigs/Pages
+app/Filament/Resources/Posts
+app/Filament/Resources/Posts/Tables
+app/Filament/Resources/Posts/Schemas
+app/Filament/Resources/Posts/PostResource.php
+app/Filament/Resources/Posts/Pages
+app/Filament/Resources/PhotoPools
+app/Filament/Resources/PhotoPools/PhotoPoolResource.php
+app/Filament/Resources/PhotoPools/RelationManagers
+app/Filament/Resources/PhotoPools/Pages
+app/Filament/Resources/FinancePayments
+app/Filament/Resources/FinancePayments/Tables
+app/Filament/Resources/FinancePayments/Schemas
+app/Filament/Resources/FinancePayments/FinancePaymentResource.php
+app/Filament/Resources/FinancePayments/RelationManagers
+app/Filament/Resources/FinancePayments/Pages
+app/Filament/Resources/Trainings
+app/Filament/Resources/Trainings/Tables
+app/Filament/Resources/Trainings/TrainingResource.php
+app/Filament/Resources/Trainings/Schemas
+app/Filament/Resources/Trainings/Pages
+app/Filament/Resources/ExternalStatSources
+app/Filament/Resources/ExternalStatSources/ExternalStatSourceResource.php
+app/Filament/Resources/ExternalStatSources/Tables
+app/Filament/Resources/ExternalStatSources/Schemas
+app/Filament/Resources/ExternalStatSources/RelationManagers
+app/Filament/Resources/ExternalStatSources/Pages
+app/Filament/Resources/LegacyImportBatches
+app/Filament/Resources/LegacyImportBatches/Tables
+app/Filament/Resources/LegacyImportBatches/Schemas
+app/Filament/Resources/LegacyImportBatches/RelationManagers
+app/Filament/Resources/LegacyImportBatches/Pages
+app/Filament/Resources/LegacyImportBatches/LegacyImportBatchResource.php
+app/Filament/Resources/PostCategories
+app/Filament/Resources/PostCategories/PostCategoryResource.php
+app/Filament/Resources/PostCategories/Pages
+app/Filament/Resources/HelpArticles
+app/Filament/Resources/HelpArticles/Tables
+app/Filament/Resources/HelpArticles/HelpArticleResource.php
+app/Filament/Resources/HelpArticles/Schemas
+app/Filament/Resources/HelpArticles/RelationManagers
+app/Filament/Resources/HelpArticles/Pages
+app/Filament/Resources/HelpCategories
+app/Filament/Resources/HelpCategories/Tables
+app/Filament/Resources/HelpCategories/Schemas
+app/Filament/Resources/HelpCategories/HelpCategoryResource.php
+app/Filament/Resources/HelpCategories/Pages
+app/Filament/Resources/Leads
+app/Filament/Resources/Leads/LeadResource.php
+app/Filament/Resources/Leads/Pages
+app/Filament/Resources/Opponents
+app/Filament/Resources/Opponents/Tables
+app/Filament/Resources/Opponents/OpponentResource.php
+app/Filament/Resources/Opponents/Schemas
+app/Filament/Resources/Opponents/Pages
+app/Filament/Resources/Opponents/Widgets
+app/Filament/Resources/FinancialTariffs
+app/Filament/Resources/FinancialTariffs/Tables
+app/Filament/Resources/FinancialTariffs/FinancialTariffResource.php
+app/Filament/Resources/FinancialTariffs/Schemas
+app/Filament/Resources/FinancialTariffs/Pages
+app/Filament/Resources/ExternalImportRuns
+app/Filament/Resources/ExternalImportRuns/Tables
+app/Filament/Resources/ExternalImportRuns/ExternalImportRunResource.php
+app/Filament/Resources/ExternalImportRuns/Schemas
+app/Filament/Resources/ExternalImportRuns/RelationManagers
+app/Filament/Resources/ExternalImportRuns/Pages
+app/Filament/Resources/CompetitionStandings
+app/Filament/Resources/CompetitionStandings/Tables
+app/Filament/Resources/CompetitionStandings/Schemas
+app/Filament/Resources/CompetitionStandings/CompetitionStandingResource.php
+app/Filament/Resources/CompetitionStandings/Pages
+app/Filament/Resources/CronLogs
+app/Filament/Resources/CronLogs/Tables
+app/Filament/Resources/CronLogs/CronLogResource.php
+app/Filament/Resources/CronLogs/Schemas
+app/Filament/Resources/CronLogs/Pages
+app/Filament/Resources/StatisticSets
+app/Filament/Resources/StatisticSets/StatisticSetResource.php
+app/Filament/Resources/StatisticSets/Tables
+app/Filament/Resources/StatisticSets/Schemas
+app/Filament/Resources/StatisticSets/RelationManagers
+app/Filament/Resources/StatisticSets/Pages
+app/Filament/Resources/PerformanceTestResults
+app/Filament/Resources/PerformanceTestResults/Tables
+app/Filament/Resources/PerformanceTestResults/Schemas
+app/Filament/Resources/PerformanceTestResults/Pages
+app/Filament/Resources/PerformanceTestResults/PerformanceTestResultResource.php
+app/Filament/Resources/PerformanceTestResults/Widgets
+app/Filament/Resources/ExternalEntityMappings
+app/Filament/Resources/ExternalEntityMappings/Tables
+app/Filament/Resources/ExternalEntityMappings/ExternalEntityMappingResource.php
+app/Filament/Resources/ExternalEntityMappings/Schemas
+app/Filament/Resources/ExternalEntityMappings/Pages
+app/Filament/Resources/ExternalEntityMappings/Widgets
+app/Filament/Resources/Roles
+app/Filament/Resources/Roles/RoleResource.php
+app/Filament/Resources/Roles/Pages
+app/Filament/Resources/Announcements
+app/Filament/Resources/Announcements/AnnouncementResource.php
+app/Filament/Resources/Announcements/Tables
+app/Filament/Resources/Announcements/Schemas
+app/Filament/Resources/Announcements/Pages
+app/Filament/Resources/Permissions
+app/Filament/Resources/Permissions/PermissionResource.php
+app/Filament/Resources/Permissions/Pages
+app/Filament/Resources/AuditLogs
+app/Filament/Resources/AuditLogs/Tables
+app/Filament/Resources/AuditLogs/Schemas
+app/Filament/Resources/AuditLogs/AuditLogResource.php
+app/Filament/Resources/AuditLogs/Pages
+app/Filament/Resources/Redirects
+app/Filament/Resources/Redirects/Tables
+app/Filament/Resources/Redirects/Schemas
+app/Filament/Resources/Redirects/RedirectResource.php
+app/Filament/Resources/Redirects/Pages
+app/Filament/Resources/Partners
+app/Filament/Resources/Partners/Tables
+app/Filament/Resources/Partners/Schemas
+app/Filament/Resources/Partners/PartnerResource.php
+app/Filament/Resources/Partners/Pages
+app/Filament/Resources/Users
+app/Filament/Resources/Users/Tables
+app/Filament/Resources/Users/UserResource.php
+app/Filament/Resources/Users/Schemas
+app/Filament/Resources/Users/RelationManagers
+app/Filament/Resources/Users/Pages
+app/Filament/Resources/FeedbackReports
+app/Filament/Resources/FeedbackReports/Tables
+app/Filament/Resources/FeedbackReports/FeedbackReportResource.php
+app/Filament/Resources/FeedbackReports/Schemas
+app/Filament/Resources/FeedbackReports/Pages
+app/Filament/Resources/Seasons
+app/Filament/Resources/Seasons/SeasonResource.php
+app/Filament/Resources/Seasons/Tables
+app/Filament/Resources/Seasons/Schemas
+app/Filament/Resources/Seasons/Pages
+app/Filament/Resources/UserSeasonConfigs
+app/Filament/Resources/UserSeasonConfigs/Tables
+app/Filament/Resources/UserSeasonConfigs/UserSeasonConfigResource.php
+app/Filament/Resources/UserSeasonConfigs/Schemas
+app/Filament/Resources/UserSeasonConfigs/Pages
+app/Filament/Resources/OpponentMergeSuggestions
+app/Filament/Resources/OpponentMergeSuggestions/OpponentMergeSuggestionResource.php
+app/Filament/Resources/OpponentMergeSuggestions/Tables
+app/Filament/Resources/OpponentMergeSuggestions/Schemas
+app/Filament/Resources/OpponentMergeSuggestions/Pages
+app/Filament/Resources/Teams
+app/Filament/Resources/Teams/Tables
+app/Filament/Resources/Teams/Schemas
+app/Filament/Resources/Teams/TeamResource.php
+app/Filament/Resources/Teams/RelationManagers
+app/Filament/Resources/Teams/Pages
+app/Filament/Resources/PlayerProfiles
+app/Filament/Resources/PlayerProfiles/Tables
+app/Filament/Resources/PlayerProfiles/Schemas
+app/Filament/Resources/PlayerProfiles/Pages
+app/Filament/Resources/PlayerProfiles/PlayerProfileResource.php
+app/Filament/Resources/ClubCompetitions
+app/Filament/Resources/ClubCompetitions/Tables
+app/Filament/Resources/ClubCompetitions/ClubCompetitionResource.php
+app/Filament/Resources/ClubCompetitions/Schemas
+app/Filament/Resources/ClubCompetitions/RelationManagers
+app/Filament/Resources/ClubCompetitions/Pages
+app/Filament/Resources/ClubCompetitions/Widgets
+app/Filament/Resources/BasketballMatches
+app/Filament/Resources/BasketballMatches/Tables
+app/Filament/Resources/BasketballMatches/Schemas
+app/Filament/Resources/BasketballMatches/BasketballMatchResource.php
+app/Filament/Resources/BasketballMatches/Pages
+app/Filament/Resources/CronTasks
+app/Filament/Resources/CronTasks/Tables
+app/Filament/Resources/CronTasks/Schemas
+app/Filament/Resources/CronTasks/RelationManagers
+app/Filament/Resources/CronTasks/CronTaskResource.php
+app/Filament/Resources/CronTasks/Pages
+app/Filament/Resources/Galleries
+app/Filament/Resources/Galleries/Tables
+app/Filament/Resources/Galleries/GalleryResource.php
+app/Filament/Resources/Galleries/Schemas
+app/Filament/Resources/Galleries/RelationManagers
+app/Filament/Resources/Galleries/Pages
+app/Filament/Resources/ClubEvents
+app/Filament/Resources/ClubEvents/ClubEventResource.php
+app/Filament/Resources/ClubEvents/Tables
+app/Filament/Resources/ClubEvents/Schemas
+app/Filament/Resources/ClubEvents/RelationManagers
+app/Filament/Resources/ClubEvents/Pages
+app/Filament/Resources/FinanceCharges
+app/Filament/Resources/FinanceCharges/Tables
+app/Filament/Resources/FinanceCharges/FinanceChargeResource.php
+app/Filament/Resources/FinanceCharges/Schemas
+app/Filament/Resources/FinanceCharges/RelationManagers
+app/Filament/Resources/FinanceCharges/Pages
+app/Filament/Resources/ExternalTeamMappings
+app/Filament/Resources/ExternalTeamMappings/Tables
+app/Filament/Resources/ExternalTeamMappings/ExternalTeamMappingResource.php
+app/Filament/Resources/ExternalTeamMappings/Schemas
+app/Filament/Resources/ExternalTeamMappings/Pages

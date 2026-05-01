@@ -29,7 +29,8 @@ class UserForm
 {
     public static function configure(Schema $schema): Schema
     {
-        return $schema
+        \Illuminate\Support\Facades\Log::debug('UserForm: configure start');
+        $schema = $schema
             ->components([
                 static::getSummaryCard()
                     ->columnSpanFull(),
@@ -46,6 +47,9 @@ class UserForm
                     ->columnSpanFull()
                     ->persistTabInQueryString(),
             ]);
+        \Illuminate\Support\Facades\Log::debug('UserForm: configure end');
+
+        return $schema;
     }
 
     protected static function getSummaryCard(): Section
