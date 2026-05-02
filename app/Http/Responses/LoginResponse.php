@@ -77,6 +77,15 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
 
                 return redirect()->route('two-factor.login');
             }
+        } elseif ($user && request()->is('admin*')) {
+            // Pokud uživatel nemá přístup do adminu, ale je na admin login stránce (např. po resetu),
+            // přesměrujeme ho do členské sekce s informací.
+            \Illuminate\Support\Facades\Log::info('LoginResponse.non_admin_on_admin_path', [
+                'user_id' => $user->id,
+                'email' => $email,
+            ]);
+
+            return redirect()->to(AuthRedirect::getTargetUrl($user, $request));
         }
 
         $targetUrl = AuthRedirect::getTargetUrl($user, $request);

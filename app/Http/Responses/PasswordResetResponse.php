@@ -29,6 +29,7 @@ class PasswordResetResponse implements FilamentPasswordResetResponseContract, Pa
                     \Illuminate\Support\Facades\Log::info('PasswordResetResponse.auto_login_successful', [
                         'user_id' => $user->id,
                         'email' => $user->email,
+                        'can_access_admin' => $user->canAccessAdmin(),
                     ]);
                 }
             }

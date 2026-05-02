@@ -28,5 +28,10 @@ class ResetUserPassword implements ResetsUserPasswords
             'remember_token' => Str::random(60),
             'onboarding_completed_at' => $user->onboarding_completed_at ?? now(),
         ])->save();
+
+        \Illuminate\Support\Facades\Log::info('User password reset via Fortify', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+        ]);
     }
 }
