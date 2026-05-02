@@ -81,12 +81,13 @@ class ScreenshotRenderController extends Controller
     {
         $appUrl = config('app.url');
 
-        // Povolit pouze pokud URL začíná na APP_URL nebo je to relativní cesta (která ale nezačíná na //)
-        if (Str::startsWith($url, $appUrl)) {
+        // Pokud je to relativní URL, považujeme ji za interní (pokud nezačíná na //)
+        if (Str::startsWith($url, '/') && !Str::startsWith($url, '//')) {
             return true;
         }
 
-        if (Str::startsWith($url, '/') && !Str::startsWith($url, '//')) {
+        // Pokud je to absolutní URL, musí začínat na APP_URL
+        if (Str::startsWith($url, $appUrl)) {
             return true;
         }
 

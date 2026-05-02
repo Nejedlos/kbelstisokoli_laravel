@@ -102,7 +102,13 @@ class ProfileController extends Controller
     public function selectAvatarFromAsset(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'media_asset_id' => ['required', Rule::exists('media_assets', 'id')],
+            'media_asset_id' => [
+                'required',
+                Rule::exists('media_assets', 'id')->where(function ($query) {
+                    $query->where('is_public', true)
+                        ->orWhere('uploaded_by_id', auth()->id());
+                }),
+            ],
         ]);
 
         $asset = MediaAsset::findOrFail($data['media_asset_id']);
