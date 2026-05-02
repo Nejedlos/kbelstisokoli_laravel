@@ -3,10 +3,12 @@
 namespace App\Filament\GlobalSearch;
 
 use App\Models\AiDocument;
+use Filament\Facades\Filament;
 use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\GlobalSearch\GlobalSearchResults;
 use Filament\GlobalSearch\Providers\Contracts\GlobalSearchProvider;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\HtmlString;
 
 class AiGlobalSearchProvider implements GlobalSearchProvider
 {
@@ -15,7 +17,18 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         $locale = App::getLocale();
         $results = GlobalSearchResults::make();
 
-        // Vyhledávání v AiDocument
+        // 1. Vyhledávání v AiDocument (AI nápověda, dokumentace, navigace)
+        $this->addAiResults($results, $query, $locale);
+
+        // 2. Vyhledávání v Eloquent modelech (Standardní administrace)
+        // Toto je ono "speciální view", které uživatel postrádal.
+        $this->addFilamentResults($results, $query);
+
+        return $results;
+    }
+
+    protected function addAiResults(GlobalSearchResults $results, string $query, string $locale): void
+    {
         // Priorita: Title (LIKE %) > Keywords (JSON) > Content (LIKE %)
         // Omezíme na admin dokumenty a dokumentaci
         $documents = AiDocument::where('locale', $locale)
@@ -36,7 +49,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         $categories = [];
 
         foreach ($documents as $doc) {
-            $category = $this->getCategoryName($doc->type);
+            $category = (string) $this->getCategoryName($doc->type);
 
             if (! array_key_exists($category, $categories)) {
                 $categories[$category] = [];
@@ -52,8 +65,51 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         foreach ($categories as $name => $items) {
             $results->category($name, $items);
         }
+    }
 
-        return $results;
+    protected function addFilamentResults(GlobalSearchResults $results, string $query): void
+    {
+        $standardResults = [];
+
+        foreach (Filament::getResources() as $resource) {
+            if (! $resource::canGloballySearch()) {
+                continue;
+            }
+
+            $resourceResults = $resource::getGlobalSearchResults($query);
+
+            if (! $resourceResults->count()) {
+                continue;
+            }
+
+            foreach ($resourceResults as $result) {
+                $details = $result->details;
+
+                // Přidáme informaci o typu záznamu pro přehlednost v "Sjednoceném view"
+                $resourceLabel = $resource::getModelLabel();
+                $details[__('admin.search.details.resource')] = (string) $resourceLabel;
+
+                $standardResults[] = new GlobalSearchResult(
+                    title: $result->title,
+                    url: $result->url,
+                    details: $details,
+                    actions: $result->actions,
+                );
+            }
+        }
+
+        if (count($standardResults) > 0) {
+            // Seřadíme výsledky (např. podle titulku)
+            usort($standardResults, fn($a, $b) => strcmp((string)$a->title, (string)$b->title));
+
+            // Omezíme počet výsledků, abychom nezahltili dropdown
+            $limitedResults = array_slice($standardResults, 0, 10);
+
+            $results->category(
+                __('admin.search.categories.database'),
+                $limitedResults
+            );
+        }
     }
 
     protected function getLocalizedValue(mixed $value): string

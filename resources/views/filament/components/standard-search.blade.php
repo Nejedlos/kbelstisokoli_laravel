@@ -41,8 +41,19 @@
         display: block !important;
         width: 100% !important;
     }
-    .filament-standard-search-container .fi-global-search-container {
+    .filament-standard-search-container .fi-global-search-ctn {
         width: 100% !important;
+        position: relative !important;
+    }
+    .filament-standard-search-container .fi-global-search-results-ctn {
+        position: static !important;
+        display: block !important;
+        width: 100% !important;
+        max-height: 400px;
+        overflow-y: auto;
+        box-shadow: none !important;
+        border: none !important;
+        margin-top: 0.5rem;
     }
     .filament-standard-search-container .fi-global-search-field {
         margin-bottom: 0 !important;

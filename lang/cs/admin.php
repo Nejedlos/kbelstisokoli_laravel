@@ -896,11 +896,13 @@ return [
             'resources' => 'Sekce (Resources)',
             'navigation' => 'Navigace',
             'documentation' => 'Dokumentace a nápověda',
+            'database' => 'Databáze (záznamy)',
             'other' => 'Ostatní',
         ],
         'details' => [
             'group' => 'Sekce v menu',
             'content' => 'Obsah',
+            'resource' => 'Typ záznamu',
         ],
     ],
     'real_attendance' => [

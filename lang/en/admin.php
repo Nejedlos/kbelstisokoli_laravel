@@ -836,11 +836,13 @@ return [
             'resources' => 'Resources',
             'navigation' => 'Navigation',
             'documentation' => 'Documentation & Help',
+            'database' => 'Database (records)',
             'other' => 'Other',
         ],
         'details' => [
             'group' => 'Menu Section',
             'content' => 'Content',
+            'resource' => 'Record type',
         ],
     ],
     'real_attendance' => [
