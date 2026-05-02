@@ -23,7 +23,7 @@ Doporučujeme vygenerovat náhodný řetězec, například pomocí:
 
 Pokud hosting umožňuje nastavit Cron jako volání URL (HTTP GET), nastavte jej na následující adresu:
 
-`https://new.kbelstisokoli.cz/system/schedule/{SCHEDULE_TOKEN}`
+`https://kbelstisokoli.cz/system/schedule/{SCHEDULE_TOKEN}`
 
 Interval spouštění nastavte na **každou minutu** (`* * * * *`).
 

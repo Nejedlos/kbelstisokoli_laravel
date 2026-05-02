@@ -6,16 +6,16 @@ Tento soubor obsahuje instrukce a základní informace o webu kbelstisokoli.cz p
 Kbelští sokoli jsou basketbalový oddíl působící na Praze 9 (Kbely a Letňany). Nabízíme tréninky pro děti i dospělé, účastníme se pravidelných soutěží a turnajů.
 
 ## Hlavní sekce webu
-- **Domovská stránka:** https://new.kbelstisokoli.cz/
-- **Nábor nových hráčů:** https://new.kbelstisokoli.cz/nabor (instrukce, jak se k nám přidat)
-- **Zápasy:** https://new.kbelstisokoli.cz/zapasy (termíny, výsledky, statistiky)
-- **Týmy:** https://new.kbelstisokoli.cz/tymy (přehled všech našich kategorií od dětí po muže)
-- **Kontakt:** https://new.kbelstisokoli.cz/kontakt (e-maily, telefony, adresy tělocvičen)
-- **Novinky:** https://new.kbelstisokoli.cz/novinky (aktuality z dění v klubu)
+- **Domovská stránka:** https://kbelstisokoli.cz/
+- **Nábor nových hráčů:** https://kbelstisokoli.cz/nabor (instrukce, jak se k nám přidat)
+- **Zápasy:** https://kbelstisokoli.cz/zapasy (termíny, výsledky, statistiky)
+- **Týmy:** https://kbelstisokoli.cz/tymy (přehled všech našich kategorií od dětí po muže)
+- **Kontakt:** https://kbelstisokoli.cz/kontakt (e-maily, telefony, adresy tělocvičen)
+- **Novinky:** https://kbelstisokoli.cz/novinky (aktuality z dění v klubu)
 
 ## Přístup k datům
-- **Sitemap:** https://new.kbelstisokoli.cz/sitemap.xml
-- **Kanonický host:** new.kbelstisokoli.cz
+- **Sitemap:** https://kbelstisokoli.cz/sitemap.xml
+- **Kanonický host:** kbelstisokoli.cz
 
 ## Omezení
 - **Členská sekce (/member) a Administrace (/admin) jsou neveřejné a vyžadují autentizaci.** Tyto sekce by neměly být procházeny ani indexovány.

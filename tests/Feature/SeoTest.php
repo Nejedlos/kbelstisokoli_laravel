@@ -12,7 +12,7 @@ class SeoTest extends TestCase
         $response = $this->get('/robots.txt');
 
         $response->assertStatus(200);
-        $response->assertSee('Sitemap: https://new.kbelstisokoli.cz/sitemap.xml');
+        $response->assertSee('Sitemap: https://kbelstisokoli.cz/sitemap.xml');
         $response->assertSee('Disallow: /admin');
     }
 
@@ -33,6 +33,6 @@ class SeoTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'text/xml; charset=utf-8');
         $response->assertSee('<urlset', false);
-        $response->assertSee('https://new.kbelstisokoli.cz', false);
+        $response->assertSee('https://kbelstisokoli.cz', false);
     }
 }

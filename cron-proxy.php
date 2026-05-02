@@ -6,7 +6,7 @@
  */
 
 // Konfigurace cílové URL s tokenem (vyžádání JSON pro diagnostiku)
-$url = 'https://new.kbelstisokoli.cz/system/schedule/6f72f0cdf9f8ce4dbc1860899c94a9ad?json=1';
+$url = 'https://kbelstisokoli.cz/system/schedule/6f72f0cdf9f8ce4dbc1860899c94a9ad?json=1';
 
 // Spuštění požadavku přes cURL
 $ch = curl_init($url);

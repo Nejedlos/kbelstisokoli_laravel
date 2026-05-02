@@ -30,7 +30,7 @@ class ResetPasswordNotification extends BaseNotification
 
             // Robustní fix pro případy, kdy route() vygeneruje URL bez hosta (např. v CLI nebo špatném kontextu)
             if (! str_contains($url, '://') || str_contains($url, '://:/')) {
-                $appUrl = config('app.url') ?: 'https://new.kbelstisokoli.cz'; // Hard fallback na produkční doménu projektu
+                $appUrl = config('app.url') ?: 'https://kbelstisokoli.cz'; // Hard fallback na produkční doménu projektu
                 $appUrl = rtrim($appUrl, '/');
                 $relativeUrl = route('password.reset', [
                     'token' => $this->token,

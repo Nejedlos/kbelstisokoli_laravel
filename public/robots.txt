@@ -11,4 +11,4 @@ Disallow: /api
 Disallow: /storage
 Disallow: /system
 
-Sitemap: https://new.kbelstisokoli.cz/sitemap.xml
+Sitemap: https://kbelstisokoli.cz/sitemap.xml
