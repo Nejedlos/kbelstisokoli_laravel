@@ -19,6 +19,12 @@ class PasswordResetTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        RateLimiter::clear("pw-reset-ip:" . md5('127.0.0.1'));
+    }
+
     public function test_filament_forgot_password_sends_email_for_existing_user()
     {
         Notification::fake();
@@ -84,13 +90,25 @@ class PasswordResetTest extends TestCase
     {
         $service = app(\App\Services\Auth\PasswordResetService::class);
         $email = 'throttle-' . uniqid() . '@example.com';
+        $emailHash = md5($email);
+        $ipHash = md5(request()->ip());
 
-        // Simulujeme 3 hity
-        for ($i = 0; $i < 3; $i++) {
+        RateLimiter::clear("pw-reset-email-throttle:{$emailHash}");
+        RateLimiter::clear("pw-reset-email:{$emailHash}");
+        RateLimiter::clear("pw-reset-ip:{$ipHash}");
+
+        // První pokus - OK
+        $status = $service->sendResetLink($email);
+        $this->assertEquals(Password::INVALID_USER, $status);
+
+        // Druhý pokus okamžitě - Throttled
+        try {
             $service->sendResetLink($email);
+            $this->fail('ValidationException was not thrown');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertArrayHasKey('email', $e->errors());
+            $this->assertStringContainsString('Počkejte prosím', $e->errors()['email'][0]);
+            $this->assertStringContainsString('sekund', $e->errors()['email'][0]);
         }
-
-        $this->expectException(\Illuminate\Validation\ValidationException::class);
-        $service->sendResetLink($email);
     }
 }

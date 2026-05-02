@@ -16,5 +16,7 @@ return [
     'throttled' => 'Už jste o obnovu hesla požádali nedávno. Počkejte prosím chvíli, než to zkusíte znovu.',
     'token' => 'Tento odkaz pro obnovu hesla už vypršel nebo není platný. Zkuste si prosím nechat poslat nový.',
     'user' => 'Uživatel s touto e-mailovou adresou u nás není registrovaný. Zkontrolujte prosím překlepy.',
+    'throttled_seconds' => 'Zkuste to znovu za :seconds sekund.',
+    'throttled_minutes' => 'Zkuste to znovu za :minutes min.',
 
 ];

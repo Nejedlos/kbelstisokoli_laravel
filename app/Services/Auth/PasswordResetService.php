@@ -49,6 +49,12 @@ class PasswordResetService
 
         $this->logRequest($email, $status, $ip);
 
+        if ($status === Password::RESET_THROTTLED) {
+            throw ValidationException::withMessages([
+                'email' => [__('passwords.throttled')],
+            ]);
+        }
+
         // Vždy vracíme success status pro UI, pokud je to potřeba v controlleru,
         // ale služba sama vrací reálný status pro interní potřebu.
         return $status;
@@ -62,22 +68,35 @@ class PasswordResetService
         $emailHash = md5($email);
         $ipHash = md5($ip);
 
-        // Per email: 3 pokusy / 15 minut
+        // Per email: 1 pokus / 60 sekund (shoda s Laravel brokerem pro zamezení enumerace)
+        if (RateLimiter::tooManyAttempts("pw-reset-email-throttle:{$emailHash}", 1)) {
+            $seconds = RateLimiter::availableIn("pw-reset-email-throttle:{$emailHash}");
+            throw ValidationException::withMessages([
+                'email' => [__('passwords.throttled') . ' ' . __('passwords.throttled_seconds', ['seconds' => $seconds])],
+            ]);
+        }
+
+        // Per email: 3 pokusy / 15 minut (dlouhodobý limit)
         if (RateLimiter::tooManyAttempts("pw-reset-email:{$emailHash}", 3)) {
             $this->logRateLimit($email, 'email', $ip);
+            $seconds = RateLimiter::availableIn("pw-reset-email:{$emailHash}");
+            $minutes = ceil($seconds / 60);
             throw ValidationException::withMessages([
-                'email' => [__('passwords.throttled')],
+                'email' => [__('passwords.throttled') . ' ' . __('passwords.throttled_minutes', ['minutes' => $minutes])],
             ]);
         }
 
         // Per IP: 10 pokusů / 15 minut
         if (RateLimiter::tooManyAttempts("pw-reset-ip:{$ipHash}", 10)) {
             $this->logRateLimit($email, 'ip', $ip);
+            $seconds = RateLimiter::availableIn("pw-reset-ip:{$ipHash}");
+            $minutes = ceil($seconds / 60);
             throw ValidationException::withMessages([
-                'email' => [__('passwords.throttled')],
+                'email' => [__('passwords.throttled') . ' ' . __('passwords.throttled_minutes', ['minutes' => $minutes])],
             ]);
         }
 
+        RateLimiter::hit("pw-reset-email-throttle:{$emailHash}", 60);
         RateLimiter::hit("pw-reset-email:{$emailHash}", 900);
         RateLimiter::hit("pw-reset-ip:{$ipHash}", 900);
     }
