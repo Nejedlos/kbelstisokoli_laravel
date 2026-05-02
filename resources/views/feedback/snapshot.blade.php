@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Feedback Snapshot</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: *;">
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/icons-fix.css', 'resources/css/app.css'])
     <x-screenshot.styles />
     {!! $context['head'] ?? '' !!}
     <base href="{{ url('/') }}">

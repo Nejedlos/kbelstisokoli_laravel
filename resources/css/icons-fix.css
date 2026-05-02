@@ -1,0 +1,12 @@
+/* Fix pro Font Awesome 7 a Tailwind v4 */
+.fa-light, .fal { font-weight: 300 !important; }
+.fa-regular, .far { font-weight: 400 !important; }
+.fa-solid, .fas { font-weight: 900 !important; }
+.fa-thin, .fat { font-weight: 100 !important; }
+.fa-duotone, .fad { font-weight: 900 !important; }
+
+/* Zajištění zviditelnění ikon */
+.fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
+    opacity: 1 !important;
+    visibility: visible !important;
+}

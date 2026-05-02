@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
                 input: [
                     'resources/css/app.css',
                     'resources/js/app.js',
+                    'resources/css/icons-fix.css',
                     'resources/css/filament-auth.css',
                     'resources/js/filament-auth.js',
                     'resources/css/filament-admin.css',
@@ -29,8 +30,9 @@ export default defineConfig(({ mode }) => {
                     'resources/js/feedback-widget.js'
                 ],
                 refresh: true,
-                // Na produkci (external) buildujeme přímo do subdomény
-                publicDirectory: isExternal ? '../subdomains/new' : 'public',
+                // Na produkci (external) buildujeme do standardní složky,
+                // Envoy se postará o synchronizaci do subdomény.
+                publicDirectory: 'public',
             }),
             tailwindcss(),
         ],

@@ -35,7 +35,7 @@
 
     <meta name="theme-color" content="{{ $branding['colors']['red'] ?? '#e11d48' }}">
     <style>{!! $branding_css !!}</style>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/icons-fix.css', 'resources/css/app.css', 'resources/js/app.js'])
     @if($is_admin)
         @vite(['resources/css/filament-admin.css'])
     @endif

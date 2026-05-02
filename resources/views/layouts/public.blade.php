@@ -138,7 +138,7 @@
     </script>
     <style>{!! $branding_css !!}</style>
     @livewireStyles
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/icons-fix.css', 'resources/css/app.css', 'resources/js/app.js'])
 
     <x-screenshot.styles />
     <x-screenshot.scripts />

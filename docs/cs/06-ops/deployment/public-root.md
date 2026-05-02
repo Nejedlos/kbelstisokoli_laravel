@@ -29,9 +29,9 @@ APP_PUBLIC_PATH="/home/html/kbelstisokoli.cz/public_html/subdomains/new"
     - To zajistí, že funkce `public_path()`, disk `public_path` ve filesystému i helper `@vite()` budou mířit do externí složky.
 
 2.  **Vite build (`vite.config.js`):**
-    - Při sestavování assetů (`npm run build`) Vite detekuje `PUBLIC_PATH_MODE=external`.
-    - Pokud je aktivní, nastaví `publicDirectory` na `../subdomains/new`.
-    - Výsledný build se pak uloží do `/subdomains/new/build`.
+    - Při sestavování assetů (`npm run build`) Vite builduje do standardní složky `public/build`.
+    - Následně se o synchronizaci do externí složky `/subdomains/new/build` postará **Envoy** v rámci `sync_public` úkolu.
+    - Toto sjednocení cest zajišťuje, že assety nejsou smazány při deploymentu.
 
 3.  **Vstupní bod (`index.php`):**
     - V externí složce `/subdomains/new` musí být `index.php`, který správně načte aplikaci ze složky `/secret`.
@@ -103,4 +103,4 @@ Na produkci spouštějte build standardně:
 ```bash
 npm run build
 ```
-Vite se postará o doručení souborů do správné složky na základě `.env` souboru.
+Vite sestaví soubory do `public/build` a skript Envoy je následně přenese do cílové složky subdomény.

@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800;900&family=Oswald:wght@400;500;600;700&family=Patrick+Hand&display=swap&subset=latin-ext" rel="stylesheet">
 
     <style>{!! $branding_css ?? '' !!}</style>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/icons-fix.css', 'resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         body {

@@ -116,6 +116,14 @@
 
                 if (options.method === 'POLL' || options.silent || options.background) return;
 
+                // Ignorujeme dlouhotrvající requesty ze SystemConsole, které mají vlastní indikaci
+                if (options.method === 'CALL' && options.params && options.params[0] === 'run') {
+                    // Pokud jde o jeden ze synchronizačních příkazů, loader nespouštíme vůbec
+                    const cmd = options.params[1] ? options.params[1][0] : null;
+                    const syncCommands = ['stats:sync-players', 'stats:sync-team-season', 'stats:import', 'app:sync-player-photos', 'stats:sync-match-detail', 'stats:sync-team-page'];
+                    if (syncCommands.includes(cmd)) return;
+                }
+
                 const isUserAction = (Date.now() - window.lastUserInteraction) < 1000;
                 const isNavigation = !!options.navigate;
 
