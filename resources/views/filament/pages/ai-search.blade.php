@@ -94,10 +94,10 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-[13px] font-bold text-gray-900 dark:text-white truncate group-hover/source:text-primary transition-colors">
-                                    {{ $this->getLocalizedValue($doc->title) }}
+                                    {{ (string) $doc->getLocalizedValue('title') }}
                                 </div>
                                 <div class="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-wider mt-0.5">
-                                    {{ str_replace(['admin.', '.'], ['', ' '], $doc->type) }}
+                                    {{ str_replace(['admin.', '.'], ['', ' '], (string) $doc->type) }}
                                 </div>
                                 @if($doc->url)
                                     <a href="{{ $doc->url }}" class="mt-2 inline-flex items-center text-[10px] text-primary font-black uppercase tracking-widest hover:underline">

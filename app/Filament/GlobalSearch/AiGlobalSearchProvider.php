@@ -43,7 +43,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
             }
 
             $categories[$category][] = new GlobalSearchResult(
-                title: $this->getLocalizedValue($doc->title),
+                title: (string) $doc->getLocalizedValue('title'),
                 url: $doc->url ?? '#',
                 details: $this->getDetails($doc),
             );
@@ -99,12 +99,13 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
 
         // Pokud je v metadatech uložena skupina v menu, přidáme ji
         if (isset($doc->metadata['group'])) {
-            $details[__('admin.search.details.group')] = $doc->metadata['group'];
+            $group = $doc->metadata['group'];
+            $details[__('admin.search.details.group')] = is_array($group) ? (string) json_encode($group) : (string) $group;
         }
 
         // AI vygenerované shrnutí (pokud existuje) nebo náhled obsahu
-        $summary = $this->getLocalizedValue($doc->summary) ?: mb_substr(strip_tags($this->getLocalizedValue($doc->content)), 0, 100).'...';
-        $details[__('admin.search.details.content')] = $summary;
+        $summary = $doc->getLocalizedValue('summary') ?: mb_substr(strip_tags($doc->getLocalizedValue('content')), 0, 100).'...';
+        $details[__('admin.search.details.content')] = (string) $summary;
 
         return $details;
     }
