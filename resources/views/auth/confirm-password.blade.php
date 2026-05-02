@@ -35,7 +35,7 @@
                 <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
                     <div class="fi-input-wrp-content-ctn">
                         <input id="password" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="password" required autofocus autocomplete="current-password"
-                               placeholder="••••••••"
+                               placeholder="••••••••••••"
                                class="fi-input">
                     </div>
                     <div class="fi-input-wrp-suffix">

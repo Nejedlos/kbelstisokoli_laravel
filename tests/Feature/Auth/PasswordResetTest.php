@@ -60,14 +60,14 @@ class PasswordResetTest extends TestCase
         ]);
 
         app(ResetUserPassword::class)->reset($user, [
-            'password' => 'NewPassword123!',
-            'password_confirmation' => 'NewPassword123!',
+            'password' => 'NewPassword123456!',
+            'password_confirmation' => 'NewPassword123456!',
         ]);
 
         $user->refresh();
         $this->assertEquals('secret', $user->two_factor_secret);
         $this->assertNotNull($user->two_factor_confirmed_at);
-        $this->assertTrue(Hash::check('NewPassword123!', $user->password));
+        $this->assertTrue(Hash::check('NewPassword123456!', $user->password));
     }
 
     public function test_fortify_failed_response_anti_enumeration()

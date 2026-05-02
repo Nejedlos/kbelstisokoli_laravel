@@ -39,7 +39,7 @@
             <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
                 <div class="fi-input-wrp-content-ctn">
                     <input id="password" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="password" autocomplete="new-password"
-                           placeholder="••••••••"
+                           placeholder="••••••••••••"
                            class="fi-input">
                 </div>
                 <div class="fi-input-wrp-suffix">
@@ -55,7 +55,7 @@
             <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
                 <div class="fi-input-wrp-content-ctn">
                     <input id="password_confirmation" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="password_confirmation" autocomplete="new-password"
-                           placeholder="••••••••"
+                           placeholder="••••••••••••"
                            class="fi-input">
                 </div>
                 <div class="fi-input-wrp-suffix">

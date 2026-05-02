@@ -11,7 +11,7 @@ const translations = {
         capslock: "Caps Lock je zapnutý",
         strength: {
             title: "Heslo není dostatečně silné.",
-            length: "Minimálně 8 znaků",
+            length: "Minimálně 12 znaků",
             upper: "Alespoň jedno velké písmeno",
             number: "Alespoň jedno číslo",
             special: "Alespoň jeden speciální znak"
@@ -30,7 +30,7 @@ const translations = {
         capslock: "Caps Lock is ON",
         strength: {
             title: "Password is not strong enough.",
-            length: "At least 8 characters",
+            length: "At least 12 characters",
             upper: "At least one uppercase letter",
             number: "At least one number",
             special: "At least one special character"
