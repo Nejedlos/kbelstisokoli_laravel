@@ -45,8 +45,8 @@ class AdminPanelProvider extends PanelProvider
                 // Podle toho, zda jsme na auth stránkách nebo v adminu, zvolíme správný CSS entrypoint
                 $isAuth = request()->routeIs('filament.admin.auth.*');
                 $entrypoints = $isAuth
-                    ? ['resources/css/filament-auth.css']
-                    : ['resources/css/filament-admin.css'];
+                    ? ['resources/css/icons-fix.css', 'resources/css/filament-auth.css']
+                    : ['resources/css/icons-fix.css', 'resources/css/filament-admin.css'];
 
                 $cropper = '';
                 if (auth()->check() && ! $isAuth) {

@@ -845,16 +845,3 @@ body .fi-no-notification[class*="fi-status-info"] .fi-no-notification-icon {
     from { transform: translateX(-50%) scale(1.3); opacity: 0.5; }
     to { transform: translateX(-50%) scale(0.6); opacity: 0.1; }
 }
-
-/* Vynucení vah pro Font Awesome 7 v produkčním buildu (Tailwind v4 fix) */
-.fa-light, .fal { font-weight: 300 !important; }
-.fa-regular, .far { font-weight: 400 !important; }
-.fa-solid, .fas { font-weight: 900 !important; }
-.fa-thin, .fat { font-weight: 100 !important; }
-.fa-duotone, .fad { font-weight: 900 !important; }
-
-/* Zajištění zviditelnění ikon po načtení Font Awesome a stabilizačního CSS z head */
-.fa-light, .fa-regular, .fa-solid, .fa-brands, .fa-thin, .fa-duotone, .fal, .far, .fas, .fab, .fat, .fad {
-    opacity: 1 !important;
-    visibility: visible !important;
-}

@@ -99,8 +99,10 @@ Na lokálním prostředí ponechte `PUBLIC_PATH_MODE=default` (nebo proměnnou v
 
 ## Build příkaz
 
-Na produkci spouštějte build standardně:
+Vzhledem k verzi Node.js na hostingu Webglobe (v14) doporučujeme spouštět build **lokálně** a následně assety nahrát na server (viz dokumentace nasazení).
+
+Pokud je na serveru k dispozici Node.js 18+, lze build spustit i tam:
 ```bash
 npm run build
 ```
-Vite sestaví soubory do `public/build` a skript Envoy je následně přenese do cílové složky subdomény.
+Vite sestaví soubory do `public/build` a skript Envoy (nebo manuální synchronizace) je následně přenese do cílové složky subdomény.
