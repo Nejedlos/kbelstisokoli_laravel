@@ -16,14 +16,24 @@
 
     <!-- Google Tag Manager / Analytics -->
     @if($gaId = env('GA_MEASUREMENT_ID'))
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
+
+            // Výchozí nastavení souhlasu (Consent Mode v2)
+            // Nastavíme 'denied', dokud uživatel neodsouhlasí v cookie liště
+            gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'wait_for_update': 500
+            });
+
             gtag('js', new Date());
             gtag('config', '{{ $gaId }}');
         </script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
     @endif
     @if($gtmId = env('GTM_CONTAINER_ID'))
         <!-- Google Tag Manager -->
@@ -194,5 +204,7 @@
     @endif
 
     @stack('scripts')
+
+    <x-cookie-consent :branding="$branding ?? []" />
 </body>
 </html>

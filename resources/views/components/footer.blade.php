@@ -378,6 +378,13 @@
                     {{ __('Ochrana soukromí') }}
                 </a>
 
+                <span class="w-1 h-1 bg-slate-800 rounded-full"></span>
+
+                <button @click="$dispatch('open-cookie-settings')" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black group flex items-center justify-center sm:justify-start">
+                    <span class="w-1 h-1 bg-primary/40 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"></span>
+                    {{ __('cookies.settings_link') }}
+                </button>
+
                 <span class="w-1 h-1 bg-slate-800 rounded-full hidden sm:block"></span>
 
                 <a href="{{ $branding['main_club_url'] }}" target="_blank" rel="noopener" class="hover:text-primary transition-all uppercase tracking-widest-responsive sm:tracking-[0.15em] text-[10px] font-black flex items-center group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:bg-primary/10 hover:border-primary/20 min-w-full sm:min-w-0 justify-center">

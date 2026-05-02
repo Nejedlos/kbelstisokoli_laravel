@@ -65,6 +65,27 @@
         }
     </style>
     @vite(['resources/css/icons-fix.css', 'resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Google Tag Manager / Analytics -->
+    @if($gaId = env('GA_MEASUREMENT_ID'))
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+
+            // Výchozí nastavení souhlasu (Consent Mode v2)
+            gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'wait_for_update': 500
+            });
+
+            gtag('js', new Date());
+            gtag('config', '{{ $gaId }}');
+        </script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
+    @endif
     <x-screenshot.styles />
     <x-screenshot.scripts />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -535,6 +556,13 @@
                         {{ __('member.feedback.contact_admin_title') }}
                     </a>
                 </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex justify-center">
+                    <button @click="$dispatch('open-cookie-settings'); sidebarOpen = false"
+                            class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
+                        <i class="fa-light fa-cookie-bite"></i>
+                        {{ __('cookies.settings_link') }}
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -681,6 +709,8 @@
         });
     </script>
     @stack('scripts')
+
+    <x-cookie-consent :branding="$branding ?? []" />
     @livewireScripts
     <script>
         document.addEventListener('livewire:init', () => {
