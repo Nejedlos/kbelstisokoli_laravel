@@ -58,4 +58,13 @@ return [
         ],
     ],
 
+    'google' => [
+        'analytics_id' => env('GA_MEASUREMENT_ID'),
+        'tag_manager_id' => env('GTM_CONTAINER_ID'),
+    ],
+
+    'facebook' => [
+        'pixel_id' => env('FB_PIXEL_ID'),
+    ],
+
 ];

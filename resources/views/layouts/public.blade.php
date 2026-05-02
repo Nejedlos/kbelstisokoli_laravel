@@ -15,7 +15,7 @@
     @include('partials.favicons')
 
     <!-- Google Tag Manager / Analytics -->
-    @if($gaId = env('GA_MEASUREMENT_ID'))
+    @if($gaId = config('services.google.analytics_id'))
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -35,7 +35,7 @@
         </script>
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
     @endif
-    @if($gtmId = env('GTM_CONTAINER_ID'))
+    @if($gtmId = config('services.google.tag_manager_id'))
         <!-- Google Tag Manager -->
         <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
                     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -46,7 +46,7 @@
     @endif
 
     <!-- Facebook Pixel -->
-    @if($fbPixelId = env('FB_PIXEL_ID'))
+    @if($fbPixelId = config('services.facebook.pixel_id'))
         <script>
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -65,8 +65,14 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="https://connect.facebook.net">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://www.google-analytics.com">
+    <link rel="preconnect" href="https://connect.facebook.net">
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 
     <script>
@@ -168,7 +174,7 @@
       x-init="headerHeight = $refs.header.offsetHeight; $nextTick(() => headerHeight = $refs.header.offsetHeight)"
       @resize.window="headerHeight = $refs.header.offsetHeight"
       @scroll.window="scrolled = window.scrollY > 10">
-    @if($gtmId = env('GTM_CONTAINER_ID'))
+    @if($gtmId = config('services.google.tag_manager_id'))
         <!-- Google Tag Manager (noscript) -->
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $gtmId }}"
                           height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
