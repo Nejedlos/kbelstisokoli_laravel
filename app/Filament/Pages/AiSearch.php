@@ -45,6 +45,10 @@ class AiSearch extends Page
     {
         $this->query = (string) $request->input('q', '');
         $this->sources = collect();
+
+        if (mb_strlen($this->query) >= 2) {
+            $this->askAi();
+        }
     }
 
     public function askAi(): void
@@ -88,5 +92,29 @@ class AiSearch extends Page
         }
 
         $this->isProcessing = false;
+    }
+
+    public function getLocalizedValue(mixed $value): string
+    {
+        if (is_array($value)) {
+            $locale = app()->getLocale();
+
+            return $value[$locale] ?? $value['cs'] ?? array_values($value)[0] ?? '';
+        }
+
+        if (is_string($value)) {
+            if (str_starts_with($value, '{') || str_starts_with($value, '[')) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $locale = app()->getLocale();
+
+                    return $decoded[$locale] ?? $decoded['cs'] ?? array_values($decoded)[0] ?? '';
+                }
+            }
+
+            return $value;
+        }
+
+        return (string) ($value ?? '');
     }
 }

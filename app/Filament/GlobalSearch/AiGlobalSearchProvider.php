@@ -26,7 +26,8 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
             ->where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
                     ->orWhere('content', 'LIKE', "%{$query}%")
-                    ->orWhere('keywords', 'LIKE', "%{$query}%");
+                    ->orWhere('keywords', 'LIKE', "%{$query}%")
+                    ->orWhere('summary', 'LIKE', "%{$query}%");
             })
             ->orderBy('title')
             ->limit(10)
@@ -42,7 +43,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
             }
 
             $categories[$category][] = new GlobalSearchResult(
-                title: $doc->title,
+                title: $this->getLocalizedValue($doc->title),
                 url: $doc->url ?? '#',
                 details: $this->getDetails($doc),
             );
@@ -55,10 +56,35 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         return $results;
     }
 
+    protected function getLocalizedValue(mixed $value): string
+    {
+        if (is_array($value)) {
+            $locale = App::getLocale();
+
+            return $value[$locale] ?? $value['cs'] ?? array_values($value)[0] ?? '';
+        }
+
+        if (is_string($value)) {
+            // Pokud je to JSON string (začíná { nebo [), zkusíme ho dekódovat
+            if (str_starts_with($value, '{') || str_starts_with($value, '[')) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $locale = App::getLocale();
+
+                    return $decoded[$locale] ?? $decoded['cs'] ?? array_values($decoded)[0] ?? '';
+                }
+            }
+
+            return $value;
+        }
+
+        return (string) ($value ?? '');
+    }
+
     protected function getCategoryName(string $type): string
     {
         if (str_starts_with($type, 'documentation.')) {
-            return __('admin.search.categories.documentation') ?: 'Dokumentace';
+            return __('admin.search.categories.documentation');
         }
 
         return match ($type) {
@@ -77,7 +103,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         }
 
         // AI vygenerované shrnutí (pokud existuje) nebo náhled obsahu
-        $summary = $doc->summary ?: mb_substr(strip_tags($doc->content), 0, 100).'...';
+        $summary = $this->getLocalizedValue($doc->summary) ?: mb_substr(strip_tags($this->getLocalizedValue($doc->content)), 0, 100).'...';
         $details[__('admin.search.details.content')] = $summary;
 
         return $details;

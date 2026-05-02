@@ -158,9 +158,11 @@ class BackendSearchService
     protected function getDocTypeLabel(string $type): string
     {
         return match ($type) {
-            'admin.resource' => __('admin.search.categories.resources'),
-            'member.resource' => __('admin.search.categories.pages'), // Nebo vhodnější label
-            default => __('admin.search.categories.other'),
+            'admin.resource' => __('search.types.admin'),
+            'member.resource' => __('search.types.member'),
+            'documentation.resource' => __('search.types.documentation'),
+            'frontend.resource' => __('search.types.page'),
+            default => __('search.types.general'),
         };
     }
 

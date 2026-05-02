@@ -94,7 +94,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-[13px] font-bold text-gray-900 dark:text-white truncate group-hover/source:text-primary transition-colors">
-                                    {{ is_array($doc->title) ? ($doc->title[app()->getLocale()] ?? $doc->title['cs'] ?? array_values($doc->title)[0] ?? 'Untitled') : ($doc->title ?: 'Untitled') }}
+                                    {{ $this->getLocalizedValue($doc->title) }}
                                 </div>
                                 <div class="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-wider mt-0.5">
                                     {{ str_replace(['admin.', '.'], ['', ' '], $doc->type) }}

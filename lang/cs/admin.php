@@ -890,10 +890,12 @@ return [
         'ai_thinking' => 'Asistent přemýšlí…',
     ],
     'search' => [
+        'input_placeholder' => 'Hledat v administraci',
         'categories' => [
             'pages' => 'Stránky',
             'resources' => 'Sekce (Resources)',
             'navigation' => 'Navigace',
+            'documentation' => 'Dokumentace a nápověda',
             'other' => 'Ostatní',
         ],
         'details' => [

@@ -830,14 +830,16 @@ return [
         'ai_thinking' => 'Assistant is thinking…',
     ],
     'search' => [
+        'input_placeholder' => 'Search in administration',
         'categories' => [
             'pages' => 'Pages',
             'resources' => 'Resources',
             'navigation' => 'Navigation',
+            'documentation' => 'Documentation & Help',
             'other' => 'Other',
         ],
         'details' => [
-            'group' => 'Menu Group',
+            'group' => 'Menu Section',
             'content' => 'Content',
         ],
     ],

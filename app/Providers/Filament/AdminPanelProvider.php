@@ -210,7 +210,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <div class="flex items-center gap-2 mr-3" wire:ignore wire:key="topbar-left-actions">
+                    <div class="flex items-center gap-2 mr-3" wire:key="topbar-left-actions">
                         @include("filament.components.standard-search")
                     </div>
                 ');
@@ -221,7 +221,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <div class="flex items-center gap-2 ml-2" wire:ignore wire:key="topbar-right-actions">
+                    <div class="flex items-center gap-2 ml-2" wire:key="topbar-right-actions">
                         @include("filament.components.language-switch")
                         @include("filament.components.ai-search")
                         @include("filament.components.impersonate-select")
@@ -229,6 +229,7 @@ class AdminPanelProvider extends PanelProvider
                 ');
             })
             ->login(Login::class)
+            ->globalSearch(\App\Filament\GlobalSearch\AiGlobalSearchProvider::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
             ->brandName(fn() => app(BrandingService::class)->getSettings()['club_name'])

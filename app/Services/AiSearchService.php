@@ -159,9 +159,9 @@ class AiSearchService
                 default => $doc->type,
             };
 
-            $title = is_array($doc->title) ? ($doc->title[$locale] ?? $doc->title['cs'] ?? array_values($doc->title)[0] ?? 'Untitled') : ($doc->title ?: 'Untitled');
-            $summary = is_array($doc->summary) ? ($doc->summary[$locale] ?? $doc->summary['cs'] ?? array_values($doc->summary)[0] ?? '') : ($doc->summary ?: '');
-            $content = is_array($doc->content) ? ($doc->content[$locale] ?? $doc->content['cs'] ?? array_values($doc->content)[0] ?? '') : ($doc->content ?: '');
+            $title = $this->getLocalizedValue($doc->title, $locale);
+            $summary = $this->getLocalizedValue($doc->summary, $locale);
+            $content = $this->getLocalizedValue($doc->content, $locale);
 
             $snippet = $summary ? 'Shrnutí: '.$summary."\nObsah: ".Str::limit($content, 600) : Str::limit($content, 800);
             $urlInfo = $doc->url ? ' (URL: '.$doc->url.')' : '';
@@ -170,5 +170,25 @@ class AiSearchService
         })->implode("\n\n");
 
         return $intro."\n\n".$chunks;
+    }
+
+    protected function getLocalizedValue(mixed $value, string $locale): string
+    {
+        if (is_array($value)) {
+            return $value[$locale] ?? $value['cs'] ?? array_values($value)[0] ?? '';
+        }
+
+        if (is_string($value)) {
+            if (str_starts_with($value, '{') || str_starts_with($value, '[')) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    return $decoded[$locale] ?? $decoded['cs'] ?? array_values($decoded)[0] ?? '';
+                }
+            }
+
+            return $value;
+        }
+
+        return (string) ($value ?? '');
     }
 }

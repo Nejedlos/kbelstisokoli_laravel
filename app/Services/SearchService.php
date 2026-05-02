@@ -28,7 +28,7 @@ class SearchService
         // Vyhledávání v DB s filtrováním sekce a jazyka
         $queryBuilder = AiDocument::query()
             ->where('locale', $locale)
-            ->where('section', $section)
+            ->whereIn('section', [$section, 'documentation'])
             ->where('is_active', true);
 
         // Použijeme LIKE vyhledávání, protože FULLTEXT na produkci (Webglobe) může chybět
@@ -76,6 +76,9 @@ class SearchService
     {
         return match ($type) {
             'frontend.resource' => __('search.types.page'),
+            'documentation.resource' => __('search.types.documentation'),
+            'admin.resource' => __('search.types.admin'),
+            'member.resource' => __('search.types.member'),
             default => __('search.types.general'),
         };
     }
