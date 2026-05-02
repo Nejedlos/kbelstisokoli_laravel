@@ -22,6 +22,7 @@ class PasswordResetResponse implements FilamentPasswordResetResponseContract, Pa
             $email = $request->input('email') ?: $request->input('data.email');
 
             if ($email) {
+                $email = trim(strtolower($email));
                 $user = \App\Models\User::where('email', $email)->first();
                 if ($user) {
                     auth()->login($user);

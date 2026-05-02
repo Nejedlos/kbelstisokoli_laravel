@@ -65,7 +65,8 @@ class FortifyServiceProvider extends ServiceProvider
 
         // Vlastní logika autentizace pro kontrolu is_active
         Fortify::authenticateUsing(function (Request $request) {
-            $user = User::where('email', $request->email)->first();
+            $email = trim(strtolower($request->email));
+            $user = User::where('email', $email)->first();
 
             if ($user && Hash::check($request->password, $user->password)) {
                 if (! $user->is_active) {
