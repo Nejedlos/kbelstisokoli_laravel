@@ -44,9 +44,12 @@ Tento dokument definuje standardy, postupy a strategii pro vývoj projektu Kbel�
     - Kontrolery: PascalCase + přípona `Controller` (např. `MemberController`).
     - Migrace: Standardní Laravel formát (snake_case).
 
-## 5. Správa databáze
+## 5. Správa databáze (Kritické)
 - Všechny změny schématu provádíme výhradně přes migrace.
 - Pro testovací data používáme Seedery a Factory.
+- **ZÁKAZ `migrate:fresh`:** V lokálním i produkčním prostředí je přísně zakázáno používat `php artisan migrate:fresh`, protože maže všechna data v databázi. Používejte pouze `php artisan migrate`.
+- **Testování bez mazání dat:** V testech (`TestCase.php`) nepoužívejte trait `RefreshDatabase`, který maže databázi před každým testem. Místo toho používejte `DatabaseTransactions`, aby po testu došlo k roll-backu změn, ale původní data v DB zůstala zachována.
+- **SQLite pro testy:** Pokud je to možné, konfigurujte testy tak, aby běžely proti SQLite v paměti (`:memory:`), aby se předešlo náhodnému smazání reálných MySQL dat při špatné konfiguraci.
 
 ## 6. Git a Commit zprávy
 - Commit zprávy píšeme v češtině nebo angličtině (dle dohody, preferujeme konzistenci).

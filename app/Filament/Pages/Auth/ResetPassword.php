@@ -40,10 +40,22 @@ class ResetPassword extends BaseResetPassword
         $status = Password::broker(Filament::getAuthPasswordBroker())->reset(
             $this->getCredentialsFromFormData($data),
             function (CanResetPassword|Model|Authenticatable $user) use ($data): void {
+                \Illuminate\Support\Facades\Log::info('User password reset via Filament', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'password_length' => strlen($data['password']),
+                ]);
+
                 $user->forceFill([
-                    $user->getAuthPasswordName() => Hash::make($data['password']),
+                    $user->getAuthPasswordName() => $data['password'],
                     $user->getRememberTokenName() => Str::random(60),
                 ])->save();
+
+                \Illuminate\Support\Facades\Log::info('Password hash after save (Filament)', [
+                    'user_id' => $user->id,
+                    'hash_prefix' => substr($user->getAuthPassword(), 0, 10),
+                    'check_ok' => Hash::check($data['password'], $user->getAuthPassword()),
+                ]);
 
                 event(new PasswordReset($user));
             }

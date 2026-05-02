@@ -3,7 +3,10 @@
 namespace App\Filament\Pages\Auth;
 
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Facades\Filament;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
 use Illuminate\Contracts\Support\Htmlable;
@@ -70,5 +73,41 @@ class Login extends BaseLogin
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
             ]);
+    }
+
+    public function authenticate(): ?FilamentLoginResponseContract
+    {
+        try {
+            $this->rateLimit(5);
+        } catch (TooManyRequestsException $exception) {
+            $this->getRateLimitedException($exception);
+        }
+
+        $data = $this->form->getState();
+
+        // Pokus o přihlášení
+        if (! Filament::auth()->attempt($this->getCredentialsFromFormData($data), $data['remember'] ?? false)) {
+            $this->throwFailureValidationException();
+        }
+
+        $user = Filament::auth()->user();
+
+        // Pokud je to admin, zkontrolujeme přístup k panelu (standardní Filament chování, ale bez okamžitého logoutu)
+        if (
+            ($user instanceof FilamentUser) &&
+            (! $user->canAccessPanel(Filament::getCurrentPanel()))
+        ) {
+            // Uživatel nemá přístup k tomuto panelu (např. hráč v adminu).
+            // NEodhlašujeme ho (pokud je heslo správné, chceme, aby zůstal přihlášen pro členskou sekci),
+            // ale necháme LoginResponse rozhodnout, kam ho poslat.
+            \Illuminate\Support\Facades\Log::info('Login.authenticate: User lacks panel access but password is OK', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+        }
+
+        session()->regenerate();
+
+        return app(FilamentLoginResponseContract::class);
     }
 }

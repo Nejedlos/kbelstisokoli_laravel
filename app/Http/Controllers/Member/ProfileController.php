@@ -55,7 +55,7 @@ class ProfileController extends Controller
 
         if ($request->filled('new_password')) {
             $user->update([
-                'password' => Hash::make($request->new_password),
+                'password' => $request->new_password,
             ]);
         }
 

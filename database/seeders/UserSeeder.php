@@ -83,5 +83,23 @@ class UserSeeder extends Seeder
         if (! $mn->hasRole('super_admin')) {
             $mn->assignRole('super_admin');
         }
+
+        // Karel Štrupl – testovací hráč
+        $ks = User::updateOrCreate(
+            ['email' => 'k.strupl@seznam.cz'],
+            [
+                'first_name' => 'Karel',
+                'last_name' => 'Štrupl',
+                'name' => 'Karel Štrupl',
+                'password' => Hash::make('ProcGesto?335'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'membership_status' => MembershipStatus::Active,
+            ]
+        );
+
+        if (! $ks->hasRole('player')) {
+            $ks->assignRole('player');
+        }
     }
 }

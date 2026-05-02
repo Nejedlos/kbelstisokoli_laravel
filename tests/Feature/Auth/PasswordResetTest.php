@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Notifications\Auth\ResetPasswordNotification;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Responses\Auth\FailedPasswordResetLinkRequestResponse;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
@@ -17,8 +16,6 @@ use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();
