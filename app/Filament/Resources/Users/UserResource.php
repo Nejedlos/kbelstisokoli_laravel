@@ -45,33 +45,24 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        UserDebug::log('UserResource: getEloquentQuery start');
-        $query = parent::getEloquentQuery()
-            ->with(['roles', 'playerProfile', 'playerProfile.primaryTeam']);
-        UserDebug::log('UserResource: getEloquentQuery end');
-
-        return $query;
+        return parent::getEloquentQuery();
     }
 
     public static function form(Schema $schema): Schema
     {
-        UserDebug::log('UserResource: form configuration start');
-        $result = UserForm::configure($schema);
-        UserDebug::log('UserResource: form configuration end');
-        return $result;
+        return $schema->components([
+            \Filament\Forms\Components\TextInput::make('name')->required(),
+            \Filament\Forms\Components\TextInput::make('email')->email()->required(),
+        ]);
     }
 
     public static function table(Table $table): Table
     {
-        UserDebug::log('UserResource: table configuration start');
-        $result = UsersTable::configure($table);
-        UserDebug::log('UserResource: table configuration end');
-        return $result;
+        return UsersTable::configure($table);
     }
 
     public static function getRelations(): array
     {
-        UserDebug::log('UserResource: getRelations');
         return [
             // RelationManagers\UserSeasonConfigsRelationManager::class,
             // RelationManagers\PlayerProfilesRelationManager::class,

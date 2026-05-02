@@ -10,13 +10,6 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
-    public function mount(): void
-    {
-        \App\Filament\Resources\Users\UserDebug::log('ListUsers: mount start');
-        parent::mount();
-        \App\Filament\Resources\Users\UserDebug::log('ListUsers: mount end');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

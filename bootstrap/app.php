@@ -45,7 +45,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 $app = Application::configure(basePath: dirname(__DIR__))
     ->booting(function ($app) {
         if (request()?->is('admin/users*')) {
-            \App\Filament\Resources\Users\UserDebug::log('Request started: ' . request()->fullUrl());
+            \App\Filament\Resources\Users\UserDebug::log('REQUEST START: ' . request()->fullUrl());
         }
         // 1. Nastavení cest (Environment a Public) - část logiky závislá na env()
         // Optimalizováno pro localhost a produkci (Webglobe)
