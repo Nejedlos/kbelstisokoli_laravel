@@ -41,12 +41,20 @@ Route::get('/index.php', function (\Illuminate\Http\Request $request) {
         ];
 
         if (isset($mapping[$page])) {
-            return redirect()->permanent($mapping[$page]);
+            return redirect($mapping[$page], 301);
         }
 
         // Zkusíme najít stránku se stejným slugem v novém systému
-        return redirect()->permanent('/' . $page);
+        return redirect('/' . $page, 301);
     }
 
-    return redirect()->permanent('/');
+    if ($request->has('rozpis_zapasu') || $request->query('zobrazit') === 'zapasy') {
+        return redirect('/zapasy', 301);
+    }
+
+    if ($request->has('soupiska')) {
+        return redirect('/tymy/soupisky', 301);
+    }
+
+    return redirect('/', 301);
 });

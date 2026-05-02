@@ -21,6 +21,12 @@
     $db_password_b64 = base64_encode($v_pass);
     if (isset($db_prefix)) { $v_pref = $db_prefix; } else { $v_pref = ''; }
     $db_prefix_b64 = base64_encode($v_pref);
+
+    if (isset($db_version)) { $v_dbver = $db_version; } else { $v_dbver = ''; }
+    $db_version_b64 = base64_encode($v_dbver);
+    if (isset($db_mariadb)) { $v_dbmaria = $db_mariadb; } else { $v_dbmaria = ''; }
+    $db_mariadb_b64 = base64_encode($v_dbmaria);
+
     if (isset($public_path)) { $v_pub = $public_path; } else { $v_pub = ''; }
     $public_path_b64 = base64_encode($v_pub);
 
@@ -86,8 +92,14 @@
             $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
             $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
             $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
-            $vars["DB_VERSION"] = "10.3.0";
-            $vars["DB_MARIADB"] = "true";
+
+            if ("{{ $db_version_b64 }}") {
+                $vars["DB_VERSION"] = base64_decode("{{ $db_version_b64 }}");
+            }
+            if ("{{ $db_mariadb_b64 }}") {
+                $vars["DB_MARIADB"] = base64_decode("{{ $db_mariadb_b64 }}");
+            }
+
             if ("{{ $db_prefix_b64 }}") {
                 $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
             }
@@ -401,8 +413,14 @@
             $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
             $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
             $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
-            $vars["DB_VERSION"] = "10.3.0";
-            $vars["DB_MARIADB"] = "true";
+
+            if ("{{ $db_version_b64 }}") {
+                $vars["DB_VERSION"] = base64_decode("{{ $db_version_b64 }}");
+            }
+            if ("{{ $db_mariadb_b64 }}") {
+                $vars["DB_MARIADB"] = base64_decode("{{ $db_mariadb_b64 }}");
+            }
+
             if ("{{ $db_prefix_b64 }}") {
                 $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
             }

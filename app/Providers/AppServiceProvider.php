@@ -94,6 +94,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Vynucení kořenové URL podle konfigurace pro správné generování odkazů v mailech a CLI
+        if ($appUrl = config('app.url')) {
+            \Illuminate\Support\Facades\URL::forceRootUrl($appUrl);
+        }
+
         // Zvýšení paměťového limitu pro administrativu (zpracování velkých obrázků)
         if (request()->is('admin*')) {
             @ini_set('memory_limit', '512M');

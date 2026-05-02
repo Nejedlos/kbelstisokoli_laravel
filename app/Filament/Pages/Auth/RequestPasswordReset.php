@@ -17,7 +17,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
     public function request(): void
     {
         try {
-            $this->rateLimit(2);
+            $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
             throw ValidationException::withMessages([
                 'data.email' => __('auth.throttle', [

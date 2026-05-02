@@ -212,6 +212,10 @@ class ProductionDeploySetupCommand extends Command
 
         $dbConfig['db_prefix'] = text('Prefix tabulek (volitelné)', default: config('app.prod_db_prefix', env('PROD_DB_PREFIX', 'new_')), hint: 'Např. new_ zajistí, že tabulky budou mít název new_users atd.');
 
+        $dbConfig['db_version'] = text('Verze databáze (volitelné)', default: config('app.prod_db_version', env('PROD_DB_VERSION', '')), hint: 'Např. 8.0.45 pro MySQL 8 nebo 5.7.0. Pokud necháte prázdné, použije se výchozí nastavení.');
+
+        $dbConfig['db_mariadb'] = select('Je to MariaDB?', ['false' => 'Ne (MySQL)', 'true' => 'Ano (MariaDB)'], config('app.prod_db_mariadb', env('PROD_DB_MARIADB', 'false')) === 'true' ? 'true' : 'false');
+
         // Uložit do .env pro příště
         $envData = [
             'PROD_HOST' => $host,
@@ -230,6 +234,8 @@ class ProductionDeploySetupCommand extends Command
             'PROD_DB_USERNAME' => $dbConfig['db_username'],
             'PROD_DB_PASSWORD' => $dbConfig['db_password'],
             'PROD_DB_PREFIX' => $dbConfig['db_prefix'] ?? '',
+            'PROD_DB_VERSION' => $dbConfig['db_version'] ?? '',
+            'PROD_DB_MARIADB' => $dbConfig['db_mariadb'] ?? 'false',
         ];
 
         $this->updateEnv($envData);

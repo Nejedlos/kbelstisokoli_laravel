@@ -22,7 +22,7 @@ class ResetPassword extends BaseResetPassword
     public function resetPassword(): ?PasswordResetResponse
     {
         try {
-            $this->rateLimit(2);
+            $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
             throw ValidationException::withMessages([
                 'data.password' => __('auth.throttle', [
