@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     <x-loader-basketball wire:target="askAi">
-        {{ __('admin.loader.ai_thinking') }}
+        {{ __('admin.ai_search.thinking') }}
     </x-loader-basketball>
 
     <div wire:init="askAi"
@@ -82,7 +82,7 @@
             <div class="mb-16 bg-gray-50/50 dark:bg-gray-800/30 rounded-[2rem] p-8 border border-gray-100/50 dark:border-gray-800/50 animate-in fade-in duration-1000">
                 <div class="text-[11px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.3em] flex items-center gap-4 mb-6">
                     <span class="w-8 h-px bg-gray-200 dark:bg-gray-700"></span>
-                    {{ __('admin.ai_search.sources') }}
+                    {{ __('admin.ai_search.sources.title') }}
                     <span class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
                 </div>
 
@@ -124,7 +124,7 @@
                     wire:model.live.debounce.300ms="query"
                     x-on:input="qLen = $el.value.length"
                     x-on:keydown.enter.prevent="if (qLen >= 2) $wire.askAi()"
-                    placeholder="{{ __('admin.ai_search.input_placeholder') }}"
+                    placeholder="{{ __('admin.ai_search.placeholder') }}"
                     class="relative w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-2 border-white dark:border-gray-800 rounded-[2rem] py-5 pl-8 pr-20 shadow-2xl focus:ring-primary focus:border-primary dark:text-white transition-all text-lg placeholder:text-gray-400 dark:placeholder:text-gray-600 outline-none"
                     @disabled($isProcessing)
                     autofocus

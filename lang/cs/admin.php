@@ -942,6 +942,9 @@ return [
         'thinking' => 'Přemýšlím...',
         'no_results' => 'Bohužel jsem na tuhle otázku nenašel odpověď.',
         'error_message' => 'Omlouváme se, došlo k chybě při komunikaci s AI.',
+        'ai_name' => 'Sokoli AI',
+        'you' => 'Vy',
+        'open' => 'Otevřít',
         'welcome' => [
             'title' => 'Vítejte v AI vyhledávání',
             'desc' => 'Toto je váš inteligentní asistent pro data klubu Kbelští sokoli.',

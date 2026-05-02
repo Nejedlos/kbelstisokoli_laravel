@@ -883,6 +883,9 @@ return [
         'thinking' => 'Thinking...',
         'no_results' => 'Unfortunately, I couldn\'t find an answer to this question.',
         'error_message' => 'Sorry, an error occurred while communicating with the AI.',
+        'ai_name' => 'Sokoli AI',
+        'you' => 'You',
+        'open' => 'Open',
         'welcome' => [
             'title' => 'Welcome to AI Search',
             'desc' => 'This is your intelligent assistant for Kbelští sokoli club data.',
