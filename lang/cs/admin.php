@@ -946,6 +946,22 @@ return [
         ],
         'tips' => [
             'title' => 'Tipy na dotazy',
+            'branding' => [
+                'title' => 'Branding',
+                'text' => 'Jak změnit logo klubu?',
+            ],
+            'members' => [
+                'title' => 'Členové',
+                'text' => 'Jak přidat nového člena?',
+            ],
+            'excuses' => [
+                'title' => 'Omluvenky',
+                'text' => 'Jak fungují omluvenky v tréninku?',
+            ],
+            'matches' => [
+                'title' => 'Zápasy',
+                'text' => 'Kde najdu rozpis zápasů na víkend?',
+            ],
         ],
         'sources' => [
             'title' => 'Zdroje informací',

@@ -159,10 +159,14 @@ class AiSearchService
                 default => $doc->type,
             };
 
-            $snippet = $doc->summary ? 'Shrnutí: '.$doc->summary."\nObsah: ".Str::limit($doc->content, 600) : Str::limit($doc->content, 800);
+            $title = is_array($doc->title) ? ($doc->title[$locale] ?? $doc->title['cs'] ?? array_values($doc->title)[0] ?? 'Untitled') : ($doc->title ?: 'Untitled');
+            $summary = is_array($doc->summary) ? ($doc->summary[$locale] ?? $doc->summary['cs'] ?? array_values($doc->summary)[0] ?? '') : ($doc->summary ?: '');
+            $content = is_array($doc->content) ? ($doc->content[$locale] ?? $doc->content['cs'] ?? array_values($doc->content)[0] ?? '') : ($doc->content ?: '');
+
+            $snippet = $summary ? 'Shrnutí: '.$summary."\nObsah: ".Str::limit($content, 600) : Str::limit($content, 800);
             $urlInfo = $doc->url ? ' (URL: '.$doc->url.')' : '';
 
-            return ($i + 1).') ['.$typeLabel.'] '.$doc->title.$urlInfo."\n".$snippet;
+            return ($i + 1).') ['.$typeLabel.'] '.$title.$urlInfo."\n".$snippet;
         })->implode("\n\n");
 
         return $intro."\n\n".$chunks;

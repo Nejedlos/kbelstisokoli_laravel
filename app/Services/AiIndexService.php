@@ -93,6 +93,9 @@ class AiIndexService
             return false;
         }
 
+        // Robustní získání obsahu pro prompt
+        $docContent = is_array($doc->content) ? ($doc->content[$doc->locale] ?? $doc->content['cs'] ?? array_values($doc->content)[0] ?? '') : $doc->content;
+
         $prompt = "### SYSTEM PROMPT (Role: Semantic Search Architect)
 Jsi expert na indexaci webového obsahu pro basketbalový klub \"Kbelští sokoli\". Tvým úkolem je transformovat surový obsah stránky do sémantického profilu, který umožní uživatelům najít stránku pomocí přirozených dotazů, záměrů (intents) a synonym.
 
@@ -102,7 +105,7 @@ Jsi expert na indexaci webového obsahu pro basketbalový klub \"Kbelští sokol
 - JAZYK: {$doc->locale} (cs/en)
 
 ### SUROVÝ OBSAH STRÁNKY
-{$doc->content}
+{$docContent}
 
 ### TVÉ INSTRUKCE (ZÁVAZNÉ)
 
@@ -173,6 +176,13 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     {
         $section = $data['section'] ?? $this->determineSection($data['type']);
         $locale = $data['locale'] ?? 'cs';
+
+        // Pokud jsou pole (title, content, summary) jako pole (translatable), vybereme správnou verzi pro tento záznam
+        foreach (['title', 'content', 'summary'] as $field) {
+            if (isset($data[$field]) && is_array($data[$field])) {
+                $data[$field] = $data[$field][$locale] ?? $data[$field]['cs'] ?? array_values($data[$field])[0] ?? '';
+            }
+        }
 
         $existing = AiDocument::where('source', $data['source'])
             ->where('locale', $locale)
@@ -277,10 +287,10 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $this->updateOrCreateDocument([
                 'type' => 'admin.resource',
                 'source' => 'PhotoPool:'.$pool->id,
-                'title' => (string) $title,
+                'title' => [$locale => (string) $title],
                 'url' => $url,
                 'locale' => $locale,
-                'content' => $content,
+                'content' => [$locale => $content],
                 'checksum' => hash('sha256', $content.$url),
                 'metadata' => ['group' => __('admin.navigation.groups.media'), 'model' => 'PhotoPool', 'id' => $pool->id],
             ], $force);
@@ -630,13 +640,15 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $onProgress("Documentation [{$locale}]: {$title}");
             }
 
+            // Uložíme jako JSON pro bilingvnost
             $this->updateOrCreateDocument([
                 'type' => 'documentation.resource',
                 'source' => 'docs/'.$locale.'/'.$relativePath,
-                'title' => $title,
+                'title' => [$locale => $title],
+                'summary' => [$locale => Str::limit(strip_tags($content), 200)],
                 'url' => route('filament.admin.pages.documentation', ['file' => $relativePath]),
                 'locale' => $locale,
-                'content' => $content,
+                'content' => [$locale => $content],
                 'checksum' => hash('sha256', $content.$relativePath.$locale),
             ], $force);
 
@@ -675,13 +687,15 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $onProgress("Help [{$locale}]: {$title}");
             }
 
+            // Uložíme titulek a obsah jako JSON pro bilingvnost, aby AiSearch mohl použít překlady
             $this->updateOrCreateDocument([
                 'type' => 'documentation.resource', // Používáme stejný typ pro vyhledávání
                 'source' => 'help/'.$locale.'/'.$relativePath,
-                'title' => $title,
+                'title' => [$locale => $title],
+                'summary' => [$locale => Str::limit(strip_tags($content), 200)],
                 'url' => route('filament.admin.pages.help', ['file' => 'docs/help/'.$locale.'/'.$relativePath]),
                 'locale' => $locale,
-                'content' => $content,
+                'content' => [$locale => $content],
                 'checksum' => hash('sha256', $content.$relativePath.$locale),
             ], $force);
 
@@ -731,10 +745,10 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $this->updateOrCreateDocument([
                 'type' => 'frontend.resource',
                 'source' => 'page:'.$page->id,
-                'title' => $title,
+                'title' => [$locale => $title],
                 'url' => $url,
                 'locale' => $locale,
-                'content' => $content,
+                'content' => [$locale => $content],
                 'checksum' => hash('sha256', $content.$url.$title),
             ], $force);
             $count++;
@@ -777,10 +791,10 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $this->updateOrCreateDocument([
                 'type' => 'frontend.resource',
                 'source' => 'post:'.$post->id,
-                'title' => $title,
+                'title' => [$locale => $title],
                 'url' => $url,
                 'locale' => $locale,
-                'content' => $content,
+                'content' => [$locale => $content],
                 'metadata' => [
                     'image' => $image,
                 ],
@@ -849,17 +863,20 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             ->limit(100)
             ->get();
 
-        $scored = $candidates->map(function (AiDocument $doc) use ($q) {
-            $title = Str::lower($doc->title);
-            $content = Str::lower(Str::limit($doc->content, 2000, ''));
+        $scored = $candidates->map(function (AiDocument $doc) use ($q, $locale) {
+            $title = is_array($doc->title) ? ($doc->title[$locale] ?? $doc->title['cs'] ?? array_values($doc->title)[0] ?? 'Untitled') : ($doc->title ?: 'Untitled');
+            $content = is_array($doc->content) ? ($doc->content[$locale] ?? $doc->content['cs'] ?? array_values($doc->content)[0] ?? '') : ($doc->content ?: '');
+
+            $titleLower = Str::lower($title);
+            $contentLower = Str::lower(Str::limit($content, 2000, ''));
             $keywords = $doc->keywords ?? [];
 
             $score = 0;
 
             // Shoda v titulku (velmi vysoká váha)
-            if (Str::contains($title, $q)) {
+            if (Str::contains($titleLower, $q)) {
                 $score += 50;
-                if ($title === $q) {
+                if ($titleLower === $q) {
                     $score += 50;
                 } // Přesná shoda
             }

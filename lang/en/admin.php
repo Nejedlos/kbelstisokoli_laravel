@@ -887,6 +887,22 @@ return [
         ],
         'tips' => [
             'title' => 'Search Tips',
+            'branding' => [
+                'title' => 'Branding',
+                'text' => 'How to change the club logo?',
+            ],
+            'members' => [
+                'title' => 'Members',
+                'text' => 'How to add a new member?',
+            ],
+            'excuses' => [
+                'title' => 'Excuses',
+                'text' => 'How do training excuses work?',
+            ],
+            'matches' => [
+                'title' => 'Matches',
+                'text' => 'Where can I find the match schedule for the weekend?',
+            ],
         ],
         'sources' => [
             'title' => 'Information Sources',

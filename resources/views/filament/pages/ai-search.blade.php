@@ -22,9 +22,9 @@
                     <div class="w-24 h-24 bg-primary/5 dark:bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
                         <i class="fa-light fa-sparkles text-4xl text-primary"></i>
                     </div>
-                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">{{ __('admin.ai_search.welcome_title') }}</h2>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">{{ __('admin.ai_search.welcome.title') }}</h2>
                     <p class="text-gray-500 dark:text-gray-400 max-w-lg mx-auto text-lg leading-relaxed">
-                        {{ __('admin.ai_search.welcome_desc') }}
+                        {{ __('admin.ai_search.welcome.desc') }}
                     </p>
 
                     <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
@@ -94,7 +94,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-[13px] font-bold text-gray-900 dark:text-white truncate group-hover/source:text-primary transition-colors">
-                                    {{ $doc->title }}
+                                    {{ is_array($doc->title) ? ($doc->title[app()->getLocale()] ?? $doc->title['cs'] ?? array_values($doc->title)[0] ?? 'Untitled') : ($doc->title ?: 'Untitled') }}
                                 </div>
                                 <div class="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-wider mt-0.5">
                                     {{ str_replace(['admin.', '.'], ['', ' '], $doc->type) }}
