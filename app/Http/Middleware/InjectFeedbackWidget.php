@@ -47,8 +47,12 @@ class InjectFeedbackWidget
             return false;
         }
 
-        // 2. MUST be authenticated
-        if (!Auth::check()) {
+        // 2. MUST be authenticated OR on a test host
+        $isAuthenticated = Auth::check();
+        $host = $request->getHost();
+        $isTestHost = str_contains($host, 'new.') || str_contains($host, '.new.') || str_contains($host, 'staging.') || str_contains($host, 'dev.') || str_contains($host, '.test') || str_contains($host, 'localhost');
+
+        if (!$isAuthenticated && !$isTestHost) {
             return false;
         }
 
@@ -60,7 +64,7 @@ class InjectFeedbackWidget
             return false;
         }
 
-        // 3. Skip redirects, special responses and partials
+        // 4. Skip redirects, special responses and partials
         if ($response instanceof \Symfony\Component\HttpFoundation\RedirectResponse ||
             $response instanceof \Symfony\Component\HttpFoundation\StreamedResponse ||
             $response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse ||
@@ -69,22 +73,13 @@ class InjectFeedbackWidget
             return false;
         }
 
-        // 4. Content check: MUST have </body> tag for reliable injection
+        // 5. Content check: MUST have </body> tag for reliable injection
         $content = $response->getContent();
         if (!str_contains($content, '</body>')) {
             return false;
         }
 
-        // 4. Always inject in Debug mode (except in tests to avoid noisy output)
-        if (config('app.debug') && !app()->runningUnitTests()) {
-            return true;
-        }
-
-        // 5. Host-based logic (for guests)
-        $host = $request->getHost();
-        $isTestHost = str_contains($host, 'new.') || str_contains($host, '.new.') || str_contains($host, 'staging.') || str_contains($host, 'dev.') || str_contains($host, '.test') || str_contains($host, 'localhost');
-
-        return $isTestHost;
+        return true;
     }
 
     protected function getSourceArea(Request $request): string
