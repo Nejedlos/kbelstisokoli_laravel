@@ -18,6 +18,12 @@ class FullPageCacheMiddleware
     {
         // Cache zapnuta pouze pro GET, a pokud je aktivní v configu
         if (! $this->shouldCache($request)) {
+            \Illuminate\Support\Facades\Log::debug('FullPageCache: shouldNotCache', [
+                'path' => $request->path(),
+                'method' => $request->method(),
+                'enabled' => config('performance.features.full_page_cache', false),
+                'auth' => auth()->check()
+            ]);
             return $next($request);
         }
 
@@ -29,6 +35,7 @@ class FullPageCacheMiddleware
         $ttl = config('performance.cache_ttl.full_page', 86400);
 
         if (Cache::has($cacheKey)) {
+            \Illuminate\Support\Facades\Log::debug('FullPageCache: HIT', ['path' => $request->path()]);
             $cached = Cache::get($cacheKey);
 
             $response = response($cached['content']);
@@ -45,6 +52,12 @@ class FullPageCacheMiddleware
 
         $response = $next($request);
         $content = $response->getContent();
+
+        \Illuminate\Support\Facades\Log::debug('FullPageCache: MISS', [
+            'path' => $request->path(),
+            'status' => $response->getStatusCode(),
+            'has_livewire' => $request->hasHeader('X-Livewire')
+        ]);
 
         // Podmínky pro uložení do cache:
         // 1. Status OK (200)
