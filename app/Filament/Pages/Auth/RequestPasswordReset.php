@@ -16,46 +16,29 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 {
     public function request(): void
     {
-        try {
-            $this->rateLimit(5);
-        } catch (TooManyRequestsException $exception) {
-            throw ValidationException::withMessages([
-                'data.email' => __('auth.throttle', [
-                    'seconds' => $exception->secondsUntilAvailable,
-                    'minutes' => ceil($exception->secondsUntilAvailable / 60),
-                ]),
-            ]);
-        }
-
         $data = $this->form->getState();
 
-        $status = Password::broker(Filament::getAuthPasswordBroker())->sendResetLink(
-            $this->getCredentialsFromFormData($data),
-            function (CanResetPassword $user, string $token): void {
-                if (! method_exists($user, 'notify')) {
-                    $userClass = $user::class;
-
-                    throw new \LogicException("Model [{$userClass}] does not have a [notify()] method.");
-                }
-
-                $notification = app(\Filament\Auth\Notifications\ResetPassword::class, ['token' => $token]);
-                $notification->url = Filament::getResetPasswordUrl($token, $user);
-
-                $user->notify($notification);
-
-                if (class_exists(PasswordResetLinkSent::class)) {
-                    event(new PasswordResetLinkSent($user));
-                }
-            },
-        );
-
-        if ($status !== Password::RESET_LINK_SENT) {
-            throw ValidationException::withMessages([
-                'data.email' => [__($status)],
+        try {
+            app(\App\Services\Auth\PasswordResetService::class)->sendResetLink(
+                $data['email'],
+                \Filament\Facades\Filament::getCurrentPanel()?->getId()
+            );
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Filament password reset request failed', [
+                'email' => $data['email'] ?? 'unknown',
+                'error' => $e->getMessage()
             ]);
         }
 
-        session()->flash('status', __($status));
+        // Vždy zobrazíme úspěch, abychom neprozradili existenci emailu (Anti-enumeration)
+        \Filament\Notifications\Notification::make()
+            ->title(__('passwords.sent'))
+            ->success()
+            ->send();
+
+        session()->flash('status', __('passwords.sent'));
 
         $this->form->fill();
     }

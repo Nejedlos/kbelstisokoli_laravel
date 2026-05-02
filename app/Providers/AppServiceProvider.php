@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,6 +15,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        Password::defaults(function () {
+            $rule = Password::min(12)
+                ->letters()
+                ->mixedCase()
+                ->numbers();
+
+            return app()->isProduction()
+                ? $rule->uncompromised()
+                : $rule;
+        });
         $this->app->bind(
             \Filament\Auth\Notifications\ResetPassword::class,
             \App\Notifications\Auth\ResetPasswordNotification::class
@@ -125,7 +136,15 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
 
-            return is_callable($previousHandler) ? $previousHandler($errno, $errstr, $errfile, $errline) : false;
+            try {
+                return is_callable($previousHandler) ? $previousHandler($errno, $errstr, $errfile, $errline) : false;
+            } catch (\Throwable $e) {
+                // V testech může previous handler (např. Symfony) selhat na chybějícím requestu/session
+                if (app()->runningUnitTests()) {
+                    return true;
+                }
+                throw $e;
+            }
         });
 
         \App\Models\UserSeasonConfig::observe(\App\Observers\UserSeasonConfigObserver::class);

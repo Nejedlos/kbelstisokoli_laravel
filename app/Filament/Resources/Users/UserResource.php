@@ -45,15 +45,13 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery();
+        return parent::getEloquentQuery()
+            ->with(['roles', 'playerProfile', 'playerProfile.primaryTeam']);
     }
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components([
-            \Filament\Forms\Components\TextInput::make('name')->required(),
-            \Filament\Forms\Components\TextInput::make('email')->email()->required(),
-        ]);
+        return UserForm::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -64,11 +62,11 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // RelationManagers\UserSeasonConfigsRelationManager::class,
-            // RelationManagers\PlayerProfilesRelationManager::class,
-            // RelationManagers\ParentsRelationManager::class,
-            // RelationManagers\ChildrenRelationManager::class,
-            // RelationManagers\ConsentsRelationManager::class,
+            RelationManagers\UserSeasonConfigsRelationManager::class,
+            RelationManagers\PlayerProfilesRelationManager::class,
+            RelationManagers\ParentsRelationManager::class,
+            RelationManagers\ChildrenRelationManager::class,
+            RelationManagers\ConsentsRelationManager::class,
         ];
     }
 
