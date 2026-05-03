@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\NotFoundLogs\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -30,9 +30,9 @@ class NotFoundLogForm
 
                         Grid::make(2)
                             ->schema([
-                                DateTimePicker::make('last_seen_at')
+                                Placeholder::make('last_seen_at')
                                     ->label(__('admin.resources.not_found_log.fields.last_seen_at'))
-                                    ->readOnly(),
+                                    ->content(fn ($record) => $record?->last_seen_at?->format('d.m.Y H:i:s') ?? '-'),
                                 TextInput::make('status')
                                     ->label(__('admin.resources.not_found_log.fields.status'))
                                     ->readOnly(),

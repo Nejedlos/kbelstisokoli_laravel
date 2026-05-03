@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\CronLogs\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -16,12 +16,12 @@ class CronLogForm
                 TextInput::make('task.name')
                     ->label('Úloha')
                     ->disabled(),
-                DateTimePicker::make('started_at')
+                Placeholder::make('started_at')
                     ->label('Začátek')
-                    ->disabled(),
-                DateTimePicker::make('finished_at')
+                    ->content(fn ($record) => $record?->started_at?->format('d.m.Y H:i:s') ?? '-'),
+                Placeholder::make('finished_at')
                     ->label('Konec')
-                    ->disabled(),
+                    ->content(fn ($record) => $record?->finished_at?->format('d.m.Y H:i:s') ?? '-'),
                 TextInput::make('status')
                     ->label('Stav')
                     ->disabled(),
