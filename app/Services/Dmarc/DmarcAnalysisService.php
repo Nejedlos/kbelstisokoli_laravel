@@ -63,13 +63,16 @@ class DmarcAnalysisService
 
     protected function findKnownSender(DmarcRecord $record, DmarcReport $report, $enrichment): ?DmarcAuthorizedSender
     {
-        // Hledáme podle IP, CIDR, domény SPF/DKIM
-        return DmarcAuthorizedSender::where('is_active', true)
-            ->where(function($query) use ($record, $enrichment) {
-                $query->whereJsonContains('allowed_ips', $record->source_ip)
-                      ->orWhereJsonContains('allowed_spf_domains', $record->spf_domain)
-                      ->orWhereJsonContains('allowed_dkim_domains', $record->dkim_domain);
-            })->first();
+        // Používáme kolekci pro kompatibilitu se SQLite v testech a flexibilitu
+        return DmarcAuthorizedSender::where('is_active', true)->get()->first(function($sender) use ($record) {
+            $allowedIps = is_array($sender->allowed_ips) ? $sender->allowed_ips : [];
+            $allowedSpf = is_array($sender->allowed_spf_domains) ? $sender->allowed_spf_domains : [];
+            $allowedDkim = is_array($sender->allowed_dkim_domains) ? $sender->allowed_dkim_domains : [];
+
+            return in_array($record->source_ip, $allowedIps) ||
+                   ($record->spf_domain && in_array($record->spf_domain, $allowedSpf)) ||
+                   ($record->dkim_domain && in_array($record->dkim_domain, $allowedDkim));
+        });
     }
 
     protected function determineEventType(DmarcRecord $record, bool $dmarcPass, ?DmarcAuthorizedSender $knownSender): string

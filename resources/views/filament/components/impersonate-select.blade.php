@@ -28,8 +28,7 @@
             window.location.href = url.replace('USER_ID', this.targetUser.id);
         }
     }"
-     class="relative flex items-center"
-     @click.outside="impersonateSearchOpen = false">
+     class="relative flex items-center">
 
     <!-- Trigger Button -->
     <button @click="impersonateSearchOpen = !impersonateSearchOpen; if(impersonateSearchOpen) { search(); $nextTick(() => $refs.impersonateInput.focus()) }"

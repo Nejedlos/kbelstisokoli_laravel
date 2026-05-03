@@ -1,11 +1,10 @@
 <div wire:ignore wire:key="ai-search-container-v4"
      x-data="{ aiSearchOpen: false, loading: false }"
-     class="relative flex items-center"
-     @click.outside="aiSearchOpen = false">
+     class="relative flex items-center">
     <x-loader-basketball x-show="loading" x-cloak class="z-[60]" />
 
     <!-- Desktop Trigger (Pill) -->
-    <button @click="aiSearchOpen = true; $nextTick(() => $refs.searchInput.focus())"
+    <button @click="aiSearchOpen = !aiSearchOpen; if(aiSearchOpen) $nextTick(() => $refs.searchInput.focus())"
             class="hidden sm:flex items-center gap-2 px-2 py-1.5 lg:px-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:border-primary/30 transition-all group text-left shadow-sm w-auto lg:w-32 xl:w-44"
             title="{{ __('search.ai_hint') }}">
         <i class="fa-light fa-sparkles text-primary group-hover:scale-110 transition-transform text-[13px] sm:text-[10px]"></i>
@@ -14,7 +13,7 @@
     </button>
 
     <!-- Mobile Trigger (Icon) -->
-    <button @click="aiSearchOpen = true; $nextTick(() => $refs.searchInput.focus())"
+    <button @click="aiSearchOpen = !aiSearchOpen; if(aiSearchOpen) $nextTick(() => $refs.searchInput.focus())"
             class="sm:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
             title="{{ __('search.ai_hint') }}">
         <i class="fa-light fa-sparkles text-xl group-hover:scale-110 transition-transform"></i>

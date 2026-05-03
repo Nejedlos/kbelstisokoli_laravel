@@ -236,7 +236,7 @@ class AdminPanelProvider extends PanelProvider
                         <div wire:key="language-switch-wrapper" class="flex-shrink-0">
                             @include("filament.components.language-switch")
                         </div>
-                        <div class="flex items-center gap-1 lg:gap-2 flex-shrink-0" wire:ignore wire:key="topbar-alpine-actions">
+                        <div class="flex items-center gap-1 lg:gap-2 flex-shrink-0" wire:key="topbar-alpine-actions">
                             @include("filament.components.ai-search")
                             @include("filament.components.impersonate-select")
                         </div>
