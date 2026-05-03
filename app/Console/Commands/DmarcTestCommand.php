@@ -15,7 +15,8 @@ class DmarcTestCommand extends Command
      */
     protected $signature = 'dmarc:test-send
                             {--email=dmarc@kbelstisokoli.cz : Cílový email pro report}
-                            {--count=1 : Počet reportů k odeslání}';
+                            {--count=1 : Počet reportů k odeslání}
+                            {--prod : Použít produkční SMTP (pouze pokud běžíte lokálně a chcete testovat reálný odesílač)}';
 
     /**
      * The console command description.
@@ -31,9 +32,10 @@ class DmarcTestCommand extends Command
     {
         $targetEmail = $this->option('email');
         $count = (int) $this->option('count');
+        $useProd = $this->option('prod');
 
-        // Pokud jsme v lokálním prostředí bez funkčního SMTP, zkusíme použít produkční konfiguraci pro odeslání
-        if (config('mail.mailers.smtp.host') === '127.0.0.1' && env('PROD_MAIL_HOST')) {
+        if ($useProd && env('PROD_MAIL_HOST')) {
+            $this->info("Konfiguruji produkční SMTP pro tento příkaz...");
             config([
                 'mail.mailers.smtp.host' => env('PROD_MAIL_HOST'),
                 'mail.mailers.smtp.port' => env('PROD_MAIL_PORT'),
@@ -43,9 +45,11 @@ class DmarcTestCommand extends Command
                 'mail.from.address' => env('PROD_MAIL_FROM_ADDRESS'),
                 'mail.from.name' => env('PROD_MAIL_FROM_NAME'),
             ]);
+            Mail::purge();
         }
 
         $this->info("Připravuji {$count} testovacích DMARC reportů pro: {$targetEmail}");
+        $this->info("SMTP Host: " . config('mail.mailers.smtp.host'));
 
         $scenarios = [
             ['org' => 'google.com', 'ip' => '209.85.222.1', 'dkim' => 'fail', 'spf' => 'fail'],
