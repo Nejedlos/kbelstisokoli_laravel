@@ -1,29 +1,32 @@
-<div x-data="{ searchOpen: false, loading: false }" class="relative flex items-center" wire:ignore wire:key="ai-search-container" @click.outside="searchOpen = false">
+<div wire:ignore wire:key="ai-search-container-v4"
+     x-data="{ aiSearchOpen: false, loading: false }"
+     class="relative flex items-center"
+     @click.outside="aiSearchOpen = false">
     <x-loader-basketball x-show="loading" x-cloak class="z-[60]" />
 
     <!-- Desktop Trigger (Pill) -->
-    <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-            class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:border-primary/30 transition-all group text-left shadow-sm min-w-[140px]"
+    <button @click="aiSearchOpen = true; $nextTick(() => $refs.searchInput.focus())"
+            class="hidden sm:flex items-center gap-2 px-2 py-1.5 lg:px-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:border-primary/30 transition-all group text-left shadow-sm w-auto lg:w-32 xl:w-44"
             title="{{ __('search.ai_hint') }}">
-        <i class="fa-light fa-sparkles text-primary group-hover:scale-110 transition-transform text-[10px]"></i>
-        <span class="text-[10px] truncate font-bold opacity-80 group-hover:opacity-100 transition-opacity">{{ __('search.ai_hint') }}</span>
-        <span class="ml-auto text-[9px] font-black text-gray-400 group-hover:text-primary transition-colors">AI</span>
+        <i class="fa-light fa-sparkles text-primary group-hover:scale-110 transition-transform text-[13px] sm:text-[10px]"></i>
+        <span class="hidden lg:inline text-[10px] truncate font-bold opacity-80 group-hover:opacity-100 transition-opacity">{{ __('search.ai_hint') }}</span>
+        <span class="hidden xl:inline ml-auto text-[9px] font-black text-gray-400 group-hover:text-primary transition-colors">AI</span>
     </button>
 
     <!-- Mobile Trigger (Icon) -->
-    <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())"
-            class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
+    <button @click="aiSearchOpen = true; $nextTick(() => $refs.searchInput.focus())"
+            class="sm:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
             title="{{ __('search.ai_hint') }}">
         <i class="fa-light fa-sparkles text-xl group-hover:scale-110 transition-transform"></i>
-        <span class="absolute -top-1 -right-1 flex h-3 w-3" x-show="!searchOpen">
+        <span class="absolute -top-1 -right-1 flex h-3 w-3" x-show="!aiSearchOpen">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-40"></span>
             <span class="relative inline-flex rounded-full h-3 w-3 bg-primary/80"></span>
         </span>
     </button>
 
     <!-- AI Search Overlay -->
-    <div x-show="searchOpen"
-         @keydown.escape.window.stop="searchOpen = false"
+    <div x-show="aiSearchOpen"
+         @keydown.escape.window.stop="aiSearchOpen = false"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -48,7 +51,8 @@
                 <input type="text"
                        name="q"
                        x-ref="searchInput"
-                       @keydown.escape.stop="searchOpen = false"
+                       wire:key="ai-search-input"
+                       @keydown.escape.stop="aiSearchOpen = false"
                        @click.stop
                        @mousedown.stop
                        placeholder="{{ __('search.ai_search_placeholder') }}"
@@ -91,4 +95,5 @@
             </div>
         </div>
     </div>
+</div>
 </div>

@@ -217,7 +217,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <div class="flex items-center gap-2 mr-3" wire:key="topbar-left-actions">
+                    <div class="flex items-center gap-1 sm:gap-2 mr-1 sm:mr-3" wire:key="topbar-left-actions">
                         @include("filament.components.standard-search")
                     </div>
                 ');
@@ -228,10 +228,14 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <div class="flex items-center gap-2 ml-2" wire:key="topbar-right-actions" wire:ignore>
-                        @include("filament.components.language-switch")
-                        @include("filament.components.ai-search")
-                        @include("filament.components.impersonate-select")
+                    <div class="flex items-center gap-1 lg:gap-2 ml-1 sm:ml-2" wire:key="topbar-right-actions-container">
+                        <div wire:key="language-switch-wrapper" class="flex-shrink-0">
+                            @include("filament.components.language-switch")
+                        </div>
+                        <div class="flex items-center gap-1 lg:gap-2 flex-shrink-0" wire:ignore wire:key="topbar-alpine-actions">
+                            @include("filament.components.ai-search")
+                            @include("filament.components.impersonate-select")
+                        </div>
                     </div>
                 ');
             })

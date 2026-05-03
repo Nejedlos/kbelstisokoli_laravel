@@ -1,37 +1,40 @@
 @if(auth()->user()?->can('impersonate_users'))
-<div x-data="{
-    searchOpen: false,
-    query: '',
-    results: [],
-    loading: false,
-    confirmModal: false,
-    targetUser: { id: null, name: '' },
-    search() {
-        this.loading = true;
-        fetch('{{ route('admin.impersonate.search') }}?q=' + encodeURIComponent(this.query))
-            .then(response => response.json())
-            .then(data => {
-                this.results = data.results;
-                this.loading = false;
-            })
-            .catch(() => {
-                this.loading = false;
-            });
-    },
-    impersonate(userId, userName) {
-        this.targetUser = { id: userId, name: userName };
-        this.confirmModal = true;
-    },
-    confirmImpersonate() {
-        let url = '{{ route('admin.impersonate.start', ['userId' => 'USER_ID']) }}';
-        window.location.href = url.replace('USER_ID', this.targetUser.id);
-    }
-}" class="relative flex items-center" wire:ignore wire:key="impersonate-select-container" @click.outside="searchOpen = false">
+<div wire:ignore wire:key="impersonate-select-container-v4"
+     x-data="{
+        impersonateSearchOpen: false,
+        impersonateQuery: '',
+        impersonateResults: [],
+        impersonateLoading: false,
+        confirmModal: false,
+        targetUser: { id: null, name: '' },
+        search() {
+            this.impersonateLoading = true;
+            fetch('{{ route('admin.impersonate.search') }}?q=' + encodeURIComponent(this.impersonateQuery))
+                .then(response => response.json())
+                .then(data => {
+                    this.impersonateResults = data.results;
+                    this.impersonateLoading = false;
+                })
+                .catch(() => {
+                    this.impersonateLoading = false;
+                });
+        },
+        impersonate(userId, userName) {
+            this.targetUser = { id: userId, name: userName };
+            this.confirmModal = true;
+        },
+        confirmImpersonate() {
+            let url = '{{ route('admin.impersonate.start', ['userId' => 'USER_ID']) }}';
+            window.location.href = url.replace('USER_ID', this.targetUser.id);
+        }
+    }"
+     class="relative flex items-center"
+     @click.outside="impersonateSearchOpen = false">
 
     <!-- Trigger Button -->
-    <button @click="searchOpen = !searchOpen; if(searchOpen) { search(); $nextTick(() => $refs.impersonateInput.focus()) }"
+    <button @click="impersonateSearchOpen = !impersonateSearchOpen; if(impersonateSearchOpen) { search(); $nextTick(() => $refs.impersonateInput.focus()) }"
             type="button"
-            class="flex items-center xl:gap-1.5 p-2 xl:px-2 xl:py-1.5 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group {{ session()->has('impersonated_by') ? 'bg-red-50 dark:bg-red-900/10 text-red-600' : '' }}"
+            class="flex items-center xl:gap-1.5 p-1.5 xl:px-2 xl:py-1.5 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group {{ session()->has('impersonated_by') ? 'bg-red-50 dark:bg-red-900/10 text-red-600' : '' }}"
             title="{{ __('permissions.impersonate_users') }}">
         <div class="relative">
             <i class="fa-light fa-user-secret text-xl sm:text-base"></i>
@@ -46,8 +49,8 @@
     </button>
 
     <!-- Dropdown Overlay -->
-    <div x-show="searchOpen"
-         @keydown.escape.window.stop="searchOpen = false"
+    <div x-show="impersonateSearchOpen"
+         @keydown.escape.window.stop="impersonateSearchOpen = false"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -63,23 +66,24 @@
             <div class="relative">
                 <input type="text"
                        x-ref="impersonateInput"
-                       x-model="query"
+                       x-model="impersonateQuery"
+                       wire:key="impersonate-search-input"
                        @input.debounce.300ms.stop="search()"
-                       @keydown.enter.stop.prevent="results.length > 0 && impersonate(results[0].id, results[0].text)"
-                       @keydown.escape.stop="searchOpen = false"
+                       @keydown.enter.stop.prevent="impersonateResults.length > 0 && impersonate(impersonateResults[0].id, impersonateResults[0].text)"
+                       @keydown.escape.stop="impersonateSearchOpen = false"
                        @click.stop
                        @mousedown.stop
                        placeholder="{{ __('Search') }}..."
                        class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg pl-8 pr-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-red-500/40 outline-none transition-all">
                 <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-gray-400">
-                    <i x-show="!loading" class="fa-light fa-magnifying-glass text-[10px]"></i>
-                    <i x-show="loading" class="fa-light fa-spinner-third fa-spin text-[10px]" style="display: none;"></i>
+                    <i x-show="!impersonateLoading" class="fa-light fa-magnifying-glass text-[10px]"></i>
+                    <i x-show="impersonateLoading" class="fa-light fa-spinner-third fa-spin text-[10px]" style="display: none;"></i>
                 </div>
             </div>
         </div>
 
         <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
-            <template x-for="user in results" :key="user.id">
+            <template x-for="user in impersonateResults" :key="user.id">
                 <button @click="impersonate(user.id, user.text)"
                         class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all flex items-center gap-2 group">
                     <div class="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[8px] font-black group-hover:bg-red-100/50 transition-colors text-gray-400 group-hover:text-red-600">
@@ -94,7 +98,7 @@
                 </button>
             </template>
 
-            <div x-show="results.length === 0 && !loading"
+            <div x-show="impersonateResults.length === 0 && !impersonateLoading"
                  class="px-2 py-4 text-center text-gray-400 italic text-[10px]">
                 {{ __('No results found') }}
             </div>
@@ -192,5 +196,6 @@
             </div>
         </div>
     </template>
+    </div>
 </div>
 @endif

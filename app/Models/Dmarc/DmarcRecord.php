@@ -19,6 +19,12 @@ class DmarcRecord extends Model
         'envelope_from',
         'dkim_domain',
         'spf_domain',
+        'known_sender_id',
+        'analysis',
+        'severity',
+        'risk_score',
+        'recommendations',
+        'analyzed_at',
         'status',
         'recommended_action',
     ];
@@ -27,11 +33,20 @@ class DmarcRecord extends Model
         'dkim_aligned' => 'boolean',
         'spf_aligned' => 'boolean',
         'count' => 'integer',
+        'risk_score' => 'integer',
+        'analysis' => 'json',
+        'recommendations' => 'json',
+        'analyzed_at' => 'datetime',
     ];
 
     public function report()
     {
         return $this->belongsTo(DmarcReport::class, 'report_id');
+    }
+
+    public function knownSender()
+    {
+        return $this->belongsTo(DmarcAuthorizedSender::class, 'known_sender_id');
     }
 
     public function incidents()

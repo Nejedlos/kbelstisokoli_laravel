@@ -19,10 +19,12 @@ class DmarcReport extends Model
         'policy_published_json',
         'raw_xml_path',
         'received_at',
+        'metadata',
     ];
 
     protected $casts = [
         'policy_published_json' => 'json',
+        'metadata' => 'json',
         'date_start' => 'datetime',
         'date_end' => 'datetime',
         'received_at' => 'datetime',

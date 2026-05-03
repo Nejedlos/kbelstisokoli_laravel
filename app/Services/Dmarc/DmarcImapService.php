@@ -15,7 +15,9 @@ class DmarcImapService
         protected AttachmentDecoder $decoder,
         protected DmarcXmlParser $parser,
         protected DmarcClassifier $classifier,
-        protected IncidentService $incidentService
+        protected IncidentService $incidentService,
+        protected DmarcAnalysisService $analysisService,
+        protected DmarcAlertService $alertService
     ) {}
 
     public function ingest(DmarcMailbox $mailbox): DmarcRun
@@ -219,6 +221,13 @@ class DmarcImapService
             ]);
 
             $this->incidentService->handleRecord($record, $report);
+
+            try {
+                $analysis = $this->analysisService->analyze($record, $report);
+                $this->alertService->handle($record, $report, $analysis);
+            } catch (\Exception $e) {
+                Log::error("DMARC Post-processing failed for record {$record->id}: " . $e->getMessage());
+            }
         }
 
         return true;

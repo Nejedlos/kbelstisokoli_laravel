@@ -1,6 +1,6 @@
 <div x-data="{ searchOpen: false }" class="relative flex items-center" wire:key="standard-search-container-v2" @click.outside="searchOpen = false">
     <!-- Desktop Trigger (Input-like) -->
-    <div class="hidden lg:block relative group min-w-[280px] mr-1">
+    <div class="hidden sm:block relative group w-40 md:w-56 lg:w-64 xl:w-72 mr-1">
         <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400 group-hover:text-primary transition-colors">
             <i class="fa-light fa-magnifying-glass text-[13px]"></i>
         </div>
@@ -13,7 +13,7 @@
 
     <!-- Mobile Trigger (Icon) -->
     <button @click="searchOpen = !searchOpen"
-            class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
+            class="sm:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none relative group"
             title="{{ __('admin.search.input_placeholder') }}">
         <i class="fa-light fa-magnifying-glass text-xl group-hover:scale-110 transition-transform"></i>
     </button>
