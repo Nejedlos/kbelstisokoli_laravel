@@ -1,7 +1,7 @@
 ### Diagnostika a oprava "Vite manifest not found" na subdoméně
 
 #### Problém
-Aplikace na produkčním serveru (subdoména `new.kbelstisokoli.cz`) padala s chybou `Illuminate\Foundation\ViteManifestNotFoundException`. Vite hledal `manifest.json` v interní složce projektu (`.../secret/public/build/`) místo ve veřejné složce subdomény (`.../subdomains/new/build/`).
+Aplikace na produkčním serveru (`kbelstisokoli.cz`) padala s chybou `Illuminate\Foundation\ViteManifestNotFoundException`. Vite hledal `manifest.json` v interní složce projektu (`.../secret/public/build/`) místo ve veřejné složce (`.../www/build/`).
 
 Hlavní příčinou bylo nesprávné patchování souboru `index.php` v deployment skriptu. V Laravelu 12 má `index.php` jinou strukturu než v předchozích verzích, a původní regulární výraz pro vložení `$app->usePublicPath(__DIR__)` selhal, protože hledal přiřazení do proměnné `$app`, které je v novém `index.php` volitelné (často je tam jen `(require ...)->handleRequest(...)`).
 
@@ -19,7 +19,7 @@ Hlavní příčinou bylo nesprávné patchování souboru `index.php` v deployme
 - `bootstrap/app.php`: Bezpečnější inicializace veřejné cesty.
 
 #### Doporučený postup
-Po nasazení těchto změn (např. pomocí `php artisan app:deploy`) dojde k přepsání `index.php` na subdoméně správným obsahem. Pokud by problém přetrvával, zkontrolujte, zda soubor `index.php` v `/home/html/kbelstisokoli.cz/public_html/subdomains/new/` obsahuje řádek:
+Po nasazení těchto změn (např. pomocí `php artisan app:deploy`) dojde k přepsání `index.php` v kořenové složce správným obsahem. Pokud by problém přetrvával, zkontrolujte, zda soubor `index.php` v `/home/html/kbelstisokoli.cz/public_html/www/` obsahuje řádek:
 ```php
 $app->usePublicPath(__DIR__);
 ```

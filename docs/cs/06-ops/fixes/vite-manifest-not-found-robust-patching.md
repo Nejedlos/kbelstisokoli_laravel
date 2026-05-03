@@ -1,7 +1,7 @@
-# Fix: Robustní patchování index.php pro subdomény (Vite Manifest Not Found)
+# Fix: Robustní patchování index.php pro veřejnou složku (Vite Manifest Not Found)
 
 ## Problém
-Aplikace nasazená na subdoméně (např. `new.kbelstisokoli.cz`) hlásila chybu `ViteManifestNotFoundException`. Příčinou bylo, že Laravel nesprávně detekoval "public path" a hledal Vite manifest v interní složce projektu (`/secret/public/build/`) místo ve skutečné veřejné složce subdomény.
+Aplikace nasazená v kořenovém adresáři (`kbelstisokoli.cz`) hlásila chybu `ViteManifestNotFoundException`. Příčinou bylo, že Laravel nesprávně detekoval "public path" a hledal Vite manifest v interní složce projektu (`/secret/public/build/`) místo ve skutečné veřejné složce (`/www/build/`).
 
 Předchozí pokusy o automatické patchování `index.php` selhávaly, pokud byl soubor již částečně upraven nebo pokud regexy neodpovídaly přesně formátu souboru.
 
@@ -22,7 +22,7 @@ Předchozí pokusy o automatické patchování `index.php` selhávaly, pokud byl
 
 ## Jak ověřit
 1. Spusťte nasazení: `php artisan app:deploy`
-2. Po dokončení zkontrolujte obsah `index.php` v adresáři subdomény na serveru. Měl by obsahovat:
+2. Po dokončení zkontrolujte obsah `index.php` v adresáři `www` na serveru. Měl by obsahovat:
    ```php
    $app = require_once '/cesta/k/projektu/bootstrap/app.php';
    $app->usePublicPath(__DIR__);

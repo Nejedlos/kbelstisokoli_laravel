@@ -159,3 +159,13 @@ Filament v akcích jako `AttachAction` automaticky odhaduje název inverzního v
 - **Helper:** Používejte `App\Support\IconHelper::get(IconHelper::KEY)` nebo modernější `App\Support\FilamentIcon::get(AppIcon::KEY)` pro metodu `->icon()`.
 - **Render:** Pro labely nebo `HtmlString` (zejména u Font Awesome ikon) používejte `IconHelper::render(IconHelper::KEY)`.
 - **Namespace:** Nepoužívejte standardní Filament ikony (Heroicons), pokud projekt vyžaduje Font Awesome přes náš `IconHelper`/`FilamentIcon`.
+
+## 13. Správa produkčního prostředí a .env (KRITICKÉ)
+Tato sekce definuje nepřekročitelná pravidla pro práci s produkční konfigurací.
+
+- **Zákaz přímé editace:** Junie (AI) má **přísný a absolutní zákaz** upravovat soubor `.env` přímo na produkčním serveru (Webglobe) přes SSH.
+- **Změnové workflow:** Veškeré úpravy produkční konfigurace se provádějí výhradně lokálně:
+    1. Úpravou souboru `.env.production` v kořeni projektu.
+    2. Úpravou lokálního `.env` v sekci s prefixy `PROD_*` (pro použití v nasazovacích skriptech).
+- **Nasazení změn:** Po lokální úpravě Junie informuje uživatele, že konfigurace je připravena. Uživatel si změny buď zkopíruje sám, nebo spustí `php artisan app:deploy`, který hodnoty přenese.
+- **Synchronizace:** Soubor `.env.production` musí být vždy aktuální a odpovídat reálnému stavu na produkci (slouží jako "source of truth" pro vývoj).

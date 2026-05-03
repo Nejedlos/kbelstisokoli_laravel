@@ -66,7 +66,7 @@ class LegacyPhotoImportCommand extends Command
 
         // Fix pro public_path na produkci v CLI prostředí
         $prodPublicPath = env('PROD_PUBLIC_PATH') ?: env('APP_PUBLIC_PATH');
-        if (app()->environment('production') || ($prodPublicPath && !str_contains(public_path(), 'subdomains/new'))) {
+        if (app()->environment('production') || ($prodPublicPath && !str_contains(public_path(), 'www'))) {
             if ($prodPublicPath && is_dir($prodPublicPath)) {
                 $this->info("Fixuji public_path na: {$prodPublicPath}");
                 app()->usePublicPath($prodPublicPath);
@@ -462,7 +462,7 @@ class LegacyPhotoImportCommand extends Command
         $photoPoolsDir = public_path($uploadsRoot . '/photo_pools');
 
         if (!File::isDirectory($photoPoolsDir) && str_contains($photoPoolsDir, 'secret/public')) {
-            $photoPoolsDir = str_replace('secret/public', 'subdomains/new', $photoPoolsDir);
+            $photoPoolsDir = str_replace('secret/public', 'www', $photoPoolsDir);
         }
 
         if (File::isDirectory($photoPoolsDir)) {

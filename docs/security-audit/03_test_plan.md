@@ -135,7 +135,7 @@ Tento dokument definuje konkrétní testovací scénáře pro ověření bezpeč
 ### ID: TEST-HEADER-01 (Security Headers Check)
 - **Cíl:** Ověřit přítomnost bezpečnostních hlaviček (`X-Frame-Options`, `Content-Security-Policy`, `Strict-Transport-Security`).
 - **Postup:** 
-    1. `curl -I https://new.kbelstisokoli.cz/`
+    1. `curl -I https://kbelstisokoli.cz/`
 - **Očekávaný výsledek:** Přítomnost hlaviček zmírňujících Clickjacking a XSS.
 - **Fail:** Chybějící hlavičky.
 - **Logování:** Kompletní seznam HTTP hlaviček.

@@ -23,8 +23,8 @@ Zaměřujeme se na lokální autority, sportovní portály a komunitní weby v o
 
 ## 2. Typy obsahu pro linkbaiting
 Obsah, na který se nejlépe získávají odkazy:
-- **Náborové stránky:** https://new.kbelstisokoli.cz/nabor (skvělé pro školy a komunitní weby).
-- **Kalendář zápasů:** https://new.kbelstisokoli.cz/zapasy (pro sportovní fanoušky).
+- **Náborové stránky:** https://kbelstisokoli.cz/nabor (skvělé pro školy a komunitní weby).
+- **Kalendář zápasů:** https://kbelstisokoli.cz/zapasy (pro sportovní fanoušky).
 - **Reporty ze zápasů a turnajů:** Články s fotografiemi dětí (rodiče sdílejí na sociální sítě).
 - **Media Kit:** Loga a fotky ke stažení pro novináře a partnery.
 
@@ -44,9 +44,9 @@ jmenuji se [Vaše Jméno] a zastupuji basketbalový oddíl Kbelští sokoli, kte
 
 Všiml jsem si, že na Vašich stránkách v sekci [Název sekce] informujete o možnostech sportovního vyžití v naší oblasti. Protože u nás trénuje více než [X] dětí z okolí [Kbel/Letňan], rádi bychom Vám nabídli krátkou informaci o našem klubu, kterou byste mohli využít pro Vaše čtenáře/občany.
 
-Naše náborová stránka s aktuálními časy tréninků je zde: https://new.kbelstisokoli.cz/nabor
+Naše náborová stránka s aktuálními časy tréninků je zde: https://kbelstisokoli.cz/nabor
 
-Budeme rádi za případné zveřejnění nebo odkaz. Pokud byste potřebovali naše logo nebo fotografie z tréninků, najdete je v našem Media kitu: https://new.kbelstisokoli.cz/media-kit
+Budeme rádi za případné zveřejnění nebo odkaz. Pokud byste potřebovali naše logo nebo fotografie z tréninků, najdete je v našem Media kitu: https://kbelstisokoli.cz/media-kit
 
 Děkuji a přeji hezký den,
 [Vaše Jméno]

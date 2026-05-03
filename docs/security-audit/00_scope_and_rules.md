@@ -1,7 +1,7 @@
 # Rozsah a pravidla bezpečnostního auditu
 
 ## Cíl auditu
-Provést autorizovaný bezpečnostní audit administrace a souvisejícího Laravel projektu pro web `new.kbelstisokoli.cz`.
+Provést autorizovaný bezpečnostní audit administrace a souvisejícího Laravel projektu pro web `kbelstisokoli.cz`.
 
 ## Rozsah (Scope)
 - Celý Laravel projekt (zdrojový kód).

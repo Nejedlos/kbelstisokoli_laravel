@@ -5,7 +5,7 @@ Tento dokument popisuje nastavení projektu pro provoz s veřejným adresářem 
 ## Architektura na produkci
 
 - **Kód aplikace:** `/home/html/kbelstisokoli.cz/public_html/secret`
-- **Veřejný adresář:** `/home/html/kbelstisokoli.cz/public_html/subdomains/new`
+- **Veřejný adresář:** `/home/html/kbelstisokoli.cz/public_html/www`
 
 ## Konfigurace prostředí (.env)
 
@@ -16,10 +16,10 @@ Pro aktivaci tohoto režimu jsou v `.env` na serveru klíčové tyto proměnné:
 PUBLIC_PATH_MODE=external
 
 # Absolutní cesta k veřejnému adresáři na serveru
-PROD_PUBLIC_PATH="/home/html/kbelstisokoli.cz/public_html/subdomains/new"
+PROD_PUBLIC_PATH="/home/html/kbelstisokoli.cz/public_html/www"
 
 # Původní proměnná (ponechána pro kompatibilitu s jinými skripty)
-APP_PUBLIC_PATH="/home/html/kbelstisokoli.cz/public_html/subdomains/new"
+APP_PUBLIC_PATH="/home/html/kbelstisokoli.cz/public_html/www"
 ```
 
 ## Jak to funguje
@@ -30,15 +30,15 @@ APP_PUBLIC_PATH="/home/html/kbelstisokoli.cz/public_html/subdomains/new"
 
 2.  **Vite build (`vite.config.js`):**
     - Při sestavování assetů (`npm run build`) Vite builduje do standardní složky `public/build`.
-    - Následně se o synchronizaci do externí složky `/subdomains/new/build` postará **Envoy** v rámci `sync_public` úkolu.
+    - Následně se o synchronizaci do externí složky `/www/build` postará **Envoy** v rámci `sync_public` úkolu.
     - Toto sjednocení cest zajišťuje, že assety nejsou smazány při deploymentu.
 
 3.  **Vstupní bod (`index.php`):**
-    - V externí složce `/subdomains/new` musí být `index.php`, který správně načte aplikaci ze složky `/secret`.
+    - V externí složce `/www` musí být `index.php`, který správně načte aplikaci ze složky `/secret`.
 
 ## Soubory pro externí složku
 
-Tyto soubory by měly být umístěny v `/home/html/kbelstisokoli.cz/public_html/subdomains/new/`:
+Tyto soubory by měly být umístěny v `/home/html/kbelstisokoli.cz/public_html/www/`:
 
 ### index.php
 
@@ -105,4 +105,4 @@ Pokud je na serveru k dispozici Node.js 18+, lze build spustit i tam:
 ```bash
 npm run build
 ```
-Vite sestaví soubory do `public/build` a skript Envoy (nebo manuální synchronizace) je následně přenese do cílové složky subdomény.
+Vite sestaví soubory do `public/build` a skript Envoy (nebo manuální synchronizace) je následně přenese do cílové složky `www`.

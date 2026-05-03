@@ -47,7 +47,7 @@ Příkaz a podkladová služba `PlayerSyncService` nyní obsahují robustní mec
 - Používá se `Spatie Media Library` a vlastní `CustomPathGenerator`.
 - Disk: `MEDIA_DISK`/`UPLOADS_DISK` (výchozí `public_path`).
 - Cesta: `public/uploads/user/{user_id}/player_photos/{media_id}`.
-  - Na produkci (Webglobe): `/home/html/kbelstisokoli.cz/public_html/subdomains/new/uploads/user/{id}/player_photos/...`
+  - Na produkci (Webglobe): `/home/html/kbelstisokoli.cz/public_html/www/uploads/user/{id}/player_photos/...`
 
 ## Příklady
 - Všechno (všechny povolené týmy a sezóny), šetrnější tempo:

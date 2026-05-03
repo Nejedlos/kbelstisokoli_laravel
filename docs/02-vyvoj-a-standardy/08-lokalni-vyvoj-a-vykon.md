@@ -47,7 +47,8 @@ V tomto projektu je kriticky důležité striktně oddělovat konfiguraci pro lo
 - **ZÁKAZ:** Nikdy do lokálního `.env` nezapisujte reálné produkční SMTP údaje do proměnných `MAIL_*`. Pokud je potřebujete uložit pro účely nasazení, používejte prefix `PROD_MAIL_*`.
 
 ### B. Produkční prostředí (Webglobe)
-- **.env na serveru:** Spravováno přes SSH a automatizované nasazovací skripty.
+- **.env na serveru:** Spravováno výhradně automatizovanými nasazovacími skripty nebo manuálně uživatelem.
+- **KRITICKÉ PRAVIDLO:** Junie (AI) má **přísný zákaz** upravovat soubor `.env` přímo na produkčním serveru přes SSH. Veškeré změny konfigurace musí být provedeny lokálně v souboru `.env.production` nebo v lokálním `.env` pomocí prefixů `PROD_*`.
 - **SMTP:** Reálné údaje Webglobe (`mail.webglobe.cz`, port `465`, SSL).
-- **Správa:** Změny v produkčním `.env` provádějte buď ručně přes SSH, nebo pomocí příkazů `php artisan app:production:setup` a `php artisan app:deploy`, které se postarají o bezpečný přenos hodnot ze souboru `.env` (hledají prefixy `PROD_*`) na server.
-- **.env.production:** Slouží pouze jako šablona a dokumentace produkčních hodnot. Skutečná pravda je v `.env` souboru na serveru.
+- **Správa:** Změny v produkčním `.env` provádějte buď pomocí příkazů `php artisan app:production:setup` a `php artisan app:deploy`, které se postarají o bezpečný přenos hodnot ze souboru `.env` (hledají prefixy `PROD_*`) na server, nebo připravte hodnoty v `.env.production` a informujte uživatele.
+- **.env.production:** Slouží jako hlavní zdroj pravdy pro produkční hodnoty. Skutečná pravda je v `.env` souboru na serveru, který by měl odpovídat tomuto souboru.

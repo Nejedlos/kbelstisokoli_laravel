@@ -76,7 +76,7 @@ class LocalAssetsDeployCommand extends Command
             $localDir = base_path($dir);
             $dirNameOnly = basename($dir); // 'build' nebo 'assets'
 
-            // Pokud máme PROD_PUBLIC_PATH, nahráváme přímo do ní (např. /subdomains/new/build)
+            // Pokud máme PROD_PUBLIC_PATH, nahráváme přímo do ní (např. /www/build)
             // Pokud nemáme, nahráváme do relativní cesty v rámci PROD_PATH (např. /secret/public/build)
             if ($remotePublicPath) {
                 $remoteDir = rtrim($remotePublicPath, '/').'/'.$dirNameOnly;
