@@ -16,7 +16,10 @@ class PerformanceService
     public function bootSettings(): void
     {
         $settings = $this->getSettings();
-        $scenario = $settings['perf_scenario'] ?? 'standard';
+
+        // Výchozí scénář pro produkci je ultra, pro ostatní standard
+        $defaultScenario = app()->isProduction() ? 'ultra' : 'standard';
+        $scenario = $settings['perf_scenario'] ?? $defaultScenario;
 
         // Povolení vynucení scénáře pro admina (užitečné pro testy)
         // Optimalizováno: Kontrola auth pouze pokud jsme v HTTP requestu a auth je k dispozici

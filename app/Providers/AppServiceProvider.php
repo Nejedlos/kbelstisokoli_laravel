@@ -154,6 +154,12 @@ class AppServiceProvider extends ServiceProvider
             app(\App\Services\PerformanceService::class)->bootSettings();
         }
 
+        // Deaktivace Telescope na produkci, pokud není explicitně vynucen přes TELESCOPE_ENABLED=true
+        // a současně omezujeme zápis do DB při vysoké zátěži
+        if (app()->isProduction() && config('telescope.enabled') && ! env('TELESCOPE_ENABLED')) {
+            config(['telescope.enabled' => false]);
+        }
+
         // Vlastní Blade direktiva pro fragment caching
         \Illuminate\Support\Facades\Blade::directive('cacheFragment', function ($expression) {
             return "<?php
@@ -250,6 +256,21 @@ class AppServiceProvider extends ServiceProvider
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
             static $cachedData = null;
             static $unreadCount = null;
+
+            // Rychlý návrat pokud již data máme v paměti procesu
+            if ($cachedData !== null) {
+                $view->with('branding', $cachedData['branding']);
+                $view->with('branding_css', $cachedData['branding_css']);
+                $view->with('announcements', $cachedData["announcements_" . ((str_starts_with($view->getName(), 'member.') || str_contains($view->getName(), 'filament-panels::')) ? 'member' : 'public')]);
+
+                if (auth()->check()) {
+                    if ($unreadCount === null) {
+                        $unreadCount = auth()->user()->unreadNotifications()->count();
+                    }
+                    $view->with('unreadNotificationsCount', $unreadCount);
+                }
+                return;
+            }
 
             $brandingService = app(\App\Services\BrandingService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);
