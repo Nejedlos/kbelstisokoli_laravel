@@ -16,8 +16,24 @@ class FullPageCacheMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Cache zapnuta pouze pro GET, a pokud je aktivní v configu
-        if (! $this->shouldCache($request)) {
+        // Rychlá kontrola pro hosty (před StartSession)
+        // Pokud middleware běží dříve než StartSession, auth()->check() nebude fungovat.
+        // V takovém případě se spoléháme na absenci session cookie.
+        $isGuest = true;
+        try {
+            if (auth()->check()) {
+                $isGuest = false;
+            }
+        } catch (\Throwable $e) {
+            // Auth zatím není připraven, zkusíme detekci přes cookie
+            $sessionCookie = config('session.cookie');
+            if ($request->hasCookie($sessionCookie)) {
+                $isGuest = false; // Má cookie, může být přihlášen -> neriskujeme cache
+            }
+        }
+
+        // Cache zapnuta pouze pro GET, hosty a pokud je aktivní v configu
+        if (! $isGuest || ! $this->shouldCache($request)) {
             return $next($request);
         }
 
@@ -49,14 +65,11 @@ class FullPageCacheMiddleware
         // Podmínky pro uložení do cache:
         // 1. Status OK (200)
         // 2. Obsah není prázdný
-        // 3. Nejde o Livewire request (X-Livewire header) - ten se cachuje samostatně přes fragmenty pokud vůbec
+        // 3. Nejde o Livewire request (X-Livewire header)
         if ($response->getStatusCode() === 200
             && ! empty($content)
             && ! $request->hasHeader('X-Livewire')
         ) {
-            // POZN: Povolujeme i Livewire 3 snapshots pro hosty.
-            // Jelikož jsme v by-passu pro auth() uživatele, snapshoty by měly být
-            // pro všechny hosty identické (pokud nepoužívají session-specific data).
             Cache::put($cacheKey, [
                 'content' => $content,
                 'type' => $response->headers->get('Content-Type'),
@@ -72,7 +85,7 @@ class FullPageCacheMiddleware
         // Cache zapnuta pokud je aktivní v configu, nebo pokud jde o priming (X-Prime-Cache)
         $enabled = config('performance.features.full_page_cache', false) || $request->hasHeader('X-Prime-Cache');
 
-        // Vyloučení rychle se měnících věcí (zápasy, tréninky, akce, novinky)
+        // Vyloučení rychle se měnících věcí
         $excludedPaths = [
             'novinky*',
             'zapasy*',
@@ -80,11 +93,12 @@ class FullPageCacheMiddleware
             'akce*',
             'admin*',
             'member*',
+            'telescope*',
+            'horizon*',
         ];
 
         return $enabled
             && $request->isMethod('GET')
-            && ! auth()->check() // Pouze pro hosty (zatím)
             && ! $request->is($excludedPaths);
     }
 }

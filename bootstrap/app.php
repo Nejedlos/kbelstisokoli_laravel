@@ -167,13 +167,13 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(prepend: [
             PerformanceProfilingMiddleware::class,
+            FullPageCacheMiddleware::class,
         ]);
 
         $middleware->web(append: [
             SecurityHeadersMiddleware::class,
             DetectScreenshotMode::class,
             SetLocaleMiddleware::class,
-            FullPageCacheMiddleware::class,
             AddRequestIdToResponse::class,
             MinifyHtmlMiddleware::class,
             InjectFeedbackWidget::class,
