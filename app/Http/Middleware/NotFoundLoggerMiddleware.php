@@ -53,15 +53,15 @@ class NotFoundLoggerMiddleware
                 $log->increment('hits_count');
                 $log->update([
                     'last_seen_at' => now(),
-                    'referer' => $request->header('referer') ?: $log->referer, // Udržíme poslední/původní referer
-                    'user_agent' => $request->userAgent() ?: $log->user_agent,
+                    'referer' => substr($request->header('referer'), 0, 255) ?: $log->referer, // Udržíme poslední/původní referer
+                    'user_agent' => substr($request->userAgent(), 0, 255) ?: $log->user_agent,
                     'ip_address' => $request->ip() ?: $log->ip_address,
                 ]);
             } else {
                 NotFoundLog::create([
-                    'url' => $path,
-                    'referer' => $request->header('referer'),
-                    'user_agent' => $request->userAgent(),
+                    'url' => substr($path, 0, 255),
+                    'referer' => substr($request->header('referer'), 0, 255),
+                    'user_agent' => substr($request->userAgent(), 0, 255),
                     'ip_address' => $request->ip(),
                     'hits_count' => 1,
                     'last_seen_at' => now(),

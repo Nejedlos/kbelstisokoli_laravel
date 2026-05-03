@@ -21,24 +21,20 @@ class PerformanceService
         $defaultScenario = app()->isProduction() ? 'ultra' : 'standard';
         $scenario = $settings['perf_scenario'] ?? $defaultScenario;
 
-        // Povolení vynucení scénáře pro admina (užitečné pro testy)
-        // Optimalizováno: Kontrola auth pouze pokud jsme v HTTP requestu a auth je k dispozici
-        if (! app()->runningInConsole() && request()->has('perf_scenario')) {
-            try {
-                if (auth()->check() && auth()->user()->can('access_admin')) {
-                    $scenario = request('perf_scenario');
-                }
-            } catch (\Throwable $e) {
-                // Tichý fail pokud auth ještě není připraven (např. v rané fázi bootu)
-            }
+        // Pokud jsme na produkci bez debugu, vynutíme scénář ultra jako základní,
+        // pokud v DB není nic nastaveno nebo pokud je tam výslovně standard.
+        if (app()->isProduction() && ! config('app.debug')) {
+             if (empty($settings['perf_scenario']) || $settings['perf_scenario'] === 'standard') {
+                 $scenario = 'ultra';
+             }
         }
 
         config([
             'performance.scenario' => $scenario,
-            'performance.features.full_page_cache' => (bool) ($settings['perf_full_page_cache'] ?? false),
-            'performance.features.fragment_cache' => (bool) ($settings['perf_fragment_cache'] ?? false),
-            'performance.features.html_minification' => (bool) ($settings['perf_html_minification'] ?? false),
-            'performance.features.livewire_navigate' => (bool) ($settings['perf_livewire_navigate'] ?? false),
+            'performance.features.full_page_cache' => (bool) ($settings['perf_full_page_cache'] ?? ($scenario === 'ultra')),
+            'performance.features.fragment_cache' => (bool) ($settings['perf_fragment_cache'] ?? in_array($scenario, ['aggressive', 'ultra'])),
+            'performance.features.html_minification' => (bool) ($settings['perf_html_minification'] ?? in_array($scenario, ['aggressive', 'ultra'])),
+            'performance.features.livewire_navigate' => (bool) ($settings['perf_livewire_navigate'] ?? ($scenario === 'ultra')),
             'performance.features.lazy_load_images' => (bool) ($settings['perf_lazy_load_images'] ?? true),
         ]);
 
