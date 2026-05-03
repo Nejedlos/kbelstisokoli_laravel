@@ -740,6 +740,18 @@ return [
             'label' => 'Statistic Set',
             'plural_label' => 'Statistic Sets',
         ],
+        'dmarc_mailbox' => [
+            'label' => 'DMARC Mailbox',
+            'plural_label' => 'DMARC Mailboxes',
+        ],
+        'dmarc_report' => [
+            'label' => 'DMARC Report',
+            'plural_label' => 'DMARC Reports',
+        ],
+        'dmarc_incident' => [
+            'label' => 'DMARC Incident',
+            'plural_label' => 'DMARC Incidents',
+        ],
     ],
     'navigation' => [
         'groups' => [
@@ -752,6 +764,7 @@ return [
             'statistics_and_data' => 'Statistics & Data',
             'external_data' => 'External Statistics',
             'documentation' => 'Documentation',
+            'dmarc_monitor' => 'DMARC Monitor',
         ],
         'pages' => [
             'dashboard' => 'Dashboard',

@@ -67,6 +67,8 @@ enum AppIcon: string
     case LOGOUT = 'right-from-bracket';
     case WARNING = 'circle-exclamation';
     case TRASH_CAN_ARROW_UP = 'trash-can-arrow-up';
+    case DMARC = 'envelope-shield';
+    case MAILBOX = 'envelopes-bulk';
 
     // --- UI Akce a Stavy ---
     case CREATE = 'circle-plus';

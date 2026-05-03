@@ -800,6 +800,18 @@ return [
             'label' => 'Sada statistik',
             'plural_label' => 'Sady statistik',
         ],
+        'dmarc_mailbox' => [
+            'label' => 'DMARC schránka',
+            'plural_label' => 'DMARC schránky',
+        ],
+        'dmarc_report' => [
+            'label' => 'DMARC report',
+            'plural_label' => 'DMARC reporty',
+        ],
+        'dmarc_incident' => [
+            'label' => 'DMARC incident',
+            'plural_label' => 'DMARC incidenty',
+        ],
     ],
     'navigation' => [
         'groups' => [
@@ -812,6 +824,7 @@ return [
             'statistics_and_data' => 'Statistiky a data',
             'external_data' => 'Externí statistiky',
             'documentation' => 'Dokumentace',
+            'dmarc_monitor' => 'DMARC Monitor',
         ],
         'pages' => [
             'dashboard' => 'Nástěnka',

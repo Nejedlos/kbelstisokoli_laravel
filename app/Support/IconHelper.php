@@ -76,6 +76,10 @@ class IconHelper
 
     public const ATTENDANCE = AppIcon::ATTENDANCE;
 
+    public const DMARC = AppIcon::DMARC;
+
+    public const MAILBOX = AppIcon::MAILBOX;
+
     public const RECAPTCHA = AppIcon::RECAPTCHA;
 
     public const DASHBOARD = AppIcon::DASHBOARD;

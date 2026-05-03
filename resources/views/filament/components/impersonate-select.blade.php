@@ -26,7 +26,7 @@
         let url = '{{ route('admin.impersonate.start', ['userId' => 'USER_ID']) }}';
         window.location.href = url.replace('USER_ID', this.targetUser.id);
     }
-}" class="relative flex items-center" wire:ignore wire:key="impersonate-select-container">
+}" class="relative flex items-center" wire:ignore wire:key="impersonate-select-container" @click.outside="searchOpen = false">
 
     <!-- Trigger Button -->
     <button @click="searchOpen = !searchOpen; if(searchOpen) { search(); $nextTick(() => $refs.impersonateInput.focus()) }"
@@ -47,11 +47,11 @@
 
     <!-- Dropdown Overlay -->
     <div x-show="searchOpen"
-         @click.outside.stop="searchOpen = false"
          @keydown.escape.window.stop="searchOpen = false"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-cloak
          class="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3 z-[100] overflow-hidden text-left"
          style="display: none;">
 
@@ -64,7 +64,7 @@
                 <input type="text"
                        x-ref="impersonateInput"
                        x-model="query"
-                       @input.debounce.300ms="search()"
+                       @input.debounce.300ms.stop="search()"
                        @keydown.enter.stop.prevent="results.length > 0 && impersonate(results[0].id, results[0].text)"
                        @keydown.escape.stop="searchOpen = false"
                        @click.stop

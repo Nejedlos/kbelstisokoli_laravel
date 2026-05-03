@@ -1,4 +1,4 @@
-<div x-data="{ searchOpen: false, loading: false }" class="relative flex items-center" wire:ignore wire:key="ai-search-container">
+<div x-data="{ searchOpen: false, loading: false }" class="relative flex items-center" wire:ignore wire:key="ai-search-container" @click.outside="searchOpen = false">
     <x-loader-basketball x-show="loading" x-cloak class="z-[60]" />
 
     <!-- Desktop Trigger (Pill) -->
@@ -23,11 +23,11 @@
 
     <!-- AI Search Overlay -->
     <div x-show="searchOpen"
-         @click.outside.stop="searchOpen = false"
          @keydown.escape.window.stop="searchOpen = false"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-cloak
          class="fixed inset-x-0 top-16 w-screen md:absolute md:inset-auto md:left-0 md:top-full md:mt-3 md:w-full md:min-w-[380px] bg-white dark:bg-gray-900 rounded-none md:rounded-2xl shadow-2xl border-t md:border border-gray-100 dark:border-gray-800 p-4 z-50 overflow-hidden text-left ring-1 ring-black/5 dark:ring-white/5"
          style="display: none;">
 

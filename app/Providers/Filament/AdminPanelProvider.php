@@ -221,7 +221,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <div class="flex items-center gap-2 ml-2" wire:key="topbar-right-actions">
+                    <div class="flex items-center gap-2 ml-2" wire:key="topbar-right-actions" wire:ignore>
                         @include("filament.components.language-switch")
                         @include("filament.components.ai-search")
                         @include("filament.components.impersonate-select")
@@ -288,6 +288,9 @@ class AdminPanelProvider extends PanelProvider
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.system'))
                     ->collapsed(),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.dmarc_monitor'))
+                    ->icon(new HtmlString('<i class="fa-light fa-envelope-shield fa-fw"></i>')),
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.documentation')),
             ])
