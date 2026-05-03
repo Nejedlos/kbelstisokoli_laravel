@@ -1,60 +1,51 @@
-# Oprava doručitelnosti e-mailů (DNS nastavení)
+# Stav doručitelnosti e-mailů a DNS (Aktualizováno 3. 5. 2026)
 
-Tento dokument obsahuje přesné instrukce pro úpravu DNS záznamů domény `kbelstisokoli.cz` u poskytovatele Webglobe za účelem vyřešení problémů s doručováním e-mailů (zejména na servery typu `@centrum.cz`, `@seznam.cz`, `@gmail.com`).
+Tento dokument shrnuje aktuální stav DNS záznamů a doručitelnosti po zásahu podpory Webglobe.
 
-## 1. Úprava SPF záznamu (Sender Policy Framework)
+## 1. Aktuální stav (Verified 3. 5. 2026)
 
-SPF určuje, které servery smí odesílat e-maily jménem vaší domény. Aktuálně máte nastaveno "SoftFail" (`~all`), což některé servery penalizují.
+| Komponenta | Stav | Hodnota / Zjištění |
+| :--- | :--- | :--- |
+| **SPF** | ✅ OK | `v=spf1 a mx include:_spf.webglobe.cz -all` (Striktní politika nastavena) |
+| **DMARC** | ✅ OK | `v=DMARC1; p=quarantine; rua=mailto:dmarc@kbelstisokoli.cz` (Aktivní karanténa a reporting) |
+| **DKIM** | ✅ OK | `default._domainkey` je správně nastaven. |
+| **MX** | ✅ OK | Ukazuje na standardní klastr Webglobe (`email.webglobe.cz` atd.) |
+| **PTR (Reverzní DNS)** | ⚠️ Částečné | IP `62.109.154.92` (mail075) má PTR. IP `62.109.151.105` (mailproxy) **nemá PTR**. |
 
-*   **Typ:** TXT
-*   **Název (Host):** `@` (v některých administracích se nechává prázdné nebo se píše název domény `kbelstisokoli.cz.`)
-*   **Původní hodnota:** `v=spf1 a mx include:_spf.webglobe.cz ~all`
-*   **Nová hodnota:** `v=spf1 a mx include:_spf.webglobe.cz -all`
-*   **Změna:** Nahraďte vlnovku `~` před slovem `all` pomlčkou `-`.
+## 2. Odpověď pro podporu Webglobe
 
-## 2. Úprava DMARC záznamu
-
-DMARC propojuje SPF a DKIM a říká přijímací straně, co má dělat, pokud e-mail neprojde kontrolou. Také umožňuje zasílání reportů o doručování na váš nový e-mail.
-
-*   **Typ:** TXT
-*   **Název (Host):** `_dmarc` (výsledný záznam je `_dmarc.kbelstisokoli.cz.`)
-*   **Původní hodnota:** `v=DMARC1; p=none;`
-*   **Nová hodnota:** `v=DMARC1; p=none; rua=mailto:dmarc@kbelstisokoli.cz`
-*   **Změna:** Původní krátký záznam nahraďte tímto delším, který obsahuje instrukci pro zasílání reportů (`rua`).
-
-## 3. Žádost na podporu Webglobe (Klíčové!)
-
-Nejdůležitější chybou jsou chybějící **PTR záznamy** (reverzní DNS). Tyto záznamy nemůžete v DNS panelu změnit sami, musí je nastavit správce sítě (Webglobe) pro své IP adresy. Bez nich vás servery jako `@centrum.cz` budou vždy považovat za podezřelé.
-
-Pošlete na podporu Webglobe (např. přes klientský panel nebo e-mail) následující žádost:
+Podpora se dotazovala na způsob odesílání. Zde je přesná technická specifikace pro komunikaci s nimi:
 
 ---
-**Předmět:** Žádost o nastavení PTR záznamů pro IP adresy odesílacích serverů
+**Předmět:** Re: Nastavení DNS a doručitelnost - kbelstisokoli.cz
 
 Dobrý den,
 
-u naší domény `kbelstisokoli.cz` řešíme problémy s doručitelností e-mailů (odmítání ze strany Centrum.cz/Seznam.cz). Diagnostika odhalila, že naše odesílací servery postrádají validní reverzní DNS (PTR) záznamy.
+děkuji za provedený reset a úpravu záznamů. Zkontroloval jsem aktuální stav a mám k němu doplňující informace a jednu prosbu:
 
-Prosím o nastavení PTR záznamů pro následující IP adresy:
+1. **Způsob odesílání:** Potvrzuji, že e-maily odesíláme **výhradně** přes vaše SMTP servery. Aplikace (Laravel) je na produkci konfigurována na hostitele `mail.webglobe.cz`. Nevyužíváme žádné služby třetích stran (jako Mailchimp, SendGrid apod.).
+2. **Diagnostika:** Hlavním důvodem penalizace na serverech `@centrum.cz` (a dříve i jinde) je chybějící PTR záznam u jednoho z odesílacích serverů.
+    - IP adresa `62.109.151.105` (na kterou směřuje `mail.webglobe.cz`) aktuálně vrací `NXDOMAIN` (nemá PTR).
+    - IPv6 adresa `2001:1ab0:7e1e:151:62:109:151:105` (pro stejný host) rovněž postrádá PTR záznam.
+    - IP adresa `62.109.154.92` (která je v MX/A záznamech) PTR má v pořádku (`mail075.webglobe.com`).
 
-1.  **IP:** `62.109.151.105` (mail.webglobe.cz) -> nastavit PTR na: `mail.webglobe.cz`
-2.  **IP:** `62.109.154.160` (smtp.kbelstisokoli.cz) -> nastavit PTR na: `smtp.kbelstisokoli.cz`
+**Prosba:** Mohli byste prosím nastavit/prověřit PTR záznamy pro IP `62.109.151.105` a IPv6 `2001:1ab0:7e1e:151:62:109:151:105` tak, aby ukazovaly na `mail.webglobe.cz` (nebo odpovídající validní hostname)?
 
-Prosím také o kontrolu, zda mají odpovídající PTR záznamy i IPv6 adresy těchto serverů, pokud jsou využívány pro odchozí SMTP provoz.
+Bez validního PTR u všech odesílacích IP adres bude doručitelnost na české freemaily (Centrum, Seznam) vždy problematická.
 
 Děkuji,
 [Vaše Jméno]
 ---
 
-## 4. Přehled změn (Tabulka)
+## 3. Technické detaily pro kontrolu (Interní)
 
-| Záznam | Co najít a odstranit (Původní) | Co zadat místo toho (Nové) |
-| :--- | :--- | :--- |
-| **SPF** (TXT @) | `v=spf1 a mx include:_spf.webglobe.cz ~all` | `v=spf1 a mx include:_spf.webglobe.cz -all` |
-| **DMARC** (TXT _dmarc) | `v=DMARC1; p=none;` | `v=DMARC1; p=none; rua=mailto:dmarc@kbelstisokoli.cz` |
-| **PTR** | (Nelze v DNS panelu měnit) | Vyžaduje zásah podpory (viz bod 3) |
+Pokud chcete sami ověřit stav, můžete použít terminál:
 
-## 5. Co dál?
-1. **Změňte DNS:** Proveďte změny SPF a DMARC v administraci Webglobe.
-2. **Napište podpoře:** Odešlete žádost o PTR záznamy.
-3. **Sledujte e-mail:** Po cca 24-48 hodinách začnou na adresu `dmarc@kbelstisokoli.cz` chodit XML reporty. Ty nám v dalším kroku pomohou ověřit, že je vše v pořádku a můžeme DMARC politiku zpřísnit na `p=quarantine`.
+- **Kontrola SPF/DMARC:** `dig kbelstisokoli.cz TXT +short` a `dig _dmarc.kbelstisokoli.cz TXT +short`
+- **Kontrola PTR (problémová IP):** `host 62.109.151.105` (mělo by vrátit název, nyní vrací chybu)
+- **Kontrola PTR (v pořádku IP):** `host 62.109.154.92` (vrací `mail075.webglobe.com`)
+
+## 4. Další kroky
+1. **Odeslat odpověď podpoře** (bod 2 tohoto dokumentu).
+2. **Sledovat DMARC monitor** v administraci aplikace. Pokud jsou záznamy v pořádku doručovány, monitor v sekci "DMARC Monitor" začne zobrazovat statistiky úspěšnosti (SPF/DKIM alignment).
+3. Jakmile bude doručitelnost stabilní, lze DMARC politiku změnit z `p=quarantine` na `p=reject`.

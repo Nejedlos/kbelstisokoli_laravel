@@ -59,18 +59,20 @@ if (! function_exists('web_asset')) {
 
         // Funkce pro kontrolu existence a vrácení asset URL
         $checkAndReturn = function($p) use ($tryWebp) {
+            $normalizedP = ltrim($p, '/');
+
             // 1) Zkusíme WebP variantu, pokud je to zapnuté
             if ($tryWebp) {
-                $info = pathinfo($p);
+                $info = pathinfo($normalizedP);
                 $webpPath = ($info['dirname'] !== '.' ? $info['dirname'] . '/' : '') . $info['filename'] . '.webp';
-                if (file_exists(public_path($webpPath))) {
+                if (file_exists(public_path($webpPath)) || @file_exists(base_path('public/' . $webpPath))) {
                     return asset($webpPath);
                 }
             }
 
             // 2) Zkusíme původní cestu
-            if (file_exists(public_path($p))) {
-                return asset($p);
+            if (file_exists(public_path($normalizedP)) || @file_exists(base_path('public/' . $normalizedP))) {
+                return asset($normalizedP);
             }
 
             return null;
@@ -96,6 +98,12 @@ if (! function_exists('web_asset')) {
         }
 
         // E) Poslední záchrana – vrať asset s původní cestou (i když neexistuje)
-        return asset($normalized);
+        // Pokud jsme na produkci, zajistíme HTTPS pokud je v APP_URL
+        $url = asset($normalized);
+        if (str_contains(config('app.url', ''), 'https://') && str_starts_with($url, 'http://')) {
+            $url = str_replace('http://', 'https://', $url);
+        }
+
+        return $url;
     }
 }

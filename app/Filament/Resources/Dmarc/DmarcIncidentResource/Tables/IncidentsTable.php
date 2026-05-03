@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Dmarc\DmarcIncidentResource\Tables;
 
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

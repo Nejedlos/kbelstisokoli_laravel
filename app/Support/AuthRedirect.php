@@ -40,7 +40,8 @@ class AuthRedirect
             '/reset-password',
             '/email-verification',
             '/logout-success',
-            '/register'
+            '/register',
+            '/feedback/widget'
         ])) {
             \Illuminate\Support\Facades\Log::debug('AuthRedirect: Auth-related URL ignored', ['url' => $url]);
             return;
@@ -101,8 +102,8 @@ class AuthRedirect
             ]);
 
             // Dodatečná validace po načtení (pro případ, že by byla v session uložena nevalidní URL)
-            if (Str_contains_any($intended, ['/login', '/logout', '/two-factor', '/2fa-challenge'])) {
-                \Illuminate\Support\Facades\Log::debug('AuthRedirect: Intended URL is auth-related, ignoring', ['intended' => $intended]);
+            if (Str_contains_any($intended, ['/login', '/logout', '/two-factor', '/2fa-challenge', '/feedback/widget'])) {
+                \Illuminate\Support\Facades\Log::debug('AuthRedirect: Intended URL is auth-related or widget, ignoring', ['intended' => $intended]);
                 return $fallback;
             }
 

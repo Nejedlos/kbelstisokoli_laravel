@@ -44,15 +44,15 @@
         $finalWebp = null;
         $finalImg = null;
 
-        if (file_exists(public_path($webp))) {
+        if (file_exists(public_path($webp)) || @file_exists(base_path('public/' . $webp))) {
             $finalWebp = $webp;
         }
 
-        if (file_exists(public_path($jpg))) {
+        if (file_exists(public_path($jpg)) || @file_exists(base_path('public/' . $jpg))) {
             $finalImg = $jpg;
-        } elseif (file_exists(public_path($jpeg))) {
+        } elseif (file_exists(public_path($jpeg)) || @file_exists(base_path('public/' . $jpeg))) {
             $finalImg = $jpeg;
-        } elseif ($ext !== 'webp' && file_exists(public_path($cleanPath))) {
+        } elseif ($ext !== 'webp' && (file_exists(public_path($cleanPath)) || @file_exists(base_path('public/' . $cleanPath)))) {
             $finalImg = $cleanPath;
         }
 
@@ -79,10 +79,10 @@
             $pi = pathinfo(ltrim($normalizedSrc, '/'));
             $baseMobile = ($pi['dirname'] !== '.' ? $pi['dirname'] . '/' : '') . ($pi['filename'] ?? '') . '-mobile';
             // Zkontrolujeme, zda existuje jakákoliv verze mobilního obrázku
-            if (file_exists(public_path($baseMobile . '.webp')) ||
-                file_exists(public_path($baseMobile . '.jpg')) ||
-                file_exists(public_path($baseMobile . '.jpeg')) ||
-                (isset($pi['extension']) && file_exists(public_path($baseMobile . '.' . $pi['extension'])))) {
+            if (file_exists(public_path($baseMobile . '.webp')) || @file_exists(base_path('public/' . $baseMobile . '.webp')) ||
+                file_exists(public_path($baseMobile . '.jpg')) || @file_exists(base_path('public/' . $baseMobile . '.jpg')) ||
+                file_exists(public_path($baseMobile . '.jpeg')) || @file_exists(base_path('public/' . $baseMobile . '.jpeg')) ||
+                (isset($pi['extension']) && (file_exists(public_path($baseMobile . '.' . $pi['extension'])) || @file_exists(base_path('public/' . $baseMobile . '.' . $pi['extension']))))) {
                 $mSrc = $baseMobile . '.' . ($pi['extension'] ?? 'jpg');
             }
         }
