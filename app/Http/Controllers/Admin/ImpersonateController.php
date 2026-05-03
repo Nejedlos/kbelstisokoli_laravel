@@ -61,75 +61,78 @@ class ImpersonateController extends Controller
             return redirect()->route('login');
         }
 
+        // 1. Zapamatovat si ID admina pro návrat
         $adminId = $admin->id;
 
-        \Illuminate\Support\Facades\Log::debug('Impersonate.start.init', [
+        \Illuminate\Support\Facades\Log::info('Impersonate.start.attempt', [
             'admin_id' => $adminId,
             'user_to_impersonate_id' => $userId,
             'session_id' => $request->session()->getId(),
         ]);
 
         // Kontrola oprávnění
-        if (! $admin || ! $admin->can('impersonate_users')) {
-            \Illuminate\Support\Facades\Log::warning('Impersonate.start.unauthorized', ['admin_id' => $admin?->id]);
-
+        if (! $admin->can('impersonate_users')) {
+            \Illuminate\Support\Facades\Log::warning('Impersonate.start.unauthorized', ['admin_id' => $admin->id]);
             return redirect()->back()->with('error', 'Nemáte oprávnění k impersonaci.');
         }
 
         // Najít cílového uživatele
         $userToImpersonate = User::findOrFail($userId);
 
-        \Illuminate\Support\Facades\Log::debug('Impersonate.start.user_found', [
-            'user_to_impersonate' => $userToImpersonate->email,
-        ]);
-
         // Zamezit impersonaci sebe sama
-        if ($adminId === $userToImpersonate->id) {
+        if ($adminId === (int) $userId) {
             return redirect()->back()->with('error', 'Nemůžete impersonovat sami sebe.');
         }
 
-        // 1. Nejprve zregenerujeme session a vyčistíme ji pro nového uživatele (bezpečnost)
-        // ale ponecháme si ID admina
-        $request->session()->invalidate();
+        // 2. Bezpečný switch uživatele
+        // Nejdříve odhlásíme admina (včetně smazání remember cookie)
+        Auth::guard('web')->logout();
+
+        // Vyčistíme a zregenerujeme sezení
+        $request->session()->flush();
+        $request->session()->regenerate();
         $request->session()->regenerateToken();
 
-        \Illuminate\Support\Facades\Log::debug('Impersonate.start.session_invalidated', [
-            'new_session_id' => $request->session()->getId(),
-        ]);
+        // 3. Přihlásíme nového uživatele do web guardu
+        Auth::guard('web')->login($userToImpersonate);
 
-        // 2. Přihlásit se jako nový uživatel přes Filament guard (pokud je k dispozici)
-        // nebo přes výchozí web guard. Použijeme guard ze session pokud existuje.
-        Auth::login($userToImpersonate);
+        // Synchronizujeme Auth state i v rámci aktuálního requestu
+        auth()->setUser($userToImpersonate);
 
-        // 3. Nastavit impersonated_by a další klíče zpět
+        // 4. Nastavit klíče do NOVÉ session
         $request->session()->put('impersonated_by', $adminId);
+        $request->session()->put('impersonation_started', $userToImpersonate->name);
 
-        // Explicitně nastavit password hash pro AuthenticateSession middleware
-        $guard = Auth::getDefaultDriver();
+        // Nastavení password hashe pro AuthenticateSession middleware
+        // Používáme oba formáty klíčů pro maximální kompatibilitu s Laravel 11/12 a Filamentem
+        $guard = Auth::getDefaultDriver() ?: 'web';
+        $passwordHash = $userToImpersonate->getAuthPassword();
+
         $request->session()->put([
-            "password_hash_{$guard}" => $userToImpersonate->getAuthPassword(),
-            'auth.2fa_confirmed_at' => now()->timestamp,
+            "password_hash_{$guard}" => $passwordHash,
+            'auth.password_hash_web' => $passwordHash,
+            'auth.2fa_confirmed_at' => now()->timestamp, // Obejít 2FA pro impersonaci
         ]);
 
-        \Illuminate\Support\Facades\Log::debug('Impersonate.start.after_login_complete', [
+        // Vynutíme uložení session do storage před redirectem
+        $request->session()->save();
+
+        \Illuminate\Support\Facades\Log::info('Impersonate.start.success', [
             'new_user_id' => Auth::id(),
-            'guard' => $guard,
-            'impersonated_by_in_session' => $request->session()->get('impersonated_by'),
-            'password_hash_present' => $request->session()->has("password_hash_{$guard}"),
+            'new_session_id' => $request->session()->getId(),
+            'impersonated_by' => $request->session()->get('impersonated_by'),
         ]);
 
-        // Určit cílovou cestu na základě oprávnění uživatele
+        // Určit cílovou cestu na základě oprávnění
         $targetRoute = $userToImpersonate->canAccessAdmin()
             ? route('filament.admin.pages.dashboard')
             : route('member.dashboard');
 
-        \Illuminate\Support\Facades\Log::debug('Impersonate.start.redirecting', [
-            'target_route' => $targetRoute,
-        ]);
-
-        $request->session()->put('impersonation_started', $userToImpersonate->name);
-
-        return redirect()->to($targetRoute);
+        // Vynutíme čistý redirect bez cache
+        return redirect()->to($targetRoute)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     /**
@@ -141,30 +144,41 @@ class ImpersonateController extends Controller
             return redirect()->route('filament.admin.pages.dashboard');
         }
 
-        $originalAdminId = $request->session()->pull('impersonated_by');
+        $originalAdminId = $request->session()->get('impersonated_by');
         $originalAdmin = User::find($originalAdminId);
 
         if ($originalAdmin) {
-            // Vyčistit session impersonovaného uživatele
-            $request->session()->invalidate();
+            // Bezpečný návrat: odhlásit se z web guardu
+            Auth::guard('web')->logout();
+
+            // Vyčistit a zregenerovat sezení
+            $request->session()->flush();
+            $request->session()->regenerate();
             $request->session()->regenerateToken();
 
-            Auth::login($originalAdmin);
+            // Přihlásit původního admina
+            Auth::guard('web')->login($originalAdmin);
+            auth()->setUser($originalAdmin);
 
-            // Nastavit password hash zpět pro admina
-            $guard = Auth::getDefaultDriver();
+            // Nastavit password hash zpět
+            $guard = Auth::getDefaultDriver() ?: 'web';
+            $passwordHash = $originalAdmin->getAuthPassword();
+
             $request->session()->put([
-                "password_hash_{$guard}" => $originalAdmin->getAuthPassword(),
+                "password_hash_{$guard}" => $passwordHash,
+                'auth.password_hash_web' => $passwordHash,
                 'auth.2fa_confirmed_at' => now()->timestamp,
+                'impersonation_stopped' => true,
             ]);
+
+            $request->session()->save();
 
             $targetRoute = $originalAdmin->canAccessAdmin()
                 ? route('filament.admin.pages.dashboard')
                 : route('member.dashboard');
 
-            $request->session()->put('impersonation_stopped', true);
-
-            return redirect()->to($targetRoute);
+            return redirect()->to($targetRoute)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
         }
 
         return redirect()->route('login')->with('error', 'Nepodařilo se obnovit původní sezení.');
