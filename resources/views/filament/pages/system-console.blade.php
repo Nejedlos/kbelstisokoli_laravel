@@ -6,7 +6,7 @@
     {{-- KPI Diagnostika --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {{-- Artisan Procesy --}}
-        <div class="bg-white dark:bg-[#0d1117] rounded-2xl p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+        <div class="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-amber-500/10 text-amber-500">
@@ -40,7 +40,7 @@
 
             <div class="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 @forelse($kpiData['processes'] as $proc)
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 group">
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/50 border border-slate-100 group">
                         <div class="min-w-0 flex-1 mr-3">
                             <div class="text-[10px] font-mono text-gray-400 mb-0.5 truncate">{{ $proc['cmd'] }}</div>
                             <div class="text-[9px] font-bold text-gray-500">PID: {{ $proc['pid'] }}</div>
@@ -67,7 +67,7 @@
         </div>
 
         {{-- Zaseknuté Importy --}}
-        <div class="bg-white dark:bg-[#0d1117] rounded-2xl p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+        <div class="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-blue-500/10 text-blue-500">
@@ -105,7 +105,7 @@
 
             <div class="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 @forelse($kpiData['imports'] as $import)
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 group">
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/50 border border-slate-100 group">
                         <div class="min-w-0 flex-1 mr-3">
                             <div class="text-[10px] font-bold text-gray-700 dark:text-gray-300 mb-0.5 truncate">{{ $import['source'] }}</div>
                             <div class="text-[9px] text-gray-400">{{ $import['type'] }} • {{ $import['updated_at']->diffForHumans() }}</div>
@@ -131,7 +131,7 @@
         </div>
 
         {{-- Čištění tabulek --}}
-        <div class="bg-white dark:bg-[#0d1117] rounded-2xl p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+        <div class="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-purple-500/10 text-purple-500">
@@ -151,7 +151,7 @@
 
             <div class="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 @forelse($kpiData['tables'] as $table)
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 group">
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/50 border border-slate-100 group">
                         <div class="min-w-0 flex-1 mr-3">
                             <div class="text-[10px] font-mono text-gray-700 dark:text-gray-300 mb-0.5 truncate">{{ $table['name'] }}</div>
                             <div class="text-[9px] font-bold text-purple-500">{{ number_format($table['count'], 0, ',', ' ') }} records</div>
@@ -194,7 +194,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach($commands as $cmdKey => $config)
                             <div
-                                class="group relative flex flex-col h-full border border-gray-100 dark:border-white/5 rounded-2xl p-4 bg-white dark:bg-[#0d1117] shadow-sm transition-all hover:shadow-xl hover:shadow-primary-500/5 hover:border-primary-500/50"
+                                class="group relative flex flex-col h-full border border-gray-100 rounded-2xl p-5 bg-white shadow-sm transition-all hover:shadow-xl hover:shadow-primary-500/10 hover:border-primary-500/30"
                                 x-data="{
                                     flags: [],
                                     selectValue: '',
@@ -212,7 +212,7 @@
                                         @endif
                                     </div>
                                     <div class="min-w-0">
-                                        <h3 class="font-bold text-[13.5px] tracking-tight leading-tight text-gray-900 dark:text-gray-100 truncate">{{ $config['label'] }}</h3>
+                                        <h3 class="font-bold text-[14px] tracking-tight leading-tight text-slate-900 truncate">{{ $config['label'] }}</h3>
                                         <div class="flex items-center gap-2">
                                             <code class="text-[9px] text-gray-400 font-mono uppercase tracking-tighter opacity-60">{{ $cmdKey }}</code>
                                             <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
@@ -221,14 +221,14 @@
                                     </div>
                                 </div>
 
-                                <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-4 flex-grow line-clamp-2 leading-relaxed">
+                                <p class="text-[11px] text-slate-500 mb-5 flex-grow line-clamp-2 leading-relaxed">
                                     {{ $config['desc'] ?? '' }}
                                 </p>
 
                                 @if(isset($config['flags']) || isset($config['select']) || isset($config['input']) || (isset($config['can_be_internal']) && $config['can_be_internal']))
-                                    <div class="space-y-4 mb-4 p-3 bg-gray-50/50 dark:bg-white/[0.02] rounded-xl border border-gray-100/50 dark:border-white/5">
+                                    <div class="space-y-4 mb-4 p-4 bg-slate-50/50 rounded-xl border border-slate-100/50">
                                         @if(isset($config['can_be_internal']) && $config['can_be_internal'])
-                                            <div class="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-white/5 mb-2">
+                                            <div class="flex items-center gap-2 pb-2 border-b border-slate-200 mb-2">
                                                 <label class="flex items-center gap-2 cursor-pointer group/internal">
                                                     <x-filament::input.checkbox
                                                         x-model="useInternal"
@@ -464,7 +464,7 @@
                 {{-- Vnitřek terminálu --}}
                 <div
                     id="console-output"
-                    class="p-6 text-[#c9d1d9] font-mono text-[11px] leading-[1.6] min-h-[500px] md:min-h-[600px] max-h-[80vh] overflow-y-auto whitespace-pre-wrap shadow-inner custom-scrollbar selection:bg-primary-500/40 selection:text-white"
+                    class="p-6 text-[#d1d5db] font-mono text-[13px] leading-[1.6] min-h-[500px] md:min-h-[600px] max-h-[80vh] overflow-y-auto whitespace-pre-wrap shadow-inner custom-scrollbar selection:bg-primary-500/40 selection:text-white"
                     wire:stream="consoleOutput"
                 >
                     @if(empty($consoleOutput))

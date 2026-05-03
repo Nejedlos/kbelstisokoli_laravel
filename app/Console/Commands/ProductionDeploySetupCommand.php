@@ -216,6 +216,44 @@ class ProductionDeploySetupCommand extends Command
 
         $dbConfig['db_mariadb'] = select('Je to MariaDB?', ['false' => 'Ne (MySQL)', 'true' => 'Ano (MariaDB)'], config('app.prod_db_mariadb', env('PROD_DB_MARIADB', 'false')) === 'true' ? 'true' : 'false');
 
+        // 4. Konfigurace Mailu
+        $mailConfig = [];
+        info('📧 Konfigurace e-mailů (SMTP) na produkci');
+        $mailConfig['mail_mailer'] = text('Mail Mailer', default: config('app.prod_mail_mailer', env('PROD_MAIL_MAILER', 'smtp')));
+        $mailConfig['mail_host'] = text('Mail Host', default: config('app.prod_mail_host', env('PROD_MAIL_HOST', 'mail.webglobe.cz')));
+        $mailConfig['mail_port'] = text('Mail Port', default: config('app.prod_mail_port', env('PROD_MAIL_PORT', '465')));
+        $mailConfig['mail_username'] = text('Mail Username', default: config('app.prod_mail_username', env('PROD_MAIL_USERNAME', 'mailer@kbelstisokoli.cz')));
+
+        $mailPassword = config('app.prod_mail_password', env('PROD_MAIL_PASSWORD', 'm0xbDdRDm0xbDdRD'));
+        if ($mailPassword) {
+            $choice = select(
+                label: 'Jak chcete naložit s heslem k produkčnímu SMTP?',
+                options: [
+                    'keep' => 'Použít uložené heslo (' . str_repeat('*', 8) . ')',
+                    'new' => 'Zadat nové heslo',
+                ],
+                default: 'keep'
+            );
+
+            if ($choice === 'new') {
+                $mailConfig['mail_password'] = password(
+                    label: 'Zadejte nové SMTP Heslo:',
+                    required: true
+                );
+            } else {
+                $mailConfig['mail_password'] = $mailPassword;
+            }
+        } else {
+            $mailConfig['mail_password'] = password(
+                label: 'Zadejte SMTP Heslo:',
+                required: true
+            );
+        }
+
+        $mailConfig['mail_encryption'] = text('Mail Encryption', default: config('app.prod_mail_encryption', env('PROD_MAIL_ENCRYPTION', 'ssl')));
+        $mailConfig['mail_from_address'] = text('Mail From Address', default: config('app.prod_mail_from_address', env('PROD_MAIL_FROM_ADDRESS', 'mailer@kbelstisokoli.cz')));
+        $mailConfig['mail_from_name'] = text('Mail From Name', default: config('app.prod_mail_from_name', env('PROD_MAIL_FROM_NAME', 'Kbelští sokoli')));
+
         // Uložit do .env pro příště
         $envData = [
             'PROD_HOST' => $host,
@@ -236,6 +274,14 @@ class ProductionDeploySetupCommand extends Command
             'PROD_DB_PREFIX' => $dbConfig['db_prefix'] ?? '',
             'PROD_DB_VERSION' => $dbConfig['db_version'] ?? '',
             'PROD_DB_MARIADB' => $dbConfig['db_mariadb'] ?? 'false',
+            'PROD_MAIL_MAILER' => $mailConfig['mail_mailer'],
+            'PROD_MAIL_HOST' => $mailConfig['mail_host'],
+            'PROD_MAIL_PORT' => $mailConfig['mail_port'],
+            'PROD_MAIL_USERNAME' => $mailConfig['mail_username'],
+            'PROD_MAIL_PASSWORD' => $mailConfig['mail_password'],
+            'PROD_MAIL_ENCRYPTION' => $mailConfig['mail_encryption'],
+            'PROD_MAIL_FROM_ADDRESS' => $mailConfig['mail_from_address'],
+            'PROD_MAIL_FROM_NAME' => $mailConfig['mail_from_name'],
         ];
 
         $this->updateEnv($envData);
@@ -243,7 +289,7 @@ class ProductionDeploySetupCommand extends Command
         info('✅ Nastavení bylo uloženo do .env.');
 
         if (confirm('Chcete nyní spustit úvodní setup (git clone, composer, npm, atd.) na serveru?', true)) {
-            $this->runEnvoySetup($host, $port, $user, $phpBinary, $path, $token, $publicPath, $dbConfig, $nodeBinary, $npmBinary);
+            $this->runEnvoySetup($host, $port, $user, $phpBinary, $path, $token, $publicPath, $dbConfig, $mailConfig, $nodeBinary, $npmBinary);
         }
 
         return self::SUCCESS;
@@ -720,7 +766,7 @@ class ProductionDeploySetupCommand extends Command
         return $url;
     }
 
-    protected function runEnvoySetup(string $host, string $port, string $user, string $phpBinary, string $path, string $token, ?string $publicPath, array $dbConfig, string $nodeBinary = 'node', string $npmBinary = 'npm'): void
+    protected function runEnvoySetup(string $host, string $port, string $user, string $phpBinary, string $path, string $token, ?string $publicPath, array $dbConfig, array $mailConfig, string $nodeBinary = 'node', string $npmBinary = 'npm'): void
     {
         $repository = $this->detectRepositoryUrl($token);
 
@@ -728,24 +774,30 @@ class ProductionDeploySetupCommand extends Command
             info("🚀 Spouštím Envoy setup na {$user}@{$host}:{$port}...");
 
             $params = [
-                '--host='.escapeshellarg($host),
-                '--port='.escapeshellarg($port),
-                '--user='.escapeshellarg($user),
-                '--php='.escapeshellarg($phpBinary),
-                '--node='.escapeshellarg($nodeBinary),
-                '--npm='.escapeshellarg($npmBinary),
-                '--path='.escapeshellarg($path),
-                '--token='.escapeshellarg($token),
-                '--repository='.escapeshellarg($repository),
+                '--host=' . escapeshellarg($host),
+                '--port=' . escapeshellarg($port),
+                '--user=' . escapeshellarg($user),
+                '--php=' . escapeshellarg($phpBinary),
+                '--node=' . escapeshellarg($nodeBinary),
+                '--npm=' . escapeshellarg($npmBinary),
+                '--path=' . escapeshellarg($path),
+                '--token=' . escapeshellarg($token),
+                '--repository=' . escapeshellarg($repository),
             ];
 
             if ($publicPath) {
-                $params[] = '--public_path='.escapeshellarg($publicPath);
+                $params[] = '--public_path=' . escapeshellarg($publicPath);
             }
 
             foreach ($dbConfig as $key => $value) {
                 if ($value !== null) {
-                    $params[] = "--{$key}=".escapeshellarg($value);
+                    $params[] = "--{$key}=" . escapeshellarg($value);
+                }
+            }
+
+            foreach ($mailConfig as $key => $value) {
+                if ($value !== null) {
+                    $params[] = "--{$key}=" . escapeshellarg($value);
                 }
             }
 

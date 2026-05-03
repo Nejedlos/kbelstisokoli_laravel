@@ -95,6 +95,17 @@ class ProductionDeployCommand extends Command
             'db_prefix' => config('app.prod_db_prefix', env('PROD_DB_PREFIX')),
         ];
 
+        $mailConfig = [
+            'mail_mailer' => config('app.prod_mail_mailer', env('PROD_MAIL_MAILER')),
+            'mail_host' => config('app.prod_mail_host', env('PROD_MAIL_HOST')),
+            'mail_port' => config('app.prod_mail_port', env('PROD_MAIL_PORT')),
+            'mail_username' => config('app.prod_mail_username', env('PROD_MAIL_USERNAME')),
+            'mail_password' => config('app.prod_mail_password', env('PROD_MAIL_PASSWORD')),
+            'mail_encryption' => config('app.prod_mail_encryption', env('PROD_MAIL_ENCRYPTION')),
+            'mail_from_address' => config('app.prod_mail_from_address', env('PROD_MAIL_FROM_ADDRESS')),
+            'mail_from_name' => config('app.prod_mail_from_name', env('PROD_MAIL_FROM_NAME')),
+        ];
+
         $currentPassword = config('app.prod_db_password', env('PROD_DB_PASSWORD'));
         $dbConfig['db_password'] = $currentPassword;
 
@@ -190,6 +201,12 @@ class ProductionDeployCommand extends Command
             }
 
             foreach ($dbConfig as $key => $value) {
+                if ($value !== null) {
+                    $params[] = "--{$key}=".escapeshellarg($value);
+                }
+            }
+
+            foreach ($mailConfig as $key => $value) {
                 if ($value !== null) {
                     $params[] = "--{$key}=".escapeshellarg($value);
                 }

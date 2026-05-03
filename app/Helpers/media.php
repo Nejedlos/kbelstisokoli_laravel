@@ -98,9 +98,11 @@ if (! function_exists('web_asset')) {
         }
 
         // E) Poslední záchrana – vrať asset s původní cestou (i když neexistuje)
-        // Pokud jsme na produkci, zajistíme HTTPS pokud je v APP_URL
+        // Pokud jsme na produkci nebo na HTTPS, zajistíme HTTPS pokud je v APP_URL nebo requestu
         $url = asset($normalized);
-        if (str_contains(config('app.url', ''), 'https://') && str_starts_with($url, 'http://')) {
+        $isSecure = str_contains(config('app.url', ''), 'https://') || (function_exists('request') && request()->isSecure());
+
+        if ($isSecure && str_starts_with($url, 'http://')) {
             $url = str_replace('http://', 'https://', $url);
         }
 

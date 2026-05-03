@@ -30,6 +30,23 @@
     if (isset($public_path)) { $v_pub = $public_path; } else { $v_pub = ''; }
     $public_path_b64 = base64_encode($v_pub);
 
+    if (isset($mail_mailer)) { $v_mail_mailer = $mail_mailer; } else { $v_mail_mailer = ''; }
+    $mail_mailer_b64 = base64_encode($v_mail_mailer);
+    if (isset($mail_host)) { $v_mail_host = $mail_host; } else { $v_mail_host = ''; }
+    $mail_host_b64 = base64_encode($v_mail_host);
+    if (isset($mail_port)) { $v_mail_port = $mail_port; } else { $v_mail_port = ''; }
+    $mail_port_b64 = base64_encode($v_mail_port);
+    if (isset($mail_username)) { $v_mail_username = $mail_username; } else { $v_mail_username = ''; }
+    $mail_username_b64 = base64_encode($v_mail_username);
+    if (isset($mail_password)) { $v_mail_password = $mail_password; } else { $v_mail_password = ''; }
+    $mail_password_b64 = base64_encode($v_mail_password);
+    if (isset($mail_encryption)) { $v_mail_encryption = $mail_encryption; } else { $v_mail_encryption = ''; }
+    $mail_encryption_b64 = base64_encode($v_mail_encryption);
+    if (isset($mail_from_address)) { $v_mail_from_address = $mail_from_address; } else { $v_mail_from_address = ''; }
+    $mail_from_address_b64 = base64_encode($v_mail_from_address);
+    if (isset($mail_from_name)) { $v_mail_from_name = $mail_from_name; } else { $v_mail_from_name = ''; }
+    $mail_from_name_b64 = base64_encode($v_mail_from_name);
+
     if (isset($freshseed) && $freshseed) { $v_freshseed_opt = '--freshseed'; } else { $v_freshseed_opt = ''; }
     if (isset($usersync) && $usersync == "1") { $v_usersync_opt = '--usersync'; } else { $v_usersync_opt = ''; }
     if (isset($stats) && $stats == "1") { $v_stats_opt = '--stats'; } else { $v_stats_opt = ''; }
@@ -107,6 +124,15 @@
         if ("{{ $public_path_b64 }}") {
             $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
         }
+
+        if ("{{ $mail_mailer_b64 }}") { $vars["MAIL_MAILER"] = base64_decode("{{ $mail_mailer_b64 }}"); }
+        if ("{{ $mail_host_b64 }}") { $vars["MAIL_HOST"] = base64_decode("{{ $mail_host_b64 }}"); }
+        if ("{{ $mail_port_b64 }}") { $vars["MAIL_PORT"] = base64_decode("{{ $mail_port_b64 }}"); }
+        if ("{{ $mail_username_b64 }}") { $vars["MAIL_USERNAME"] = base64_decode("{{ $mail_username_b64 }}"); }
+        if ("{{ $mail_password_b64 }}") { $vars["MAIL_PASSWORD"] = base64_decode("{{ $mail_password_b64 }}"); }
+        if ("{{ $mail_encryption_b64 }}") { $vars["MAIL_ENCRYPTION"] = base64_decode("{{ $mail_encryption_b64 }}"); }
+        if ("{{ $mail_from_address_b64 }}") { $vars["MAIL_FROM_ADDRESS"] = base64_decode("{{ $mail_from_address_b64 }}"); }
+        if ("{{ $mail_from_name_b64 }}") { $vars["MAIL_FROM_NAME"] = base64_decode("{{ $mail_from_name_b64 }}"); }
         foreach ($vars as $key => $value) {
             $found = false;
             $safeValue = str_replace(["\\", "\"", "$"], ["\\\\", "\\\"", "\\$"], $value);
@@ -428,6 +454,15 @@
         if ("{{ $public_path_b64 }}") {
             $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
         }
+
+        if ("{{ $mail_mailer_b64 }}") { $vars["MAIL_MAILER"] = base64_decode("{{ $mail_mailer_b64 }}"); }
+        if ("{{ $mail_host_b64 }}") { $vars["MAIL_HOST"] = base64_decode("{{ $mail_host_b64 }}"); }
+        if ("{{ $mail_port_b64 }}") { $vars["MAIL_PORT"] = base64_decode("{{ $mail_port_b64 }}"); }
+        if ("{{ $mail_username_b64 }}") { $vars["MAIL_USERNAME"] = base64_decode("{{ $mail_username_b64 }}"); }
+        if ("{{ $mail_password_b64 }}") { $vars["MAIL_PASSWORD"] = base64_decode("{{ $mail_password_b64 }}"); }
+        if ("{{ $mail_encryption_b64 }}") { $vars["MAIL_ENCRYPTION"] = base64_decode("{{ $mail_encryption_b64 }}"); }
+        if ("{{ $mail_from_address_b64 }}") { $vars["MAIL_FROM_ADDRESS"] = base64_decode("{{ $mail_from_address_b64 }}"); }
+        if ("{{ $mail_from_name_b64 }}") { $vars["MAIL_FROM_NAME"] = base64_decode("{{ $mail_from_name_b64 }}"); }
         foreach ($vars as $key => $value) {
             $found = false;
             $safeValue = str_replace(["\\", "\"", "$"], ["\\\\", "\\\"", "\\$"], $value);

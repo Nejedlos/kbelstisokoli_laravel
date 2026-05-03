@@ -38,7 +38,14 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->spa() // Zapnutí SPA navigace (wire:navigate) pro bleskovou administraci
-            ->colors(fn () => app(BrandingService::class)->getSettings()['colors'])
+            ->colors(fn () => [
+                'primary' => \Filament\Support\Colors\Color::hex(app(\App\Services\BrandingService::class)->getSettings()['colors']['red'] ?? '#e11d48'),
+                'gray' => \Filament\Support\Colors\Color::Slate,
+                'info' => \Filament\Support\Colors\Color::Sky,
+                'success' => \Filament\Support\Colors\Color::Emerald,
+                'warning' => \Filament\Support\Colors\Color::Amber,
+                'danger' => \Filament\Support\Colors\Color::Rose,
+            ])
             ->darkMode(false)
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
             ->renderHook('panels::head.end', function (): string {
@@ -106,7 +113,7 @@ class AdminPanelProvider extends PanelProvider
                 $favicons = '';
                 try {
                     if (app()->bound('translator')) {
-                        $favicons = view('partials.favicons', ['includeMain' => false])->render();
+                        $favicons = view('partials.favicons', ['includeMain' => true])->render();
                     }
                 } catch (\Throwable $e) {}
 
@@ -259,10 +266,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn () => __('admin.navigation.pages.public_web'))
                     ->url(fn () => route('public.home'))
                     ->icon(new HtmlString('<i class="fa-light fa-globe fa-fw"></i>')),
-            ])
-            ->colors(fn() => [
-                'primary' => Color::hex(app(BrandingService::class)->getSettings()['colors']['red'] ?? '#e11d48'),
-                'gray' => Color::Slate,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

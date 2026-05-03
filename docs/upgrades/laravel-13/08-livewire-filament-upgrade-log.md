@@ -20,7 +20,7 @@
 - Updated `PostsTable.php`:
     - Renamed `recordActions()` to `actions()`.
     - Renamed `toolbarActions()` to `bulkActions()`.
-    - Fixed namespace for `BulkActionGroup`, `DeleteBulkAction`, and `EditAction` to `Filament\Tables\Actions`.
+    - Fixed namespace for `BulkActionGroup`, `DeleteBulkAction`, and `EditAction` to `Filament\Actions`.
 
 ## 4. Known Risks & Issues
 - **Custom Schemas:** The project uses a non-standard `Filament\Schemas\Schema` namespace (standard is `Filament\Forms\Form`). While this is according to project guidelines, it may cause confusion with standard Filament documentation.

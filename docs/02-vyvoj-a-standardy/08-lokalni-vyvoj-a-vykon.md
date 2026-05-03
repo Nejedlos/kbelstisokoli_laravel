@@ -36,4 +36,18 @@ Xdebug (zejména s povoleným `step_debugger`) zpomaluje PHP o 200–500 %. Pro 
 Pokud nepoužíváte Redis, Laravel Herd/Valet standardně používají `file` pro cache a sessions. Pokud máte v `.env` nastaveno `CACHE_STORE=database`, zvažte přepnutí na `file` pro lokální vývoj, pokud nepotřebujete testovat specifické chování DB cache.
 
 ## 3. Databázové indexy
-Byly přidány indexy na sloupce `first_name`, `last_name` a `name` v tabulce `users`, aby se zrychlilo vyhledávání a detekce duplicit v administraci.
+## 4. Striktní oddělení prostředí (Local vs. Production)
+
+V tomto projektu je kriticky důležité striktně oddělovat konfiguraci pro lokální vývoj a produkci.
+
+### A. Lokální prostředí (Herd)
+- **.env:** Obsahuje nastavení pro lokální vývoj na Laravel Herd.
+- **SMTP:** Používá Mailpit nebo Mailtrap na `127.0.0.1` port `1025`.
+- **APP_URL:** Obvykle `http://kbelstisokoli.test`.
+- **ZÁKAZ:** Nikdy do lokálního `.env` nezapisujte reálné produkční SMTP údaje do proměnných `MAIL_*`. Pokud je potřebujete uložit pro účely nasazení, používejte prefix `PROD_MAIL_*`.
+
+### B. Produkční prostředí (Webglobe)
+- **.env na serveru:** Spravováno přes SSH a automatizované nasazovací skripty.
+- **SMTP:** Reálné údaje Webglobe (`mail.webglobe.cz`, port `465`, SSL).
+- **Správa:** Změny v produkčním `.env` provádějte buď ručně přes SSH, nebo pomocí příkazů `php artisan app:production:setup` a `php artisan app:deploy`, které se postarají o bezpečný přenos hodnot ze souboru `.env` (hledají prefixy `PROD_*`) na server.
+- **.env.production:** Slouží pouze jako šablona a dokumentace produkčních hodnot. Skutečná pravda je v `.env` souboru na serveru.
