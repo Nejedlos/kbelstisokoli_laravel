@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Dmarc\DmarcReportResource\Schemas;
 
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -25,18 +26,15 @@ class ReportForm
                         TextInput::make('domain')
                             ->label('Doména')
                             ->disabled(),
-                        TextInput::make('date_start')
+                        Placeholder::make('date_start')
                             ->label('Od')
-                            ->dateTime()
-                            ->disabled(),
-                        TextInput::make('date_end')
+                            ->content(fn ($record) => $record?->date_start?->format('d.m.Y H:i:s') ?? '-'),
+                        Placeholder::make('date_end')
                             ->label('Do')
-                            ->dateTime()
-                            ->disabled(),
-                        TextInput::make('received_at')
+                            ->content(fn ($record) => $record?->date_end?->format('d.m.Y H:i:s') ?? '-'),
+                        Placeholder::make('received_at')
                             ->label('Přijato')
-                            ->dateTime()
-                            ->disabled(),
+                            ->content(fn ($record) => $record?->received_at?->format('d.m.Y H:i:s') ?? '-'),
                     ]),
 
                 Section::make('Záznamy reportu')

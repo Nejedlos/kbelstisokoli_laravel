@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Dmarc\DmarcIncidentResource\Schemas;
 
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -58,14 +59,12 @@ class IncidentForm
                         TextInput::make('occurrences_count')
                             ->label('Počet výskytů')
                             ->disabled(),
-                        TextInput::make('first_seen_at')
+                        Placeholder::make('first_seen_at')
                             ->label('Prvně spatřeno')
-                            ->dateTime()
-                            ->disabled(),
-                        TextInput::make('last_seen_at')
+                            ->content(fn ($record) => $record?->first_seen_at?->format('d.m.Y H:i:s') ?? '-'),
+                        Placeholder::make('last_seen_at')
                             ->label('Naposledy spatřeno')
-                            ->dateTime()
-                            ->disabled(),
+                            ->content(fn ($record) => $record?->last_seen_at?->format('d.m.Y H:i:s') ?? '-'),
                     ]),
             ]);
     }

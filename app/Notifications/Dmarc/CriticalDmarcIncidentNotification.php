@@ -23,7 +23,7 @@ class CriticalDmarcIncidentNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('⚠️ ' . $this->incident->title)
+            ->subject('DMARC ALERT: ' . $this->incident->domain . ' [' . $this->incident->source_ip . ']')
             ->greeting('Dobrý den,')
             ->line('Byl detekován kritický problém s doručitelností e-mailů (DMARC fail).')
             ->line('**Doména:** ' . $this->incident->domain)
