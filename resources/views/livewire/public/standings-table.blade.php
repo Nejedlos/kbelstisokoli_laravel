@@ -63,7 +63,7 @@
                 $isExpanded = $expanded[$url] ?? false;
                 $displayRows = $rows; // Bereme vždy všechny, o filtraci se postará Alpine
             @endphp
-            <div x-data="{ expanded: @entangle('expanded.' . $url).live }"
+            <div x-data="{ expanded: false }"
                  class="bg-white/60 backdrop-blur-xl rounded-3xl border border-slate-200/60 shadow-xl overflow-hidden animate-fade-in group/table transition-all duration-500">
                 <div class="bg-slate-900/[0.02] px-6 py-4 border-b border-slate-100 flex items-center justify-between group-hover/table:bg-slate-900/[0.04] transition-colors">
                     <h3 class="text-[11px] font-black uppercase tracking-[0.15em] text-secondary flex items-center gap-3">
