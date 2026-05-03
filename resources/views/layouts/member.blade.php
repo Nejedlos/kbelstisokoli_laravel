@@ -647,6 +647,29 @@
                         </div>
                     @endif
 
+                    @if ($errors->any())
+                        <div x-data="{ show: true }"
+                             x-show="show"
+                             x-init="setTimeout(() => show = false, 15000)"
+                             x-transition:leave="transition ease-in duration-500"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-700 rounded-2xl animate-fade-in">
+                            <div class="flex items-center gap-4 mb-2">
+                                <i class="fa-light fa-circle-exclamation text-rose-500 text-lg"></i>
+                                <span class="font-bold text-sm">Při ukládání došlo k chybám:</span>
+                                <button @click="show = false" class="ml-auto text-rose-500/50 hover:text-rose-500 transition-colors">
+                                    <i class="fa-light fa-xmark"></i>
+                                </button>
+                            </div>
+                            <ul class="list-disc list-inside text-xs space-y-1 ml-9">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     @yield('content')
                     {{ $slot ?? '' }}
                 </div>
