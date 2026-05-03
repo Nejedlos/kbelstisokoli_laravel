@@ -197,5 +197,4 @@
         </div>
     </template>
     </div>
-</div>
 @endif

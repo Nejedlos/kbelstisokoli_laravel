@@ -193,12 +193,14 @@ class AdminPanelProvider extends PanelProvider
                     return '';
                 }
 
-                // Renderování přes Blade::render pro správnou inicializaci Livewire a komponent
+                // Obalení do jediného elementu pro stabilitu Livewire
                 return Blade::render('
-                    <x-loader-global title="Administrace" />
-                    <x-impersonation-banner />
-                    <x-impersonation-notification />
-                    <livewire:sync-status-bar />
+                    <div wire:key="body-start-container">
+                        <x-loader-global title="Administrace" />
+                        <x-impersonation-banner />
+                        <x-impersonation-notification />
+                        <livewire:sync-status-bar />
+                    </div>
                 ');
             })
             ->renderHook('panels::body.end', function (): string {
@@ -207,8 +209,10 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 return Blade::render('
-                    <x-back-to-top />
-                    <livewire:member.avatar-modal />
+                    <div wire:key="body-end-container">
+                        <x-back-to-top />
+                        <livewire:member.avatar-modal />
+                    </div>
                 ');
             })
             ->renderHook('panels::global-search.before', function (): string {

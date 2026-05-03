@@ -28,6 +28,11 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
+
+        if ($dbConn === 'sqlite' && ($_ENV['DB_DATABASE'] ?? '') === ':memory:') {
+            $this->artisan('migrate');
+        }
+
         $this->seed(\Database\Seeders\PermissionSeeder::class);
         $this->seed(RoleSeeder::class);
     }
