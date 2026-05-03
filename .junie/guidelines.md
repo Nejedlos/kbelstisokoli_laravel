@@ -160,12 +160,14 @@ Filament v akcích jako `AttachAction` automaticky odhaduje název inverzního v
 - **Render:** Pro labely nebo `HtmlString` (zejména u Font Awesome ikon) používejte `IconHelper::render(IconHelper::KEY)`.
 - **Namespace:** Nepoužívejte standardní Filament ikony (Heroicons), pokud projekt vyžaduje Font Awesome přes náš `IconHelper`/`FilamentIcon`.
 
-## 13. Správa produkčního prostředí a .env (KRITICKÉ)
+### 13. Správa produkčního prostředí a .env (ABSOLUTNÍ ZÁKAZ)
 Tato sekce definuje nepřekročitelná pravidla pro práci s produkční konfigurací.
 
-- **Zákaz přímé editace:** Junie (AI) má **přísný a absolutní zákaz** upravovat soubor `.env` přímo na produkčním serveru (Webglobe) přes SSH.
+- **PŘÍSNÝ ZÁKAZ:** Junie (AI) má **přísný, absolutní a doživotní zákaz** upravovat soubor `.env` přímo na produkčním serveru (Webglobe) přes SSH, SFTP, SCP nebo jakýmkoliv jiným způsobem.
+- **Důsledek:** Jakýkoliv pokus o přímou úpravu `.env` na produkci je považován za kritické selhání.
 - **Změnové workflow:** Veškeré úpravy produkční konfigurace se provádějí výhradně lokálně:
     1. Úpravou souboru `.env.production` v kořeni projektu.
-    2. Úpravou lokálního `.env` v sekci s prefixy `PROD_*` (pro použití v nasazovacích skriptech).
-- **Nasazení změn:** Po lokální úpravě Junie informuje uživatele, že konfigurace je připravena. Uživatel si změny buď zkopíruje sám, nebo spustí `php artisan app:deploy`, který hodnoty přenese.
+    2. Úpravou lokálního `.env` v sekci s prefixy `PROD_*`.
+- **Nasazení změn:** Po lokální úpravě Junie informuje uživatele, že konfigurace je připravena v `.env.production`. Uživatel si tyto změny musí do produkčního `.env` přenést sám (např. ručním zkopírováním obsahu).
 - **Synchronizace:** Soubor `.env.production` musí být vždy aktuální a odpovídat reálnému stavu na produkci (slouží jako "source of truth" pro vývoj).
+- **Oprávnění:** Pokud aplikace na produkci nevidí hodnoty z `.env`, Junie nesmí měnit oprávnění souboru `.env` bez výslovného souhlasu uživatele, ale musí na tento problém upozornit.
