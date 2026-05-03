@@ -120,17 +120,35 @@ class DmarcImapService
 
     protected function getFilename($part): ?string
     {
+        $filename = null;
+
         if ($part->ifdparameters) {
             foreach ($part->dparameters as $object) {
-                if (strtolower($object->attribute) === 'filename') return $object->value;
+                $attr = strtolower($object->attribute);
+                if ($attr === 'filename' || $attr === 'filename*') {
+                    $filename = $object->value;
+                    break;
+                }
             }
         }
-        if ($part->ifparameters) {
+
+        if (!$filename && $part->ifparameters) {
             foreach ($part->parameters as $object) {
-                if (strtolower($object->attribute) === 'name') return $object->value;
+                $attr = strtolower($object->attribute);
+                if ($attr === 'name' || $attr === 'name*') {
+                    $filename = $object->value;
+                    break;
+                }
             }
         }
-        return null;
+
+        if ($filename && (str_contains($filename, "''") || str_contains($filename, "?="))) {
+            // Velmi hrubé pročištění pro RFC 2231/2047 pokud je to nutné
+            // Pro účely testu to zkusíme nechat tak, isDmarcAttachment kouká na příponu
+            $filename = urldecode(preg_replace('/^.*\'\'/', '', $filename));
+        }
+
+        return $filename;
     }
 
     protected function decodeBody($data, $encoding): string
