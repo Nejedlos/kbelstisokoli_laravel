@@ -27,6 +27,9 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\FinanceCharge::class => \App\Policies\FinanceChargePolicy::class,
         \App\Models\FinancePayment::class => \App\Policies\FinancePaymentPolicy::class,
         \App\Models\ChargePaymentAllocation::class => \App\Policies\ChargePaymentAllocationPolicy::class,
+        \App\Models\Dmarc\DmarcMailbox::class => \App\Policies\DmarcMailboxPolicy::class,
+        \App\Models\Dmarc\DmarcReport::class => \App\Policies\DmarcReportPolicy::class,
+        \App\Models\Dmarc\DmarcIncident::class => \App\Policies\DmarcIncidentPolicy::class,
     ];
 
     /**

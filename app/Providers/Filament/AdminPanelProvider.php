@@ -289,8 +289,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn (): string => __('admin.navigation.groups.system'))
                     ->collapsed(),
                 \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.dmarc_monitor'))
-                    ->icon(new HtmlString('<i class="fa-light fa-envelope-shield fa-fw"></i>')),
+                    ->label(fn (): string => __('admin.navigation.groups.dmarc_monitor')),
                 \Filament\Navigation\NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.documentation')),
             ])
