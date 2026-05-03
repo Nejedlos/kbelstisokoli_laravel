@@ -141,6 +141,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         */
         $schedule->call(function () {
             Cache::put('scheduler_heartbeat', now());
+            Log::info('Scheduler Heartbeat tick.');
         })->everyMinute();
     })
     ->withMiddleware(function (Middleware $middleware): void {

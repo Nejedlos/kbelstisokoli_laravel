@@ -42,6 +42,17 @@ class ProductionDeployCommand extends Command
         $token = config('app.prod_git_token', env('PROD_GIT_TOKEN'));
         $publicPath = config('app.prod_public_path', env('PROD_PUBLIC_PATH'));
 
+        // Performance config from env
+        $perfConfig = [
+            'telescope_enabled' => env('PROD_TELESCOPE_ENABLED', 'false'),
+            'perf_scenario' => env('PROD_PERF_SCENARIO', 'ultra'),
+            'perf_full_page_cache' => env('PROD_PERF_FULL_PAGE_CACHE', 'true'),
+            'perf_fragment_cache' => env('PROD_PERF_FRAGMENT_CACHE', 'true'),
+            'perf_html_minify' => env('PROD_PERF_HTML_MINIFY', 'true'),
+            'perf_lw_navigate' => env('PROD_PERF_LW_NAVIGATE', 'true'),
+            'log_level' => env('PROD_LOG_LEVEL', 'warning'),
+        ];
+
         if (! $host || ! $user || ! $path) {
             error('❌ Chybí konfigurace produkce v .env. Spusťte prosím: php artisan app:production:setup');
 
@@ -207,6 +218,12 @@ class ProductionDeployCommand extends Command
             }
 
             foreach ($mailConfig as $key => $value) {
+                if ($value !== null) {
+                    $params[] = "--{$key}=".escapeshellarg($value);
+                }
+            }
+
+            foreach ($perfConfig as $key => $value) {
                 if ($value !== null) {
                     $params[] = "--{$key}=".escapeshellarg($value);
                 }

@@ -102,6 +102,9 @@ Schedule::call(fn() => Artisan::call('stats:import', ['--queue' => true]))->dail
 // Častější synchronizace nedávných zápasů (každou hodinu) pro čerstvé výsledky a statistiky
 Schedule::call(fn() => Artisan::call('stats:import', ['--recent' => true]))->hourly();
 
+// Zpracování DMARC reportů (každou hodinu)
+Schedule::call(fn() => Artisan::call('dmarc:ingest'))->hourly()->name('dmarc-ingest');
+
 // Pravidelný přepočet statistik po synchronizaci (každou hodinu v 15. minutě)
 Schedule::call(fn() => Artisan::call('stats:recompute'))->hourlyAt(15);
 

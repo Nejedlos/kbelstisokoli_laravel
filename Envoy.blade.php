@@ -47,6 +47,21 @@
     if (isset($mail_from_name)) { $v_mail_from_name = $mail_from_name; } else { $v_mail_from_name = ''; }
     $mail_from_name_b64 = base64_encode($v_mail_from_name);
 
+    if (isset($telescope_enabled)) { $v_telescope = $telescope_enabled; } else { $v_telescope = 'false'; }
+    $telescope_enabled_b64 = base64_encode($v_telescope);
+    if (isset($perf_scenario)) { $v_perf_scenario = $perf_scenario; } else { $v_perf_scenario = 'ultra'; }
+    $perf_scenario_b64 = base64_encode($v_perf_scenario);
+    if (isset($perf_full_page_cache)) { $v_perf_fpc = $perf_full_page_cache; } else { $v_perf_fpc = 'true'; }
+    $perf_full_page_cache_b64 = base64_encode($v_perf_fpc);
+    if (isset($perf_fragment_cache)) { $v_perf_frag = $perf_fragment_cache; } else { $v_perf_frag = 'true'; }
+    $perf_fragment_cache_b64 = base64_encode($v_perf_frag);
+    if (isset($perf_html_minify)) { $v_perf_minify = $perf_html_minify; } else { $v_perf_minify = 'true'; }
+    $perf_html_minify_b64 = base64_encode($v_perf_minify);
+    if (isset($perf_lw_navigate)) { $v_perf_nav = $perf_lw_navigate; } else { $v_perf_nav = 'true'; }
+    $perf_lw_navigate_b64 = base64_encode($v_perf_nav);
+    if (isset($log_level)) { $v_log_level = $log_level; } else { $v_log_level = 'warning'; }
+    $log_level_b64 = base64_encode($v_log_level);
+
     if (isset($freshseed) && $freshseed) { $v_freshseed_opt = '--freshseed'; } else { $v_freshseed_opt = ''; }
     if (isset($usersync) && $usersync == "1") { $v_usersync_opt = '--usersync'; } else { $v_usersync_opt = ''; }
     if (isset($stats) && $stats == "1") { $v_stats_opt = '--stats'; } else { $v_stats_opt = ''; }
@@ -133,6 +148,16 @@
         if ("{{ $mail_encryption_b64 }}") { $vars["MAIL_ENCRYPTION"] = base64_decode("{{ $mail_encryption_b64 }}"); }
         if ("{{ $mail_from_address_b64 }}") { $vars["MAIL_FROM_ADDRESS"] = base64_decode("{{ $mail_from_address_b64 }}"); }
         if ("{{ $mail_from_name_b64 }}") { $vars["MAIL_FROM_NAME"] = base64_decode("{{ $mail_from_name_b64 }}"); }
+
+        if ("{{ $telescope_enabled_b64 }}") { $vars["TELESCOPE_ENABLED"] = base64_decode("{{ $telescope_enabled_b64 }}"); }
+        if ("{{ $perf_scenario_b64 }}") { $vars["PERF_SCENARIO"] = base64_decode("{{ $perf_scenario_b64 }}"); }
+        if ("{{ $perf_full_page_cache_b64 }}") { $vars["PERF_FULL_PAGE_CACHE"] = base64_decode("{{ $perf_full_page_cache_b64 }}"); }
+        if ("{{ $perf_fragment_cache_b64 }}") { $vars["PERF_FRAGMENT_CACHE"] = base64_decode("{{ $perf_fragment_cache_b64 }}"); }
+        if ("{{ $perf_html_minify_b64 }}") { $vars["PERF_HTML_MINIFY"] = base64_decode("{{ $perf_html_minify_b64 }}"); }
+        if ("{{ $perf_lw_navigate_b64 }}") { $vars["PERF_LW_NAVIGATE"] = base64_decode("{{ $perf_lw_navigate_b64 }}"); }
+        if ("{{ $log_level_b64 }}") { $vars["LOG_LEVEL"] = base64_decode("{{ $log_level_b64 }}"); }
+        $vars["DEBUGBAR_ENABLED"] = "false";
+
         foreach ($vars as $key => $value) {
             $found = false;
             $safeValue = str_replace(["\\", "\"", "$"], ["\\\\", "\\\"", "\\$"], $value);
@@ -463,6 +488,16 @@
         if ("{{ $mail_encryption_b64 }}") { $vars["MAIL_ENCRYPTION"] = base64_decode("{{ $mail_encryption_b64 }}"); }
         if ("{{ $mail_from_address_b64 }}") { $vars["MAIL_FROM_ADDRESS"] = base64_decode("{{ $mail_from_address_b64 }}"); }
         if ("{{ $mail_from_name_b64 }}") { $vars["MAIL_FROM_NAME"] = base64_decode("{{ $mail_from_name_b64 }}"); }
+
+        if ("{{ $telescope_enabled_b64 }}") { $vars["TELESCOPE_ENABLED"] = base64_decode("{{ $telescope_enabled_b64 }}"); }
+        if ("{{ $perf_scenario_b64 }}") { $vars["PERF_SCENARIO"] = base64_decode("{{ $perf_scenario_b64 }}"); }
+        if ("{{ $perf_full_page_cache_b64 }}") { $vars["PERF_FULL_PAGE_CACHE"] = base64_decode("{{ $perf_full_page_cache_b64 }}"); }
+        if ("{{ $perf_fragment_cache_b64 }}") { $vars["PERF_FRAGMENT_CACHE"] = base64_decode("{{ $perf_fragment_cache_b64 }}"); }
+        if ("{{ $perf_html_minify_b64 }}") { $vars["PERF_HTML_MINIFY"] = base64_decode("{{ $perf_html_minify_b64 }}"); }
+        if ("{{ $perf_lw_navigate_b64 }}") { $vars["PERF_LW_NAVIGATE"] = base64_decode("{{ $perf_lw_navigate_b64 }}"); }
+        if ("{{ $log_level_b64 }}") { $vars["LOG_LEVEL"] = base64_decode("{{ $log_level_b64 }}"); }
+        $vars["DEBUGBAR_ENABLED"] = "false";
+
         foreach ($vars as $key => $value) {
             $found = false;
             $safeValue = str_replace(["\\", "\"", "$"], ["\\\\", "\\\"", "\\$"], $value);
