@@ -37,8 +37,13 @@ class EnsureUserIsActive
 
                 auth()->logout();
 
-                return redirect()->route('login')
-                    ->withErrors(['email' => __('Váš účet byl deaktivován. Kontaktujte prosím správce.')]);
+                $loginRoute = 'login';
+                if ($request->is('admin') || $request->is('admin/*')) {
+                    $loginRoute = 'filament.admin.auth.login';
+                }
+
+                return redirect()->route($loginRoute)
+                    ->withErrors(['email' => __('Váš účet není aktivní. Kontaktujte prosím tým pro aktivaci.')]);
             }
         }
 

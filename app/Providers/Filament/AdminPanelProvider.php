@@ -323,6 +323,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\EnsureUserIsActive::class,
                 \App\Http\Middleware\EnsureTwoFactorEnabled::class,
                 \App\Http\Middleware\CheckTwoFactorTimeout::class,
             ]);

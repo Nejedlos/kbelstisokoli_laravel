@@ -84,9 +84,23 @@ class Login extends BaseLogin
         }
 
         $data = $this->form->getState();
+        $credentials = $this->getCredentialsFromFormData($data);
 
-        // Pokus o přihlášení
-        if (! Filament::auth()->attempt($this->getCredentialsFromFormData($data), $data['remember'] ?? false)) {
+        // Najdeme uživatele pro předběžnou kontrolu aktivity
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+
+        if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+            if (! $user->is_active) {
+                \Illuminate\Support\Facades\Log::warning('Filament Auth: Login attempt for inactive user', ['email' => $user->email]);
+
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'data.email' => __('Váš účet není aktivní. Kontaktujte prosím tým pro aktivaci.'),
+                ]);
+            }
+        }
+
+        // Pokus o přihlášení (standardní cesta)
+        if (! Filament::auth()->attempt($credentials, $data['remember'] ?? false)) {
             $this->throwFailureValidationException();
         }
 

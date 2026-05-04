@@ -179,6 +179,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             MinifyHtmlMiddleware::class,
             InjectFeedbackWidget::class,
             NotFoundLoggerMiddleware::class,
+            'active',
         ]);
 
         $middleware->trustProxies(at: '*');
@@ -187,6 +188,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             StartSession::class,
             DetectScreenshotMode::class,
             Authenticate::class,
+            EnsureUserIsActive::class,
             Filament\Http\Middleware\Authenticate::class,
             Authorize::class,
             EnsureTwoFactorEnabled::class,

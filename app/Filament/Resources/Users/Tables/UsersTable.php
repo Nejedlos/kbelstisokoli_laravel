@@ -236,6 +236,37 @@ class UsersTable
                                 ->send();
                         })
                         ->visible(fn ($record) => $record->is_active && ! $record->onboarding_completed_at),
+                    Action::make('activate')
+                        ->label(__('user.actions.activate'))
+                        ->icon(IconHelper::get(IconHelper::ACTIVATE))
+                        ->color('success')
+                        ->visible(fn ($record) => ! $record->is_active || $record->membership_status !== MembershipStatus::Active)
+                        ->action(function ($record) {
+                            $record->update([
+                                'is_active' => true,
+                                'membership_status' => MembershipStatus::Active,
+                            ]);
+                            FilamentNotification::make()
+                                ->title(__('user.actions.activate'))
+                                ->success()
+                                ->send();
+                        }),
+                    Action::make('deactivate')
+                        ->label(__('user.actions.deactivate'))
+                        ->icon(IconHelper::get(IconHelper::DEACTIVATE))
+                        ->color('danger')
+                        ->visible(fn ($record) => $record->is_active || $record->membership_status === MembershipStatus::Active)
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            $record->update([
+                                'is_active' => false,
+                                'membership_status' => MembershipStatus::Inactive,
+                            ]);
+                            FilamentNotification::make()
+                                ->title(__('user.actions.deactivate'))
+                                ->success()
+                                ->send();
+                        }),
                     Action::make('impersonate')
                         ->label(__('user.actions.impersonate'))
                         ->icon(IconHelper::get(IconHelper::IMPERSONATE))

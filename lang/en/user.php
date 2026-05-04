@@ -133,6 +133,8 @@ return [
         'merge_bulk_submit' => 'Start merge',
         'activate_selected' => 'Activate selected',
         'deactivate_selected' => 'Deactivate selected',
+        'activate' => 'Activate',
+        'deactivate' => 'Deactivate',
     ],
     'filters' => [
         'duplicates' => 'Duplicates by name',

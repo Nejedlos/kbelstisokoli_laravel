@@ -135,6 +135,8 @@ return [
         'merge_bulk_submit' => 'Spustit sloučení',
         'activate_selected' => 'Aktivovat vybrané',
         'deactivate_selected' => 'Deaktivovat vybrané',
+        'activate' => 'Aktivovat',
+        'deactivate' => 'Deaktivovat',
     ],
     'filters' => [
         'duplicates' => 'Duplicity podle jména',

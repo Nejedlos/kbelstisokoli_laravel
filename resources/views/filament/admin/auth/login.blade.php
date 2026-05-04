@@ -6,16 +6,11 @@
     @endif
 
     @if ($errors->any())
-        @php
-            $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
-        @endphp
-        @if (!empty($filteredErrors))
-            <x-auth-alert type="error">
-                @foreach ($filteredErrors as $error)
-                    <div>{{ $error }}</div>
-                @endforeach
-            </x-auth-alert>
-        @endif
+        <x-auth-alert type="error">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </x-auth-alert>
     @endif
 
     {{-- Globální basketbalový loader pro okamžitou zpětnou vazbu při přihlašování --}}

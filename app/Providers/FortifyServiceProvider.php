@@ -70,8 +70,9 @@ class FortifyServiceProvider extends ServiceProvider
 
             if ($user && Hash::check($request->password, $user->password)) {
                 if (! $user->is_active) {
+                    \Illuminate\Support\Facades\Log::warning('Auth: Login attempt for inactive user', ['email' => $email]);
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        Fortify::username() => ['Váš účet momentálně není aktivní. Kontaktujte prosím správce svého týmu.'],
+                        'email' => __('Váš účet není aktivní. Kontaktujte prosím tým pro aktivaci.'),
                     ]);
                 }
 
