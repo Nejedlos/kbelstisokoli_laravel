@@ -44,9 +44,10 @@ class TwoFactorLoginResponse implements TwoFactorLoginResponseContract
             $token = bin2hex(random_bytes(32));
 
             // Uložíme token do user metadata nebo session (pro jednoduchost zde použijeme podepsanou cookie s user_id)
+            // Laravel cookie automaticky šifruje, takže nepoužíváme encrypt() manuálně, abychom se vyhnuli double-encryption
             $cookie = \Illuminate\Support\Facades\Cookie::make(
                 '2fa_remember',
-                encrypt(['user_id' => $user->id, 'token' => $token]),
+                ['user_id' => $user->id, 'token' => $token],
                 30 * 24 * 60 // 30 dní v minutách
             );
             $response->withCookie($cookie);

@@ -58,6 +58,19 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
                 try {
                     $data = decrypt($rememberCookie);
                     $remembered = isset($data['user_id']) && $data['user_id'] === $user->id;
+
+                    if ($remembered) {
+                        $guard = auth()->getDefaultDriver();
+                        $request->session()->put([
+                            'auth.2fa_confirmed_at' => now()->timestamp,
+                            "password_hash_{$guard}" => $user->getAuthPassword(),
+                        ]);
+
+                        \Illuminate\Support\Facades\Log::info('LoginResponse.remembered_by_cookie', [
+                            'user_id' => $user->id,
+                            'guard' => $guard,
+                        ]);
+                    }
                 } catch (\Throwable $e) {
                     $remembered = false;
                 }

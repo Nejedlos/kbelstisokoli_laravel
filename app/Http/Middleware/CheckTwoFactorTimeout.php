@@ -54,7 +54,12 @@ class CheckTwoFactorTimeout
                 $data = decrypt($rememberCookie);
                 if (isset($data['user_id']) && $data['user_id'] === $user->id) {
                     // Zařízení je zapamatováno, prodloužíme platnost potvrzení v session
-                    $request->session()->put('auth.2fa_confirmed_at', now()->timestamp);
+                    // a zajistíme přítomnost password hashe pro Filament
+                    $guard = auth()->getDefaultDriver();
+                    $request->session()->put([
+                        'auth.2fa_confirmed_at' => now()->timestamp,
+                        "password_hash_{$guard}" => $user->getAuthPassword(),
+                    ]);
 
                     return $next($request);
                 }
