@@ -12,6 +12,7 @@ U každého neuhrazeného předpisu (stav "K úhradě") uvidíte:
 -   **Částku** k zaplacení.
 -   **Bankovní účet** klubu.
 -   **Variabilní symbol (VS):** Nejdůležitější údaj pro správné spárování platby.
+-   **QR kód:** Nejrychlejší cesta k úhradě. Stačí jej naskenovat v mobilním bankovnictví a všechny údaje (účet, částka, VS) se vyplní automaticky.
 -   **Datum splatnosti:** Do kdy je nutné částku odeslat.
 
 ## Stavy mých předpisů

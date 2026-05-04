@@ -29,28 +29,44 @@ class SecurityAuthListener
             ]);
             SecurityLogger::log('login_success', ['email' => $event->user->email]);
         } elseif ($event instanceof Failed) {
-            $this->auditLogService->security('login_failed', 'login_failed', [
-                'email' => $event->credentials['email'] ?? 'unknown',
-                'credentials_keys' => array_keys($event->credentials),
-            ], 'warning');
+            $this->auditLogService->security(
+                eventKey: 'login_failed',
+                action: 'login_failed',
+                metadata: [
+                    'email' => $event->credentials['email'] ?? 'unknown',
+                    'credentials_keys' => array_keys($event->credentials),
+                ],
+                severity: 'warning',
+                actor: $event->user
+            );
             SecurityLogger::log('login_failed', ['email' => $event->credentials['email'] ?? 'unknown']);
         } elseif ($event instanceof Logout) {
             $this->auditLogService->security('logout', 'logout');
             SecurityLogger::log('logout');
         } elseif ($event instanceof PasswordReset) {
-            $this->auditLogService->security('password_reset', 'password_reset', [
-                'email' => $event->user->email,
-            ]);
+            $this->auditLogService->security(
+                eventKey: 'password_reset',
+                action: 'password_reset',
+                metadata: ['email' => $event->user->email],
+                actor: $event->user
+            );
             SecurityLogger::log('password_reset', ['email' => $event->user->email]);
         } elseif ($event instanceof TwoFactorAuthenticationEnabled) {
-            $this->auditLogService->security('2fa_enabled', '2fa_enabled', [
-                'user_id' => $event->user->id,
-            ]);
+            $this->auditLogService->security(
+                eventKey: '2fa_enabled',
+                action: '2fa_enabled',
+                metadata: ['user_id' => $event->user->id],
+                actor: $event->user
+            );
             SecurityLogger::log('2fa_enabled', ['user_id' => $event->user->id]);
         } elseif ($event instanceof TwoFactorAuthenticationDisabled) {
-            $this->auditLogService->security('2fa_disabled', '2fa_disabled', [
-                'user_id' => $event->user->id,
-            ], 'warning');
+            $this->auditLogService->security(
+                eventKey: '2fa_disabled',
+                action: '2fa_disabled',
+                metadata: ['user_id' => $event->user->id],
+                severity: 'warning',
+                actor: $event->user
+            );
             SecurityLogger::log('2fa_disabled', ['user_id' => $event->user->id]);
         }
     }

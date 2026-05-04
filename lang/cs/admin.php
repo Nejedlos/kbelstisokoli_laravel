@@ -517,6 +517,7 @@ return [
                 'login' => 'Přihlášení',
                 'logout' => 'Odhlášení',
                 'password_reset' => 'Reset hesla',
+                'login_failed' => 'Nezdařené přihlášení',
                 'failed_login' => 'Nezdařené přihlášení',
             ],
             'severities' => [
@@ -968,19 +969,19 @@ return [
             'title' => 'Tipy na dotazy',
             'branding' => [
                 'title' => 'Branding',
-                'text' => 'Jak změnit logo klubu?',
+                'text' => 'Jak se mění logo klubu a barvy?',
             ],
             'members' => [
                 'title' => 'Členové',
-                'text' => 'Jak přidat nového člena?',
+                'text' => 'Jak přidat nového člena do systému?',
             ],
             'excuses' => [
                 'title' => 'Omluvenky',
-                'text' => 'Jak fungují omluvenky v tréninku?',
+                'text' => 'Jak omluvit dítě z tréninku?',
             ],
             'matches' => [
                 'title' => 'Zápasy',
-                'text' => 'Kde najdu rozpis zápasů na víkend?',
+                'text' => 'Kdy hrajeme další zápas?',
             ],
         ],
         'sources' => [

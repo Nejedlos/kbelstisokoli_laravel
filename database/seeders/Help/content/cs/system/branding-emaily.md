@@ -11,6 +11,12 @@ V administraci v levém menu pod položkou **Systém > Branding**.
 - **Design webu**: Zapnutí/vypnutí sekcí jako Sponzoři, Partneři nebo Bannery.
 - **Sociální sítě**: Odkazy na Facebook, Instagram a Youtube v patičce.
 
+### Jak změnit logo?
+1. Přejděte do **Nastavení webu > Branding**.
+2. V části **Loga** nahrajte nové soubory. Doporučujeme formát PNG nebo SVG s průhledným pozadím.
+3. Nezapomeňte nahrát i **Favicon** (ikonku prohlížeče).
+4. Klikněte na tlačítko **Uložit změny**.
+
 ## E-mailové šablony
 Automatické e-maily (pozvánky, obnovy hesla, potvrzení plateb) přebírají barvy a logo z nastavení brandingu.
 

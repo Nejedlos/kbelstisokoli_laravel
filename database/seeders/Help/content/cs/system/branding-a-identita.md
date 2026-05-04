@@ -8,6 +8,12 @@ V této sekci nastavujete oficiální údaje:
 - **Loga:** Systém vyžaduje několik variant (pro světlé/tmavé pozadí, favicon, vodoznak).
 - **Slogan:** Hlavní motto klubu viditelné na homepage.
 
+#### Jak změnit logo?
+1. Přejděte do **Nastavení webu > Branding**.
+2. V části **Loga** nahrajte nové soubory. Doporučujeme formát PNG nebo SVG s průhledným pozadím.
+3. Nezapomeňte nahrát i **Favicon** (ikonku prohlížeče).
+4. Klikněte na tlačítko **Uložit změny**.
+
 ### Ekonomické údaje (Kritické)
 Údaje v této sekci mají přímý vliv na finance:
 - **Bankovní účet a název banky:** Tyto údaje se automaticky zobrazují členům v jejich profilu jako instrukce k platbě. Pokud je zde změníte, všechny nové instrukce budou obsahovat nové číslo účtu.

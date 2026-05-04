@@ -424,6 +424,7 @@ return [
                 'login' => 'Login',
                 'logout' => 'Logout',
                 'password_reset' => 'Password Reset',
+                'login_failed' => 'Failed Login',
                 'failed_login' => 'Failed Login',
             ],
             'severities' => [
@@ -909,19 +910,19 @@ return [
             'title' => 'Search Tips',
             'branding' => [
                 'title' => 'Branding',
-                'text' => 'How to change the club logo?',
+                'text' => 'How to change club logo and colors?',
             ],
             'members' => [
                 'title' => 'Members',
-                'text' => 'How to add a new member?',
+                'text' => 'How to add a new member to the system?',
             ],
             'excuses' => [
                 'title' => 'Excuses',
-                'text' => 'How do training excuses work?',
+                'text' => 'How to excuse a child from training?',
             ],
             'matches' => [
                 'title' => 'Matches',
-                'text' => 'Where can I find the match schedule for the weekend?',
+                'text' => 'When is the next match?',
             ],
         ],
         'sources' => [

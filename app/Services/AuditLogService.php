@@ -21,9 +21,10 @@ class AuditLogService
         array $metadata = [],
         array $changes = [],
         string $severity = 'info',
-        ?string $subjectLabel = null
+        ?string $subjectLabel = null,
+        ?Model $actor = null
     ): AuditLog {
-        $user = Auth::user();
+        $user = $actor ?? Auth::user();
         $ip = Request::ip();
         $isAuth = $category === 'auth';
 
@@ -54,14 +55,20 @@ class AuditLogService
     /**
      * Helper pro logování auth událostí.
      */
-    public function security(string $eventKey, string $action, array $metadata = [], string $severity = 'info'): AuditLog
-    {
+    public function security(
+        string $eventKey,
+        string $action,
+        array $metadata = [],
+        string $severity = 'info',
+        ?Model $actor = null
+    ): AuditLog {
         return $this->log(
             eventKey: "auth.{$eventKey}",
             category: 'auth',
             action: $action,
             metadata: $metadata,
-            severity: $severity
+            severity: $severity,
+            actor: $actor
         );
     }
 

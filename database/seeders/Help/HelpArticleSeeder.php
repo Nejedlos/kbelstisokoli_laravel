@@ -303,7 +303,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => false,
                     'audience_roles' => ['player', 'parent', 'coach', 'admin', 'super_admin'],
-                    'search_keywords' => ['2fa', 'zabezpeceni', 'heslo', 'overeni', 'security', 'authenticator'],
+                    'search_keywords' => ['2fa', 'zabezpeceni', 'heslo', 'overeni', 'security', 'authenticator', 'změna hesla', 'změnit heslo'],
                 ],
                 'translations' => [
                     'title' => [
@@ -523,7 +523,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['admin', 'super_admin', 'coach'],
-                    'search_keywords' => ['uzivatele', 'clenove', 'ghost', 'duplicity', 'filtry', 'users', 'members', 'merging', 'sloučení'],
+                    'search_keywords' => ['uzivatele', 'clenove', 'ghost', 'duplicity', 'filtry', 'users', 'members', 'merging', 'sloučení', 'přidat člena', 'nový člen'],
                 ],
                 'translations' => [
                     'title' => [
@@ -596,7 +596,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => false,
                     'audience_roles' => ['admin', 'super_admin'],
-                    'search_keywords' => ['editace', 'profil', 'udaje', 'osobni', 'admin', 'update', 'seznam', 'member', 'update'],
+                    'search_keywords' => ['editace', 'profil', 'udaje', 'osobni', 'admin', 'update', 'seznam', 'member', 'reset hesla', 'zapomenuté heslo'],
                 ],
                 'translations' => [
                     'title' => [
@@ -1075,7 +1075,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['admin', 'super_admin', 'coach'],
-                    'search_keywords' => ['zapas', 'nominace', 'vysledek', 'skore', 'pozvanka', 'match', 'cbf', 'cz.basketball', 'sync'],
+                    'search_keywords' => ['zapas', 'nominace', 'vysledek', 'skore', 'pozvanka', 'match', 'cbf', 'cz.basketball', 'sync', 'rozpis', 'víkend', 'kdy hrajeme'],
                 ],
                 'translations' => [
                     'title' => [
@@ -1216,7 +1216,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['player', 'parent'],
-                    'search_keywords' => ['omluva', 'kalendar', 'absence', 'duvod', 'deadline'],
+                    'search_keywords' => ['omluva', 'kalendar', 'absence', 'duvod', 'deadline', 'trénink', 'zápas', 'syn', 'dcera', 'dítě', 'omluvit'],
                 ],
                 'translations' => [
                     'title' => [
@@ -1489,7 +1489,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['parent', 'player'],
-                    'search_keywords' => ['vyuctovani', 'moje', 'ucet', 'bankovni', 'cislo', 'zaplatit'],
+                    'search_keywords' => ['vyuctovani', 'moje', 'ucet', 'bankovni', 'cislo', 'zaplatit', 'platba', 'qr kód', 'variabilní symbol', 'příspěvky'],
                 ],
                 'translations' => [
                     'title' => [
@@ -1513,6 +1513,16 @@ class HelpArticleSeeder extends Seeder
                         ],
                     ],
                 ],
+                'quick_actions' => [
+                    [
+                        'label' => [
+                            'cs' => 'Moje finance',
+                            'en' => 'My finances',
+                        ],
+                        'url' => '/member/finance',
+                        'icon' => 'fa-light fa-wallet',
+                    ],
+                ],
             ],
             [
                 'category_slug' => 'clenska-sekce',
@@ -1522,7 +1532,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['player', 'parent', 'coach'],
-                    'search_keywords' => ['omluva', 'dochazka', 'nepritomnost', 'trenink', 'zapas', 'omluvit'],
+                    'search_keywords' => ['omluva', 'dochazka', 'nepritomnost', 'trenink', 'zapas', 'omluvit', 'syn', 'dcera', 'dítě', 'nemoc'],
                 ],
                 'translations' => [
                     'title' => [
@@ -2428,7 +2438,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['admin', 'super_admin'],
-                    'search_keywords' => ['branding', 'nastaveni', 'barvy', 'loga', 'identita', 'banka', 'seo', 'haly'],
+                    'search_keywords' => ['branding', 'nastaveni', 'barvy', 'loga', 'identita', 'banka', 'seo', 'haly', 'změna loga', 'logo klubu', 'favicon'],
                 ],
                 'translations' => [
                     'title' => [

@@ -41,6 +41,7 @@ class AuditLogsTable
                         'updated' => 'warning',
                         'deleted' => 'danger',
                         'login' => 'info',
+                        'login_failed' => 'danger',
                         'failed_login' => 'danger',
                         default => 'gray',
                     })
@@ -51,6 +52,7 @@ class AuditLogsTable
                         'login' => FilamentIcon::get(AppIcon::LOGIN),
                         'logout' => FilamentIcon::get(AppIcon::LOGOUT),
                         'password_reset' => FilamentIcon::get(AppIcon::PERMISSIONS),
+                        'login_failed' => FilamentIcon::get(AppIcon::WARNING),
                         'failed_login' => FilamentIcon::get(AppIcon::WARNING),
                         default => FilamentIcon::get(AppIcon::INFO),
                     })

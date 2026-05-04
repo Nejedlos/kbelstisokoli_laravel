@@ -41,6 +41,9 @@ app(AuditLogService::class)->crud($model, 'updated', $changes);
 
 // Helper pro bezpečnost
 app(AuditLogService::class)->security('login_failed', 'login_attempt', ['email' => '...'], 'warning');
+
+// Helper s explicitním aktérem (užitečné např. u resetu hesla, kdy není uživatel přihlášen)
+app(AuditLogService::class)->security('password_reset', 'reset', actor: $user);
 ```
 
 ## Automatické logování (Trait `Auditable`)
