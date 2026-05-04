@@ -28,4 +28,7 @@ return [
     'rsvp_login' => 'Log in to join',
     'rsvp_go_to_attendance' => 'Confirm Attendance / Join',
     'rsvp_notice' => 'Please log in to your member account to confirm your attendance.',
+    'stats_confirmed' => 'Going',
+    'stats_declined' => 'Not going',
+    'stats_maybe' => 'Maybe',
 ];

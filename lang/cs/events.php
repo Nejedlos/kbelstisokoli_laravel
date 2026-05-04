@@ -28,4 +28,7 @@ return [
     'rsvp_login' => 'Přihlásit se na akci',
     'rsvp_go_to_attendance' => 'Zadat docházku / Přihlásit se',
     'rsvp_notice' => 'Pro potvrzení účasti se prosím přihlaste do členské sekce.',
+    'stats_confirmed' => 'Přijde',
+    'stats_declined' => 'Nepřijde',
+    'stats_maybe' => 'Možná',
 ];

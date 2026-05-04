@@ -13,8 +13,46 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-8">
-                    <div class="bg-white rounded-3xl p-8 md:p-12 border border-slate-100 shadow-sm">
-                        <div class="prose prose-slate max-w-none">
+                    {{-- Statistiky docházky --}}
+                    @if($event->rsvp_enabled)
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow group">
+                                <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                    <i class="fa-light fa-circle-check"></i>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-black text-secondary leading-none mb-1">{{ $stats['confirmed'] }}</div>
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('events.stats_confirmed') }}</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow group">
+                                <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                                    <i class="fa-light fa-circle-xmark"></i>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-black text-secondary leading-none mb-1">{{ $stats['declined'] }}</div>
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('events.stats_declined') }}</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow group">
+                                <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                    <i class="fa-light fa-circle-question"></i>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-black text-secondary leading-none mb-1">{{ $stats['maybe'] }}</div>
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ __('events.stats_maybe') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="bg-white rounded-3xl p-8 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+                            <i class="fa-light fa-calendar-check text-9xl"></i>
+                        </div>
+                        <div class="prose prose-slate max-w-none relative">
                             {!! \App\Support\TextProcessor::enhanceDescription($event->getTranslation('description', app()->getLocale()), $event->id) !!}
                         </div>
                     </div>

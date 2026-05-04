@@ -29,7 +29,7 @@
                 </a>
             </h3>
 
-            <div class="flex flex-wrap items-center gap-y-2 gap-x-6 text-slate-500 text-sm">
+            <div class="flex flex-wrap items-center gap-y-2 gap-x-6 text-slate-500 text-sm mt-4 pt-4 border-t border-slate-50">
                 <div class="flex items-center gap-2">
                     <i class="fa-light fa-clock text-primary"></i>
                     <span>{{ $event->starts_at->format(__('general.time_format')) }} @if($event->ends_at) — {{ $event->ends_at->format(__('general.time_format')) }} @endif</span>
@@ -39,6 +39,19 @@
                 <div class="flex items-center gap-2">
                     <i class="fa-light fa-location-dot text-primary"></i>
                     <span>{{ $event->location }}</span>
+                </div>
+                @endif
+
+                @if($event->rsvp_enabled)
+                <div class="flex items-center gap-4 sm:ml-auto">
+                    <div class="flex items-center gap-1.5 text-emerald-600" title="{{ __('events.stats_confirmed') }}">
+                        <i class="fa-light fa-circle-check"></i>
+                        <span class="font-bold leading-none">{{ $event->confirmed_count ?? 0 }}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-rose-600" title="{{ __('events.stats_declined') }}">
+                        <i class="fa-light fa-circle-xmark"></i>
+                        <span class="font-bold leading-none">{{ $event->declined_count ?? 0 }}</span>
+                    </div>
                 </div>
                 @endif
             </div>

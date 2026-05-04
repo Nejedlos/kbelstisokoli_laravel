@@ -16,6 +16,17 @@ class ClubEventController extends Controller
         $teamId = $request->get('team_id');
 
         $query = ClubEvent::with(['teams'])
+            ->withCount([
+                'attendances as confirmed_count' => function ($query) {
+                    $query->where('planned_status', 'confirmed');
+                },
+                'attendances as declined_count' => function ($query) {
+                    $query->where('planned_status', 'declined');
+                },
+                'attendances as maybe_count' => function ($query) {
+                    $query->where('planned_status', 'maybe');
+                },
+            ])
             ->where('is_public', true);
 
         if ($eventType) {
@@ -67,8 +78,21 @@ class ClubEventController extends Controller
             ->where('is_public', true)
             ->findOrFail($id);
 
+        $attendanceStats = $event->attendances()
+            ->selectRaw('planned_status, count(*) as count')
+            ->groupBy('planned_status')
+            ->pluck('count', 'planned_status')
+            ->toArray();
+
+        $stats = [
+            'confirmed' => $attendanceStats['confirmed'] ?? 0,
+            'declined' => $attendanceStats['declined'] ?? 0,
+            'maybe' => $attendanceStats['maybe'] ?? 0,
+        ];
+
         return view('public.events.show', [
             'event' => $event,
+            'stats' => $stats,
             'seo_title' => $event->getTranslation('title', app()->getLocale()) . ' | Akce',
             'seo_description' => substr(strip_tags($event->getTranslation('description', app()->getLocale())), 0, 160),
         ]);
