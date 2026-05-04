@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Dmarc\DmarcIncidentResource\Pages;
 
 use App\Filament\Resources\Dmarc\DmarcIncidentResource;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditIncident extends EditRecord
@@ -11,6 +12,8 @@ class EditIncident extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            DeleteAction::make(),
+        ];
     }
 }

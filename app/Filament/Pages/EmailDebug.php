@@ -4,7 +4,9 @@ namespace App\Filament\Pages;
 
 use App\Mail\ErrorMail;
 use App\Mail\TestMail;
+use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -121,6 +123,19 @@ class EmailDebug extends Page
                 ->icon(new HtmlString('<i class="fa-light fa-paper-plane"></i>'))
                 ->color('info')
                 ->form([
+                    Select::make('user_id')
+                        ->label(__('admin.email_debug.fields.select_user'))
+                        ->options(User::pluck('name', 'id'))
+                        ->searchable()
+                        ->live()
+                        ->afterStateUpdated(function ($state, $set) {
+                            if ($state) {
+                                $user = User::find($state);
+                                if ($user) {
+                                    $set('email', $user->email);
+                                }
+                            }
+                        }),
                     TextInput::make('email')
                         ->label(__('admin.email_debug.fields.recipient'))
                         ->email()

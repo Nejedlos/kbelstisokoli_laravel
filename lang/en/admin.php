@@ -982,6 +982,7 @@ return [
         ],
         'fields' => [
             'recipient' => 'Recipient',
+            'select_user' => 'Select User',
             'message' => 'Message',
             'test_message_default' => 'This is a test message to verify SMTP.',
         ],

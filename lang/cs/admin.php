@@ -1041,6 +1041,7 @@ return [
         ],
         'fields' => [
             'recipient' => 'Příjemce',
+            'select_user' => 'Vybrat uživatele',
             'message' => 'Zpráva',
             'test_message_default' => 'Toto je testovací zpráva pro ověření SMTP.',
         ],

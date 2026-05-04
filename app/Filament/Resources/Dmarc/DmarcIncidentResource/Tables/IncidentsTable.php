@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\Dmarc\DmarcIncidentResource\Tables;
 
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -66,6 +69,12 @@ class IncidentsTable
             ->defaultSort('last_seen_at', 'desc')
             ->actions([
                 EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

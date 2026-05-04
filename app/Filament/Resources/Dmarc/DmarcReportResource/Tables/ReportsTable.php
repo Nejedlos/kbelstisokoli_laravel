@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Dmarc\DmarcReportResource\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -47,13 +50,13 @@ class ReportsTable
                 ViewAction::make(),
                 Action::make('download_xml')
                     ->label('Stáhnout XML')
-                    ->icon('heroicon-o-document-text')
+                    ->icon(new HtmlString(IconHelper::render(IconHelper::CODE)))
                     ->action(function (DmarcReport $record) {
                         return Storage::download($record->raw_xml_path, "report-{$record->report_id}.xml");
                     }),
                 Action::make('download_human')
                     ->label('Lidská verze')
-                    ->icon('heroicon-o-user')
+                    ->icon(new HtmlString(IconHelper::render(IconHelper::USER)))
                     ->action(function (DmarcReport $record) {
                         $content = "DMARC Aggregate Report\n";
                         $content .= "=====================\n";
@@ -76,6 +79,12 @@ class ReportsTable
                             echo $content;
                         }, "dmarc-human-{$record->report_id}.txt");
                     }),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }
