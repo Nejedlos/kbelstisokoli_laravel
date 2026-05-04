@@ -135,40 +135,7 @@ class EmailDebug extends Page
 
     protected function isRelevantLogLine(string $line): bool
     {
-        $lower = strtolower($line);
-
-        // Pokud řádka obsahuje "DEBUG_MAIL", je vždy relevantní
-        if (str_contains($line, 'DEBUG_MAIL')) {
-            return true;
-        }
-
-        // Základní filtry pro e-maily a obecné chyby
-        $isRelevant = (str_contains($lower, 'mail') || str_contains($lower, 'error') || str_contains($lower, 'warning') || str_contains($lower, 'critical') || str_contains($lower, 'alert') || str_contains($lower, 'emergency'));
-
-        if (! $isRelevant) {
-            return false;
-        }
-
-        // Seznam balastu, který chceme ignorovat, i když obsahuje "error" nebo "mail"
-        $noise = [
-            'perftest',
-            '"route":"feedback.widget"',
-            '"route":"default-livewire.update"',
-            'notfoundloggermiddleware error', // Chyby loggeru 404
-            'string data, right truncated', // SQL ořezávání (vyřešeno migrací)
-            'command "lang:cache" is not defined', // Zastaralý příkaz
-            'class "app\models\test" not found', // Smazaný testovací resource
-            'supportnestingcomponents.php', // Livewire balast
-            'supportlocales.php', // Livewire balast
-        ];
-
-        foreach ($noise as $pattern) {
-            if (str_contains($lower, $pattern)) {
-                return false;
-            }
-        }
-
-        return true;
+        return str_contains($line, 'DEBUG_MAIL');
     }
 
     protected function getHeaderActions(): array
@@ -210,7 +177,7 @@ class EmailDebug extends Page
                             ->success()
                             ->send();
                     } catch (\Throwable $e) {
-                        Log::error('Email Debug Test Failed: '.$e->getMessage(), [
+                        Log::error('DEBUG_MAIL: ERROR: Email Debug Test Failed: '.$e->getMessage(), [
                             'exception' => get_class($e),
                             'trace' => $e->getTraceAsString(),
                         ]);
@@ -281,7 +248,7 @@ class EmailDebug extends Page
                             ->send();
 
                     } catch (\Throwable $e) {
-                        Log::error('Email Debug Error Report Failed: '.$e->getMessage());
+                        Log::error('DEBUG_MAIL: ERROR: Email Debug Error Report Failed: '.$e->getMessage());
 
                         Notification::make()
                             ->title('Chyba při odesílání reportu')

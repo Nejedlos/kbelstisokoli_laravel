@@ -95,7 +95,7 @@ class ErrorMailThrottle
         $logKey = 'error_mail_suppressed_log:'.$fingerprint;
 
         if (! Cache::has($logKey)) {
-            Log::info('Error mail suppressed (deduped)', [
+            Log::info('DEBUG_MAIL: Error mail suppressed (deduped)', [
                 'fingerprint' => $fingerprint,
                 'exception' => get_class($e),
                 'file' => $e->getFile().':'.$e->getLine(),

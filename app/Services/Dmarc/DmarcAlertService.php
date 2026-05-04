@@ -76,9 +76,9 @@ class DmarcAlertService
             $event->last_email_sent_at = now();
             $event->save();
 
-            Log::info("DMARC Alert: Email sent to {$email} for {$event->source_ip} on {$event->domain}");
+            Log::info("DEBUG_MAIL: DMARC Alert: Email sent to {$email} for {$event->source_ip} on {$event->domain}");
         } catch (\Exception $e) {
-            Log::error("DMARC Alert: Failed to send email: " . $e->getMessage());
+            Log::error("DEBUG_MAIL: DMARC Alert: Failed to send email: " . $e->getMessage());
         }
     }
 }
