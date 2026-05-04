@@ -7,20 +7,26 @@ V sekci **[Můj program](/member/attendance)** najdete přehled všech trénink�
 - **Nadcházející:** Akce, které teprve proběhnou.
 - **Minulé:** Historie vašich účastí.
 
-## Jak se omluvit z tréninku?
-Pokud víte, že na trénink nedorazíte, je vaší povinností se co nejdříve omluvit.
-1. Přejděte do sekce **Můj program**.
-2. Najděte příslušný trénink.
-3. Klikněte na tlačítko **Omluvit se**.
-4. Zadejte důvod absence (např. nemoc, škola, rodinné důvody).
-5. Potvrďte omluvu.
+## Jak se omluvit z tréninku nebo zápasu?
+Pokud víte, že na akci nedorazíte, je vaší povinností se co nejdříve omluvit. V systému máte dvě cesty, jak to udělat:
 
-Trenér uvidí vaši omluvu okamžitě a bude moci lépe naplánovat tréninkovou jednotku.
+### 1. Přes "Můj program" (Rychlá volba)
+Tato cesta je nejrychlejší a umožňuje i hromadné omlouvání.
+1. Přejděte do sekce **[Můj program](/member/attendance)**.
+2. U každé nadcházející akce vidíte tlačítko **Omluvit se** (pokud jste se již omluvili, uvidíte **Změnit omluvu**).
+3. Kliknutím na tlačítko se otevře okno, kde vyberete důvod a potvrdíte.
+4. **Hromadné omlouvání:** Pokud se chcete omluvit z více akcí najednou, můžete v seznamu "Můj program" využít hromadné akce (pokud jsou u vašeho týmu povoleny).
+
+### 2. Detail události
+1. V sekci **Můj program** klikněte přímo na název události (např. "Trénink - U15").
+2. Otevře se detailní karta akce, kde v pravé části (nebo dole na mobilu) najdete sekci pro potvrzení účasti nebo omluvu.
+3. Zadejte důvod a uložte.
 
 ## Omluvy ze zápasů
 Omluva ze zápasu je ještě kritičtější než z tréninku. U zápasů trenéři pracují s **nominací**.
 - Pokud jste nominováni, potvrďte svou účast co nejdříve.
 - Pokud se z vážných důvodů nemůžete zúčastnit, použijte stejný postup jako u tréninku.
+- V detailu zápasu uvidíte i místo konání, sraz a další pokyny od trenéra.
 
 ## Statistiky docházky
 Svoji historickou docházku a "procentuální morálku" můžete sledovat v sekci **[Moje statistiky](/member/statistics/me)**. Dobrá docházka je často klíčovým faktorem pro nominaci do důležitých utkání!

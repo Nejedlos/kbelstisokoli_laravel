@@ -1216,7 +1216,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['player', 'parent'],
-                    'search_keywords' => ['omluva', 'kalendar', 'absence', 'duvod', 'deadline', 'trénink', 'zápas', 'syn', 'dcera', 'dítě', 'omluvit'],
+                    'search_keywords' => ['omluva', 'kalendar', 'absence', 'duvod', 'deadline', 'trénink', 'zápas', 'syn', 'dcera', 'dítě', 'omluvit', 'můj program', 'hromadně', 'hromadná omluva', 'nemoc', 'marod', 'nebude', 'nepřítomen', 'omlouvání'],
                 ],
                 'translations' => [
                     'title' => [
@@ -1532,7 +1532,7 @@ class HelpArticleSeeder extends Seeder
                     'is_published' => true,
                     'is_featured' => true,
                     'audience_roles' => ['player', 'parent', 'coach'],
-                    'search_keywords' => ['omluva', 'dochazka', 'nepritomnost', 'trenink', 'zapas', 'omluvit', 'syn', 'dcera', 'dítě', 'nemoc'],
+                    'search_keywords' => ['omluva', 'dochazka', 'nepritomnost', 'trenink', 'zapas', 'omluvit', 'syn', 'dcera', 'dítě', 'nemoc', 'můj program', 'hromadně', 'hromadná omluva', 'marod', 'absence', 'omlouvání'],
                 ],
                 'translations' => [
                     'title' => [

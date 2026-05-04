@@ -156,7 +156,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $doc->update([
                     'title' => $data['title'] ?? $doc->title,
                     'summary' => $data['description'] ?? $doc->summary,
-                    'keywords' => array_unique(array_merge($data['queries'] ?? [], $data['keywords'] ?? [])),
+                    'keywords' => array_unique(array_merge($doc->keywords ?? [], $data['queries'] ?? [], $data['keywords'] ?? [])),
                     'metadata' => array_merge($doc->metadata ?? [], ['priority' => $data['priority'] ?? 5]),
                 ]);
 
@@ -675,28 +675,53 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             }
 
             $relativePath = $file->getRelativePathname();
+            $slug = Str::before($file->getFilename(), '.md');
             $content = File::get($file->getPathname());
 
-            // Základní extrakce titulku z Markdownu (# Title)
+            // Pokusíme se najít článek v databázi pro získání metadat a klíčových slov
+            $article = \App\Models\HelpArticle::where('slug', $slug)->first();
+
             $title = $file->getFilenameWithoutExtension();
-            if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
-                $title = trim($matches[1]);
+            $keywords = [];
+            $summary = Str::limit(strip_tags($content), 200);
+
+            if ($article) {
+                // Použijeme data z DB (pokud existují)
+                $title = $article->getTranslation('title', $locale, false) ?: $title;
+                $keywords = $article->getTranslation('search_keywords', $locale, false) ?: [];
+                $summary = $article->getTranslation('excerpt', $locale, false) ?: $summary;
+
+                // Obohatíme obsah o FAQ pro lepší AI odpovědi
+                $faqs = $article->faqs;
+                if ($faqs->isNotEmpty()) {
+                    $content .= "\n\n### Časté dotazy (FAQ):\n";
+                    foreach ($faqs as $faq) {
+                        $content .= "Otázka: ".$faq->getTranslation('question', $locale)."\n";
+                        $content .= "Odpověď: ".$faq->getTranslation('answer', $locale)."\n\n";
+                    }
+                }
+            } else {
+                // Základní extrakce titulku z Markdownu (# Title)
+                if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
+                    $title = trim($matches[1]);
+                }
             }
 
             if ($onProgress) {
                 $onProgress("Help [{$locale}]: {$title}");
             }
 
-            // Uložíme titulek a obsah jako JSON pro bilingvnost, aby AiSearch mohl použít překlady
+            // Uložíme jako JSON pro bilingvnost, aby AiSearch mohl použít překlady
             $this->updateOrCreateDocument([
-                'type' => 'documentation.resource', // Používáme stejný typ pro vyhledávání
+                'type' => 'documentation.resource',
                 'source' => 'help/'.$locale.'/'.$relativePath,
                 'title' => [$locale => $title],
-                'summary' => [$locale => Str::limit(strip_tags($content), 200)],
+                'summary' => [$locale => $summary],
                 'url' => route('filament.admin.pages.help', ['file' => 'docs/help/'.$locale.'/'.$relativePath]),
                 'locale' => $locale,
                 'content' => [$locale => $content],
-                'checksum' => hash('sha256', $content.$relativePath.$locale),
+                'keywords' => $keywords,
+                'checksum' => hash('sha256', $content.$relativePath.$locale.json_encode($keywords)),
             ], $force);
 
             $count++;
@@ -834,10 +859,19 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
     public function search(string $query, string $locale = 'cs', int $limit = 8, ?string $section = null)
     {
-        $q = Str::lower($query);
+        $q = Str::lower(trim($query));
         $words = array_filter(explode(' ', $q), fn ($w) => mb_strlen($w) > 2);
 
-        // Jednoduché LIKE vyhledávání + heuristické seřazení v PHP
+        // Vytvoříme "kmeny" pro češtinu (osekání koncovek u delších slov)
+        $stems = [];
+        if ($locale === 'cs') {
+            foreach ($words as $word) {
+                if (mb_strlen($word) > 4) {
+                    $stems[] = mb_substr($word, 0, -2);
+                }
+            }
+        }
+
         $queryBuilder = AiDocument::query()
             ->where('locale', $locale)
             ->where('is_active', true);
@@ -849,66 +883,101 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             });
         }
 
-        $candidates = $queryBuilder->where(function ($w) use ($q, $words) {
+        $candidates = $queryBuilder->where(function ($w) use ($q, $words, $stems) {
+            // 1. Prioritní shoda s celým dotazem
             $w->where('title', 'LIKE', '%'.$q.'%')
                 ->orWhere('content', 'LIKE', '%'.$q.'%')
                 ->orWhere('keywords', 'LIKE', '%'.$q.'%')
                 ->orWhere('summary', 'LIKE', '%'.$q.'%');
 
-            // Fallback na jednotlivá slova pro lepší match v přirozeném jazyce
+            // 2. Shoda s jednotlivými slovy
             foreach ($words as $word) {
                 $w->orWhere('title', 'LIKE', '%'.$word.'%')
-                    ->orWhere('content', 'LIKE', '%'.$word.'%');
+                    ->orWhere('content', 'LIKE', '%'.$word.'%')
+                    ->orWhere('keywords', 'LIKE', '%'.$word.'%')
+                    ->orWhere('summary', 'LIKE', '%'.$word.'%');
+            }
+
+            // 3. Shoda s kmeny (stemming)
+            foreach ($stems as $stem) {
+                $w->orWhere('title', 'LIKE', '%'.$stem.'%')
+                    ->orWhere('keywords', 'LIKE', '%'.$stem.'%')
+                    ->orWhere('summary', 'LIKE', '%'.$stem.'%');
             }
         })
             ->limit(100)
             ->get();
 
-        $scored = $candidates->map(function (AiDocument $doc) use ($q, $locale) {
-            $title = is_array($doc->title) ? ($doc->title[$locale] ?? $doc->title['cs'] ?? array_values($doc->title)[0] ?? 'Untitled') : ($doc->title ?: 'Untitled');
-            $content = is_array($doc->content) ? ($doc->content[$locale] ?? $doc->content['cs'] ?? array_values($doc->content)[0] ?? '') : ($doc->content ?: '');
-
-            $titleLower = Str::lower($title);
-            $contentLower = Str::lower(Str::limit($content, 2000, ''));
-            $keywords = $doc->keywords ?? [];
+        $scored = $candidates->map(function (AiDocument $doc) use ($q, $words, $stems, $locale) {
+            // Použijeme metodu z modelu pro získání lokalizovaných textů
+            $title = Str::lower($doc->getLocalizedValue('title'));
+            $content = Str::lower($doc->getLocalizedValue('content'));
+            $summary = Str::lower($doc->getLocalizedValue('summary'));
+            $keywords = array_map(fn ($k) => Str::lower($k), $doc->keywords ?? []);
 
             $score = 0;
 
-            // Shoda v titulku (velmi vysoká váha)
-            if (Str::contains($titleLower, $q)) {
-                $score += 50;
-                if ($titleLower === $q) {
-                    $score += 50;
-                } // Přesná shoda
-            }
-
-            // Shoda v klíčových slovech (vysoká váha)
-            foreach ($keywords as $keyword) {
-                $keywordLower = Str::lower($keyword);
-                if ($keywordLower === $q) {
+            // --- A. SHODA CELÉHO DOTAZU ---
+            if ($q !== '') {
+                if (Str::contains($title, $q)) {
+                    $score += 100;
+                }
+                if (Str::contains($summary, $q)) {
                     $score += 40;
-                } elseif (Str::contains($keywordLower, $q)) {
-                    $score += 10;
+                }
+                if (Str::contains($content, $q)) {
+                    $score += 20;
                 }
             }
 
-            // Shoda v obsahu (nižší váha)
-            $contentMatchCount = substr_count($content, $q);
-            $score += min($contentMatchCount * 2, 20); // Zastropujeme, aby dlouhé texty nepřebily vše
+            // --- B. SHODA JEDNOTLIVÝCH SLOV ---
+            foreach ($words as $word) {
+                if (Str::contains($title, $word)) {
+                    $score += 30;
+                }
 
-            // Bonus za pozici v obsahu
-            $pos = strpos($content, $q);
-            if ($pos !== false && $pos < 500) {
-                $score += (500 - $pos) / 50;
+                // Klíčová slova - vysoká váha
+                foreach ($keywords as $keyword) {
+                    if ($keyword === $word) {
+                        $score += 40;
+                    } elseif (Str::contains($keyword, $word)) {
+                        $score += 15;
+                    }
+                }
+
+                if (Str::contains($summary, $word)) {
+                    $score += 10;
+                }
+                if (Str::contains($content, $word)) {
+                    $score += 5;
+                }
             }
 
-            // Typový boost (upřednostnit admin sekci)
-            if (str_starts_with($doc->type, 'admin.')) {
-                $score += 30;
+            // --- C. SHODA KMENŮ (STEMS) ---
+            foreach ($stems as $stem) {
+                if (Str::contains($title, $stem)) {
+                    $score += 15;
+                }
+                foreach ($keywords as $keyword) {
+                    if (Str::contains($keyword, $stem)) {
+                        $score += 20;
+                    }
+                }
+            }
+
+            // Typový boost (upřednostnit konkrétní sekci)
+            if (str_contains($doc->type, 'resource')) {
+                $score += 5;
+            }
+
+            // Dokumentace má obecně vysokou hodnotu pro rady
+            if ($doc->section === 'documentation' || $doc->section === 'help') {
+                $score += 15;
             }
 
             return [$doc, $score];
         })->sortByDesc(fn ($pair) => $pair[1])
+            ->filter(fn ($pair) => $pair[1] > 0)
             ->take($limit)
             ->map(fn ($pair) => $pair[0])
             ->values();

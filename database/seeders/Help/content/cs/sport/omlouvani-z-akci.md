@@ -3,10 +3,11 @@
 Tento návod je určen především hráčům a rodičům, kteří se potřebují omluvit z tréninku nebo zápasu.
 
 ## Jak se omluvit
-1. Přihlaste se do **Členské sekce** na webu nebo přes mobilní aplikaci.
-2. Na nástěnce nebo v kalendáři klikněte na danou událost (Trénink / Zápas).
-3. V detailu události vidíte tlačítko pro **Potvrzení účasti** nebo **Omluvu**.
-4. Pokud se omlouváte, vyberte **Důvod omluvy** (např. Nemoc, Škola, Rodinné důvody) a přidejte případně krátký komentář.
+1. Přihlaste se do **Členské sekce**.
+2. V menu vyberte **[Můj program](/member/attendance)**.
+3. **Přímo v seznamu:** U události klikněte na tlačítko **Omluvit se**. Zde je možné provádět i **hromadné omluvy** výběrem více akcí.
+4. **V detailu akce:** Klikněte na název události a v pravém panelu zvolte **Omluvu**.
+5. Vyberte **Důvod omluvy** (např. Nemoc, Škola, Rodinné důvody) a přidejte případně krátký komentář.
 
 ## Pravidla omlouvání
 - **Deadline**: Každý tým může mít nastavený časový limit, do kdy je možné se omluvit (např. 24 hodin před akcí).
