@@ -13,6 +13,15 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-8">
+                    {{-- Plakát / Upoutávka --}}
+                    @if($event->hasMedia('poster'))
+                        <div class="rounded-3xl overflow-hidden shadow-lg border border-slate-100 bg-white p-2">
+                            <img src="{{ $event->getFirstMediaUrl('poster', 'large') }}"
+                                 alt="{{ $event->getTranslation('title', app()->getLocale()) }}"
+                                 class="w-full h-auto rounded-2xl">
+                        </div>
+                    @endif
+
                     {{-- Statistiky docházky --}}
                     @if($event->rsvp_enabled)
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -56,6 +65,40 @@
                             {!! \App\Support\TextProcessor::enhanceDescription($event->getTranslation('description', app()->getLocale()), $event->id) !!}
                         </div>
                     </div>
+
+                    {{-- Přílohy --}}
+                    @if($event->hasMedia('attachments'))
+                        <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+                            <h3 class="text-lg font-black uppercase tracking-tight mb-6 text-secondary border-b border-slate-50 pb-4 flex items-center gap-3">
+                                <i class="fa-light fa-file-lines text-primary"></i>
+                                {{ __('events.attachments') }}
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @foreach($event->getMedia('attachments') as $media)
+                                    <a href="{{ $media->getUrl() }}" target="_blank" class="flex items-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition-all group">
+                                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center mr-4 shrink-0 shadow-sm group-hover:text-primary transition-colors">
+                                            @php
+                                                $icon = match(strtolower($media->extension)) {
+                                                    'pdf' => 'fa-file-pdf',
+                                                    'doc', 'docx' => 'fa-file-word',
+                                                    'xls', 'xlsx' => 'fa-file-excel',
+                                                    'ppt', 'pptx' => 'fa-file-powerpoint',
+                                                    'jpg', 'jpeg', 'png', 'gif', 'webp' => 'fa-file-image',
+                                                    'zip', 'rar', '7z' => 'fa-file-zipper',
+                                                    default => 'fa-file'
+                                                };
+                                            @endphp
+                                            <i class="fa-light {{ $icon }} text-lg"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-sm font-bold text-secondary truncate">{{ $media->name }}</div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{{ $media->human_readable_size }} • {{ strtoupper($media->extension) }}</div>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Sidebar -->

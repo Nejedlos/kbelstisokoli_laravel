@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -90,7 +91,6 @@ class ClubEventForm
 
                 Section::make('Popis a poznámky')
                     ->collapsible()
-                    ->collapsed()
                     ->columnSpanFull()
                     ->headerActions([
                         Action::make('generateAi')
@@ -126,6 +126,32 @@ class ClubEventForm
                                     ->label('Detailní popis akce (EN)')
                                     ->columnSpanFull(),
                             ]),
+                    ]),
+
+                Section::make('Média a přílohy')
+                    ->icon(new HtmlString('<i class="fa-light fa-photo-film fa-fw mr-1"></i>'))
+                    ->collapsible()
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('poster')
+                            ->label('Plakát / Upoutávka')
+                            ->collection('poster')
+                            ->disk('media_public')
+                            ->image()
+                            ->imageEditor()
+                            ->responsiveImages()
+                            ->helperText('Hlavní obrázek akce. Bude zobrazen v detailu a seznamech.')
+                            ->columnSpanFull(),
+
+                        SpatieMediaLibraryFileUpload::make('attachments')
+                            ->label('Další přílohy a dokumenty')
+                            ->collection('attachments')
+                            ->disk('media_public')
+                            ->multiple()
+                            ->reorderable()
+                            ->downloadable()
+                            ->openable()
+                            ->helperText('Libovolné další soubory (PDF, obrázky, dokumenty).')
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

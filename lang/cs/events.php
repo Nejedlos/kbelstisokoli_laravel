@@ -31,4 +31,6 @@ return [
     'stats_confirmed' => 'Přijde',
     'stats_declined' => 'Nepřijde',
     'stats_maybe' => 'Možná',
+    'attachments' => 'Přílohy a dokumenty',
+    'no_attachments' => 'Žádné přílohy nebyly nahrány.',
 ];

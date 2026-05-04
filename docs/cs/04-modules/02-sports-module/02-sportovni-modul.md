@@ -10,7 +10,7 @@
 - **Opponents (Soupeři):** Název, město, logo.
 - **BasketballMatches (Zápasy):** Vazba na tým, sezónu a soupeře. Pole: datum, místo, skóre, stav (plánováno, odehráno...), domácí/hosté.
 - **Trainings (Tréninky):** Jednotlivé termíny tréninků pro týmy.
-- **Events (Akce):** Klubové akce mimo běžný režim (soustředění, schůze).
+- **Events (Akce):** Klubové akce mimo běžný režim (soustředění, schůze). Podporují nahrávání plakátů a příloh (dokumenty, PDF).
 
 ### Vztahy
 - `BasketballMatch` patří pod `Team`, `Season` a `Opponent`.

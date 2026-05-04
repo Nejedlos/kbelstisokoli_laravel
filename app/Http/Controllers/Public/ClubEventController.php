@@ -74,7 +74,7 @@ class ClubEventController extends Controller
 
     public function show(int $id): View
     {
-        $event = ClubEvent::with(['teams'])
+        $event = ClubEvent::with(['teams', 'media'])
             ->where('is_public', true)
             ->findOrFail($id);
 

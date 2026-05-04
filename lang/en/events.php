@@ -31,4 +31,6 @@ return [
     'stats_confirmed' => 'Going',
     'stats_declined' => 'Not going',
     'stats_maybe' => 'Maybe',
+    'attachments' => 'Attachments and Documents',
+    'no_attachments' => 'No attachments uploaded.',
 ];

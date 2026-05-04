@@ -240,6 +240,7 @@ class AppServiceProvider extends ServiceProvider
                 \App\Models\Post::class,
                 \App\Models\PostCategory::class,
                 \App\Models\ClubCompetition::class,
+                \App\Models\ClubEvent::class,
             ];
 
             foreach ($models as $model) {
@@ -254,39 +255,26 @@ class AppServiceProvider extends ServiceProvider
 
         \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*', 'filament-panels::layout.*', 'filament-panels::pages.*'], function ($view) {
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
-            static $cachedData = null;
-            static $unreadCount = null;
-
-            // Rychlý návrat pokud již data máme v paměti procesu
-            if ($cachedData !== null) {
-                $view->with('branding', $cachedData['branding']);
-                $view->with('branding_css', $cachedData['branding_css']);
-                $view->with('announcements', $cachedData["announcements_" . ((str_starts_with($view->getName(), 'member.') || str_contains($view->getName(), 'filament-panels::')) ? 'member' : 'public')]);
-
-                if (auth()->check()) {
-                    if ($unreadCount === null) {
-                        $unreadCount = auth()->user()->unreadNotifications()->count();
-                    }
-                    $view->with('unreadNotificationsCount', $unreadCount);
-                }
-                return;
-            }
+            static $cachedData = [];
+            static $unreadCount = [];
 
             $brandingService = app(\App\Services\BrandingService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);
 
             $viewName = $view->getName();
             $audience = (str_starts_with($viewName, 'member.') || str_contains($viewName, 'filament-panels::')) ? 'member' : 'public';
+            $locale = app()->getLocale();
+            $userId = auth()->id() ?: 0;
 
-            if ($cachedData === null) {
+            if (! isset($cachedData[$locale])) {
                 $branding = $brandingService->getSettings();
                 $branding['club_name'] = $brandingService->replacePlaceholders($branding['club_name']);
                 $branding['club_short_name'] = $brandingService->replacePlaceholders($branding['club_short_name']);
                 $branding['slogan'] = $brandingService->replacePlaceholders($branding['slogan'] ?? '');
 
                 try {
-                    $cacheKey = 'view_composer_data_' . app()->getLocale();
-                    $cachedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($brandingService, $communicationService, $branding) {
+                    $cacheKey = 'view_composer_data_' . $locale;
+                    $cachedData[$locale] = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($brandingService, $communicationService, $branding) {
                         return [
                             'branding' => $branding,
                             'branding_css' => $brandingService->getCssVariables(),
@@ -296,7 +284,7 @@ class AppServiceProvider extends ServiceProvider
                     });
                 } catch (\Throwable $e) {
                     // Fallback při selhání cache (lock timeout)
-                    $cachedData = [
+                    $cachedData[$locale] = [
                         'branding' => $branding,
                         'branding_css' => $brandingService->getCssVariables(),
                         'announcements_public' => $communicationService->getActiveAnnouncements('public'),
@@ -305,9 +293,11 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
 
-            $view->with('branding', $cachedData['branding']);
-            $view->with('branding_css', $cachedData['branding_css']);
-            $view->with('announcements', $cachedData["announcements_{$audience}"]);
+            $currentData = $cachedData[$locale];
+
+            $view->with('branding', $currentData['branding']);
+            $view->with('branding_css', $currentData['branding_css']);
+            $view->with('announcements', $currentData["announcements_{$audience}"]);
 
             // Přidání SEO metadat pro public layout, pokud už nejsou nastaveny
             if ($audience === 'public' && ! isset($view->seo)) {
@@ -317,10 +307,10 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if (auth()->check()) {
-                if ($unreadCount === null) {
-                    $unreadCount = auth()->user()->unreadNotifications()->count();
+                if (! isset($unreadCount[$userId])) {
+                    $unreadCount[$userId] = auth()->user()->unreadNotifications()->count();
                 }
-                $view->with('unreadNotificationsCount', $unreadCount);
+                $view->with('unreadNotificationsCount', $unreadCount[$userId]);
             }
         });
     }
