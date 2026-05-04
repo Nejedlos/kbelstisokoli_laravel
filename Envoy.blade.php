@@ -286,6 +286,12 @@
     {{ $php }} artisan config:clear
     {{ $php }} artisan cache:clear
 
+    # Reset OpCache for Web (via temporary file)
+    echo "Resetting OpCache..."
+    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
+    rm public/opcache_reset.php
+
     echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
 
@@ -298,6 +304,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:cache
     {{ $php }} artisan optimize
+    {{ $php }} artisan system:cleanup
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
@@ -387,6 +394,12 @@
     {{ $php }} artisan config:clear
     {{ $php }} artisan cache:clear
 
+    # Reset OpCache for Web (via temporary file)
+    echo "Resetting OpCache..."
+    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
+    rm public/opcache_reset.php
+
     echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
 
@@ -399,6 +412,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:cache
     {{ $php }} artisan optimize
+    {{ $php }} artisan system:cleanup
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
@@ -543,6 +557,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:cache
     {{ $php }} artisan optimize
+    {{ $php }} artisan system:cleanup
 
     # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)
     if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then

@@ -33,7 +33,7 @@ class FullPageCacheMiddleware
         }
 
         // Cache zapnuta pouze pro GET, hosty a pokud je aktivní v configu
-        if (! $isGuest || ! $this->shouldCache($request)) {
+        if (! $isGuest || ! $this->shouldCache($request) || $this->isImpersonating($request)) {
             return $next($request);
         }
 
@@ -66,9 +66,11 @@ class FullPageCacheMiddleware
         // 1. Status OK (200)
         // 2. Obsah není prázdný
         // 3. Nejde o Livewire request (X-Livewire header)
+        // 4. Uživatel není přihlášen (ověření po proběhnutí session)
         if ($response->getStatusCode() === 200
             && ! empty($content)
             && ! $request->hasHeader('X-Livewire')
+            && ! auth()->check()
         ) {
             Cache::put($cacheKey, [
                 'content' => $content,
@@ -85,20 +87,47 @@ class FullPageCacheMiddleware
         // Cache zapnuta pokud je aktivní v configu, nebo pokud jde o priming (X-Prime-Cache)
         $enabled = config('performance.features.full_page_cache', false) || $request->hasHeader('X-Prime-Cache');
 
-        // Vyloučení rychle se měnících věcí
+        // Vyloučení rychle se měnících věcí, které nechceme cachovat vůbec
+        // (Většina veřejných stránek se nyní cachuje a invaliduje přes PerformanceObserver)
         $excludedPaths = [
-            'novinky*',
-            'zapasy*',
-            'treninky*',
-            'akce*',
             'admin*',
             'member*',
+            'clenska-sekce*',
             'telescope*',
             'horizon*',
+            'up',
+            'system*',
+            // Dynamické sekce vyžadující čerstvá data
+            '/',
+            'zapasy*',
+            'tymy*',
+            'treninky*',
+            'akce*',
+            'souteze*',
+            'hledat*',
         ];
 
         return $enabled
             && $request->isMethod('GET')
-            && ! $request->is($excludedPaths);
+            && ! $request->is($excludedPaths)
+            && ! $request->hasHeader('X-Screenshot-Mode')
+            && ! $request->hasHeader('X-Screenshot-Token')
+            && ! $request->query('screenshot_user_id');
+    }
+
+    /**
+     * Zkontroluje, zda probíhá impersonace (pokud je již session dostupná)
+     */
+    protected function isImpersonating(Request $request): bool
+    {
+        try {
+            if ($request->hasSession() && $request->session()->has('impersonated_by')) {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            // Session ještě nemusí být inicializována
+        }
+
+        return false;
     }
 }

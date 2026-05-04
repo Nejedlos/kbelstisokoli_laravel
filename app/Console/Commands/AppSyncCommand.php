@@ -107,7 +107,9 @@ class AppSyncCommand extends Command
 
         // Livewire discover
         $this->info('Cachuji Livewire komponenty...');
-        $this->call('livewire:discover');
+        if (\Illuminate\Support\Facades\Artisan::has('livewire:discover')) {
+            $this->call('livewire:discover');
+        }
 
         // Finance
         if (class_exists(\App\Console\Commands\FinanceSyncCommand::class)) {
