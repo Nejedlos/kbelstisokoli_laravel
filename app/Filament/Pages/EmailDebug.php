@@ -83,36 +83,93 @@ class EmailDebug extends Page
 
     public function getRecentLogs(): array
     {
-        $logFile = storage_path('logs/laravel.log');
-        if (! file_exists($logFile)) {
-            return [];
-        }
+        $today = date('Y-m-d');
+        $logFiles = [
+            storage_path("logs/laravel-{$today}.log"),
+            storage_path('logs/laravel.log'),
+        ];
 
-        $lines = [];
-        $fp = fopen($logFile, 'r');
-        fseek($fp, 0, SEEK_END);
-        $pos = ftell($fp);
-        $buffer = '';
-        $count = 0;
+        $results = [];
+        $maxLinesToRead = 1000; // Prohledáme 1000 řádků z každého logu
+        $maxResults = 30;      // Ale chceme jen 30 relevantních výsledků
 
-        while ($pos > 0 && $count < 20) {
-            fseek($fp, --$pos);
-            $char = fgetc($fp);
-            if ($char === "\n") {
-                if ($buffer !== '') {
-                    $lines[] = strrev($buffer);
-                    $count++;
+        foreach ($logFiles as $logFile) {
+            if (! file_exists($logFile)) {
+                continue;
+            }
+
+            $lines = [];
+            $fp = fopen($logFile, 'r');
+            fseek($fp, 0, SEEK_END);
+            $pos = ftell($fp);
+            $buffer = '';
+            $count = 0;
+
+            while ($pos > 0 && $count < $maxLinesToRead) {
+                fseek($fp, --$pos);
+                $char = fgetc($fp);
+                if ($char === "\n") {
+                    if ($buffer !== '') {
+                        $line = strrev($buffer);
+                        if ($this->isRelevantLogLine($line)) {
+                            $results[] = $line;
+                            if (count($results) >= $maxResults) {
+                                break;
+                            }
+                        }
+                        $count++;
+                    }
+                    $buffer = '';
+                } else {
+                    $buffer .= $char;
                 }
-                $buffer = '';
-            } else {
-                $buffer .= $char;
+            }
+            fclose($fp);
+
+            if (count($results) >= $maxResults) {
+                break;
             }
         }
-        fclose($fp);
 
-        return array_filter($lines, function ($line) {
-            return str_contains(strtolower($line), 'mail') || str_contains(strtolower($line), 'error');
-        });
+        return $results;
+    }
+
+    protected function isRelevantLogLine(string $line): bool
+    {
+        $lower = strtolower($line);
+
+        // Pokud řádka obsahuje "DEBUG_MAIL", je vždy relevantní
+        if (str_contains($line, 'DEBUG_MAIL')) {
+            return true;
+        }
+
+        // Základní filtry pro e-maily a obecné chyby
+        $isRelevant = (str_contains($lower, 'mail') || str_contains($lower, 'error'));
+
+        if (! $isRelevant) {
+            return false;
+        }
+
+        // Seznam balastu, který chceme ignorovat, i když obsahuje "error" nebo "mail"
+        $noise = [
+            'perftest',
+            '"route":"feedback.widget"',
+            '"route":"default-livewire.update"',
+            'notfoundloggermiddleware error', // Chyby loggeru 404
+            'string data, right truncated', // SQL ořezávání (vyřešeno migrací)
+            'command "lang:cache" is not defined', // Zastaralý příkaz
+            'class "app\models\test" not found', // Smazaný testovací resource
+            'supportnestingcomponents.php', // Livewire balast
+            'supportlocales.php', // Livewire balast
+        ];
+
+        foreach ($noise as $pattern) {
+            if (str_contains($lower, $pattern)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function getHeaderActions(): array

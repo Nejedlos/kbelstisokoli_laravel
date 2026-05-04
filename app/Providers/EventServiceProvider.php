@@ -54,7 +54,7 @@ class EventServiceProvider extends ServiceProvider
                 $cc = array_map(fn($address) => $address->toString(), $event->message->getCc());
                 $bcc = array_map(fn($address) => $address->toString(), $event->message->getBcc());
 
-                \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Sending email', [
+                \Illuminate\Support\Facades\Log::info('DEBUG_MAIL: Sending email', [
                     'mailer' => config('mail.default'),
                     'host' => config('mail.mailers.'.config('mail.default').'.host') ?? 'n/a',
                     'to' => $to,
@@ -70,7 +70,7 @@ class EventServiceProvider extends ServiceProvider
             function ($event) {
                 $to = array_map(fn($address) => $address->toString(), $event->message->getTo());
 
-                \Illuminate\Support\Facades\Log::channel('single')->info('DEBUG_MAIL: Email sent successfully', [
+                \Illuminate\Support\Facades\Log::info('DEBUG_MAIL: Email sent successfully', [
                     'to' => $to,
                     'subject' => $event->message->getSubject(),
                     'sent_at' => now()->toDateTimeString(),
