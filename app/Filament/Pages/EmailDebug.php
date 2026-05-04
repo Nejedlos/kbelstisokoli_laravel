@@ -83,15 +83,14 @@ class EmailDebug extends Page
 
     public function getRecentLogs(): array
     {
-        $today = date('Y-m-d');
-        $logFiles = [
-            storage_path("logs/laravel-{$today}.log"),
-            storage_path('logs/laravel.log'),
-        ];
+        $logFiles = glob(storage_path("logs/laravel*.log"));
+        usort($logFiles, function ($a, $b) {
+            return filemtime($b) <=> filemtime($a);
+        });
 
         $results = [];
-        $maxLinesToRead = 1000; // Prohledáme 1000 řádků z každého logu
-        $maxResults = 30;      // Ale chceme jen 30 relevantních výsledků
+        $maxLinesToRead = 10000; // Prohledáme 1000 řádků z každého logu
+        $maxResults = 50;      // Ale chceme jen 30 relevantních výsledků
 
         foreach ($logFiles as $logFile) {
             if (! file_exists($logFile)) {
@@ -144,7 +143,7 @@ class EmailDebug extends Page
         }
 
         // Základní filtry pro e-maily a obecné chyby
-        $isRelevant = (str_contains($lower, 'mail') || str_contains($lower, 'error'));
+        $isRelevant = (str_contains($lower, 'mail') || str_contains($lower, 'error') || str_contains($lower, 'warning') || str_contains($lower, 'critical') || str_contains($lower, 'alert') || str_contains($lower, 'emergency'));
 
         if (! $isRelevant) {
             return false;

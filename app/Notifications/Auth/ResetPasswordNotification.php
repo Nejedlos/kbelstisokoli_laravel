@@ -41,7 +41,7 @@ class ResetPasswordNotification extends BaseNotification
             }
         }
 
-        Log::channel('single')->info('DEBUG_MAIL: Preparing ResetPassword email', [
+        Log::channel('single')->warning('DEBUG_MAIL: Preparing ResetPassword email', [
             'user_id' => $notifiable->id,
             'email' => $notifiable->email,
             'locale' => app()->getLocale(),

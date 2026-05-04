@@ -193,14 +193,14 @@ class UsersTable
                         ->color('warning')
                         ->requiresConfirmation()
                         ->action(function ($record) {
-                            Log::channel('single')->info('DEBUG_MAIL: Admin triggered password reset', [
+                            Log::channel('single')->warning('DEBUG_MAIL: Admin triggered password reset', [
                                 'user_id' => $record->id,
                                 'email' => $record->email,
                             ]);
 
                             $status = Password::broker()->sendResetLink(['email' => $record->email]);
 
-                            Log::channel('single')->info('DEBUG_MAIL: Password reset broker result', [
+                            Log::channel('single')->warning('DEBUG_MAIL: Password reset broker result', [
                                 'user_id' => $record->id,
                                 'email' => $record->email,
                                 'status' => $status,
