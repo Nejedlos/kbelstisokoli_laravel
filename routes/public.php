@@ -29,6 +29,10 @@ Route::get('/system/schedule/{token}', function (string $token) {
         abort(403, 'Neplatný token.');
     }
 
+    // Na sdíleném hostingu neběží queue worker, proto pro plánované úlohy
+    // vynutíme synchronní zpracování. Všechny joby se tak provedou v rámci tohoto requestu.
+    config(['queue.default' => 'sync']);
+
     \Illuminate\Support\Facades\Artisan::call('schedule:run');
     $output = \Illuminate\Support\Facades\Artisan::output();
 

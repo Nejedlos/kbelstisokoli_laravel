@@ -7,6 +7,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use App\Support\IconHelper;
+use Illuminate\Support\HtmlString;
 
 class CronHeartbeatWidget extends BaseWidget
 {
@@ -28,9 +29,11 @@ class CronHeartbeatWidget extends BaseWidget
         $isOk = $lastHeartbeat && $lastHeartbeat instanceof Carbon && $lastHeartbeat->diffInMinutes(now()) < 5;
 
         return [
-            Stat::make(__('admin.widgets.cron_heartbeat.label'), $isOk ? __('admin.widgets.cron_heartbeat.running') : __('admin.widgets.cron_heartbeat.inactive'))
+            Stat::make(
+                new HtmlString(IconHelper::render(IconHelper::HEARTBEAT) . ' ' . __('admin.widgets.cron_heartbeat.label')),
+                $isOk ? __('admin.widgets.cron_heartbeat.running') : __('admin.widgets.cron_heartbeat.inactive')
+            )
                 ->description($lastHeartbeat instanceof Carbon ? __('admin.widgets.cron_heartbeat.last_run', ['time' => $lastHeartbeat->diffForHumans()]) : __('admin.widgets.cron_heartbeat.no_heartbeat'))
-                ->descriptionIcon(IconHelper::get(IconHelper::HEARTBEAT))
                 ->color($isOk ? 'success' : 'danger'),
         ];
     }
