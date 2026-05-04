@@ -842,6 +842,7 @@ return [
     ],
     'loader' => [
         'ai_thinking' => 'Assistant is thinking…',
+        'processing' => 'Working on it…',
     ],
     'search' => [
         'input_placeholder' => 'Search in administration',

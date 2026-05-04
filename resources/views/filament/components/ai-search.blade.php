@@ -1,7 +1,9 @@
 <div wire:ignore wire:key="ai-search-container-v4"
      x-data="{ aiSearchOpen: false, loading: false }"
      class="relative flex items-center">
-    <x-loader-basketball x-show="loading" x-cloak class="z-[60]" />
+    <x-loader-basketball x-show="loading" x-cloak class="z-[60]">
+        {{ __('admin.loader.ai_thinking') }}
+    </x-loader-basketball>
 
     <!-- Desktop Trigger (Pill) -->
     <button @click="aiSearchOpen = !aiSearchOpen; if(aiSearchOpen) $nextTick(() => $refs.searchInput.focus())"

@@ -35,7 +35,7 @@
             @else
                 <div class="ks-loader-text">
                     @if($slot->isEmpty())
-                        {{ __('admin.navigation.resources.photo_pool.notifications.processing') }}
+                        {{ __('admin.loader.processing') }}
                     @else
                         {{ $slot }}
                     @endif

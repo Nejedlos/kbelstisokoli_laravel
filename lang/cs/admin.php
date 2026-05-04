@@ -902,6 +902,7 @@ return [
     ],
     'loader' => [
         'ai_thinking' => 'Asistent přemýšlí…',
+        'processing' => 'Pracuji na tom…',
     ],
     'search' => [
         'input_placeholder' => 'Hledat v administraci',

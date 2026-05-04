@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     <x-loader-basketball wire:target="askAi">
-        {{ __('admin.ai_search.thinking') }}
+        {{ __('admin.loader.ai_thinking') }}
     </x-loader-basketball>
 
     <div wire:init="askAi"

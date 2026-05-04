@@ -70,7 +70,7 @@ class AiIndexService
 
         if (! $section || $section === 'help') {
             Log::info("AI Indexing: Starting help section for locale '{$locale}'");
-            $count += $this->indexHelp($locale, $onProgress, $force);
+            $count += $this->indexHelpArticles($locale, $onProgress, $force);
         }
 
         // Smažeme dokumenty, které již nejsou aktivní
@@ -225,6 +225,9 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         }
         if (str_starts_with($type, 'documentation.')) {
             return 'documentation';
+        }
+        if (str_starts_with($type, 'help.')) {
+            return 'help';
         }
 
         return 'frontend';
@@ -658,6 +661,70 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         return $count;
     }
 
+    private function indexHelpArticles(string $locale, ?\Closure $onProgress = null, bool $force = false): int
+    {
+        $count = 0;
+        // Používáme moderní systém HelpArticle
+        $articles = \App\Models\HelpArticle::published()->get();
+
+        foreach ($articles as $article) {
+            $title = $article->getTranslation('title', $locale, false);
+            $content = $article->getTranslation('content', $locale, false);
+
+            if (empty($title) || empty($content)) {
+                // Fallback na výchozí jazyk
+                $fallback = $article->getFallbackLocale();
+                $title = $article->getTranslation('title', $fallback, false);
+                $content = $article->getTranslation('content', $fallback, false);
+                if (empty($title) || empty($content)) {
+                    continue;
+                }
+            }
+
+            $summary = $article->getTranslation('excerpt', $locale, false) ?: Str::limit(strip_tags($content), 200);
+            $keywords = $article->getTranslation('search_keywords', $locale, false) ?: [];
+
+            // Obohatíme obsah o FAQ pro lepší AI odpovědi
+            $faqs = $article->faqs;
+            if ($faqs->isNotEmpty()) {
+                $content .= "\n\n### Časté dotazy (FAQ):\n";
+                foreach ($faqs as $faq) {
+                    $q = $faq->getTranslation('question', $locale, false);
+                    $a = $faq->getTranslation('answer', $locale, false);
+                    if ($q && $a) {
+                        $content .= "Otázka: ".$q."\n";
+                        $content .= "Odpověď: ".$a."\n\n";
+                    }
+                }
+            }
+
+            if ($onProgress) {
+                $onProgress("HelpArticle [{$locale}]: {$title}");
+            }
+
+            $this->updateOrCreateDocument([
+                'type' => 'help.article',
+                'source' => 'db.help_articles.'.$article->id,
+                'source_type' => 'HelpArticle',
+                'source_id' => $article->id,
+                'title' => [$locale => $title],
+                'summary' => [$locale => $summary],
+                'url' => route('filament.admin.pages.help', ['file' => $article->slug]),
+                'locale' => $locale,
+                'content' => [$locale => $content],
+                'keywords' => $keywords,
+                'checksum' => hash('sha256', $content.$article->slug.$locale.json_encode($keywords)),
+            ], $force);
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * @deprecated Používejte indexHelpArticles pro moderní systém nápovědy.
+     */
     private function indexHelp(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
@@ -860,7 +927,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     public function search(string $query, string $locale = 'cs', int $limit = 8, ?string $section = null)
     {
         $q = Str::lower(trim($query));
-        $words = array_filter(explode(' ', $q), fn ($w) => mb_strlen($w) > 2);
+        $stopWords = ['jak', 'jako', 'kdy', 'kde', 'kdo', 'pro', 'nad', 'pod', 'vše', 'všech', 'jsou', 'tento', 'tato', 'toto', 'nebo', 'vám', 'může', 'můžete'];
+        $words = array_filter(explode(' ', $q), fn ($w) => mb_strlen($w) > 2 && ! in_array($w, $stopWords));
 
         // Vytvoříme "kmeny" pro češtinu (osekání koncovek u delších slov)
         $stems = [];
@@ -879,7 +947,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         if ($section) {
             $queryBuilder->where(function ($w) use ($section) {
                 $w->where('section', $section)
-                    ->orWhere('section', 'documentation');
+                    ->orWhere('section', 'documentation')
+                    ->orWhere('section', 'help');
             });
         }
 
@@ -933,34 +1002,34 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             // --- B. SHODA JEDNOTLIVÝCH SLOV ---
             foreach ($words as $word) {
                 if (Str::contains($title, $word)) {
-                    $score += 30;
+                    $score += 40;
                 }
 
                 // Klíčová slova - vysoká váha
                 foreach ($keywords as $keyword) {
                     if ($keyword === $word) {
-                        $score += 40;
+                        $score += 60;
                     } elseif (Str::contains($keyword, $word)) {
-                        $score += 15;
+                        $score += 20;
                     }
                 }
 
                 if (Str::contains($summary, $word)) {
-                    $score += 10;
+                    $score += 15;
                 }
                 if (Str::contains($content, $word)) {
-                    $score += 5;
+                    $score += 2;
                 }
             }
 
             // --- C. SHODA KMENŮ (STEMS) ---
             foreach ($stems as $stem) {
                 if (Str::contains($title, $stem)) {
-                    $score += 15;
+                    $score += 25;
                 }
                 foreach ($keywords as $keyword) {
                     if (Str::contains($keyword, $stem)) {
-                        $score += 20;
+                        $score += 35;
                     }
                 }
             }
@@ -970,10 +1039,11 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 $score += 5;
             }
 
-            // Dokumentace má obecně vysokou hodnotu pro rady
             if ($doc->section === 'documentation' || $doc->section === 'help') {
-                $score += 15;
+                $score += 25;
             }
+
+            $doc->score = $score;
 
             return [$doc, $score];
         })->sortByDesc(fn ($pair) => $pair[1])
