@@ -116,6 +116,7 @@ enum AppIcon: string
     case NETWORK = 'network-wired';
     case HELP = 'circle-question';
     case ATTENDANCE = 'user-check';
+    case HEARTBEAT = 'heartbeat';
 
     /**
      * Získá výchozí styl pro danou ikonu.

@@ -1051,4 +1051,13 @@ return [
             'logs_cleared' => 'Logy byly promazány',
         ],
     ],
+    'widgets' => [
+        'cron_heartbeat' => [
+            'label' => 'Stav plánovače (Heartbeat)',
+            'running' => 'Běží',
+            'inactive' => 'Nenalezen / Neaktivní',
+            'last_run' => 'Poslední aktivita: :time',
+            'no_heartbeat' => 'Plánovač nebyl v poslední době zaznamenán',
+        ],
+    ],
 ];

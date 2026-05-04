@@ -76,6 +76,8 @@ class IconHelper
 
     public const ATTENDANCE = AppIcon::ATTENDANCE;
 
+    public const HEARTBEAT = AppIcon::HEARTBEAT;
+
     public const DMARC = AppIcon::DMARC;
 
     public const MAILBOX = AppIcon::MAILBOX;

@@ -992,4 +992,13 @@ return [
             'logs_cleared' => 'Logs have been cleared',
         ],
     ],
+    'widgets' => [
+        'cron_heartbeat' => [
+            'label' => 'Scheduler Status (Heartbeat)',
+            'running' => 'Running',
+            'inactive' => 'Not found / Inactive',
+            'last_run' => 'Last activity: :time',
+            'no_heartbeat' => 'No scheduler activity detected recently',
+        ],
+    ],
 ];
