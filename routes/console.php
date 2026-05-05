@@ -75,6 +75,9 @@ use Illuminate\Support\Facades\Event;
 // Pravidelný priming cache pro veřejný web (každé 3 hodiny)
 Schedule::call(fn() => Artisan::call('page-cache:prime'))->name('page-cache:prime')->everyThreeHours()->onOneServer();
 
+// Automatické zpracování fronty (každých 10 minut) - pro prostředí bez daemon workerů (Webglobe)
+Schedule::command('queue:work --stop-when-empty')->everyTenMinutes()->onOneServer();
+
 // Hook pro smazání full-page cache při volání optimize:clear
 Event::listen(CommandFinished::class, function (CommandFinished $event) {
     if ($event->command === 'optimize:clear') {
