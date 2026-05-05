@@ -190,7 +190,7 @@ return [
             'enable' => 'Enable 2FA',
             'disable' => 'Disable 2FA',
             'regenerate_codes' => 'Regenerate Recovery Codes',
-            'cannot_disable' => '2FA deactivation is mandatory for your role (Administrator/Coach) and cannot be turned off.',
+            'cannot_disable' => 'Two-factor authentication (2FA) is mandatory for your role (Administrator/Coach) and cannot be turned off.',
             'recovery_codes_title' => 'Your Recovery Codes',
             'recovery_codes_help' => 'Save these codes in a safe place. They will help you log in if you lose access to the app.',
             'setup_title' => 'Complete Setup',
