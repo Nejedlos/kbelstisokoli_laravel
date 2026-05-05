@@ -175,6 +175,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             MinifyHtmlMiddleware::class,
             InjectFeedbackWidget::class,
             NotFoundLoggerMiddleware::class,
+            \App\Http\Middleware\Restrict2FADeactivation::class,
             'active',
         ]);
 

@@ -255,7 +255,7 @@
                 </section>
 
                 <!-- Two Factor Authentication -->
-                <section class="card p-6 sm:p-8 space-y-6 border-l-4 {{ $user->two_factor_secret ? 'border-l-emerald-500' : 'border-l-warning' }}">
+                <section id="two-factor-setup" class="card p-6 sm:p-8 space-y-6 border-l-4 {{ $user->two_factor_secret ? 'border-l-emerald-500' : 'border-l-warning' }}">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-5 gap-4">
                         <h3 class="text-xl font-black uppercase tracking-tight text-secondary leading-none">{{ __('member.profile.two_factor.title') }}</h3>
                         <span class="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm self-start sm:self-center {{ $user->two_factor_secret ? 'bg-emerald-50 text-emerald-700' : 'bg-warning-50 text-warning-700' }}">
@@ -267,7 +267,7 @@
                     <div class="space-y-6">
                         <p class="text-sm text-slate-600 font-medium leading-relaxed italic opacity-80">
                             {{ __('member.profile.two_factor.help') }}
-                            @if($user->can('access_admin'))
+                            @if($user->canAccessAdmin())
                                 <span class="text-primary font-black block mt-3 uppercase tracking-wider text-[11px] non-italic">{{ __('member.profile.two_factor.admin_warning') }}</span>
                             @endif
                         </p>
@@ -287,9 +287,18 @@
                                             <i class="fa-light fa-arrows-rotate mr-2 text-primary"></i> {{ __('member.profile.two_factor.regenerate_codes') }}
                                         </button>
 
-                                        <button type="submit" form="two-factor-disable-form" class="btn bg-rose-50 text-rose-600 hover:bg-rose-100 py-2.5 px-5 border-transparent w-full justify-center font-bold sm:w-auto">
-                                            <i class="fa-light fa-trash-can mr-2"></i> {{ __('member.profile.two_factor.disable') }}
-                                        </button>
+                                        @if($user->canAccessAdmin())
+                                            <div class="flex items-center gap-3 px-5 py-3 bg-rose-50 rounded-2xl border border-rose-100 group/disable-info">
+                                                <i class="fa-light fa-circle-exclamation text-rose-500 animate-pulse"></i>
+                                                <span class="text-[11px] font-black uppercase tracking-tight text-rose-600 leading-tight">
+                                                    {{ __('member.profile.two_factor.cannot_disable') }}
+                                                </span>
+                                            </div>
+                                        @else
+                                            <button type="submit" form="two-factor-disable-form" class="btn bg-rose-50 text-rose-600 hover:bg-rose-100 py-2.5 px-5 border-transparent w-full justify-center font-bold sm:w-auto">
+                                                <i class="fa-light fa-trash-can mr-2"></i> {{ __('member.profile.two_factor.disable') }}
+                                            </button>
+                                        @endif
                                     </div>
 
                                     @if(session('status') == 'two-factor-authentication-enabled' || session('status') == 'recovery-codes-generated')

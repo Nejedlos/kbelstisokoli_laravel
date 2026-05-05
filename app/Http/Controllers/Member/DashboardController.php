@@ -52,6 +52,19 @@ class DashboardController extends Controller
             ];
         }
 
+        if (! $user->two_factor_secret) {
+            $nudges[] = [
+                'id' => 'two_factor',
+                'title' => __('dashboard.nudges.two_factor.title'),
+                'message' => __('dashboard.nudges.two_factor.message'),
+                'cta' => __('dashboard.nudges.two_factor.cta'),
+                'url' => route('member.profile.edit') . '#two-factor-setup',
+                'icon' => 'shield-check',
+                'color' => 'primary',
+                'instruction' => __('dashboard.nudges.two_factor.instruction'),
+            ];
+        }
+
         return view('member.dashboard', array_merge($data, [
             'user' => $user,
             'avatarUrl' => $avatarUrl,

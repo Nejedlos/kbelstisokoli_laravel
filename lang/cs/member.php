@@ -190,6 +190,7 @@ return [
             'enable' => 'Aktivovat 2FA',
             'disable' => 'Deaktivovat 2FA',
             'regenerate_codes' => 'Regenerovat záchranné kódy',
+            'cannot_disable' => 'Deaktivace 2FA je pro vaši roli (Administrátor/Trenér) povinná a nelze ji vypnout.',
             'recovery_codes_title' => 'Vaše záchranné kódy',
             'recovery_codes_help' => 'Uložte si tyto kódy na bezpečné místo. Pomohou vám se přihlásit, pokud ztratíte přístup k aplikaci.',
             'setup_title' => 'Dokončení nastavení',

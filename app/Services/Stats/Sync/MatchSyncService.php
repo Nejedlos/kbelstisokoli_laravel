@@ -302,6 +302,13 @@ class MatchSyncService
         // (ochrana proti dočasným výpadkům výsledků v seznamu na webu)
         if ($match && in_array($match->status, ['finished', 'played', 'completed']) && in_array($status, ['planned', 'scheduled'])) {
             $status = $match->status === 'played' ? 'finished' : $match->status;
+
+            // Pokud máme skóre v DB, ale teď přišlo prázdné, ponecháme to v DB (další úroveň ochrany k řádkům 284-285)
+            if ($scoreHome === null && $match->score_home !== null) {
+                $scoreHome = $match->score_home;
+                $scoreAway = $match->score_away;
+                \Log::info("MatchSync: Preserving existing score {$scoreHome}:{$scoreAway} for finished match ID {$match->id} because source provided no score in list.");
+            }
         }
 
         // Finální určení statusu na základě skóre
@@ -541,6 +548,26 @@ class MatchSyncService
             $metaPrimary = $primary->metadata ?? [];
             $metaOther = $m->metadata ?? [];
             $primary->metadata = array_replace_recursive($metaOther, $metaPrimary);
+
+            // Přesunout skóre a status pokud na primárním chybí
+            if ($primary->score_home === null && $m->score_home !== null) {
+                $primary->score_home = $m->score_home;
+                $primary->score_away = $m->score_away;
+                \Log::info("MatchSync (merge_candidate): Transferred score {$m->score_home}:{$m->score_away} from duplicate match ID {$m->id} to primary ID {$primary->id}");
+            }
+
+            if (!in_array($primary->status, ['finished', 'played', 'completed']) && in_array($m->status, ['finished', 'played', 'completed'])) {
+                $primary->status = 'finished';
+                \Log::info("MatchSync (merge_candidate): Transferred status 'finished' from duplicate match ID {$m->id} to primary ID {$primary->id}");
+            }
+
+            // Sjednotit další pole pokud chybí na primárním
+            if (!$primary->scheduled_at && $m->scheduled_at) {
+                $primary->scheduled_at = $m->scheduled_at;
+            }
+            if ($primary->opponent_id === null && $m->opponent_id) {
+                $primary->opponent_id = $m->opponent_id;
+            }
 
             if ($run) {
                 $run->addLog('merged_candidate', $primary, ['merged_id' => $m->id], null);
