@@ -51,12 +51,12 @@ class EmailDebug extends Page
         $config = config('mail.mailers.smtp');
 
         // GIT info
-        $gitHash = 'unknown';
-        try {
-            $gitHash = trim(shell_exec('git log -1 --format=%h'));
-            $gitDate = trim(shell_exec('git log -1 --format=%cd --date=iso'));
-            $gitHash = $gitHash . " (" . $gitDate . ")";
-        } catch (\Throwable $e) {}
+        $gitInfo = 'unknown';
+        if (file_exists(base_path('.git'))) {
+            try {
+                $gitInfo = trim(shell_exec('git log -1 --format="%h (%cd)" --date=iso'));
+            } catch (\Throwable $e) {}
+        }
 
         // Mask password
         if (isset($config['password'])) {
@@ -68,7 +68,7 @@ class EmailDebug extends Page
 
         return [
             'App Version' => '1.0.0',
-            'Git Commit' => $gitHash,
+            'Git Info' => $gitInfo,
             'Mailer' => config('mail.default'),
             'Host' => $config['host'] ?? '-',
             'Port' => $config['port'] ?? '-',
@@ -89,46 +89,79 @@ class EmailDebug extends Page
         });
 
         $results = [];
-        $maxLinesToRead = 10000; // Prohledáme 1000 řádků z každého logu
-        $maxResults = 50;      // Ale chceme jen 30 relevantních výsledků
+        $maxResults = 50;
+        $totalLinesScanned = 0;
+        $maxLinesToScan = 20000; // Celkový limit řádků k prohledání
 
         foreach ($logFiles as $logFile) {
-            if (! file_exists($logFile)) {
+            if (! file_exists($logFile) || filesize($logFile) === 0) {
                 continue;
             }
 
-            $lines = [];
-            $fp = fopen($logFile, 'r');
-            fseek($fp, 0, SEEK_END);
-            $pos = ftell($fp);
-            $buffer = '';
-            $count = 0;
+            $fileResults = $this->readFileBackwards(
+                $logFile,
+                $maxResults - count($results),
+                $totalLinesScanned,
+                $maxLinesToScan
+            );
 
-            while ($pos > 0 && $count < $maxLinesToRead) {
-                fseek($fp, --$pos);
-                $char = fgetc($fp);
-                if ($char === "\n") {
-                    if ($buffer !== '') {
-                        $line = strrev($buffer);
-                        if ($this->isRelevantLogLine($line)) {
-                            $results[] = $line;
-                            if (count($results) >= $maxResults) {
-                                break;
-                            }
-                        }
-                        $count++;
-                    }
-                    $buffer = '';
-                } else {
-                    $buffer .= $char;
-                }
-            }
-            fclose($fp);
+            $results = array_merge($results, $fileResults);
 
-            if (count($results) >= $maxResults) {
+            if (count($results) >= $maxResults || $totalLinesScanned >= $maxLinesToScan) {
                 break;
             }
         }
+
+        return $results;
+    }
+
+    private function readFileBackwards(string $filePath, int $needed, int &$totalLinesScanned, int $maxScan): array
+    {
+        $results = [];
+        $handle = fopen($filePath, 'rb');
+        if (! $handle) {
+            return [];
+        }
+
+        $chunkSize = 8192;
+        fseek($handle, 0, SEEK_END);
+        $pos = ftell($handle);
+        $buffer = '';
+
+        while ($pos > 0 && count($results) < $needed && $totalLinesScanned < $maxScan) {
+            $readSize = min($pos, $chunkSize);
+            $pos -= $readSize;
+            fseek($handle, $pos);
+            $chunk = fread($handle, $readSize);
+            $buffer = $chunk.$buffer;
+
+            $lines = explode("\n", $buffer);
+            // První část v bufferu si necháme (je to začátek řádku, který může pokračovat v dalším bloku)
+            $buffer = array_shift($lines);
+
+            for ($i = count($lines) - 1; $i >= 0; $i--) {
+                $totalLinesScanned++;
+                if ($this->isRelevantLogLine($lines[$i])) {
+                    $results[] = $lines[$i];
+                    if (count($results) >= $needed) {
+                        break 2;
+                    }
+                }
+                if ($totalLinesScanned >= $maxScan) {
+                    break 2;
+                }
+            }
+        }
+
+        // Zpracujeme zbytek v bufferu pokud jsme na začátku souboru
+        if ($pos == 0 && count($results) < $needed && $totalLinesScanned < $maxScan) {
+            $totalLinesScanned++;
+            if ($this->isRelevantLogLine($buffer)) {
+                $results[] = $buffer;
+            }
+        }
+
+        fclose($handle);
 
         return $results;
     }

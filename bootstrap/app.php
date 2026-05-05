@@ -110,10 +110,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withSchedule(function (Schedule $schedule) {
-        if (! app()->runningInConsole()) {
-            return;
-        }
-
         // Zabezpečení pro případy, kdy DB není dostupná (např. při setupu nebo migracích)
         $argv = $_SERVER['argv'] ?? [];
         if (count(array_intersect(['help', 'list', 'migrate', 'key:generate', 'package:discover', 'optimize', 'filament:upgrade'], $argv)) > 0) {
