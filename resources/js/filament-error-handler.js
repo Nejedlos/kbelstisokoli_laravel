@@ -11,12 +11,13 @@ const translations = {
         capslock: "Caps Lock je zapnutý",
         strength: {
             title: "Heslo není dostatečně silné.",
-            length: "Minimálně 12 znaků",
+            length: "Minimálně 8 znaků",
             upper: "Alespoň jedno velké písmeno",
-            number: "Alespoň jedno číslo",
-            special: "Alespoň jeden speciální znak"
+            lower: "Alespoň jedno malé písmeno",
+            number: "Alespoň jedno číslo"
         },
         mismatch: "Hesla se neshodují, zkuste to znovu.",
+        current_password_required: "Při změně hesla musíte zadat i to stávající.",
         match: {
             empty: "Čekám na přihrávku...",
             partial: "Driblink v pořádku...",
@@ -30,12 +31,13 @@ const translations = {
         capslock: "Caps Lock is ON",
         strength: {
             title: "Password is not strong enough.",
-            length: "At least 12 characters",
+            length: "At least 8 characters",
             upper: "At least one uppercase letter",
-            number: "At least one number",
-            special: "At least one special character"
+            lower: "At least one lowercase letter",
+            number: "At least one number"
         },
         mismatch: "Passwords do not match, please try again.",
+        current_password_required: "You must enter your current password when changing it.",
         match: {
             empty: "Waiting for the pass...",
             partial: "Dribbling fine...",
@@ -68,8 +70,8 @@ const checkStrength = (val) => {
     return {
         length: val.length >= 8,
         upper: /[A-Z]/.test(val),
-        number: /[0-9]/.test(val),
-        special: /[^A-Za-z0-9]/.test(val)
+        lower: /[a-z]/.test(val),
+        number: /[0-9]/.test(val)
     };
 };
 
@@ -83,8 +85,9 @@ const isValid = (input) => {
     const rawVal = input.value;
     const val = isPassword ? rawVal : rawVal.trim();
 
-    if (!val && !isPassword) return false;
-    if (isPassword && val === '') return false;
+    if (!val) {
+        return !input.hasAttribute("required");
+    }
 
     if (input.type === 'email') return !!val.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
 
@@ -95,14 +98,30 @@ const isValid = (input) => {
             return passwordInput && val === passwordInput.value;
         }
 
-        // Password strength for new passwords (register or reset)
-        if (document.querySelector('[id*="Confirmation"], [name*="Confirmation"]') || window.location.pathname.includes('reset')) {
+        // Password strength for new passwords
+        if (isNewPasswordField(input)) {
             const s = checkStrength(val);
-            return s.length && s.upper && s.number && s.special;
+            return s.length && s.upper && s.lower && s.number;
         }
     }
 
     return true;
+};
+
+const isNewPasswordField = (input) => {
+    if (isConfirmationField(input)) return false;
+    const ident = (input.name || input.id || '').toLowerCase();
+    if (ident.includes('current')) return false;
+
+    // Reset password page
+    if (window.location.pathname.includes('reset')) {
+        return ident === 'password';
+    }
+
+    // Profile page or register
+    if (ident === 'new_password' || ident === 'password') return true;
+
+    return false;
 };
 
 const showClientError = (input, message) => {
@@ -138,7 +157,7 @@ const renderPasswordStrength = (field) => {
     const strengthDiv = document.createElement('div');
     strengthDiv.className = 'ks-password-strength animate-fade-in';
 
-    const rules = ['length', 'upper', 'number', 'special'];
+    const rules = ['length', 'upper', 'lower', 'number'];
     rules.forEach(rule => {
         const ruleDiv = document.createElement('div');
         ruleDiv.className = `strength-rule rule-${rule}`;
@@ -155,7 +174,7 @@ const updatePasswordStrength = (input) => {
     const field = input.closest('.fi-fo-field') || input.closest('.fi-fo-field-wrp');
     if (!field) return;
 
-    const isNewPassword = document.querySelector('[id*="Confirmation"], [name*="Confirmation"]') || window.location.pathname.includes('reset');
+    const isNewPassword = isNewPasswordField(input);
     if (!isNewPassword) return;
 
     const val = input.value;
@@ -240,14 +259,20 @@ const updateMatchProgress = (input) => {
 };
 
 const validateInput = (input, isSubmit = false) => {
-    if (!input || input.type === 'hidden' || input.type === 'submit') return;
+    if (!input || input.type === 'hidden' || input.type === 'submit' || input.disabled) return true;
+
+    // Skip hidden inputs (e.g. hidden via x-show)
+    if (input.offsetParent === null) return true;
 
     const field = input.closest('.fi-fo-field') || input.closest('.fi-fo-field-wrp');
-    if (!field) return;
+    if (!field) return true;
 
+    const ident = (input.name || input.id || '').toLowerCase();
     const isPassword = input.type === 'password' || input.classList.contains('fi-revealable');
     const rawVal = input.value;
     const val = isPassword ? rawVal : rawVal.trim();
+
+    let isInputValid = isValid(input);
 
     if (isPassword) {
         field.classList.add('ks-password-field');
@@ -277,31 +302,54 @@ const validateInput = (input, isSubmit = false) => {
         }
     }
 
-    // Success logic (always on input/change)
-    if (isValid(input)) {
-        field.classList.add('ks-valid');
-        if (!isSubmit) showClientError(input, null);
+    // Additional check for current_password dependency
+    if (ident === 'current_password' && !val) {
+        const form = input.closest('form');
+        const newPass = form ? form.querySelector('input[name="new_password"]') : null;
+        if (newPass && newPass.value) {
+            isInputValid = false;
+        }
     }
 
-    // Error logic (only on submit)
-    if (isSubmit) {
+    // Success logic
+    if (isInputValid) {
+        field.classList.add('ks-valid');
+        field.classList.remove('ks-invalid');
+        showClientError(input, null);
+    } else {
+        field.classList.remove('ks-valid');
+    }
+
+    // Error logic (always show on submit, or if already marked invalid)
+    if (isSubmit || field.classList.contains('ks-invalid')) {
         let message = "";
         if (input.hasAttribute("required") && !val) {
             message = t('required');
         } else if (input.type === "email" && val && !val.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
             message = t('email');
-        } else if (isPassword && !val) {
+        } else if (isPassword && !val && input.hasAttribute("required")) {
             message = t('required');
-        } else if (isPassword && !isValid(input)) {
+        } else if (isPassword && val && !isValid(input)) {
             if (isConfirmationField(input)) {
                 message = t('mismatch');
-            } else if (document.querySelector('[id*="Confirmation"], [name*="Confirmation"]') || window.location.pathname.includes('reset')) {
+            } else if (isNewPasswordField(input)) {
                 message = t('strength.title');
+            }
+        } else if (ident === 'current_password' && !val) {
+            const form = input.closest('form');
+            const newPass = form ? form.querySelector('input[name="new_password"]') : null;
+            if (newPass && newPass.value) {
+                message = t('current_password_required');
             }
         }
 
-        if (message) showClientError(input, message);
+        if (message) {
+            showClientError(input, message);
+            return false;
+        }
     }
+
+    return isInputValid;
 };
 
 const init = () => {
@@ -315,11 +363,17 @@ document.addEventListener('input', (e) => {
     if (e.target.matches('input, select, textarea')) {
         validateInput(e.target);
 
-        // If main password changed, re-validate confirmation
+        // If main password changed, re-validate confirmation and current_password
         const isMainPassword = (e.target.type === 'password' || e.target.classList.contains('fi-revealable')) && !isConfirmationField(e.target);
         if (isMainPassword) {
             const confirmationInput = document.querySelector('input[id*="Confirmation"], input[name*="Confirmation"]');
             if (confirmationInput) validateInput(confirmationInput);
+
+            const ident = (e.target.name || e.target.id || '').toLowerCase();
+            if (ident === 'new_password') {
+                const currentPass = document.querySelector('input[name="current_password"]');
+                if (currentPass) validateInput(currentPass, true);
+            }
         }
     }
 });
@@ -327,12 +381,24 @@ document.addEventListener('input', (e) => {
 document.addEventListener('submit', (e) => {
     const form = e.target;
     if (form.tagName === 'FORM') {
+        let isFormValid = true;
         form.querySelectorAll('input, select, textarea').forEach(input => {
-            validateInput(input, true);
+            if (!validateInput(input, true)) {
+                isFormValid = false;
+            }
         });
 
-        const firstError = form.querySelector('.ks-invalid input');
-        if (firstError) firstError.focus();
+        if (!isFormValid) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const firstErrorField = form.querySelector('.ks-invalid');
+            if (firstErrorField) {
+                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const input = firstErrorField.querySelector('input, select, textarea');
+                if (input) input.focus({ preventScroll: true });
+            }
+        }
     }
 }, true);
 

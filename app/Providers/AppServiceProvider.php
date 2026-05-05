@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         Password::defaults(function () {
-            $rule = Password::min(12)
+            $rule = Password::min(8)
                 ->letters()
                 ->mixedCase()
                 ->numbers();

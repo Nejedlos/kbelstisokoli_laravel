@@ -72,7 +72,7 @@
             opacity: 0;
         }
     </style>
-    @vite(['resources/css/icons-fix.css', 'resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/icons-fix.css', 'resources/css/app.css', 'resources/js/app.js', 'resources/js/filament-error-handler.js'])
 
     <!-- Google Tag Manager / Analytics -->
     @if($gaId = config('services.google.analytics_id'))

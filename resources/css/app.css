@@ -473,6 +473,101 @@
         @apply ring-2 ring-primary/20 shadow-md;
         box-shadow: 0 10px 20px -12px rgba(225, 29, 72, 0.35);
     }
+
+    /* Password Strength & Match Progress (Member Section) */
+    .fi-input-wrp {
+        @apply flex items-center bg-slate-50 border border-slate-200 rounded-2xl focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/5 focus-within:border-primary/30 transition-all relative overflow-hidden;
+    }
+
+    .fi-input-wrp-content-ctn {
+        @apply flex-1;
+    }
+
+    .fi-input-wrp-suffix {
+        @apply flex items-center pr-1.5;
+    }
+
+    .fi-input-wrp-action {
+        @apply w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer;
+    }
+
+    .ks-match-progress {
+        margin-top: 0.75rem;
+        padding: 1rem;
+        @apply bg-slate-50 border border-slate-200 rounded-2xl flex flex-col gap-2;
+    }
+
+    .match-text {
+        @apply text-[10px] font-black uppercase tracking-widest text-slate-400;
+    }
+
+    .match-bar-container {
+        @apply h-1 bg-slate-200 rounded-full overflow-hidden;
+    }
+
+    .match-bar {
+        @apply h-full w-0 bg-primary transition-all duration-500;
+        transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .ks-match-progress.state-partial .match-text { @apply text-blue-600; }
+    .ks-match-progress.state-partial .match-bar { @apply bg-blue-600; }
+    .ks-match-progress.state-mismatch .match-text { @apply text-danger-600; }
+    .ks-match-progress.state-mismatch .match-bar { @apply bg-danger-600 w-full!; }
+    .ks-match-progress.state-full .match-text { @apply text-success-600; }
+    .ks-match-progress.state-full .match-bar { @apply bg-success-600; }
+
+    .ks-password-strength {
+        @apply mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl grid grid-cols-2 gap-3;
+    }
+
+    @media (max-width: 640px) {
+        .ks-password-strength {
+            @apply grid-cols-1;
+        }
+    }
+
+    .strength-rule {
+        @apply flex items-center gap-2 text-xs font-bold text-slate-400 transition-all duration-300;
+    }
+
+    .strength-rule.is-valid {
+        @apply text-success-600;
+    }
+
+    .strength-rule i {
+        @apply text-sm;
+    }
+
+    /* Validation styles added by JS */
+    .ks-invalid .fi-input-wrp,
+    .ks-invalid .form-input:not(.fi-input) {
+        @apply border-danger-500 bg-danger-50/50 animate-shake;
+    }
+
+    .ks-valid:not(.ks-password-field) .fi-input-wrp,
+    .ks-valid:not(.ks-password-field) .form-input:not(.fi-input) {
+        @apply border-success-500 bg-success-50/50;
+    }
+
+    /* Validation Icons */
+    .ks-valid:not(.ks-password-field) .fi-input-wrp::after {
+        content: "\f00c";
+        font-family: "Font Awesome 7 Pro";
+        font-weight: 900;
+        @apply pr-4 text-success-600 animate-fade-in text-sm;
+    }
+
+    .ks-invalid:not(.ks-password-field) .fi-input-wrp::after {
+        content: "\f06a";
+        font-family: "Font Awesome 7 Pro";
+        font-weight: 900;
+        @apply pr-4 text-danger-600 animate-fade-in text-sm;
+    }
+
+    .animate-fade-in {
+        @apply animate-fade-in;
+    }
 }
 
 @layer utilities {

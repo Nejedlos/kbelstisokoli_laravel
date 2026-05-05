@@ -43,6 +43,14 @@ class ProfileController extends Controller
             'new_password' => ['nullable', 'confirmed', Password::defaults()],
             'member_default_team_id' => ['nullable', Rule::exists('teams', 'id')],
             'member_view_all_by_default' => ['boolean'],
+        ], [], [
+            'name' => __('member.profile.name'),
+            'phone' => __('member.profile.phone'),
+            'public_bio' => __('member.profile.bio'),
+            'jersey_number' => __('member.profile.jersey_number'),
+            'current_password' => __('member.profile.current_password'),
+            'new_password' => __('member.profile.new_password'),
+            'member_default_team_id' => __('member.profile.section_settings.default_team'),
         ]);
 
         // Update User

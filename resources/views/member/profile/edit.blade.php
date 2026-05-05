@@ -234,21 +234,50 @@
                     <p class="text-xs text-slate-500 font-medium leading-relaxed italic opacity-80">{{ __('member.profile.password_help') }}</p>
 
                     <div class="space-y-6">
-                        <div class="space-y-2">
+                        <div class="fi-fo-field space-y-2">
                             <label for="current_password" class="form-label">{{ __('member.profile.current_password') }}</label>
-                            <input type="password" name="current_password" id="current_password" class="form-input min-h-[44px]">
+                            <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
+                                <div class="fi-input-wrp-content-ctn">
+                                    <input id="current_password" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="current_password"
+                                           class="fi-input form-input border-none! shadow-none! bg-transparent! min-h-[44px]">
+                                </div>
+                                <div class="fi-input-wrp-suffix">
+                                    <button type="button" x-on:click="isPasswordRevealed = !isPasswordRevealed" class="fi-input-wrp-action px-3 text-slate-400 hover:text-primary transition-colors" :title="isPasswordRevealed ? 'Skrýt heslo' : 'Zobrazit heslo'">
+                                        <i class="fa-light" :class="isPasswordRevealed ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                    </button>
+                                </div>
+                            </div>
                             @error('current_password') <p class="text-[10px] text-danger-600 font-bold mt-1.5 uppercase tracking-wider italic">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                            <div class="space-y-2">
-                                <label for="new_password" class="form-label">{{ __('member.profile.new_password') }}</label>
-                                <input type="password" name="new_password" id="new_password" class="form-input min-h-[44px]">
-                                @error('new_password') <p class="text-[10px] text-danger-600 font-bold mt-1.5 uppercase tracking-wider italic">{{ $message }}</p> @enderror
+                        <div class="fi-fo-field space-y-2">
+                            <label for="new_password" class="form-label">{{ __('member.profile.new_password') }}</label>
+                            <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
+                                <div class="fi-input-wrp-content-ctn">
+                                    <input id="new_password" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="new_password"
+                                           class="fi-input form-input border-none! shadow-none! bg-transparent! min-h-[44px]">
+                                </div>
+                                <div class="fi-input-wrp-suffix">
+                                    <button type="button" x-on:click="isPasswordRevealed = !isPasswordRevealed" class="fi-input-wrp-action px-3 text-slate-400 hover:text-primary transition-colors" :title="isPasswordRevealed ? 'Skrýt heslo' : 'Zobrazit heslo'">
+                                        <i class="fa-light" :class="isPasswordRevealed ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="space-y-2">
-                                <label for="new_password_confirmation" class="form-label">{{ __('member.profile.confirm_new_password') }}</label>
-                                <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="form-input min-h-[44px]">
+                            @error('new_password') <p class="text-[10px] text-danger-600 font-bold mt-1.5 uppercase tracking-wider italic">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="fi-fo-field space-y-2">
+                            <label for="new_password_confirmation" class="form-label">{{ __('member.profile.confirm_new_password') }}</label>
+                            <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
+                                <div class="fi-input-wrp-content-ctn">
+                                    <input id="new_password_confirmation" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="new_password_confirmation"
+                                           class="fi-input form-input border-none! shadow-none! bg-transparent! min-h-[44px]">
+                                </div>
+                                <div class="fi-input-wrp-suffix">
+                                    <button type="button" x-on:click="isPasswordRevealed = !isPasswordRevealed" class="fi-input-wrp-action px-3 text-slate-400 hover:text-primary transition-colors" :title="isPasswordRevealed ? 'Skrýt heslo' : 'Zobrazit heslo'">
+                                        <i class="fa-light" :class="isPasswordRevealed ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

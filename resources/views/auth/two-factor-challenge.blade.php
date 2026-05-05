@@ -34,7 +34,7 @@
                 <label for="code" class="fi-fo-field-label block text-center">{{ __('6místný ověřovací kód') }}</label>
                 <div class="relative group/input">
                     <input id="code" type="text" name="code" inputmode="numeric" autofocus autocomplete="one-time-code"
-                           placeholder="000 000"
+                           placeholder="000 000" required
                            class="fi-input-wrp w-full bg-white border border-slate-200 rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.5em] text-center text-3xl py-6">
                 </div>
                 <p class="text-[10px] text-white/40 font-medium text-center italic">{{ __('Otevřete Google Authenticator nebo podobnou aplikaci.') }}</p>
@@ -44,7 +44,7 @@
                 <label for="recovery_code" class="fi-fo-field-label block text-center">{{ __('Záchranný kód') }}</label>
                 <div class="relative group/input">
                     <input id="recovery_code" type="text" name="recovery_code" autocomplete="one-time-code"
-                           placeholder="abcde-fghij"
+                           placeholder="abcde-fghij" required
                            class="fi-input-wrp w-full bg-white border border-slate-200 rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-mono font-bold text-slate-900 placeholder-slate-300 outline-none text-center text-xl py-6 uppercase">
                 </div>
             </div>

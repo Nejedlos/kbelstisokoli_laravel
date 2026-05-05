@@ -17,7 +17,7 @@ class Restrict2FADeactivation
     {
         if ($request->user() && $request->user()->canAccessAdmin()) {
             if ($request->routeIs('two-factor.disable')) {
-                abort(403, __('Deaktivace dvoufázového ověření není pro administrátory povolena.'));
+                abort(403, __('member.profile.two_factor.cannot_disable'));
             }
         }
 
