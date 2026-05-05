@@ -135,7 +135,7 @@
     }
 @endphp
 <body class="h-full flex flex-col antialiased font-sans text-text selection:bg-primary selection:text-white bg-slate-50/50"
-      x-data="{ sidebarOpen: false }"
+      x-data="{ sidebarOpen: false, supportExpanded: false }"
 >
     <x-loader-global :title="$title ?? __('nav.member_section')" />
     <x-impersonation-banner />
@@ -542,34 +542,47 @@
             @endif
 
             <!-- Bottom Action / Help (Mobile) -->
-            <div class="mt-auto p-6 pb-24 border-t border-slate-50 bg-slate-50/30 space-y-4">
-                <a href="{{ route('member.help') }}" @click="sidebarOpen = false" class="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-500">
-                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary shrink-0">
-                        <i class="fa-light fa-circle-question text-lg"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-xs font-black uppercase tracking-widest text-secondary">{{ __('nav.need_help') }}</span>
-                        <span class="text-[10px] italic">{{ __('nav.help_text') }}</span>
-                    </div>
-                </a>
-                <div class="grid grid-cols-2 gap-3">
-                    <a href="{{ route('member.contact.coach.form') }}" @click="sidebarOpen = false"
-                       class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm text-xs font-bold text-slate-600">
-                        <i class="fa-light fa-whistle text-primary"></i>
-                        {{ __('member.feedback.contact_coach_title') }}
+            <div class="mt-auto border-t border-slate-100 bg-slate-50/30">
+                <button @click="supportExpanded = !supportExpanded"
+                        class="w-full flex items-center justify-between p-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-light fa-circle-question text-lg text-primary"></i>
+                        {{ __('nav.contact_us') }}
+                    </span>
+                    <i class="fa-light transition-transform duration-300" :class="supportExpanded ? 'fa-chevron-down rotate-180' : 'fa-chevron-up'"></i>
+                </button>
+
+                <div x-show="supportExpanded"
+                     x-collapse
+                     class="px-6 pb-24 space-y-4">
+                    <a href="{{ route('member.help') }}" @click="sidebarOpen = false" class="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-500">
+                        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary shrink-0">
+                            <i class="fa-light fa-circle-question text-lg"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs font-black uppercase tracking-widest text-secondary">{{ __('nav.need_help') }}</span>
+                            <span class="text-[10px] italic">{{ __('nav.help_text') }}</span>
+                        </div>
                     </a>
-                    <a href="{{ route('member.contact.admin.form') }}" @click="sidebarOpen = false"
-                       class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm text-xs font-bold text-slate-600">
-                        <i class="fa-light fa-user-gear text-slate-400"></i>
-                        {{ __('member.feedback.contact_admin_title') }}
-                    </a>
-                </div>
-                <div class="mt-6 pt-4 border-t border-slate-100 flex justify-center">
-                    <button @click="$dispatch('open-cookie-settings'); sidebarOpen = false"
-                            class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
-                        <i class="fa-light fa-cookie-bite"></i>
-                        {{ __('cookies.settings_link') }}
-                    </button>
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{{ route('member.contact.coach.form') }}" @click="sidebarOpen = false"
+                           class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm text-xs font-bold text-slate-600">
+                            <i class="fa-light fa-whistle text-primary"></i>
+                            {{ __('member.feedback.contact_coach_title') }}
+                        </a>
+                        <a href="{{ route('member.contact.admin.form') }}" @click="sidebarOpen = false"
+                           class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm text-xs font-bold text-slate-600">
+                            <i class="fa-light fa-user-gear text-slate-400"></i>
+                            {{ __('member.feedback.contact_admin_title') }}
+                        </a>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-center">
+                        <button @click="$dispatch('open-cookie-settings'); sidebarOpen = false"
+                                class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
+                            <i class="fa-light fa-cookie-bite"></i>
+                            {{ __('cookies.settings_link') }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,12 +1,4 @@
-<div class="space-y-8 relative" wire:init="init" x-data="{ view: @entangle('view'), filtersExpanded: false, isSticky: false }" x-init="
-    console.log('MyStatistics initialized');
-    // Detekce přilepení (sticky) pro mobilní zobrazení
-    const observer = new IntersectionObserver(
-        ([e]) => isSticky = e.intersectionRatio < 1,
-        { threshold: [1], rootMargin: '-73px 0px 0px 0px' }
-    );
-    if ($refs.stickyPanel) observer.observe($refs.stickyPanel);
-">
+<div class="space-y-8 relative" wire:init="init" x-data="{ view: @entangle('view') }">
     <style>
         @keyframes bounce-subtle {
             0%, 100% { transform: translateY(-10%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
@@ -18,21 +10,15 @@
     </style>
     {{-- Top Navigation & Selection --}}
     <div
-        x-ref="stickyPanel"
-        class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-2 rounded-[2rem] shadow-xl shadow-gray-200/40 dark:shadow-none border border-white/20 dark:border-gray-700 flex flex-col xl:flex-row justify-between items-center gap-4 sticky top-[72px] md:top-4 z-30 transition-all duration-500"
-        :class="{
-            'max-md:-translate-y-[calc(100%-48px)]': isSticky && !filtersExpanded,
-            'max-md:translate-y-0': !isSticky || filtersExpanded,
-            'max-md:rounded-t-none': isSticky && !filtersExpanded
-        }"
+        class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-2 rounded-[2rem] shadow-xl shadow-gray-200/40 dark:shadow-none border border-white/20 dark:border-gray-700 flex flex-col xl:flex-row justify-between items-center gap-4 transition-all duration-500"
     >
         {{-- View Switcher & Toggle --}}
         <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
-            <div class="flex p-1.5 bg-gray-100/50 dark:bg-gray-900/50 rounded-2xl w-full md:w-auto border border-gray-200/30 dark:border-gray-800">
+            <div class="flex p-1.5 bg-gray-100/50 dark:bg-gray-900/50 rounded-2xl w-full md:w-auto border border-gray-200/30 dark:border-gray-800 overflow-x-auto no-scrollbar">
                 <a
                     href="{{ route('member.statistics.me') }}"
                     @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider whitespace-nowrap"
                     :class="view === 'personal' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
                 >
                     <i class="fa-light fa-user-chart mr-2"></i> Osobní
@@ -40,7 +26,7 @@
                 <button
                     wire:click="$set('view', 'career')"
                     @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider whitespace-nowrap"
                     :class="view === 'career' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
                 >
                     <i class="fa-light fa-sparkles mr-2"></i> Kariéra
@@ -48,7 +34,7 @@
                 <a
                     href="{{ route('member.statistics.players') }}"
                     @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider whitespace-nowrap"
                     :class="view === 'team' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
                 >
                     <i class="fa-light fa-users-viewfinder mr-2"></i> Tým
@@ -56,7 +42,7 @@
                 <a
                     href="{{ route('member.statistics.matches') }}"
                     @click="window.dispatchEvent(new CustomEvent('loading-start'))"
-                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider"
+                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-black transition-all text-center uppercase tracking-wider whitespace-nowrap"
                     :class="view === 'matches' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
                 >
                     <i class="fa-light fa-calendar-lines mr-2"></i> Zápasy
@@ -125,31 +111,6 @@
             </div>
         </div>
 
-        {{-- Mobilní úchyt pro rozbalení --}}
-        <div
-            x-show="isSticky"
-            class="md:hidden absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-[80%] transition-opacity duration-300"
-            :class="filtersExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'"
-            style="display: none;"
-        >
-            <button
-                @click="filtersExpanded = true"
-                class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary-600 flex items-center gap-2 ring-4 ring-primary-500/10"
-            >
-                <i class="fa-light fa-filter"></i>
-                Filtry
-            </button>
-        </div>
-
-        {{-- Mobilní tlačítko pro sbalení --}}
-        <button
-            x-show="isSticky && filtersExpanded"
-            @click="filtersExpanded = false"
-            class="md:hidden absolute -bottom-4 left-1/2 -translate-x-1/2 w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg z-50 border-4 border-white dark:border-gray-800"
-            style="display: none;"
-        >
-            <i class="fa-light fa-chevron-up"></i>
-        </button>
     </div>
 
     @if(!$readyToLoad)
