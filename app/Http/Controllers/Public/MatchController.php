@@ -16,7 +16,7 @@ class MatchController extends Controller
         $seasonId = $request->get('season_id');
         $matchType = $request->get('match_type');
 
-        $query = BasketballMatch::with(['teams', 'opponent', 'season', 'prediction']);
+        $query = BasketballMatch::with(['team', 'teams', 'opponent', 'season', 'prediction', 'venue']);
 
         // Defaultní sezóna (aktuální), pokud není vybrána jiná
         if (! $seasonId) {

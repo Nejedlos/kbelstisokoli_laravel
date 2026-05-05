@@ -281,8 +281,9 @@ class MatchSyncService
         $status = $matchData['status'] ?? 'planned';
 
         // Zpracování skóre
-        $scoreHome = null;
-        $scoreAway = null;
+        $scoreHome = $match ? $match->score_home : null;
+        $scoreAway = $match ? $match->score_away : null;
+
         if (isset($matchData['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $matchData['score'], $m)) {
             $canHaveScore = ! in_array($status, ['planned', 'scheduled']);
 
@@ -297,7 +298,13 @@ class MatchSyncService
             }
         }
 
-        // Finální určení statusu
+        // Pokud je zápas již označen jako odehraný v DB a teď přišel status planned, ponecháme finished
+        // (ochrana proti dočasným výpadkům výsledků v seznamu na webu)
+        if ($match && $match->status === 'finished' && in_array($status, ['planned', 'scheduled'])) {
+            $status = 'finished';
+        }
+
+        // Finální určení statusu na základě skóre
         if (($scoreHome !== null && $scoreAway !== null) || in_array($status, ['played', 'completed'])) {
             $status = 'finished';
         }

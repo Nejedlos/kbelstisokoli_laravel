@@ -12,8 +12,7 @@ class PerformanceObserver
      */
     public function saved($model): void
     {
-        // Optimalizace: Nemusíme mazat cache, pokud se změnila jen technická pole PhotoPoolu,
-        // což by se sice při použití updateQuietly() dít nemělo, ale jako pojistka je to vhodné.
+        // Pokud je to technická změna PhotoPoolu, ignorujeme
         if ($model instanceof \App\Models\PhotoPool) {
             $technicalFields = ['is_processing_import', 'pending_import_queue', 'updated_at'];
             $dirtyFields = array_keys($model->getDirty());
@@ -23,7 +22,7 @@ class PerformanceObserver
             }
         }
 
-        $this->clearCache();
+        $this->clearCache($model);
     }
 
     /**
@@ -31,52 +30,62 @@ class PerformanceObserver
      */
     public function deleted($model): void
     {
-        $this->clearCache();
+        $this->clearCache($model);
     }
 
-    protected function clearCache(): void
+    protected function clearCache($model = null): void
     {
         try {
-            // 1. Mažeme statické klíče systémových nastavení (včetně lokalizace)
+            // Základní klíče mažeme vždy (jsou malé)
             Cache::forget('performance_settings');
             Cache::forget('view_composer_data_cs');
             Cache::forget('view_composer_data_en');
             Cache::forget('global_branding_settings_cs');
             Cache::forget('global_branding_settings_en');
 
-            // Mažeme také globální cache pro partnery
-            Cache::forget('partners_homepage_strip');
-            Cache::forget('partners_footer');
-            Cache::forget('partners_match');
-            Cache::forget('partners_contact');
-            Cache::forget('partners_recruitment');
-        } catch (\Throwable $e) {
-            // V tichosti ignorujeme - uložení modelu je důležitější než okamžitý flush cache
-        }
+            // Selektivní mazání podle typu modelu
+            if ($model instanceof \App\Models\Partner) {
+                Cache::forget('partners_homepage_strip');
+                Cache::forget('partners_footer');
+                Cache::forget('partners_match');
+                Cache::forget('partners_contact');
+                Cache::forget('partners_recruitment');
+            }
 
-        // 2. Pro fragmenty a full-page cache (které mají dynamické klíče)
-        // se pokusíme o cílené smazání v DB, pokud používáme database driver.
-        // Tím předejdeme kompletnímu flush() celé cache, což na Webglobe
-        // hostingu způsobuje lock wait timeouty a deadloky.
-        if (config('cache.default') === 'database') {
-            try {
+            // Statistiky mažeme pouze pokud se změní zápasy nebo statistiky
+            $shouldClearStats = ! $model ||
+                $model instanceof \App\Models\BasketballMatch ||
+                $model instanceof \App\Models\StatisticRow ||
+                $model instanceof \App\Models\ExternalPlayerMatch;
+
+            // Fragmenty mažeme u obsahu
+            $shouldClearFragments = ! $model ||
+                $model instanceof \App\Models\Post ||
+                $model instanceof \App\Models\Page ||
+                $model instanceof \App\Models\Team ||
+                $model instanceof \App\Models\PostCategory;
+
+            // 2. Pro fragmenty a full-page cache
+            if (config('cache.default') === 'database') {
                 $table = config('cache.stores.database.table', 'cache');
                 $prefix = config('cache.prefix', '');
 
-                DB::table($table)
-                    ->where('key', 'like', $prefix.'fragment_%')
-                    ->orWhere('key', 'like', $prefix.'full_page_%')
-                    ->orWhere('key', 'like', $prefix.'help_%')
-                    ->delete();
-            } catch (\Throwable $e) {
-                // Fallback v případě chyby DB - v tichosti ignorujeme,
-                // aby uložení modelu (např. článku) neselhalo kvůli cache.
+                $query = DB::table($table)->where('key', 'like', $prefix.'full_page_%');
+
+                if ($shouldClearFragments) {
+                    $query->orWhere('key', 'like', $prefix.'fragment_%')
+                          ->orWhere('key', 'like', $prefix.'help_%');
+                }
+
+                if ($shouldClearStats) {
+                    $query->orWhere('key', 'like', $prefix.'team_stats_%')
+                          ->orWhere('key', 'like', $prefix.'player_stats_%');
+                }
+
+                $query->delete();
             }
-        } else {
-            // Pro file driver na sdíleném hostingu (Webglobe) se vyhýbáme flush(),
-            // který by mohl smazat i kritické soubory uprostřed requestu
-            // v jiném vlákně/procesu (Race conditions).
-            // Pokud je potřeba kompletní flush, měl by ho provést admin přes CLI.
+        } catch (\Throwable $e) {
+            // Tichá chyba
         }
     }
 }

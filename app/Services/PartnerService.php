@@ -25,7 +25,7 @@ class PartnerService
             return collect();
         }
 
-        return \Illuminate\Support\Facades\Cache::remember('partners_homepage_strip', 3600, function () {
+        return \Illuminate\Support\Facades\Cache::store('file')->remember('partners_homepage_strip', 3600, function () {
             return Partner::where('is_active', true)
                 ->where('show_on_homepage', true)
                 ->where('show_below_hero', true)
@@ -46,7 +46,7 @@ class PartnerService
             return collect();
         }
 
-        return \Illuminate\Support\Facades\Cache::remember('partners_footer', 3600, function () {
+        return \Illuminate\Support\Facades\Cache::store('file')->remember('partners_footer', 3600, function () {
             return Partner::where('is_active', true)
                 ->where('show_in_footer', true)
                 ->orderBy('is_featured', 'desc')
@@ -66,7 +66,7 @@ class PartnerService
             return collect();
         }
 
-        return \Illuminate\Support\Facades\Cache::remember('partners_match', 3600, function () {
+        return \Illuminate\Support\Facades\Cache::store('file')->remember('partners_match', 3600, function () {
             return Partner::where('is_active', true)
                 ->where('show_on_match_pages', true)
                 ->orderBy('is_featured', 'desc')

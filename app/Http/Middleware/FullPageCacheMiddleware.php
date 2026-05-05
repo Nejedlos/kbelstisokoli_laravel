@@ -16,20 +16,14 @@ class FullPageCacheMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Rychlá kontrola pro hosty (před StartSession)
-        // Pokud middleware běží dříve než StartSession, auth()->check() nebude fungovat.
-        // V takovém případě se spoléháme na absenci session cookie.
+        // Rychlá kontrola pro hosty
         $isGuest = true;
         try {
             if (auth()->check()) {
                 $isGuest = false;
             }
         } catch (\Throwable $e) {
-            // Auth zatím není připraven, zkusíme detekci přes cookie
-            $sessionCookie = config('session.cookie');
-            if ($request->hasCookie($sessionCookie)) {
-                $isGuest = false; // Má cookie, může být přihlášen -> neriskujeme cache
-            }
+            // Auth zatím není připraven, spoléháme na výchozí true
         }
 
         // Cache zapnuta pouze pro GET, hosty a pokud je aktivní v configu
@@ -97,13 +91,6 @@ class FullPageCacheMiddleware
             'horizon*',
             'up',
             'system*',
-            // Dynamické sekce vyžadující čerstvá data
-            '/',
-            'zapasy*',
-            'tymy*',
-            'treninky*',
-            'akce*',
-            'souteze*',
             'hledat*',
         ];
 
