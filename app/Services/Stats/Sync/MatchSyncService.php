@@ -300,8 +300,8 @@ class MatchSyncService
 
         // Pokud je zápas již označen jako odehraný v DB a teď přišel status planned, ponecháme finished
         // (ochrana proti dočasným výpadkům výsledků v seznamu na webu)
-        if ($match && $match->status === 'finished' && in_array($status, ['planned', 'scheduled'])) {
-            $status = 'finished';
+        if ($match && in_array($match->status, ['finished', 'played', 'completed']) && in_array($status, ['planned', 'scheduled'])) {
+            $status = $match->status === 'played' ? 'finished' : $match->status;
         }
 
         // Finální určení statusu na základě skóre
@@ -413,6 +413,16 @@ class MatchSyncService
             // Přesunout external_player_matches
             DB::table('external_player_matches')->where('basketball_match_id', $m->id)
                 ->update(['basketball_match_id' => $primary->id]);
+
+            // Přesunout skóre a status pokud na primárním chybí
+            if ($primary->score_home === null && $m->score_home !== null) {
+                $primary->score_home = $m->score_home;
+                $primary->score_away = $m->score_away;
+            }
+
+            if ($primary->status !== 'finished' && $m->status === 'finished') {
+                $primary->status = 'finished';
+            }
 
             // Přesunout attendances (polymorfní) s deduplikací podle user_id
             $attendanceRows = DB::table('attendances')

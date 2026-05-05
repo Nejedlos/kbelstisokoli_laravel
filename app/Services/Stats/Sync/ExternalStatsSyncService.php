@@ -508,7 +508,7 @@ class ExternalStatsSyncService
     {
         $excesive = $options['excesive'] ?? false;
         $force = ($options['force'] ?? false) || ($options['fresh'] ?? false) || $excesive;
-        $defaultLimit = $force ? 100 : 15;
+        $defaultLimit = $force ? 100 : 50;
         if ($excesive) {
             $defaultLimit = 1000; // Prakticky bez limitu pro jednu sezónu
         }
@@ -521,6 +521,10 @@ class ExternalStatsSyncService
             ->where('season_id', $season->id)
             ->whereIn('status', ['finished', 'planned', 'scheduled', 'played'])
             ->where('metadata', 'like', '%"external_id":%');
+
+        // Prioritizace zápasů v minulosti, které nemají skóre (uživatelova "akce proběhla")
+        $query->orderByRaw('CASE WHEN scheduled_at < NOW() AND score_home IS NULL THEN 0 ELSE 1 END ASC')
+              ->orderBy('scheduled_at', 'desc');
 
         if ($recentOnly) {
             $days = config('external_sources.czbasketball.limits.recent_match_days', 3);
@@ -576,16 +580,19 @@ class ExternalStatsSyncService
                 $recentDays = config('external_sources.czbasketball.limits.recent_match_days', 3);
                 $isRecentlyScheduled = $match->scheduled_at && $match->scheduled_at->gt(now()->subDays($recentDays));
 
-                // Pokud zápas nemá boxscore a je nedávný, automaticky vynutíme excesivní synchronizaci (i bez flagu v options),
-                // aby se statistiky stáhly hned s prvním dostupným boxscorem.
-                if (! $hasBoxscore && $isRecentlyScheduled) {
+                // Speciální pravidlo: Pokud je zápas v minulosti a nemá skóre, zkoušíme ho každou hodinu,
+                // dokud se skóre neobjeví.
+                $isPastWithoutScore = $match->scheduled_at && $match->scheduled_at->isPast() && $match->score_home === null;
+
+                // Pokud zápas nemá boxscore a je nedávný (nebo v minulosti bez skóre), automaticky vynutíme excesivní synchronizaci
+                if (! $hasBoxscore && ($isRecentlyScheduled || $isPastWithoutScore)) {
                     $matchOptions['excesive'] = true;
                 }
 
-                $syncInterval = (!$hasBoxscore && $isRecentlyScheduled) ? now()->subHour() : now()->subDay();
+                $syncInterval = ((!$hasBoxscore || $match->score_home === null) && ($isRecentlyScheduled || $isPastWithoutScore)) ? now()->subHour() : now()->subDay();
 
                 if ($lastSynced && \Illuminate\Support\Carbon::parse($lastSynced)->gt($syncInterval)) {
-                    ConsoleService::log("    - Zápas {$match->id} ($matchExtId) přeskočen (naposledy synchronizováno: $lastSynced, interval: " . ($isRecentlyScheduled && !$hasBoxscore ? '1h' : '24h') . ")", 'debug');
+                    ConsoleService::log("    - Zápas {$match->id} ($matchExtId) přeskočen (naposledy synchronizováno: $lastSynced, interval: " . (($isRecentlyScheduled || $isPastWithoutScore) && (!$hasBoxscore || $match->score_home === null) ? '1h' : '24h') . ")", 'debug');
                     continue;
                 }
             }
