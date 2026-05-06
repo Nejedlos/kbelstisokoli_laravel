@@ -8,7 +8,7 @@ Tento dokument popisuje změnu v mechanismu cachování frontendu, která byla p
 - Na sdíleném hostingu (Webglobe) s `file` driverem byla selektivní invalidace omezená.
 
 ## Nový stav
-1.  **Pravidelný Priming:** Cache se nyní aktivně přegenerovává každých **30 minut** pomocí cronu (`page-cache:prime`).
+1.  **Pravidelný Priming:** Cache se nyní aktivně přegenerovává každých **30 minut** pomocí cronu (`page-cache:prime`). Proces automaticky prochází obě jazykové verze (**CS** i **EN**).
 2.  **In-place Update:** Middleware `FullPageCacheMiddleware` byl upraven tak, aby při požadavku s hlavičkou `X-Prime-Cache` (kterou posílá priming command) ignoroval stávající cache a uložil novou verzi. Tím dochází k aktualizaci obsahu bez nutnosti explicitního mazání souborů.
 3.  **Výchozí aktivace:** V `config/performance.php` bylo nastaveno výchozí zapnutí Full Page Cache a Fragment Cache na `true`.
 
