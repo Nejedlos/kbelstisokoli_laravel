@@ -54,6 +54,7 @@
 @source '../**/*.js';
 
 :root {
+    color-scheme: light;
     /* Fallbacky pro build a statickou analýzu */
     --color-brand-navy: #0b1f3a;
     --color-brand-navy-rgb: 11, 31, 58;

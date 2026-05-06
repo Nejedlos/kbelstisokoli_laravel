@@ -118,22 +118,56 @@ class AdminPanelProvider extends PanelProvider
                 } catch (\Throwable $e) {}
 
                 return "
+                    <meta name=\"color-scheme\" content=\"light\">
                     {$favicons}
                     {$screenshotSupport}
-                    <script data-navigate-once>
+                    <script>
                         /**
-                         * VYNUCENÍ SVĚTLÉHO REŽIMU NA MOBILECH
-                         * Na zařízeních s šířkou pod 1024px odstraňujeme třídu .dark.
+                         * ABSOLUTNÍ VYNUCENÍ SVĚTLÉHO REŽIMU (AGRESIVNÍ)
+                         * Tento skript aktivně sleduje změny na <html> elementu a okamžitě
+                         * odstraňuje třídu .dark, pokud se ji jakýkoliv jiný skript (Filament, Alpine)
+                         * pokusí přidat. Zároveň vynucuje světlé téma v localStorage.
                          */
                         (function() {
-                            const forceLightOnMobile = () => {
-                                if (window.innerWidth < 1024) {
+                            const forceLight = () => {
+                                if (document.documentElement.classList.contains('dark')) {
                                     document.documentElement.classList.remove('dark');
                                 }
+                                if (localStorage.getItem('theme') !== 'light') {
+                                    localStorage.setItem('theme', 'light');
+                                }
+                                // Vynucení color-scheme na elementu
+                                if (document.documentElement.style.colorScheme !== 'light') {
+                                    document.documentElement.style.colorScheme = 'light';
+                                }
                             };
-                            forceLightOnMobile();
-                            window.addEventListener('resize', forceLightOnMobile);
-                            document.addEventListener('livewire:navigated', forceLightOnMobile);
+
+                            // 1. Okamžité spuštění
+                            forceLight();
+
+                            // 2. MutationObserver pro sledování změn (nejvíc robustní metoda)
+                            const observer = new MutationObserver((mutations) => {
+                                mutations.forEach((mutation) => {
+                                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                                        if (document.documentElement.classList.contains('dark')) {
+                                            document.documentElement.classList.remove('dark');
+                                        }
+                                    }
+                                });
+                            });
+                            observer.observe(document.documentElement, { attributes: true });
+
+                            // 3. Pojistka pro eventy
+                            window.addEventListener('resize', forceLight);
+                            document.addEventListener('livewire:navigated', forceLight);
+                            document.addEventListener('DOMContentLoaded', forceLight);
+
+                            // 4. Globální fix pro Alpine.js store (pokud ho Filament používá)
+                            document.addEventListener('alpine:init', () => {
+                                if (window.Alpine && window.Alpine.store('theme')) {
+                                    window.Alpine.store('theme', 'light');
+                                }
+                            });
                         })();
 
                         /**

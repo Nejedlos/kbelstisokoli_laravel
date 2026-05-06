@@ -7,6 +7,25 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>{{ $seo['title'] }}</title>
+    <meta name="color-scheme" content="light">
+    <script>
+        /**
+         * ABSOLUTNÍ VYNUCENÍ SVĚTLÉHO REŽIMU
+         * Odstraňujeme třídu .dark z dokumentu, aby aplikace vypadala vždy světle
+         * bez ohledu na systémové nastavení nebo šířku zařízení.
+         */
+        (function() {
+            const forceLight = () => {
+                document.documentElement.classList.remove('dark');
+                if (localStorage.getItem('theme') === 'dark') {
+                    localStorage.setItem('theme', 'light');
+                }
+            };
+            forceLight();
+            window.addEventListener('resize', forceLight);
+            document.addEventListener('livewire:navigated', forceLight);
+        })();
+    </script>
     <meta name="description" content="{{ $seo['description'] }}">
     <meta name="keywords" content="{{ $seo['keywords'] }}">
     <link rel="canonical" href="{{ $seo['canonical'] }}">

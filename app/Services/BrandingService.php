@@ -201,6 +201,7 @@ class BrandingService
         ];
 
         $css = ":root {\n";
+        $css .= "    color-scheme: light;\n";
         foreach ($vars as $key => $value) {
             $css .= "    {$key}: {$value};\n";
         }

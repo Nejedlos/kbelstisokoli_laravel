@@ -1,6 +1,58 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+:root {
+    color-scheme: light !important;
+}
+
+/*
+ * ABSOLUTNÍ POTLAČENÍ TMAVÉHO REŽIMU
+ * Pokud se třída .dark přesto objeví nebo ji prohlížeč vynutí,
+ * přemalujeme klíčové komponenty Filamentu zpět na světlé.
+ */
+:is(.dark) {
+    color-scheme: light !important;
+}
+
+:is(.dark) body {
+    background-color: #f8fafc !important; /* gray-50 */
+    color: #0f172a !important; /* gray-900 */
+}
+
+:is(.dark) .fi-card,
+:is(.dark) .fi-section,
+:is(.dark) .fi-ta-ctn,
+:is(.dark) .fi-sidebar,
+:is(.dark) .fi-topbar,
+:is(.dark) .fi-modal-window,
+:is(.dark) .fi-fo-field-wrp,
+:is(.dark) .fi-ta-record,
+:is(.dark) .fi-fieldset {
+    background-color: white !important;
+    color: #0f172a !important;
+    border-color: #e2e8f0 !important; /* gray-200 */
+    --tw-bg-opacity: 1 !important;
+    --tw-text-opacity: 1 !important;
+    --tw-border-opacity: 1 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+:is(.dark) .fi-sidebar-item-label,
+:is(.dark) .fi-sidebar-group-label,
+:is(.dark) .fi-topbar-item-label,
+:is(.dark) .fi-ta-text-item-label {
+    color: #475569 !important; /* gray-600 */
+}
+
+:is(.dark) .fi-input-wrp {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+:is(.dark) .fi-input {
+    color: #0f172a !important;
+}
+
 /* Font Awesome Pro - Lokální (Vendored) pro admin panel */
 @import "../vendor/fontawesome/css/all.min.css";
 

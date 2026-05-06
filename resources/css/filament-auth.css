@@ -7,6 +7,10 @@
 @import "../vendor/fontawesome/css/all.min.css";
 @import "tailwindcss";
 
+:root {
+    color-scheme: light;
+}
+
 @theme {
     --dark-mode: selector;
     /* Design Tokens - Hypermoderní Sportovní Styl */

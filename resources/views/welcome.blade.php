@@ -5,19 +5,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        <meta name="color-scheme" content="light">
         <script>
             /**
-             * VYNUCENÍ SVĚTLÉHO REŽIMU NA MOBILECH
-             * Na zařízeních s šířkou pod 1024px odstraňujeme třídu .dark.
+             * ABSOLUTNÍ VYNUCENÍ SVĚTLÉHO REŽIMU
+             * Odstraňujeme třídu .dark z dokumentu, aby aplikace vypadala vždy světle
+             * bez ohledu na systémové nastavení nebo šířku zařízení.
              */
             (function() {
-                const forceLightOnMobile = () => {
-                    if (window.innerWidth < 1024) {
-                        document.documentElement.classList.remove('dark');
+                const forceLight = () => {
+                    document.documentElement.classList.remove('dark');
+                    if (localStorage.getItem('theme') === 'dark') {
+                        localStorage.setItem('theme', 'light');
                     }
                 };
-                forceLightOnMobile();
-                window.addEventListener('resize', forceLightOnMobile);
+                forceLight();
+                window.addEventListener('resize', forceLight);
             })();
         </script>
 
