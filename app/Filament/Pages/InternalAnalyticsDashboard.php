@@ -9,7 +9,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\DatePicker;
-use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 use App\Support\IconHelper;
@@ -66,7 +65,6 @@ class InternalAnalyticsDashboard extends Page
             Action::make('filter')
                 ->label('Filtry')
                 ->icon('heroicon-m-funnel')
-                ->size(ActionSize::Small)
                 ->form([
                     Grid::make(3)
                         ->schema([
