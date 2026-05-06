@@ -14,6 +14,7 @@ use App\Http\Middleware\PublicMaintenanceMiddleware;
 use App\Http\Middleware\RedirectMiddleware;
 use App\Http\Middleware\SecurityHeadersMiddleware;
 use App\Http\Middleware\SetLocaleMiddleware;
+use App\Http\Middleware\NormalizeSignedUrlParameters;
 use App\Jobs\RunCronTaskJob;
 use App\Mail\ErrorMail;
 use App\Models\CronTask;
@@ -171,6 +172,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
             AddRequestIdToResponse::class,
             MinifyHtmlMiddleware::class,
             InjectFeedbackWidget::class,
+            // Strip neznámé query parametry z podepsaných URL (např. UTM z e-mailů), aby nepadala validace podpisu
+            NormalizeSignedUrlParameters::class,
             NotFoundLoggerMiddleware::class,
             \App\Http\Middleware\Restrict2FADeactivation::class,
             \App\Http\Middleware\InternalAnalyticsMiddleware::class,
