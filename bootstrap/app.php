@@ -162,15 +162,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'not_found_logger' => NotFoundLoggerMiddleware::class,
         ]);
 
-        $middleware->web(prepend: [
-            PerformanceProfilingMiddleware::class,
-            FullPageCacheMiddleware::class,
-        ]);
-
         $middleware->web(append: [
+            PerformanceProfilingMiddleware::class,
             SecurityHeadersMiddleware::class,
             DetectScreenshotMode::class,
             SetLocaleMiddleware::class,
+            FullPageCacheMiddleware::class,
             AddRequestIdToResponse::class,
             MinifyHtmlMiddleware::class,
             InjectFeedbackWidget::class,
