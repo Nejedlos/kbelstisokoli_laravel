@@ -75,12 +75,12 @@
                                     @if($card['link'] ?? null)
                                         @if($isExternal)
                                             <a href="{{ $card['link'] }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm w-full sm:w-auto px-6 py-2.5">
-                                                <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
+                                                <span>{{ $card['link_label'] ?? __('general.more_info') }}</span>
                                                 <i class="fa-light fa-arrow-up-right ml-2 text-[10px]"></i>
                                             </a>
                                         @else
                                             <a href="{{ $card['link'] }}" class="inline-flex items-center font-black uppercase tracking-widest-responsive text-xs sm:text-[10px] text-slate-400 group-hover:text-primary transition-colors py-1 underline decoration-slate-300 underline-offset-4 group-hover:decoration-primary" data-track-click="cards_grid_primary" data-track-label="{{ $card['title'] ?? '' }}">
-                                                <span>{{ $card['link_label'] ?? 'Více informací' }}</span>
+                                                <span>{{ $card['link_label'] ?? __('general.more_info') }}</span>
                                                 <div class="ml-2 w-4 h-px bg-slate-200 group-hover:bg-primary transition-all group-hover:w-8 hidden xs:block"></div>
                                             </a>
                                         @endif
@@ -88,7 +88,7 @@
 
                                     @if($card['secondary_link'] ?? null)
                                         <a href="{{ $card['secondary_link'] }}" class="text-xs sm:text-[10px] font-bold uppercase tracking-widest-responsive text-slate-400 hover:text-secondary transition-colors underline decoration-slate-200 underline-offset-4 py-1 ml-auto sm:ml-0">
-                                            {{ $card['secondary_link_label'] ?? 'Program' }}
+                                            {{ $card['secondary_link_label'] ?? __('general.nav.program') }}
                                         </a>
                                     @endif
                                 </div>

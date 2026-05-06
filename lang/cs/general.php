@@ -35,6 +35,7 @@ return [
     ],
     'view_on_map' => 'Zobrazit na mapě',
     'view_more' => 'Zobrazit více',
+    'more_info' => 'Více informací',
     'common' => [
         'view_more' => 'Zobrazit více',
         'view_all' => 'Zobrazit vše',

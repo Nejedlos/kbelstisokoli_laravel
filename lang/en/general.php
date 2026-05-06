@@ -35,6 +35,7 @@ return [
     ],
     'view_on_map' => 'View on map',
     'view_more' => 'View more',
+    'more_info' => 'More information',
     'common' => [
         'view_more' => 'View more',
         'view_all' => 'View all',
