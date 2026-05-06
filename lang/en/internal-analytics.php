@@ -1,0 +1,70 @@
+<?php
+
+return [
+    'title' => 'Internal Analytics',
+    'navigation_label' => 'Traffic Analytics',
+    'navigation_group' => 'System',
+    'description' => 'Overview of internal traffic, logins, section load and technical application events.',
+
+    'filters' => [
+        'period' => 'Period',
+        'area' => 'Site Section',
+        'event_type' => 'Event Type',
+        'authenticated' => 'Authentication',
+        'all' => 'All',
+        'today' => 'Today',
+        'yesterday' => 'Yesterday',
+        'last_7_days' => 'Last 7 days',
+        'last_30_days' => 'Last 30 days',
+        'this_month' => 'This month',
+        'last_month' => 'Last month',
+        'frontend' => 'Frontend',
+        'member' => 'Member Section',
+        'admin' => 'Administration',
+        'api' => 'API',
+        'unknown' => 'Unknown',
+        'guests' => 'Guests',
+        'authenticated_only' => 'Authenticated',
+    ],
+
+    'stats' => [
+        'page_views' => 'Page Views',
+        'unique_visitors' => 'Unique Visitors',
+        'authenticated_users' => 'Authenticated Users',
+        'logins' => 'Logins',
+        'admin_access' => 'Admin Access',
+        'member_access' => 'Member Access',
+        'error_requests' => 'Error Requests',
+        'avg_response_time' => 'Avg Response Time',
+        'max_response_time' => 'Max Response Time',
+        'not_found_count' => '404 Count',
+    ],
+
+    'charts' => [
+        'traffic_by_day' => 'Traffic by Day',
+        'traffic_by_area' => 'Traffic by Section',
+        'logins_by_day' => 'Logins by Day',
+        'status_codes' => 'Status Codes',
+        'guest_vs_auth' => 'Guest vs Authenticated Ratio',
+    ],
+
+    'tables' => [
+        'top_pages' => 'Most Visited Pages',
+        'recent_events' => 'Recent Important Events',
+        'slow_requests' => 'Slow Requests',
+        'error_requests' => 'Error Requests',
+        'column' => [
+            'path' => 'Path',
+            'route' => 'Route',
+            'area' => 'Section',
+            'views' => 'Views',
+            'unique_visitors' => 'Unique',
+            'avg_time' => 'Avg Time',
+            'occurred_at' => 'Time',
+            'event_type' => 'Type',
+            'user' => 'User',
+            'status' => 'Status',
+            'time' => 'Time (ms)',
+        ],
+    ],
+];

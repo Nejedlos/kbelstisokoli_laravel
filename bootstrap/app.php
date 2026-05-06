@@ -173,6 +173,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             InjectFeedbackWidget::class,
             NotFoundLoggerMiddleware::class,
             \App\Http\Middleware\Restrict2FADeactivation::class,
+            \App\Http\Middleware\InternalAnalyticsMiddleware::class,
             'active',
         ]);
 

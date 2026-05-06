@@ -43,6 +43,15 @@ class EventServiceProvider extends ServiceProvider
     ];
 
     /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        \App\Listeners\InternalAnalytics\AuthEventListener::class,
+    ];
+
+    /**
      * Register any events for your application.
      */
     public function boot(): void

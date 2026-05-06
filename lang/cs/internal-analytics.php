@@ -1,0 +1,70 @@
+<?php
+
+return [
+    'title' => 'Interní analytika',
+    'navigation_label' => 'Analytika provozu',
+    'navigation_group' => 'Systém',
+    'description' => 'Přehled interní návštěvnosti, přihlášení, zatížení sekcí a technických událostí aplikace.',
+
+    'filters' => [
+        'period' => 'Období',
+        'area' => 'Sekce webu',
+        'event_type' => 'Typ události',
+        'authenticated' => 'Autentizace',
+        'all' => 'Vše',
+        'today' => 'Dnes',
+        'yesterday' => 'Včera',
+        'last_7_days' => 'Posledních 7 dní',
+        'last_30_days' => 'Posledních 30 dní',
+        'this_month' => 'Tento měsíc',
+        'last_month' => 'Minulý měsíc',
+        'frontend' => 'Frontend',
+        'member' => 'Členská sekce',
+        'admin' => 'Administrace',
+        'api' => 'API',
+        'unknown' => 'Neznámé',
+        'guests' => 'Hosté',
+        'authenticated_only' => 'Přihlášení',
+    ],
+
+    'stats' => [
+        'page_views' => 'Zobrazení stránek',
+        'unique_visitors' => 'Unikátní návštěvníci',
+        'authenticated_users' => 'Přihlášení uživatelé',
+        'logins' => 'Počet loginů',
+        'admin_access' => 'Admin přístupy',
+        'member_access' => 'Member přístupy',
+        'error_requests' => 'Chybové requesty',
+        'avg_response_time' => 'Průměrná odezva',
+        'max_response_time' => 'Nejpomalejší request',
+        'not_found_count' => 'Počet 404',
+    ],
+
+    'charts' => [
+        'traffic_by_day' => 'Návštěvnost po dnech',
+        'traffic_by_area' => 'Návštěvnost podle sekcí',
+        'logins_by_day' => 'Přihlášení po dnech',
+        'status_codes' => 'Stavové kódy',
+        'guest_vs_auth' => 'Poměr host vs přihlášený',
+    ],
+
+    'tables' => [
+        'top_pages' => 'Nejnavštěvovanější stránky',
+        'recent_events' => 'Poslední důležité události',
+        'slow_requests' => 'Pomalé requesty',
+        'error_requests' => 'Chybové requesty',
+        'column' => [
+            'path' => 'Cesta',
+            'route' => 'Route',
+            'area' => 'Sekce',
+            'views' => 'Zobrazení',
+            'unique_visitors' => 'Unikátní',
+            'avg_time' => 'Prům. čas',
+            'occurred_at' => 'Čas',
+            'event_type' => 'Typ',
+            'user' => 'Uživatel',
+            'status' => 'Status',
+            'time' => 'Čas (ms)',
+        ],
+    ],
+];
