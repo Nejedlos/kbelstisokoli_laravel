@@ -61,10 +61,12 @@ class FullPageCacheMiddleware
         // 2. Obsah není prázdný
         // 3. Nejde o Livewire request (X-Livewire header)
         // 4. Uživatel není přihlášen (ověření po proběhnutí session)
+        // 5. Obsah neobsahuje CSRF token (pro jistotu, aby se nenacachovaly formuláře)
         if ($response->getStatusCode() === 200
             && ! empty($content)
             && ! $request->hasHeader('X-Livewire')
             && ! auth()->check()
+            && ! str_contains($content, 'name="_token"')
         ) {
             Cache::put($cacheKey, [
                 'content' => $content,
@@ -92,7 +94,24 @@ class FullPageCacheMiddleware
             'up',
             'system*',
             'hledat*',
+            'login',
+            'logout',
+            'register',
+            'password*',
+            'forgot-password*',
+            'reset-password*',
+            'two-factor*',
+            'email/verify*',
+            'verify-email*',
         ];
+
+        // Pokud má request session, zkontrolujeme zda neobsahuje flash data (např. po chybě validace)
+        if ($request->hasSession()) {
+            $session = $request->session();
+            if ($session->has('errors') || $session->has('status') || $session->has('success') || $session->has('message')) {
+                return false;
+            }
+        }
 
         return $enabled
             && $request->isMethod('GET')
