@@ -116,7 +116,7 @@ class PageCachePrimeCommand extends Command
      */
     protected function primeUrl(string $url, string $locale): void
     {
-        $defaultLocale = config('app.locale', 'cs');
+        $defaultLocale = 'cs';
 
         // Pro výchozí jazyk (cs) voláme čistou URL bez lang parametru,
         // protože to je to, co dostanou běžní návštěvníci (předpokládáme).
