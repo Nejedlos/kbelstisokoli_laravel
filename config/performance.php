@@ -14,8 +14,8 @@ return [
     'scenario' => env('PERF_SCENARIO', 'ultra'),
 
     'features' => [
-        'full_page_cache' => env('PERF_FULL_PAGE_CACHE', false),
-        'fragment_cache' => env('PERF_FRAGMENT_CACHE', false),
+        'full_page_cache' => env('PERF_FULL_PAGE_CACHE', true),
+        'fragment_cache' => env('PERF_FRAGMENT_CACHE', true),
         'html_minification' => env('PERF_HTML_MINIFY', false),
         'livewire_navigate' => env('PERF_LW_NAVIGATE', false),
         'lazy_load_images' => env('PERF_LAZY_IMAGES', true),
