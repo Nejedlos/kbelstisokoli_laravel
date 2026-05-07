@@ -78,6 +78,7 @@
 
     <!-- Google Tag Manager / Analytics -->
     @if($gaId = config('services.google.analytics_id'))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -92,9 +93,21 @@
             });
 
             gtag('js', new Date());
-            gtag('config', '{{ $gaId }}');
+            gtag('config', '{{ $gaId }}', {
+                'send_page_view': true
+            });
+
+            // Podpora pro Livewire 3 navigaci (SPA mode)
+            document.addEventListener('livewire:navigated', function() {
+                if (typeof gtag === 'function') {
+                    gtag('config', '{{ $gaId }}', {
+                        'page_path': window.location.pathname,
+                        'page_location': window.location.href,
+                        'page_title': document.title
+                    });
+                }
+            });
         </script>
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
     @endif
     <x-screenshot.styles />
     <x-screenshot.scripts />

@@ -143,15 +143,16 @@ function cookieConsent() {
         applyConsent(consent) {
             window.ksCookieConsent = consent;
 
-            // Nastavení GTAG consent mode
+            // Nastavení GTAG consent mode (Consent Mode v2)
             if (window.gtag) {
+                const state = consent.analytics ? 'granted' : 'denied';
                 gtag('consent', 'update', {
-                    'analytics_storage': consent.analytics ? 'granted' : 'denied'
+                    'analytics_storage': state,
+                    'ad_storage': state,
+                    'ad_user_data': state,
+                    'ad_personalization': state
                 });
             }
-
-            // Pokud máme souhlas s analytikou a GTAG ještě neběží, můžeme ho inicializovat
-            // Ale v našem setupu v public.blade.php budeme mít default 'denied' a tady ho jen updatujeme.
 
             window.dispatchEvent(new CustomEvent('cookie-consent-updated', { detail: consent }));
         },

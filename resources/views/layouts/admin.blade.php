@@ -37,6 +37,40 @@
             document.addEventListener('livewire:navigated', forceLight);
         })();
     </script>
+    <!-- Google Tag Manager / Analytics -->
+    @if($gaId = config('services.google.analytics_id'))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+
+            // Výchozí nastavení souhlasu (Consent Mode v2)
+            gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'wait_for_update': 500
+            });
+
+            gtag('js', new Date());
+            gtag('config', '{{ $gaId }}', {
+                'send_page_view': true
+            });
+
+            // Podpora pro Livewire 3 navigaci (SPA mode)
+            document.addEventListener('livewire:navigated', function() {
+                if (typeof gtag === 'function') {
+                    gtag('config', '{{ $gaId }}', {
+                        'page_path': window.location.pathname,
+                        'page_location': window.location.href,
+                        'page_title': document.title
+                    });
+                }
+            });
+        </script>
+    @endif
+
     @vite(['resources/css/icons-fix.css', 'resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
