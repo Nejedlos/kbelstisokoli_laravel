@@ -41,12 +41,12 @@
             function gtag(){dataLayer.push(arguments);}
 
             // Výchozí nastavení souhlasu (Consent Mode v2)
-            // Nastavíme 'denied', dokud uživatel neodsouhlasí v cookie liště
+            // Nastavíme 'granted' (aktivní), dokud uživatel explicitně nezamítne
             gtag('consent', 'default', {
-                'analytics_storage': 'denied',
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
+                'analytics_storage': 'granted',
+                'ad_storage': 'granted',
+                'ad_user_data': 'granted',
+                'ad_personalization': 'granted',
                 'wait_for_update': 500
             });
 
