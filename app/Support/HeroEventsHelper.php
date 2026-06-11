@@ -10,65 +10,60 @@ use Illuminate\Support\Collection;
 class HeroEventsHelper
 {
     /**
-     * Získá nejbližší akci (zápas nebo klubovou akci) pro každý aktivní tým.
+     * Získá nejbližší akce (zápasy nebo klubové akce) napříč všemi týmy.
      */
     public static function getUpcomingEvents(): Collection
     {
-        $activeTeams = Team::all();
-        $events = collect();
         $now = now();
 
-        foreach ($activeTeams as $team) {
-            // Najdeme nejbližší zápas
-            $match = BasketballMatch::whereHas('teams', function ($query) use ($team) {
-                $query->where('team_id', $team->id);
-            })
+        // 1. Získáme nejbližší zápasy (přednačteme týmy)
+        $matches = BasketballMatch::with('teams')
             ->where('scheduled_at', '>', $now)
             ->where('status', '!=', 'cancelled')
+            ->whereHas('teams')
             ->orderBy('scheduled_at')
-            ->first();
+            ->limit(5)
+            ->get();
 
-            // Najdeme nejbližší klubovou akci
-            $clubEvent = ClubEvent::whereHas('teams', function ($query) use ($team) {
-                $query->where('team_id', $team->id);
-            })
+        // 2. Získáme nejbližší klubové akce (přednačteme týmy)
+        $clubEvents = ClubEvent::with('teams')
             ->where('starts_at', '>', $now)
             ->where('is_public', true)
+            ->whereHas('teams')
             ->orderBy('starts_at')
-            ->first();
+            ->limit(5)
+            ->get();
 
-            // Vybereme to, co je dřív
-            $chosen = null;
-            if ($match && $clubEvent) {
-                $chosen = $match->scheduled_at < $clubEvent->starts_at ? $match : $clubEvent;
-            } elseif ($match) {
-                $chosen = $match;
-            } elseif ($clubEvent) {
-                $chosen = $clubEvent;
-            }
-
-            if ($chosen) {
-                $events->push(self::formatEvent($chosen, $team));
-            }
-        }
-
-        return $events->sortBy('date')->take(2);
+        // 3. Sloučíme, seřadíme a naformátujeme
+        return $matches->concat($clubEvents)
+            ->sortBy(fn($event) => $event instanceof BasketballMatch ? $event->scheduled_at : $event->starts_at)
+            ->take(2)
+            ->map(fn($event) => self::formatEvent($event));
     }
 
-    protected static function formatEvent($event, Team $team): array
+    protected static function formatEvent($event): array
     {
         $isMatch = $event instanceof BasketballMatch;
+        $locale = app()->getLocale();
+
+        // Sestavíme zkratky všech zapojených týmů
+        $teamShorts = $event->teams->map(function ($team) use ($locale) {
+            $name = $team->getTranslation('name', $locale);
+            return trim(str_replace('Sokol Kbely ', '', $name));
+        })->unique();
+
+        $teamShort = $teamShorts->implode(' & ');
 
         return [
             'id' => $event->id,
             'type' => $isMatch ? 'match' : 'event',
-            'team_name' => $team->getTranslation('name', app()->getLocale()),
-            'team_short' => str_replace('Sokol Kbely ', '', $team->getTranslation('name', app()->getLocale())),
+            'team_name' => $teamShort,
+            'team_short' => $teamShort,
             'title' => $isMatch
                 ? ($event->is_home
                     ? $event->official_team_name . ' – ' . $event->official_opponent_name
                     : $event->official_opponent_name . ' – ' . $event->official_team_name)
-                : $event->getTranslation('title', app()->getLocale()),
+                : $event->getTranslation('title', $locale),
             'date' => $isMatch ? $event->scheduled_at : $event->starts_at,
             'location' => $isMatch ? ($event->venue?->name ?? $event->location) : $event->location,
             'is_home' => $isMatch ? $event->is_home : true,
