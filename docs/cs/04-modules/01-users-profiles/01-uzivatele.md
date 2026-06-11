@@ -20,6 +20,7 @@ Tento modul zajišťuje správu uživatelských účtů (přihlášení, role) a
 - **UserResource:** Správa jména, e‑mailu, telefonu, rolí a aktivity. Obsahuje `PlayerProfileRelationManager`.
 - **PlayerProfileResource:** Správa sportovních údajů, dresu, pozice a přiřazení k týmům.
 - **Role & Permissions:** Read-only přehledy v administraci. Úpravy rolí jsou povoleny pouze pro `super-admin`.
+- **Pozvánky:** Administrátor může poslat uživateli pozvánku do členské sekce pomocí akce „Poslat pozvánku“ na stránce úpravy uživatele. Tato akce vygeneruje bezpečný odkaz pro nastavení hesla a odešle jej na e-mail uživatele v graficky zpracované šabloně s basketbalovou tématikou.
 
 ## 4. Autorizace a bezpečnost
 - **Policies:** Všechny operace chráněny oprávněním `manage_users`. Hráči vidí vlastní profil.

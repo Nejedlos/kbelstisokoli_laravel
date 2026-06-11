@@ -5,11 +5,13 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Enums\MembershipStatus;
 use App\Filament\Resources\Users\UserResource;
 use App\Support\IconHelper;
+use App\Notifications\Auth\UserInvitationNotification;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\MaxWidth;
+use Illuminate\Support\Facades\Password;
 
 class EditUser extends EditRecord
 {
@@ -23,6 +25,20 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('sendInvitation')
+                ->label(__('user.actions.send_invitation'))
+                ->icon(IconHelper::get(IconHelper::ACTIVATE))
+                ->color('info')
+                ->requiresConfirmation()
+                ->action(function ($record) {
+                    $token = Password::createToken($record);
+                    $record->notify(new UserInvitationNotification($token));
+
+                    Notification::make()
+                        ->title(__('user.notifications.invitation_sent'))
+                        ->success()
+                        ->send();
+                }),
             Action::make('activate')
                 ->label(__('user.actions.activate'))
                 ->icon(IconHelper::get(IconHelper::ACTIVATE))
