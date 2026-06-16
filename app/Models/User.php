@@ -117,7 +117,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
     }
 
     /**
-     * Automatické skládání jména.
+     * Automatické skládání jména a výchozí role.
      */
     protected static function booted()
     {
@@ -135,6 +135,21 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
 
                 if ($user->isDirty('payment_vs') && ! empty($user->getOriginal('payment_vs'))) {
                     $user->payment_vs = $user->getOriginal('payment_vs');
+                }
+            }
+        });
+
+        static::created(function ($user) {
+            // Pokud uživatel nemá přiřazenou žádnou roli, přiřadíme mu roli 'player'
+            // jako základní přístup do členské sekce. To je důležité zejména při
+            // vytváření uživatelů trenéry, kteří nemají právo spravovat role.
+            if ($user->roles()->count() === 0) {
+                try {
+                    $user->assignRole('player');
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to assign default player role to user: ' . $user->id, [
+                        'error' => $e->getMessage()
+                    ]);
                 }
             }
         });
