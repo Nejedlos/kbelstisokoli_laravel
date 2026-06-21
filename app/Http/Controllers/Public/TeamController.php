@@ -48,8 +48,11 @@ class TeamController extends Controller
         return view('public.teams.roster', compact('teams', 'page'));
     }
 
-    public function show(string $slug): View
+    public function show(?string $slug = null): View
     {
+        if (is_null($slug)) {
+            abort(404);
+        }
         $team = \App\Models\Team::where('slug', $slug)
             ->with(['coaches', 'seo', 'rosterPlayers.user'])
             ->firstOrFail();

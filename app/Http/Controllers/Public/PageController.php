@@ -8,8 +8,11 @@ use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function show(string $slug, \App\Services\BreadcrumbService $breadcrumbService): View|\Illuminate\Http\RedirectResponse
+    public function show(\App\Services\BreadcrumbService $breadcrumbService, ?string $slug = null): View|\Illuminate\Http\RedirectResponse
     {
+        if (is_null($slug)) {
+            abort(404);
+        }
         // Homepage by měla být dostupná pouze na kořenové URL
         if ($slug === 'home') {
             return redirect()->route('public.home');

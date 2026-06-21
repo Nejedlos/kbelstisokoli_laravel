@@ -37,8 +37,11 @@ class GalleryController extends Controller
         return view('public.galleries.index', compact('galleries', 'pools', 'randomPhotos'));
     }
 
-    public function show(string $slug): View
+    public function show(?string $slug = null): View
     {
+        if (is_null($slug)) {
+            abort(404);
+        }
         // Nejdřív zkusíme starou galerii
         $gallery = Gallery::with(['mediaAssets.media', 'coverAsset.media', 'seo'])
             ->where('slug', $slug)

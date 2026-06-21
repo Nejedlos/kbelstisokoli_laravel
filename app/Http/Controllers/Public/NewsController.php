@@ -21,8 +21,11 @@ class NewsController extends Controller
         return view('public.news.index', compact('posts', 'page', 'breadcrumbs'));
     }
 
-    public function show(string $slug, \App\Services\BreadcrumbService $breadcrumbService): View
+    public function show(\App\Services\BreadcrumbService $breadcrumbService, ?string $slug = null): View
     {
+        if (is_null($slug)) {
+            abort(404);
+        }
         $post = \App\Models\Post::with(['category', 'seo'])
             ->where('slug', $slug)
             ->where('status', 'published')
