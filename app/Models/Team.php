@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasSeo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class Team extends Model
 {
-    use HasSeo, HasTranslations;
+    use HasFactory, HasSeo, HasTranslations;
 
     protected $fillable = [
         'name',

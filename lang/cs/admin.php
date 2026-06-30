@@ -615,6 +615,18 @@ return [
                     'period_this_season' => 'Do konce sezóny',
                 ],
             ],
+            'bulk_actions' => [
+                'change_location' => [
+                    'label' => 'Změnit místo konání',
+                    'modal_description' => 'Zadejte nové místo konání pro všechny vybrané tréninky.',
+                    'success_notification' => 'Místo konání bylo hromadně změněno.',
+                ],
+                'change_teams' => [
+                    'label' => 'Změnit týmy',
+                    'modal_description' => 'Vyberte týmy, které budou přiřazeny ke všem vybraným tréninkům. Původní týmy budou nahrazeny.',
+                    'success_notification' => 'Týmy byly hromadně změněny.',
+                ],
+            ],
         ],
         'user' => [
             'label' => 'Uživatel',

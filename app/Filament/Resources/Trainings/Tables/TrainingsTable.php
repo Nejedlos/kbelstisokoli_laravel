@@ -3,11 +3,18 @@
 namespace App\Filament\Resources\Trainings\Tables;
 
 use App\Models\Training;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class TrainingsTable
 {
@@ -59,6 +66,50 @@ class TrainingsTable
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    BulkAction::make('change_location')
+                        ->label(__('admin.resources.training.bulk_actions.change_location.label'))
+                        ->icon(FilamentIcon::get(AppIcon::LOCATION))
+                        ->modalDescription(__('admin.resources.training.bulk_actions.change_location.modal_description'))
+                        ->form([
+                            TextInput::make('new_location')
+                                ->label(__('admin.resources.training.fields.location'))
+                                ->placeholder(__('admin.resources.training.fields.location_placeholder'))
+                                ->required(),
+                        ])
+                        ->action(function (Collection $records, array $data): void {
+                            $records->each(fn (Training $record) => $record->update([
+                                'location' => $data['new_location'],
+                            ]));
+
+                            Notification::make()
+                                ->title(__('admin.resources.training.bulk_actions.change_location.success_notification'))
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+
+                    BulkAction::make('change_teams')
+                        ->label(__('admin.resources.training.bulk_actions.change_teams.label'))
+                        ->icon(FilamentIcon::get(AppIcon::TEAMS))
+                        ->modalDescription(__('admin.resources.training.bulk_actions.change_teams.modal_description'))
+                        ->form([
+                            Select::make('teams')
+                                ->label(__('admin.resources.training.fields.teams'))
+                                ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                                ->multiple()
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                        ])
+                        ->action(function (Collection $records, array $data): void {
+                            $records->each(fn (Training $record) => $record->teams()->sync($data['teams']));
+
+                            Notification::make()
+                                ->title(__('admin.resources.training.bulk_actions.change_teams.success_notification'))
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

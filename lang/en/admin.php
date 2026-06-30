@@ -525,6 +525,18 @@ return [
                     'period_this_season' => 'Until end of season',
                 ],
             ],
+            'bulk_actions' => [
+                'change_location' => [
+                    'label' => 'Change Location',
+                    'modal_description' => 'Enter a new location for all selected trainings.',
+                    'success_notification' => 'Location has been bulk updated.',
+                ],
+                'change_teams' => [
+                    'label' => 'Change Teams',
+                    'modal_description' => 'Select teams to be assigned to all selected trainings. Existing teams will be replaced.',
+                    'success_notification' => 'Teams have been bulk updated.',
+                ],
+            ],
         ],
         'help_category' => [
             'label' => 'Help Category',
