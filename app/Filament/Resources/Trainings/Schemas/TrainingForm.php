@@ -21,6 +21,14 @@ class TrainingForm
             ->components([
                 Grid::make(2)
                     ->schema([
+                        Select::make('sport')
+                            ->label(__('admin.resources.training.fields.sport'))
+                            ->options([
+                                'basketball' => __('trainings.basketball'),
+                                'volleyball' => __('trainings.volleyball'),
+                            ])
+                            ->default('basketball')
+                            ->required(),
                         Select::make('teams')
                             ->label(__('admin.resources.training.fields.teams'))
                             ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))

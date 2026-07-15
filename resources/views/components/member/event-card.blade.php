@@ -16,16 +16,34 @@
     $pendingCount = max(0, $totalCount - ($confirmedCount + $declinedCount + $maybeCount));
 
     $typeIcons = [
-        'training' => 'dumbbell',
+        'training' => [
+            'basketball' => 'basketball',
+            'volleyball' => 'volleyball',
+            'default' => 'dumbbell',
+        ],
         'match' => 'basketball',
         'event' => 'star',
     ];
 
+    $icon = $typeIcons[$type];
+    if ($type === 'training') {
+        $icon = $typeIcons['training'][$data->sport ?? 'default'] ?? $typeIcons['training']['default'];
+    }
+
     $typeLabels = [
-        'training' => __('member.attendance.event_types.training'),
+        'training' => [
+            'basketball' => __('member.attendance.event_types.training_basketball'),
+            'volleyball' => __('member.attendance.event_types.training_volleyball'),
+            'default' => __('member.attendance.event_types.training'),
+        ],
         'match' => __('member.attendance.event_types.match'),
         'event' => __('member.attendance.event_types.event'),
     ];
+
+    $label = $typeLabels[$type];
+    if ($type === 'training') {
+        $label = $typeLabels['training'][$data->sport ?? 'default'] ?? $typeLabels['training']['default'];
+    }
 
     $statusColors = [
         'pending' => 'bg-slate-100 text-slate-600',
@@ -85,8 +103,8 @@
             <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2 sm:gap-4 mb-1 sm:mb-1.5">
                     <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-1.5 group-hover:text-primary transition-colors">
-                        <i class="fa-light fa-{{ $typeIcons[$type] }} text-primary"></i>
-                        {{ $typeLabels[$type] }}
+                        <i class="fa-light fa-{{ $icon }} text-primary"></i>
+                        {{ $label }}
                     </span>
                     <div class="flex items-center gap-1.5">
                         <span class="text-[7px] font-black uppercase tracking-widest text-slate-400/80">{{ __('member.attendance.my_status') }}:</span>
@@ -108,7 +126,7 @@
                     @if($type === 'match')
                         {{ $data->team?->name }} <span class="text-primary italic mx-1">vs</span> {{ $data->opponent?->name }}
                     @elseif($type === 'training')
-                        {{ __('member.attendance.event_types.training') }}
+                        {{ $label }}
                     @else
                         {{ $data->title }}
                     @endif

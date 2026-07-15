@@ -500,6 +500,9 @@ return [
             'label' => 'Training',
             'plural_label' => 'Trainings',
             'fields' => [
+                'sport' => 'Sport',
+                'sport_basketball' => 'Basketball',
+                'sport_volleyball' => 'Volleyball',
                 'teams' => 'Teams',
                 'location' => 'Location (Gym)',
                 'location_placeholder' => 'e.g. Kbely Hall',
@@ -535,6 +538,22 @@ return [
                     'label' => 'Change Teams',
                     'modal_description' => 'Select teams to be assigned to all selected trainings. Existing teams will be replaced.',
                     'success_notification' => 'Teams have been bulk updated.',
+                ],
+                'replicate' => [
+                    'label' => 'Clone Training(s)',
+                    'modal_description' => 'Selected trainings will be copied. You can choose either a specific date for a one-time clone, or set recurrence rules.',
+                    'success_notification' => 'Trainings have been successfully cloned.',
+                    'fields' => [
+                        'mode' => 'Clone Mode',
+                        'mode_single' => 'One-time on a specific date',
+                        'mode_recurring' => 'Recurring (according to scheme)',
+                        'target_date' => 'Clone Date',
+                    ],
+                ],
+                'change_sport' => [
+                    'label' => 'Change Sport',
+                    'modal_description' => 'Change the sport for all selected trainings.',
+                    'success_notification' => 'Sport has been bulk updated.',
                 ],
             ],
         ],

@@ -58,6 +58,7 @@ return [
     'teams' => 'Týmy',
     'all_teams' => 'Všechny týmy',
     'today' => 'DNES',
+    'confirmed_count' => ':count přislíbilo',
     'upcoming_events_title' => 'Nejbližší akce',
     'stats' => [
         'title' => 'Naše síla v číslech',

@@ -590,6 +590,9 @@ return [
             'label' => 'Trénink',
             'plural_label' => 'Tréninky',
             'fields' => [
+                'sport' => 'Sport',
+                'sport_basketball' => 'Basketbal',
+                'sport_volleyball' => 'Volejbal',
                 'teams' => 'Týmy',
                 'location' => 'Místo (Hala/Tělocvična)',
                 'location_placeholder' => 'např. Hala Kbely',
@@ -625,6 +628,22 @@ return [
                     'label' => 'Změnit týmy',
                     'modal_description' => 'Vyberte týmy, které budou přiřazeny ke všem vybraným tréninkům. Původní týmy budou nahrazeny.',
                     'success_notification' => 'Týmy byly hromadně změněny.',
+                ],
+                'replicate' => [
+                    'label' => 'Klonovat trénink(y)',
+                    'modal_description' => 'Vybrané tréninky budou zkopírovány. Můžete zvolit buď konkrétní datum pro jednorázové klonování, nebo nastavit pravidla opakování.',
+                    'success_notification' => 'Tréninky byly úspěšně naklonovány.',
+                    'fields' => [
+                        'mode' => 'Režim klonování',
+                        'mode_single' => 'Jednorázově na konkrétní datum',
+                        'mode_recurring' => 'Opakovaně (podle schématu)',
+                        'target_date' => 'Datum klonování',
+                    ],
+                ],
+                'change_sport' => [
+                    'label' => 'Změnit sport',
+                    'modal_description' => 'Změňte sport pro všechny vybrané tréninky.',
+                    'success_notification' => 'Sport byl hromadně změněn.',
                 ],
             ],
         ],

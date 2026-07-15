@@ -11,6 +11,7 @@ class Training extends Model
     use HasFactory;
 
     protected $fillable = [
+        'sport',
         'location',
         'starts_at',
         'ends_at',
@@ -43,5 +44,10 @@ class Training extends Model
     public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'team_training');
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return __('member.attendance.event_types.training_' . ($this->sport ?? 'basketball'));
     }
 }

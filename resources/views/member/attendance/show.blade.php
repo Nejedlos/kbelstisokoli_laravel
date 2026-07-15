@@ -1,6 +1,38 @@
+@php
+    $typeIcons = [
+        'training' => [
+            'basketball' => 'basketball',
+            'volleyball' => 'volleyball',
+            'default' => 'dumbbell',
+        ],
+        'match' => 'basketball',
+        'event' => 'star',
+    ];
+
+    $icon = $typeIcons[$type];
+    if ($type === 'training') {
+        $icon = $typeIcons['training'][$item->sport ?? 'default'] ?? $typeIcons['training']['default'];
+    }
+
+    $typeLabels = [
+        'training' => [
+            'basketball' => __('member.attendance.event_types.training_basketball'),
+            'volleyball' => __('member.attendance.event_types.training_volleyball'),
+            'default' => __('member.attendance.event_types.training'),
+        ],
+        'match' => __('member.attendance.event_types.match'),
+        'event' => __('member.attendance.event_types.event'),
+    ];
+
+    $label = $typeLabels[$type];
+    if ($type === 'training') {
+        $label = $typeLabels['training'][$item->sport ?? 'default'] ?? $typeLabels['training']['default'];
+    }
+@endphp
+
 @extends('layouts.member', [
     'title' => __('member.attendance.detail_title') ?? 'Detail události',
-    'subtitle' => $item->title ?? ($type === 'match' ? ($item->team?->name . ' vs ' . $item->opponent?->name) : __('member.attendance.event_types.training'))
+    'subtitle' => $item->title ?? ($type === 'match' ? ($item->team?->name . ' vs ' . $item->opponent?->name) : $label)
 ])
 
 @section('content')
@@ -26,11 +58,17 @@
                                 <span class="text-xl sm:text-2xl font-black leading-none">{{ $time->format('d') }}</span>
                             </div>
                             <div class="min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-1.5">
+                                        <i class="fa-light fa-{{ $icon }} text-primary"></i>
+                                        {{ $label }}
+                                    </span>
+                                </div>
                                 <h2 class="text-xl sm:text-2xl font-black text-secondary leading-tight tracking-tight">
                                     @if($type === 'match')
                                         {{ $item->team?->name }} <span class="text-primary italic mx-1">vs</span> {{ $item->opponent?->name }}
                                     @elseif($type === 'training')
-                                        {{ __('member.attendance.event_types.training') }}
+                                        {{ $label }}
                                     @else
                                         {{ $item->getTranslation('title', app()->getLocale()) }}
                                     @endif

@@ -89,6 +89,8 @@ return [
         'event_types' => [
             'match' => 'Basketbalový zápas',
             'training' => 'Trénink',
+            'training_basketball' => 'Basketbalový trénink',
+            'training_volleyball' => 'Volejbalový trénink',
             'event' => 'Akce',
             'unknown' => 'Neznámá akce',
         ],

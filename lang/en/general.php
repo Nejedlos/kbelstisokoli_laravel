@@ -58,6 +58,7 @@ return [
     'teams' => 'Teams',
     'all_teams' => 'All teams',
     'today' => 'TODAY',
+    'confirmed_count' => ':count promised',
     'upcoming_events_title' => 'Upcoming events',
     'stats' => [
         'title' => 'Our strength in numbers',

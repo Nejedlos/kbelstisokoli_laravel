@@ -63,11 +63,23 @@
                 <div class="space-y-4">
                     @forelse($upcomingTrainings as $training)
                         <div class="card p-5 flex items-center justify-between group hover:bg-slate-50 transition-colors cursor-default">
-                            <div>
-                                <h4 class="font-bold text-secondary">{{ $training->starts_at->translatedFormat('l d.m.') }}</h4>
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    {{ $training->starts_at->format('H:i') }} - {{ $training->ends_at->format('H:i') }} • {{ $training->location ?: 'Kbely' }}
-                                </p>
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 shrink-0 group-hover:bg-white transition-colors">
+                                    <i class="fa-light fa-{{ $training->sport === 'volleyball' ? 'volleyball' : 'basketball' }} text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-secondary">
+                                        {{ $training->display_name }}
+                                        <span class="text-slate-400 font-medium ml-1 text-xs">— {{ $training->starts_at->translatedFormat('l d.m.') }}</span>
+                                    </h4>
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        {{ $training->starts_at->format('H:i') }}
+                                        @if($training->ends_at)
+                                            - {{ $training->ends_at->format('H:i') }}
+                                        @endif
+                                        • {{ $training->location ?: 'Kbely' }}
+                                    </p>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="px-3 py-1 bg-success-50 text-success-700 rounded-full font-black text-xs">

@@ -20,6 +20,7 @@ enum AppIcon: string
     case MENUS = 'bars';
     case TRAININGS = 'dumbbell';
     case MATCHES = 'basketball';
+    case VOLLEYBALL = 'volleyball';
     case EVENTS = 'calendar-check';
     case SEASONS = 'calendar-days';
     case TEAMS = 'user-group';

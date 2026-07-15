@@ -89,6 +89,8 @@ return [
         'event_types' => [
             'match' => 'Basketball match',
             'training' => 'Training',
+            'training_basketball' => 'Basketball training',
+            'training_volleyball' => 'Volleyball training',
             'event' => 'Event',
             'unknown' => 'Unknown event',
         ],

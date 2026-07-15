@@ -30,16 +30,32 @@
                             @else
                                 <div class="space-y-4">
                                     @foreach($team->trainings as $training)
+                                        @php
+                                            $sportIcon = match($training->sport) {
+                                                'volleyball' => 'volleyball',
+                                                default => 'basketball',
+                                            };
+                                            $sportLabel = $training->display_name;
+                                        @endphp
                                         <div class="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-md transition-all">
                                             <div class="bg-white shadow-sm text-secondary p-3 rounded-xl text-center min-w-[70px] border border-slate-100 group-hover:bg-primary group-hover:text-white transition-colors">
                                                 <div class="text-[10px] font-black uppercase tracking-widest opacity-60">{{ $training->starts_at->translatedFormat('M') }}</div>
                                                 <div class="text-2xl font-black leading-none">{{ $training->starts_at->day }}</div>
                                             </div>
-                                            <div>
-                                                <div class="font-black text-secondary uppercase tracking-tight">
-                                                    {{ $training->starts_at->format(__('general.time_format')) }} - {{ $training->ends_at->format(__('general.time_format')) }}
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-1.5">
+                                                        <i class="fa-light fa-{{ $sportIcon }} text-primary"></i>
+                                                        {{ $sportLabel }}
+                                                    </span>
                                                 </div>
-                                                <div class="text-sm text-slate-500 flex items-center mt-1">
+                                                <div class="font-black text-secondary uppercase tracking-tight text-base">
+                                                    {{ $training->starts_at->format(__('general.time_format')) }}
+                                                    @if($training->ends_at)
+                                                        - {{ $training->ends_at->format(__('general.time_format')) }}
+                                                    @endif
+                                                </div>
+                                                <div class="text-xs text-slate-500 flex items-center mt-1">
                                                     <i class="fa-light fa-location-dot mr-2 text-primary opacity-70"></i>
                                                     {{ $training->location ?? __('trainings.location_not_specified') }}
                                                 </div>
@@ -57,11 +73,13 @@
                                                         <i class="fa-light fa-circle-xmark"></i>
                                                         {{ $training->declined_count ?? 0 }}
                                                     </div>
-                                                    <a href="{{ route('member.attendance.show', ['type' => 'training', 'id' => $training->id]) }}"
-                                                       class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-sm ml-auto">
-                                                        {{ __('trainings.detail_in_member') }}
-                                                        <i class="fa-light fa-arrow-right"></i>
-                                                    </a>
+                                                    @auth
+                                                        <a href="{{ route('member.attendance.show', ['type' => 'training', 'id' => $training->id]) }}"
+                                                           class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-sm ml-auto">
+                                                            {{ __('trainings.detail_in_member') }}
+                                                            <i class="fa-light fa-arrow-right"></i>
+                                                        </a>
+                                                    @endauth
                                                 </div>
                                             </div>
                                         </div>

@@ -231,10 +231,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Odeslání e-mailu s chybou na produkci (vynechá 4xx chyby)
         $exceptions->report(function (Throwable $e) {
-            Log::error('App Exception: '.$e->getMessage(), [
-                'exception' => $e,
-                'url' => request()?->fullUrl(),
-            ]);
+            if (app()->bound('log')) {
+                Log::error('App Exception: '.$e->getMessage(), [
+                    'exception' => $e,
+                    'url' => app()->bound('request') ? request()->fullUrl() : 'CLI',
+                ]);
+            } else {
+                error_log('App Exception (Log facade not bound): '.$e->getMessage());
+            }
 
             try {
                 $reportEnvs = config('mail.error_reporting.environments', ['production']);
@@ -246,7 +250,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     return; // nehlásíme 4xx
                 }
 
-                $request = request();
+                $request = app()->bound('request') ? request() : null;
 
                 // Sestavení hlášení s očištěním citlivých údajů
                 $sanitize = function (array $data) use (&$sanitize): array {
