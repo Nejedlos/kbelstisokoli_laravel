@@ -15,6 +15,8 @@ class DmarcReportResource extends Resource
 {
     protected static ?string $model = DmarcReport::class;
 
+    protected static ?string $slug = 'dmarc-reports';
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.navigation.groups.dmarc_monitor');

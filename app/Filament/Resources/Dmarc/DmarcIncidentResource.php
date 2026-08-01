@@ -15,6 +15,8 @@ class DmarcIncidentResource extends Resource
 {
     protected static ?string $model = DmarcIncident::class;
 
+    protected static ?string $slug = 'dmarc-incidents';
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.navigation.groups.dmarc_monitor');
@@ -59,6 +61,7 @@ class DmarcIncidentResource extends Resource
     {
         return [
             'index' => Pages\ListIncidents::route('/'),
+            'view' => Pages\ViewIncident::route('/{record}'),
             'edit' => Pages\EditIncident::route('/{record}/edit'),
         ];
     }

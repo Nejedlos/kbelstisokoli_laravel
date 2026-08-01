@@ -15,6 +15,8 @@ class DmarcAuthorizedSenderResource extends Resource
 {
     protected static ?string $model = DmarcAuthorizedSender::class;
 
+    protected static ?string $slug = 'dmarc-authorized-senders';
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.navigation.groups.dmarc_monitor');

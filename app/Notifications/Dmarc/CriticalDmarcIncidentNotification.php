@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Dmarc;
 
+use App\Filament\Resources\Dmarc\DmarcIncidentResource;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -30,7 +31,7 @@ class CriticalDmarcIncidentNotification extends Notification
             ->line('**Zdrojová IP:** ' . $this->incident->source_ip)
             ->line('**Popis:** ' . $this->incident->description)
             ->line('**Doporučená akce:** ' . $this->incident->recommended_action)
-            ->action('Zobrazit incident v administraci', url(config('app.url') . '/admin/dmarc-incidents/' . $this->incident->id))
+            ->action('Zobrazit incident v administraci', DmarcIncidentResource::getUrl('edit', ['record' => $this->incident]))
             ->line('Tento incident byl automaticky vygenerován na základě DMARC aggregate reportů.');
     }
 }

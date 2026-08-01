@@ -15,6 +15,8 @@ class DmarcMailboxResource extends Resource
 {
     protected static ?string $model = DmarcMailbox::class;
 
+    protected static ?string $slug = 'dmarc-mailboxes';
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.navigation.groups.dmarc_monitor');
