@@ -870,6 +870,10 @@ return [
             'label' => 'DMARC incident',
             'plural_label' => 'DMARC incidenty',
         ],
+        'dmarc_authorized_sender' => [
+            'label' => 'Autorizovaný odesílatel',
+            'plural_label' => 'Autorizovaní odesílatelé',
+        ],
     ],
     'navigation' => [
         'groups' => [

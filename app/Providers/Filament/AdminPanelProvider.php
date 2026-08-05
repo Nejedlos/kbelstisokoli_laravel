@@ -7,6 +7,10 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RequestPasswordReset;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Resources\Dmarc\DmarcAuthorizedSenderResource;
+use App\Filament\Resources\Dmarc\DmarcIncidentResource;
+use App\Filament\Resources\Dmarc\DmarcMailboxResource;
+use App\Filament\Resources\Dmarc\DmarcReportResource;
 use App\Services\BrandingService;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -308,6 +312,12 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn () => __('admin.navigation.pages.public_web'))
                     ->url(fn () => route('public.home'))
                     ->icon(new HtmlString('<i class="fa-light fa-globe fa-fw"></i>')),
+            ])
+            ->resources([
+                DmarcAuthorizedSenderResource::class,
+                DmarcIncidentResource::class,
+                DmarcMailboxResource::class,
+                DmarcReportResource::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

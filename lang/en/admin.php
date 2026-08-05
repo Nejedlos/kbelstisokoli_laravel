@@ -810,6 +810,10 @@ return [
             'label' => 'DMARC Incident',
             'plural_label' => 'DMARC Incidents',
         ],
+        'dmarc_authorized_sender' => [
+            'label' => 'Authorized Sender',
+            'plural_label' => 'Authorized Senders',
+        ],
     ],
     'navigation' => [
         'groups' => [

@@ -17,6 +17,16 @@ class DmarcAuthorizedSenderResource extends Resource
 
     protected static ?string $slug = 'dmarc-authorized-senders';
 
+    public static function getModelLabel(): string
+    {
+        return __('admin.resources.dmarc_authorized_sender.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.resources.dmarc_authorized_sender.plural_label');
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.navigation.groups.dmarc_monitor');
