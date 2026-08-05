@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InternalAnalyticsEvent extends Model
 {
+    use Prunable;
     protected $fillable = [
         'event_type',
         'area',
@@ -41,5 +43,14 @@ class InternalAnalyticsEvent extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Definice záznamů k automatickému smazání (Prunable).
+     * Mažeme záznamy starší než 30 dní.
+     */
+    public function prunable(): \Illuminate\Database\Eloquent\Builder
+    {
+        return static::where('occurred_at', '<', now()->subDays(30));
     }
 }

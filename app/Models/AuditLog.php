@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 
 class AuditLog extends Model
 {
-    use HasFactory;
+    use HasFactory, Prunable;
 
     protected $fillable = [
         'occurred_at',
@@ -42,6 +43,15 @@ class AuditLog extends Model
     public function actor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'actor_user_id');
+    }
+
+    /**
+     * Definice záznamů k automatickému smazání (Prunable).
+     * Mažeme záznamy starší než 7 dní.
+     */
+    public function prunable(): \Illuminate\Database\Eloquent\Builder
+    {
+        return static::where('occurred_at', '<', now()->subDays(7));
     }
 
     public function subject(): \Illuminate\Database\Eloquent\Relations\MorphTo

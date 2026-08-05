@@ -2,12 +2,16 @@
 
 namespace App\Notifications\Auth;
 
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Auth\Notifications\ResetPassword as BaseNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Log;
 
-class ResetPasswordNotification extends BaseNotification
+class ResetPasswordNotification extends BaseNotification implements ShouldQueue
 {
+    use Queueable;
+
     /**
      * The password reset URL.
      *
