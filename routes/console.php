@@ -76,11 +76,10 @@ use Illuminate\Support\Facades\Event;
 Schedule::call(fn() => Artisan::call('page-cache:prime'))->name('page-cache:prime')->everyThirtyMinutes()->onOneServer();
 
 // Automatické zpracování fronty (každou minutu) - pro prostředí bez daemon workerů (Webglobe)
-Schedule::command('queue:work --stop-when-empty')
+Schedule::command('php8.4 artisan queue:work --stop-when-empty')
     ->name('queue-worker-maintenance')
     ->everyMinute()
-    ->onOneServer()
-    ->usePhpBinary('/usr/bin/php8.4');
+    ->onOneServer();
 
 // Automatické čištění starých záznamů a jobů (každou noc)
 Schedule::command('queue:prune-failed --hours=24')->dailyAt('03:30');
