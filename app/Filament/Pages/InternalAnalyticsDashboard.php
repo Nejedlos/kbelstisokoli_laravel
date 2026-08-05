@@ -6,13 +6,13 @@ use App\Services\InternalAnalytics\AnalyticsQueryService;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
-use App\Support\IconHelper;
-use App\Support\AppIcon;
+use App\Support\Icons\AppIcon;
+use App\Support\FilamentIcon;
 use Filament\Pages\Dashboard\Concerns\HasFilters;
 
 class InternalAnalyticsDashboard extends Page
@@ -21,7 +21,7 @@ class InternalAnalyticsDashboard extends Page
 
     public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::GAUGE);
+        return FilamentIcon::get(AppIcon::GAUGE);
     }
 
     protected string $view = 'filament.pages.internal-analytics-dashboard';
@@ -64,7 +64,7 @@ class InternalAnalyticsDashboard extends Page
         return [
             Action::make('filter')
                 ->label('Filtry')
-                ->icon('heroicon-m-funnel')
+                ->icon(FilamentIcon::get(AppIcon::FILTER))
                 ->form([
                     Grid::make(3)
                         ->schema([
