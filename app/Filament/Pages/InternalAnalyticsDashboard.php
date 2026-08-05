@@ -64,7 +64,7 @@ class InternalAnalyticsDashboard extends Page
         return [
             Action::make('filter')
                 ->label('Filtry')
-                ->icon(FilamentIcon::get(AppIcon::FILTER))
+                ->icon(FilamentIcon::render(AppIcon::FILTER))
                 ->form([
                     Grid::make(3)
                         ->schema([

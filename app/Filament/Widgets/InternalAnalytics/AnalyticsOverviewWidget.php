@@ -7,6 +7,9 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Livewire\Attributes\On;
 use Carbon\Carbon;
+use App\Support\Icons\AppIcon;
+use App\Support\FilamentIcon;
+use Illuminate\Support\HtmlString;
 
 class AnalyticsOverviewWidget extends BaseWidget
 {
@@ -24,19 +27,13 @@ class AnalyticsOverviewWidget extends BaseWidget
         $data = $queryService->getOverviewStats($this->prepareFilters());
 
         return [
-            Stat::make(__('internal-analytics.stats.page_views'), $data['page_views'])
-                ->icon('heroicon-o-eye'),
-            Stat::make(__('internal-analytics.stats.unique_visitors'), $data['unique_visitors'])
-                ->icon('heroicon-o-users'),
-            Stat::make(__('internal-analytics.stats.authenticated_users'), $data['authenticated_users'])
-                ->icon('heroicon-o-user-circle'),
-            Stat::make(__('internal-analytics.stats.logins'), $data['logins'])
-                ->icon('heroicon-o-key'),
-            Stat::make(__('internal-analytics.stats.avg_response_time'), round($data['avg_response_time']) . ' ms')
-                ->icon('heroicon-o-clock')
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::VIEW) . ' ' . __('internal-analytics.stats.page_views')), $data['page_views']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::USERS) . ' ' . __('internal-analytics.stats.unique_visitors')), $data['unique_visitors']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::USER) . ' ' . __('internal-analytics.stats.authenticated_users')), $data['authenticated_users']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::PERMISSIONS) . ' ' . __('internal-analytics.stats.logins')), $data['logins']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::CRON_TASKS) . ' ' . __('internal-analytics.stats.avg_response_time')), round($data['avg_response_time']) . ' ms')
                 ->color($data['avg_response_time'] > 500 ? 'warning' : 'success'),
-            Stat::make(__('internal-analytics.stats.error_requests'), $data['error_requests'])
-                ->icon('heroicon-o-exclamation-triangle')
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::WARNING) . ' ' . __('internal-analytics.stats.error_requests')), $data['error_requests'])
                 ->color($data['error_requests'] > 0 ? 'danger' : 'success'),
         ];
     }

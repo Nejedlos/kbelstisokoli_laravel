@@ -42,6 +42,7 @@ class TopPagesTableWidget extends BaseWidget
                     ->groupBy('path', 'route_name', 'area')
                     ->orderByDesc('views')
             )
+            ->defaultKeySort(false)
             ->columns([
                 Tables\Columns\TextColumn::make('path')
                     ->label(__('internal-analytics.tables.column.path'))
@@ -64,6 +65,11 @@ class TopPagesTableWidget extends BaseWidget
                     ->sortable(),
             ])
             ->paginated([5, 10]);
+    }
+
+    public function getTableRecordKey($record): string
+    {
+        return ($record->area ?? '') . '_' . ($record->route_name ?? '') . '_' . ($record->path ?? '');
     }
 
     protected function applyFilters($query)
