@@ -79,7 +79,8 @@ Schedule::call(fn() => Artisan::call('page-cache:prime'))->name('page-cache:prim
 Schedule::command('queue:work --stop-when-empty')
     ->name('queue-worker-maintenance')
     ->everyMinute()
-    ->onOneServer();
+    ->onOneServer()
+    ->usePhpBinary('/usr/bin/php8.4');
 
 // Automatické čištění starých záznamů a jobů (každou noc)
 Schedule::command('queue:prune-failed --hours=24')->dailyAt('03:30');
