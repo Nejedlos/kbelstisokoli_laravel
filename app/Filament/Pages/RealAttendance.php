@@ -101,7 +101,18 @@ class RealAttendance extends Page
             ->concat($trainings)
             ->concat($matches)
             ->concat($clubEvents)
-            ->flatMap(fn($event) => $event->teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id')))
+            ->flatMap(function($event) {
+                $teams = collect();
+                if (method_exists($event, 'teams')) {
+                    $teams = $teams->concat($event->teams);
+                }
+                if ($event instanceof BasketballMatch && $event->team) {
+                    if (!$teams->contains('id', $event->team_id)) {
+                        $teams->push($event->team);
+                    }
+                }
+                return $teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id'));
+            })
             ->unique();
 
         $configs = $activeSeason
@@ -150,7 +161,17 @@ class RealAttendance extends Page
         }
 
         // Získáme všechny unikátní uživatele (hráče) z týmů události
-        $userIds = $event->teams->flatMap(function($team) {
+        $teams = collect();
+        if (method_exists($event, 'teams')) {
+            $teams = $teams->concat($event->teams);
+        }
+        if ($event instanceof BasketballMatch && $event->team) {
+            if (!$teams->contains('id', $event->team_id)) {
+                $teams->push($event->team);
+            }
+        }
+
+        $userIds = $teams->flatMap(function($team) {
             return $team->activePlayers->pluck('user_id');
         })->unique();
 

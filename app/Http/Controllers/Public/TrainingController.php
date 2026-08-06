@@ -42,9 +42,22 @@ class TrainingController extends Controller
 
             foreach ($trainings as $training) {
                 // Pro každý trénink vypočítáme celkový počet očekávaných hráčů ze všech přiřazených týmů
-                $training->total_expected_count = $training->teams->sum(function ($t) use ($teamExpectedCounts) {
-                    return $teamExpectedCounts[$t->id] ?? 0;
-                });
+                // Musíme to počítat unikátně, protože hráč může být ve více týmech assigned k jednomu tréninku
+                $expectedUserIds = collect();
+                foreach ($training->teams as $t) {
+                    // Načteme hráče týmu a jejich trackování docházky
+                    // Tady je to trochu neefektivní, ale pro 5 tréninků na stránku to nevadí
+                    $userIds = $t->activePlayers()
+                        ->whereHas('user.userSeasonConfigs', function ($sq) use ($currentSeasonId) {
+                            $sq->where('season_id', $currentSeasonId)
+                                ->where('track_attendance', true);
+                        })
+                        ->pluck('user_id');
+                    
+                    $expectedUserIds = $expectedUserIds->concat($userIds);
+                }
+                
+                $training->total_expected_count = $expectedUserIds->unique()->count();
             }
 
             $team->setRelation('trainings', $trainings);

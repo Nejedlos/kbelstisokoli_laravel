@@ -125,6 +125,7 @@ class DashboardController extends Controller
 
         $matches = BasketballMatch::with([
             'team.activePlayers:player_profiles.id,user_id',
+            'teams.activePlayers:player_profiles.id,user_id',
             'opponent',
             'attendances' => fn ($q) => $q->where('user_id', $user->id),
         ])
@@ -134,7 +135,7 @@ class DashboardController extends Controller
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('scheduled_at', '>=', $now)
-            ->when($activeTeamId, fn ($q) => $q->where('team_id', $activeTeamId))
+            ->when($activeTeamId, fn ($q) => $q->where(fn($sq) => $sq->where('team_id', $activeTeamId)->orWhereHas('teams', fn($ssq) => $ssq->where('teams.id', $activeTeamId))))
             ->orderBy('scheduled_at')
             ->limit(3)
             ->get()
@@ -150,8 +151,19 @@ class DashboardController extends Controller
                 });
 
                 $expectedIds = [];
+                // Sběr týmů ze starého sloupce i nové relace
+                $teams = collect();
                 if ($item->team) {
-                    foreach ($item->team->activePlayers as $profile) {
+                    $teams->push($item->team);
+                }
+                foreach ($item->teams as $t) {
+                    if (! $teams->contains('id', $t->id)) {
+                        $teams->push($t);
+                    }
+                }
+
+                foreach ($teams as $team) {
+                    foreach ($team->activePlayers as $profile) {
                         if (in_array($profile->user_id, $seasonTrackedIds)) {
                             $expectedIds[] = $profile->user_id;
                         }

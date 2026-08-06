@@ -154,8 +154,20 @@ class AttendanceController extends Controller
                 $trackedIds = UserSeasonConfig::where('season_id', $seasonId)->where('track_attendance', true)->pluck('user_id')->toArray();
 
                 $expectedIds = collect();
+
+                // Sběr týmů ze starého sloupce i nové relace
+                $teams = collect();
                 if ($item->team) {
-                    foreach ($item->team->activePlayers as $profile) {
+                    $teams->push($item->team);
+                }
+                foreach ($item->teams as $t) {
+                    if (! $teams->contains('id', $t->id)) {
+                        $teams->push($t);
+                    }
+                }
+
+                foreach ($teams as $team) {
+                    foreach ($team->activePlayers as $profile) {
                         if (in_array($profile->user_id, $trackedIds)) {
                             $expectedIds->push($profile->user_id);
                         }
@@ -230,7 +242,7 @@ class AttendanceController extends Controller
         if ($type === 'training') {
             $query->with(['teams.activePlayers.user']);
         } elseif ($type === 'match') {
-            $query->with(['team.activePlayers.user', 'opponent', 'season', 'prediction']);
+            $query->with(['team.activePlayers.user', 'teams.activePlayers.user', 'opponent', 'season', 'prediction']);
         } elseif ($type === 'event') {
             $query->with(['teams.activePlayers.user']);
         }
@@ -251,6 +263,12 @@ class AttendanceController extends Controller
         if ($type === 'match') {
             if ($item->team) {
                 $teams->push($item->team);
+            }
+            // Přidáme i týmy z many-to-many relace, pokud tam jsou
+            foreach ($item->teams as $t) {
+                if (! $teams->contains('id', $t->id)) {
+                    $teams->push($t);
+                }
             }
         } else {
             $teams = $item->teams;
