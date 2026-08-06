@@ -329,7 +329,7 @@
 
     # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
     echo "Resetting OpCache (final)..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
     if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
@@ -449,7 +449,7 @@
 
     # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
     echo "Resetting OpCache (final)..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
     if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
@@ -609,7 +609,7 @@
 
     # Reset OpCache for Web (via temporary file)
     echo "Resetting OpCache (final)..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
     if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
