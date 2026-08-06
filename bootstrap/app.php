@@ -56,7 +56,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         // Fix pro správnou PHP binárku na produkci (pro Scheduler a subprocesy)
-        if (app()->runningInConsole() && $app->environment('production') && $php = (config('app.prod_php_binary') ?: env('PROD_PHP_BINARY'))) {
+        if ($app->environment('production') && $php = (config('app.prod_php_binary') ?: env('PROD_PHP_BINARY'))) {
             putenv("PHP_BINARY=$php");
         }
 

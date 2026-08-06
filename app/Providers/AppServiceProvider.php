@@ -228,57 +228,88 @@ class AppServiceProvider extends ServiceProvider
                 ->outsidePanelsRenderHook(\Filament\View\PanelsRenderHook::BODY_START);
         });
 
-        // Registrace Performance Observeru pro automatické mazání cache (pouze pokud neběžíme v konzoli a není to static asset)
-        // Optimalizováno: Registrujeme pouze pro požadavky, které mohou měnit data (POST, PUT, DELETE, PATCH)
+        // Optimalizovaná registrace observerů - pouze pro zápisové požadavky
         if (! $this->app->runningInConsole()
             && ! request()->isMethod('GET')
             && ! request()->is('assets/*', 'livewire/livewire.js')) {
-            $models = [
-                \App\Models\Post::class,
-                \App\Models\BasketballMatch::class,
-                \App\Models\Team::class,
-                \App\Models\Training::class,
-                \App\Models\Setting::class,
-                \App\Models\Page::class,
-                \App\Models\PageBlock::class,
-                \App\Models\Menu::class,
-                \App\Models\MenuItem::class,
-                \App\Models\Announcement::class,
-                \App\Models\MediaAsset::class,
-                \App\Models\Gallery::class,
-                \App\Models\PhotoPool::class,
-                \App\Models\HelpCategory::class,
-                \App\Models\HelpArticle::class,
-                \App\Models\HelpFaq::class,
-                \App\Models\HelpQuickAction::class,
-                \App\Models\Partner::class,
-                \App\Models\Opponent::class,
-                \App\Models\Page::class,
-                \App\Models\Post::class,
-                \App\Models\PostCategory::class,
-                \App\Models\ClubCompetition::class,
-                \App\Models\ClubEvent::class,
-            ];
-
-            foreach ($models as $model) {
-                if (class_exists($model)) {
-                    $model::observe(\App\Observers\PerformanceObserver::class);
-                }
-            }
-
-            \App\Models\BasketballMatch::observe(\App\Observers\MatchPredictionObserver::class);
-            \App\Models\StatisticRow::observe(\App\Observers\MatchPredictionObserver::class);
+            $this->registerObservers();
         }
 
-        \Illuminate\Support\Facades\View::composer(['layouts.*', 'public.*', 'member.*', 'auth.*', 'errors.*', 'filament-panels::layout.*', 'filament-panels::pages.*'], function ($view) {
+        $this->registerViewComposers();
+    }
+
+    /**
+     * Registrace observerů pro invalidaci cache.
+     */
+    protected function registerObservers(): void
+    {
+        $models = [
+            \App\Models\Post::class,
+            \App\Models\BasketballMatch::class,
+            \App\Models\Team::class,
+            \App\Models\Training::class,
+            \App\Models\Setting::class,
+            \App\Models\Page::class,
+            \App\Models\PageBlock::class,
+            \App\Models\Menu::class,
+            \App\Models\MenuItem::class,
+            \App\Models\Announcement::class,
+            \App\Models\MediaAsset::class,
+            \App\Models\Gallery::class,
+            \App\Models\PhotoPool::class,
+            \App\Models\HelpCategory::class,
+            \App\Models\HelpArticle::class,
+            \App\Models\HelpFaq::class,
+            \App\Models\HelpQuickAction::class,
+            \App\Models\Partner::class,
+            \App\Models\Opponent::class,
+            \App\Models\PostCategory::class,
+            \App\Models\ClubCompetition::class,
+            \App\Models\ClubEvent::class,
+        ];
+
+        foreach ($models as $model) {
+            if (class_exists($model)) {
+                $model::observe(\App\Observers\PerformanceObserver::class);
+            }
+        }
+
+        \App\Models\BasketballMatch::observe(\App\Observers\MatchPredictionObserver::class);
+        \App\Models\StatisticRow::observe(\App\Observers\MatchPredictionObserver::class);
+    }
+
+    /**
+     * Registrace view composerů s optimalizovaným rozsahem.
+     */
+    protected function registerViewComposers(): void
+    {
+        // Omezujeme pouze na hlavní layouty a stránky, nikoliv na každý malý komponent (výkon)
+        $targets = [
+            'layouts.*',
+            'public.*',
+            'member.*',
+            'auth.*',
+            'errors.*',
+            'filament-panels::layout',
+            'filament-panels::pages.*'
+        ];
+
+        View::composer($targets, function ($view) {
             // Statická cache pro minimalizaci DB dotazů v rámci jednoho requestu
             static $cachedData = [];
             static $unreadCount = [];
 
+            $viewName = $view->getName();
+
+            // Přeskočíme interní livewire komponenty a drobné prvky, pokud už mají data z layoutu
+            // (Laravel sice static cache má, ale i tak je tam režie volání closure)
+            if (str_contains($viewName, 'livewire.') || str_contains($viewName, 'components.')) {
+                return;
+            }
+
             $brandingService = app(\App\Services\BrandingService::class);
             $communicationService = app(\App\Services\Communication\CommunicationService::class);
 
-            $viewName = $view->getName();
             $audience = (str_starts_with($viewName, 'member.') || str_contains($viewName, 'filament-panels::')) ? 'member' : 'public';
             try {
                 $locale = app()->getLocale();
@@ -288,14 +319,14 @@ class AppServiceProvider extends ServiceProvider
             $userId = auth()->id() ?: 0;
 
             if (! isset($cachedData[$locale])) {
-                $branding = $brandingService->getSettings();
-                $branding['club_name'] = $brandingService->replacePlaceholders($branding['club_name']);
-                $branding['club_short_name'] = $brandingService->replacePlaceholders($branding['club_short_name']);
-                $branding['slogan'] = $brandingService->replacePlaceholders($branding['slogan'] ?? '');
-
                 try {
-                    $cacheKey = 'view_composer_data_' . $locale;
-                    $cachedData[$locale] = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($brandingService, $communicationService, $branding) {
+                    $cacheKey = 'view_composer_data_'.$locale;
+                    $cachedData[$locale] = Cache::remember($cacheKey, 3600, function () use ($brandingService, $communicationService) {
+                        $branding = $brandingService->getSettings();
+                        $branding['club_name'] = $brandingService->replacePlaceholders($branding['club_name']);
+                        $branding['club_short_name'] = $brandingService->replacePlaceholders($branding['club_short_name']);
+                        $branding['slogan'] = $brandingService->replacePlaceholders($branding['slogan'] ?? '');
+
                         return [
                             'branding' => $branding,
                             'branding_css' => $brandingService->getCssVariables(),
@@ -304,33 +335,32 @@ class AppServiceProvider extends ServiceProvider
                         ];
                     });
                 } catch (\Throwable $e) {
-                    // Fallback při selhání cache (lock timeout)
                     $cachedData[$locale] = [
-                        'branding' => $branding,
-                        'branding_css' => $brandingService->getCssVariables(),
-                        'announcements_public' => $communicationService->getActiveAnnouncements('public'),
-                        'announcements_member' => $communicationService->getActiveAnnouncements('member'),
+                        'branding' => [],
+                        'branding_css' => '',
+                        'announcements_public' => collect(),
+                        'announcements_member' => collect(),
                     ];
                 }
             }
 
             $currentData = $cachedData[$locale];
 
-            $view->with('branding', $currentData['branding']);
-            $view->with('branding_css', $currentData['branding_css']);
-            $view->with('announcements', $currentData["announcements_{$audience}"]);
+            $view->with([
+                'branding' => $currentData['branding'],
+                'branding_css' => $currentData['branding_css'],
+                'announcements' => $currentData["announcements_{$audience}"],
+            ]);
 
-            // Přidání SEO metadat pro public layout, pokud už nejsou nastaveny
+            // SEO pouze pro veřejné layouty
             if ($audience === 'public' && ! isset($view->seo)) {
                 $seoService = app(\App\Services\SeoService::class);
                 $model = $view->page ?? $view->post ?? $view->news ?? $view->team ?? $view->gallery ?? $view->pool ?? null;
                 $view->with('seo', $seoService->getMetadata($model));
             }
 
-            if (auth()->check()) {
-                if (! isset($unreadCount[$userId])) {
-                    $unreadCount[$userId] = auth()->user()->unreadNotifications()->count();
-                }
+            if ($userId && ! isset($unreadCount[$userId])) {
+                $unreadCount[$userId] = auth()->user()->unreadNotifications()->count();
                 $view->with('unreadNotificationsCount', $unreadCount[$userId]);
             }
         });
