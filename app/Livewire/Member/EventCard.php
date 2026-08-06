@@ -14,15 +14,17 @@ class EventCard extends Component
     public $type;
     public $eventId;
     public $showActions = true;
+    public $compact = false;
 
     // Pro Alpine.js integraci
     public $selectedEvents = [];
 
-    public function mount($event, $showActions = true)
+    public function mount($event, $showActions = true, $compact = false)
     {
         $this->type = $event['type'];
         $this->eventId = $event['data']->id;
         $this->showActions = $showActions;
+        $this->compact = $compact;
     }
 
     #[On('attendanceUpdated')]

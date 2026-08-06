@@ -208,7 +208,7 @@
                 @else
                     <div class="space-y-4" x-data="{ selectedEvents: [] }">
                         @foreach($upcoming as $event)
-                            <livewire:member.event-card :event="$event" :key="'dash-'.$event['type'].'-'.$event['data']->id" />
+                            <livewire:member.event-card :event="$event" :key="'dash-'.$event['type'].'-'.$event['data']->id" :compact="true" />
                         @endforeach
                     </div>
                 @endif

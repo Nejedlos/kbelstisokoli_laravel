@@ -76,7 +76,7 @@
              :class="selectedEvents.includes('{{ $type . ':' . $data->id }}') ? 'w-2 bg-primary' : ''"></div>
     </div>
 
-    <div class="relative p-5 sm:p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-10">
+    <div class="relative {{ $compact ? 'p-4 sm:p-5 lg:p-6' : 'p-5 sm:p-6 lg:p-8' }} flex flex-col lg:flex-row items-start lg:items-center justify-between {{ $compact ? 'gap-4 lg:gap-6' : 'gap-6 lg:gap-10' }}">
         <div class="flex items-center gap-4 sm:gap-5 flex-1 w-full min-w-0">
             @if($showActions && $canChange && !($type === 'match' && $data->has_score))
                 <div class="shrink-0 z-20">
@@ -131,10 +131,10 @@
             </a>
         </div>
 
-        <div class="flex items-center flex-wrap lg:flex-nowrap justify-between lg:justify-end gap-x-3 gap-y-4 sm:gap-x-6 lg:gap-x-8 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 lg:pl-0 {{ $showActions && $canChange && !($type === 'match' && $data->has_score) ? 'pl-[calc(1.75rem+1rem)] sm:pl-[calc(1.75rem+1.25rem)]' : 'pl-0' }}">
-            <div class="flex items-center gap-2 sm:gap-4 lg:gap-6">
+        <div class="flex items-center flex-wrap lg:flex-nowrap justify-between lg:justify-end gap-x-3 gap-y-4 sm:gap-x-6 {{ $compact ? 'lg:gap-x-4' : 'lg:gap-x-8' }} w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 lg:pl-0 {{ $showActions && $canChange && !($type === 'match' && $data->has_score) ? 'pl-[calc(1.75rem+1rem)] sm:pl-[calc(1.75rem+1.25rem)]' : 'pl-0' }}">
+            <div class="flex items-center gap-2 sm:gap-4 {{ $compact ? 'lg:gap-3' : 'lg:gap-6' }}">
                 <!-- Attendance Stats -->
-                <div class="flex items-center gap-3 sm:gap-4 lg:gap-6 bg-slate-50/50 px-3 sm:px-4 lg:px-6 py-2 lg:py-3 rounded-2xl border border-slate-100/50">
+                <div class="flex items-center gap-3 sm:gap-4 {{ $compact ? 'lg:gap-4' : 'lg:gap-6' }} bg-slate-50/50 px-3 sm:px-4 {{ $compact ? 'lg:px-4' : 'lg:px-6' }} py-2 {{ $compact ? 'lg:py-2' : 'lg:py-3' }} rounded-2xl border border-slate-100/50">
                     <div class="flex flex-col items-center" title="{{ __('member.attendance.status.confirmed') }}">
                         <span class="text-[10px] sm:text-[11px] font-black text-emerald-600 leading-none mb-1 sm:mb-1.5">{{ $confirmedCount }}</span>
                         <i class="fa-solid fa-circle-check text-[9px] sm:text-[10px] text-emerald-200"></i>
@@ -179,7 +179,7 @@
                         $borderHsl = "hsla({$hue}, 75%, 45%, 0.15)";
                     @endphp
                     <div @click.stop="predictionOpen = true"
-                         class="cursor-pointer group/pred flex items-center gap-3 lg:gap-4 px-3 lg:px-5 py-2 lg:py-3 rounded-2xl border transition-all duration-300 shrink-0 relative overflow-hidden"
+                         class="cursor-pointer group/pred flex items-center gap-3 {{ $compact ? 'lg:gap-3' : 'lg:gap-4' }} px-3 {{ $compact ? 'lg:px-3' : 'lg:px-5' }} py-2 {{ $compact ? 'lg:py-2' : 'lg:py-3' }} rounded-2xl border transition-all duration-300 shrink-0 relative overflow-hidden"
                          style="background: linear-gradient(135deg, {{ $bgHsl }}, white); border-color: {{ $borderHsl }};"
                          onmouseover="this.style.borderColor='hsla({{ $hue }}, 75%, 45%, 0.4)'; this.style.boxShadow='0 10px 15px -3px hsla({{ $hue }}, 75%, 45%, 0.1)';"
                          onmouseout="this.style.borderColor='{{ $borderHsl }}'; this.style.boxShadow='none';">
@@ -205,50 +205,56 @@
 
             <!-- Quick Actions -->
             @if($showActions && $canChange)
-                <div class="grid grid-cols-4 sm:flex items-center gap-2 lg:gap-4 ml-auto lg:ml-0 w-full sm:w-auto">
+                <div class="grid grid-cols-4 sm:flex items-center gap-2 {{ $compact ? 'lg:gap-2' : 'lg:gap-4' }} ml-auto lg:ml-0 w-full sm:w-auto">
                     <button wire:click="setStatus('confirmed')"
                             wire:loading.attr="disabled"
                             wire:target="setStatus('confirmed')"
-                            class="h-11 sm:h-12 lg:h-14 lg:px-8 flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'confirmed' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 ring-4 ring-emerald-500/10' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/20' }}"
+                            class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-8' }} flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'confirmed' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 ring-4 ring-emerald-500/10' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/20' }}"
                             title="{{ __('member.attendance.status.confirmed') }}">
                         <div class="flex items-center gap-2.5 lg:gap-3">
                             <div class="relative flex items-center justify-center">
                                 <i wire:loading.remove wire:target="setStatus('confirmed')" class="fa-light fa-check text-xl lg:text-2xl"></i>
                                 <i wire:loading wire:target="setStatus('confirmed')" class="fa-light fa-spinner-third fa-spin text-lg"></i>
                             </div>
-                            <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.confirmed') }}</span>
+                            @if(!$compact)
+                                <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.confirmed') }}</span>
+                            @endif
                         </div>
                     </button>
 
                     <button wire:click="setStatus('declined')"
                             wire:loading.attr="disabled"
                             wire:target="setStatus('declined')"
-                            class="h-11 sm:h-12 lg:h-14 lg:px-8 flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'declined' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40 ring-4 ring-rose-500/10' : 'bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20' }}"
+                            class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-8' }} flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'declined' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40 ring-4 ring-rose-500/10' : 'bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20' }}"
                             title="{{ __('member.attendance.status.declined') }}">
                         <div class="flex items-center gap-2.5 lg:gap-3">
                             <div class="relative flex items-center justify-center">
                                 <i wire:loading.remove wire:target="setStatus('declined')" class="fa-light fa-xmark text-xl lg:text-2xl"></i>
                                 <i wire:loading wire:target="setStatus('declined')" class="fa-light fa-spinner-third fa-spin text-lg"></i>
                             </div>
-                            <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.declined') }}</span>
+                            @if(!$compact)
+                                <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.declined') }}</span>
+                            @endif
                         </div>
                     </button>
 
                     <button wire:click="setStatus('maybe')"
                             wire:loading.attr="disabled"
                             wire:target="setStatus('maybe')"
-                            class="h-11 sm:h-12 lg:h-14 lg:px-8 flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'maybe' ? 'bg-warning-500 text-white shadow-lg shadow-warning-500/40 ring-4 ring-warning-500/10' : 'bg-warning-50 text-warning-600 hover:bg-warning-500 hover:text-white hover:shadow-lg hover:shadow-warning-500/20' }}"
+                            class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-8' }} flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'maybe' ? 'bg-warning-500 text-white shadow-lg shadow-warning-500/40 ring-4 ring-warning-500/10' : 'bg-warning-50 text-warning-600 hover:bg-warning-500 hover:text-white hover:shadow-lg hover:shadow-warning-500/20' }}"
                             title="{{ __('member.attendance.status.maybe') }}">
                         <div class="flex items-center gap-2.5 lg:gap-3">
                             <div class="relative flex items-center justify-center">
                                 <i wire:loading.remove wire:target="setStatus('maybe')" class="fa-light fa-circle-dot text-xl lg:text-2xl"></i>
                                 <i wire:loading wire:target="setStatus('maybe')" class="fa-light fa-spinner-third fa-spin text-lg"></i>
                             </div>
-                            <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.maybe') }}</span>
+                            @if(!$compact)
+                                <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.maybe') }}</span>
+                            @endif
                         </div>
                     </button>
 
-                    <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="h-11 sm:h-12 lg:h-14 lg:px-7 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-primary/20 active:scale-95 group/btn" title="Detail">
+                    <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-7' }} flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-primary/20 active:scale-95 group/btn" title="Detail">
                         <i class="fa-light fa-chevron-right text-lg lg:text-xl"></i>
                     </a>
                 </div>
