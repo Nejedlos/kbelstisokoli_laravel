@@ -30,7 +30,7 @@ class FullPageCacheMiddleware
         $shouldCache = $this->shouldCache($request);
         if (! $isGuest || ! $shouldCache || $this->isImpersonating($request)) {
             $response = $next($request);
-            // $response->headers->set('X-Page-Cache-Skip', ! $isGuest ? 'not-guest' : (! $shouldCache ? $request->attributes->get('cache_skip_reason', 'unknown') : 'impersonating'));
+            $response->headers->set('X-Page-Cache-Skip', ! $isGuest ? 'not-guest' : (! $shouldCache ? $request->attributes->get('cache_skip_reason', 'unknown') : 'impersonating'));
 
             return $response;
         }

@@ -5,7 +5,49 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Absolutní základní cesta k aplikaci (mimo veřejný adresář)
+// --- EARLY EXIT FAST CACHE (Redis) ---
+// Pouze pro GET požadavky hostů na veřejných stránkách.
+// Bypasuje celý Laravel bootstrap a vendor autoloading.
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' 
+    && !isset($_COOKIE['kbelsti-sokoli-session'])
+    && !isset($_SERVER['HTTP_X_PRIME_CACHE'])
+    && !isset($_GET['screenshot_user_id'])
+) {
+    $uri_path = ltrim(explode('?', $_SERVER['REQUEST_URI'] ?? '/')[0], '/');
+    if ($uri_path === '') $uri_path = '/';
+    
+    // Vyloučení administrace a členské sekce
+    if (!str_starts_with($uri_path, 'admin') && !str_starts_with($uri_path, 'clenska-sekce')) {
+        $queryParams = $_GET;
+        ksort($queryParams);
+        $serializedParams = serialize($queryParams);
+        
+        $redis = new Redis();
+        if (@$redis->connect('c-redis', 6379, 0.05)) {
+            $redis->select(1);
+            $prefix = 'kbelsti-sokoli-database-kbelsti-sokoli-cache-full_page_';
+            
+            // Zkusíme oba jazyky (výchozí CS je první)
+            foreach (['cs', 'en'] as $l) {
+                $key = $prefix . md5($uri_path . '_' . $serializedParams . '_' . $l);
+                $cached = $redis->get($key);
+                if ($cached) {
+                    $data = unserialize($cached);
+                    if (isset($data['content'])) {
+                        header('Content-Type: ' . ($data['type'] ?? 'text/html; charset=UTF-8'));
+                        header('X-Page-Cache: fast-hit');
+                        header('X-Fast-Cache-Locale: ' . $l);
+                        header('Cache-Control: public, max-age=300, stale-while-revalidate=600');
+                        echo $data['content'];
+                        exit;
+                    }
+                }
+            }
+        }
+    }
+}
+// --- KONEC EARLY EXIT ---
+
 $APP_BASE = '/home/html/kbelstisokoli.cz/public_html/secret';
 
 // Determine if the application is in maintenance mode...
