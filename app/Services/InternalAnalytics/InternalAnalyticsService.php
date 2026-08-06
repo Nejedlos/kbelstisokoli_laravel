@@ -52,13 +52,13 @@ class InternalAnalyticsService
 
             // Detekce pomalého requestu
             if ($responseTime >= config('internal-analytics.slow_request_threshold_ms', 1000)) {
-                $this->trackEvent('slow_request', array_merge($data, ['original_event_type' => $eventType]));
+                $data['metadata']['is_slow'] = true;
+                $data['metadata']['slow_threshold_ms'] = config('internal-analytics.slow_request_threshold_ms', 1000);
             }
 
             // Detekce chyb
             if ($response->getStatusCode() >= 400) {
-                $errorType = $response->getStatusCode() === 404 ? 'not_found_request' : 'error_request';
-                $this->trackEvent($errorType, array_merge($data, ['original_event_type' => $eventType]));
+                $data['metadata']['is_error'] = true;
             }
 
             InternalAnalyticsEvent::create($data);

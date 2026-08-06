@@ -29,12 +29,23 @@ Route::get('/system/schedule/{token}', function (string $token) {
         abort(403, 'Neplatný token.');
     }
 
-    // Na sdíleném hostingu neběží queue worker, proto pro plánované úlohy
-    // vynutíme synchronní zpracování. Všechny joby se tak provedou v rámci tohoto requestu.
-    config(['queue.default' => 'sync']);
-
+    // Spustíme plánovač (dispečink úloh)
     \Illuminate\Support\Facades\Artisan::call('schedule:run');
     $output = \Illuminate\Support\Facades\Artisan::output();
+
+    // Spustíme queue worker v pozadí pro zpracování dispečinkovaných úloh (např. RunCronTaskJob)
+    // Na sdíleném hostingu (Webglobe) neběží trvalý worker, proto ho nastartujeme jednorázově
+    // s parametrem --stop-when-empty, aby po dokončení úloh skončil.
+    try {
+        $php = env('PROD_PHP_BINARY', '/usr/bin/php8.4');
+        $artisan = base_path('artisan');
+        // Použijeme nohup a přesměrování do /dev/null pro bezpečné spuštění v pozadí
+        exec("nohup {$php} {$artisan} queue:work --stop-when-empty > /dev/null 2>&1 &");
+        $output .= "\n[Queue worker started in background]";
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error('Failed to start background queue worker: ' . $e->getMessage());
+        $output .= "\n[Failed to start queue worker: " . $e->getMessage() . "]";
+    }
 
     // Heartbeat logování pro diagnostiku
     $isHeartbeat = str_contains($output, 'Running scheduled command: (callable)')
