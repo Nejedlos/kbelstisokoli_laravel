@@ -1,5 +1,5 @@
 @php
-    $image_url = $data['image_url'] ?? 'assets/img/home/recruitment-split.jpg';
+    $image_url = $data['image_url'] ?? 'assets/img/home/team-muzi-c-nabor.jpg';
     $title = $data['title'] ?? __('general.recruitment.title');
     $subtitle = $data['subtitle'] ?? __('general.recruitment.subtitle');
     $cta_label = $data['cta_label'] ?? __('general.recruitment.cta');
@@ -11,7 +11,7 @@
     <div class="flex flex-col lg:flex-row min-h-[500px]">
         {{-- Image Side --}}
         <div class="w-full lg:w-1/2 relative min-h-[400px] lg:min-h-0 {{ $alignment === 'right' ? 'lg:order-last' : '' }}">
-            <img src="{{ asset($image_url) }}" alt="{{ $title }}" class="absolute inset-0 w-full h-full object-cover">
+            <x-picture :src="$image_url" :alt="$title" class="absolute inset-0 w-full h-full object-cover" />
             {{-- Overlay Decoration --}}
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
             <div class="absolute bottom-12 left-12 right-12 text-white/20 font-black text-[100px] uppercase tracking-tighter leading-none pointer-events-none -rotate-3 select-none">

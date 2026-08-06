@@ -97,7 +97,7 @@
         {{-- Featured Recruitment --}}
         <x-public.blocks.featured_split :data="[
             'alignment' => 'left',
-            'image_url' => 'assets/img/home/recruitment-split.jpg',
+            'image_url' => 'assets/img/home/team-muzi-c-nabor.jpg',
             'title' => __('general.recruitment.funnel_title'),
             'subtitle' => __('general.recruitment.funnel_subtitle')
         ]" />
