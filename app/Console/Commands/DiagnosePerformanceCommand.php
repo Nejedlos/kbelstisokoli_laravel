@@ -65,6 +65,12 @@ class DiagnosePerformanceCommand extends Command
         $this->check('Redis/File Cache', Cache::getStore() instanceof \Illuminate\Cache\FileStore || Cache::getStore() instanceof \Illuminate\Cache\RedisStore);
         $this->check('OPcache Active', function_exists('opcache_get_status') && opcache_get_status() !== false);
 
+        // 4b. Database Indexes Status
+        $this->info("\n[DATABASE INDEXES]");
+        $this->checkIndex('matches', 'scheduled_at');
+        $this->checkIndex('trainings', 'starts_at');
+        $this->checkIndex('seasons', 'is_active');
+
         // 5. Statistics
         $this->info("\n[STORAGE STATISTICS]");
         $sessionCount = count(glob(storage_path('framework/sessions/*')));
@@ -120,6 +126,19 @@ class DiagnosePerformanceCommand extends Command
         $color = $duration < 50 ? 'info' : ($duration < 200 ? 'comment' : 'error');
 
         $this->line(sprintf("%-40s: <$color>%8.2f ms</$color> [%s]", $label, $duration, $status));
+    }
+
+    protected function checkIndex($table, $column)
+    {
+        try {
+            $schemaManager = DB::connection()->getSchemaBuilder();
+            $indexes = DB::select("SHOW INDEX FROM {$table} WHERE Column_name = '{$column}'");
+            $exists = count($indexes) > 0;
+            $this->check("Index {$table}.{$column}", $exists);
+        } catch (\Throwable $e) {
+            // Pro SQLite nebo jiné DB kde SHOW INDEX nefunguje
+            $this->line(sprintf('%-40s: <comment>UNKNOWN (Requires MySQL)</comment>', "Index {$table}.{$column}"));
+        }
     }
 
     protected function check($label, $condition)

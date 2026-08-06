@@ -299,7 +299,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
-    {{ $php }} artisan optimize
+    {{ $php }} artisan optimize:cache
     {{ $php }} artisan system:cleanup
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
@@ -416,7 +416,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
-    {{ $php }} artisan optimize
+    {{ $php }} artisan optimize:cache
     {{ $php }} artisan system:cleanup
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
@@ -576,7 +576,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
-    {{ $php }} artisan optimize
+    {{ $php }} artisan optimize:cache
     {{ $php }} artisan system:cleanup
 
     # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)

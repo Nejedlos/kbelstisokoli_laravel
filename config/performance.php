@@ -16,8 +16,8 @@ return [
     'features' => [
         'full_page_cache' => env('PERF_FULL_PAGE_CACHE', true),
         'fragment_cache' => env('PERF_FRAGMENT_CACHE', true),
-        'html_minification' => env('PERF_HTML_MINIFY', false),
-        'livewire_navigate' => env('PERF_LW_NAVIGATE', false),
+        'html_minification' => env('PERF_HTML_MINIFY', true),
+        'livewire_navigate' => env('PERF_LW_NAVIGATE', true),
         'lazy_load_images' => env('PERF_LAZY_IMAGES', true),
     ],
 
