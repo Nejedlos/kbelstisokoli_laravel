@@ -87,7 +87,18 @@ class AuthRedirect
 
         $memberDashboard = '/clenska-sekce/dashboard';
 
-        $fallback = $isAdmin ? $adminPath : $memberDashboard;
+        // Logika pro prioritní přesměrování (na přání uživatele):
+        // 1. Pokud má uživatel roli 'member' nebo jinou členskou roli (hráč, rodič, atd.),
+        //    jde primárně do členské sekce.
+        // 2. Do adminu jde automaticky jen tehdy, pokud má pouze admin roli a žádnou jinou.
+        // 3. Ostatní jdou do členské sekce.
+        $roles = $user->roles->pluck('name');
+        $adminOnlyRoles = ['admin', 'super_admin'];
+
+        // Zjistíme, zda má uživatel pouze admin role (admin nebo super_admin) a žádnou členskou
+        $isOnlyAdmin = $roles->isNotEmpty() && $roles->diff($adminOnlyRoles)->isEmpty();
+
+        $fallback = ($isAdmin && $isOnlyAdmin) ? $adminPath : $memberDashboard;
 
         $intended = \Illuminate\Support\Facades\Session::get('url.intended');
 

@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
+use Livewire\Livewire;
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -198,6 +198,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Schema::defaultStringLength(191);
+
+        // Explicitní registrace Livewire komponent pro zajištění správné discovery v produkci (zejména pro lazy loading)
+        Livewire::component('public.hero-events', \App\Livewire\Public\HeroEvents::class);
+        Livewire::component('public.standings-table', \App\Livewire\Public\StandingsTable::class);
+        Livewire::component('public.team-season-stats', \App\Livewire\Public\TeamSeasonStats::class);
 
 
         // LanguageSwitch configuration updated for v5
