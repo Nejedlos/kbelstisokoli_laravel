@@ -87,18 +87,10 @@ class AuthRedirect
 
         $memberDashboard = '/clenska-sekce/dashboard';
 
-        // Logika pro prioritní přesměrování (na přání uživatele):
-        // 1. Pokud má uživatel roli 'member' nebo jinou členskou roli (hráč, rodič, atd.),
-        //    jde primárně do členské sekce.
-        // 2. Do adminu jde automaticky jen tehdy, pokud má pouze admin roli a žádnou jinou.
-        // 3. Ostatní jdou do členské sekce.
-        $roles = $user->roles->pluck('name');
-        $adminOnlyRoles = ['admin', 'super_admin'];
-
-        // Zjistíme, zda má uživatel pouze admin role (admin nebo super_admin) a žádnou členskou
-        $isOnlyAdmin = $roles->isNotEmpty() && $roles->diff($adminOnlyRoles)->isEmpty();
-
-        $fallback = ($isAdmin && $isOnlyAdmin) ? $adminPath : $memberDashboard;
+        // Logika pro prioritní přesměrování:
+        // Všechny uživatele (včetně adminů) posíláme primárně do členské sekce,
+        // pokud nemají explicitní záměr jít do administrace (url.intended).
+        $fallback = $memberDashboard;
 
         $intended = \Illuminate\Support\Facades\Session::get('url.intended');
 
@@ -112,9 +104,14 @@ class AuthRedirect
                 'is_admin' => $isAdmin
             ]);
 
-            // Dodatečná validace po načtení (pro případ, že by byla v session uložena nevalidní URL)
-            if (Str_contains_any($intended, ['/login', '/logout', '/two-factor', '/2fa-challenge', '/feedback/widget'])) {
-                \Illuminate\Support\Facades\Log::debug('AuthRedirect: Intended URL is auth-related or widget, ignoring', ['intended' => $intended]);
+            // Dodatečná validace po načtení:
+            // 1. Vyloučit auth-related stránky
+            // 2. Pokud admin/člen přijde z domovské stránky, pošleme ho raději do dashboardu,
+            //    protože pro přihlášeného uživatele je dashboard užitečnější startovní bod.
+            $isHome = $intended === url('/') || $intended === route('public.home') || $intended === '/';
+            
+            if ($isHome || Str_contains_any($intended, ['/login', '/logout', '/two-factor', '/2fa-challenge', '/feedback/widget'])) {
+                \Illuminate\Support\Facades\Log::debug('AuthRedirect: Intended URL is home or auth-related, using fallback', ['intended' => $intended, 'fallback' => $fallback]);
                 return $fallback;
             }
 
@@ -122,12 +119,6 @@ class AuthRedirect
             if (! $isAdmin && str_contains($intended, $adminPath)) {
                 \Illuminate\Support\Facades\Log::debug('AuthRedirect: Non-admin tried to access admin path, redirecting to member dashboard');
                 return $memberDashboard;
-            }
-
-            // Pokud admin přijde z domovské stránky, pošleme ho raději do dashboardu
-            if ($isAdmin && ($intended === url('/') || $intended === route('public.home'))) {
-                \Illuminate\Support\Facades\Log::debug('AuthRedirect: Admin coming from home page, redirecting to admin dashboard');
-                return $adminPath;
             }
 
             // Musí jít o interní URL
