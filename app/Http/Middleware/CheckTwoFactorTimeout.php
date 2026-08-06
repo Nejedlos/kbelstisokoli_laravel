@@ -39,9 +39,9 @@ class CheckTwoFactorTimeout
             return $next($request);
         }
 
-        // Kontrola 2FA potvrzení v session (např. timeout 24 hodin)
+        // Kontrola 2FA potvrzení v session (např. timeout 1 týden)
         $confirmedAt = $request->session()->get('auth.2fa_confirmed_at');
-        $timeout = config('auth.2fa_timeout', 86400); // Výchozí 24 hodin
+        $timeout = config('auth.2fa_timeout', 604800); // Zvýšeno na 7 dní z 24h pro lepší UX
 
         if ($confirmedAt && (now()->timestamp - $confirmedAt) < $timeout) {
             return $next($request);
@@ -51,8 +51,15 @@ class CheckTwoFactorTimeout
         $rememberCookie = $request->cookie('2fa_remember');
         if ($rememberCookie) {
             try {
-                $data = decrypt($rememberCookie);
-                if (isset($data['user_id']) && $data['user_id'] === $user->id) {
+                // Laravel automaticky dešifruje cookies, pokud nejsou v 'except' v EncryptCookies.
+                // Naše cookie '2fa_remember' je pole, které Cookie::make serializovalo.
+                $data = $rememberCookie;
+                
+                if (is_string($data)) {
+                    $data = json_decode($data, true);
+                }
+                
+                if (is_array($data) && isset($data['user_id']) && (int) $data['user_id'] === (int) $user->id) {
                     // Zařízení je zapamatováno, prodloužíme platnost potvrzení v session
                     // a zajistíme přítomnost password hashe pro Filament
                     $guard = auth()->getDefaultDriver();

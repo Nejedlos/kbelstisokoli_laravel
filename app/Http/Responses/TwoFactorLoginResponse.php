@@ -47,7 +47,7 @@ class TwoFactorLoginResponse implements TwoFactorLoginResponseContract
             // Laravel cookie automaticky šifruje, takže nepoužíváme encrypt() manuálně, abychom se vyhnuli double-encryption
             $cookie = \Illuminate\Support\Facades\Cookie::make(
                 '2fa_remember',
-                ['user_id' => $user->id, 'token' => $token],
+                json_encode(['user_id' => $user->id, 'token' => $token]),
                 30 * 24 * 60 // 30 dní v minutách
             );
             $response->withCookie($cookie);

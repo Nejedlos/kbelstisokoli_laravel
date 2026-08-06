@@ -100,15 +100,18 @@ class RsvpChangedHandler implements ShouldQueue
             $teams = collect([$eventModel->team]);
         }
 
-        foreach ($teams as $team) {
-            if ($team) {
-                foreach ($team->activeCoaches()->get() as $coach) {
-                    if (! $notifiables->has($coach->id)) {
-                        $notifiables->put($coach->id, [
-                            'notifiable' => $coach,
-                            'is_self' => false,
-                        ]);
-                    }
+        if ($teams->isNotEmpty()) {
+            $teamIds = $teams->pluck('id')->toArray();
+            $coaches = \App\Models\User::whereHas('teams', function ($q) use ($teamIds) {
+                $q->whereIn('teams.id', $teamIds);
+            })->where('is_active', true)->get();
+
+            foreach ($coaches as $coach) {
+                if (! $notifiables->has($coach->id)) {
+                    $notifiables->put($coach->id, [
+                        'notifiable' => $coach,
+                        'is_self' => false,
+                    ]);
                 }
             }
         }

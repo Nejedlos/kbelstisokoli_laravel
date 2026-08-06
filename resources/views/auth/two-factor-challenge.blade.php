@@ -35,6 +35,7 @@
                 <div class="relative group/input">
                     <input id="code" type="text" name="code" inputmode="numeric" autofocus autocomplete="one-time-code"
                            placeholder="000 000" required
+                           x-on:input="if ($el.value.replace(/\D/g, '').length === 6) { $el.closest('form').classList.add('is-loading'); $el.closest('form').submit(); }"
                            class="fi-input-wrp w-full bg-white border border-slate-200 rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.5em] text-center text-3xl py-6">
                 </div>
                 <p class="text-[10px] text-white/40 font-medium text-center italic">{{ __('Otevřete Google Authenticator nebo podobnou aplikaci.') }}</p>
@@ -59,7 +60,7 @@
             <div class="flex items-center justify-center">
                 <label class="flex items-center gap-3 cursor-pointer group/rem">
                     <div class="relative flex items-center">
-                        <input type="checkbox" name="remember_device" value="1" class="peer sr-only">
+                        <input type="checkbox" name="remember_device" value="1" class="peer sr-only" checked>
                         <div class="w-5 h-5 border-2 border-white/20 rounded-md bg-white/5 peer-checked:bg-primary peer-checked:border-primary transition-all duration-300"></div>
                         <i class="fa-solid fa-check absolute text-[10px] text-white opacity-0 peer-checked:opacity-100 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity pointer-events-none"></i>
                     </div>

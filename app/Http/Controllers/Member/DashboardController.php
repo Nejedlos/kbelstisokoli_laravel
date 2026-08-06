@@ -94,6 +94,8 @@ class DashboardController extends Controller
             })
             : [];
 
+        $teamTrackedUserIds = [];
+
         // 1. Nejbližší akce (limit 3)
         $trainings = Training::with([
             'teams.activePlayers:player_profiles.id,user_id', // Načteme jen to nejdůležitější pro výpočet
@@ -109,16 +111,18 @@ class DashboardController extends Controller
             ->orderBy('starts_at')
             ->limit(3)
             ->get()
-            ->map(function ($item) use ($trackedUserIds) {
-                $expectedIds = [];
+            ->map(function ($item) use ($trackedUserIds, &$teamTrackedUserIds) {
+                $expectedIds = collect();
                 foreach ($item->teams as $team) {
-                    foreach ($team->activePlayers as $profile) {
-                        if (in_array($profile->user_id, $trackedUserIds)) {
-                            $expectedIds[] = $profile->user_id;
-                        }
+                    if (! isset($teamTrackedUserIds[$team->id])) {
+                        $teamTrackedUserIds[$team->id] = $team->activePlayers
+                            ->pluck('user_id')
+                            ->filter(fn($uid) => in_array($uid, $trackedUserIds))
+                            ->toArray();
                     }
+                    $expectedIds = $expectedIds->concat($teamTrackedUserIds[$team->id]);
                 }
-                $item->expected_players_count = count(array_unique($expectedIds));
+                $item->expected_players_count = $expectedIds->unique()->count();
 
                 return ['type' => 'training', 'data' => $item, 'time' => $item->starts_at];
             });
@@ -139,7 +143,7 @@ class DashboardController extends Controller
             ->orderBy('scheduled_at')
             ->limit(3)
             ->get()
-            ->map(function ($item) use ($currentSeasonId, $trackedUserIds) {
+            ->map(function ($item) use ($currentSeasonId, $trackedUserIds, &$teamTrackedUserIds) {
                 $seasonId = $item->season_id ?: $currentSeasonId;
 
                 // Pokud je sezóna jiná než aktuální (což u budoucích zápasů je málo pravděpodobné, ale možné)
@@ -150,7 +154,7 @@ class DashboardController extends Controller
                         ->toArray();
                 });
 
-                $expectedIds = [];
+                $expectedIds = collect();
                 // Sběr týmů ze starého sloupce i nové relace
                 $teams = collect();
                 if ($item->team) {
@@ -163,13 +167,16 @@ class DashboardController extends Controller
                 }
 
                 foreach ($teams as $team) {
-                    foreach ($team->activePlayers as $profile) {
-                        if (in_array($profile->user_id, $seasonTrackedIds)) {
-                            $expectedIds[] = $profile->user_id;
-                        }
+                    $cacheKey = "{$team->id}_{$seasonId}";
+                    if (! isset($teamTrackedUserIds[$cacheKey])) {
+                        $teamTrackedUserIds[$cacheKey] = $team->activePlayers
+                            ->pluck('user_id')
+                            ->filter(fn($uid) => in_array($uid, $seasonTrackedIds))
+                            ->toArray();
                     }
+                    $expectedIds = $expectedIds->concat($teamTrackedUserIds[$cacheKey]);
                 }
-                $item->expected_players_count = count(array_unique($expectedIds));
+                $item->expected_players_count = $expectedIds->unique()->count();
 
                 return ['type' => 'match', 'data' => $item, 'time' => $item->scheduled_at];
             });
@@ -189,16 +196,18 @@ class DashboardController extends Controller
             ->orderBy('starts_at')
             ->limit(3)
             ->get()
-            ->map(function ($item) use ($trackedUserIds) {
-                $expectedIds = [];
+            ->map(function ($item) use ($trackedUserIds, &$teamTrackedUserIds) {
+                $expectedIds = collect();
                 foreach ($item->teams as $team) {
-                    foreach ($team->activePlayers as $profile) {
-                        if (in_array($profile->user_id, $trackedUserIds)) {
-                            $expectedIds[] = $profile->user_id;
-                        }
+                    if (! isset($teamTrackedUserIds[$team->id])) {
+                        $teamTrackedUserIds[$team->id] = $team->activePlayers
+                            ->pluck('user_id')
+                            ->filter(fn($uid) => in_array($uid, $trackedUserIds))
+                            ->toArray();
                     }
+                    $expectedIds = $expectedIds->concat($teamTrackedUserIds[$team->id]);
                 }
-                $item->expected_players_count = count(array_unique($expectedIds));
+                $item->expected_players_count = $expectedIds->unique()->count();
 
                 return ['type' => 'event', 'data' => $item, 'time' => $item->starts_at];
             });

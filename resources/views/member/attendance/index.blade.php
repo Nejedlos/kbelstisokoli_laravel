@@ -211,7 +211,7 @@
         @else
             <div class="flex flex-col gap-4">
                 @foreach($program as $event)
-                    <x-member.event-card :event="$event" />
+                    <livewire:member.event-card :event="$event" :key="$event['type'].'-'.$event['data']->id" />
                 @endforeach
             </div>
         @endif

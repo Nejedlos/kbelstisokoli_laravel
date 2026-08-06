@@ -206,9 +206,9 @@
                         {{ __('dashboard.no_upcoming') }}
                     </div>
                 @else
-                    <div class="space-y-4">
+                    <div class="space-y-4" x-data="{ selectedEvents: [] }">
                         @foreach($upcoming as $event)
-                            <x-member.event-card :event="$event" />
+                            <livewire:member.event-card :event="$event" :key="'dash-'.$event['type'].'-'.$event['data']->id" />
                         @endforeach
                     </div>
                 @endif

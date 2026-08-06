@@ -56,8 +56,14 @@ class LoginResponse implements FilamentLoginResponseContract, LoginResponseContr
             $remembered = false;
             if ($rememberCookie) {
                 try {
-                    $data = decrypt($rememberCookie);
-                    $remembered = isset($data['user_id']) && $data['user_id'] === $user->id;
+                    // Laravel automaticky dešifruje cookies, pokud nejsou v 'except' v EncryptCookies.
+                    $data = $rememberCookie;
+                    
+                    if (is_string($data)) {
+                        $data = json_decode($data, true);
+                    }
+                    
+                    $remembered = is_array($data) && isset($data['user_id']) && (int) $data['user_id'] === (int) $user->id;
 
                     if ($remembered) {
                         $guard = auth()->getDefaultDriver();

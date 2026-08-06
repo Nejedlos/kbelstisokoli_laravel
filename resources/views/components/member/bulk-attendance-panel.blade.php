@@ -120,6 +120,11 @@
                             // Vyčistit výběr hned po odeslání, aby panel zmizel
                             selectedEvents = [];
                             this.openDecline = false;
+
+                            // Obnovit Livewire komponenty (karty) pro synchronizaci dat
+                            if (window.Livewire) {
+                                Livewire.dispatch('attendanceUpdated');
+                            }
                         } else {
                             // Standardní hláška při erroru
                             $dispatch('loading-stop');
