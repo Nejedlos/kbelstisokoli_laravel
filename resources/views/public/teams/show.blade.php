@@ -63,7 +63,7 @@
 
                     <h3 class="text-2xl font-black uppercase tracking-tight mb-6">{{ __('teams.detail.standings') ?? 'Tabulka soutěže' }}</h3>
                     <div class="mb-12">
-                        @livewire('public.standings-table', ['teamId' => $team->id, 'showFilters' => false, 'compact' => true])
+                        @livewire('public-standings-table', ['teamId' => $team->id, 'showFilters' => false, 'compact' => true])
                     </div>
 
                     @if($team->rosterPlayers->isNotEmpty())

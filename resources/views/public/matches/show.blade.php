@@ -468,7 +468,7 @@
                             <h3 class="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 px-2">
                                 {{ __('matches.standings_widget_title') ?? 'Aktuální tabulka' }}
                             </h3>
-                            @livewire('public.standings-table', [
+                            @livewire('public-standings-table', [
                                 'competitionUrl' => $match->competition_url,
                                 'showFilters' => false,
                                 'compact' => true,

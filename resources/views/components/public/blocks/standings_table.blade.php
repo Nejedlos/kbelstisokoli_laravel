@@ -17,7 +17,7 @@
         @endif
 
         <div class="max-w-4xl mx-auto">
-            @livewire('public.standings-table', [
+            @livewire('public-standings-table', [
                 'teamId' => $teamId,
                 'seasonId' => $seasonId,
                 'showFilters' => $showFilters,

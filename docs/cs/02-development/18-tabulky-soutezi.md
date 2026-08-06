@@ -17,10 +17,10 @@ Komponenta `App\Livewire\Public\StandingsTable` je navržena pro znovupoužiteln
 ### Použití v Blade
 ```blade
 {{-- Automatický náhled tabulky pro konkrétní tým --}}
-@livewire('public.standings-table', ['teamId' => $team->id, 'showFilters' => false, 'limit' => 5])
+@livewire('public-standings-table', ['teamId' => $team->id, 'showFilters' => false, 'limit' => 5])
 
 {{-- Detailní tabulka konkrétní soutěže v sidebaru --}}
-@livewire('public.standings-table', ['competitionUrl' => $match->competition_url, 'compact' => true])
+@livewire('public-standings-table', ['competitionUrl' => $match->competition_url, 'compact' => true])
 ```
 
 ## Design a UX

@@ -200,7 +200,7 @@
             @endphp
 
             @if($showEvents)
-                @livewire('public.hero-events', ['alignment' => $alignment, 'lazy' => true])
+                @livewire('public-hero-events', ['alignment' => $alignment, 'lazy' => true])
             @endif
 
             @if(($data['cta_label'] ?? null) || ($data['cta_secondary_label'] ?? null) || ($data['cta_tertiary_label'] ?? null))

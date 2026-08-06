@@ -38,7 +38,7 @@
                 align="center"
             />
             <div class="max-w-4xl mx-auto">
-                @livewire('public.standings-table', ['showFilters' => false, 'limit' => 5])
+                @livewire('public-standings-table', ['showFilters' => false, 'limit' => 5])
 
                 <div class="mt-12 text-center">
                     <a href="{{ route('public.teams.index') }}" class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-secondary text-white font-black uppercase tracking-widest text-xs hover:bg-primary hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95">
