@@ -186,7 +186,7 @@
         {{ $php }} artisan key:generate --no-interaction
     fi
 
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         echo "Ensuring custom public path is configured: {{ $public_path }}"
         if [ ! -L "{{ $public_path }}" ] && [ ! -d "{{ $public_path }}" ]; then
             ln -sf "{{ $path }}/public" "{{ $public_path }}"
@@ -196,7 +196,7 @@
 
     # Determine and patch entry point
     if [ -f "public/index.production.php" ]; then
-        if [ -z "{{ isset($public_path) ? $public_path : '' }}" ] || [ "{{ isset($public_path) ? $public_path : '' }}" = "{{ $path }}/public" ]; then
+        if [ "{{ $v_pub }}" = "" ] || [ "{{ $target_public }}" = "{{ $v_path }}/public" ]; then
             DEST="{{ $path }}/public/index.php"
         else
             DEST="{{ $public_path }}/index.php"
@@ -303,7 +303,7 @@
     {{ $php }} artisan system:cleanup
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
         if [ ! -L "{{ $public_path }}" ]; then
             cd {{ $path }}/public
@@ -331,12 +331,12 @@
     echo "Resetting OpCache (final)..."
     echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
     fi
     curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
     rm -f public/opcache_reset.php
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         rm -f "{{ $public_path }}/opcache_reset.php"
     fi
 
@@ -420,7 +420,7 @@
     {{ $php }} artisan system:cleanup
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         # Pokud public_path není symlink (tedy je to fyzický adresář), musíme do něj soubory zkopírovat
         if [ ! -L "{{ $public_path }}" ]; then
             cd {{ $path }}/public
@@ -451,12 +451,12 @@
     echo "Resetting OpCache (final)..."
     echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
     fi
     curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
     rm -f public/opcache_reset.php
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         rm -f "{{ $public_path }}/opcache_reset.php"
     fi
 
@@ -580,7 +580,7 @@
     {{ $php }} artisan system:cleanup
 
     # Dynamická synchronizace všech adresářů z public/ do public_path (kromě storage)
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         if [ ! -L "{{ $public_path }}" ]; then
             cd {{ $path }}/public
             # Najdeme všechny skutečné adresáře v public/
@@ -611,12 +611,12 @@
     echo "Resetting OpCache (final)..."
     echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
     fi
     curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
     rm -f public/opcache_reset.php
-    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
         rm -f "{{ $public_path }}/opcache_reset.php"
     fi
 
