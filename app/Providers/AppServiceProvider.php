@@ -109,6 +109,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 1. Explicitní registrace Livewire komponent pro zajištění správné discovery v produkci (zejména pro lazy loading)
+        // Musí proběhnout co nejdříve, před případnými chybami v bootování ostatních služeb
+        if (class_exists(\Livewire\Livewire::class)) {
+            // Registrujeme obě varianty názvů (pomlčkovou pro náš kód, tečkovou pro standardní Livewire discovery)
+            Livewire::component('public-hero-events', \App\Livewire\Public\HeroEvents::class);
+            Livewire::component('public.hero-events', \App\Livewire\Public\HeroEvents::class);
+
+            Livewire::component('public-standings-table', \App\Livewire\Public\StandingsTable::class);
+            Livewire::component('public.standings-table', \App\Livewire\Public\StandingsTable::class);
+
+            Livewire::component('public-team-season-stats', \App\Livewire\Public\TeamSeasonStats::class);
+            Livewire::component('public.team-season-stats', \App\Livewire\Public\TeamSeasonStats::class);
+        }
+
         // Vynucení kořenové URL podle konfigurace pro správné generování odkazů v mailech a CLI
         if ($appUrl = config('app.url')) {
             \Illuminate\Support\Facades\URL::forceRootUrl($appUrl);
@@ -202,12 +216,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Schema::defaultStringLength(191);
-
-        // Explicitní registrace Livewire komponent pro zajištění správné discovery v produkci (zejména pro lazy loading)
-        Livewire::component('public-hero-events', \App\Livewire\Public\HeroEvents::class);
-        Livewire::component('public-standings-table', \App\Livewire\Public\StandingsTable::class);
-        Livewire::component('public-team-season-stats', \App\Livewire\Public\TeamSeasonStats::class);
-
 
         // LanguageSwitch configuration updated for v5
         \BezhanSalleh\LanguageSwitch\LanguageSwitch::configureUsing(function (\BezhanSalleh\LanguageSwitch\LanguageSwitch $switch) {

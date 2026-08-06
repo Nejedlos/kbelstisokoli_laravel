@@ -294,8 +294,10 @@
 
     {{ $php }} artisan filament:optimize
     {{ $php }} artisan livewire:publish --assets --force
-    {{ $php }} artisan livewire:discover
+    # Livewire discover na produkci nepoužíváme, spoléháme na explicitní registraci v AppServiceProvider
+    # {{ $php }} artisan livewire:discover
     {{ $php }} artisan cache:clear
+    {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
     {{ $php }} artisan optimize
     {{ $php }} artisan system:cleanup
@@ -409,8 +411,10 @@
 
     {{ $php }} artisan filament:optimize
     {{ $php }} artisan livewire:publish --assets --force
-    {{ $php }} artisan livewire:discover
+    # Livewire discover na produkci nepoužíváme, spoléháme na explicitní registraci v AppServiceProvider
+    # {{ $php }} artisan livewire:discover
     {{ $php }} artisan cache:clear
+    {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
     {{ $php }} artisan optimize
     {{ $php }} artisan system:cleanup
@@ -567,8 +571,10 @@
 
     {{ $php }} artisan filament:optimize
     {{ $php }} artisan livewire:publish --assets --force
-    {{ $php }} artisan livewire:discover
+    # Livewire discover na produkci nepoužíváme, spoléháme na explicitní registraci v AppServiceProvider
+    # {{ $php }} artisan livewire:discover
     {{ $php }} artisan cache:clear
+    {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
     {{ $php }} artisan optimize
     {{ $php }} artisan system:cleanup
