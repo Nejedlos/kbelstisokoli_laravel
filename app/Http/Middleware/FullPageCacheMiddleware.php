@@ -27,8 +27,12 @@ class FullPageCacheMiddleware
         }
 
         // Cache zapnuta pouze pro GET, hosty a pokud je aktivní v configu
-        if (! $isGuest || ! $this->shouldCache($request) || $this->isImpersonating($request)) {
-            return $next($request);
+        $shouldCache = $this->shouldCache($request);
+        if (! $isGuest || ! $shouldCache || $this->isImpersonating($request)) {
+            $response = $next($request);
+            // $response->headers->set('X-Page-Cache-Skip', ! $isGuest ? 'not-guest' : (! $shouldCache ? $request->attributes->get('cache_skip_reason', 'unknown') : 'impersonating'));
+
+            return $response;
         }
 
         // Zahrneme do klíče i query parametry (seřazené) a jazyk
@@ -44,6 +48,9 @@ class FullPageCacheMiddleware
             $response = response($cached['content']);
             $response->headers->set('Content-Type', $cached['type']);
             $response->headers->set('X-Page-Cache', 'hit');
+
+            // Browser cache na 5 minut pro veřejné stránky (minimalizace TTFB při navigaci)
+            $response->headers->set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
 
             // Přidáme i cookies, které mohly být vyfrontovány předchozími middleware (např. SetLocale)
             foreach (cookie()->getQueuedCookies() as $cookie) {
@@ -83,8 +90,17 @@ class FullPageCacheMiddleware
         // Cache zapnuta pokud je aktivní v configu, nebo pokud jde o priming (X-Prime-Cache)
         $enabled = config('performance.features.full_page_cache', false) || $request->hasHeader('X-Prime-Cache');
 
+        if (! $enabled) {
+            $request->attributes->set('cache_skip_reason', 'config-disabled');
+            return false;
+        }
+
+        if (! $request->isMethod('GET')) {
+            $request->attributes->set('cache_skip_reason', 'not-get');
+            return false;
+        }
+
         // Vyloučení rychle se měnících věcí, které nechceme cachovat vůbec
-        // (Většina veřejných stránek se nyní cachuje a invaliduje přes PerformanceObserver)
         $excludedPaths = [
             'admin*',
             'member*',
@@ -105,20 +121,21 @@ class FullPageCacheMiddleware
             'verify-email*',
         ];
 
-        // Pokud má request session, zkontrolujeme zda neobsahuje flash data (např. po chybě validace)
+        if ($request->is($excludedPaths)) {
+            $request->attributes->set('cache_skip_reason', 'excluded-path');
+            return false;
+        }
+
+        // Pokud má request session, zkontrolujeme zda neobsahuje flash data
         if ($request->hasSession()) {
             $session = $request->session();
             if ($session->has('errors') || $session->has('status') || $session->has('success') || $session->has('message')) {
+                $request->attributes->set('cache_skip_reason', 'session-flash-data');
                 return false;
             }
         }
 
-        return $enabled
-            && $request->isMethod('GET')
-            && ! $request->is($excludedPaths)
-            && ! $request->hasHeader('X-Screenshot-Mode')
-            && ! $request->hasHeader('X-Screenshot-Token')
-            && ! $request->query('screenshot_user_id');
+        return true;
     }
 
     /**
