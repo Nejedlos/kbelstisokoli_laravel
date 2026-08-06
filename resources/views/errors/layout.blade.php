@@ -1,5 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php
+    try {
+        $locale = str_replace('_', '-', app()->getLocale());
+    } catch (\Throwable $e) {
+        $locale = config('app.locale', 'cs');
+    }
+@endphp
+<html lang="{{ $locale }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

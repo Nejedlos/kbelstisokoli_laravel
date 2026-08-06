@@ -286,12 +286,6 @@
     {{ $php }} artisan config:clear
     {{ $php }} artisan cache:clear
 
-    # Reset OpCache for Web (via temporary file)
-    echo "Resetting OpCache..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
-    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
-    rm public/opcache_reset.php
-
     echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
 
@@ -329,6 +323,19 @@
     if [ "{{ $noai }}" != "1" ]; then
         echo "Reindexing AI..."
         {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    fi
+
+    # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
+    echo "Resetting OpCache (final)..."
+    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    # Pokud máme externí public_path, zkopírujeme soubor i tam
+    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+        cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
+    fi
+    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
+    rm -f public/opcache_reset.php
+    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+        rm -f "{{ $public_path }}/opcache_reset.php"
     fi
 
     echo "✅ Setup finished successfully!"
@@ -394,12 +401,6 @@
     {{ $php }} artisan config:clear
     {{ $php }} artisan cache:clear
 
-    # Reset OpCache for Web (via temporary file)
-    echo "Resetting OpCache..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
-    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
-    rm public/opcache_reset.php
-
     echo "Running idempotent database migrations..."
     {{ $php }} artisan migrate --force
 
@@ -440,6 +441,19 @@
     if [ "{{ $noai }}" != "1" ]; then
         echo "Reindexing AI..."
         {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    fi
+
+    # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
+    echo "Resetting OpCache (final)..."
+    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    # Pokud máme externí public_path, zkopírujeme soubor i tam
+    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+        cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
+    fi
+    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
+    rm -f public/opcache_reset.php
+    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+        rm -f "{{ $public_path }}/opcache_reset.php"
     fi
 
     echo "✅ Deployment finished successfully!"
@@ -585,6 +599,19 @@
     if [ "{{ $noai }}" != "1" ]; then
         echo "Reindexing AI..."
         {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
+    fi
+
+    # Reset OpCache for Web (via temporary file)
+    echo "Resetting OpCache (final)..."
+    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    # Pokud máme externí public_path, zkopírujeme soubor i tam
+    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+        cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
+    fi
+    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
+    rm -f public/opcache_reset.php
+    if [ ! -z "{{ isset($public_path) ? $public_path : '' }}" ] && [ "{{ isset($public_path) ? $public_path : '' }}" != "{{ $path }}/public" ]; then
+        rm -f "{{ $public_path }}/opcache_reset.php"
     fi
 
     echo "✅ Sync finished successfully!"

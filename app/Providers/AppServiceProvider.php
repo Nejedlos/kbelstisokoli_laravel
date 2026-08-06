@@ -272,7 +272,11 @@ class AppServiceProvider extends ServiceProvider
 
             $viewName = $view->getName();
             $audience = (str_starts_with($viewName, 'member.') || str_contains($viewName, 'filament-panels::')) ? 'member' : 'public';
-            $locale = app()->getLocale();
+            try {
+                $locale = app()->getLocale();
+            } catch (\Throwable $e) {
+                $locale = config('app.locale', 'cs');
+            }
             $userId = auth()->id() ?: 0;
 
             if (! isset($cachedData[$locale])) {

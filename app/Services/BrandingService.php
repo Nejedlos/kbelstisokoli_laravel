@@ -253,7 +253,11 @@ class BrandingService
                 }
             }
 
-            $locale = app()->getLocale();
+            try {
+                $locale = app()->getLocale();
+            } catch (\Throwable $e) {
+                $locale = config('app.locale', 'cs');
+            }
 
             $store = 'file';
             return $this->dbSettings = Cache::store($store)->remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {

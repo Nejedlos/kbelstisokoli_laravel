@@ -56,17 +56,17 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         // Fix pro správnou PHP binárku na produkci (pro Scheduler a subprocesy)
-        if (app()->runningInConsole() && env('APP_ENV') === 'production' && $php = env('PROD_PHP_BINARY')) {
+        if (app()->runningInConsole() && $app->environment('production') && $php = (config('app.prod_php_binary') ?: env('PROD_PHP_BINARY'))) {
             putenv("PHP_BINARY=$php");
         }
 
         // Nastavení public_path - musí fungovat i v Console (pro importy, seedy, media library)
         // Zabezpečení pro localhost: pokud jsme v local prostředí a produkční cesta neexistuje, nulujeme ji
-        $publicPath = env('PROD_PUBLIC_PATH');
+        $publicPath = config('app.prod_public_path') ?: env('PROD_PUBLIC_PATH');
 
-        if (env('PUBLIC_PATH_MODE') !== 'external' || ! $publicPath) {
+        if ((config('app.public_path_mode') ?: env('PUBLIC_PATH_MODE')) !== 'external' || ! $publicPath) {
             $publicPath = null;
-        } elseif (! file_exists($publicPath) && env('APP_ENV') === 'local') {
+        } elseif (! file_exists($publicPath) && $app->environment('local')) {
             $publicPath = null;
         }
 
@@ -75,9 +75,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         if (! $publicPath) {
-            $publicPath = env('APP_PUBLIC_PATH');
+            $publicPath = config('app.public_path') ?: env('APP_PUBLIC_PATH');
             // Zabezpečení pro localhost: pokud cesta neexistuje a jsme v local, nepoužívat ji
-            if ($publicPath && ! file_exists($publicPath) && env('APP_ENV') === 'local') {
+            if ($publicPath && ! file_exists($publicPath) && $app->environment('local')) {
                 $publicPath = null;
             }
         }
@@ -90,8 +90,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Vynucení HTTPS na produkci pro stabilní generování assetů (Vite, asset(), ...)
         // Důležité po optimize:clear, kdy se spoléháme na dynamickou detekci URL
-        if (env('APP_ENV') === 'production') {
-            URL::forceScheme('https');
+        if ($app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
         }
     })
     ->withRouting(
