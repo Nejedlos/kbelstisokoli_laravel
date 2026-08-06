@@ -105,11 +105,7 @@ class AppSyncCommand extends Command
             $this->call('announcements:sync');
         }
 
-        // Livewire discover
-        $this->info('Cachuji Livewire komponenty...');
-        if (\Illuminate\Support\Facades\Artisan::has('livewire:discover')) {
-            $this->call('livewire:discover');
-        }
+        // Livewire (v Livewire 3 se používá auto-discovery, příkaz discover již neexistuje)
 
         // Finance
         if (class_exists(\App\Console\Commands\FinanceSyncCommand::class)) {
