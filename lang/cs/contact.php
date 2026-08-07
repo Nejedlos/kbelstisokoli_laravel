@@ -6,7 +6,8 @@ return [
     'breadcrumbs' => 'Kontakt',
     'connect_with_us' => 'Spojte se s námi',
     'connect_desc' => 'Máte dotaz k náboru, tréninkům nebo zápasům? Jsme tu pro vás.',
-    'address' => 'Adresa',
+    'address' => 'Sídlo oddílu',
+    'address_note' => 'Pouze pro korespondenci',
     'email' => 'Email',
     'phone' => 'Telefon',
     'follow_us' => 'Sledujte nás',
@@ -22,6 +23,7 @@ return [
     'gps' => 'GPS',
     'team_leader' => 'Vedoucí týmu',
     'venue' => 'Hala / Aréna',
+    'venue_note' => 'Zde se konají všechna domácí utkání',
     'match_day' => 'Hlavní hrací den',
     'map_not_available' => 'Mapa není k dispozici',
 

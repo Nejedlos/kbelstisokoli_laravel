@@ -6,7 +6,8 @@ return [
     'breadcrumbs' => 'Contact',
     'connect_with_us' => 'Connect with us',
     'connect_desc' => 'Have a question about recruitment, training or matches? We are here for you.',
-    'address' => 'Address',
+    'address' => 'Registered Office',
+    'address_note' => 'Correspondence only',
     'email' => 'Email',
     'phone' => 'Phone',
     'follow_us' => 'Follow us',
@@ -22,6 +23,7 @@ return [
     'gps' => 'GPS',
     'team_leader' => 'Team Leader',
     'venue' => 'Gym / Arena',
+    'venue_note' => 'All home matches are played here',
     'match_day' => 'Main Match Day',
     'map_not_available' => 'Map not available',
 

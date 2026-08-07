@@ -61,39 +61,46 @@
                             </div>
                         @endif
 
-                        @if($branding['venue']['name'] ?? null)
-                            <div class="flex items-start group">
-                                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
-                                    <i class="fa-light fa-basketball-hoop text-xl"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.venue') ?? 'Hala / Aréna' }}</h4>
-                                    <div class="font-bold text-secondary tracking-tight">
-                                        {{ $branding['venue']['name'] }}
-                                    </div>
-                                    <div class="text-sm text-slate-500">
-                                        {{ $branding['venue']['street'] }}, {{ $branding['venue']['city'] }}
-                                    </div>
-                                    @if($branding['venue']['gps'] ?? null)
-                                        <div class="text-[10px] font-mono text-slate-400 mt-1">
-                                            GPS: {{ $branding['venue']['gps'] }}
+                        @if(($branding['venue']['name'] ?? null) || ($branding['match_day'] ?? null))
+                            <div class="p-6 bg-primary/5 rounded-2xl border border-primary/10 mb-8 shadow-sm">
+                                @if($branding['venue']['name'] ?? null)
+                                    <div class="flex items-start mb-6 last:mb-0">
+                                        <div class="w-12 h-12 rounded-2xl bg-primary shadow-sm flex items-center justify-center text-white shrink-0 mr-4 border border-primary/20">
+                                            <i class="fa-light fa-basketball-hoop text-xl"></i>
                                         </div>
-                                    @endif
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($branding['match_day'] ?? null)
-                            <div class="flex items-start group">
-                                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
-                                    <i class="fa-light fa-calendar-star text-xl"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.match_day') ?? 'Hlavní hrací den' }}</h4>
-                                    <div class="font-bold text-secondary tracking-tight">
-                                        {{ $branding['match_day'] }}
+                                        <div>
+                                            <div class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary text-white uppercase tracking-wider mb-2">
+                                                {{ __('contact.venue_note') }}
+                                            </div>
+                                            <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.venue') ?? 'Hala / Aréna' }}</h4>
+                                            <div class="font-bold text-secondary tracking-tight text-lg leading-tight mb-1">
+                                                {{ $branding['venue']['name'] }}
+                                            </div>
+                                            <div class="text-sm text-slate-600">
+                                                {{ $branding['venue']['street'] }}, {{ $branding['venue']['city'] }}
+                                            </div>
+                                            @if($branding['venue']['gps'] ?? null)
+                                                <div class="text-[10px] font-mono text-slate-400 mt-2 bg-white/50 inline-block px-1.5 py-0.5 rounded border border-slate-100">
+                                                    GPS: {{ $branding['venue']['gps'] }}
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
+
+                                @if($branding['match_day'] ?? null)
+                                    <div class="flex items-start pt-6 border-t border-primary/10">
+                                        <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0 mr-4 border border-slate-100">
+                                            <i class="fa-light fa-calendar-star text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-1">{{ __('contact.match_day') ?? 'Hlavní hrací den' }}</h4>
+                                            <div class="font-bold text-secondary tracking-tight">
+                                                {{ $branding['match_day'] }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         @endif
 
@@ -107,6 +114,9 @@
                                     <address class="not-italic font-bold text-secondary tracking-tight">
                                         {!! nl2br(e($branding['contact']['address'])) !!}
                                     </address>
+                                    <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-bold">
+                                        {{ __('contact.address_note') }}
+                                    </div>
                                 </div>
                             </div>
                         @endif
