@@ -37,11 +37,29 @@ Route::get('/system/schedule/{token}', function (string $token) {
     // Na sdíleném hostingu (Webglobe) neběží trvalý worker, proto ho nastartujeme jednorázově
     // s parametrem --stop-when-empty, aby po dokončení úloh skončil.
     try {
-        $php = env('PROD_PHP_BINARY', '/usr/bin/php8.4');
+        $php = config('app.prod_php_binary') ?: env('PROD_PHP_BINARY', '/usr/bin/php8.4');
         $artisan = base_path('artisan');
+
+        // Diagnostika: Zkusíme, zda binárka vůbec funguje
+        $testResult = -1;
+        @exec("{$php} -v 2>&1", $testOutput, $testResult);
+
+        if ($testResult !== 0 && $php !== 'php8.4') {
+            // Zkusíme fallback na prosté 'php8.4', které bývá v PATH
+            $php = 'php8.4';
+            @exec("{$php} -v 2>&1", $testOutput, $testResult);
+        }
+
         // Použijeme nohup a přesměrování do /dev/null pro bezpečné spuštění v pozadí
-        exec("nohup {$php} {$artisan} queue:work --stop-when-empty > /dev/null 2>&1 &");
-        $output .= "\n[Queue worker started in background]";
+        $cmd = "nohup {$php} {$artisan} queue:work --stop-when-empty > /dev/null 2>&1 &";
+        exec($cmd, $execOutput, $execResult);
+
+        if ($execResult === 0) {
+            $output .= "\n[Queue worker started in background using {$php}]";
+        } else {
+            $output .= "\n[Failed to start queue worker (Code {$execResult})]";
+            \Illuminate\Support\Facades\Log::error("Failed to start background queue worker. Cmd: {$cmd}, Result: {$execResult}");
+        }
     } catch (\Exception $e) {
         \Illuminate\Support\Facades\Log::error('Failed to start background queue worker: ' . $e->getMessage());
         $output .= "\n[Failed to start queue worker: " . $e->getMessage() . "]";

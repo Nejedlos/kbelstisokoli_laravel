@@ -87,9 +87,9 @@ Schedule::command('php8.4 artisan queue:work --stop-when-empty')
 */
 
 // Automatické čištění starých záznamů a jobů (každou noc)
-Schedule::command('queue:prune-failed --hours=24')->dailyAt('03:30');
-Schedule::command('model:prune')->dailyAt('03:45');
-Schedule::command('telescope:clear')->dailyAt('04:15');
+Schedule::call(fn() => Artisan::call('queue:prune-failed', ['--hours' => 24]))->dailyAt('03:30')->name('queue-prune-failed');
+Schedule::call(fn() => Artisan::call('model:prune'))->dailyAt('03:45')->name('model-prune');
+Schedule::call(fn() => Artisan::call('telescope:clear'))->dailyAt('04:15')->name('telescope-clear');
 
 // Hook pro smazání full-page cache při volání optimize:clear
 Event::listen(CommandFinished::class, function (CommandFinished $event) {

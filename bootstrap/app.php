@@ -111,6 +111,13 @@ $app = Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withSchedule(function (Schedule $schedule) {
+        // Fix pro správnou PHP binárku na produkci (pro subprocesy scheduleru)
+        // Důležité pro Symfony Process, který scheduler interně používá pro command() úlohy.
+        if (app()->environment('production')) {
+            $php = config('app.prod_php_binary') ?: env('PROD_PHP_BINARY', '/usr/bin/php8.4');
+            $schedule->usePhpBinary($php);
+        }
+
         // Zabezpečení pro případy, kdy DB není dostupná (např. při setupu nebo migracích)
         $argv = $_SERVER['argv'] ?? [];
         if (count(array_intersect(['help', 'list', 'migrate', 'key:generate', 'package:discover', 'optimize', 'filament:upgrade'], $argv)) > 0) {
