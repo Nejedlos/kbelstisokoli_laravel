@@ -4,6 +4,9 @@
 Dne 7. 8. 2026 v 03:30 došlo na produkci k pádu plánovače úloh s chybou:
 `Scheduled command ['/usr/bin/php8.4' 'artisan' queue:prune-failed --hours=24] failed with exit code [126].`
 
+Následně po prvním pokusu o opravu došlo k chybě:
+`BadMethodCallException: Method Illuminate\Console\Scheduling\Schedule::usePhpBinary does not exist.`
+
 ### Příčina
 Chyba `exit code 126` znamená, že proces byl vytvořen, ale nešel spustit (obvykle "Permission denied" pro danou binárku). Na sdíleném hostingu Webglobe webový uživatel (pod kterým běží PHP-FPM a tedy i HTTP endpoint pro cron) nemá práva spouštět CLI binárku PHP na absolutní cestě `/usr/bin/php8.4`.
 
@@ -18,14 +21,15 @@ Změnili jsme způsob spouštění kritických úloh z `Schedule::command()` na 
 Tato změna zajišťuje, že příkaz běží v rámci aktuálního PHP procesu a nevyžaduje spouštění externí binárky.
 
 ### 2. Úprava `bootstrap/app.php`
-V bloku `withSchedule` jsme přidali explicitní konfiguraci PHP binárky pro scheduler:
+Původně zamýšlené volání `$schedule->usePhpBinary()` bylo odstraněno, protože v této verzi Laravelu neexistuje. Místo toho se spoléháme na:
+1. Konverzi příkazů na `Schedule::call()`, které běží v aktuálním procesu.
+2. Nastavení environmentální proměnné `PHP_BINARY` v bloku `booting` souboru `bootstrap/app.php`:
 ```php
-if (app()->environment('production')) {
-    $php = config('app.prod_php_binary') ?: env('PROD_PHP_BINARY', '/usr/bin/php8.4');
-    $schedule->usePhpBinary($php);
+if ($app->environment('production') && $php = config('app.prod_php_binary')) {
+    putenv("PHP_BINARY=$php");
 }
 ```
-To pomůže v případech, kdy by subproces byl nezbytný (např. u úloh definovaných v DB jako command).
+Toto nastavení pomáhá Symfony Process komponentě najít správnou binárku, pokud je subproces přesto vyžadován.
 
 ### 3. Úprava `routes/public.php` (Diagnostika a Fallback)
 Vylepšili jsme start queue workera:
