@@ -174,7 +174,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Deaktivace Telescope na produkci, pokud není explicitně vynucen přes TELESCOPE_ENABLED=true
         // a současně omezujeme zápis do DB při vysoké zátěži
-        if (app()->isProduction() && config('telescope.enabled') && ! env('TELESCOPE_ENABLED')) {
+        if (app()->isProduction() && config('telescope.enabled') && ! config('app.telescope_enabled')) {
             config(['telescope.enabled' => false]);
         }
 

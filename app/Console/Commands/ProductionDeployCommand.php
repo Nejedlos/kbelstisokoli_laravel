@@ -32,25 +32,27 @@ class ProductionDeployCommand extends Command
      */
     public function handle()
     {
-        $host = config('app.prod_host', env('PROD_HOST'));
-        $port = config('app.prod_port', env('PROD_PORT', '22'));
-        $user = config('app.prod_user', env('PROD_USER'));
-        $phpBinary = config('app.prod_php_binary', env('PROD_PHP_BINARY', 'php'));
-        $nodeBinary = config('app.prod_node_binary', env('PROD_NODE_BINARY', 'node'));
-        $npmBinary = config('app.prod_npm_binary', env('PROD_NPM_BINARY', 'npm'));
-        $path = config('app.prod_path', env('PROD_PATH'));
-        $token = config('app.prod_git_token', env('PROD_GIT_TOKEN'));
-        $publicPath = config('app.prod_public_path', env('PROD_PUBLIC_PATH'));
+        $prodEnv = $this->loadProductionEnv();
+
+        $host = $prodEnv['PROD_HOST'] ?? config('app.prod_host', env('PROD_HOST'));
+        $port = $prodEnv['PROD_PORT'] ?? config('app.prod_port', env('PROD_PORT', '22'));
+        $user = $prodEnv['PROD_USER'] ?? config('app.prod_user', env('PROD_USER'));
+        $phpBinary = $prodEnv['PROD_PHP_BINARY'] ?? config('app.prod_php_binary', env('PROD_PHP_BINARY', 'php'));
+        $nodeBinary = $prodEnv['PROD_NODE_BINARY'] ?? config('app.prod_node_binary', env('PROD_NODE_BINARY', 'node'));
+        $npmBinary = $prodEnv['PROD_NPM_BINARY'] ?? config('app.prod_npm_binary', env('PROD_NPM_BINARY', 'npm'));
+        $path = $prodEnv['PROD_PATH'] ?? config('app.prod_path', env('PROD_PATH'));
+        $token = $prodEnv['PROD_GIT_TOKEN'] ?? config('app.prod_git_token', env('PROD_GIT_TOKEN'));
+        $publicPath = $prodEnv['PROD_PUBLIC_PATH'] ?? config('app.prod_public_path', env('PROD_PUBLIC_PATH'));
 
         // Performance config from env
         $perfConfig = [
-            'telescope_enabled' => env('PROD_TELESCOPE_ENABLED', 'false'),
-            'perf_scenario' => env('PROD_PERF_SCENARIO', 'ultra'),
-            'perf_full_page_cache' => env('PROD_PERF_FULL_PAGE_CACHE', 'true'),
-            'perf_fragment_cache' => env('PROD_PERF_FRAGMENT_CACHE', 'true'),
-            'perf_html_minify' => env('PROD_PERF_HTML_MINIFY', 'true'),
-            'perf_lw_navigate' => env('PROD_PERF_LW_NAVIGATE', 'true'),
-            'log_level' => env('PROD_LOG_LEVEL', 'warning'),
+            'telescope_enabled' => $prodEnv['PROD_TELESCOPE_ENABLED'] ?? env('PROD_TELESCOPE_ENABLED', 'false'),
+            'perf_scenario' => $prodEnv['PROD_PERF_SCENARIO'] ?? env('PROD_PERF_SCENARIO', 'ultra'),
+            'perf_full_page_cache' => $prodEnv['PROD_PERF_FULL_PAGE_CACHE'] ?? env('PROD_PERF_FULL_PAGE_CACHE', 'true'),
+            'perf_fragment_cache' => $prodEnv['PROD_PERF_FRAGMENT_CACHE'] ?? env('PROD_PERF_FRAGMENT_CACHE', 'true'),
+            'perf_html_minify' => $prodEnv['PROD_PERF_HTML_MINIFY'] ?? env('PROD_PERF_HTML_MINIFY', 'true'),
+            'perf_lw_navigate' => $prodEnv['PROD_PERF_LW_NAVIGATE'] ?? env('PROD_PERF_LW_NAVIGATE', 'true'),
+            'log_level' => $prodEnv['PROD_LOG_LEVEL'] ?? env('PROD_LOG_LEVEL', 'warning'),
         ];
 
         if (! $host || ! $user || ! $path) {
@@ -59,7 +61,7 @@ class ProductionDeployCommand extends Command
             return self::FAILURE;
         }
 
-        $currentToken = env('PROD_GIT_TOKEN');
+        $currentToken = $prodEnv['PROD_GIT_TOKEN'] ?? env('PROD_GIT_TOKEN');
         $token = $currentToken;
 
         if (! $this->option('ai-test')) {
@@ -67,7 +69,7 @@ class ProductionDeployCommand extends Command
                 $choice = select(
                     label: 'Jak chcete naložit s GitHub Personal Access Tokenem?',
                     options: [
-                        'keep' => 'Použít uložený token ('.substr($currentToken, 0, 4).'...'.substr($currentToken, -4).')',
+                        'keep' => 'Použít uložený token ('.substr((string) $currentToken, 0, 4).'...'.substr((string) $currentToken, -4).')',
                         'new' => 'Zadat nové token',
                     ],
                     default: 'keep'
@@ -97,27 +99,27 @@ class ProductionDeployCommand extends Command
 
         // DB config from env
         $dbConfig = [
-            'db_connection' => config('app.prod_db_connection', env('PROD_DB_CONNECTION')),
-            'db_host' => config('app.prod_db_host', env('PROD_DB_HOST')),
-            'db_port' => config('app.prod_db_port', env('PROD_DB_PORT')),
-            'db_database' => config('app.prod_db_database', env('PROD_DB_DATABASE')),
-            'db_username' => config('app.prod_db_username', env('PROD_DB_USERNAME')),
-            'db_password' => config('app.prod_db_password', env('PROD_DB_PASSWORD')),
-            'db_prefix' => config('app.prod_db_prefix', env('PROD_DB_PREFIX')),
+            'db_connection' => $prodEnv['PROD_DB_CONNECTION'] ?? config('app.prod_db_connection', env('PROD_DB_CONNECTION')),
+            'db_host' => $prodEnv['PROD_DB_HOST'] ?? config('app.prod_db_host', env('PROD_DB_HOST')),
+            'db_port' => $prodEnv['PROD_DB_PORT'] ?? config('app.prod_db_port', env('PROD_DB_PORT')),
+            'db_database' => $prodEnv['PROD_DB_DATABASE'] ?? config('app.prod_db_database', env('PROD_DB_DATABASE')),
+            'db_username' => $prodEnv['PROD_DB_USERNAME'] ?? config('app.prod_db_username', env('PROD_DB_USERNAME')),
+            'db_password' => $prodEnv['PROD_DB_PASSWORD'] ?? config('app.prod_db_password', env('PROD_DB_PASSWORD')),
+            'db_prefix' => $prodEnv['PROD_DB_PREFIX'] ?? config('app.prod_db_prefix', env('PROD_DB_PREFIX')),
         ];
 
         $mailConfig = [
-            'mail_mailer' => config('app.prod_mail_mailer', env('PROD_MAIL_MAILER')),
-            'mail_host' => config('app.prod_mail_host', env('PROD_MAIL_HOST')),
-            'mail_port' => config('app.prod_mail_port', env('PROD_MAIL_PORT')),
-            'mail_username' => config('app.prod_mail_username', env('PROD_MAIL_USERNAME')),
-            'mail_password' => config('app.prod_mail_password', env('PROD_MAIL_PASSWORD')),
-            'mail_encryption' => config('app.prod_mail_encryption', env('PROD_MAIL_ENCRYPTION')),
-            'mail_from_address' => config('app.prod_mail_from_address', env('PROD_MAIL_FROM_ADDRESS')),
-            'mail_from_name' => config('app.prod_mail_from_name', env('PROD_MAIL_FROM_NAME')),
+            'mail_mailer' => $prodEnv['PROD_MAIL_MAILER'] ?? config('app.prod_mail_mailer', env('PROD_MAIL_MAILER')),
+            'mail_host' => $prodEnv['PROD_MAIL_HOST'] ?? config('app.prod_mail_host', env('PROD_MAIL_HOST')),
+            'mail_port' => $prodEnv['PROD_MAIL_PORT'] ?? config('app.prod_mail_port', env('PROD_MAIL_PORT')),
+            'mail_username' => $prodEnv['PROD_MAIL_USERNAME'] ?? config('app.prod_mail_username', env('PROD_MAIL_USERNAME')),
+            'mail_password' => $prodEnv['PROD_MAIL_PASSWORD'] ?? config('app.prod_mail_password', env('PROD_MAIL_PASSWORD')),
+            'mail_encryption' => $prodEnv['PROD_MAIL_ENCRYPTION'] ?? config('app.prod_mail_encryption', env('PROD_MAIL_ENCRYPTION')),
+            'mail_from_address' => $prodEnv['PROD_MAIL_FROM_ADDRESS'] ?? config('app.prod_mail_from_address', env('PROD_MAIL_FROM_ADDRESS')),
+            'mail_from_name' => $prodEnv['PROD_MAIL_FROM_NAME'] ?? config('app.prod_mail_from_name', env('PROD_MAIL_FROM_NAME')),
         ];
 
-        $currentPassword = config('app.prod_db_password', env('PROD_DB_PASSWORD'));
+        $currentPassword = $prodEnv['PROD_DB_PASSWORD'] ?? config('app.prod_db_password', env('PROD_DB_PASSWORD'));
         $dbConfig['db_password'] = $currentPassword;
 
         if (! $this->option('ai-test')) {
@@ -211,6 +213,10 @@ class ProductionDeployCommand extends Command
                 $params[] = '--public_path='.escapeshellarg($publicPath);
             }
 
+            if (file_exists(base_path('.env.production'))) {
+                $params[] = '--env_contents='.escapeshellarg(base64_encode(file_get_contents(base_path('.env.production'))));
+            }
+
             foreach ($dbConfig as $key => $value) {
                 if ($value !== null) {
                     $params[] = "--{$key}=".escapeshellarg($value);
@@ -262,6 +268,44 @@ class ProductionDeployCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Načte obsah .env.production jako pole.
+     */
+    protected function loadProductionEnv(): array
+    {
+        $path = base_path('.env.production');
+
+        if (! file_exists($path)) {
+            return [];
+        }
+
+        $content = file_get_contents($path);
+        $lines = explode("\n", $content);
+        $env = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line) || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            if (str_contains($line, '=')) {
+                [$key, $value] = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                // Odstranění uvozovek
+                if (str_starts_with($value, '"') && str_ends_with($value, '"')) {
+                    $value = substr($value, 1, -1);
+                } elseif (str_starts_with($value, "'") && str_ends_with($value, "'")) {
+                    $value = substr($value, 1, -1);
+                }
+                $env[$key] = $value;
+            }
+        }
+
+        return $env;
     }
 
     /**

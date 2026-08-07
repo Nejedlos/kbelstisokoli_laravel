@@ -37,9 +37,10 @@ class ProductionDeploySetupCommand extends Command
     {
         info('🔧 Production Setup - Kbelští sokoli');
 
+        $prodEnv = $this->loadProductionEnv();
         $connection = $this->argument('connection');
 
-        if (! $connection && ! config('app.prod_host', env('PROD_HOST'))) {
+        if (! $connection && ! ($prodEnv['PROD_HOST'] ?? config('app.prod_host', env('PROD_HOST')))) {
             $connection = text(
                 label: 'SSH příkaz nebo spojení (nepovinné)?',
                 placeholder: 'ssh -p 20001 ssh-588875@dw191.webglobe.com',
@@ -53,7 +54,7 @@ class ProductionDeploySetupCommand extends Command
             $host = text(
                 label: 'IP adresa nebo hostitel produkčního serveru?',
                 placeholder: 'dw191.webglobe.com',
-                default: $parsed['host'] ?? config('app.prod_host', env('PROD_HOST', '')),
+                default: $parsed['host'] ?? $prodEnv['PROD_HOST'] ?? config('app.prod_host', env('PROD_HOST', '')),
                 hint: 'Tyto údaje jsou nezbytné pro připojení k SSH konzoli, přes kterou se spouští všechny příkazy (git, composer, build).',
                 required: true
             );
@@ -61,7 +62,7 @@ class ProductionDeploySetupCommand extends Command
             $port = text(
                 label: 'SSH port?',
                 placeholder: '22',
-                default: $parsed['port'] ?? config('app.prod_port', env('PROD_PORT', '22')),
+                default: $parsed['port'] ?? $prodEnv['PROD_PORT'] ?? config('app.prod_port', env('PROD_PORT', '22')),
                 hint: 'Výchozí port je 22. U hostingu Webglobe se často používá 20001.',
                 required: true
             );
@@ -69,7 +70,7 @@ class ProductionDeploySetupCommand extends Command
             $user = text(
                 label: 'SSH uživatel na serveru?',
                 placeholder: 'ssh-588875',
-                default: $parsed['user'] ?? config('app.prod_user', env('PROD_USER', '')),
+                default: $parsed['user'] ?? $prodEnv['PROD_USER'] ?? config('app.prod_user', env('PROD_USER', '')),
                 hint: 'Uživatelské jméno pro SSH přístup (např. ssh-XXXXXX).',
                 required: true
             );
@@ -148,12 +149,12 @@ class ProductionDeploySetupCommand extends Command
         // 2. Veřejný adresář (kam přijde obsah public)
         $publicPath = $this->browseServerPath($host, $port, $user, 'Zvolte VEŘEJNÝ ADRESÁŘ (kam přijdou veřejné soubory, obvykle www, public_html)', $defaultPublic);
 
-        $token = config('app.prod_git_token', env('PROD_GIT_TOKEN'));
+        $token = $prodEnv['PROD_GIT_TOKEN'] ?? config('app.prod_git_token', env('PROD_GIT_TOKEN'));
         if ($token) {
             $choice = select(
                 label: 'Jak chcete naložit s GitHub Personal Access Tokenem?',
                 options: [
-                    'keep' => 'Použít uložený token ('.substr($token, 0, 4).'...'.substr($token, -4).')',
+                    'keep' => 'Použít uložený token ('.substr((string) $token, 0, 4).'...'.substr((string) $token, -4).')',
                     'new' => 'Zadat nový token',
                 ],
                 default: 'keep'
@@ -178,13 +179,13 @@ class ProductionDeploySetupCommand extends Command
         // 3. Konfigurace databáze
         $dbConfig = [];
         info('🗄️  Konfigurace databáze na produkci');
-        $dbConfig['db_connection'] = select('Typ databáze?', ['mysql', 'mariadb', 'pgsql', 'sqlite'], config('app.prod_db_connection', env('PROD_DB_CONNECTION', 'mysql')));
-        $dbConfig['db_host'] = text('DB Host', default: config('app.prod_db_host', env('PROD_DB_HOST', '127.0.0.1')));
-        $dbConfig['db_port'] = text('DB Port', default: config('app.prod_db_port', env('PROD_DB_PORT', '3306')));
-        $dbConfig['db_database'] = text('Název databáze', default: config('app.prod_db_database', env('PROD_DB_DATABASE', '')), required: true);
-        $dbConfig['db_username'] = text('DB Uživatel', default: config('app.prod_db_username', env('PROD_DB_USERNAME', '')), required: true);
+        $dbConfig['db_connection'] = select('Typ databáze?', ['mysql', 'mariadb', 'pgsql', 'sqlite'], $prodEnv['PROD_DB_CONNECTION'] ?? config('app.prod_db_connection', env('PROD_DB_CONNECTION', 'mysql')));
+        $dbConfig['db_host'] = text('DB Host', default: $prodEnv['PROD_DB_HOST'] ?? config('app.prod_db_host', env('PROD_DB_HOST', '127.0.0.1')));
+        $dbConfig['db_port'] = text('DB Port', default: $prodEnv['PROD_DB_PORT'] ?? config('app.prod_db_port', env('PROD_DB_PORT', '3306')));
+        $dbConfig['db_database'] = text('Název databáze', default: $prodEnv['PROD_DB_DATABASE'] ?? config('app.prod_db_database', env('PROD_DB_DATABASE', '')), required: true);
+        $dbConfig['db_username'] = text('DB Uživatel', default: $prodEnv['PROD_DB_USERNAME'] ?? config('app.prod_db_username', env('PROD_DB_USERNAME', '')), required: true);
 
-        $dbPassword = config('app.prod_db_password', env('PROD_DB_PASSWORD'));
+        $dbPassword = $prodEnv['PROD_DB_PASSWORD'] ?? config('app.prod_db_password', env('PROD_DB_PASSWORD'));
         if ($dbPassword) {
             $choice = select(
                 label: 'Jak chcete naložit s heslem k produkční databázi?',
@@ -210,21 +211,21 @@ class ProductionDeploySetupCommand extends Command
             );
         }
 
-        $dbConfig['db_prefix'] = text('Prefix tabulek (volitelné)', default: config('app.prod_db_prefix', env('PROD_DB_PREFIX', 'new_')), hint: 'Např. new_ zajistí, že tabulky budou mít název new_users atd.');
+        $dbConfig['db_prefix'] = text('Prefix tabulek (volitelné)', default: $prodEnv['PROD_DB_PREFIX'] ?? config('app.prod_db_prefix', env('PROD_DB_PREFIX', 'new_')), hint: 'Např. new_ zajistí, že tabulky budou mít název new_users atd.');
 
-        $dbConfig['db_version'] = text('Verze databáze (volitelné)', default: config('app.prod_db_version', env('PROD_DB_VERSION', '')), hint: 'Např. 8.0.45 pro MySQL 8 nebo 5.7.0. Pokud necháte prázdné, použije se výchozí nastavení.');
+        $dbConfig['db_version'] = text('Verze databáze (volitelné)', default: $prodEnv['PROD_DB_VERSION'] ?? config('app.prod_db_version', env('PROD_DB_VERSION', '')), hint: 'Např. 8.0.45 pro MySQL 8 nebo 5.7.0. Pokud necháte prázdné, použije se výchozí nastavení.');
 
-        $dbConfig['db_mariadb'] = select('Je to MariaDB?', ['false' => 'Ne (MySQL)', 'true' => 'Ano (MariaDB)'], config('app.prod_db_mariadb', env('PROD_DB_MARIADB', 'false')) === 'true' ? 'true' : 'false');
+        $dbConfig['db_mariadb'] = select('Je to MariaDB?', ['false' => 'Ne (MySQL)', 'true' => 'Ano (MariaDB)'], ($prodEnv['PROD_DB_MARIADB'] ?? config('app.prod_db_mariadb', env('PROD_DB_MARIADB', 'false'))) === 'true' ? 'true' : 'false');
 
         // 4. Konfigurace Mailu
         $mailConfig = [];
         info('📧 Konfigurace e-mailů (SMTP) na produkci');
-        $mailConfig['mail_mailer'] = text('Mail Mailer', default: config('app.prod_mail_mailer', env('PROD_MAIL_MAILER', 'smtp')));
-        $mailConfig['mail_host'] = text('Mail Host', default: config('app.prod_mail_host', env('PROD_MAIL_HOST', 'mail.webglobe.cz')));
-        $mailConfig['mail_port'] = text('Mail Port', default: config('app.prod_mail_port', env('PROD_MAIL_PORT', '465')));
-        $mailConfig['mail_username'] = text('Mail Username', default: config('app.prod_mail_username', env('PROD_MAIL_USERNAME', 'mailer@kbelstisokoli.cz')));
+        $mailConfig['mail_mailer'] = text('Mail Mailer', default: $prodEnv['PROD_MAIL_MAILER'] ?? config('app.prod_mail_mailer', env('PROD_MAIL_MAILER', 'smtp')));
+        $mailConfig['mail_host'] = text('Mail Host', default: $prodEnv['PROD_MAIL_HOST'] ?? config('app.prod_mail_host', env('PROD_MAIL_HOST', 'mail.webglobe.cz')));
+        $mailConfig['mail_port'] = text('Mail Port', default: $prodEnv['PROD_MAIL_PORT'] ?? config('app.prod_mail_port', env('PROD_MAIL_PORT', '465')));
+        $mailConfig['mail_username'] = text('Mail Username', default: $prodEnv['PROD_MAIL_USERNAME'] ?? config('app.prod_mail_username', env('PROD_MAIL_USERNAME', 'mailer@kbelstisokoli.cz')));
 
-        $mailPassword = config('app.prod_mail_password', env('PROD_MAIL_PASSWORD', 'm0xbDdRDm0xbDdRD'));
+        $mailPassword = $prodEnv['PROD_MAIL_PASSWORD'] ?? config('app.prod_mail_password', env('PROD_MAIL_PASSWORD', 'm0xbDdRDm0xbDdRD'));
         if ($mailPassword) {
             $choice = select(
                 label: 'Jak chcete naložit s heslem k produkčnímu SMTP?',
@@ -250,9 +251,9 @@ class ProductionDeploySetupCommand extends Command
             );
         }
 
-        $mailConfig['mail_encryption'] = text('Mail Encryption', default: config('app.prod_mail_encryption', env('PROD_MAIL_ENCRYPTION', 'ssl')));
-        $mailConfig['mail_from_address'] = text('Mail From Address', default: config('app.prod_mail_from_address', env('PROD_MAIL_FROM_ADDRESS', 'mailer@kbelstisokoli.cz')));
-        $mailConfig['mail_from_name'] = text('Mail From Name', default: config('app.prod_mail_from_name', env('PROD_MAIL_FROM_NAME', 'Kbelští sokoli')));
+        $mailConfig['mail_encryption'] = text('Mail Encryption', default: $prodEnv['PROD_MAIL_ENCRYPTION'] ?? config('app.prod_mail_encryption', env('PROD_MAIL_ENCRYPTION', 'ssl')));
+        $mailConfig['mail_from_address'] = text('Mail From Address', default: $prodEnv['PROD_MAIL_FROM_ADDRESS'] ?? config('app.prod_mail_from_address', env('PROD_MAIL_FROM_ADDRESS', 'mailer@kbelstisokoli.cz')));
+        $mailConfig['mail_from_name'] = text('Mail From Name', default: $prodEnv['PROD_MAIL_FROM_NAME'] ?? config('app.prod_mail_from_name', env('PROD_MAIL_FROM_NAME', 'Kbelští sokoli')));
 
         // Uložit do .env pro příště
         $envData = [
@@ -722,6 +723,44 @@ class ProductionDeploySetupCommand extends Command
         }, 'Prověřuji požadavky serveru...');
     }
 
+    /**
+     * Načte obsah .env.production jako pole.
+     */
+    protected function loadProductionEnv(): array
+    {
+        $path = base_path('.env.production');
+
+        if (! file_exists($path)) {
+            return [];
+        }
+
+        $content = file_get_contents($path);
+        $lines = explode("\n", $content);
+        $env = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line) || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            if (str_contains($line, '=')) {
+                [$key, $value] = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                // Odstranění uvozovek
+                if (str_starts_with($value, '"') && str_ends_with($value, '"')) {
+                    $value = substr($value, 1, -1);
+                } elseif (str_starts_with($value, "'") && str_ends_with($value, "'")) {
+                    $value = substr($value, 1, -1);
+                }
+                $env[$key] = $value;
+            }
+        }
+
+        return $env;
+    }
+
     protected function updateEnv(array $data): void
     {
         $path = base_path('.env');
@@ -787,6 +826,10 @@ class ProductionDeploySetupCommand extends Command
 
             if ($publicPath) {
                 $params[] = '--public_path=' . escapeshellarg($publicPath);
+            }
+
+            if (file_exists(base_path('.env.production'))) {
+                $params[] = '--env_contents=' . escapeshellarg(base64_encode(file_get_contents(base_path('.env.production'))));
             }
 
             foreach ($dbConfig as $key => $value) {

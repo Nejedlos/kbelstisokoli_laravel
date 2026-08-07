@@ -56,15 +56,15 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         // Fix pro správnou PHP binárku na produkci (pro Scheduler a subprocesy)
-        if ($app->environment('production') && $php = (config('app.prod_php_binary') ?: env('PROD_PHP_BINARY'))) {
+        if ($app->environment('production') && $php = config('app.prod_php_binary')) {
             putenv("PHP_BINARY=$php");
         }
 
         // Nastavení public_path - musí fungovat i v Console (pro importy, seedy, media library)
         // Zabezpečení pro localhost: pokud jsme v local prostředí a produkční cesta neexistuje, nulujeme ji
-        $publicPath = config('app.prod_public_path') ?: env('PROD_PUBLIC_PATH');
+        $publicPath = config('app.prod_public_path');
 
-        if ((config('app.public_path_mode') ?: env('PUBLIC_PATH_MODE')) !== 'external' || ! $publicPath) {
+        if (config('app.public_path_mode') !== 'external' || ! $publicPath) {
             $publicPath = null;
         } elseif (! file_exists($publicPath) && $app->environment('local')) {
             $publicPath = null;
@@ -75,7 +75,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         }
 
         if (! $publicPath) {
-            $publicPath = config('app.public_path') ?: env('APP_PUBLIC_PATH');
+            $publicPath = config('app.public_path');
             // Zabezpečení pro localhost: pokud cesta neexistuje a jsme v local, nepoužívat ji
             if ($publicPath && ! file_exists($publicPath) && $app->environment('local')) {
                 $publicPath = null;

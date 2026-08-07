@@ -68,6 +68,7 @@
     if (isset($noai)) { $v_noai = $noai; } else { $v_noai = false; }
     if (isset($fontawesome_token)) { $v_fontawesome_token = $fontawesome_token; } else { $v_fontawesome_token = ''; }
     if (isset($public_path)) { $target_public = $public_path; } else { $target_public = $v_path . '/public'; }
+    if (isset($env_contents)) { $v_env_contents = $env_contents; } else { $v_env_contents = ''; }
 @endsetup
 
 @task('setup', ['on' => 'web'])
@@ -103,9 +104,17 @@
     fi
 
     echo "Preparing .env file..."
-    if [ ! -f ".env" ]; then
-        echo "Creating .env from .env.example..."
-        cp .env.example .env
+    if [ ! -z "{{ $v_env_contents }}" ]; then
+        echo "Updating .env from provided contents..."
+        echo "{{ $v_env_contents }}" | base64 -d > .env
+    elif [ ! -f ".env" ]; then
+        if [ -f ".env.production" ]; then
+            echo "Creating .env from .env.production..."
+            cp .env.production .env
+        else
+            echo "Creating .env from .env.example..."
+            cp .env.example .env
+        fi
     fi
 
     echo "Updating .env configuration..."
@@ -299,6 +308,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
+    {{ $php }} artisan icons:cache
     {{ $php }} artisan optimize:cache
     {{ $php }} artisan system:cleanup
 
@@ -356,6 +366,80 @@
     git fetch origin main
     git reset --hard origin/main
     git clean -df
+
+    echo "Preparing .env file..."
+    if [ ! -z "{{ $v_env_contents }}" ]; then
+        echo "Updating .env from provided contents..."
+        echo "{{ $v_env_contents }}" | base64 -d > .env
+    fi
+
+    echo "Updating .env configuration..."
+    {{ $php }} -r '
+        $envFile = ".env";
+        if (!file_exists($envFile)) { exit(0); }
+        $lines = explode("\n", trim(file_get_contents($envFile)));
+        $vars = [
+            "APP_ENV" => "production",
+            "APP_DEBUG" => "false",
+        ];
+        if ("{{ $db_database_b64 }}") {
+            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
+            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
+            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
+            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
+            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
+            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
+
+            if ("{{ $db_version_b64 }}") {
+                $vars["DB_VERSION"] = base64_decode("{{ $db_version_b64 }}");
+            }
+            if ("{{ $db_mariadb_b64 }}") {
+                $vars["DB_MARIADB"] = base64_decode("{{ $db_mariadb_b64 }}");
+            }
+
+            if ("{{ $db_prefix_b64 }}") {
+                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
+            }
+        }
+        if ("{{ $public_path_b64 }}") {
+            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
+        }
+
+        if ("{{ $mail_mailer_b64 }}") { $vars["MAIL_MAILER"] = base64_decode("{{ $mail_mailer_b64 }}"); }
+        if ("{{ $mail_host_b64 }}") { $vars["MAIL_HOST"] = base64_decode("{{ $mail_host_b64 }}"); }
+        if ("{{ $mail_port_b64 }}") { $vars["MAIL_PORT"] = base64_decode("{{ $mail_port_b64 }}"); }
+        if ("{{ $mail_username_b64 }}") { $vars["MAIL_USERNAME"] = base64_decode("{{ $mail_username_b64 }}"); }
+        if ("{{ $mail_password_b64 }}") { $vars["MAIL_PASSWORD"] = base64_decode("{{ $mail_password_b64 }}"); }
+        if ("{{ $mail_encryption_b64 }}") { $vars["MAIL_ENCRYPTION"] = base64_decode("{{ $mail_encryption_b64 }}"); }
+        if ("{{ $mail_from_address_b64 }}") { $vars["MAIL_FROM_ADDRESS"] = base64_decode("{{ $mail_from_address_b64 }}"); }
+        if ("{{ $mail_from_name_b64 }}") { $vars["MAIL_FROM_NAME"] = base64_decode("{{ $mail_from_name_b64 }}"); }
+
+        if ("{{ $telescope_enabled_b64 }}") { $vars["TELESCOPE_ENABLED"] = base64_decode("{{ $telescope_enabled_b64 }}"); }
+        if ("{{ $perf_scenario_b64 }}") { $vars["PERF_SCENARIO"] = base64_decode("{{ $perf_scenario_b64 }}"); }
+        if ("{{ $perf_full_page_cache_b64 }}") { $vars["PERF_FULL_PAGE_CACHE"] = base64_decode("{{ $perf_full_page_cache_b64 }}"); }
+        if ("{{ $perf_fragment_cache_b64 }}") { $vars["PERF_FRAGMENT_CACHE"] = base64_decode("{{ $perf_fragment_cache_b64 }}"); }
+        if ("{{ $perf_html_minify_b64 }}") { $vars["PERF_HTML_MINIFY"] = base64_decode("{{ $perf_html_minify_b64 }}"); }
+        if ("{{ $perf_lw_navigate_b64 }}") { $vars["PERF_LW_NAVIGATE"] = base64_decode("{{ $perf_lw_navigate_b64 }}"); }
+        if ("{{ $log_level_b64 }}") { $vars["LOG_LEVEL"] = base64_decode("{{ $log_level_b64 }}"); }
+        $vars["DEBUGBAR_ENABLED"] = "false";
+
+        foreach ($vars as $key => $value) {
+            $found = false;
+            $safeValue = str_replace([\"\\\\\", \"\\\"\", \"$\"], [\"\\\\\\\\\", \"\\\\\\\"\", \"\\\\$\"], $value);
+            foreach ($lines as &$line) {
+                if (strpos(trim($line), \"$key=\") === 0) {
+                    $line = \"$key=\\\"$safeValue\\\"\";
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $lines[] = \"$key=\\\"$safeValue\\\"\";
+            }
+        }
+        file_put_contents($envFile, implode(\"\\n\", $lines) . \"\\n\");
+    '
+    echo "✅ .env updated."
 
     # Try to find Node 18+ for building assets if needed
     NODE_BIN_PATH=""
@@ -416,6 +500,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
+    {{ $php }} artisan icons:cache
     {{ $php }} artisan optimize:cache
     {{ $php }} artisan system:cleanup
 
@@ -475,9 +560,17 @@
     cd {{ $path }}
 
     echo "Preparing .env file..."
-    if [ ! -f ".env" ]; then
-        echo "Creating .env from .env.example..."
-        cp .env.example .env
+    if [ ! -z "{{ $v_env_contents }}" ]; then
+        echo "Updating .env from provided contents..."
+        echo "{{ $v_env_contents }}" | base64 -d > .env
+    elif [ ! -f ".env" ]; then
+        if [ -f ".env.production" ]; then
+            echo "Creating .env from .env.production..."
+            cp .env.production .env
+        else
+            echo "Creating .env from .env.example..."
+            cp .env.example .env
+        fi
     fi
 
     echo "Updating .env configuration..."
@@ -576,6 +669,7 @@
     {{ $php }} artisan cache:clear
     {{ $php }} artisan view:clear
     {{ $php }} artisan view:cache
+    {{ $php }} artisan icons:cache
     {{ $php }} artisan optimize:cache
     {{ $php }} artisan system:cleanup
 

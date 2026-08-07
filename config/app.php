@@ -128,6 +128,7 @@ return [
 
     'schedule_token' => env('SCHEDULE_TOKEN'),
     'seed_users' => env('APP_SEED_USERS', false),
+    'telescope_enabled' => env('TELESCOPE_ENABLED', false),
 
     'previous_keys' => array_filter(
         explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

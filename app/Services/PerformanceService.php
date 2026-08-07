@@ -18,11 +18,11 @@ class PerformanceService
         $settings = $this->getSettings();
 
         // Výchozí scénář: .env má přednost, pak DB, pak auto-detekce podle prostředí
-        $scenario = env('PERF_SCENARIO', $settings['perf_scenario'] ?? (app()->isProduction() ? 'ultra' : 'standard'));
+        $scenario = config('performance.scenario', $settings['perf_scenario'] ?? (app()->isProduction() ? 'ultra' : 'standard'));
 
         // Pokud jsme na produkci bez debugu, vynutíme scénář ultra jako základní,
         // pokud v DB není nic nastaveno nebo pokud je tam výslovně standard a není to vynuceno v .env
-        if (app()->isProduction() && ! config('app.debug') && ! env('PERF_SCENARIO')) {
+        if (app()->isProduction() && ! config('app.debug') && ! config('performance.scenario')) {
              if (empty($settings['perf_scenario']) || $settings['perf_scenario'] === 'standard') {
                  $scenario = 'ultra';
              }
@@ -30,11 +30,11 @@ class PerformanceService
 
         config([
             'performance.scenario' => $scenario,
-            'performance.features.full_page_cache' => (bool) env('PERF_FULL_PAGE_CACHE', $settings['perf_full_page_cache'] ?? ($scenario === 'ultra')),
-            'performance.features.fragment_cache' => (bool) env('PERF_FRAGMENT_CACHE', $settings['perf_fragment_cache'] ?? in_array($scenario, ['aggressive', 'ultra'])),
-            'performance.features.html_minification' => (bool) env('PERF_HTML_MINIFY', $settings['perf_html_minification'] ?? in_array($scenario, ['aggressive', 'ultra'])),
-            'performance.features.livewire_navigate' => (bool) env('PERF_LW_NAVIGATE', $settings['perf_livewire_navigate'] ?? ($scenario === 'ultra')),
-            'performance.features.lazy_load_images' => (bool) env('PERF_LAZY_IMAGES', $settings['perf_lazy_load_images'] ?? true),
+            'performance.features.full_page_cache' => (bool) config('performance.features.full_page_cache', $settings['perf_full_page_cache'] ?? ($scenario === 'ultra')),
+            'performance.features.fragment_cache' => (bool) config('performance.features.fragment_cache', $settings['perf_fragment_cache'] ?? in_array($scenario, ['aggressive', 'ultra'])),
+            'performance.features.html_minification' => (bool) config('performance.features.html_minification', $settings['perf_html_minification'] ?? in_array($scenario, ['aggressive', 'ultra'])),
+            'performance.features.livewire_navigate' => (bool) config('performance.features.livewire_navigate', $settings['perf_livewire_navigate'] ?? ($scenario === 'ultra')),
+            'performance.features.lazy_load_images' => (bool) config('performance.features.lazy_load_images', $settings['perf_lazy_load_images'] ?? true),
         ]);
 
         // Pokud je vybrán scénář, přepíše jednotlivé features dle předdefinovaných šablon
