@@ -19,31 +19,39 @@ class RedirectMiddleware
         $path = '/'.ltrim($request->getPathInfo(), '/');
         $locale = app()->getLocale();
 
-        // 1. Hledání přesného match (nacachované)
-        $redirect = \Illuminate\Support\Facades\Cache::remember("redirect_exact_{$locale}_".md5($path), 3600, function() use ($path) {
-            return Redirect::where('is_active', true)
-                ->where('source_path', $path)
-                ->where('match_type', 'exact')
-                ->orderBy('priority', 'desc')
-                ->first();
-        });
+        $redirect = null;
 
-        // 2. Pokud není exact, hledáme prefix match (nacachované)
-        if (! $redirect) {
-            $prefixRedirects = \Illuminate\Support\Facades\Cache::remember("redirect_prefixes_{$locale}", 3600, function() {
+        try {
+            // 1. Hledání přesného match (nacachované)
+            $redirect = \Illuminate\Support\Facades\Cache::remember("redirect_exact_{$locale}_".md5($path), 3600, function() use ($path) {
                 return Redirect::where('is_active', true)
-                    ->where('match_type', 'prefix')
+                    ->where('source_path', $path)
+                    ->where('match_type', 'exact')
                     ->orderBy('priority', 'desc')
-                    ->orderByRaw('LENGTH(source_path) DESC')
-                    ->get();
+                    ->first();
             });
 
-            foreach ($prefixRedirects as $pRedirect) {
-                if (str_starts_with($path, $pRedirect->source_path)) {
-                    $redirect = $pRedirect;
-                    break;
+            // 2. Pokud není exact, hledáme prefix match (nacachované)
+            if (! $redirect) {
+                $prefixRedirects = \Illuminate\Support\Facades\Cache::remember("redirect_prefixes_{$locale}", 3600, function() {
+                    return Redirect::where('is_active', true)
+                        ->where('match_type', 'prefix')
+                        ->orderBy('priority', 'desc')
+                        ->orderByRaw('LENGTH(source_path) DESC')
+                        ->get();
+                });
+
+                foreach ($prefixRedirects as $pRedirect) {
+                    if (str_starts_with($path, $pRedirect->source_path)) {
+                        $redirect = $pRedirect;
+                        break;
+                    }
                 }
             }
+        } catch (\Throwable $e) {
+            // Při výpadku DB (např. Connection refused na produkci) tiše pokračujeme dál.
+            // Logujeme to jako warning, abychom věděli, že k něčemu došlo, ale nezhodili web hned na začátku.
+            \Illuminate\Support\Facades\Log::warning('RedirectMiddleware: Database or Cache connection failure, skipping redirects: '.$e->getMessage());
         }
 
         if ($redirect) {
@@ -65,8 +73,13 @@ class RedirectMiddleware
             }
 
             // Inkrementace statistik (pro jednoduchost bez queue, v reálu vhodné optimalizovat)
-            $redirect->increment('hits_count');
-            $redirect->update(['last_hit_at' => now()]);
+            try {
+                $redirect->increment('hits_count');
+                $redirect->update(['last_hit_at' => now()]);
+            } catch (\Throwable $e) {
+                // Selhání zápisu statistik nás nezastaví v provedení redirectu
+                \Illuminate\Support\Facades\Log::error('RedirectMiddleware: Failed to update stats: '.$e->getMessage());
+            }
 
             return redirect()->to($target, $redirect->status_code);
         }
