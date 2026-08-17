@@ -21,6 +21,8 @@ return [
     'send_email' => 'Poslat email',
     'rumcajs_arena' => 'Rumcajs Arena',
     'gps' => 'GPS',
+    'copy_gps' => 'Kopírovat GPS',
+    'copied' => 'Kopírováno!',
     'team_leader' => 'Vedoucí týmu',
     'venue' => 'Hala / Aréna',
     'venue_note' => 'Zde se konají všechna domácí utkání',

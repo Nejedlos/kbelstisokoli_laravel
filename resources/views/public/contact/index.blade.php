@@ -80,8 +80,28 @@
                                                 {{ $branding['venue']['street'] }}, {{ $branding['venue']['city'] }}
                                             </div>
                                             @if($branding['venue']['gps'] ?? null)
-                                                <div class="text-[10px] font-mono text-slate-400 mt-2 bg-white/50 inline-block px-1.5 py-0.5 rounded border border-slate-100">
-                                                    GPS: {{ $branding['venue']['gps'] }}
+                                                <div x-data="{
+                                                    gps: @js($branding['venue']['gps']),
+                                                    copied: false,
+                                                    labelCopy: @js(__('contact.copy_gps')),
+                                                    labelCopied: @js(__('contact.copied')),
+                                                    copy() {
+                                                        navigator.clipboard.writeText(this.gps);
+                                                        this.copied = true;
+                                                        setTimeout(() => this.copied = false, 2000);
+                                                    }
+                                                }" class="mt-2 flex items-center flex-wrap gap-2">
+                                                    <div class="text-[11px] sm:text-[10px] font-mono text-slate-400 bg-white/50 inline-block px-2 py-1 sm:px-1.5 sm:py-0.5 rounded border border-slate-100">
+                                                        GPS: {{ $branding['venue']['gps'] }}
+                                                    </div>
+                                                    <button
+                                                        @click="copy"
+                                                        type="button"
+                                                        class="text-xs sm:text-[10px] font-bold uppercase tracking-wider text-primary hover:text-primary-hover transition-colors flex items-center gap-2 sm:gap-1 bg-white px-4 py-2 sm:px-2 sm:py-0.5 rounded-xl sm:rounded border border-slate-100 shadow-sm active:scale-95 cursor-pointer touch-manipulation"
+                                                    >
+                                                        <i class="fa-light fa-fw" :class="copied ? 'fa-check text-green-500' : 'fa-copy'"></i>
+                                                        <span x-text="copied ? labelCopied : labelCopy"></span>
+                                                    </button>
                                                 </div>
                                             @endif
                                         </div>

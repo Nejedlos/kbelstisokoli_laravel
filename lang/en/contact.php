@@ -21,6 +21,8 @@ return [
     'send_email' => 'Send email',
     'rumcajs_arena' => 'Rumcajs Arena',
     'gps' => 'GPS',
+    'copy_gps' => 'Copy GPS',
+    'copied' => 'Copied!',
     'team_leader' => 'Team Leader',
     'venue' => 'Gym / Arena',
     'venue_note' => 'All home matches are played here',
