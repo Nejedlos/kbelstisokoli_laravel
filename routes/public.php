@@ -1,13 +1,26 @@
 <?php
 
+use App\Http\Controllers\Public\ClubEventController;
 use App\Http\Controllers\Public\ContactController;
+use App\Http\Controllers\Public\GalleryController;
 use App\Http\Controllers\Public\HistoryController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\MatchController;
 use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\PageController;
+use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Public\TeamController;
 use App\Http\Controllers\Public\TrainingController;
+use App\Http\Controllers\PublicLeadController;
+use App\Models\Gallery;
+use App\Models\Page;
+use App\Models\Post;
+use App\Models\Team;
+use App\Services\SeoService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,8 +43,8 @@ Route::get('/system/schedule/{token}', function (string $token) {
     }
 
     // Spustíme plánovač (dispečink úloh)
-    \Illuminate\Support\Facades\Artisan::call('schedule:run');
-    $output = \Illuminate\Support\Facades\Artisan::output();
+    Artisan::call('schedule:run');
+    $output = Artisan::output();
 
     // Spustíme queue worker v pozadí pro zpracování dispečinkovaných úloh (např. RunCronTaskJob)
     // Na sdíleném hostingu (Webglobe) neběží trvalý worker, proto ho nastartujeme jednorázově
@@ -58,11 +71,11 @@ Route::get('/system/schedule/{token}', function (string $token) {
             $output .= "\n[Queue worker started in background using {$php}]";
         } else {
             $output .= "\n[Failed to start queue worker (Code {$execResult})]";
-            \Illuminate\Support\Facades\Log::error("Failed to start background queue worker. Cmd: {$cmd}, Result: {$execResult}");
+            Log::error("Failed to start background queue worker. Cmd: {$cmd}, Result: {$execResult}");
         }
-    } catch (\Exception $e) {
-        \Illuminate\Support\Facades\Log::error('Failed to start background queue worker: ' . $e->getMessage());
-        $output .= "\n[Failed to start queue worker: " . $e->getMessage() . "]";
+    } catch (Exception $e) {
+        Log::error('Failed to start background queue worker: '.$e->getMessage());
+        $output .= "\n[Failed to start queue worker: ".$e->getMessage().']';
     }
 
     // Heartbeat logování pro diagnostiku
@@ -75,7 +88,7 @@ Route::get('/system/schedule/{token}', function (string $token) {
     $cachePath = config('cache.stores.file.path');
     $isWritable = is_writable($cachePath);
 
-    \Illuminate\Support\Facades\Log::info('Schedule:run endpoint hit', [
+    Log::info('Schedule:run endpoint hit', [
         'ip' => request()->ip(),
         'ua' => request()->userAgent(),
         'is_heartbeat' => $isHeartbeat,
@@ -87,9 +100,9 @@ Route::get('/system/schedule/{token}', function (string $token) {
     ]);
 
     if ($isHeartbeat) {
-        \Illuminate\Support\Facades\Log::info('Schedule:run triggered heartbeat from HTTP (or no commands ready).');
+        Log::info('Schedule:run triggered heartbeat from HTTP (or no commands ready).');
     } else {
-        \Illuminate\Support\Facades\Log::warning('Schedule:run DID NOT trigger heartbeat from HTTP matching known strings. Output: ' . $output);
+        Log::warning('Schedule:run DID NOT trigger heartbeat from HTTP matching known strings. Output: '.$output);
     }
 
     $writeSuccess = false;
@@ -99,20 +112,20 @@ Route::get('/system/schedule/{token}', function (string $token) {
     // Vždy se pokusíme o zápis heartbeatu přímo zde, abychom měli jistotu
     try {
         $now = now();
-        \Illuminate\Support\Facades\Cache::put('scheduler_heartbeat', $now);
-        \Illuminate\Support\Facades\Cache::store('file')->put('scheduler_heartbeat', $now); // Explicitní zápis i do file storu
+        Cache::put('scheduler_heartbeat', $now);
+        Cache::store('file')->put('scheduler_heartbeat', $now); // Explicitní zápis i do file storu
 
-        $verify = \Illuminate\Support\Facades\Cache::get('scheduler_heartbeat');
+        $verify = Cache::get('scheduler_heartbeat');
         $writeSuccess = ($verify !== null);
         $writeTime = $verify ? (is_string($verify) ? $verify : $verify->toDateTimeString()) : null;
 
-        \Illuminate\Support\Facades\Log::info('Schedule:run explicit heartbeat write check', [
+        Log::info('Schedule:run explicit heartbeat write check', [
             'success' => $writeSuccess,
             'time' => $writeTime,
         ]);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         $errorMessage = $e->getMessage();
-        \Illuminate\Support\Facades\Log::error('Schedule:run heartbeat write FAILED: ' . $errorMessage);
+        Log::error('Schedule:run heartbeat write FAILED: '.$errorMessage);
     }
 
     if (request()->wantsJson() || request()->header('X-Requested-With') === 'XMLHttpRequest' || request()->has('json')) {
@@ -166,47 +179,49 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     });
 
     // Galerie
-    Route::get('/galerie', [\App\Http\Controllers\Public\GalleryController::class, 'index'])->name('galleries.index');
-    Route::get('/galerie/{slug}', [\App\Http\Controllers\Public\GalleryController::class, 'show'])->name('galleries.show');
+    Route::get('/galerie', [GalleryController::class, 'index'])->name('galleries.index');
+    Route::get('/galerie/{slug}', [GalleryController::class, 'show'])->name('galleries.show');
 
     // Tréninky
     Route::get('/treninky', [TrainingController::class, 'index'])->name('trainings.index');
 
     // Akce (Turnaje, Soustředění)
-    Route::get('/akce', [\App\Http\Controllers\Public\ClubEventController::class, 'index'])->name('events.index');
-    Route::get('/akce/{id}', [\App\Http\Controllers\Public\ClubEventController::class, 'show'])->name('events.show');
+    Route::get('/akce', [ClubEventController::class, 'index'])->name('events.index');
+    Route::get('/akce/{id}', [ClubEventController::class, 'show'])
+        ->whereNumber('id')
+        ->name('events.show');
 
     // Historie
     Route::get('/historie', [HistoryController::class, 'index'])->name('history.index');
 
     // Kontakt
     Route::get('/kontakt', [ContactController::class, 'index'])->name('contact.index');
-    Route::post('/kontakt', [\App\Http\Controllers\PublicLeadController::class, 'storeContact'])->name('contact.store')->middleware('throttle:5,1');
-    Route::get('/napiste-nam', function (\Illuminate\Http\Request $request) {
+    Route::post('/kontakt', [PublicLeadController::class, 'storeContact'])->name('contact.store')->middleware('throttle:5,1');
+    Route::get('/napiste-nam', function (Request $request) {
         return view('public.contact.form', ['to' => $request->query('to', '')]);
     })->name('contact-form');
 
     // Nábor – GET (statická landing page)
     Route::get('/nabor', function () {
-        $teams = \App\Models\Team::where('category', 'senior')->orderBy('slug')->get();
+        $teams = Team::where('category', 'senior')->orderBy('slug')->get();
 
         return view('public.recruitment', compact('teams'));
     })->name('recruitment.index');
 
     // Nábor – Samostatná stránka s formulářem
     Route::get('/join/{team?}', function ($team = null) {
-        $homePage = \App\Models\Page::where('slug', 'home')->first();
-        $seo = app(\App\Services\SeoService::class)->getMetadata($homePage); // Základní SEO z homepage
+        $homePage = Page::where('slug', 'home')->first();
+        $seo = app(SeoService::class)->getMetadata($homePage); // Základní SEO z homepage
         $seo['title'] = 'Chci hrát za C & E | Kbelští sokoli';
 
         return view('public.join', compact('team', 'seo'));
     })->name('recruitment.join');
 
     // Nábor – POST (zpracování leadu)
-    Route::post('/nabor', [\App\Http\Controllers\PublicLeadController::class, 'storeRecruitment'])->name('recruitment.store')->middleware('throttle:5,1');
+    Route::post('/nabor', [PublicLeadController::class, 'storeRecruitment'])->name('recruitment.store')->middleware('throttle:5,1');
 
     // Vyhledávání
-    Route::get('/hledat', [\App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');
+    Route::get('/hledat', [SearchController::class, 'index'])->name('search');
 
     // GDPR
     Route::get('/gdpr', function () {
@@ -226,9 +241,9 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
         }
 
         return response()->view('public.sitemap', [
-            'pages' => \App\Models\Page::where('status', 'published')->where('is_visible', true)->get(),
-            'posts' => \App\Models\Post::where('status', 'published')->where('is_visible', true)->get(),
-            'galleries' => \App\Models\Gallery::where('is_public', true)->where('is_visible', true)->get(),
+            'pages' => Page::where('status', 'published')->where('is_visible', true)->get(),
+            'posts' => Post::where('status', 'published')->where('is_visible', true)->get(),
+            'galleries' => Gallery::where('is_public', true)->where('is_visible', true)->get(),
         ], 200)->header('Content-Type', 'text/xml');
     })->name('sitemap');
 

@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClubEvent;
+use App\Models\Page;
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ClubEventController extends Controller
 {
@@ -48,7 +51,7 @@ class ClubEventController extends Controller
         }
 
         $events = $query->paginate(12);
-        $page = \App\Models\Page::where('slug', 'akce')->first();
+        $page = Page::where('slug', 'akce')->first();
 
         $eventTypes = [
             'camp' => __('events.filter_type_camp'),
@@ -59,7 +62,7 @@ class ClubEventController extends Controller
             'other' => __('events.filter_type_other'),
         ];
 
-        $teams = \App\Models\Team::orderBy('name')->get();
+        $teams = Team::orderBy('name')->get();
 
         return view('public.events.index', compact(
             'events',
@@ -72,11 +75,15 @@ class ClubEventController extends Controller
         ));
     }
 
-    public function show(int $id): View
+    public function show(string $id): View
     {
+        if (! ctype_digit($id)) {
+            throw new NotFoundHttpException;
+        }
+
         $event = ClubEvent::with(['teams', 'media'])
             ->where('is_public', true)
-            ->findOrFail($id);
+            ->findOrFail((int) $id);
 
         $attendanceStats = $event->attendances()
             ->selectRaw('planned_status, count(*) as count')
@@ -93,7 +100,7 @@ class ClubEventController extends Controller
         return view('public.events.show', [
             'event' => $event,
             'stats' => $stats,
-            'seo_title' => $event->getTranslation('title', app()->getLocale()) . ' | Akce',
+            'seo_title' => $event->getTranslation('title', app()->getLocale()).' | Akce',
             'seo_description' => substr(strip_tags($event->getTranslation('description', app()->getLocale())), 0, 160),
         ]);
     }
