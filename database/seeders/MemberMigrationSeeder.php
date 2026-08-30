@@ -4,12 +4,15 @@ namespace Database\Seeders;
 
 use App\Enums\BasketballPosition;
 use App\Enums\MembershipStatus;
+use App\Enums\MembershipType;
 use App\Models\PlayerProfile;
 use App\Models\Team;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
@@ -34,10 +37,10 @@ class MemberMigrationSeeder extends Seeder
             $this->command->warn('Režim FRESH: Mažu existující profily a uživatele (kromě administrátora)...');
             // Smažeme pouze ty, kteří mají legacy metadata nebo nejsou admini
             // Pozor na integritu, PlayerProfile má cizí klíč na User.
-            \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
-            \App\Models\PlayerProfile::all()->filter(fn($p) => isset($p->metadata['legacy_r_id']))->each->delete();
+            Schema::disableForeignKeyConstraints();
+            PlayerProfile::all()->filter(fn ($p) => isset($p->metadata['legacy_r_id']))->each->delete();
             // User::where('metadata', 'LIKE', '%"legacy_r_id"%')->delete(); // Raději nebudeme mazat uživatele úplně, jen profily.
-            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+            Schema::enableForeignKeyConstraints();
         }
 
         // Načtení nových týmů
@@ -122,6 +125,7 @@ class MemberMigrationSeeder extends Seeder
                 'address_street' => $reg->adresa,
                 'is_active' => $isActive,
                 'membership_status' => $membershipStatus,
+                'membership_types' => [MembershipType::Player->value],
                 'notification_preferences' => $notificationPreferences,
                 'metadata' => [
                     'legacy_r_id' => $reg->id,
@@ -190,7 +194,7 @@ class MemberMigrationSeeder extends Seeder
                 'public_bio' => $profileData->charakteristika ?? null,
                 'private_note' => $profileData->kariera ?? null,
                 'is_active' => $isActive,
-                'valid_from' => $reg->cas > 0 ? \Carbon\Carbon::createFromTimestamp($reg->cas) : now(),
+                'valid_from' => $reg->cas > 0 ? Carbon::createFromTimestamp($reg->cas) : now(),
                 'primary_team_id' => $primaryTeamId,
                 'metadata' => array_merge(
                     [

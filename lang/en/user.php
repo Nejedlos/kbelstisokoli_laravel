@@ -50,7 +50,8 @@ return [
         'club_member_id' => 'Member ID',
         'payment_vs' => 'Variable Symbol',
         'membership_status' => 'Membership Status',
-        'membership_type' => 'Member Type',
+        'membership_type' => 'Primary Member Type',
+        'membership_types' => 'Membership Types',
         'membership_started_at' => 'Member Since',
         'membership_ended_at' => 'Member Until',
         'finance_ok' => 'Fees OK',
@@ -84,14 +85,16 @@ return [
         'roles' => 'Roles',
         'last_activity' => 'Activity',
     ],
+    'helpers' => [
+        'phone_9_digits' => 'Enter 9 digits without the prefix (e.g., 777666555).',
+        'membership_types_roles' => 'Multiple values may be selected. Player, coach and parent automatically assign the corresponding access roles.',
+        'roles_membership_sync' => 'Player, coach and parent roles are controlled by membership types on the Club tab. Other administrative roles remain managed here.',
+    ],
     'warnings' => [
         'duplicates' => 'Other records with the same name found (:count)',
         'ghost' => 'Temporary Ghost profile',
         'external_sync' => 'Synchronized from an external source',
         'duplicates_simple' => ':count duplicates',
-    ],
-    'helpers' => [
-        'phone_9_digits' => 'Enter 9 digits without the prefix (e.g., 777666555).',
     ],
     'notifications' => [
         'invitation_sent' => 'Invitation has been sent',

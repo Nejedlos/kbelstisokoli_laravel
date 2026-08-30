@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\MembershipStatus;
+use App\Enums\MembershipType;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -23,6 +24,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'membership_status' => MembershipStatus::Active,
+                'membership_types' => [MembershipType::Staff->value],
             ]
         );
 
@@ -40,6 +42,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'membership_status' => MembershipStatus::Active,
+                'membership_types' => [MembershipType::Staff->value],
             ]
         );
 
@@ -56,6 +59,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'membership_status' => MembershipStatus::Active,
+                'membership_types' => [MembershipType::Coach->value],
             ]
         );
 
@@ -77,6 +81,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'membership_status' => MembershipStatus::Active,
+                'membership_types' => [MembershipType::Staff->value],
             ]
         );
 
@@ -95,6 +100,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'membership_status' => MembershipStatus::Active,
+                'membership_types' => [MembershipType::Player->value],
             ]
         );
 

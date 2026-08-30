@@ -8,7 +8,9 @@ use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
 use App\Enums\PaymentMethod;
 use App\Notifications\Auth\ResetPasswordNotification;
+use App\Services\Users\MembershipRoleSynchronizer;
 use App\Traits\Auditable;
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
@@ -16,18 +18,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use Auditable, HasFactory, HasRoles, InteractsWithMedia, Notifiable, TwoFactorAuthenticatable;
 
     /**
@@ -53,6 +58,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
         'payment_vs',
         'membership_status',
         'membership_type',
+        'membership_types',
         'membership_started_at',
         'membership_ended_at',
         'finance_ok',
@@ -109,6 +115,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
             'gender' => Gender::class,
             'membership_status' => MembershipStatus::class,
             'membership_type' => MembershipType::class,
+            'membership_types' => 'array',
             'payment_method' => PaymentMethod::class,
             'phone' => E164PhoneNumberCast::class.':CZ',
             'phone_secondary' => E164PhoneNumberCast::class.':CZ',
@@ -126,6 +133,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
                 $user->name = $user->first_name.' '.$user->last_name;
             }
 
+            // Zachováme kompatibilní hlavní typ pro starší části systému.
+            if ($user->isDirty('membership_types') && is_array($user->membership_types)) {
+                $user->membership_type = collect($user->membership_types)
+                    ->map(fn ($type) => $type instanceof MembershipType ? $type->value : (string) $type)
+                    ->first(fn (string $type) => MembershipType::tryFrom($type) !== null);
+            }
+
             // Pojistka proti přepsání klubového ID a variabilního symbolu
             // Jednou vygenerované údaje se nesmí změnit
             if ($user->exists) {
@@ -139,20 +153,39 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
             }
         });
 
-        static::created(function ($user) {
-            // Pokud uživatel nemá přiřazenou žádnou roli, přiřadíme mu roli 'player'
-            // jako základní přístup do členské sekce. To je důležité zejména při
-            // vytváření uživatelů trenéry, kteří nemají právo spravovat role.
-            if ($user->roles()->count() === 0) {
-                try {
-                    $user->assignRole('player');
-                } catch (\Throwable $e) {
-                    \Illuminate\Support\Facades\Log::error('Failed to assign default player role to user: ' . $user->id, [
-                        'error' => $e->getMessage()
-                    ]);
-                }
+        static::saved(function (User $user) {
+            try {
+                app(MembershipRoleSynchronizer::class)->sync($user);
+            } catch (\Throwable $e) {
+                Log::error('Failed to synchronize membership roles for user: '.$user->id, [
+                    'error' => $e->getMessage(),
+                ]);
             }
         });
+    }
+
+    /**
+     * Normalized membership types with a fallback for the legacy scalar field.
+     *
+     * @return list<MembershipType>
+     */
+    public function getMembershipTypes(): array
+    {
+        $values = $this->membership_types;
+
+        if (! is_array($values) || $values === []) {
+            $legacyType = $this->membership_type;
+            $values = $legacyType instanceof MembershipType
+                ? [$legacyType->value]
+                : array_filter([(string) $legacyType]);
+        }
+
+        return collect($values)
+            ->map(fn ($value) => $value instanceof MembershipType ? $value : MembershipType::tryFrom((string) $value))
+            ->filter()
+            ->unique(fn (MembershipType $type) => $type->value)
+            ->values()
+            ->all();
     }
 
     /**
@@ -276,7 +309,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
     /**
      * Externí mapování uživatele.
      */
-    public function externalMappings(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function externalMappings(): MorphMany
     {
         return $this->morphMany(ExternalEntityMapping::class, 'internal');
     }
@@ -348,7 +381,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
      */
     public function getPlayerPhotoUrl(?int $seasonId = null): ?string
     {
-        $cacheKey = "user_{$this->id}_player_photo_url_" . ($seasonId ?: 'latest');
+        $cacheKey = "user_{$this->id}_player_photo_url_".($seasonId ?: 'latest');
 
         return Cache::remember($cacheKey, now()->addDay(), function () use ($seasonId) {
             $media = $this->getMedia('player_photos');
@@ -426,7 +459,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
     /**
      * Zaregistruje konverze médií.
      */
-    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         // Společná miniatura pro avatar i hráčské fotky
         $this->addMediaConversion('thumb')
@@ -474,14 +507,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
      */
     public function sendPasswordResetNotification($token): void
     {
-        \Illuminate\Support\Facades\Log::channel('single')->warning('DEBUG_MAIL: Password reset requested for user (sendPasswordResetNotification called)', [
+        Log::channel('single')->warning('DEBUG_MAIL: Password reset requested for user (sendPasswordResetNotification called)', [
             'user_id' => $this->id,
             'email' => $this->email,
         ]);
 
         $this->notify(new ResetPasswordNotification($token));
 
-        \Illuminate\Support\Facades\Log::channel('single')->warning('DEBUG_MAIL: Notification sent to notify() method', [
+        Log::channel('single')->warning('DEBUG_MAIL: Notification sent to notify() method', [
             'user_id' => $this->id,
         ]);
     }

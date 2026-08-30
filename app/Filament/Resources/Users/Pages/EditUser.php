@@ -4,8 +4,9 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Enums\MembershipStatus;
 use App\Filament\Resources\Users\UserResource;
-use App\Support\IconHelper;
 use App\Notifications\Auth\UserInvitationNotification;
+use App\Services\Users\MembershipRoleSynchronizer;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -20,6 +21,11 @@ class EditUser extends EditRecord
     public function getMaxWidth(): MaxWidth|string|null
     {
         return MaxWidth::Full;
+    }
+
+    protected function afterSave(): void
+    {
+        app(MembershipRoleSynchronizer::class)->sync($this->record);
     }
 
     protected function getHeaderActions(): array

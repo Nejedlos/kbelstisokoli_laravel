@@ -46,7 +46,7 @@ class UsersTable
             ->striped()
             ->modifyQueryUsing(fn ($query) => $query
                 ->with(['externalMappings', 'roles', 'playerProfile.primaryTeam', 'media'])
-                ->select("users.*")
+                ->select('users.*')
             )
             ->columns([
                 SpatieMediaLibraryImageColumn::make('player_photos')
@@ -67,10 +67,10 @@ class UsersTable
                     ->description(fn ($record) => $record->email)
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->isGhost()
-                            ? IconHelper::render(AppIcon::NOT_FOUND, 'fal')->toHtml() . ' '
+                            ? IconHelper::render(AppIcon::NOT_FOUND, 'fal')->toHtml().' '
                             : '').
                         ($record->externalMappings->isNotEmpty()
-                            ? IconHelper::render(AppIcon::STAT_SOURCES, 'fal')->toHtml() . ' '
+                            ? IconHelper::render(AppIcon::STAT_SOURCES, 'fal')->toHtml().' '
                             : '').e($state)
                     ))
                     ->searchable(['name', 'email', 'first_name', 'last_name'])
@@ -99,6 +99,11 @@ class UsersTable
                     ->label(__('user.fields.membership_status'))
                     ->badge()
                     ->sortable(),
+                TextColumn::make('membership_types')
+                    ->label(__('user.fields.membership_types'))
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => MembershipType::tryFrom((string) $state)?->getLabel() ?? (string) $state)
+                    ->separator(','),
                 TextColumn::make('playerProfile.jersey_number')
                     ->label('#')
                     ->sortable()
@@ -124,9 +129,13 @@ class UsersTable
                 SelectFilter::make('membership_status')
                     ->label(__('user.fields.membership_status'))
                     ->options(MembershipStatus::class),
-                SelectFilter::make('membership_type')
-                    ->label(__('user.fields.membership_type'))
-                    ->options(MembershipType::class),
+                SelectFilter::make('membership_types')
+                    ->label(__('user.fields.membership_types'))
+                    ->options(MembershipType::class)
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['value'] ?? null,
+                        fn (Builder $query, string $value): Builder => $query->where('membership_types', 'like', '%"'.$value.'"%')
+                    )),
                 SelectFilter::make('preferred_locale')
                     ->label(__('user.fields.preferred_locale'))
                     ->options([

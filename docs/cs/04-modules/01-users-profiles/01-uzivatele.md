@@ -9,6 +9,7 @@ Tento modul zajišťuje správu uživatelských účtů (přihlášení, role) a
 
 ## 2. Datový model
 - **users:** Rozšířeno o `is_active`, `phone`, `last_login_at`, `admin_note`, `club_member_id` a `payment_vs`.
+- **Typy členství:** `membership_types` je vícenásobný JSON seznam uložený v `LONGTEXT`. Původní `membership_type` zůstává jako kompatibilní hlavní hodnota pro starší integrace.
 - **Automatické generování ID:** Při prvním přihlášení uživatele (pokud chybí) se automaticky vygeneruje:
     - **ID člena (`club_member_id`):** Formát `KS-RRXXXX` (např. KS-261234).
     - **Variabilní symbol (`payment_vs`):** Formát `RRMMXXXX` (např. 26021234).
@@ -21,6 +22,15 @@ Tento modul zajišťuje správu uživatelských účtů (přihlášení, role) a
 - **PlayerProfileResource:** Správa sportovních údajů, dresu, pozice a přiřazení k týmům.
 - **Role & Permissions:** Read-only přehledy v administraci. Úpravy rolí jsou povoleny pouze pro `super-admin`.
 - **Pozvánky:** Administrátor může poslat uživateli pozvánku do členské sekce pomocí akce „Poslat pozvánku“ na stránce úpravy uživatele. Tato akce vygeneruje bezpečný odkaz pro nastavení hesla a odešle jej na e-mail uživatele v graficky zpracované šabloně s basketbalovou tématikou.
+
+### Typy členství a systémové role
+
+- Jeden uživatel může mít více typů členství, například **Hráč + Trenér**.
+- Typy `player`, `coach` a `parent` automaticky synchronizují stejnojmenné systémové role.
+- Odebrání typu členství odebere pouze příslušnou automaticky řízenou roli.
+- Ručně přidělené role `admin`, `super_admin`, `editor` a případné další privilegované role synchronizace nikdy nemaže.
+- Typy `staff`, `fan` a `honorary` nemají vlastní přístupovou roli a samy o sobě neodemykají členskou sekci.
+- Centrální logika je v `App\Services\Users\MembershipRoleSynchronizer`; formuláře ani importy nemají mapování rolí duplikovat.
 
 ## 4. Autorizace a bezpečnost
 - **Policies:** Všechny operace chráněny oprávněním `manage_users`. Hráči vidí vlastní profil.

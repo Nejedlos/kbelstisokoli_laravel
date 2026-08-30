@@ -51,7 +51,8 @@ return [
         'club_member_id' => 'Členské ID',
         'payment_vs' => 'Variabilní symbol',
         'membership_status' => 'Stav členství',
-        'membership_type' => 'Typ člena',
+        'membership_type' => 'Hlavní typ člena',
+        'membership_types' => 'Typy členství',
         'membership_started_at' => 'Členem od',
         'membership_ended_at' => 'Členem do',
         'finance_ok' => 'Příspěvky v pořádku',
@@ -85,14 +86,16 @@ return [
         'roles' => 'Role',
         'last_activity' => 'Aktivita',
     ],
+    'helpers' => [
+        'phone_9_digits' => 'Zadejte 9 číslic bez předvolby (např. 777666555).',
+        'membership_types_roles' => 'Lze vybrat více možností. Hráč, trenér a rodič automaticky nastavují stejnojmenné přístupové role.',
+        'roles_membership_sync' => 'Role Hráč, Trenér a Rodič se řídí typy členství na záložce Klub. Ostatní administrativní role zůstávají spravovány zde.',
+    ],
     'warnings' => [
         'duplicates' => 'Nalezeny další záznamy se stejným jménem (:count)',
         'ghost' => 'Dočasný Ghost profil',
         'external_sync' => 'Synchronizováno z externího zdroje',
         'duplicates_simple' => ':count duplicity',
-    ],
-    'helpers' => [
-        'phone_9_digits' => 'Zadejte 9 číslic bez předvolby (např. 777666555).',
     ],
     'notifications' => [
         'invitation_sent' => 'Pozvánka byla odeslána',

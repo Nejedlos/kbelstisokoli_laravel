@@ -13,7 +13,8 @@ Slouží ke správě základní identity a kontaktů.
 
 ### Záložka: Klubové údaje
 - **ID člena a Platební VS**: Unikátní identifikátory v klubu. Pokud u nového člena nejsou vyplněny, lze je vygenerovat ikonou "obnovit" v poli. Jednou vygenerované ID již nelze měnit.
-- **Stav členství**: Rozlišení typu "Hráč", "Pasivní člen" nebo "Čestný člen".
+- **Stav členství**: Určuje, zda je člen aktivní, čekající, pozastavený nebo bývalý.
+- **Typy členství**: Lze vybrat více hodnot současně, například „Hráč“ a „Trenér“. Typy Hráč, Trenér a Rodič automaticky nastavují odpovídající přístupové role.
 - **Finance OK**: Rychlý indikátor (přepínač), zda má člen v pořádku všechny členské závazky (nastavuje se ručně po dohodě nebo automaticky z finančního modulu).
 - **Doporučená metoda platby**: Volba mezi převodem, hotovostí atd. (ovlivňuje info pro uživatele v členské sekci).
 
@@ -30,7 +31,7 @@ Tato sekce se zobrazuje pouze pokud je zapnut přepínač "Má aktivní hráčsk
 - **Aktivace účtu**: V záložce Zabezpečení (u Editace) je i akce pro rychlou aktivaci/deaktivaci celého přístupu.
 
 ### Záložka: Admin
-- **Uživatelské role**: Přidělení práv (Administrátor, Trenér, Editor). Člen klubu může mít více rolí současně.
+- **Uživatelské role**: Zobrazuje výsledná přístupová práva. Role Hráč, Trenér a Rodič se synchronizují z typů členství na záložce Klub. Administrativní role, například Administrátor nebo Editor, se přidělují zde a automatická synchronizace je zachová.
 - **Admin poznámka**: Interní textový prostor pro správce systému (např. historie problémů, poznámky k přestupu).
 - **Audit**: Přehled o datech vytvoření, úpravy a posledního přihlášení (last login).
 

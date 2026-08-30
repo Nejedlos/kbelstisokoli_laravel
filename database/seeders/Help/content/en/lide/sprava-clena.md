@@ -13,7 +13,8 @@ Serves to manage basic identity and contacts.
 
 ### Club Data Tab
 - **Member ID and Payment VS**: Unique identifiers in the club. If they are not filled for a new member, they can be generated using the "refresh" icon in the field. Once generated, the ID can no longer be changed.
-- **Membership Status**: Distinguishing between "Player", "Passive member", or "Honorary member".
+- **Membership Status**: Determines whether the membership is active, pending, suspended, or former.
+- **Membership Types**: Multiple values can be selected, for example “Player” and “Coach”. Player, Coach and Parent automatically assign the corresponding access roles.
 - **Finance OK**: Quick indicator (toggle) whether the member has all club obligations in order (set manually by agreement or automatically from the financial module).
 - **Recommended Payment Method**: Choice between bank transfer, cash, etc. (affects information for users in the member section).
 
@@ -30,7 +31,7 @@ This section is only displayed if the "Has active player profile" toggle is on.
 - **Account Activation**: In the Security tab (during Editing), there is also an action for quick activation/deactivation of the entire access.
 
 ### Admin Tab
-- **User Roles**: Assignment of rights (Administrator, Coach, Editor). A club member can have multiple roles simultaneously.
+- **User Roles**: Shows the resulting access rights. Player, Coach and Parent roles are synchronized from membership types on the Club tab. Administrative roles such as Administrator or Editor are assigned here and are preserved by automatic synchronization.
 - **Admin Note**: Internal text space for system administrators (e.g., history of issues, transfer notes).
 - **Audit**: Overview of creation, modification, and last login dates.
 

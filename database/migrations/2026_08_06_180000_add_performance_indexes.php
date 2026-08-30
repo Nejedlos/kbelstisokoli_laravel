@@ -11,36 +11,46 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('matches', function (Blueprint $table) {
-            $table->index('scheduled_at');
-            $table->index('status');
-        });
+        $this->addIndexIfMissing('matches', ['scheduled_at'], 'matches_scheduled_at_index');
+        $this->addIndexIfMissing('matches', ['status'], 'matches_status_index');
 
-        Schema::table('trainings', function (Blueprint $table) {
-            $table->index('starts_at');
-            $table->index('ends_at');
-        });
+        $this->addIndexIfMissing('trainings', ['starts_at'], 'trainings_starts_at_index');
+        $this->addIndexIfMissing('trainings', ['ends_at'], 'trainings_ends_at_index');
 
         if (Schema::hasTable('events')) {
-            Schema::table('events', function (Blueprint $table) {
-                $table->index('starts_at');
-                $table->index('ends_at');
-            });
+            $this->addIndexIfMissing('events', ['starts_at'], 'events_starts_at_index');
+            $this->addIndexIfMissing('events', ['ends_at'], 'events_ends_at_index');
         }
 
         if (Schema::hasTable('club_events')) {
-            Schema::table('club_events', function (Blueprint $table) {
-                $table->index('starts_at');
-                $table->index('ends_at');
-            });
+            $this->addIndexIfMissing('club_events', ['starts_at'], 'club_events_starts_at_index');
+            $this->addIndexIfMissing('club_events', ['ends_at'], 'club_events_ends_at_index');
         }
 
-        Schema::table('seasons', function (Blueprint $table) {
-            $table->index('is_active');
-        });
+        $this->addIndexIfMissing('seasons', ['is_active'], 'seasons_is_active_index');
+        $this->addIndexIfMissing('teams', ['category'], 'teams_category_index');
+    }
 
-        Schema::table('teams', function (Blueprint $table) {
-            $table->index('category');
+    /**
+     * Add an index only when no existing index already covers the same columns.
+     * This keeps fresh SQLite tests and repeatedly deployed production migrations safe.
+     */
+    private function addIndexIfMissing(string $tableName, array $columns, string $indexName): void
+    {
+        if (! Schema::hasTable($tableName)) {
+            return;
+        }
+
+        $normalizedColumns = array_values($columns);
+        $alreadyIndexed = collect(Schema::getIndexes($tableName))
+            ->contains(fn (array $index) => array_values($index['columns'] ?? []) === $normalizedColumns);
+
+        if ($alreadyIndexed) {
+            return;
+        }
+
+        Schema::table($tableName, function (Blueprint $table) use ($columns, $indexName): void {
+            $table->index($columns, $indexName);
         });
     }
 
@@ -49,36 +59,33 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('teams', function (Blueprint $table) {
-            $table->dropIndex(['category']);
-        });
+        $this->dropIndexIfExists('teams', 'teams_category_index');
+        $this->dropIndexIfExists('seasons', 'seasons_is_active_index');
+        $this->dropIndexIfExists('club_events', 'club_events_starts_at_index');
+        $this->dropIndexIfExists('club_events', 'club_events_ends_at_index');
+        $this->dropIndexIfExists('events', 'events_starts_at_index');
+        $this->dropIndexIfExists('events', 'events_ends_at_index');
+        $this->dropIndexIfExists('trainings', 'trainings_starts_at_index');
+        $this->dropIndexIfExists('trainings', 'trainings_ends_at_index');
+        $this->dropIndexIfExists('matches', 'matches_scheduled_at_index');
+        $this->dropIndexIfExists('matches', 'matches_status_index');
+    }
 
-        Schema::table('seasons', function (Blueprint $table) {
-            $table->dropIndex(['is_active']);
-        });
-
-        if (Schema::hasTable('club_events')) {
-            Schema::table('club_events', function (Blueprint $table) {
-                $table->dropIndex(['starts_at']);
-                $table->dropIndex(['ends_at']);
-            });
+    private function dropIndexIfExists(string $tableName, string $indexName): void
+    {
+        if (! Schema::hasTable($tableName)) {
+            return;
         }
 
-        if (Schema::hasTable('events')) {
-            Schema::table('events', function (Blueprint $table) {
-                $table->dropIndex(['starts_at']);
-                $table->dropIndex(['ends_at']);
-            });
+        $exists = collect(Schema::getIndexes($tableName))
+            ->contains(fn (array $index) => ($index['name'] ?? null) === $indexName);
+
+        if (! $exists) {
+            return;
         }
 
-        Schema::table('trainings', function (Blueprint $table) {
-            $table->dropIndex(['starts_at']);
-            $table->dropIndex(['ends_at']);
-        });
-
-        Schema::table('matches', function (Blueprint $table) {
-            $table->dropIndex(['scheduled_at']);
-            $table->dropIndex(['status']);
+        Schema::table($tableName, function (Blueprint $table) use ($indexName): void {
+            $table->dropIndex($indexName);
         });
     }
 };

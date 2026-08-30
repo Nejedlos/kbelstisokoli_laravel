@@ -10,6 +10,7 @@ use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
 use App\Enums\PaymentMethod;
 use App\Services\ClubIdentifierService;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
@@ -19,6 +20,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -137,8 +140,8 @@ class UserForm
                                     <div class='flex flex-col'>
                                         <span class='text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1'>Účet</span>
                                         ".($record?->is_active
-                                                ? "<span class='text-success-600 dark:text-success-400 font-black flex items-center gap-1.5 text-xl uppercase'>".\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK).' Aktivní</span>'
-                                                : "<span class='text-danger-600 dark:text-danger-400 font-black flex items-center gap-1.5 text-xl uppercase'>".\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK).' Neaktivní</span>').'
+                                                ? "<span class='text-success-600 dark:text-success-400 font-black flex items-center gap-1.5 text-xl uppercase'>".IconHelper::render(IconHelper::CIRCLE_CHECK).' Aktivní</span>'
+                                                : "<span class='text-danger-600 dark:text-danger-400 font-black flex items-center gap-1.5 text-xl uppercase'>".IconHelper::render(IconHelper::CIRCLE_XMARK).' Neaktivní</span>').'
                                     </div>
                                 </div>
                                 ' : "<p class='text-gray-500 dark:text-gray-400 mt-2'>Vyplňte základní údaje pro vytvoření nového člena.</p>").'
@@ -155,7 +158,7 @@ class UserForm
     protected static function getOverviewTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('user.tabs.overview'))
-            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::VIEW))
+            ->icon(IconHelper::get(IconHelper::VIEW))
             ->schema([
                 Placeholder::make('avatar_placeholder')
                     ->label(__('user.fields.avatar'))
@@ -195,7 +198,7 @@ class UserForm
                     ->columnSpanFull(),
 
                 Section::make(__('user.sections.identity'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IDENTITY))
+                    ->icon(IconHelper::get(IconHelper::IDENTITY))
                     ->description(__('user.sections.identity_desc'))
                     ->compact()
                     ->schema([
@@ -221,7 +224,7 @@ class UserForm
                     ]),
 
                 Section::make(__('user.sections.contact'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PHONE))
+                    ->icon(IconHelper::get(IconHelper::PHONE))
                     ->description(__('user.sections.contact_desc'))
                     ->compact()
                     ->schema([
@@ -259,7 +262,7 @@ class UserForm
     protected static function getPersonalTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('user.tabs.personal'))
-            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::USER))
+            ->icon(IconHelper::get(IconHelper::USER))
             ->schema([
                 Section::make()
                     ->schema([
@@ -286,7 +289,7 @@ class UserForm
                     ]),
 
                 Section::make(__('user.sections.address'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::LOCATION))
+                    ->icon(IconHelper::get(IconHelper::LOCATION))
                     ->description(__('user.sections.address_desc'))
                     ->compact()
                     ->schema([
@@ -309,7 +312,7 @@ class UserForm
                     ]),
 
                 Section::make(__('user.sections.emergency_contact'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::EMERGENCY))
+                    ->icon(IconHelper::get(IconHelper::EMERGENCY))
                     ->compact()
                     ->schema([
                         Grid::make(2)
@@ -336,10 +339,10 @@ class UserForm
     protected static function getClubTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('user.tabs.club'))
-            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CLUB))
+            ->icon(IconHelper::get(IconHelper::CLUB))
             ->schema([
                 Section::make(__('user.sections.membership'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::BADGE))
+                    ->icon(IconHelper::get(IconHelper::BADGE))
                     ->description(__('user.sections.membership_desc'))
                     ->schema([
                         Grid::make(2)
@@ -351,7 +354,7 @@ class UserForm
                                     ->dehydrated()
                                     ->suffixAction(
                                         Action::make('generate_id')
-                                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::REFRESH))
+                                            ->icon(IconHelper::get(IconHelper::REFRESH))
                                             ->hidden(fn ($record) => $record && ! empty($record->club_member_id))
                                             ->action(function ($set) {
                                                 $set('club_member_id', app(ClubIdentifierService::class)->generateClubMemberId());
@@ -361,9 +364,13 @@ class UserForm
                                     ->label(__('user.fields.membership_status'))
                                     ->options(MembershipStatus::class)
                                     ->required(),
-                                Select::make('membership_type')
-                                    ->label(__('user.fields.membership_type'))
-                                    ->options(MembershipType::class),
+                                Select::make('membership_types')
+                                    ->label(__('user.fields.membership_types'))
+                                    ->options(MembershipType::class)
+                                    ->multiple()
+                                    ->required()
+                                    ->preload()
+                                    ->helperText(__('user.helpers.membership_types_roles')),
                                 Grid::make(2)
                                     ->schema([
                                         DatePicker::make('membership_started_at')
@@ -378,7 +385,7 @@ class UserForm
                     ]),
 
                 Section::make(__('user.sections.payments'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::FINANCE_PAYMENTS))
+                    ->icon(IconHelper::get(IconHelper::FINANCE_PAYMENTS))
                     ->description(__('user.sections.payments_desc'))
                     ->schema([
                         Grid::make(2)
@@ -390,7 +397,7 @@ class UserForm
                                     ->dehydrated()
                                     ->suffixAction(
                                         Action::make('generate_vs')
-                                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::REFRESH))
+                                            ->icon(IconHelper::get(IconHelper::REFRESH))
                                             ->hidden(fn ($record) => $record && ! empty($record->payment_vs))
                                             ->action(function ($set) {
                                                 $set('payment_vs', app(ClubIdentifierService::class)->generatePaymentVs());
@@ -413,7 +420,7 @@ class UserForm
     protected static function getPlayerTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('user.tabs.player'))
-            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::BASKETBALL))
+            ->icon(IconHelper::get(IconHelper::BASKETBALL))
             ->schema([
                 Grid::make(1)
                     ->schema([
@@ -433,7 +440,7 @@ class UserForm
                                         ? new HtmlString("<div class='bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 p-4 rounded-xl mb-4'>
                                             <div class='flex items-center gap-3'>
                                                 <div class='p-2 bg-primary-100 dark:bg-primary-800 rounded-lg text-primary-600 dark:text-primary-400'>
-                                                    ".\App\Support\IconHelper::render(\App\Support\IconHelper::CLOCK)."
+                                                    ".IconHelper::render(IconHelper::CLOCK)."
                                                 </div>
                                                 <div>
                                                     <p class='text-sm font-bold text-primary-900 dark:text-primary-100'>Aktuálně aktivní profil</p>
@@ -450,7 +457,7 @@ class UserForm
                                     ),
 
                                 Section::make(__('user.sections.basketball'))
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::BASKETBALL))
+                                    ->icon(IconHelper::get(IconHelper::BASKETBALL))
                                     ->description(__('user.sections.basketball_desc'))
                                     ->relationship('playerProfile')
                                     ->schema([
@@ -485,7 +492,7 @@ class UserForm
                                     ]),
 
                                 Section::make(__('user.sections.physical'))
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PHYSICAL))
+                                    ->icon(IconHelper::get(IconHelper::PHYSICAL))
                                     ->description(__('user.sections.physical_desc'))
                                     ->relationship('playerProfile')
                                     ->schema([
@@ -509,7 +516,7 @@ class UserForm
                                     ]),
 
                                 Section::make(__('user.sections.internal'))
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::NOTE))
+                                    ->icon(IconHelper::get(IconHelper::NOTE))
                                     ->description(__('user.sections.internal_desc'))
                                     ->relationship('playerProfile')
                                     ->collapsed()
@@ -523,7 +530,7 @@ class UserForm
                                     ]),
 
                                 Section::make(__('user.sections.player_photos'))
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMAGE))
+                                    ->icon(IconHelper::get(IconHelper::IMAGE))
                                     ->description(__('user.sections.player_photos_desc'))
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('player_photos')
@@ -548,10 +555,10 @@ class UserForm
     protected static function getSecurityTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('user.tabs.security'))
-            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SHIELD_CHECK))
+            ->icon(IconHelper::get(IconHelper::SHIELD_CHECK))
             ->schema([
                 Section::make(__('user.sections.security_password'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SECURITY))
+                    ->icon(IconHelper::get(IconHelper::SECURITY))
                     ->description('Správa přístupových údajů.')
                     ->schema([
                         Grid::make(2)
@@ -560,25 +567,25 @@ class UserForm
                                     ->label(__('user.fields.password'))
                                     ->password()
                                     ->dehydrated(fn ($state) => filled($state))
-                                    ->required(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
+                                    ->required(fn ($livewire) => $livewire instanceof CreateRecord)
                                     ->maxLength(255),
                                 Toggle::make('is_active')
                                     ->label(__('user.fields.is_active'))
                                     ->onColor('success')
                                     ->offColor('danger')
                                     ->default(true)
-                                    ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),
+                                    ->visible(fn ($livewire) => $livewire instanceof CreateRecord),
                                 Placeholder::make('is_active_status')
                                     ->label(__('user.fields.is_active'))
                                     ->content(fn ($record) => $record?->is_active
-                                        ? new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-bold uppercase">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK).' Aktivní účet</div>')
-                                        : new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-bold uppercase">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK).' Neaktivní účet</div>')
+                                        ? new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-bold uppercase">'.IconHelper::render(IconHelper::CIRCLE_CHECK).' Aktivní účet</div>')
+                                        : new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-bold uppercase">'.IconHelper::render(IconHelper::CIRCLE_XMARK).' Neaktivní účet</div>')
                                     )
-                                    ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord)
+                                    ->visible(fn ($livewire) => $livewire instanceof EditRecord)
                                     ->hintAction(
                                         Action::make('toggle_active_record')
                                             ->label(fn ($record) => $record?->is_active ? 'Deaktivovat' : 'Aktivovat')
-                                            ->icon(fn ($record) => $record?->is_active ? \App\Support\IconHelper::get(\App\Support\IconHelper::DEACTIVATE) : \App\Support\IconHelper::get(\App\Support\IconHelper::ACTIVATE))
+                                            ->icon(fn ($record) => $record?->is_active ? IconHelper::get(IconHelper::DEACTIVATE) : IconHelper::get(IconHelper::ACTIVATE))
                                             ->color(fn ($record) => $record?->is_active ? 'danger' : 'success')
                                             ->requiresConfirmation()
                                             ->visible(fn () => auth()->user()?->can('manage_users'))
@@ -598,16 +605,16 @@ class UserForm
                     ]),
 
                 Section::make(__('user.sections.security_2fa'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PERMISSIONS))
+                    ->icon(IconHelper::get(IconHelper::PERMISSIONS))
                     ->description('Zabezpečení účtu pomocí druhého faktoru.')
                     ->aside()
                     ->schema([
                         Placeholder::make('2fa_status_detailed')
                             ->label('Aktuální stav')
                             ->content(fn ($record) => match (true) {
-                                ! $record?->two_factor_secret => new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-medium">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_XMARK).' Neaktivní</div>'),
-                                ! $record->two_factor_confirmed_at => new HtmlString('<div class="flex items-center gap-2 text-warning-600 dark:text-warning-400 font-medium">'.\App\Support\IconHelper::render(\App\Support\IconHelper::INFO).' Čeká na potvrzení</div>'),
-                                default => new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-medium">'.\App\Support\IconHelper::render(\App\Support\IconHelper::CIRCLE_CHECK).' Aktivní a ověřeno</div>'),
+                                ! $record?->two_factor_secret => new HtmlString('<div class="flex items-center gap-2 text-danger-600 dark:text-danger-400 font-medium">'.IconHelper::render(IconHelper::CIRCLE_XMARK).' Neaktivní</div>'),
+                                ! $record->two_factor_confirmed_at => new HtmlString('<div class="flex items-center gap-2 text-warning-600 dark:text-warning-400 font-medium">'.IconHelper::render(IconHelper::INFO).' Čeká na potvrzení</div>'),
+                                default => new HtmlString('<div class="flex items-center gap-2 text-success-600 dark:text-success-400 font-medium">'.IconHelper::render(IconHelper::CIRCLE_CHECK).' Aktivní a ověřeno</div>'),
                             }),
                         Placeholder::make('2fa_confirmed_at')
                             ->label('Datum aktivace')
@@ -617,7 +624,7 @@ class UserForm
                     ->headerActions([
                         Action::make('disable_2fa')
                             ->label(__('user.actions.reset_2fa'))
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TRASH))
+                            ->icon(IconHelper::get(IconHelper::TRASH))
                             ->color('danger')
                             ->requiresConfirmation()
                             ->action(function ($record) {
@@ -641,10 +648,10 @@ class UserForm
     protected static function getAdminTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('user.tabs.admin'))
-            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::USER_GEAR))
+            ->icon(IconHelper::get(IconHelper::USER_GEAR))
             ->schema([
                 Section::make(__('user.sections.internal'))
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::GEARS))
+                    ->icon(IconHelper::get(IconHelper::GEARS))
                     ->schema([
                         Select::make('roles')
                             ->label('Role uživatele')
@@ -653,15 +660,16 @@ class UserForm
                             ->multiple()
                             ->preload()
                             ->searchable()
+                            ->helperText(__('user.helpers.roles_membership_sync'))
                             ->visible(fn () => auth()->user()?->hasRole('admin'))
-                            ->disabled(fn () => !auth()->user()?->hasRole('admin')),
+                            ->disabled(fn () => ! auth()->user()?->hasRole('admin')),
                         Textarea::make('admin_note')
                             ->label(__('user.fields.admin_note'))
                             ->rows(5),
                     ]),
 
                 Section::make('Audit')
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::AUDIT))
+                    ->icon(IconHelper::get(IconHelper::AUDIT))
                     ->compact()
                     ->schema([
                         Grid::make(3)
