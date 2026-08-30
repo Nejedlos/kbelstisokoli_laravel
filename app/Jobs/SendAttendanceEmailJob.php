@@ -28,7 +28,11 @@ class SendAttendanceEmailJob implements ShouldQueue
         $delivery = AttendanceEmailDelivery::with(['user', 'attendable'])->findOrFail($this->deliveryId);
         $preference = $delivery->kind === 'summary' ? 'attendance_summaries' : 'attendance_reminders';
 
-        if ($delivery->sent_at || ! $delivery->user || ! $delivery->attendable || ! $delivery->user->prefersNotification($preference)) {
+        if ($delivery->sent_at || $delivery->status !== 'pending') {
+            return;
+        }
+
+        if (! $delivery->user || ! $delivery->attendable || ! $delivery->user->prefersNotification($preference)) {
             $delivery->update(['status' => 'skipped']);
 
             return;

@@ -40,6 +40,29 @@ class AttendanceEmailSystemTest extends TestCase
         $this->assertNotNull($delivery->fresh()->sent_at);
     }
 
+    public function test_job_never_resends_sent_or_skipped_delivery(): void
+    {
+        Mail::fake();
+        [$user, $event] = $this->makeTrackedPlayerEvent(now()->addDays(3));
+
+        foreach ([
+            ['status' => 'sent', 'sent_at' => now()],
+            ['status' => 'skipped', 'sent_at' => null],
+        ] as $state) {
+            $delivery = AttendanceEmailDelivery::create([
+                'user_id' => $user->id,
+                'attendable_id' => $event->id,
+                'attendable_type' => $event::class,
+                'kind' => 'reminder',
+                'stage' => $state['status'],
+                ...$state,
+            ]);
+            (new SendAttendanceEmailJob($delivery->id))->handle();
+        }
+
+        Mail::assertNothingSent();
+    }
+
     public function test_due_reminder_is_queued_once_on_critical_queue(): void
     {
         Carbon::setTestNow('2026-09-01 08:15:00');
