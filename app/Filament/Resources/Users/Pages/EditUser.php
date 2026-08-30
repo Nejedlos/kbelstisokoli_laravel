@@ -38,7 +38,7 @@ class EditUser extends EditRecord
                 ->requiresConfirmation()
                 ->action(function ($record) {
                     $token = Password::createToken($record);
-                    $record->notify(new UserInvitationNotification($token));
+                    retry(3, fn () => $record->notify(new UserInvitationNotification($token)), 250);
 
                     Notification::make()
                         ->title(__('user.notifications.invitation_sent'))

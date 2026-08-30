@@ -512,7 +512,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
             'email' => $this->email,
         ]);
 
-        $this->notify(new ResetPasswordNotification($token));
+        retry(3, fn () => $this->notify(new ResetPasswordNotification($token)), 250);
 
         Log::channel('single')->warning('DEBUG_MAIL: Notification sent to notify() method', [
             'user_id' => $this->id,

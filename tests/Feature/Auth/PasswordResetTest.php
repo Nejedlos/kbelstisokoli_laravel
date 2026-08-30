@@ -2,16 +2,20 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Actions\Fortify\ResetUserPassword;
+use App\Filament\Pages\Auth\RequestPasswordReset;
+use App\Http\Responses\Auth\FailedPasswordResetLinkRequestResponse;
 use App\Models\User;
 use App\Notifications\Auth\ResetPasswordNotification;
-use App\Actions\Fortify\ResetUserPassword;
-use App\Http\Responses\Auth\FailedPasswordResetLinkRequestResponse;
+use App\Notifications\Auth\UserInvitationNotification;
+use App\Services\Auth\PasswordResetService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
-use App\Filament\Pages\Auth\RequestPasswordReset;
 use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
@@ -19,13 +23,19 @@ class PasswordResetTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        RateLimiter::clear("pw-reset-ip:" . md5('127.0.0.1'));
+        RateLimiter::clear('pw-reset-ip:'.md5('127.0.0.1'));
+    }
+
+    public function test_critical_auth_emails_are_not_queued(): void
+    {
+        $this->assertNotInstanceOf(ShouldQueue::class, new ResetPasswordNotification('token'));
+        $this->assertNotInstanceOf(ShouldQueue::class, new UserInvitationNotification('token'));
     }
 
     public function test_filament_forgot_password_sends_email_for_existing_user()
     {
         Notification::fake();
-        $email = 'admin-' . uniqid() . '@example.com';
+        $email = 'admin-'.uniqid().'@example.com';
         $user = User::factory()->create(['email' => $email]);
 
         Livewire::test(RequestPasswordReset::class)
@@ -39,7 +49,7 @@ class PasswordResetTest extends TestCase
     public function test_filament_forgot_password_does_not_reveal_non_existing_user()
     {
         Notification::fake();
-        $email = 'nonexisting-admin-' . uniqid() . '@example.com';
+        $email = 'nonexisting-admin-'.uniqid().'@example.com';
 
         Livewire::test(RequestPasswordReset::class)
             ->set('data.email', $email)
@@ -85,8 +95,8 @@ class PasswordResetTest extends TestCase
 
     public function test_rate_limiting_logic()
     {
-        $service = app(\App\Services\Auth\PasswordResetService::class);
-        $email = 'throttle-' . uniqid() . '@example.com';
+        $service = app(PasswordResetService::class);
+        $email = 'throttle-'.uniqid().'@example.com';
         $emailHash = md5($email);
         $ipHash = md5(request()->ip());
 
@@ -102,7 +112,7 @@ class PasswordResetTest extends TestCase
         try {
             $service->sendResetLink($email);
             $this->fail('ValidationException was not thrown');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->assertArrayHasKey('email', $e->errors());
             $this->assertStringContainsString('Počkejte prosím', $e->errors()['email'][0]);
             $this->assertStringContainsString('sekund', $e->errors()['email'][0]);

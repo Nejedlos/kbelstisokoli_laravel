@@ -13,11 +13,12 @@ use Illuminate\Support\Facades\Schema;
 
 Artisan::command('telescope:clear {--all : Smazat úplně všechno}', function () {
     $this->info('Starting telescope entries maintenance...');
-    $this->info('Memory peak usage: ' . round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB');
+    $this->info('Memory peak usage: '.round(memory_get_peak_usage(true) / 1024 / 1024, 2).' MB');
 
     try {
-        if (!Schema::hasTable('telescope_entries')) {
+        if (! Schema::hasTable('telescope_entries')) {
             $this->error('Table telescope_entries does not exist in database.');
+
             return;
         }
 
@@ -55,41 +56,41 @@ Artisan::command('telescope:clear {--all : Smazat úplně všechno}', function (
         $totalAfter = DB::table('telescope_entries')->count();
         $tagsAfter = DB::table('telescope_entries_tags')->count();
 
-        $this->info("Maintenance complete.");
-        $this->info("Final total entries: $totalAfter (Deleted: " . ($totalBefore - $totalAfter) . ")");
-        $this->info("Final tags count: $tagsAfter (Deleted tags: " . ($tagsBefore - $tagsAfter) . ")");
-        $this->info('Memory peak usage: ' . round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB');
+        $this->info('Maintenance complete.');
+        $this->info("Final total entries: $totalAfter (Deleted: ".($totalBefore - $totalAfter).')');
+        $this->info("Final tags count: $tagsAfter (Deleted tags: ".($tagsBefore - $tagsAfter).')');
+        $this->info('Memory peak usage: '.round(memory_get_peak_usage(true) / 1024 / 1024, 2).' MB');
 
-    } catch (\Throwable $e) {
-        $this->error('Telescope maintenance failed: ' . $e->getMessage());
-        Log::error('Telescope Clear Error: ' . $e->getMessage(), [
+    } catch (Throwable $e) {
+        $this->error('Telescope maintenance failed: '.$e->getMessage());
+        Log::error('Telescope Clear Error: '.$e->getMessage(), [
             'exception' => $e,
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]);
     }
 })->purpose('Prune old telescope entries (keeps last 24h or clears all with --all)');
 
-use Illuminate\Support\Facades\Schedule;
+use App\Jobs\Stats\SyncTeamSeasonJob;
+use App\Models\ExternalTeamSeasonConfig;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schedule;
 
 // Pravidelný priming cache pro veřejný web (každých 30 minut)
-Schedule::call(fn() => Artisan::call('page-cache:prime'))->name('page-cache:prime')->everyThirtyMinutes()->onOneServer();
+Schedule::call(fn () => Artisan::call('page-cache:prime'))->name('page-cache:prime')->everyThirtyMinutes()->onOneServer();
 
-// Automatické zpracování fronty (každou minutu) - pro prostředí bez daemon workerů (Webglobe)
-// Poznámka: Worker se spouští v pozadí v routes/public.php po doběhnutí plánovače,
-// proto zde není nutný a navíc způsoboval chyby kvůli duplicitě a syntaxi.
-/*
-Schedule::command('php8.4 artisan queue:work --stop-when-empty')
+// Jednorázový dávkový worker pro hosting bez trvalého queue procesu.
+// Limity chrání HTTP cron před timeoutem, withoutOverlapping brání souběžným workerům.
+Schedule::command('queue:work --stop-when-empty --max-jobs=25 --max-time=120 --tries=3')
     ->name('queue-worker-maintenance')
     ->everyMinute()
+    ->withoutOverlapping(5)
     ->onOneServer();
-*/
 
 // Automatické čištění starých záznamů a jobů (každou noc)
-Schedule::call(fn() => Artisan::call('queue:prune-failed', ['--hours' => 24]))->dailyAt('03:30')->name('queue-prune-failed');
-Schedule::call(fn() => Artisan::call('model:prune'))->dailyAt('03:45')->name('model-prune');
-Schedule::call(fn() => Artisan::call('telescope:clear'))->dailyAt('04:15')->name('telescope-clear');
+Schedule::call(fn () => Artisan::call('queue:prune-failed', ['--hours' => 24]))->dailyAt('03:30')->name('queue-prune-failed');
+Schedule::call(fn () => Artisan::call('model:prune'))->dailyAt('03:45')->name('model-prune');
+Schedule::call(fn () => Artisan::call('telescope:clear'))->dailyAt('04:15')->name('telescope-clear');
 
 // Hook pro smazání full-page cache při volání optimize:clear
 Event::listen(CommandFinished::class, function (CommandFinished $event) {
@@ -98,28 +99,28 @@ Event::listen(CommandFinished::class, function (CommandFinished $event) {
     }
 });
 
-Schedule::call(fn() => Artisan::call('seo:generate-sitemap'))->dailyAt('03:00');
+Schedule::call(fn () => Artisan::call('seo:generate-sitemap'))->dailyAt('03:00');
 
 // Hloubková (excesivní) synchronizace historie hráčů - každou neděli ve 02:00
-Schedule::call(fn() => Artisan::call('stats:sync-players', ['--excesive' => true]))->weeklyOn(0, '02:00');
+Schedule::call(fn () => Artisan::call('stats:sync-players', ['--excesive' => true]))->weeklyOn(0, '02:00');
 
 // Zpracování DMARC reportů (každou hodinu)
-Schedule::call(fn() => Artisan::call('dmarc:ingest'))->hourly()->name('dmarc-ingest');
+Schedule::call(fn () => Artisan::call('dmarc:ingest'))->hourly()->name('dmarc-ingest');
 
 // Čištění duplicit (každý den ve 4:00)
-Schedule::call(fn() => Artisan::call('stats:cleanup-duplicates'))->dailyAt('04:00');
+Schedule::call(fn () => Artisan::call('stats:cleanup-duplicates'))->dailyAt('04:00');
 
 // Generování týdenní AI aktuality (každé pondělí v 8:00)
-Schedule::call(fn() => Artisan::call('app:news:generate-weekly'))->weeklyOn(1, '08:00');
+Schedule::call(fn () => Artisan::call('app:news:generate-weekly'))->weeklyOn(1, '08:00');
 
 // Synchronizace výchozích týmů členů (každou hodinu)
-Schedule::call(fn() => Artisan::call('app:sync-member-default-teams'))->hourly();
+Schedule::call(fn () => Artisan::call('app:sync-member-default-teams'))->hourly();
 
 // Měsíční hloubková (excesivní) synchronizace všech historických sezón týmů (1. v měsíci v 1:00)
 Schedule::call(function () {
-    $configs = \App\Models\ExternalTeamSeasonConfig::where('is_enabled', true)->get();
+    $configs = ExternalTeamSeasonConfig::where('is_enabled', true)->get();
 
     foreach ($configs as $config) {
-        \App\Jobs\Stats\SyncTeamSeasonJob::dispatch($config->team_id, $config->season_id, ['excesive' => true]);
+        SyncTeamSeasonJob::dispatch($config->team_id, $config->season_id, ['excesive' => true]);
     }
 })->monthlyOn(1, '01:00');

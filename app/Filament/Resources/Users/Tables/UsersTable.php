@@ -7,7 +7,7 @@ use App\Enums\MembershipStatus;
 use App\Enums\MembershipType;
 use App\Mail\TestMail;
 use App\Models\User;
-use App\Notifications\UserInvitationNotification;
+use App\Notifications\Auth\UserInvitationNotification;
 use App\Services\Stats\Sync\PlayerSyncService;
 use App\Services\Users\UserMergeService;
 use App\Support\IconHelper;
@@ -237,7 +237,7 @@ class UsersTable
                         ->requiresConfirmation()
                         ->action(function ($record) {
                             $token = Password::broker()->createToken($record);
-                            $record->notify(new UserInvitationNotification($token));
+                            retry(3, fn () => $record->notify(new UserInvitationNotification($token)), 250);
 
                             FilamentNotification::make()
                                 ->title(__('user.notifications.invitation_sent'))
