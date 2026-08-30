@@ -33,6 +33,6 @@ class RenewSeasonCommand extends Command
 
         $result = $renewSeasonAction->execute($targetId, $sourceId);
 
-        $this->success("Obnova dokončena. Vytvořeno: {$result['created']}, Aktualizováno: {$result['updated']}.");
+        $this->components->info("Obnova dokončena. Vytvořeno konfigurací: {$result['created']}, přeskočeno: {$result['skipped']}, externích konfigurací: {$result['external_created']}.");
     }
 }

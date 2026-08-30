@@ -7,7 +7,6 @@ use App\Models\MediaAsset;
 use App\Models\Team;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -43,6 +42,8 @@ class ProfileController extends Controller
             'new_password' => ['nullable', 'confirmed', Password::defaults()],
             'member_default_team_id' => ['nullable', Rule::exists('teams', 'id')],
             'member_view_all_by_default' => ['boolean'],
+            'attendance_reminders_email' => ['boolean'],
+            'attendance_summaries_email' => ['boolean'],
         ], [], [
             'name' => __('member.profile.name'),
             'phone' => __('member.profile.phone'),
@@ -54,11 +55,16 @@ class ProfileController extends Controller
         ]);
 
         // Update User
+        $preferences = $user->notification_preferences ?? [];
+        data_set($preferences, 'attendance_reminders.mail', $request->boolean('attendance_reminders_email'));
+        data_set($preferences, 'attendance_summaries.mail', $request->boolean('attendance_summaries_email'));
+
         $user->update([
             'name' => $request->name,
             'phone' => $request->phone,
             'member_default_team_id' => $request->member_default_team_id,
             'member_view_all_by_default' => $request->boolean('member_view_all_by_default'),
+            'notification_preferences' => $preferences,
         ]);
 
         if ($request->filled('new_password')) {

@@ -230,6 +230,18 @@
 
                 <!-- Password Change -->
                 <section class="card p-6 sm:p-8 space-y-6">
+                    <h3 class="text-xl font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-5">{{ __('attendance_mail.settings.title') }}</h3>
+                    @foreach(['attendance_reminders' => 'reminders', 'attendance_summaries' => 'summaries'] as $key => $label)
+                        <label class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer">
+                            <input type="hidden" name="{{ $key }}_email" value="0">
+                            <input type="checkbox" name="{{ $key }}_email" value="1" {{ old($key.'_email', $user->prefersNotification($key)) ? 'checked' : '' }} class="w-4 h-4 mt-1 text-primary rounded">
+                            <span><strong class="block text-sm text-secondary">{{ __('attendance_mail.settings.'.$label) }}</strong><small class="text-slate-500">{{ __('attendance_mail.settings.'.$label.'_help') }}</small></span>
+                        </label>
+                    @endforeach
+                </section>
+
+                <!-- Password Change -->
+                <section class="card p-6 sm:p-8 space-y-6">
                     <h3 class="text-xl font-black uppercase tracking-tight text-secondary border-b border-slate-100 pb-5 leading-none">{{ __('member.profile.password_change') }}</h3>
                     <p class="text-xs text-slate-500 font-medium leading-relaxed italic opacity-80">{{ __('member.profile.password_help') }}</p>
 

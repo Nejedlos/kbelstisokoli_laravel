@@ -87,6 +87,16 @@ Schedule::command('queue:work --stop-when-empty --max-jobs=25 --max-time=120 --t
     ->withoutOverlapping(5)
     ->onOneServer();
 
+Schedule::command('rsvp:reminders')->everyFifteenMinutes()->withoutOverlapping(10)->onOneServer();
+Schedule::command('queue:work --queue=critical-mail --stop-when-empty --max-jobs=200 --max-time=50 --tries=5')
+    ->name('critical-mail-worker')->everyMinute()->withoutOverlapping(3)->onOneServer();
+
+Schedule::command('season:renew')
+    ->name('season-renewal')
+    ->yearlyOn(9, 1, '00:05')
+    ->withoutOverlapping(60)
+    ->onOneServer();
+
 // Automatické čištění starých záznamů a jobů (každou noc)
 Schedule::call(fn () => Artisan::call('queue:prune-failed', ['--hours' => 24]))->dailyAt('03:30')->name('queue-prune-failed');
 Schedule::call(fn () => Artisan::call('model:prune'))->dailyAt('03:45')->name('model-prune');

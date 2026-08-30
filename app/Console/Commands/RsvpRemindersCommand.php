@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Attendance\AttendanceEmailService;
 use Illuminate\Console\Command;
 
 class RsvpRemindersCommand extends Command
@@ -23,10 +24,11 @@ class RsvpRemindersCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(AttendanceEmailService $service): int
     {
-        $this->info('Dispatching attendance reminders job...');
-        \App\Jobs\RsvpReminderJob::dispatch();
-        $this->info('Job dispatched successfully.');
+        $counts = $service->dispatchDue(now());
+        $this->info("Queued {$counts['reminders']} reminders and {$counts['summaries']} summaries on critical-mail.");
+
+        return self::SUCCESS;
     }
 }

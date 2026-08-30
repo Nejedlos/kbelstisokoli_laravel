@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Season extends Model
 {
@@ -113,19 +116,19 @@ class Season extends Model
 
     /**
      * Zjistí, zda datum patří do této sezóny.
-     * Sezóna začíná 1. srpna (aby se chytily i srpnové turnaje/zápasy).
+     * Sezóna začíná 1. září.
      */
-    public function containsDate(\Carbon\CarbonInterface $date): bool
+    public function containsDate(CarbonInterface $date): bool
     {
         $normalized = self::normalizeName($this->name);
-        if (!str_contains($normalized, '/')) {
+        if (! str_contains($normalized, '/')) {
             return false;
         }
 
         [$startYear, $endYear] = explode('/', $normalized);
 
-        $start = \Illuminate\Support\Carbon::create((int) $startYear, 8, 1)->startOfDay();
-        $end = \Illuminate\Support\Carbon::create((int) $endYear, 7, 31)->endOfDay();
+        $start = Carbon::create((int) $startYear, 9, 1)->startOfDay();
+        $end = Carbon::create((int) $endYear, 8, 31)->endOfDay();
 
         return $date->between($start, $end);
     }
@@ -133,25 +136,25 @@ class Season extends Model
     /**
      * Vrátí sezónu, do které patří dané datum.
      */
-    public static function forDate(\Carbon\CarbonInterface $date): ?self
+    public static function forDate(CarbonInterface $date): ?self
     {
         $year = (int) $date->format('Y');
         $month = (int) $date->format('m');
 
-        // Sezóna začíná v srpnu
-        $name = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
+        // Sezóna začíná 1. září.
+        $name = ($month >= 9) ? "$year/".($year + 1) : ($year - 1)."/$year";
 
         $season = self::where('name', $name)->first();
-        if (!$season) {
+        if (! $season) {
             // Zkusíme zkrácený formát 2024/25
-            $shortName = substr($name, 0, 5) . substr($name, 7, 2);
+            $shortName = substr($name, 0, 5).substr($name, 7, 2);
             $season = self::where('name', $shortName)->first();
         }
 
         return $season;
     }
 
-    public function matches(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function matches(): HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'season_id');
     }
