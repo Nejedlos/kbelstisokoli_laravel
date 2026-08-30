@@ -38,13 +38,18 @@ class SendAttendanceEmailJob implements ShouldQueue
             ? $delivery->user->preferred_locale
             : config('app.fallback_locale', 'cs');
 
-        App::withLocale($locale, function () use ($delivery): void {
+        $previousLocale = App::currentLocale();
+        App::setLocale($locale);
+
+        try {
             $mail = $delivery->kind === 'summary'
                 ? new AttendanceSummaryMail($delivery)
                 : new AttendanceReminderMail($delivery);
 
             Mail::to($delivery->user)->send($mail);
-        });
+        } finally {
+            App::setLocale($previousLocale);
+        }
 
         $delivery->update([
             'status' => 'sent',

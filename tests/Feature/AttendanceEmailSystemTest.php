@@ -14,12 +14,32 @@ use App\Models\User;
 use App\Models\UserSeasonConfig;
 use App\Services\Attendance\AttendanceEmailService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class AttendanceEmailSystemTest extends TestCase
 {
+    public function test_queued_job_sends_mail_and_marks_delivery_as_sent(): void
+    {
+        Mail::fake();
+        [$user, $event] = $this->makeTrackedPlayerEvent(now()->addDays(3));
+        $delivery = AttendanceEmailDelivery::create([
+            'user_id' => $user->id,
+            'attendable_id' => $event->id,
+            'attendable_type' => $event::class,
+            'kind' => 'reminder',
+            'stage' => 'three_days',
+        ]);
+
+        (new SendAttendanceEmailJob($delivery->id))->handle();
+
+        Mail::assertSent(AttendanceReminderMail::class, fn ($mail) => $mail->hasTo($user->email));
+        $this->assertSame('sent', $delivery->fresh()->status);
+        $this->assertNotNull($delivery->fresh()->sent_at);
+    }
+
     public function test_due_reminder_is_queued_once_on_critical_queue(): void
     {
         Carbon::setTestNow('2026-09-01 08:15:00');
