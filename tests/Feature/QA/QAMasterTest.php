@@ -9,11 +9,14 @@ use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Stats\Contracts\StatFetcherInterface;
+use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
 use App\Services\Stats\Legacy\Extractors\LegacyStatExtractor;
 use App\Services\Stats\Legacy\LegacyFileClassifier;
 use App\Services\Stats\Sync\ExternalStatsSyncService;
+use App\Services\Stats\Sync\MatchSyncService;
 use App\Services\Stats\Sync\StatisticSetService;
 use App\Services\Stats\Sync\StatisticSyncService;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Mockery;
@@ -26,7 +29,7 @@ class QAMasterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
     }
 
     /**
@@ -35,8 +38,8 @@ class QAMasterTest extends TestCase
     public function test_auth_and_permissions()
     {
         // 1. Guest Access
-        $this->get('/admin')->assertRedirect();
-        $this->get('/clenska-sekce/dashboard')->assertRedirect();
+        $this->get('/admin')->assertUnauthorized();
+        $this->get('/clenska-sekce/dashboard')->assertUnauthorized();
 
         // 2. Member (Player) Access
         $player = User::factory()->create(['is_active' => true]);
@@ -47,15 +50,10 @@ class QAMasterTest extends TestCase
         $this->get('/admin')->assertStatus(403);
 
         // 3. Admin Access
-        $admin = User::factory()->create([
-            'is_active' => true,
-            'two_factor_secret' => 'secret',
-            'two_factor_confirmed_at' => now(),
-        ]);
-        $admin->assignRole('admin');
+        $admin = $this->with2FA($this->createAdmin());
 
         $this->actingAs($admin, 'web');
-        session(['impersonated_by' => 1]);
+        $this->confirm2FA($admin);
 
         $this->get('/admin')->assertStatus(200);
         $this->get('/clenska-sekce/dashboard')->assertStatus(200);
@@ -110,13 +108,13 @@ class QAMasterTest extends TestCase
 
         if (BasketballMatch::count() === 0) {
             dump('Matches list fixture content length: '.strlen(File::get(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html'))));
-            $extractor = $this->app->make(\App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor::class);
+            $extractor = $this->app->make(MatchesListExtractor::class);
             $data = $extractor->extract(File::get(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html')));
             dump('Extractor data rows count: '.count($data['data']->rows));
 
             // Manual sync attempt to see if it fails here
             dump('Manual sync attempt...');
-            $matchSync = $this->app->make(\App\Services\Stats\Sync\MatchSyncService::class);
+            $matchSync = $this->app->make(MatchSyncService::class);
             try {
                 $matchSync->sync($team, $season, $data['data']->rows[0]->values);
                 dump('Manual sync success. Matches count: '.BasketballMatch::count());

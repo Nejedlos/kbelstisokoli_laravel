@@ -2,14 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\FeedbackReport;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class FeedbackSystemTest extends TestCase
@@ -48,17 +47,10 @@ class FeedbackSystemTest extends TestCase
 
     public function test_auth_admin_sees_widget_in_admin_panel(): void
     {
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $admin = User::factory()->create(['is_active' => true]);
-        $admin->assignRole($adminRole);
+        $admin = $this->with2FA($this->createAdmin());
+        $this->confirm2FA($admin);
 
         $response = $this->actingAs($admin)->get('/admin');
-
-        // Filament can redirect to dashboard or login if session is not right,
-        // but since we are actingAs, it should be 200 or 302 to dashboard.
-        if ($response->status() === 302) {
-            $response = $this->followRedirects($response);
-        }
 
         $response->assertStatus(200);
         $response->assertSee('ks-fb-loader');
@@ -110,7 +102,7 @@ class FeedbackSystemTest extends TestCase
                 'timestamp' => now()->toISOString(),
             ],
             'capture' => [
-                'screenshot' => 'data:image/jpeg;base64,' . base64_encode('fake-image'),
+                'screenshot' => 'data:image/jpeg;base64,'.base64_encode('fake-image'),
                 'domLight' => '<div>test</div>',
             ],
             'logs' => [
@@ -147,7 +139,7 @@ class FeedbackSystemTest extends TestCase
                 'device' => ['userAgent' => 'TestBot'],
                 'password' => 'secret123',
                 'other' => 'safe',
-            ]
+            ],
         ]);
 
         $response->assertStatus(200);
@@ -181,7 +173,7 @@ class FeedbackSystemTest extends TestCase
         }
 
         // 11th should be throttled (429)
-        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test 11"]))->assertStatus(429);
+        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => 'Test 11']))->assertStatus(429);
     }
 
     public function test_duplicate_guard_works(): void
@@ -206,9 +198,7 @@ class FeedbackSystemTest extends TestCase
 
     public function test_admin_access_to_resource(): void
     {
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $admin = User::factory()->create(['is_active' => true]);
-        $admin->assignRole($adminRole);
+        $admin = $this->with2FA($this->createAdmin());
 
         $this->assertTrue($admin->canAccessAdmin());
 
@@ -217,14 +207,10 @@ class FeedbackSystemTest extends TestCase
         // Member cannot access admin
         $this->actingAs($member)->get('/admin/feedback-reports')->assertStatus(403);
 
-        // Admin can access admin - check if it redirects to login (302) or is 200
+        // Check the resource itself after both factors, not a successful setup page.
+        $this->confirm2FA($admin);
         $response = $this->actingAs($admin)->get('/admin/feedback-reports');
 
-        // If it redirects, it might be due to 2FA or other middleware
-        if ($response->status() === 302) {
-             $this->followRedirects($response)->assertStatus(200);
-        } else {
-             $response->assertStatus(200);
-        }
+        $response->assertStatus(200);
     }
 }

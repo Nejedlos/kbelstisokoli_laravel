@@ -18,8 +18,8 @@ class TeamControllerTest extends TestCase
 
     public function test_index_is_accessible_by_admin(): void
     {
-        $admin = $this->createAdmin();
-        // Admin has all permissions usually
+        $admin = $this->with2FA($this->createAdmin());
+        $this->confirm2FA($admin);
 
         $response = $this->actingAs($admin)->get('/clenska-sekce/tymove-prehledy');
 

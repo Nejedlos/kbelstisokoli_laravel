@@ -16,10 +16,10 @@ class AuthAccessTest extends TestCase
         // Guest vidí public route
         $this->get(route('public.home'))->assertStatus(200);
 
-        // Guest na member route -> redirect na login
+        // Nepřihlášený návštěvník dostane projektovou 401 stránku s přihlášením.
         $this->get(route('member.dashboard'))->assertStatus(401);
 
-        // Guest na admin route -> redirect na admin login (Filament specifické)
+        // Stejná 401 stránka platí i pro administraci.
         $this->get('/admin')->assertStatus(401);
     }
 

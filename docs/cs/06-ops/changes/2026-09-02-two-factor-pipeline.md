@@ -39,3 +39,12 @@ Regresní scénáře jsou v `tests/Feature/TwoFactorPipelineTest.php`, navazují
 Testovací základ používá jednotně `RefreshDatabase`; původní kombinace s `DatabaseTransactions` otevírala v části sady dvě transakce. Před migracemi se kontroluje skutečně načtená konfigurace prostředí `testing` a databáze SQLite `:memory:`, včetně ochrany před omylem ponechanou produkční konfigurační cache.
 
 V prohlížeči ověřeno povinné nastavení trenéra i dobrovolné nastavení hráče: přihlášení, QR, skutečný TOTP kód, zobrazení záložních kódů, pokračování a návrat do profilu. Použity samostatná testovací databáze a smyšlené účty.
+
+### Výsledek ověření
+
+- Všech 19 scénářů `TwoFactorPipelineTest` prošlo i v úplném běhu. Prošly také cílené kontroly přístupů, přesměrování, rolí, členského profilu a týmových přehledů.
+- Frontend: `npm run build` úspěšný. Změněné PHP soubory zformátovány Pintem.
+- Úplný běh `COMPOSER_PROCESS_TIMEOUT=0 composer test` v prostředí `testing` se SQLite `:memory:` skončil výsledkem **186 passed, 8 skipped, 33 failed** (723,68 s). Výchozí limit Composeru 300 s na tuto sadu nestačí.
+- Po tomto běhu byly aktualizovány testy původního vloženého 2FA formuláře, testovacího hesla neodpovídajícího platným pravidlům, očekávané odpovědi 401 pro hosta a administrátora přistupujícího k týmovým přehledům bez 2FA. Opravené scénáře následně prošly samostatně.
+- Testy administračního widgetu zpětné vazby a jeho resource nyní používají skutečně ověřené 2FA a kontrolují přímo administrační stránku místo následování přesměrování na průvodce. Oba následně prošly.
+- Sada jako celek zatím není zelená. Další hlášené chyby zahrnují neaktivní testovací účty ve zpětné vazbě a médiích, očekávání widgetu a e-mailového brandingu, duplicitní oprávnění v testu ikon, zastaralé očekávání názvu článku nápovědy, veřejnou trasu akce, sitemapu a chybějící či neodpovídající podklady testů importu statistik. Tyto části nejsou opravou přihlašování vyřešeny.
