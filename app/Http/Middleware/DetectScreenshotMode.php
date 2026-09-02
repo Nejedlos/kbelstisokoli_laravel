@@ -6,7 +6,7 @@ use App\Support\ScreenshotMode;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,7 +15,7 @@ class DetectScreenshotMode
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -23,7 +23,7 @@ class DetectScreenshotMode
             $userId = $request->query('screenshot_user_id');
             ScreenshotMode::activate($userId);
 
-            \Illuminate\Support\Facades\Log::debug('[ScreenshotMode] Detected in request', [
+            Log::debug('[ScreenshotMode] Detected in request', [
                 'user_id' => $userId,
                 'url' => $request->fullUrl(),
                 'headers' => [
@@ -48,24 +48,20 @@ class DetectScreenshotMode
                         $guard = $request->is('admin*') ? 'web' : config('auth.defaults.guard', 'web');
                         Auth::guard($guard)->onceUsingId($userId);
 
-                        // Pokud potřebujeme v tomto requestu přistupovat k datům chráněným 2FA,
-                        // můžeme dočasně nastavit bypass v kontejneru nebo v session (ale jen in-memory).
-                        if ($request->hasSession()) {
-                            $request->session()->flash('impersonated_by', 'screenshot_system');
-                            $request->session()->flash('auth.2fa_confirmed_at', now()->timestamp);
-                        }
+                        // Výjimka platí jen pro tento autorizovaný požadavek, nikdy pro další session.
+                        $request->attributes->set('two_factor_trusted_screenshot', true);
 
-                        \Illuminate\Support\Facades\Log::info('[ScreenshotMode] User impersonated (once)', [
+                        Log::info('[ScreenshotMode] User impersonated (once)', [
                             'user_id' => $userId,
                             'auth_id' => Auth::id(),
                         ]);
                     } catch (\Throwable $e) {
-                        \Illuminate\Support\Facades\Log::error('[ScreenshotMode] Impersonation failed', [
+                        Log::error('[ScreenshotMode] Impersonation failed', [
                             'error' => $e->getMessage(),
                         ]);
                     }
                 } else {
-                    \Illuminate\Support\Facades\Log::warning('[ScreenshotMode] User ID provided but not authenticated', [
+                    Log::warning('[ScreenshotMode] User ID provided but not authenticated', [
                         'user_id' => $userId,
                     ]);
                 }

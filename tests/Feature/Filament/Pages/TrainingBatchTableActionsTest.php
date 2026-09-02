@@ -2,23 +2,20 @@
 
 namespace Tests\Feature\Filament\Pages;
 
+use App\Filament\Resources\Trainings\Pages\ListTrainings;
+use App\Models\Role;
 use App\Models\Team;
 use App\Models\Training;
 use App\Models\User;
-use App\Models\Role;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tests\TestCase;
-use App\Filament\Resources\Trainings\Pages\ListTrainings;
 use Livewire\Livewire;
+use Tests\TestCase;
 
 class TrainingBatchTableActionsTest extends TestCase
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $user = User::factory()->create();
         $role = Role::firstOrCreate(['name' => 'super_admin']);
         $user->assignRole($role);
@@ -28,7 +25,7 @@ class TrainingBatchTableActionsTest extends TestCase
     public function test_can_bulk_delete_trainings()
     {
         $trainings = Training::factory()->count(3)->create();
-        
+
         Livewire::test(ListTrainings::class)
             ->callTableBulkAction('delete', $trainings)
             ->assertHasNoErrors();
@@ -40,7 +37,7 @@ class TrainingBatchTableActionsTest extends TestCase
 
     public function test_can_bulk_change_location()
     {
-        // Poznámka: Testování hromadných akcí s formulářem ve Filament v5/Livewire 4 
+        // Poznámka: Testování hromadných akcí s formulářem ve Filament v5/Livewire 4
         // může v tomto testovacím prostředí narážet na problémy s předáváním dat do Livewire komponenty.
         // Kód byl ověřen dle standardů projektu.
         $this->markTestSkipped('Problém s předáváním dat do hromadné akce v testovacím prostředí.');
@@ -48,7 +45,7 @@ class TrainingBatchTableActionsTest extends TestCase
         $trainings = Training::factory()->count(3)->create([
             'location' => 'Old Hall',
         ]);
-        
+
         Livewire::test(ListTrainings::class)
             ->callTableBulkAction('change_location', $trainings, [
                 'new_location' => 'New Hall',
@@ -66,9 +63,9 @@ class TrainingBatchTableActionsTest extends TestCase
 
         $team1 = Team::factory()->create();
         $team2 = Team::factory()->create();
-        
+
         $trainings = Training::factory()->count(2)->create();
-        
+
         Livewire::test(ListTrainings::class)
             ->callTableBulkAction('change_teams', $trainings, [
                 'teams' => [$team1->id, $team2->id],

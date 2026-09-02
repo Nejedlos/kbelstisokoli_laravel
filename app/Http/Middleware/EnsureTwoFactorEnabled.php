@@ -2,61 +2,33 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Auth\TwoFactorService;
+use App\Support\AuthRedirect;
 use Closure;
 use Illuminate\Http\Request;
-use Laravel\Fortify\Fortify;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTwoFactorEnabled
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
+        $twoFactor = app(TwoFactorService::class);
 
-        \Illuminate\Support\Facades\Log::info('EnsureTwoFactorEnabled.enter', [
-            'user_id' => $user?->id,
-            'email' => $user?->email,
-            'route' => $request->route()?->getName(),
-            'url' => $request->fullUrl(),
-        ]);
-
-        // Pokud je uživatel přihlášen a má oprávnění pro přístup do adminu
-        // A ZÁROVEŇ se pokouší přistoupit k admin sekci (včetně Filamentu)
-        $isAdminRoute = $request->is('admin*') || $request->routeIs('admin.*') || $request->routeIs('filament.admin.*');
-
-        $isAdmin = $user && $user->canAccessAdmin();
-
-        // Pokud je impersonace aktivní nebo jsme v screenshot režimu, přeskakujeme kontrolu 2FA
-        if ($request->session()->has('impersonated_by') || \App\Support\ScreenshotMode::isActive()) {
+        if (! $user || ! $user->canAccessAdmin() || $user->hasEnabledTwoFactorAuthentication()
+            || $twoFactor->isExempt($request) || $twoFactor->isExitRoute($request)
+            || $request->routeIs(
+                'auth.two-factor-setup', 'two-factor.enable', 'two-factor.confirm',
+                'two-factor.qr-code', 'two-factor.secret-key',
+                'password.confirm', 'password.confirm.store', 'password.confirmation'
+            )) {
             return $next($request);
         }
 
-        if ($isAdmin && $isAdminRoute) {
-            // A nemá AKTIVOVANÉ (potvrzené) 2FA
-            // Fortify používá two_factor_confirmed_at pokud je zapnuté 'confirm' v configu
-            $isConfirmed = $user->two_factor_confirmed_at !== null;
-            $needsConfirmation = \Laravel\Fortify\Fortify::confirmsTwoFactorAuthentication();
-
-            if (! $user->two_factor_secret || ($needsConfirmation && ! $isConfirmed)) {
-
-                // Pokud už není na stránce nastavení 2FA, přesměrujeme ho tam
-                if (! $request->routeIs('auth.two-factor-setup')) {
-                    \Illuminate\Support\Facades\Log::info('EnsureTwoFactorEnabled.redirect_to_setup', [
-                        'user_id' => $user->id,
-                        'email' => $user->email,
-                        'target' => $request->fullUrl(),
-                    ]);
-
-                    \App\Support\AuthRedirect::storeIntendedUrl($request->fullUrl());
-
-                    return redirect()->route('auth.two-factor-setup');
-                }
-            }
+        if ($request->isMethod('GET')) {
+            AuthRedirect::storeIntendedUrl($request->fullUrl());
         }
 
-        return $next($request);
+        return redirect()->route('auth.two-factor-setup');
     }
 }

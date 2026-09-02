@@ -11,6 +11,7 @@ Pokud si nepamatujete své přístupové heslo, můžete si jej sami obnovit pom
 
 ## Časté chyby
 - **Nedoručení e-mailu:** Pokud e-mail do 10 minut nedorazí, zkontrolujte složku „Spam“ nebo „Hromadné zprávy“.
+- **Odesílání bez fronty:** Nové pozvánky z administrace a odkazy pro obnovu hesla se předávají poštovnímu serveru přímo, bez čekání na zpracování fronty. Pokud zpráva nedorazí ani po kontrole spamu, požádejte správce o ověření SMTP. Po opravě odesílání si vyžádejte nový odkaz.
 - **Neplatný odkaz:** Odkaz v e-mailu má omezenou platnost (zpravidla 60 minut). Pokud jej nestihnete využít, musíte požádat o novou nahrávku.
 - **Zadání špatného e-mailu:** Pokud zadáte e-mail, který v našem systému neexistuje, z bezpečnostních důvodů se nic neodešle. Ověřte, zda používáte stejný e-mail, na který vám chodí klubové informace.
 

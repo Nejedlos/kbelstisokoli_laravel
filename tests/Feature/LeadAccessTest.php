@@ -105,7 +105,7 @@ class LeadAccessTest extends TestCase
         // Oprávněný (admin)
         $admin = $this->createAdmin();
         $this->with2FA($admin);
-        session(['auth.2fa_confirmed_at' => now()->timestamp]);
+        $this->confirm2FA($admin);
         $this->actingAs($admin);
 
         $this->get('/admin/leads')->assertStatus(200);

@@ -21,6 +21,12 @@ Speciální akce, která nasimuluje pád aplikace (Exception) a odeslání techn
 ### 4. Sledování logů
 V dolní části stránky se zobrazuje posledních 20 řádků ze souboru `laravel.log`, které obsahují klíčová slova "mail" nebo "error". To umožňuje rychlou diagnostiku selhání bez nutnosti přístupu k serveru přes SSH.
 
+## Pozvánky a obnova hesla
+
+Pozvánky z administrace a odkazy pro obnovu hesla se odesílají synchronně přes SMTP. Třída `App\Notifications\Auth\ResetPasswordNotification` ani její potomek `UserInvitationNotification` nesmí implementovat `ShouldQueue`. Ostatní úlohy mohou nadále používat databázovou frontu.
+
+Při opravě starší produkční verze nestačí zkontrolovat lokální kód: ověřte také nasazenou třídu a notifikaci získanou přes binding Filamentu. Změna se vztahuje na nové požadavky; dříve uložené úlohy zůstávají ve frontě. U starých odkazů může mezitím vypršet platnost, proto po opravě vyžádejte nový reset nebo odešlete novou pozvánku.
+
 ## Související soubory
 - **Třída:** `App\Filament\Pages\EmailDebug`
 - **Šablona:** `resources/views/filament/pages/email-debug.blade.php`

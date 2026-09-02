@@ -11,6 +11,24 @@ use Tests\TestCase;
 
 class MembershipRoleSynchronizationTest extends TestCase
 {
+    public function test_authentication_updates_preserve_legacy_and_privileged_roles(): void
+    {
+        $user = User::factory()->create(['membership_type' => null, 'membership_types' => null]);
+        $user->syncRoles(['player', 'coach', 'admin', 'editor']);
+
+        $user->forceFill([
+            'last_login_at' => now(),
+            'two_factor_secret' => encrypt('JBSWY3DPEHPK3PXP'),
+            'two_factor_confirmed_at' => now(),
+        ])->save();
+
+        $this->assertTrue($user->fresh()->hasAllRoles(['player', 'coach', 'admin', 'editor']));
+
+        $user->update(['membership_types' => [MembershipType::Player->value]]);
+        $this->assertTrue($user->fresh()->hasAllRoles(['player', 'admin', 'editor']));
+        $this->assertFalse($user->fresh()->hasRole('coach'));
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

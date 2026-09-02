@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use App\Jobs\GenerateUserIdentifiersJob;
+use App\Services\Auth\TwoFactorService;
 use App\Support\AuthRedirect;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Illuminate\Http\RedirectResponse;
@@ -11,109 +12,29 @@ use Livewire\Features\SupportRedirects\Redirector;
 
 class LoginResponse implements FilamentLoginResponseContract, LoginResponseContract
 {
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     */
     public function toResponse($request): RedirectResponse|Redirector
     {
-        $user = auth()->user();
-        $email = $user ? $user->email : 'null';
-
-        \Illuminate\Support\Facades\Log::info('LoginResponse.enter', [
-            'user_id' => $user?->id,
-            'email' => $email,
-            'session_id' => \Illuminate\Support\Facades\Session::getId(),
-        ]);
+        $user = $request->user();
+        $twoFactor = app(TwoFactorService::class);
 
         if ($user && (empty($user->club_member_id) || empty($user->payment_vs))) {
             GenerateUserIdentifiersJob::dispatch($user->id);
         }
 
-        if ($user && $user->canAccessAdmin()) {
-            $needsConfirmation = \Laravel\Fortify\Fortify::confirmsTwoFactorAuthentication();
-            $hasSecret = (bool) $user->two_factor_secret;
-            $isConfirmed = (bool) $user->two_factor_confirmed_at;
+        if ($user) {
+            $request->session()->forget(['auth.2fa_confirmed_at', 'auth.2fa_fingerprint']);
+            // This response follows successful password verification, including password reset.
+            $request->session()->put('auth.password_confirmed_at', now()->timestamp);
 
-            if (! $hasSecret || ($needsConfirmation && ! $isConfirmed)) {
-                if (! session()->has('url.intended')) {
-                    AuthRedirect::storeIntendedUrl(url()->previous());
-                }
-
-                \Illuminate\Support\Facades\Log::info('LoginResponse.redirect_to_2fa_setup', [
-                    'user_id' => $user->id,
-                    'email' => $email,
-                ]);
-
+            if ($user->canAccessAdmin() && ! $user->hasEnabledTwoFactorAuthentication()) {
                 return redirect()->route('auth.two-factor-setup');
             }
 
-            // Po zadání hesla na login stránce VŽDY vyžadujeme kód 2FA,
-            // pokud má uživatel 2FA aktivované. Ignorujeme případný starý příznak v session,
-            // abychom předešli probliknutí administrace (přímý redirect na challenge).
-            $hasValidSession2fa = false;
-
-            $rememberCookie = $request->cookie('2fa_remember');
-            $remembered = false;
-            if ($rememberCookie) {
-                try {
-                    // Laravel automaticky dešifruje cookies, pokud nejsou v 'except' v EncryptCookies.
-                    $data = $rememberCookie;
-                    
-                    if (is_string($data)) {
-                        $data = json_decode($data, true);
-                    }
-                    
-                    $remembered = is_array($data) && isset($data['user_id']) && (int) $data['user_id'] === (int) $user->id;
-
-                    if ($remembered) {
-                        $guard = auth()->getDefaultDriver();
-                        $request->session()->put([
-                            'auth.2fa_confirmed_at' => now()->timestamp,
-                            "password_hash_{$guard}" => $user->getAuthPassword(),
-                        ]);
-
-                        \Illuminate\Support\Facades\Log::info('LoginResponse.remembered_by_cookie', [
-                            'user_id' => $user->id,
-                            'guard' => $guard,
-                        ]);
-                    }
-                } catch (\Throwable $e) {
-                    $remembered = false;
-                }
+            if ($user->hasEnabledTwoFactorAuthentication() && ! $twoFactor->rememberDevice($request, $user)) {
+                return $twoFactor->challenge($request, $user, (bool) $request->session()->pull('login.remember', $request->boolean('remember')));
             }
-
-            if (! $hasValidSession2fa && ! $remembered) {
-                \Illuminate\Support\Facades\Log::info('LoginResponse.redirect_to_2fa_challenge', [
-                    'user_id' => $user->id,
-                    'email' => $email,
-                ]);
-
-                session()->put('login.id', $user->id);
-
-                if (! session()->has('url.intended')) {
-                    AuthRedirect::storeIntendedUrl(url()->previous());
-                }
-
-                return redirect()->route('two-factor.login');
-            }
-        } elseif ($user && request()->is('admin*')) {
-            // Pokud uživatel nemá přístup do adminu, ale je na admin login stránce (např. po resetu),
-            // přesměrujeme ho do členské sekce s informací.
-            \Illuminate\Support\Facades\Log::info('LoginResponse.non_admin_on_admin_path', [
-                'user_id' => $user->id,
-                'email' => $email,
-            ]);
-
-            return redirect()->to(AuthRedirect::getTargetUrl($user, $request));
         }
 
-        $targetUrl = AuthRedirect::getTargetUrl($user, $request);
-
-        \Illuminate\Support\Facades\Log::info('LoginResponse.redirect_to_target', [
-            'user_id' => $user?->id,
-            'target_url' => $targetUrl,
-        ]);
-
-        return redirect()->to($targetUrl);
+        return redirect()->to(AuthRedirect::getTargetUrl($user, $request));
     }
 }

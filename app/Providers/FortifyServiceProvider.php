@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Actions\Fortify\RedirectIfTwoFactorAuthenticatable;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
@@ -19,15 +20,19 @@ use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse as FilamentPass
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse as FailedPasswordResetLinkRequestResponseContract;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
+use Laravel\Fortify\Contracts\PasswordConfirmedResponse;
 use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse as SuccessfulPasswordResetLinkRequestResponseContract;
+use Laravel\Fortify\Contracts\TwoFactorConfirmedResponse;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Fortify;
 
@@ -41,6 +46,8 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
         $this->app->singleton(LogoutResponseContract::class, LogoutResponse::class);
         $this->app->singleton(TwoFactorLoginResponseContract::class, TwoFactorLoginResponse::class);
+        $this->app->singleton(TwoFactorConfirmedResponse::class, \App\Http\Responses\TwoFactorConfirmedResponse::class);
+        $this->app->singleton(PasswordConfirmedResponse::class, \App\Http\Responses\PasswordConfirmedResponse::class);
         $this->app->singleton(PasswordResetResponseContract::class, PasswordResetResponse::class);
 
         $this->app->singleton(FailedPasswordResetLinkRequestResponseContract::class, FailedPasswordResetLinkRequestResponse::class);
@@ -70,8 +77,8 @@ class FortifyServiceProvider extends ServiceProvider
 
             if ($user && Hash::check($request->password, $user->password)) {
                 if (! $user->is_active) {
-                    \Illuminate\Support\Facades\Log::warning('Auth: Login attempt for inactive user', ['email' => $email]);
-                    throw \Illuminate\Validation\ValidationException::withMessages([
+                    Log::warning('Auth: Login attempt for inactive user', ['email' => $email]);
+                    throw ValidationException::withMessages([
                         'email' => __('Váš účet není aktivní. Kontaktujte prosím tým pro aktivaci.'),
                     ]);
                 }
@@ -84,8 +91,8 @@ class FortifyServiceProvider extends ServiceProvider
 
         // Mapování Fortify view na naše základní šablony
         Fortify::loginView(function () {
-            \Illuminate\Support\Facades\Log::info('Fortify.loginView', [
-                'session_id' => \Illuminate\Support\Facades\Session::getId(),
+            Log::info('Fortify.loginView', [
+                'session_id' => Session::getId(),
                 'intended' => session('url.intended'),
             ]);
 
@@ -93,10 +100,10 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::twoFactorChallengeView(function () {
-            \Illuminate\Support\Facades\Log::info('Fortify.twoFactorChallengeView.enter', [
+            Log::info('Fortify.twoFactorChallengeView.enter', [
                 'user_id' => auth()->id(),
                 'email' => auth()->user()?->email,
-                'session_id' => \Illuminate\Support\Facades\Session::getId(),
+                'session_id' => Session::getId(),
                 'intended' => session('url.intended'),
                 'has_secret' => (bool) auth()->user()?->two_factor_secret,
                 'confirmed' => (bool) auth()->user()?->two_factor_confirmed_at,

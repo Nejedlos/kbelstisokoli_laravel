@@ -4,15 +4,13 @@ namespace Tests\Feature\Support;
 
 use App\Models\BasketballMatch;
 use App\Models\ClubEvent;
+use App\Models\Season;
 use App\Models\Team;
 use App\Support\HeroEventsHelper;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class HeroEventsHelperTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_it_groups_events_for_multiple_teams()
     {
         // 1. Připravíme týmy
@@ -52,7 +50,7 @@ class HeroEventsHelperTest extends TestCase
     public function test_it_groups_matches_for_multiple_teams()
     {
         // Potřebujeme sezónu
-        $season = \App\Models\Season::create(['name' => '2025/2026', 'is_active' => true]);
+        $season = Season::create(['name' => '2025/2026', 'is_active' => true]);
 
         // 1. Připravíme týmy
         $teamC = Team::create([

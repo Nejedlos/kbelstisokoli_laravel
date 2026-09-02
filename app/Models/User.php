@@ -153,13 +153,21 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
             }
         });
 
-        static::saved(function (User $user) {
+        $syncMembershipRoles = function (User $user) {
             try {
                 app(MembershipRoleSynchronizer::class)->sync($user);
             } catch (\Throwable $e) {
                 Log::error('Failed to synchronize membership roles for user: '.$user->id, [
                     'error' => $e->getMessage(),
                 ]);
+            }
+        };
+
+        static::created($syncMembershipRoles);
+        static::updated(function (User $user) use ($syncMembershipRoles) {
+            // Authentication updates must not remove legacy or manually assigned roles.
+            if ($user->wasChanged(['membership_type', 'membership_types'])) {
+                $syncMembershipRoles($user);
             }
         });
     }
@@ -350,22 +358,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia
     }
 
     /**
-     * Cache pro výsledek kontroly přístupu v rámci requestu.
-     */
-    protected ?bool $cachedCanAccessAdmin = null;
-
-    /**
      * Zkontroluje, zda má uživatel přístup k administraci (Filament nebo custom).
      */
     public function canAccessAdmin(): bool
     {
-        if ($this->cachedCanAccessAdmin !== null) {
-            return $this->cachedCanAccessAdmin;
-        }
-
         // Povolíme přístup, pokud je uživatel aktivní a má roli/oprávnění
-        return $this->cachedCanAccessAdmin = ($this->is_active &&
-               ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach'])));
+        return $this->is_active &&
+               ($this->can('access_admin') || $this->hasAnyRole(['admin', 'editor', 'coach']));
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Http\Controllers\MediaDownloadController;
 use App\Http\Controllers\Public\LanguageController;
 use App\Http\Controllers\ScreenshotRenderController;
 use App\Http\Controllers\System\CronController;
+use App\Http\Middleware\EnsureValidTwoFactorChallenge;
 use App\Services\BrandingService;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -53,10 +54,14 @@ Route::get('/logout-success', function (BrandingService $brandingService) {
 // Webový trigger pro cron/scheduler
 Route::get('/system/cron/run', [CronController::class, 'run'])->name('system.cron.run');
 
-// Povinný 2FA setup pro adminy
+// Společný průvodce: povinný pro přístup do administrace, dobrovolný pro členy.
 Route::get('/auth/two-factor-setup', TwoFactorSetupController::class)
     ->middleware(['auth', 'active'])
     ->name('auth.two-factor-setup');
+
+Route::get('/auth/two-factor-complete', [TwoFactorSetupController::class, 'complete'])
+    ->middleware(['auth', 'active'])
+    ->name('auth.two-factor-complete');
 
 // Zabezpečené stahování médií
 Route::get('/media/download/{uuid}', [MediaDownloadController::class, 'download'])
@@ -102,11 +107,11 @@ Route::middleware(['web', 'auth'])->group(function () {
 // což u našeho flow (uživatel je přihlášen a vyžádána 2FA) způsobí redirect na HOME.
 // Přeregistrujeme GET/POST se stejnou cestou a jménem, ale bez 'guest' middleware.
 Route::get('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'create'])
-    ->middleware(['web'])
+    ->middleware(['web', EnsureValidTwoFactorChallenge::class])
     ->name('two-factor.login');
 
 Route::post('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'store'])
-    ->middleware(['web', 'throttle:two-factor'])
+    ->middleware(['web', 'throttle:two-factor', EnsureValidTwoFactorChallenge::class])
     ->name('two-factor.login.store');
 
 // --- Mail Preview (pouze pro local nebo adminy s právy) ---

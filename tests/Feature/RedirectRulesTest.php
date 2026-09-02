@@ -35,7 +35,7 @@ class RedirectRulesTest extends TestCase
         $admin = $this->createAdmin();
         $this->with2FA($admin);
         $this->actingAs($admin);
-        session(['auth.2fa_confirmed_at' => now()->timestamp]);
+        $this->confirm2FA($admin);
 
         // Arrange: záznam, který by jinak posílal /admin na /
         Redirect::create([

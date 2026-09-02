@@ -7,14 +7,16 @@ use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\FullPageCacheMiddleware;
 use App\Http\Middleware\InjectFeedbackWidget;
+use App\Http\Middleware\InternalAnalyticsMiddleware;
 use App\Http\Middleware\MinifyHtmlMiddleware;
+use App\Http\Middleware\NormalizeSignedUrlParameters;
 use App\Http\Middleware\NotFoundLoggerMiddleware;
 use App\Http\Middleware\PerformanceProfilingMiddleware;
 use App\Http\Middleware\PublicMaintenanceMiddleware;
 use App\Http\Middleware\RedirectMiddleware;
+use App\Http\Middleware\Restrict2FADeactivation;
 use App\Http\Middleware\SecurityHeadersMiddleware;
 use App\Http\Middleware\SetLocaleMiddleware;
-use App\Http\Middleware\NormalizeSignedUrlParameters;
 use App\Jobs\RunCronTaskJob;
 use App\Mail\ErrorMail;
 use App\Models\CronTask;
@@ -91,7 +93,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // Vynucení HTTPS na produkci pro stabilní generování assetů (Vite, asset(), ...)
         // Důležité po optimize:clear, kdy se spoléháme na dynamickou detekci URL
         if ($app->environment('production')) {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+            URL::forceScheme('https');
         }
     })
     ->withRouting(
@@ -175,9 +177,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
             // Strip neznámé query parametry z podepsaných URL (např. UTM z e-mailů), aby nepadala validace podpisu
             NormalizeSignedUrlParameters::class,
             NotFoundLoggerMiddleware::class,
-            \App\Http\Middleware\Restrict2FADeactivation::class,
-            \App\Http\Middleware\InternalAnalyticsMiddleware::class,
+            Restrict2FADeactivation::class,
+            InternalAnalyticsMiddleware::class,
             'active',
+            EnsureTwoFactorEnabled::class,
+            CheckTwoFactorTimeout::class,
         ]);
 
         $middleware->trustProxies(at: '*');

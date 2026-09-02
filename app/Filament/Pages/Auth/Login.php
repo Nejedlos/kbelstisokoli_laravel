@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Models\User;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Filament\Auth\Pages\Login as BaseLogin;
@@ -9,7 +10,11 @@ use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
@@ -19,7 +24,7 @@ class Login extends BaseLogin
     // DŮLEŽITÉ: `$view` musí být NEstatická vlastnost, aby odpovídala `Filament\Pages\SimplePage`
     protected string $view = 'filament.admin.auth.login';
 
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
         return __('Vstup do kabiny');
     }
@@ -50,7 +55,7 @@ class Login extends BaseLogin
 
     protected function getRateLimitedException(TooManyRequestsException $exception): never
     {
-        throw \Illuminate\Validation\ValidationException::withMessages([
+        throw ValidationException::withMessages([
             'data.email' => __('auth.throttle', [
                 'seconds' => $exception->secondsUntilAvailable,
                 'minutes' => ceil($exception->secondsUntilAvailable / 60),
@@ -60,12 +65,12 @@ class Login extends BaseLogin
 
     protected function throwFailureValidationException(): never
     {
-        throw \Illuminate\Validation\ValidationException::withMessages([
+        throw ValidationException::withMessages([
             'data.email' => __('auth.failed'),
         ]);
     }
 
-    public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public function form(Schema $schema): Schema
     {
         return parent::form($schema)
             ->components([
@@ -87,13 +92,13 @@ class Login extends BaseLogin
         $credentials = $this->getCredentialsFromFormData($data);
 
         // Najdeme uživatele pro předběžnou kontrolu aktivity
-        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        $user = User::where('email', $credentials['email'])->first();
 
-        if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        if ($user && Hash::check($credentials['password'], $user->password)) {
             if (! $user->is_active) {
-                \Illuminate\Support\Facades\Log::warning('Filament Auth: Login attempt for inactive user', ['email' => $user->email]);
+                Log::warning('Filament Auth: Login attempt for inactive user', ['email' => $user->email]);
 
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'data.email' => __('Váš účet není aktivní. Kontaktujte prosím tým pro aktivaci.'),
                 ]);
             }
@@ -114,14 +119,18 @@ class Login extends BaseLogin
             // Uživatel nemá přístup k tomuto panelu (např. hráč v adminu).
             // NEodhlašujeme ho (pokud je heslo správné, chceme, aby zůstal přihlášen pro členskou sekci),
             // ale necháme LoginResponse rozhodnout, kam ho poslat.
-            \Illuminate\Support\Facades\Log::info('Login.authenticate: User lacks panel access but password is OK', [
+            Log::info('Login.authenticate: User lacks panel access but password is OK', [
                 'user_id' => $user->id,
                 'email' => $user->email,
             ]);
         }
 
         session()->regenerate();
+        session()->put('login.remember', (bool) ($data['remember'] ?? false));
 
-        return app(FilamentLoginResponseContract::class);
+        // Resolve the redirect while this Livewire component is active.
+        app(FilamentLoginResponseContract::class)->toResponse(request());
+
+        return null;
     }
 }

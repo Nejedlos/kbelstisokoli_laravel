@@ -2,21 +2,18 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\Dmarc\DmarcReport;
-use App\Models\Dmarc\DmarcRecord;
-use App\Models\Dmarc\DmarcMailbox;
 use App\Models\Dmarc\DmarcAuthorizedSender;
+use App\Models\Dmarc\DmarcMailbox;
+use App\Models\Dmarc\DmarcRecord;
+use App\Models\Dmarc\DmarcReport;
 use App\Services\Dmarc\DmarcAnalysisService;
-use App\Services\Dmarc\DmarcIpEnrichmentService;
 use App\Services\Dmarc\DmarcDnsCheckService;
+use App\Services\Dmarc\DmarcIpEnrichmentService;
 use App\Services\Dmarc\DmarcRecommendationService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\TestCase;
 
 class DmarcAnalysisTest extends TestCase
 {
-    use DatabaseTransactions;
-
     protected DmarcAnalysisService $service;
 
     protected function setUp(): void
@@ -34,7 +31,7 @@ class DmarcAnalysisTest extends TestCase
     {
         $mailbox = DmarcMailbox::create([
             'email' => 'test@example.com',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $report = DmarcReport::create([

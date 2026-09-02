@@ -1,5 +1,7 @@
 Systém Kbelští sokoli využívá model RBAC (Role-Based Access Control). To znamená, že přístup k jednotlivým funkcím v administraci i mobilní aplikaci je řízen přidělenými rolemi.
 
+Účty s přístupem do administrace mají povinné 2FA i při vstupu do členské sekce. Přihlášení ani změna zabezpečení nepřidává a neodebírá role. Role odvozené od členství se synchronizují při vytvoření účtu nebo změně typu členství; ručně přidělené privilegované role zůstávají zachovány.
+
 ### Hlavní systémové role
 1. **Superadmin**: Má absolutní přístup ke všemu v systému, včetně citlivých nastavení, logů a správy samotných rolí.
 2. **Administrátor**: Hlavní role pro vedení klubu. Může spravovat členy, finance, týmy a obsah webu, ale nemá přístup k nejcitlivějším technickým konfiguracím.

@@ -67,18 +67,18 @@
     <div x-show="!showHelp" x-transition class="relative z-10">
         <!-- Header -->
         <x-auth-header
-            :title="__('Taktická porada')"
-            :subtitle="__('Bezpečný driblink vyžaduje dvoufázové ověření.')"
+            :title="__('member.profile.two_factor.title')"
+            :subtitle="$isConfirmed ? __('two-factor.enabled_help') : ($user->canAccessAdmin() ? __('two-factor.required') : __('two-factor.optional'))"
             icon="fa-shield-plus"
         />
 
         @if (session('status'))
-            <x-auth-alert type="success" :message="session('status')" />
+            <x-auth-alert type="success" :message="__('two-factor.status.'.session('status'))" />
         @endif
 
-        @if ($errors->any())
+        @if ($errors->any() || $errors->getBag('confirmTwoFactorAuthentication')->any())
             @php
-                $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
+                $filteredErrors = collect(array_merge($errors->all(), $errors->getBag('confirmTwoFactorAuthentication')->all()))->filter(fn($error) => trim($error) !== '')->all();
             @endphp
             @if (!empty($filteredErrors))
                 <x-auth-alert type="error">
@@ -102,7 +102,7 @@
                     <div class="space-y-3">
                         <h2 class="text-xl font-black uppercase tracking-tight text-white italic">{{ __('Neprůstřelná obrana') }}</h2>
                         <p class="text-xs text-white/50 font-medium leading-relaxed">
-                            {{ __('Jako člen realizačního týmu máš přístup k taktice celého klubu. Musíme tvůj účet bránit jako koš v poslední vteřině.') }}
+                            {{ $user->canAccessAdmin() ? __('two-factor.required') : __('two-factor.optional') }}
                         </p>
                     </div>
 
@@ -110,13 +110,13 @@
                         @csrf
                         <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">
                             <span class="relative z-10 flex items-center justify-center gap-3">
-                                {{ __('Aktivovat obranu (2FA)') }}
+                                {{ __('member.profile.two_factor.enable') }}
                                 <i class="fa-light fa-shield-check group-hover/btn:scale-110 transition-transform duration-500"></i>
                             </span>
                         </button>
                     </form>
                 </div>
-            @elseif(! $user->two_factor_confirmed_at)
+            @elseif(! $isConfirmed)
                 {{-- Krok 2: Konfigurace a potvrzení --}}
                 <div class="space-y-8">
                     <div class="text-center space-y-3">
@@ -184,7 +184,7 @@
                         <div class="space-y-3 fi-fo-field {{ $errors->has('code') ? 'ks-invalid' : '' }}">
                             <label for="code" class="fi-fo-field-label text-center block">{{ __('Zadejte 6místný kód z aplikace') }}</label>
                             <div class="relative group/input">
-                                <input id="code" type="text" name="code" inputmode="numeric" autofocus required autocomplete="one-time-code"
+                                <input id="code" type="text" name="code" inputmode="numeric" required autocomplete="one-time-code" maxlength="6"
                                        placeholder="000 000"
                                        class="fi-input-wrp w-full bg-white border border-white/10 rounded-full focus:ring-4 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all duration-300 font-black text-slate-900 placeholder-slate-300 outline-none tracking-[0.4em] text-center text-3xl py-6">
                             </div>
@@ -192,7 +192,7 @@
 
                         <button type="submit" class="fi-btn fi-color-primary w-full py-5 rounded-full text-base group/btn">
                             <span class="relative z-10 flex items-center justify-center gap-3">
-                                {{ __('Potvrdit nahrávku') }}
+                                {{ __('member.profile.two_factor.confirm_button') }}
                                 <i class="fa-light fa-unlock-keyhole group-hover/btn:scale-110 transition-transform duration-500"></i>
                             </span>
                         </button>
@@ -236,7 +236,7 @@
                              <div class="h-px flex-1 bg-emerald-500/20"></div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             @foreach ($user->recoveryCodes() as $code)
                                 <div class="bg-slate-950/50 border border-white/5 px-3 py-2 rounded-xl font-mono text-sm text-white text-center tracking-wider hover:bg-slate-900 transition-colors">
                                     {{ $code }}
@@ -267,8 +267,13 @@
                         </p>
                     </div>
 
+                    <form method="POST" action="{{ route('two-factor.regenerate-recovery-codes') }}">
+                        @csrf
+                        <button type="submit" class="auth-footer-link-primary">{{ __('member.profile.two_factor.regenerate_codes') }}</button>
+                    </form>
+
                     <div class="pt-4">
-                        <a href="{{ session('url.intended') ?? route('filament.admin.pages.dashboard') }}" class="fi-btn fi-color-primary w-full !py-5 rounded-full text-base group/btn flex items-center justify-center gap-3">
+                        <a href="{{ route('auth.two-factor-complete') }}" class="fi-btn fi-color-primary w-full !py-5 rounded-full text-base group/btn flex items-center justify-center gap-3">
                             {{ __('Vstoupit do kabiny') }}
                             <i class="fa-light fa-arrow-right-long group-hover/btn:translate-x-2 transition-transform duration-500"></i>
                         </a>
@@ -279,9 +284,11 @@
 
         <div class="mt-12 text-center animate-fade-in space-y-6" style="animation-delay: 0.4s">
             <div class="flex flex-col gap-4">
-                <a href="{{ route('member.dashboard') }}" class="auth-footer-link-primary flex items-center justify-center gap-2">
-                    <i class="fa-light fa-arrow-left-long"></i> {{ __('Přejít do členské sekce') }}
-                </a>
+                @if($user->can('view_member_section') && (! $user->canAccessAdmin() || $isConfirmed))
+                    <a href="{{ route('member.profile.edit') }}#two-factor-setup" class="auth-footer-link-primary flex items-center justify-center gap-2">
+                        <i class="fa-light fa-arrow-left-long"></i> {{ __('two-factor.back_to_profile') }}
+                    </a>
+                @endif
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="text-rose-500/60 hover:text-rose-500 text-xs font-black uppercase tracking-widest transition-colors">

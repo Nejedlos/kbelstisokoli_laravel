@@ -86,21 +86,22 @@ class ProfileTest extends TestCase
             ->post(route('member.profile.update'), [
                 'name' => $user->name,
                 'current_password' => 'password',
-                'new_password' => 'new-password-123',
-                'new_password_confirmation' => 'new-password-123',
+                'new_password' => 'New-password-123',
+                'new_password_confirmation' => 'New-password-123',
             ]);
 
         $response->assertRedirect(route('member.profile.edit'));
+        $response->assertSessionHasNoErrors();
         $response->assertSessionHas('status');
 
         $user->refresh();
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('new-password-123', $user->password));
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('New-password-123', $user->password));
     }
 
     /**
-     * Testuje, že 2FA formuláře jsou přítomny a odesílají se správně.
+     * Profil odkazuje na společný průvodce nastavením 2FA.
      */
-    public function test_two_factor_forms_presence(): void
+    public function test_profile_links_to_shared_two_factor_setup(): void
     {
         $user = $this->createMember();
 
@@ -108,7 +109,7 @@ class ProfileTest extends TestCase
             ->get(route('member.profile.edit'));
 
         $response->assertStatus(200);
-        $response->assertSee('id="two-factor-enable-form"', false);
-        $response->assertSee('form="two-factor-enable-form"', false);
+        $response->assertSee(route('auth.two-factor-setup'), false);
+        $response->assertSee(__('two-factor.optional'));
     }
 }

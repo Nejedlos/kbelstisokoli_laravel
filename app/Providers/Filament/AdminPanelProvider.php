@@ -2,21 +2,31 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\GlobalSearch\AiGlobalSearchProvider;
 use App\Filament\Pages\Auth\EmailVerificationPrompt;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RequestPasswordReset;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\RealAttendance;
 use App\Filament\Resources\Dmarc\DmarcAuthorizedSenderResource;
 use App\Filament\Resources\Dmarc\DmarcIncidentResource;
 use App\Filament\Resources\Dmarc\DmarcMailboxResource;
 use App\Filament\Resources\Dmarc\DmarcReportResource;
+use App\Http\Middleware\CheckTwoFactorTimeout;
+use App\Http\Middleware\DetectScreenshotMode;
+use App\Http\Middleware\EnsureTwoFactorEnabled;
+use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\InjectFeedbackWidget;
+use App\Http\Middleware\SetLocaleMiddleware;
 use App\Services\BrandingService;
+use App\Support\ScreenshotMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Assets\Css;
@@ -24,6 +34,7 @@ use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Vite;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
@@ -43,12 +54,12 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->spa() // Zapnutí SPA navigace (wire:navigate) pro bleskovou administraci
             ->colors(fn () => [
-                'primary' => \Filament\Support\Colors\Color::hex(app(\App\Services\BrandingService::class)->getSettings()['colors']['red'] ?? '#e11d48'),
-                'gray' => \Filament\Support\Colors\Color::Slate,
-                'info' => \Filament\Support\Colors\Color::Sky,
-                'success' => \Filament\Support\Colors\Color::Emerald,
-                'warning' => \Filament\Support\Colors\Color::Amber,
-                'danger' => \Filament\Support\Colors\Color::Rose,
+                'primary' => Color::hex(app(BrandingService::class)->getSettings()['colors']['red'] ?? '#e11d48'),
+                'gray' => Color::Slate,
+                'info' => Color::Sky,
+                'success' => Color::Emerald,
+                'warning' => Color::Amber,
+                'danger' => Color::Rose,
             ])
             ->darkMode(false)
             // Vložíme vlastní CSS variables do <head> přes render hook (globálně pro barvy)
@@ -68,12 +79,12 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 // Branding service vrací --color-brand-* tokens a RGB varianty
-                $brandingService = app(\App\Services\BrandingService::class);
+                $brandingService = app(BrandingService::class);
                 $brandingVariables = $brandingService->getCssVariables();
 
                 // Screenshot mode support
-                $screenshotSupport = "";
-                if (class_exists(\App\Support\ScreenshotMode::class)) {
+                $screenshotSupport = '';
+                if (class_exists(ScreenshotMode::class)) {
                     $screenshotSupport = Blade::render('<x-screenshot.styles /><x-screenshot.scripts />');
                 }
 
@@ -109,9 +120,9 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 // Optimalizovaný výstup bez Blade::render pro zrychlení requestu
-                $viteAssets = app(\Illuminate\Foundation\Vite::class)->__invoke($entrypoints)->toHtml();
+                $viteAssets = app(Vite::class)->__invoke($entrypoints)->toHtml();
                 if ($isAuth) {
-                    $viteAssets .= app(\Illuminate\Foundation\Vite::class)->__invoke(['resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])->toHtml();
+                    $viteAssets .= app(Vite::class)->__invoke(['resources/js/filament-auth.js', 'resources/js/filament-error-handler.js'])->toHtml();
                 }
 
                 $favicons = '';
@@ -119,7 +130,8 @@ class AdminPanelProvider extends PanelProvider
                     if (app()->bound('translator')) {
                         $favicons = view('partials.favicons', ['includeMain' => true])->render();
                     }
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
 
                 return "
                     <meta name=\"color-scheme\" content=\"light\">
@@ -282,11 +294,11 @@ class AdminPanelProvider extends PanelProvider
                 ');
             })
             ->login(Login::class)
-            ->globalSearch(\App\Filament\GlobalSearch\AiGlobalSearchProvider::class)
+            ->globalSearch(AiGlobalSearchProvider::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->emailVerification(EmailVerificationPrompt::class)
-            ->brandName(fn() => app(BrandingService::class)->getSettings()['club_name'])
-            ->brandLogo(function() {
+            ->brandName(fn () => app(BrandingService::class)->getSettings()['club_name'])
+            ->brandLogo(function () {
                 $branding = app(BrandingService::class)->getSettings();
                 $logoUrl = web_asset($branding['team_logo']['paths']['velke'] ?? '/assets/img/loga/logo_kbelsti_sokoli_velke.png', false);
 
@@ -302,7 +314,7 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 ');
             })
-            ->favicon(fn() => web_asset(app(BrandingService::class)->getSettings()['team_logo']['paths']['mini'] ?? '/favicon.ico', false))
+            ->favicon(fn () => web_asset(app(BrandingService::class)->getSettings()['team_logo']['paths']['mini'] ?? '/favicon.ico', false))
             ->userMenuItems([
                 'member_section' => MenuItem::make()
                     ->label(fn () => __('admin.navigation.pages.member_section'))
@@ -323,29 +335,29 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
-                \App\Filament\Pages\RealAttendance::class,
+                RealAttendance::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->navigationGroups([
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.sports_agenda')),
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.users_and_people')),
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.finance')),
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.content_and_media')),
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.web_settings')),
-                \Filament\Navigation\NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data'))
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.groups.statistics_and_data').' > '.__('admin.navigation.groups.external_data'))
                     ->collapsed(),
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.system'))
                     ->collapsed(),
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.dmarc_monitor')),
-                \Filament\Navigation\NavigationGroup::make()
+                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.groups.documentation')),
             ])
             ->widgets([
@@ -355,21 +367,21 @@ class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                \App\Http\Middleware\SetLocaleMiddleware::class,
+                SetLocaleMiddleware::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\DetectScreenshotMode::class,
-                \App\Http\Middleware\InjectFeedbackWidget::class,
+                DetectScreenshotMode::class,
+                InjectFeedbackWidget::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\EnsureUserIsActive::class,
-                \App\Http\Middleware\EnsureTwoFactorEnabled::class,
-                \App\Http\Middleware\CheckTwoFactorTimeout::class,
-            ]);
+                EnsureUserIsActive::class,
+                EnsureTwoFactorEnabled::class,
+                CheckTwoFactorTimeout::class,
+            ], isPersistent: true);
     }
 }

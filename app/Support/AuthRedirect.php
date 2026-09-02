@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 /**
  * Centrální logika pro rozhodování o přesměrování po přihlášení a 2FA.
@@ -26,7 +28,8 @@ class AuthRedirect
 
         // Musí jít o interní URL aplikace (prevence open redirect)
         if (! self::isInternalUrl($url)) {
-            \Illuminate\Support\Facades\Log::debug('AuthRedirect: External URL ignored', ['url' => $url]);
+            Log::debug('AuthRedirect: External URL ignored', ['url' => $url]);
+
             return;
         }
 
@@ -37,18 +40,21 @@ class AuthRedirect
             '/two-factor',
             '/2fa-challenge',
             '/password-reset',
+            '/confirm-password',
+            '/confirmed-password',
             '/reset-password',
             '/email-verification',
             '/logout-success',
             '/register',
-            '/feedback/widget'
+            '/feedback/widget',
         ])) {
-            \Illuminate\Support\Facades\Log::debug('AuthRedirect: Auth-related URL ignored', ['url' => $url]);
+            Log::debug('AuthRedirect: Auth-related URL ignored', ['url' => $url]);
+
             return;
         }
 
-        \Illuminate\Support\Facades\Log::debug('AuthRedirect: Storing intended URL', ['url' => $url]);
-        \Illuminate\Support\Facades\Session::put('url.intended', $url);
+        Log::debug('AuthRedirect: Storing intended URL', ['url' => $url]);
+        Session::put('url.intended', $url);
     }
 
     /**
@@ -56,15 +62,20 @@ class AuthRedirect
      */
     public static function isInternalUrl(string $url): bool
     {
+        if (preg_match('/[\x00-\x20\\\\]/', $url)) {
+            return false;
+        }
+
         if (str_starts_with($url, '/')) {
-            return true;
+            return ! str_starts_with($url, '//');
         }
 
         $appUrl = config('app.url');
         $appHost = parse_url($appUrl, PHP_URL_HOST);
         $urlHost = parse_url($url, PHP_URL_HOST);
 
-        if ($urlHost === null) {
+        if (! $appHost || ! $urlHost || ! in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)
+            || parse_url($url, PHP_URL_USER) !== null || parse_url($url, PHP_URL_PASS) !== null) {
             return false;
         }
 
@@ -90,18 +101,18 @@ class AuthRedirect
         // Logika pro prioritní přesměrování:
         // Všechny uživatele (včetně adminů) posíláme primárně do členské sekce,
         // pokud nemají explicitní záměr jít do administrace (url.intended).
-        $fallback = $memberDashboard;
+        $fallback = $isAdmin && ! $user->can('view_member_section') ? $adminPath : $memberDashboard;
 
-        $intended = \Illuminate\Support\Facades\Session::get('url.intended');
+        $intended = Session::get('url.intended');
 
         if ($intended) {
             // VŽDY vyčistíme intended URL po přečtení (one-time use)
-            \Illuminate\Support\Facades\Session::forget('url.intended');
+            Session::forget('url.intended');
 
-            \Illuminate\Support\Facades\Log::debug('AuthRedirect: Processing intended URL', [
+            Log::debug('AuthRedirect: Processing intended URL', [
                 'intended' => $intended,
                 'user_id' => $user->id,
-                'is_admin' => $isAdmin
+                'is_admin' => $isAdmin,
             ]);
 
             // Dodatečná validace po načtení:
@@ -109,30 +120,37 @@ class AuthRedirect
             // 2. Pokud admin/člen přijde z domovské stránky, pošleme ho raději do dashboardu,
             //    protože pro přihlášeného uživatele je dashboard užitečnější startovní bod.
             $isHome = $intended === url('/') || $intended === route('public.home') || $intended === '/';
-            
-            if ($isHome || Str_contains_any($intended, ['/login', '/logout', '/two-factor', '/2fa-challenge', '/feedback/widget'])) {
-                \Illuminate\Support\Facades\Log::debug('AuthRedirect: Intended URL is home or auth-related, using fallback', ['intended' => $intended, 'fallback' => $fallback]);
+
+            if ($isHome || Str_contains_any($intended, ['/login', '/logout', '/two-factor', '/2fa-challenge', '/feedback/widget', '/confirm-password', '/confirmed-password', '/reset-password', '/password-reset', '/confirmed-two-factor'])) {
+                Log::debug('AuthRedirect: Intended URL is home or auth-related, using fallback', ['intended' => $intended, 'fallback' => $fallback]);
+
                 return $fallback;
+            }
+
+            if ($isAdmin && ! $user->can('view_member_section') && str_contains($intended, '/clenska-sekce')) {
+                return $adminPath;
             }
 
             // Ochrana oprávnění: non-admin nesmí do adminu, i když to má jako intended
             if (! $isAdmin && str_contains($intended, $adminPath)) {
-                \Illuminate\Support\Facades\Log::debug('AuthRedirect: Non-admin tried to access admin path, redirecting to member dashboard');
+                Log::debug('AuthRedirect: Non-admin tried to access admin path, redirecting to member dashboard');
+
                 return $memberDashboard;
             }
 
             // Musí jít o interní URL
             if (! self::isInternalUrl($intended)) {
-                \Illuminate\Support\Facades\Log::warning('AuthRedirect: External intended URL detected and blocked', ['intended' => $intended]);
+                Log::warning('AuthRedirect: External intended URL detected and blocked', ['intended' => $intended]);
+
                 return $fallback;
             }
 
-            \Illuminate\Support\Facades\Log::info('AuthRedirect: Redirecting to intended URL', ['intended' => $intended]);
+            Log::info('AuthRedirect: Redirecting to intended URL', ['intended' => $intended]);
 
             return $intended;
         }
 
-        \Illuminate\Support\Facades\Log::debug('AuthRedirect: No intended URL, using fallback', ['fallback' => $fallback]);
+        Log::debug('AuthRedirect: No intended URL, using fallback', ['fallback' => $fallback]);
 
         return $fallback;
     }

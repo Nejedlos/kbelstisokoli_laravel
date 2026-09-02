@@ -52,13 +52,13 @@ class DashboardController extends Controller
             ];
         }
 
-        if (! $user->two_factor_secret) {
+        if (! $user->hasEnabledTwoFactorAuthentication()) {
             $nudges[] = [
                 'id' => 'two_factor',
                 'title' => __('dashboard.nudges.two_factor.title'),
                 'message' => __('dashboard.nudges.two_factor.message'),
                 'cta' => __('dashboard.nudges.two_factor.cta'),
-                'url' => route('member.profile.edit') . '#two-factor-setup',
+                'url' => route('auth.two-factor-setup'),
                 'icon' => 'shield-check',
                 'color' => 'primary',
                 'instruction' => __('dashboard.nudges.two_factor.instruction'),
@@ -71,6 +71,7 @@ class DashboardController extends Controller
             'nudges' => $nudges,
         ]));
     }
+
     /**
      * Sestaví data pro dashboard (extrahováno pro možnost obejití cache při impersonaci).
      */
@@ -117,7 +118,7 @@ class DashboardController extends Controller
                     if (! isset($teamTrackedUserIds[$team->id])) {
                         $teamTrackedUserIds[$team->id] = $team->activePlayers
                             ->pluck('user_id')
-                            ->filter(fn($uid) => in_array($uid, $trackedUserIds))
+                            ->filter(fn ($uid) => in_array($uid, $trackedUserIds))
                             ->toArray();
                     }
                     $expectedIds = $expectedIds->concat($teamTrackedUserIds[$team->id]);
@@ -139,7 +140,7 @@ class DashboardController extends Controller
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
             ->where('scheduled_at', '>=', $now)
-            ->when($activeTeamId, fn ($q) => $q->where(fn($sq) => $sq->where('team_id', $activeTeamId)->orWhereHas('teams', fn($ssq) => $ssq->where('teams.id', $activeTeamId))))
+            ->when($activeTeamId, fn ($q) => $q->where(fn ($sq) => $sq->where('team_id', $activeTeamId)->orWhereHas('teams', fn ($ssq) => $ssq->where('teams.id', $activeTeamId))))
             ->orderBy('scheduled_at')
             ->limit(3)
             ->get()
@@ -171,7 +172,7 @@ class DashboardController extends Controller
                     if (! isset($teamTrackedUserIds[$cacheKey])) {
                         $teamTrackedUserIds[$cacheKey] = $team->activePlayers
                             ->pluck('user_id')
-                            ->filter(fn($uid) => in_array($uid, $seasonTrackedIds))
+                            ->filter(fn ($uid) => in_array($uid, $seasonTrackedIds))
                             ->toArray();
                     }
                     $expectedIds = $expectedIds->concat($teamTrackedUserIds[$cacheKey]);
@@ -202,7 +203,7 @@ class DashboardController extends Controller
                     if (! isset($teamTrackedUserIds[$team->id])) {
                         $teamTrackedUserIds[$team->id] = $team->activePlayers
                             ->pluck('user_id')
-                            ->filter(fn($uid) => in_array($uid, $trackedUserIds))
+                            ->filter(fn ($uid) => in_array($uid, $trackedUserIds))
                             ->toArray();
                     }
                     $expectedIds = $expectedIds->concat($teamTrackedUserIds[$team->id]);

@@ -3,14 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\InternalAnalyticsEvent;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InternalAnalyticsTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_it_tracks_frontend_requests()
     {
         $this->get('/');

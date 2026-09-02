@@ -17,10 +17,10 @@ class AuthAccessTest extends TestCase
         $this->get(route('public.home'))->assertStatus(200);
 
         // Guest na member route -> redirect na login
-        $this->get(route('member.dashboard'))->assertRedirect(route('login'));
+        $this->get(route('member.dashboard'))->assertStatus(401);
 
         // Guest na admin route -> redirect na admin login (Filament specifické)
-        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->get('/admin')->assertStatus(401);
     }
 
     /**
@@ -50,7 +50,7 @@ class AuthAccessTest extends TestCase
         $this->actingAs($admin);
 
         // Simulujeme úspěšnou 2FA challenge nastavením session klíče, který očekává CheckTwoFactorTimeout middleware
-        session(['auth.2fa_confirmed_at' => now()->timestamp]);
+        $this->confirm2FA($admin);
 
         // Admin má přístup do admin sekce
         // Použijeme /admin/ aby se předešlo 301/302 trailing slash redirectu
@@ -125,7 +125,7 @@ class AuthAccessTest extends TestCase
         $this->with2FA($user);
 
         $this->actingAs($user);
-        session(['auth.2fa_confirmed_at' => now()->timestamp]);
+        $this->confirm2FA($user);
 
         // Má přístup do obou sekcí
         $this->get('/admin/')->assertStatus(200);
@@ -144,7 +144,7 @@ class AuthAccessTest extends TestCase
         // Middleware 'active' odhlásí uživatele a přesměruje na login s chybou
         $response = $this->get(route('member.dashboard'));
         $response->assertRedirect(route('login'));
-        $response->assertSessionHasErrors(['email' => 'Váš účet byl deaktivován. Kontaktujte prosím správce.']);
+        $response->assertSessionHasErrors(['email' => 'Váš účet není aktivní. Kontaktujte prosím tým pro aktivaci.']);
         $this->assertGuest();
     }
 }

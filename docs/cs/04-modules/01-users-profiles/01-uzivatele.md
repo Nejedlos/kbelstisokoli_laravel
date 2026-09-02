@@ -27,6 +27,7 @@ Tento modul zajišťuje správu uživatelských účtů (přihlášení, role) a
 
 - Jeden uživatel může mít více typů členství, například **Hráč + Trenér**.
 - Typy `player`, `coach` a `parent` automaticky synchronizují stejnojmenné systémové role.
+- Synchronizace probíhá při vytvoření účtu nebo změně typů členství. Přihlášení, změna hesla a nastavení 2FA nemění přidělené role, včetně rolí starších účtů bez vyplněného členství.
 - Odebrání typu členství odebere pouze příslušnou automaticky řízenou roli.
 - Ručně přidělené role `admin`, `super_admin`, `editor` a případné další privilegované role synchronizace nikdy nemaže.
 - Typy `staff`, `fan` a `honorary` nemají vlastní přístupovou roli a samy o sobě neodemykají členskou sekci.
@@ -35,7 +36,7 @@ Tento modul zajišťuje správu uživatelských účtů (přihlášení, role) a
 ## 4. Autorizace a bezpečnost
 - **Policies:** Všechny operace chráněny oprávněním `manage_users`. Hráči vidí vlastní profil.
 - **Deaktivace:** Fortify login hook a middleware `active` brání přístupu deaktivovaným uživatelům.
-- **2FA:** Administrátoři mají povinné dvoufázové ověření pro přístup do panelu.
+- **2FA:** Všichni uživatelé s přístupem do administrace musí dokončit dvoufázové ověření před pokračováním, a to i do členské sekce. Pro ostatní členy je 2FA dobrovolné.
 
 ## 5. První Administrátor
 První superadmin uživatel byl vytvořen s údaji:

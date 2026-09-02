@@ -296,103 +296,16 @@
                 </section>
 
                 <!-- Two Factor Authentication -->
-                <section id="two-factor-setup" class="card p-6 sm:p-8 space-y-6 border-l-4 {{ $user->two_factor_secret ? 'border-l-emerald-500' : 'border-l-warning' }}">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-5 gap-4">
-                        <h3 class="text-xl font-black uppercase tracking-tight text-secondary leading-none">{{ __('member.profile.two_factor.title') }}</h3>
-                        <span class="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm self-start sm:self-center {{ $user->two_factor_secret ? 'bg-emerald-50 text-emerald-700' : 'bg-warning-50 text-warning-700' }}">
-                            <div class="inline-block w-1.5 h-1.5 rounded-full mr-2 {{ $user->two_factor_secret ? 'bg-emerald-500 animate-pulse' : 'bg-warning-500' }}"></div>
-                            {{ $user->two_factor_secret ? __('member.profile.two_factor.active') : __('member.profile.two_factor.inactive') }}
-                        </span>
-                    </div>
-
-                    <div class="space-y-6">
-                        <p class="text-sm text-slate-600 font-medium leading-relaxed italic opacity-80">
-                            {{ __('member.profile.two_factor.help') }}
-                            @if($user->canAccessAdmin())
-                                <span class="text-primary font-black block mt-3 uppercase tracking-wider text-[11px] non-italic">{{ __('member.profile.two_factor.admin_warning') }}</span>
-                            @endif
-                        </p>
-
-                        @if(! $user->two_factor_secret)
-                            {{-- Enable 2FA --}}
-                            <button type="submit" form="two-factor-enable-form" class="btn btn-primary px-8 py-3 w-full sm:w-auto">
-                                <i class="fa-light fa-shield-check mr-2"></i> {{ __('member.profile.two_factor.enable') }}
-                            </button>
-                        @else
-                            {{-- 2FA Setup Flow (Confirming) --}}
-                            @if($user->two_factor_confirmed_at)
-                                {{-- Show Recovery Codes --}}
-                                <div class="space-y-6 pt-2">
-                                    <div class="flex flex-col sm:flex-row gap-3">
-                                        <button type="submit" form="two-factor-recovery-codes-form" class="btn btn-outline py-2.5 px-5 w-full justify-center sm:w-auto">
-                                            <i class="fa-light fa-arrows-rotate mr-2 text-primary"></i> {{ __('member.profile.two_factor.regenerate_codes') }}
-                                        </button>
-
-                                        @if($user->canAccessAdmin())
-                                            <div class="flex items-center gap-3 px-5 py-3 bg-rose-50 rounded-2xl border border-rose-100 group/disable-info">
-                                                <i class="fa-light fa-circle-exclamation text-rose-500 animate-pulse"></i>
-                                                <span class="text-[11px] font-black uppercase tracking-tight text-rose-600 leading-tight">
-                                                    {{ __('member.profile.two_factor.cannot_disable') }}
-                                                </span>
-                                            </div>
-                                        @else
-                                            <button type="submit" form="two-factor-disable-form" class="btn bg-rose-50 text-rose-600 hover:bg-rose-100 py-2.5 px-5 border-transparent w-full justify-center font-bold sm:w-auto">
-                                                <i class="fa-light fa-trash-can mr-2"></i> {{ __('member.profile.two_factor.disable') }}
-                                            </button>
-                                        @endif
-                                    </div>
-
-                                    @if(session('status') == 'two-factor-authentication-enabled' || session('status') == 'recovery-codes-generated')
-                                        <div class="bg-slate-900 rounded-[2rem] p-6 sm:p-8 mt-6 relative overflow-hidden group shadow-2xl">
-                                            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:rotate-12 transition-transform duration-700">
-                                                <i class="fa-light fa-shield-keyhole text-7xl text-white"></i>
-                                            </div>
-                                            <p class="text-[11px] font-black uppercase tracking-[0.25em] text-primary mb-5 relative z-10">{{ __('member.profile.two_factor.recovery_codes_title') }}</p>
-                                            <p class="text-[11px] text-slate-400 mb-6 font-medium italic leading-relaxed relative z-10">{{ __('member.profile.two_factor.recovery_codes_help') }}</p>
-                                            <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 font-mono text-sm text-white relative z-10">
-                                                @foreach ($user->recoveryCodes() as $code)
-                                                    <div class="bg-white/5 hover:bg-white/10 px-4 py-2.5 rounded-xl border border-white/5 transition-colors text-center tracking-widest text-xs sm:text-sm">{{ $code }}</div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                            @else
-                                {{-- Confirming 2FA --}}
-                                <div class="bg-slate-50 border border-slate-200/60 rounded-[2rem] p-6 sm:p-8 space-y-8 shadow-inner">
-                                    <div class="flex flex-col md:flex-row gap-8 sm:gap-10 items-center">
-                                        <div class="p-6 bg-white rounded-[2rem] shadow-xl border border-slate-100 flex-shrink-0">
-                                            {!! $user->twoFactorQrCodeSvg() !!}
-                                        </div>
-                                        <div class="space-y-5 flex-1 text-center md:text-left">
-                                            <h4 class="font-black uppercase tracking-tight text-secondary text-lg leading-tight">{{ __('member.profile.two_factor.setup_title') }}</h4>
-                                            <ol class="text-xs text-slate-500 space-y-3 list-decimal list-inside font-bold italic opacity-80 leading-relaxed text-left">
-                                                <li>{{ __('member.profile.two_factor.setup_step_1') }}</li>
-                                                <li>{{ __('member.profile.two_factor.setup_step_2') }}</li>
-                                                <li>{{ __('member.profile.two_factor.setup_step_3') }}</li>
-                                            </ol>
-                                            <div class="pt-4 border-t border-slate-200/60 text-left">
-                                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{{ __('member.profile.two_factor.manual_key') }}:</p>
-                                                <code class="text-xs font-black text-primary bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg break-all tracking-widest">{{ decrypt($user->two_factor_secret) }}</code>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex flex-col sm:flex-row items-end gap-5 max-w-md mx-auto md:mx-0 border-t border-slate-200 pt-8">
-                                        <div class="w-full sm:flex-1 space-y-2">
-                                            <label for="code" class="form-label text-center sm:text-left">{{ __('member.profile.two_factor.code_label') }}</label>
-                                            <input id="code" type="text" name="code" form="two-factor-confirm-form" inputmode="numeric" required autofocus autocomplete="one-time-code"
-                                                   class="form-input text-center tracking-[0.3em] sm:tracking-[0.5em] text-lg sm:text-xl py-4" placeholder="000 000">
-                                        </div>
-                                        <button type="submit" form="two-factor-confirm-form" class="btn btn-primary w-full sm:w-auto h-[60px] px-8">
-                                            {{ __('member.profile.two_factor.confirm_button') }}
-                                        </button>
-                                    </div>
-                                    @error('code', 'confirmTwoFactorAuthentication') <p class="text-[10px] text-danger-600 font-bold mt-2 uppercase tracking-wider text-center md:text-left">{{ $message }}</p> @enderror
-                                </div>
-                            @endif
-                        @endif
-                    </div>
+                <section id="two-factor-setup" class="card p-6 sm:p-8 space-y-6">
+                    <h3 class="text-xl font-black uppercase tracking-tight text-secondary">{{ __('member.profile.two_factor.title') }}</h3>
+                    <p class="text-sm text-slate-600">{{ $user->hasEnabledTwoFactorAuthentication() ? __('member.profile.two_factor.active') : ($user->two_factor_secret ? __('two-factor.pending') : __('member.profile.two_factor.inactive')) }}</p>
+                    <p class="text-sm text-slate-600">{{ $user->canAccessAdmin() ? __('two-factor.required') : __('two-factor.optional') }}</p>
+                    <a href="{{ route('auth.two-factor-setup') }}" class="btn btn-primary">
+                        {{ $user->hasEnabledTwoFactorAuthentication() ? __('two-factor.manage') : __('member.profile.two_factor.enable') }}
+                    </a>
+                    @if($user->two_factor_secret && ! $user->canAccessAdmin())
+                        <button type="submit" form="two-factor-disable-form" class="btn btn-outline">{{ __('member.profile.two_factor.disable') }}</button>
+                    @endif
                 </section>
 
                 <div class="flex items-center justify-center sm:justify-end">
@@ -404,25 +317,10 @@
         </div>
     </div>
 
-    {{-- Hidden forms for 2FA actions to avoid nested forms --}}
-    @if(! $user->two_factor_secret)
-        <form method="POST" action="{{ route('two-factor.enable') }}" id="two-factor-enable-form">
+    @if($user->two_factor_secret && ! $user->canAccessAdmin())
+        <form method="POST" action="{{ route('two-factor.disable') }}" id="two-factor-disable-form">
             @csrf
+            @method('DELETE')
         </form>
-    @else
-        @if($user->two_factor_confirmed_at)
-            <form method="POST" action="{{ route('two-factor.recovery-codes') }}" id="two-factor-recovery-codes-form">
-                @csrf
-            </form>
-
-            <form method="POST" action="{{ route('two-factor.disable') }}" id="two-factor-disable-form">
-                @csrf
-                @method('DELETE')
-            </form>
-        @else
-            <form method="POST" action="{{ route('two-factor.confirm') }}" id="two-factor-confirm-form">
-                @csrf
-            </form>
-        @endif
     @endif
 @endsection

@@ -64,7 +64,8 @@ class AdminAccessTest extends TestCase
 
         $response = $this->actingAs($admin)->get('/admin');
 
-        $response->assertStatus(403);
+        $response->assertRedirect(route('filament.admin.auth.login'));
+        $this->assertGuest();
     }
 
     /**
@@ -75,9 +76,9 @@ class AdminAccessTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        // Obcházíme 2FA challenge v testu pomocí screenshot režimu (?screenshot=1)
-        // Musíme také poslat X-Screenshot-Token pro bypass v DetectScreenshotMode, pokud je vyžadován
-        $response = $this->actingAs($admin)->get('/admin?screenshot=1');
+        $this->with2FA($admin);
+        $this->confirm2FA($admin);
+        $response = $this->actingAs($admin)->get('/admin');
 
         $response->assertStatus(200);
     }
@@ -93,7 +94,9 @@ class AdminAccessTest extends TestCase
         ]);
         $coach->assignRole('coach');
 
-        $response = $this->actingAs($coach)->get('/admin?screenshot=1');
+        $this->with2FA($coach);
+        $this->confirm2FA($coach);
+        $response = $this->actingAs($coach)->get('/admin');
 
         $response->assertStatus(200);
     }

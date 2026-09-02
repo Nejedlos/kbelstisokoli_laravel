@@ -16,7 +16,7 @@ class AdminSmokeTest extends TestCase
 
         // Authenticate admin for all tests in this file
         $this->actingAs($this->admin);
-        session(['auth.2fa_confirmed_at' => now()->timestamp]);
+        $this->confirm2FA($this->admin);
     }
 
     /**

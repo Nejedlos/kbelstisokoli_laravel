@@ -1,5 +1,7 @@
 # Systém přihlašování a validací
 
+> **Aktuální pravidla od 2026-09-02:** Uživatel s přístupem do administrace musí dokončit 2FA před vstupem do kterékoli aplikační sekce, včetně členské. Pro ostatní je 2FA dobrovolné. Historické popisy odděleného vynucování níže již neplatí. Podrobný průchod je v [dokumentaci přihlašovacího procesu](../06-ops/changes/2026-09-02-two-factor-pipeline.md).
+
 Tento dokument popisuje vylepšení systému přihlašování, inline validací a notifikací v projektu Kbelští sokoli.
 
 ## Účel
@@ -108,7 +110,7 @@ Logika přístupu byla zpřesněna. Nyní je primárním klíčem k přístupu d
 - Mechanismus, kdy se stav členství změní z **Čekající** na **Aktivní** při prvním přihlášení, zůstává zachován. Tento proces proběhne pouze u uživatelů, kteří mají účet aktivní (`is_active = true`).
 
 ### Další krok
-- Přidat integrační testy pro scénáře admin bez 2FA → member sekce povolena, admin sekce blokována.
+- Aktuální integrační testy ověřují, že účet s přístupem do administrace bez 2FA nemůže ani do členské sekce.
 - Ověřit lokalizační texty a ikony v obou menu (Font Awesome Light varianta) napříč prostředími.
 
 ---

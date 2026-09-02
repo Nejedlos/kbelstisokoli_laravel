@@ -30,13 +30,13 @@ class AuthRedirectTest extends TestCase
         $this->assertEquals('/clenska-sekce/dashboard', $url);
     }
 
-    public function test_admin_redirects_to_admin_by_default(): void
+    public function test_admin_redirects_to_member_dashboard_by_default(): void
     {
         $user = User::factory()->create(['is_active' => true]);
         $user->assignRole('admin');
 
         $url = AuthRedirect::getTargetUrl($user);
-        $this->assertEquals('/admin', $url);
+        $this->assertEquals('/clenska-sekce/dashboard', $url);
     }
 
     public function test_member_respects_intended_url(): void
@@ -67,14 +67,30 @@ class AuthRedirectTest extends TestCase
         $this->assertEquals(url('/admin/settings'), $url);
     }
 
-    public function test_admin_prefers_admin_over_general_member_dashboard(): void
+    public function test_admin_respects_member_dashboard_destination(): void
     {
         $user = User::factory()->create(['is_active' => true]);
         $user->assignRole('admin');
         Session::put('url.intended', url('/clenska-sekce/dashboard'));
 
         $url = AuthRedirect::getTargetUrl($user);
-        $this->assertEquals('/admin', $url);
+        $this->assertEquals(url('/clenska-sekce/dashboard'), $url);
+    }
+
+    public function test_admin_without_member_permission_gets_an_accessible_destination(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $user->givePermissionTo('access_admin');
+
+        $this->assertEquals('/admin', AuthRedirect::getTargetUrl($user));
+        Session::put('url.intended', url('/clenska-sekce/dashboard'));
+        $this->assertEquals('/admin', AuthRedirect::getTargetUrl($user));
+
+        $this->with2FA($user);
+        $this->confirm2FA($user);
+        $this->actingAs($user)->withSession(['auth.password_confirmed_at' => now()->timestamp]);
+        $this->get(route('auth.two-factor-setup'))->assertOk()->assertDontSee(route('member.profile.edit'), false);
+        $this->get(route('auth.two-factor-complete'))->assertRedirect('/admin');
     }
 
     public function test_ignores_login_and_logout_intended_urls(): void
