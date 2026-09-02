@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -347,6 +348,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Vlastní 500 stránka s kopírovatelnými debug informacemi (bez citlivých dat)
         $exceptions->render(function (Throwable $e, Request $request) {
+            // Validace patří zpět do formuláře (nebo JSON 422), nikoliv na stránku 500.
+            if ($e instanceof ValidationException || $e instanceof AuthenticationException) {
+                return null;
+            }
+
             if (! app()->environment('production')) {
                 return null; // nezasahujeme mimo produkci
             }

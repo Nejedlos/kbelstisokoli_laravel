@@ -17,6 +17,12 @@ Tento dokument popisuje, jak v projektu funguje odesílání chybových reportů
 
 ## Diagnostika a testování (Admin)
 
+### Validace formulářů
+
+`ValidationException` se nesmí převést na produkční stránku 500. Globální renderer ji přenechává Laravelu: HTML požadavek se vrací do formuláře s konkrétními chybami, JSON dostává stav 422. To platí také pro odmítnuté heslo při obnově a nesprávné přihlašovací údaje. Kontrola hesel známých z úniků dat zůstává zapnutá. Formulář obnovy uvádí požadavky na nové heslo předem a při odmítnutí výslovně sděluje, že heslo nebylo změněno.
+
+Obecný renderer rovněž přenechává `AuthenticationException` standardnímu zpracování, pokud ji již neobsloužil konkrétní handler administrace nebo členské sekce. Odhlášený návštěvník průvodce 2FA se tak přesměruje na přihlášení. Po nasazení změn rout obnovte cache příkazem `php artisan route:cache`; jinak může nová šablona odkazovat na routu, kterou stará cache ještě neobsahuje.
+
 V administraci byla přidána stránka **Debugování e-mailů** (v sekci Admin nástroje), která umožňuje:
 - Kontrolu aktuálně načtené SMTP konfigurace (hostitel, port, šifrování).
 - Odeslání zkušebního e-mailu na libovolnou adresu.

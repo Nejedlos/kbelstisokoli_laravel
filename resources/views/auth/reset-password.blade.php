@@ -13,7 +13,8 @@
             $filteredErrors = collect($errors->all())->filter(fn($error) => trim($error) !== '')->all();
         @endphp
         @if (!empty($filteredErrors))
-            <x-auth-alert type="error">
+            <x-auth-alert type="error" role="alert">
+                <div>{{ __('passwords.not_changed') }}</div>
                 @foreach ($filteredErrors as $error)
                     <div>{{ $error }}</div>
                 @endforeach
@@ -39,6 +40,8 @@
             <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
                 <div class="fi-input-wrp-content-ctn">
                     <input id="password" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="password" autocomplete="new-password"
+                           type="password" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}"
+                           aria-describedby="password-requirements{{ $errors->has('password') ? ' password-error' : '' }}"
                            placeholder="••••••••••••"
                            class="fi-input">
                 </div>
@@ -50,11 +53,17 @@
             </div>
         </div>
 
+        <p id="password-requirements" class="text-sm">{{ __('passwords.requirements') }}</p>
+        @error('password')
+            <p id="password-error" class="text-sm text-red-400" role="alert">{{ $message }}</p>
+        @enderror
+
         <div class="space-y-3 fi-fo-field">
             <label for="password_confirmation" class="fi-fo-field-label ml-1">{{ __('Potvrzení hesla') }}</label>
             <div class="fi-input-wrp" x-data="{ isPasswordRevealed: false }">
                 <div class="fi-input-wrp-content-ctn">
                     <input id="password_confirmation" x-bind:type="isPasswordRevealed ? 'text' : 'password'" name="password_confirmation" autocomplete="new-password"
+                           type="password"
                            placeholder="••••••••••••"
                            class="fi-input">
                 </div>

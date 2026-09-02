@@ -10,6 +10,7 @@ Pokud si nepamatujete své přístupové heslo, můžete si jej sami obnovit pom
 6. Potvrďte změnu a následně se přihlaste s novým heslem.
 
 ## Časté chyby
+- **Odmítnuté nové heslo:** Po odeslání formulář zobrazí konkrétní důvod. Heslo zatím nebylo změněno. Zvolte alespoň 8 znaků, malé i velké písmeno a číslici; obě hesla musí být stejná. Pokud se heslo objevilo v únicích dat, zvolte jiné. Opravte údaje a odešlete stejný formulář znovu.
 - **Nedoručení e-mailu:** Pokud e-mail do 10 minut nedorazí, zkontrolujte složku „Spam“ nebo „Hromadné zprávy“.
 - **Odesílání bez fronty:** Nové pozvánky z administrace a odkazy pro obnovu hesla se předávají poštovnímu serveru přímo, bez čekání na zpracování fronty. Pokud zpráva nedorazí ani po kontrole spamu, požádejte správce o ověření SMTP. Po opravě odesílání si vyžádejte nový odkaz.
 - **Neplatný odkaz:** Odkaz v e-mailu má omezenou platnost (zpravidla 60 minut). Pokud jej nestihnete využít, musíte požádat o novou nahrávku.

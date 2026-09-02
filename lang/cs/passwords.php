@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'requirements' => 'Použijte alespoň 8 znaků, malé i velké písmeno a číslici. Heslo nesmí být známé z úniků dat. Obě zadaná hesla se musí shodovat.',
+    'not_changed' => 'Heslo zatím nebylo změněno. Opravte prosím údaje podle hlášky níže a formulář odešlete znovu.',
 
     /*
     |--------------------------------------------------------------------------

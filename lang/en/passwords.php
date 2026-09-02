@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'requirements' => 'Use at least 8 characters, including lowercase and uppercase letters and a number. The password must not appear in known data leaks. Both passwords must match.',
+    'not_changed' => 'Your password has not been changed yet. Correct the details as described below and submit the form again.',
 
     /*
     |--------------------------------------------------------------------------
