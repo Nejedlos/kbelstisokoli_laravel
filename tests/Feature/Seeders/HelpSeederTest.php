@@ -2,17 +2,18 @@
 
 namespace Tests\Feature\Seeders;
 
-use App\Models\HelpCategory;
 use App\Models\HelpArticle;
+use App\Models\HelpCategory;
 use Database\Seeders\Help\HelpSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class HelpSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_seeds_help_structure_and_content()
     {
         // Spustíme seeder
@@ -28,7 +29,7 @@ class HelpSeederTest extends TestCase
         $this->assertGreaterThan(0, HelpArticle::count());
 
         // Zkusíme najít konkrétní známé články ze seederu
-        $this->assertDatabaseHas('help_articles', ['slug' => 'prvni-kroky']);
-        $this->assertDatabaseHas('help_articles', ['slug' => 'sprava-dochazky']);
+        $this->assertDatabaseHas('help_articles', ['slug' => 'vstup-do-kabiny']);
+        $this->assertDatabaseHas('help_articles', ['slug' => 'treninky-a-dochazka']);
     }
 }

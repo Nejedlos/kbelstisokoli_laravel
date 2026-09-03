@@ -2,16 +2,17 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\HelpCategory;
 use App\Models\HelpArticle;
+use App\Models\HelpCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class HelpTranslationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_falls_back_to_czech_if_english_translation_is_missing()
     {
         $category = HelpCategory::create([
@@ -28,7 +29,7 @@ class HelpTranslationTest extends TestCase
         $this->assertEquals('Český název', $category->getTranslation('name', 'en'));
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_specific_locale_if_available()
     {
         $category = HelpCategory::create([
@@ -40,7 +41,7 @@ class HelpTranslationTest extends TestCase
         $this->assertEquals('English Name', $category->getTranslation('name', 'en'));
     }
 
-    /** @test */
+    #[Test]
     public function it_falls_back_to_czech_for_articles()
     {
         $cat = HelpCategory::create([

@@ -13,11 +13,11 @@ class TeamFactory extends Factory
     public function definition(): array
     {
         $name = $this->faker->unique()->word;
+
         return [
             'name' => ['cs' => $name, 'en' => $name],
             'slug' => Str::slug($name),
             'category' => 'youth',
-            'is_active' => true,
         ];
     }
 }

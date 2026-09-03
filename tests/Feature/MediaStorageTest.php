@@ -6,6 +6,7 @@ use App\Models\MediaAsset;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MediaStorageTest extends TestCase
@@ -19,7 +20,7 @@ class MediaStorageTest extends TestCase
         Storage::fake('media_private');
     }
 
-    /** @test */
+    #[Test]
     public function it_stores_public_files_in_correct_structure()
     {
         $asset = MediaAsset::create([
@@ -46,7 +47,7 @@ class MediaStorageTest extends TestCase
         Storage::disk('media_public')->assertExists($expectedPath);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_secure_url_for_private_files()
     {
         $asset = MediaAsset::create([
@@ -65,7 +66,7 @@ class MediaStorageTest extends TestCase
         $this->assertStringContainsString($asset->getFirstMedia('default')->uuid, $url);
     }
 
-    /** @test */
+    #[Test]
     public function it_renames_file_on_title_change()
     {
         $asset = MediaAsset::create([

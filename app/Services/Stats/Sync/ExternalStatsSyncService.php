@@ -2,24 +2,28 @@
 
 namespace App\Services\Stats\Sync;
 
+use App\Jobs\ComputeMatchPredictionJob;
 use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
-use App\Services\Stats\Contracts\StatFetcherInterface;
-use App\Services\Stats\Contracts\StatNormalizerInterface;
-use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
-use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
-use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use App\Services\Stats\Clippers\CzBasketball\CzBasketballMatchDetailClipper;
 use App\Services\Stats\Clippers\CzBasketball\CzBasketballMatchesListClipper;
 use App\Services\Stats\Clippers\CzBasketball\CzBasketballTeamPageClipper;
+use App\Services\Stats\Contracts\StatFetcherInterface;
+use App\Services\Stats\Contracts\StatNormalizerInterface;
+use App\Services\Stats\DTO\NormalizedTableDTO;
+use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
+use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
+use App\Services\Stats\Extractors\CzBasketball\TeamHeaderExtractor;
+use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use App\Services\Support\ConsoleService;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ExternalStatsSyncService
 {
@@ -67,6 +71,7 @@ class ExternalStatsSyncService
         // pokud není vynucen FORCE mode.
         if (! $season->is_active && $config->last_synced_at && ! ($options['force'] ?? false)) {
             ConsoleService::log("Přeskakuji neaktivní sezónu {$season->name} pro tým {$team->slug} (již synchronizováno {$config->last_synced_at->format('d.m.Y H:i')}).", 'info');
+
             return;
         }
 
@@ -80,7 +85,7 @@ class ExternalStatsSyncService
         if ($options['sync_roster'] ?? true) {
             try {
                 if ($parentRun) {
-                    $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync') . ': Soupiska');
+                    $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync').': Soupiska');
                 }
                 ConsoleService::log('- Synchronizace soupisky...');
                 $this->syncRoster($team, $season, $config, $options);
@@ -106,7 +111,7 @@ class ExternalStatsSyncService
         if ($options['sync_matches'] ?? true) {
             try {
                 if ($parentRun) {
-                    $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync') . ': Zápasy');
+                    $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync').': Zápasy');
                 }
                 ConsoleService::log('- Synchronizace seznamu zápasů...');
                 $this->syncMatchesList($team, $season, $config, $options);
@@ -119,14 +124,14 @@ class ExternalStatsSyncService
         }
 
         if ($parentRun) {
-            $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync') . ': Detaily zápasů');
+            $parentRun->updateProgress(label: ($parentRun->current_item_label ?: 'Sync').': Detaily zápasů');
         }
 
         // 3. Verifikace konzistence
         try {
             $this->matchSyncService->validateSeasonConsistency($team, $season, $config);
         } catch (\Exception $e) {
-            Log::warning("Chyba při verifikaci konzistence sezóny: ".$e->getMessage());
+            Log::warning('Chyba při verifikaci konzistence sezóny: '.$e->getMessage());
         }
 
         $config->update(['last_synced_at' => now()]);
@@ -161,13 +166,13 @@ class ExternalStatsSyncService
                 throw new \Exception('Synchronizace soupisky zastavena uživatelem po stažení HTML.');
             }
 
-            ConsoleService::log("    - Staženo " . number_format(strlen($html) / 1024, 1) . " KB HTML.", 'debug');
+            ConsoleService::log('    - Staženo '.number_format(strlen($html) / 1024, 1).' KB HTML.', 'debug');
 
             $aiOnly = config('external_sources.czbasketball.ai_only', env('CZBASKETBALL_AI_ONLY', false)) || ($options['ai'] ?? false);
 
             $clipper = app(CzBasketballTeamPageClipper::class);
             $clips = $clipper->clip($html, $config->team_season_url);
-            ConsoleService::log("    - Extrahováno " . count($clips) . " fragmentů (clips) z HTML.", 'debug');
+            ConsoleService::log('    - Extrahováno '.count($clips).' fragmentů (clips) z HTML.', 'debug');
 
             // CNH a JSON Linky
             $cnh = $clipper->buildCnh($clips);
@@ -176,9 +181,9 @@ class ExternalStatsSyncService
             // Uložit CNH a JSON pro debug/AI
             $year = $season->year ?? 'unknown';
             $basePath = "external/czbasketball/clips/{$config->external_team_id}/y{$year}";
-            \Illuminate\Support\Facades\Storage::disk('local')->makeDirectory($basePath);
-            \Illuminate\Support\Facades\Storage::disk('local')->put("{$basePath}/team_page_cnh.html", $cnh);
-            \Illuminate\Support\Facades\Storage::disk('local')->put("{$basePath}/extracted_links.json", $linksJson);
+            Storage::disk('local')->makeDirectory($basePath);
+            Storage::disk('local')->put("{$basePath}/team_page_cnh.html", $cnh);
+            Storage::disk('local')->put("{$basePath}/extracted_links.json", $linksJson);
 
             $rosterClip = collect($clips)->firstWhere('id', 'roster_table');
             $headerClip = collect($clips)->firstWhere('id', 'team_header');
@@ -201,7 +206,7 @@ class ExternalStatsSyncService
                     throw new \Exception('AI normalizace soupisky zastavena uživatelem.');
                 }
 
-                if (!$rosterClip) {
+                if (! $rosterClip) {
                     throw new \Exception('Roster table clip not found for AI-only mode.');
                 }
 
@@ -221,7 +226,7 @@ class ExternalStatsSyncService
                 } catch (\Exception $e) {
                     Log::warning("DOM extractor selhal pro soupisku týmu {$team->slug}, zkouším AI fallback. Chyba: ".$e->getMessage());
 
-                    if (!$rosterClip) {
+                    if (! $rosterClip) {
                         throw new \Exception('DOM extractor failed and Roster table clip not found for AI fallback.');
                     }
 
@@ -240,8 +245,8 @@ class ExternalStatsSyncService
                 try {
                     $headerData = $aiOnly
                         ? $this->normalizer->normalize($headerClip->htmlFragment, ['type' => 'team_header', 'strict_schema' => $this->getTeamHeaderSchema()])
-                        : app(\App\Services\Stats\Extractors\CzBasketball\TeamHeaderExtractor::class)->extract($html, [
-                            'external_season_year' => $config->external_season_year
+                        : app(TeamHeaderExtractor::class)->extract($html, [
+                            'external_season_year' => $config->external_season_year,
                         ])['data'];
 
                     if ($headerData && isset($headerData->metadata['team_name'])) {
@@ -258,28 +263,28 @@ class ExternalStatsSyncService
 
                         $config->update(['metadata' => array_filter($configMetadata)]);
 
-                        if (!empty($headerData->metadata['competition']) && empty($config->competition_label)) {
+                        if (! empty($headerData->metadata['competition']) && empty($config->competition_label)) {
                             $config->update(['competition_label' => $headerData->metadata['competition']]);
                         }
 
-                        if (!empty($headerData->metadata['competition_url']) && empty($config->competition_url)) {
+                        if (! empty($headerData->metadata['competition_url']) && empty($config->competition_url)) {
                             // Zajistíme, aby URL byla absolutní, pokud je relativní
                             $compUrl = $headerData->metadata['competition_url'];
                             if (str_starts_with($compUrl, '/')) {
-                                $compUrl = 'https://cz.basketball' . $compUrl;
+                                $compUrl = 'https://cz.basketball'.$compUrl;
                             }
                             $config->update(['competition_url' => $compUrl]);
                         }
                     }
                 } catch (\Exception $e) {
-                    Log::warning("Nepodařilo se extrahovat team header: " . $e->getMessage());
+                    Log::warning('Nepodařilo se extrahovat team header: '.$e->getMessage());
                 }
             }
 
             $hash = hash('sha256', $fragmentHtml);
 
             if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
-                ConsoleService::log("    - Obsah soupisky se nezměnil (hash match), přeskakuji import.", 'info');
+                ConsoleService::log('    - Obsah soupisky se nezměnil (hash match), přeskakuji import.', 'info');
                 $run->skip();
 
                 return;
@@ -302,12 +307,12 @@ class ExternalStatsSyncService
             }
 
             $this->rosterSyncService->syncWithData($config, $data);
-            ConsoleService::log("    - Synchronizováno " . count($data->rows) . " hráčů do databáze.", 'success');
+            ConsoleService::log('    - Synchronizováno '.count($data->rows).' hráčů do databáze.', 'success');
 
             // Link following: Hráči
-            if (!empty($rosterClip->links) && ($options['follow_players'] ?? false)) {
+            if (! empty($rosterClip->links) && ($options['follow_players'] ?? false)) {
                 $playerLinks = collect($rosterClip->links)
-                    ->filter(fn($l) => !empty($m = preg_match('/\/hrac\/(\d+)/', ($l['url'] ?? ($l['href'] ?? '')), $matches)))
+                    ->filter(fn ($l) => ! empty($m = preg_match('/\/hrac\/(\d+)/', ($l['url'] ?? ($l['href'] ?? '')), $matches)))
                     ->take(10);
 
                 foreach ($playerLinks as $link) {
@@ -324,7 +329,7 @@ class ExternalStatsSyncService
         } catch (\Exception $e) {
             if (isset($html)) {
                 $sanitized = $this->normalizer->sanitizeHtml($html);
-                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
+                Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
                 $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
             }
             $run->fail($e);
@@ -352,7 +357,7 @@ class ExternalStatsSyncService
                 throw new \Exception('Synchronizace seznamu zápasů zastavena uživatelem po stažení HTML.');
             }
 
-            ConsoleService::log("    - Staženo " . number_format(strlen($html) / 1024, 1) . " KB HTML.", 'debug');
+            ConsoleService::log('    - Staženo '.number_format(strlen($html) / 1024, 1).' KB HTML.', 'debug');
 
             $aiOnly = config('external_sources.czbasketball.ai_only', env('CZBASKETBALL_AI_ONLY', false)) || ($options['ai'] ?? false);
 
@@ -367,14 +372,14 @@ class ExternalStatsSyncService
                 'html_size' => strlen($html),
                 'clips_found' => count($clips),
                 'clip_ids' => collect($clips)->pluck('id')->toArray(),
-                'links_json_file' => "external/czbasketball/clips/{$config->external_team_id}/y" . ($season->year ?? 'unknown') . "/matches_list_links.json",
+                'links_json_file' => "external/czbasketball/clips/{$config->external_team_id}/y".($season->year ?? 'unknown').'/matches_list_links.json',
             ]);
 
             // Uložit linky
             $year = $season->year ?? 'unknown';
             $basePath = "external/czbasketball/clips/{$config->external_team_id}/y{$year}";
-            \Illuminate\Support\Facades\Storage::disk('local')->makeDirectory($basePath);
-            \Illuminate\Support\Facades\Storage::disk('local')->put("{$basePath}/matches_list_links.json", $linksJson);
+            Storage::disk('local')->makeDirectory($basePath);
+            Storage::disk('local')->put("{$basePath}/matches_list_links.json", $linksJson);
 
             $usedAi = false;
             $allRows = [];
@@ -398,7 +403,7 @@ class ExternalStatsSyncService
                     $fragmentHtml .= $clip->htmlFragment;
                 }
                 $usedAi = true;
-                $finalData = new \App\Services\Stats\DTO\NormalizedTableDTO('Matches List', [], $allRows, ['ai_normalized' => true]);
+                $finalData = new NormalizedTableDTO('Matches List', [], $allRows, ['ai_normalized' => true]);
             } else {
                 try {
                     \Log::info("Extracting matches for {$team->slug}");
@@ -433,14 +438,14 @@ class ExternalStatsSyncService
                         $fragmentHtml .= $clip->htmlFragment;
                     }
                     $usedAi = true;
-                    $finalData = new \App\Services\Stats\DTO\NormalizedTableDTO('Matches List', [], $allRows, ['ai_normalized' => true]);
+                    $finalData = new NormalizedTableDTO('Matches List', [], $allRows, ['ai_normalized' => true]);
                 }
             }
 
             $hash = hash('sha256', $fragmentHtml);
 
             if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
-                ConsoleService::log("    - Obsah seznamu zápasů se nezměnil (hash match).", 'info');
+                ConsoleService::log('    - Obsah seznamu zápasů se nezměnil (hash match).', 'info');
                 $run->skip();
             } else {
                 $run->update([
@@ -472,11 +477,11 @@ class ExternalStatsSyncService
                 }
 
                 // Link following: Detaily zápasů
-                if (($options['follow_matches'] ?? true) && !empty($clips)) {
+                if (($options['follow_matches'] ?? true) && ! empty($clips)) {
                     $allMatchLinks = collect($clips)
-                        ->flatMap(fn($c) => $c->links)
-                        ->filter(fn($l) => str_contains($l['url'] ?? ($l['href'] ?? ''), '/zapas/'));
-                    Log::debug("Found " . $allMatchLinks->count() . " match links to follow from clips.");
+                        ->flatMap(fn ($c) => $c->links)
+                        ->filter(fn ($l) => str_contains($l['url'] ?? ($l['href'] ?? ''), '/zapas/'));
+                    Log::debug('Found '.$allMatchLinks->count().' match links to follow from clips.');
                 }
 
                 $run->finish([
@@ -493,7 +498,7 @@ class ExternalStatsSyncService
         } catch (\Exception $e) {
             if (isset($html)) {
                 $sanitized = $this->normalizer->sanitizeHtml($html);
-                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
+                Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
                 $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
             }
             $run->fail($e);
@@ -515,7 +520,7 @@ class ExternalStatsSyncService
         $limit = $options['maxMatchDetails'] ?? $options['limit'] ?? $defaultLimit;
         $recentOnly = ($options['recentOnly'] ?? false);
 
-        ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').", recentOnly=".($recentOnly ? 'true' : 'false').", excesive=".($excesive ? 'true' : 'false'), 'debug');
+        ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').', recentOnly='.($recentOnly ? 'true' : 'false').', excesive='.($excesive ? 'true' : 'false'), 'debug');
 
         $query = BasketballMatch::where('team_id', $team->id)
             ->where('season_id', $season->id)
@@ -523,8 +528,8 @@ class ExternalStatsSyncService
             ->where('metadata', 'like', '%"external_id":%');
 
         // Prioritizace zápasů v minulosti, které nemají skóre (uživatelova "akce proběhla")
-        $query->orderByRaw('CASE WHEN scheduled_at < NOW() AND score_home IS NULL THEN 0 ELSE 1 END ASC')
-              ->orderBy('scheduled_at', 'desc');
+        $query->orderByRaw('CASE WHEN scheduled_at < ? AND score_home IS NULL THEN 0 ELSE 1 END ASC', [now()])
+            ->orderBy('scheduled_at', 'desc');
 
         if ($recentOnly) {
             $days = config('external_sources.czbasketball.limits.recent_match_days', 3);
@@ -589,10 +594,11 @@ class ExternalStatsSyncService
                     $matchOptions['excesive'] = true;
                 }
 
-                $syncInterval = ((!$hasBoxscore || $match->score_home === null) && ($isRecentlyScheduled || $isPastWithoutScore)) ? now()->subHour() : now()->subDay();
+                $syncInterval = ((! $hasBoxscore || $match->score_home === null) && ($isRecentlyScheduled || $isPastWithoutScore)) ? now()->subHour() : now()->subDay();
 
-                if ($lastSynced && \Illuminate\Support\Carbon::parse($lastSynced)->gt($syncInterval)) {
-                    ConsoleService::log("    - Zápas {$match->id} ($matchExtId) přeskočen (naposledy synchronizováno: $lastSynced, interval: " . (($isRecentlyScheduled || $isPastWithoutScore) && (!$hasBoxscore || $match->score_home === null) ? '1h' : '24h') . ")", 'debug');
+                if ($lastSynced && Carbon::parse($lastSynced)->gt($syncInterval)) {
+                    ConsoleService::log("    - Zápas {$match->id} ($matchExtId) přeskočen (naposledy synchronizováno: $lastSynced, interval: ".(($isRecentlyScheduled || $isPastWithoutScore) && (! $hasBoxscore || $match->score_home === null) ? '1h' : '24h').')', 'debug');
+
                     continue;
                 }
             }
@@ -665,7 +671,7 @@ class ExternalStatsSyncService
             $clipper = app(CzBasketballMatchDetailClipper::class);
             $clips = $clipper->clip($html, $url);
 
-            $boxscoreClips = collect($clips)->filter(fn($c) => str_starts_with($c->id, 'boxscore_'));
+            $boxscoreClips = collect($clips)->filter(fn ($c) => str_starts_with($c->id, 'boxscore_'));
 
             $run->updateMetadata([
                 'html_size' => strlen($html),
@@ -728,7 +734,7 @@ class ExternalStatsSyncService
 
             $hash = hash('sha256', $fragmentHtml);
             if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
-                ConsoleService::log("    - Obsah detailu zápasu se nezměnil (hash match).", 'info');
+                ConsoleService::log('    - Obsah detailu zápasu se nezměnil (hash match).', 'info');
                 $run->skip();
 
                 return;
@@ -752,7 +758,7 @@ class ExternalStatsSyncService
 
             // Předběžná příprava metadat z hlavičky pro detekci týmů v tabulkách
             $header = $mainData->metadata['header'] ?? [];
-            Log::info("DEBUG SYNC: Header found", ['header_keys' => array_keys($header)]);
+            Log::info('DEBUG SYNC: Header found', ['header_keys' => array_keys($header)]);
             $matchMetadata = $match->metadata ?? [];
             $matchMetadata['last_synced_at'] = now()->toDateTimeString();
 
@@ -770,7 +776,7 @@ class ExternalStatsSyncService
                 }
 
                 // Pokud tabulka obsahuje sumární řádek, uložíme ho do metadat zápasu pro rychlý přístup
-                $totalRow = collect($tableData->rows)->first(fn($r) => !empty($r->metadata['is_total']));
+                $totalRow = collect($tableData->rows)->first(fn ($r) => ! empty($r->metadata['is_total']));
                 if ($totalRow) {
                     $tableName = mb_strtolower($tableData->name);
                     $homeName = mb_strtolower($header['home_team'] ?? '');
@@ -783,9 +789,9 @@ class ExternalStatsSyncService
                     } else {
                         // Fallback podle pořadí (první je obvykle domácí)
                         $index = array_search($tableData, $tables);
-                        if ($index === 0 && !isset($matchMetadata['stats_home'])) {
+                        if ($index === 0 && ! isset($matchMetadata['stats_home'])) {
                             $matchMetadata['stats_home'] = $totalRow->values;
-                        } elseif ($index === 1 && !isset($matchMetadata['stats_away'])) {
+                        } elseif ($index === 1 && ! isset($matchMetadata['stats_away'])) {
                             $matchMetadata['stats_away'] = $totalRow->values;
                         }
                     }
@@ -793,48 +799,48 @@ class ExternalStatsSyncService
             }
 
             // Aktualizace metadat a skóre zápasu z extrahované hlavičky
-            if (!empty($header['periods_text'])) {
+            if (! empty($header['periods_text'])) {
                 $matchMetadata['periods'] = $header['periods_text'];
             }
-            if (!empty($header['periods'])) {
+            if (! empty($header['periods'])) {
                 $matchMetadata['periods_detailed'] = $header['periods'];
             }
-            if (!empty($header['venue'])) {
+            if (! empty($header['venue'])) {
                 $matchMetadata['venue'] = $header['venue'];
                 if (empty($match->location)) {
                     $match->location = $header['venue'];
                 }
             }
-            if (!empty($header['referees'])) {
+            if (! empty($header['referees'])) {
                 $matchMetadata['referees'] = $header['referees'];
             }
-            if (!empty($header['attendance'])) {
+            if (! empty($header['attendance'])) {
                 $matchMetadata['attendance'] = $header['attendance'];
             }
-            if (!empty($header['commissioner'])) {
+            if (! empty($header['commissioner'])) {
                 $matchMetadata['commissioner'] = $header['commissioner'];
             }
-            if (!empty($header['scheduled_at'])) {
+            if (! empty($header['scheduled_at'])) {
                 // Aktualizujeme čas zápasu, pokud je v detailu nalezen (bývá přesnější než v seznamu)
                 $match->scheduled_at = $header['scheduled_at'];
             }
 
             // Uložení nejlepších hráčů
             $bestPlayers = $mainData->metadata['best_players'] ?? [];
-            if (!empty($bestPlayers)) {
+            if (! empty($bestPlayers)) {
                 $matchMetadata['best_players'] = $bestPlayers;
                 // Zpracování fotografií nejlepších hráčů (pokud jsou naši)
                 $this->processBestPlayerPhotos($bestPlayers, $run, $match);
             }
 
             // Uložení srovnání týmů a posledních zápasů
-            if (!empty($mainData->metadata['team_comparison'])) {
+            if (! empty($mainData->metadata['team_comparison'])) {
                 $matchMetadata['team_comparison'] = $mainData->metadata['team_comparison'];
             }
-            if (!empty($mainData->metadata['last_matches'])) {
+            if (! empty($mainData->metadata['last_matches'])) {
                 $matchMetadata['last_matches'] = $mainData->metadata['last_matches'];
             }
-            if (!empty($mainData->metadata['mutual_matches'])) {
+            if (! empty($mainData->metadata['mutual_matches'])) {
                 $matchMetadata['mutual_matches'] = $mainData->metadata['mutual_matches'];
             }
 
@@ -842,9 +848,9 @@ class ExternalStatsSyncService
             $matchMetadata['boxscore_synced_at'] = now()->toDateTimeString();
 
             $updateData = ['metadata' => $matchMetadata];
-            Log::info("DEBUG SYNC: Match metadata before update", ['metadata_keys' => array_keys($matchMetadata)]);
+            Log::info('DEBUG SYNC: Match metadata before update', ['metadata_keys' => array_keys($matchMetadata)]);
 
-            if (!empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {
+            if (! empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {
                 $scoreHome = (int) $scoreMatches[1];
                 $scoreAway = (int) $scoreMatches[2];
 
@@ -864,8 +870,8 @@ class ExternalStatsSyncService
             $match->update($updateData);
 
             // Po úspěšné synchronizaci detailu (i pro budoucí zápasy) vyvoláme přepočet predikce
-            if (class_exists(\App\Jobs\ComputeMatchPredictionJob::class)) {
-                \App\Jobs\ComputeMatchPredictionJob::dispatch($match->id);
+            if (class_exists(ComputeMatchPredictionJob::class)) {
+                ComputeMatchPredictionJob::dispatch($match->id);
                 Log::info("Dispatched ComputeMatchPredictionJob for match {$match->id} after detail sync.");
             }
 
@@ -877,7 +883,7 @@ class ExternalStatsSyncService
         } catch (\Exception $e) {
             if (isset($html)) {
                 $sanitized = $this->normalizer->sanitizeHtml($html);
-                \Illuminate\Support\Facades\Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
+                Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
                 $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
             }
             $run->fail($e);
@@ -888,20 +894,20 @@ class ExternalStatsSyncService
     /**
      * Zpracuje fotografie nejlepších hráčů a uloží je do jejich portfolia.
      */
-    protected function processBestPlayerPhotos(array $bestPlayers, ExternalImportRun $run, ?\App\Models\BasketballMatch $match = null): void
+    protected function processBestPlayerPhotos(array $bestPlayers, ExternalImportRun $run, ?BasketballMatch $match = null): void
     {
         $config = ExternalTeamSeasonConfig::where('team_id', $run->team_id)
             ->where('season_id', $run->season_id)
             ->first();
 
-        if (!$config) {
+        if (! $config) {
             return;
         }
 
         // Extrahujeme všechny hráče z kategorizované struktury a určíme stranu (home/away)
         $playersToProcess = [];
         foreach ($bestPlayers as $category => $data) {
-            if (!is_array($data)) {
+            if (! is_array($data)) {
                 continue;
             }
 
@@ -918,7 +924,7 @@ class ExternalStatsSyncService
             }
 
             // Varianta 2: Pole hráčů (např. General)
-            if (empty($data['home']) && empty($data['away']) && !isset($data['external_id'])) {
+            if (empty($data['home']) && empty($data['away']) && ! isset($data['external_id'])) {
                 foreach ($data as $item) {
                     if (is_array($item) && isset($item['external_id'])) {
                         // Pokud nemáme side, zkusíme ji odhadnout z dat (v match_detail extractor dáváme _side)
@@ -936,10 +942,10 @@ class ExternalStatsSyncService
         // Odstranění duplicit (podle external_id)
         $uniquePlayers = [];
         foreach ($playersToProcess as $p) {
-            if (!empty($p['external_id'])) {
+            if (! empty($p['external_id'])) {
                 $extId = $p['external_id'];
                 // Pokud už hráče máme, ale tenhle má _side (z kategorií home/away), preferujeme ho
-                if (!isset($uniquePlayers[$extId]) || (!empty($p['_side']) && empty($uniquePlayers[$extId]['_side']))) {
+                if (! isset($uniquePlayers[$extId]) || (! empty($p['_side']) && empty($uniquePlayers[$extId]['_side']))) {
                     $uniquePlayers[$extId] = $p;
                 }
             }
@@ -952,7 +958,7 @@ class ExternalStatsSyncService
             $name = $playerData['name'] ?? null;
             $side = $playerData['_side'] ?? null;
 
-            if (!$photoUrl || !$name) {
+            if (! $photoUrl || ! $name) {
                 continue;
             }
 
@@ -960,7 +966,7 @@ class ExternalStatsSyncService
             $isOur = true;
             if ($match && $side) {
                 // Pokud match->is_home je true, pak home je náš. Pokud false, pak away je náš.
-                $isOur = ($side === 'home' && $match->is_home) || ($side === 'away' && !$match->is_home);
+                $isOur = ($side === 'home' && $match->is_home) || ($side === 'away' && ! $match->is_home);
             }
 
             try {
@@ -971,7 +977,7 @@ class ExternalStatsSyncService
                         $this->playerSyncService->syncPhoto($user, $photoUrl, false, [
                             'season_id' => $run->season_id,
                             'team_id' => $run->team_id,
-                            'added_from' => 'match_detail_sync'
+                            'added_from' => 'match_detail_sync',
                         ]);
                     }
                 } else {
@@ -981,7 +987,7 @@ class ExternalStatsSyncService
                 }
                 $processedCount++;
             } catch (\Exception $e) {
-                Log::warning("ExternalStatsSyncService: Nepodařilo se zpracovat fotografii nejlepšího hráče {$name}: " . $e->getMessage());
+                Log::warning("ExternalStatsSyncService: Nepodařilo se zpracovat fotografii nejlepšího hráče {$name}: ".$e->getMessage());
             }
         }
 

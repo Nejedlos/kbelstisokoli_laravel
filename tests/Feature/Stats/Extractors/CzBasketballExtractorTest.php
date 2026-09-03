@@ -69,4 +69,12 @@ class CzBasketballExtractorTest extends TestCase
         $this->assertArrayHasKey('header', $dto->metadata);
         $this->assertArrayHasKey('home_team', $dto->metadata['header']);
     }
+
+    public function test_missing_boxscore_is_serializable_without_fabricated_rows(): void
+    {
+        $result = (new MatchDetailBoxscoreExtractor)->extract('<html><body><h1>Upcoming match</h1></body></html>');
+        $this->assertSame([], $result['data']->rows);
+        $this->assertSame([], $result['data']->toArray()['rows']);
+        $this->assertContains('No tables found', $result['data']->warnings);
+    }
 }

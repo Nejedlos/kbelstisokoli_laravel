@@ -28,3 +28,6 @@ Z nasbíraných dat systém automaticky generuje reporty:
 ### Tipy pro trenéry
 - **Poznámky k tréninku**: Do pole "Poznámka" v detailu tréninku zapisujte zaměření (např. zónová obrana), aby hráči v mobilu věděli, na co se připravit.
 - **Hromadné omlouvání**: Pokud se trénink zruší z důvodu poruchy v hale, použijte hromadnou akci "Omluvit všechny", čímž všem hráčům zašlete notifikaci o zrušení.
+
+### Hromadná změna týmů
+V seznamu označte tréninky a zvolte **Změnit týmy**. Po potvrzení se u označených tréninků nahradí dosavadní týmy novým výběrem. Neoznačené tréninky zůstanou beze změny.

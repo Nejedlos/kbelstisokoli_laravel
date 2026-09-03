@@ -147,27 +147,11 @@ class QAMasterTest extends TestCase
     }
 
     /**
-     * QA-LEG-*: Testy legacy importu z reálné složky
+     * QA-LEG-*: Offline regression test of the legacy import pipeline
      */
     public function test_legacy_import_pipeline()
     {
-        $path = storage_path('app/legacystats');
-        if (! File::isDirectory($path) || count(File::files($path)) === 0) {
-            $this->markTestSkipped("Legacy source files not found in {$path}");
-        }
-
-        $files = File::files($path);
-        $testFile = null;
-        foreach ($files as $file) {
-            if ($file->getExtension() === 'html') {
-                $testFile = $file;
-                break;
-            }
-        }
-
-        if (! $testFile) {
-            $this->markTestSkipped('No .html legacy files found.');
-        }
+        $testFile = new \SplFileInfo(base_path('tests/Fixtures/Stats/Legacy/muzi-e_2024-2025_hraci.html'));
 
         /** @var LegacyFileClassifier $classifier */
         $classifier = $this->app->make(LegacyFileClassifier::class);

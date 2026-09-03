@@ -34,3 +34,6 @@ V administraci je k dispozici SEO sekce pro modely, které to podporují. Tato d
 - `SportsOrganization` pro každou stránku.
 - `NewsArticle` pro detaily novinek.
 - Podporuje manuální override strukturovaných dat v administraci.
+
+## Generování sitemap bez předem vytvořeného souboru
+Fallback šablona `public.sitemap` vypisuje XML deklaraci přes PHP, aby ji překladač Blade nezaměnil za PHP otevírací značku. Test generování používá izolovanou veřejnou cestu, takže není závislý na lokálním ignorovaném exportu `public/sitemap.xml`.

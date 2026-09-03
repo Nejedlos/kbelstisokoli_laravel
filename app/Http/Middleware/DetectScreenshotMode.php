@@ -19,55 +19,61 @@ class DetectScreenshotMode
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (config('screenshot.enabled', true) && ScreenshotMode::shouldActivate($request)) {
-            $userId = $request->query('screenshot_user_id');
-            ScreenshotMode::activate($userId);
+        ScreenshotMode::deactivate();
 
-            Log::debug('[ScreenshotMode] Detected in request', [
-                'user_id' => $userId,
-                'url' => $request->fullUrl(),
-                'headers' => [
-                    'X-Screenshot-Token' => $request->hasHeader('X-Screenshot-Token') ? 'PRESENT' : 'MISSING',
-                    'X-Screenshot-Mode' => $request->header('X-Screenshot-Mode'),
-                ],
-            ]);
+        try {
+            if (config('screenshot.enabled', true) && ScreenshotMode::shouldActivate($request)) {
+                $userId = $request->query('screenshot_user_id');
+                ScreenshotMode::activate($userId);
 
-            // Zajištění absolutních URL pro assety
-            URL::forceRootUrl(config('app.url'));
+                Log::debug('[ScreenshotMode] Detected in request', [
+                    'user_id' => $userId,
+                    'url' => $request->fullUrl(),
+                    'headers' => [
+                        'X-Screenshot-Token' => $request->hasHeader('X-Screenshot-Token') ? 'PRESENT' : 'MISSING',
+                        'X-Screenshot-Mode' => $request->header('X-Screenshot-Mode'),
+                    ],
+                ]);
 
-            // Autorizace impersonifikace:
-            if ($userId) {
-                $internalToken = config('screenshot.internal_token');
-                $isAuthenticated = ($internalToken && $request->header('X-Screenshot-Token') === $internalToken)
-                                   || $request->hasValidSignature();
+                // Zajištění absolutních URL pro assety
+                URL::forceRootUrl(config('app.url'));
 
-                if ($isAuthenticated) {
-                    try {
-                        // Přihlášení uživatele POUZE PRO TENTO JEDEN REQUEST (jednorázová impersonifikace)
-                        // Nepoužíváme loginUsingId, protože by se to trvale uložilo do session uživatele.
-                        $guard = $request->is('admin*') ? 'web' : config('auth.defaults.guard', 'web');
-                        Auth::guard($guard)->onceUsingId($userId);
+                // Autorizace impersonifikace:
+                if ($userId) {
+                    $internalToken = config('screenshot.internal_token');
+                    $isAuthenticated = ($internalToken && $request->header('X-Screenshot-Token') === $internalToken)
+                                       || $request->hasValidSignature();
 
-                        // Výjimka platí jen pro tento autorizovaný požadavek, nikdy pro další session.
-                        $request->attributes->set('two_factor_trusted_screenshot', true);
+                    if ($isAuthenticated) {
+                        try {
+                            // Přihlášení uživatele POUZE PRO TENTO JEDEN REQUEST (jednorázová impersonifikace)
+                            // Nepoužíváme loginUsingId, protože by se to trvale uložilo do session uživatele.
+                            $guard = $request->is('admin*') ? 'web' : config('auth.defaults.guard', 'web');
+                            Auth::guard($guard)->onceUsingId($userId);
 
-                        Log::info('[ScreenshotMode] User impersonated (once)', [
+                            // Výjimka platí jen pro tento autorizovaný požadavek, nikdy pro další session.
+                            $request->attributes->set('two_factor_trusted_screenshot', true);
+
+                            Log::info('[ScreenshotMode] User impersonated (once)', [
+                                'user_id' => $userId,
+                                'auth_id' => Auth::id(),
+                            ]);
+                        } catch (\Throwable $e) {
+                            Log::error('[ScreenshotMode] Impersonation failed', [
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    } else {
+                        Log::warning('[ScreenshotMode] User ID provided but not authenticated', [
                             'user_id' => $userId,
-                            'auth_id' => Auth::id(),
-                        ]);
-                    } catch (\Throwable $e) {
-                        Log::error('[ScreenshotMode] Impersonation failed', [
-                            'error' => $e->getMessage(),
                         ]);
                     }
-                } else {
-                    Log::warning('[ScreenshotMode] User ID provided but not authenticated', [
-                        'user_id' => $userId,
-                    ]);
                 }
             }
-        }
 
-        return $next($request);
+            return $next($request);
+        } finally {
+            ScreenshotMode::deactivate();
+        }
     }
 }

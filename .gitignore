@@ -46,3 +46,6 @@ check_config.php
 cron-proxy.php
 deploy_elo_fix.sh
 production_tail_large.log
+
+# Version the synthetic offline HTML regression samples.
+!tests/Fixtures/**/*.html

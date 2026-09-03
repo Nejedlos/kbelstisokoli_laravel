@@ -3,9 +3,13 @@
 namespace Tests\Feature\Security;
 
 use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Tests\TestCase;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
+use Tests\TestCase;
 
 class AdminAuthorizationTest extends TestCase
 {
@@ -15,9 +19,9 @@ class AdminAuthorizationTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
     protected function actingAsWith2fa(User $user)
@@ -28,7 +32,7 @@ class AdminAuthorizationTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function only_admins_can_access_debug_operations()
     {
         $coach = User::factory()->create([
@@ -55,7 +59,7 @@ class AdminAuthorizationTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    #[Test]
     public function only_admins_can_access_season_renewal()
     {
         $coach = User::factory()->create([
@@ -81,7 +85,7 @@ class AdminAuthorizationTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    #[Test]
     public function only_editors_can_access_posts()
     {
         $coach = User::factory()->create([
@@ -121,7 +125,7 @@ class AdminAuthorizationTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    #[Test]
     public function only_admins_can_see_roles_field_in_user_form()
     {
         $admin = User::factory()->create([
@@ -156,7 +160,7 @@ class AdminAuthorizationTest extends TestCase
             ->assertSee('Role uživatele');
     }
 
-    /** @test */
+    #[Test]
     public function coaches_cannot_see_all_finance_payments()
     {
         // We need to make sure 'coach' role doesn't have 'manage_economy' for this test to be meaningful,

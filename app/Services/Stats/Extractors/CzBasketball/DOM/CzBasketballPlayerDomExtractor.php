@@ -29,7 +29,9 @@ class CzBasketballPlayerDomExtractor
                 ]";
 
         $table = $crawler->filterXPath($xpath);
-        if ($table->count() === 0) return [];
+        if ($table->count() === 0) {
+            return [];
+        }
 
         $headers = $this->getTableHeaders($table);
         $rows = [];
@@ -37,19 +39,35 @@ class CzBasketballPlayerDomExtractor
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $headers) {
             $rowData = [];
             $cells = $tr->filter('td');
-            if ($cells->count() === 0) return;
+            if ($cells->count() === 0) {
+                return;
+            }
 
             foreach ($headers as $index => $label) {
                 $cell = $cells->eq($index);
-                if ($cell->count() === 0) continue;
+                if ($cell->count() === 0) {
+                    continue;
+                }
                 $val = trim($cell->text());
 
-                if (str_contains($label, 'Sezona')) $rowData['season_label'] = $val;
-                if (str_contains($label, 'Tým')) $rowData['team_name'] = $val;
-                if (str_contains($label, 'Zápasy')) $rowData['gp'] = $val;
-                if ($label === 'B') $rowData['pts_pg'] = $val;
-                if ($label === '2B') $rowData['fg2_pg'] = $val;
-                if ($label === '3B') $rowData['fg3_pg'] = $val;
+                if (str_contains($label, 'Sezona')) {
+                    $rowData['season_label'] = $val;
+                }
+                if (str_contains($label, 'Tým')) {
+                    $rowData['team_name'] = $val;
+                }
+                if (str_contains($label, 'Zápasy')) {
+                    $rowData['gp'] = $val;
+                }
+                if ($label === 'B') {
+                    $rowData['pts_pg'] = $val;
+                }
+                if ($label === '2B') {
+                    $rowData['fg2_pg'] = $val;
+                }
+                if ($label === '3B') {
+                    $rowData['fg3_pg'] = $val;
+                }
                 if ($label === 'TH') {
                     $rowData['ft_pg_raw'] = $val;
                     if (str_contains($val, '/')) {
@@ -58,8 +76,12 @@ class CzBasketballPlayerDomExtractor
                         $rowData['ft_att_pg'] = trim($parts[1]);
                     }
                 }
-                if (str_contains($label, 'TH %')) $rowData['ft_pct'] = $val;
-                if (str_contains($label, 'F-')) $rowData['fouls_pg'] = $val;
+                if (str_contains($label, 'TH %')) {
+                    $rowData['ft_pct'] = $val;
+                }
+                if (str_contains($label, 'F-')) {
+                    $rowData['fouls_pg'] = $val;
+                }
             }
             $rows[] = $rowData;
         });
@@ -78,7 +100,9 @@ class CzBasketballPlayerDomExtractor
                 ]";
 
         $table = $crawler->filterXPath($xpath);
-        if ($table->count() === 0) return [];
+        if ($table->count() === 0) {
+            return [];
+        }
 
         $headers = $this->getTableHeaders($table);
         $rows = [];
@@ -86,19 +110,35 @@ class CzBasketballPlayerDomExtractor
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $headers) {
             $rowData = [];
             $cells = $tr->filter('td');
-            if ($cells->count() === 0) return;
+            if ($cells->count() === 0) {
+                return;
+            }
 
             foreach ($headers as $index => $label) {
                 $cell = $cells->eq($index);
-                if ($cell->count() === 0) continue;
+                if ($cell->count() === 0) {
+                    continue;
+                }
                 $val = trim($cell->text());
 
-                if (str_contains($label, 'Datum')) $rowData['date'] = $val;
-                if (str_contains($label, 'Fáze sezóny')) $rowData['phase'] = $val;
-                if (str_contains($label, 'Soupeř')) $rowData['opponent_name'] = $val;
-                if ($label === 'B') $rowData['pts'] = $val;
-                if ($label === '2B') $rowData['fg2_pts'] = $val;
-                if ($label === '3B') $rowData['fg3_pts'] = $val;
+                if (str_contains($label, 'Datum')) {
+                    $rowData['date'] = $val;
+                }
+                if (str_contains($label, 'Fáze sezóny')) {
+                    $rowData['phase'] = $val;
+                }
+                if (str_contains($label, 'Soupeř')) {
+                    $rowData['opponent_name'] = $val;
+                }
+                if ($label === 'B') {
+                    $rowData['pts'] = $val;
+                }
+                if ($label === '2B') {
+                    $rowData['fg2_pts'] = $val;
+                }
+                if ($label === '3B') {
+                    $rowData['fg3_pts'] = $val;
+                }
                 if ($label === 'TH') {
                     $rowData['ft_raw'] = $val;
                     if (str_contains($val, '/')) {
@@ -107,7 +147,9 @@ class CzBasketballPlayerDomExtractor
                         $rowData['ft_att'] = trim($parts[1]);
                     }
                 }
-                if (str_contains($label, 'TH %')) $rowData['ft_pct'] = $val;
+                if (str_contains($label, 'TH %')) {
+                    $rowData['ft_pct'] = $val;
+                }
             }
             $rows[] = $rowData;
         });
@@ -124,7 +166,9 @@ class CzBasketballPlayerDomExtractor
                 ]";
 
         $table = $crawler->filterXPath($xpath);
-        if ($table->count() === 0) return [];
+        if ($table->count() === 0) {
+            return [];
+        }
 
         $headers = $this->getTableHeaders($table);
         $rows = [];
@@ -132,18 +176,32 @@ class CzBasketballPlayerDomExtractor
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $headers) {
             $rowData = [];
             $cells = $tr->filter('td');
-            if ($cells->count() === 0) return;
+            if ($cells->count() === 0) {
+                return;
+            }
 
             foreach ($headers as $index => $label) {
                 $cell = $cells->eq($index);
-                if ($cell->count() === 0) continue;
+                if ($cell->count() === 0) {
+                    continue;
+                }
                 $val = trim($cell->text());
 
-                if (str_contains($label, 'Soupeř')) $rowData['opponent_name'] = $val;
-                if ($label === 'Z') $rowData['gp'] = $val;
-                if ($label === 'B') $rowData['pts_pg'] = $val;
-                if ($label === '2B') $rowData['fg2_pg'] = $val;
-                if ($label === '3B') $rowData['fg3_pg'] = $val;
+                if (str_contains($label, 'Soupeř')) {
+                    $rowData['opponent_name'] = $val;
+                }
+                if ($label === 'Z') {
+                    $rowData['gp'] = $val;
+                }
+                if ($label === 'B') {
+                    $rowData['pts_pg'] = $val;
+                }
+                if ($label === '2B') {
+                    $rowData['fg2_pg'] = $val;
+                }
+                if ($label === '3B') {
+                    $rowData['fg3_pg'] = $val;
+                }
                 if ($label === 'TH') {
                     $rowData['ft_pg_raw'] = $val;
                     if (str_contains($val, '/')) {
@@ -152,8 +210,12 @@ class CzBasketballPlayerDomExtractor
                         $rowData['ft_att_pg'] = trim($parts[1]);
                     }
                 }
-                if (str_contains($label, 'TH %')) $rowData['ft_pct'] = $val;
-                if (str_contains($label, 'F-')) $rowData['fouls_pg'] = $val;
+                if (str_contains($label, 'TH %')) {
+                    $rowData['ft_pct'] = $val;
+                }
+                if (str_contains($label, 'F-')) {
+                    $rowData['fouls_pg'] = $val;
+                }
             }
             $rows[] = $rowData;
         });
@@ -167,10 +229,12 @@ class CzBasketballPlayerDomExtractor
         $label = $crawler->filterXPath("//span[contains(normalize-space(.), 'Aktuální klub')]");
         if ($label->count() > 0) {
             // Pokud je to span s textem "Aktuální klub:", zkusíme vzít dalšího sourozence
-            $next = $label->filterXPath("following-sibling::span[1]");
+            $next = $label->nextAll()->filter('span')->first();
             if ($next->count() > 0) {
                 $club = trim($next->text());
-                if (!empty($club)) return ['club_name' => $club];
+                if (! empty($club)) {
+                    return ['club_name' => $club];
+                }
             }
         }
 
@@ -180,7 +244,7 @@ class CzBasketballPlayerDomExtractor
             // Použijeme regex pro přesnější shodu
             if (preg_match('/Aktuální klub:\s*(.+)/u', $t, $m) && empty($club)) {
                 $candidate = trim($m[1]);
-                if (!empty($candidate) && strlen($candidate) < 100) {
+                if (! empty($candidate) && strlen($candidate) < 100) {
                     $club = $candidate;
                 }
             }
@@ -198,6 +262,7 @@ class CzBasketballPlayerDomExtractor
                 $headers[] = trim($node->text());
             });
         }
+
         return $headers;
     }
 }

@@ -28,3 +28,6 @@ Pokud potřebujete data hned (např. po skončení důležitého zápasu):
 ### Časté dotazy
 - **Proč se hráči nenačetly body?** Zkontrolujte, zda má hráč nastavené správné `external_id` a zda je jeho tým v dané soutěži spárován.
 - **Kde najdu ID hráče v ČBF?** Obvykle v URL adrese profilu hráče na webu cz.basketball.
+
+### Zápas bez zveřejněných statistik
+Pokud zdroj ještě nemá tabulku hráčských statistik, zůstane boxscore prázdný a import obsahuje upozornění. Prázdná tabulka sama o sobě neznamená pád synchronizace; údaje lze doplnit při dalším importu.

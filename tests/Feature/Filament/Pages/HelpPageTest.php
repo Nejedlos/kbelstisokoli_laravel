@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Filament\Pages;
 
-use App\Models\User;
-use App\Models\HelpCategory;
+use App\Filament\Pages\Help;
+use App\Http\Middleware\CheckTwoFactorTimeout;
+use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Models\HelpArticle;
+use App\Models\HelpCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class HelpPageTest extends TestCase
@@ -18,12 +20,12 @@ class HelpPageTest extends TestCase
         parent::setUp();
 
         $this->withoutMiddleware([
-            \App\Http\Middleware\EnsureTwoFactorEnabled::class,
-            \App\Http\Middleware\CheckTwoFactorTimeout::class,
+            EnsureTwoFactorEnabled::class,
+            CheckTwoFactorTimeout::class,
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_access_help_page_as_admin()
     {
         $admin = $this->createAdmin();
@@ -31,18 +33,18 @@ class HelpPageTest extends TestCase
 
         $this->actingAs($admin);
 
-        $response = $this->get(\App\Filament\Pages\Help::getUrl());
+        $response = $this->get(Help::getUrl());
 
         if ($response->status() !== 200) {
-            dump("Redirected to: " . $response->headers->get('Location'));
-            dump("Response content: " . mb_substr($response->content(), 0, 500));
+            dump('Redirected to: '.$response->headers->get('Location'));
+            dump('Response content: '.mb_substr($response->content(), 0, 500));
         }
 
         $response->assertStatus(200);
         $response->assertSee(__('admin.navigation.pages.help'));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_see_categories_on_help_home()
     {
         $admin = $this->createAdmin();
@@ -56,27 +58,43 @@ class HelpPageTest extends TestCase
 
         $this->actingAs($admin);
 
-        $response = $this->get(\App\Filament\Pages\Help::getUrl());
+        $response = $this->get(Help::getUrl());
 
         $response->assertStatus(200);
         $response->assertSee('Sportovní agenda');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_see_article_detail()
     {
-        $this->markTestSkipped('Problém s URL parametry v L13/Livewire 4 vyžaduje hlubší analýzu.');
-        $admin = $this->createAdmin();
-        $admin = $this->with2FA($admin);
-        // ...
+        $admin = $this->with2FA($this->createAdmin());
+        $this->actingAs($admin);
+        $article = $this->createArticle();
+        $this->get(Help::getUrl(['file' => $article->slug]))
+            ->assertOk()->assertSee('Jedinečný obsah nápovědy');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_search_on_help_page()
     {
-        $this->markTestSkipped('Problém s URL parametry v L13/Livewire 4 vyžaduje hlubší analýzu.');
-        $admin = $this->createAdmin();
-        $admin = $this->with2FA($admin);
-        // ...
+        $admin = $this->with2FA($this->createAdmin());
+        $this->actingAs($admin);
+        $this->createArticle();
+        $this->get(Help::getUrl(['q' => 'Jedinečný']))
+            ->assertOk()->assertSee('Jedinečný návod');
+    }
+
+    private function createArticle(): HelpArticle
+    {
+        $category = HelpCategory::create(['name' => ['cs' => 'Testovací kategorie'], 'slug' => 'test-category', 'is_published' => true]);
+
+        return HelpArticle::create([
+            'category_id' => $category->id,
+            'title' => ['cs' => 'Jedinečný návod'],
+            'slug' => 'unique-guide',
+            'content' => ['cs' => 'Jedinečný obsah nápovědy'],
+            'metadata' => ['cs' => ['section' => 'admin']],
+            'is_published' => true,
+        ]);
     }
 }

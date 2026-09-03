@@ -28,3 +28,6 @@ V přehledu tréninků lze vybrat více záznamů najednou a provést s nimi ná
 ## Omezení
 - Hromadné vytváření je dostupné pouze při **vytváření** nového tréninku.
 - Maximální počet hromadně vytvořených tréninků je z bezpečnostních důvodů nastaven na 50 (přes číselník) resp. 100 (při výpočtu období).
+
+### Oprava předání týmů (3. 9. 2026)
+Hromadná akce musí explicitně předat hodnotu vícenásobného relačního výběru do dat akce (`dehydrated()`); vztahy pak synchronizuje pro každý vybraný trénink. Regresní test ověřuje nahrazení původních týmů a zachování nevybraného tréninku.

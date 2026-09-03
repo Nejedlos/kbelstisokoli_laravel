@@ -86,3 +86,9 @@ Tento příkaz by měl být naplánován v scheduleru pro automatické promazáv
 - **Auth:** Login success/fail, logout, password reset, 2FA zapnutí/vypnutí.
 - **CRUD:** Modely `Page`, `Post`, `User`, `Setting`, `ClubEvent`, `BasketballMatch`, `PageBlock`.
 - **Systém:** Importy statistik (`StatsImportJob`).
+
+### Údaje o zařízení (3. 9. 2026)
+
+Detail události obsahuje v `metadata.device` původní User-Agent (nejvýše 2048 znaků), model, platformu, verzi systému, příznak mobilního zařízení a povolené hlavičky User-Agent Client Hints včetně úplných verzí prohlížečů. Stejný kontext se ukládá u HTTP požadavků v interní analytice. Hlavičky poskytuje klient; nejsou ověřenou identitou ani podkladem pro oprávnění. Chybějící model a verze zůstávají `null`; redukované `Android 10; K` se nepovažuje za skutečný model či verzi systému. Sbírá se pouze výslovně uvedený seznam diagnostických hlaviček, nikoli cookies, autorizační hlavičky nebo hesla.
+
+Server žádá další údaje hlavičkou `Accept-CH` v `.htaccess`, i při obsluze veřejné cache mimo Laravel. Podporovaný prohlížeč je může poslat při následujícím požadavku; zpětné doplnění starých logů není možné. Podrobnosti protokolu: https://developer.chrome.com/docs/privacy-security/user-agent-client-hints .

@@ -38,3 +38,8 @@ V členské sekci se v detailu zápasu zobrazují:
 - Kompletní boxscore obou týmů.
 - Rozšířené statistiky: Doskoky (REB), Asistence (AST), Zisky (STL), Ztráty (TOV), Bloky (BLK).
 - Validita dat (VAL) s barevným odlišením výkonu.
+
+## Regresní opravy a offline testy (3. 9. 2026)
+Aktuální testovací podklady jsou syntetické HTML soubory v `tests/Fixtures/Stats/CzBasketball/` a `tests/Fixtures/Stats/Legacy/`; jsou verzované výjimkou z obecného zákazu `*.html`. Testy nesmějí vyžadovat místní historické soubory ani živou síť.
+
+Pokud zápas ještě nemá boxscore, extraktor vrací prázdné řádky, metadata hlavičky a upozornění; metadata se nesmějí vydávat za řádky statistik. DOM extraktory procházejí sourozence pomocí `nextAll()` a ošetřují chybějící obalový div. Plánovač detailů váže aktuální čas jako SQL parametr, aby fungoval stejně s produkční databází i SQLite v testech.

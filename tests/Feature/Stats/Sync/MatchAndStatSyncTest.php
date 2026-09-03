@@ -65,7 +65,9 @@ class MatchAndStatSyncTest extends TestCase
         ]);
 
         $statSync = $this->app->make(StatisticSyncService::class);
-        $statSync->syncMatchBoxscore($match, $extracted['data']);
+        foreach ($extracted['tables'] as $table) {
+            $statSync->syncMatchBoxscore($match, $table);
+        }
 
         // Check statistic rows
         $boxscoreSet = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->first();

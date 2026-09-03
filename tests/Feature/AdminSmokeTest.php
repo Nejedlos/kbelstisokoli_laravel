@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Page;
+use App\Models\Post;
 use Tests\TestCase;
 
 class AdminSmokeTest extends TestCase
@@ -28,23 +28,21 @@ class AdminSmokeTest extends TestCase
     }
 
     /**
-     * Admin otevře seznam Pages.
+     * Admin otevře seznam Posts.
      */
-    public function test_admin_can_see_pages_index(): void
+    public function test_admin_can_see_posts_index(): void
     {
-        $this->markTestSkipped('PageResource chybí v projektu a vyžaduje obnovení.');
-        $this->get('/admin/pages')->assertStatus(200);
+        $this->get('/admin/posts')->assertStatus(200);
     }
 
     /**
-     * Admin otevře editaci Page.
+     * Admin otevře editaci Post.
      */
-    public function test_admin_can_see_page_edit_form(): void
+    public function test_admin_can_see_post_edit_form(): void
     {
-        $this->markTestSkipped('PageResource chybí v projektu a vyžaduje obnovení.');
-        $page = Page::factory()->create();
+        $post = Post::create(['title' => ['cs' => 'Testovací aktualita'], 'slug' => 'test-post', 'status' => 'draft']);
 
-        $this->get("/admin/pages/{$page->id}/edit")->assertStatus(200);
+        $this->get("/admin/posts/{$post->id}/edit")->assertStatus(200);
     }
 
     /**

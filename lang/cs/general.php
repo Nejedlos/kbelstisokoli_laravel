@@ -88,6 +88,7 @@ return [
         'funnel_subtitle' => 'Hrajeme v Letňanech, ale patříme do velké kbelské rodiny.',
     ],
     'nav' => [
+        'toggle_menu' => 'Otevřít nebo zavřít menu',
         'home' => 'Úvod',
         'teams' => 'Týmy',
         'program' => 'Program',

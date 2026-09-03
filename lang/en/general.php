@@ -88,6 +88,7 @@ return [
         'funnel_subtitle' => 'We play in Letňany, but we belong to the big Kbely family.',
     ],
     'nav' => [
+        'toggle_menu' => 'Open or close menu',
         'home' => 'Home',
         'teams' => 'Teams',
         'program' => 'Program',

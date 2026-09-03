@@ -45,7 +45,7 @@ class AuditLogService
             'ip_hash' => $ip ? hash('sha256', $ip.config('app.key')) : null,
             'user_agent_summary' => Str::limit(Request::userAgent(), 255),
             'request_id' => Request::header('X-Request-ID') ?? (string) Str::uuid(),
-            'metadata' => $metadata,
+            'metadata' => array_merge($metadata, ['device' => app(DeviceContextService::class)->collect(request())]),
             'changes' => $changes,
             'is_system_event' => $isAuth ? ($user === null) : $this->resolveIsSystemEvent(),
             'source' => $isAuth ? 'web' : $this->resolveSource(),

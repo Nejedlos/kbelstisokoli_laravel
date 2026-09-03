@@ -15,8 +15,8 @@ class IconErrorTest extends TestCase
     {
         // Create user with permission to see coach section
         $user = User::factory()->create(['is_active' => true]);
-        $permission = Permission::create(['name' => 'view_member_section']);
-        $manageTeamsPermission = Permission::create(['name' => 'manage_teams']);
+        $permission = Permission::findByName('view_member_section', 'web');
+        $manageTeamsPermission = Permission::findByName('manage_teams', 'web');
         $user->givePermissionTo($permission);
         $user->givePermissionTo($manageTeamsPermission);
 

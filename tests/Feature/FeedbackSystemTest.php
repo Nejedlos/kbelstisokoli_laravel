@@ -27,17 +27,17 @@ class FeedbackSystemTest extends TestCase
         Storage::fake('local');
     }
 
-    public function test_guest_does_not_see_widget_in_html_response_on_localhost(): void
+    public function test_guest_does_not_see_widget_on_production_host(): void
     {
-        // Localhost is considered a test host in InjectFeedbackWidget, but now we require auth
-        $response = $this->get('/');
+        // Public production responses must not contain the authenticated feedback widget.
+        $response = $this->get('https://kbelstisokoli.cz/');
         $response->assertStatus(200);
         $response->assertDontSee('ks-fb-loader');
     }
 
     public function test_auth_user_sees_widget_in_html_response(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
 
         $response = $this->actingAs($user)->get('/');
 
@@ -65,7 +65,7 @@ class FeedbackSystemTest extends TestCase
 
     public function test_widget_renders_successfully_for_auth(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
         $response = $this->actingAs($user)->get('/feedback/widget');
 
         $response->assertStatus(200);
@@ -88,7 +88,7 @@ class FeedbackSystemTest extends TestCase
 
     public function test_auth_user_can_post_feedback(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
 
         $response = $this->actingAs($user)->postJson('/feedback', [
             'type' => 'bug',
@@ -126,7 +126,7 @@ class FeedbackSystemTest extends TestCase
 
     public function test_redaction_works(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
         Config::set('feedback.redaction.redact_keys', ['password']);
 
         $response = $this->actingAs($user)->postJson('/feedback', [
@@ -155,7 +155,7 @@ class FeedbackSystemTest extends TestCase
     public function test_rate_limit_works(): void
     {
         Cache::flush();
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
 
         $payload = [
             'type' => 'bug',
@@ -167,19 +167,21 @@ class FeedbackSystemTest extends TestCase
             ],
         ];
 
-        // Send many requests to hit the limit (default 10,1)
-        for ($i = 1; $i <= 10; $i++) {
+        // Exercise the configured boundary (testing deliberately uses a higher limit).
+        $limit = (int) explode(',', config('feedback.limits.rate_limit'))[0];
+        $this->freezeTime();
+        for ($i = 1; $i <= $limit; $i++) {
             $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => "Test $i"]))->assertStatus(200);
         }
 
-        // 11th should be throttled (429)
-        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => 'Test 11']))->assertStatus(429);
+        // The next distinct report must be throttled.
+        $this->actingAs($user)->postJson('/feedback', array_merge_recursive($payload, ['title' => 'Over the limit']))->assertStatus(429);
     }
 
     public function test_duplicate_guard_works(): void
     {
         Cache::flush();
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
 
         $payload = [
             'type' => 'bug',

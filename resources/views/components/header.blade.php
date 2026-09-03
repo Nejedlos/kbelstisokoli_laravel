@@ -232,13 +232,16 @@ class="bg-white shadow-sm overflow-visible">
                 </a>
             @endauth
 
-            <button @click="mobileMenuOpen = !mobileMenuOpen"
-                    class="p-2 -mr-1 text-slate-700 hover:text-primary focus:outline-none transition-colors xl:hidden"
+            <button type="button" @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="p-2 -mr-1 min-w-11 min-h-11 text-slate-700 hover:text-primary focus:outline-none transition-colors xl:hidden"
                     :class="isNavOverflowing ? '!block' : '!hidden'"
                     aria-label="{{ __('general.nav.toggle_menu') }}"
+                    aria-controls="public-mobile-menu"
                     :aria-expanded="mobileMenuOpen">
-                <i x-show="!mobileMenuOpen" class="fa-light fa-bars-staggered text-2xl"></i>
-                <i x-show="mobileMenuOpen" class="fa-light fa-xmark text-2xl"></i>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+                    <path x-show="!mobileMenuOpen" d="M3 6h18M3 12h12M3 18h18" />
+                    <path x-show="mobileMenuOpen" x-cloak d="m6 6 12 12M6 18 18 6" />
+                </svg>
             </button>
         </div>
     </div>
@@ -274,7 +277,7 @@ class="bg-white shadow-sm overflow-visible">
 
     <!-- Mobile Menu Shell -->
     @if(!($branding['maintenance_mode'] ?? false))
-    <div x-show="mobileMenuOpen && isNavOverflowing"
+    <div id="public-mobile-menu" x-show="mobileMenuOpen && isNavOverflowing"
          x-cloak
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 -translate-y-10"

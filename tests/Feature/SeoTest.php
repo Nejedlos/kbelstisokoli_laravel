@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\Test;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Tests\TestCase;
 
 class SeoTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function robots_txt_is_accessible_and_contains_sitemap()
     {
         $response = $this->get('/robots.txt');
@@ -16,7 +19,7 @@ class SeoTest extends TestCase
         $response->assertSee('Disallow: /admin');
     }
 
-    /** @test */
+    #[Test]
     public function llms_txt_is_accessible()
     {
         $response = $this->get('/llms.txt');
@@ -25,14 +28,25 @@ class SeoTest extends TestCase
         $response->assertSee('llms.txt - Kbelští sokoli');
     }
 
-    /** @test */
+    #[Test]
     public function sitemap_xml_is_accessible()
     {
-        $response = $this->get('/sitemap.xml');
+        // Exercise generation independently of an ignored local sitemap export.
+        $originalPublicPath = public_path();
+        $this->app->usePublicPath(sys_get_temp_dir().'/ks-sitemap-'.Str::uuid());
+        try {
+            $response = $this->get('https://kbelstisokoli.cz/sitemap.xml');
+        } finally {
+            $this->app->usePublicPath($originalPublicPath);
+        }
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'text/xml; charset=utf-8');
-        $response->assertSee('<urlset', false);
-        $response->assertSee('https://kbelstisokoli.cz', false);
+        $xml = $response->baseResponse instanceof BinaryFileResponse
+            ? file_get_contents($response->baseResponse->getFile()->getPathname())
+            : $response->getContent();
+        $this->assertNotFalse(simplexml_load_string($xml));
+        $this->assertStringContainsString('<urlset', $xml);
+        $this->assertStringContainsString('<loc>'.e(url('/')).'</loc>', $xml);
     }
 }

@@ -21,3 +21,7 @@ Pokud hledáte konkrétní událost:
 ## Důležité upozornění
 - **Obnova smazaných dat**: Audit log slouží pro informaci o smazání, ale neobsahuje tlačítko pro automatickou obnovu smazaného záznamu. Obnova dat vyžaduje technický zásah administrátora databáze.
 - **Retence dat**: Staré záznamy v logu mohou být po čase automaticky mazány, aby systém zůstal rychlý.
+
+### Podrobnosti telefonu a prohlížeče
+
+V detailu události, v metadatech pod `device`, najdete dostupný model telefonu, systém a jeho verzi, mobilní režim a hlavičky s úplnou verzí prohlížeče. Tyto údaje se zaznamenávají nově při návštěvě a přihlášení; starší záznamy je nemají. Pokud prohlížeč údaje neposkytuje, hodnota zůstane prázdná (`null`). Obecné označení `Android 10; K` není skutečný model telefonu. Údaje hlásí prohlížeč a mohou být změněné, proto neslouží k ověření identity uživatele.

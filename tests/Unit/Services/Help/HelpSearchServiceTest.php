@@ -2,10 +2,11 @@
 
 namespace Tests\Unit\Services\Help;
 
-use App\Models\HelpCategory;
 use App\Models\HelpArticle;
+use App\Models\HelpCategory;
 use App\Services\Help\HelpSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class HelpSearchServiceTest extends TestCase
@@ -17,10 +18,10 @@ class HelpSearchServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new HelpSearchService();
+        $this->service = new HelpSearchService;
     }
 
-    /** @test */
+    #[Test]
     public function it_finds_articles_by_title()
     {
         $cat = HelpCategory::create([
@@ -42,7 +43,7 @@ class HelpSearchServiceTest extends TestCase
         $this->assertEquals('login-guide', $results->first()->slug);
     }
 
-    /** @test */
+    #[Test]
     public function it_finds_articles_by_keywords()
     {
         $cat = HelpCategory::create([
@@ -65,7 +66,7 @@ class HelpSearchServiceTest extends TestCase
         $this->assertEquals('payments', $results->first()->slug);
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_by_audience_role()
     {
         $cat = HelpCategory::create([
@@ -101,7 +102,7 @@ class HelpSearchServiceTest extends TestCase
         $this->assertCount(2, $results);
     }
 
-    /** @test */
+    #[Test]
     public function it_respects_published_status()
     {
         $cat = HelpCategory::create([

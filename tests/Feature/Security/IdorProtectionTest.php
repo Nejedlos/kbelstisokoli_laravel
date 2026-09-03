@@ -32,8 +32,8 @@ class IdorProtectionTest extends TestCase
      */
     public function test_user_cannot_download_other_user_avatar(): void
     {
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
+        $userA = User::factory()->create(['is_active' => true]);
+        $userB = User::factory()->create(['is_active' => true]);
 
         // Add private media to user A
         $file = UploadedFile::fake()->image('avatar.jpg');

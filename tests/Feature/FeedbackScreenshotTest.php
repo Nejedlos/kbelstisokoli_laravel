@@ -32,7 +32,7 @@ class FeedbackScreenshotTest extends TestCase
 
     public function test_server_screenshot_endpoint_works_with_mocked_service(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
 
         $this->mock(ScreenshotService::class, function (MockInterface $mock) {
             $mock->shouldReceive('captureViaPlaywrightFromDom')
@@ -43,7 +43,7 @@ class FeedbackScreenshotTest extends TestCase
                     'width' => 1920,
                     'height' => 1080,
                     'mime' => 'image/png',
-                    'path' => '/tmp/test.png'
+                    'path' => '/tmp/test.png',
                 ]);
         });
 
@@ -86,7 +86,7 @@ class FeedbackScreenshotTest extends TestCase
 
     public function test_report_submission_works_without_screenshot_on_failure(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_active' => true]);
 
         // Simulate report submission where capture.screenshot is null (simulating failure on frontend)
         $response = $this->actingAs($user)->postJson('/feedback', [
@@ -102,8 +102,8 @@ class FeedbackScreenshotTest extends TestCase
                 'screenshot_meta' => [
                     'strategy' => 'server',
                     'error' => 'Playwright failed',
-                ]
-            ]
+                ],
+            ],
         ]);
 
         $response->assertStatus(200);

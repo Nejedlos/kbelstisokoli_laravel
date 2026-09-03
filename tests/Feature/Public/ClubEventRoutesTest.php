@@ -24,6 +24,7 @@ class ClubEventRoutesTest extends TestCase
         $this->router = new Router(new Dispatcher($app), $app);
 
         $app->instance('router', $this->router);
+        Facade::clearResolvedInstances();
         Facade::setFacadeApplication($app);
 
         require dirname(__DIR__, 3).'/routes/public.php';

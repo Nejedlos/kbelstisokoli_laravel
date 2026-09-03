@@ -2,10 +2,11 @@
 
 namespace Tests\Unit\Services\Help;
 
-use App\Models\HelpCategory;
 use App\Models\HelpArticle;
+use App\Models\HelpCategory;
 use App\Services\Help\HelpNavigationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class HelpNavigationServiceTest extends TestCase
@@ -17,10 +18,10 @@ class HelpNavigationServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new HelpNavigationService();
+        $this->service = new HelpNavigationService;
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_root_breadcrumbs()
     {
         $breadcrumbs = $this->service->getBreadcrumbs();
@@ -30,7 +31,7 @@ class HelpNavigationServiceTest extends TestCase
         $this->assertTrue($breadcrumbs[0]['is_active']);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_category_breadcrumbs()
     {
         $root = HelpCategory::create([
@@ -52,7 +53,7 @@ class HelpNavigationServiceTest extends TestCase
         $this->assertTrue($breadcrumbs[2]['is_active']);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_article_breadcrumbs()
     {
         $root = HelpCategory::create([
@@ -75,7 +76,7 @@ class HelpNavigationServiceTest extends TestCase
         $this->assertTrue($breadcrumbs[2]['is_active']);
     }
 
-    /** @test */
+    #[Test]
     public function it_prevents_infinite_recursion_in_breadcrumbs()
     {
         $cat1 = HelpCategory::create([

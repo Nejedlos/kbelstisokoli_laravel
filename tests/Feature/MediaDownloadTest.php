@@ -3,10 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\MediaAsset;
-use App\Models\User;
+use App\Services\Media\CustomPathGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MediaDownloadTest extends TestCase
@@ -19,7 +20,7 @@ class MediaDownloadTest extends TestCase
         Storage::fake('media_private');
     }
 
-    /** @test */
+    #[Test]
     public function guests_cannot_download_private_media()
     {
         $asset = MediaAsset::create([
@@ -34,17 +35,11 @@ class MediaDownloadTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function admins_can_download_private_media()
     {
-        $admin = User::factory()->create();
-        // Simulujeme roli super_admin (pokud ji systém má, nebo prostě can())
-        // V našem kontroleru kontrolujeme hasRole('super_admin')
-
-        // Pokud nemáme role v testu, můžeme je přidat přes Spatie
-        // Ale pro jednoduchost testu se ujistíme, že hasRole vrací true
-        $admin = \Mockery::mock($admin)->makePartial();
-        $admin->shouldReceive('hasRole')->with('super_admin')->andReturn(true);
+        $admin = $this->with2FA($this->createAdmin());
+        $this->confirm2FA($admin);
         $this->actingAs($admin);
 
         $asset = MediaAsset::create([
@@ -55,7 +50,7 @@ class MediaDownloadTest extends TestCase
         $media = $asset->addMedia($file)->toMediaCollection('default', 'media_private');
 
         // Musíme zajistit, aby soubor fyzicky existoval pro response()->download()
-        $relativeDiskPath = app(\App\Services\Media\CustomPathGenerator::class)->getPath($media).$media->file_name;
+        $relativeDiskPath = app(CustomPathGenerator::class)->getPath($media).$media->file_name;
         Storage::disk('media_private')->put($relativeDiskPath, 'content');
 
         $response = $this->get(route('media.download', ['uuid' => $media->uuid]));

@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Auth;
 
 use App\Models\User;
+use App\Support\AuthRedirect;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Filament\Auth\Pages\Login as BaseLogin;
@@ -23,6 +24,18 @@ class Login extends BaseLogin
 
     // DŮLEŽITÉ: `$view` musí být NEstatická vlastnost, aby odpovídala `Filament\Pages\SimplePage`
     protected string $view = 'filament.admin.auth.login';
+
+    public function mount(): void
+    {
+        if ($user = Filament::auth()->user()) {
+            // Reopening login must use the same permission-aware destination as login itself.
+            redirect()->to(AuthRedirect::getTargetUrl($user, request()));
+
+            return;
+        }
+
+        parent::mount();
+    }
 
     public function getHeading(): string|Htmlable
     {

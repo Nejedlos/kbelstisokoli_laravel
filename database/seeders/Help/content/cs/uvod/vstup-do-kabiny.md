@@ -20,4 +20,6 @@ Vstupní brána do systému klubu se nachází na adrese `https://kbelstisokoli.
 - **Expirované sezení:** Z bezpečnostních důvodů vás systém po delší době neaktivity odhlásí. Stačí se znovu přihlásit.
 
 ## Tip pro efektivitu
+Na telefonu otevřete horní menu tlačítkem se třemi čarami a zvolte **Přihlášení pro členy**. Adresa s `www` se automaticky převede na hlavní doménu. Pokud už jste přihlášeni, opětovné otevření přihlášení vás zavede do dostupné sekce; běžného člena na členskou nástěnku.
+
 Doporučujeme si stránku s přihlášením uložit do záložek v prohlížeči nebo si ji přidat na plochu telefonu jako aplikaci (viz návod **Sokoli v mobilu**).

@@ -3,6 +3,7 @@
 namespace App\Services\InternalAnalytics;
 
 use App\Models\InternalAnalyticsEvent;
+use App\Services\DeviceContextService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +15,7 @@ class InternalAnalyticsService
     public function trackRequest(Request $request, Response $response, array $context = []): void
     {
         try {
-            if (!$this->shouldTrack($request)) {
+            if (! $this->shouldTrack($request)) {
                 return;
             }
 
@@ -43,6 +44,7 @@ class InternalAnalyticsService
                 'user_agent' => Str::limit($request->userAgent(), 500),
                 'referer' => Str::limit($request->headers->get('referer'), 500),
                 'metadata' => array_merge($context, [
+                    'device' => app(DeviceContextService::class)->collect($request),
                     'is_ajax' => $request->ajax(),
                     'is_pjax' => $request->pjax(),
                     'is_livewire' => $request->hasHeader('X-Livewire'),
@@ -63,7 +65,7 @@ class InternalAnalyticsService
 
             InternalAnalyticsEvent::create($data);
         } catch (\Exception $e) {
-            Log::error('InternalAnalytics failed to track request: ' . $e->getMessage(), [
+            Log::error('InternalAnalytics failed to track request: '.$e->getMessage(), [
                 'exception' => $e,
                 'path' => $request->path(),
             ]);
@@ -73,7 +75,7 @@ class InternalAnalyticsService
     public function trackEvent(string $eventType, array $data = []): void
     {
         try {
-            if (!config('internal-analytics.enabled', true)) {
+            if (! config('internal-analytics.enabled', true)) {
                 return;
             }
 
@@ -82,7 +84,7 @@ class InternalAnalyticsService
                 'occurred_at' => now(),
             ], $data));
         } catch (\Exception $e) {
-            Log::error('InternalAnalytics failed to track event: ' . $e->getMessage(), [
+            Log::error('InternalAnalytics failed to track event: '.$e->getMessage(), [
                 'event_type' => $eventType,
             ]);
         }
@@ -131,29 +133,31 @@ class InternalAnalyticsService
         $ua = $request->userAgent();
         $salt = config('internal-analytics.hash_salt');
 
-        return hash('sha256', $ip . $ua . $salt);
+        return hash('sha256', $ip.$ua.$salt);
     }
 
     public function makeSessionHash(Request $request): ?string
     {
-        if (!$request->hasSession()) {
+        if (! $request->hasSession()) {
             return null;
         }
 
-        return hash('sha256', $request->session()->getId() . config('internal-analytics.hash_salt'));
+        return hash('sha256', $request->session()->getId().config('internal-analytics.hash_salt'));
     }
 
     public function makeIpHash(Request $request): ?string
     {
         $ip = $request->ip();
-        if (!$ip) return null;
+        if (! $ip) {
+            return null;
+        }
 
-        return hash('sha256', $ip . config('internal-analytics.hash_salt'));
+        return hash('sha256', $ip.config('internal-analytics.hash_salt'));
     }
 
     public function shouldTrack(Request $request): bool
     {
-        if (!config('internal-analytics.enabled', true)) {
+        if (! config('internal-analytics.enabled', true)) {
             return false;
         }
 
@@ -164,11 +168,21 @@ class InternalAnalyticsService
             }
         }
 
-        if ($this->isIgnoredMethod($request)) return false;
-        if ($this->isIgnoredPath($request)) return false;
-        if ($this->isIgnoredRoute($request)) return false;
-        if ($this->isIgnoredExtension($request)) return false;
-        if ($this->isBot($request)) return false;
+        if ($this->isIgnoredMethod($request)) {
+            return false;
+        }
+        if ($this->isIgnoredPath($request)) {
+            return false;
+        }
+        if ($this->isIgnoredRoute($request)) {
+            return false;
+        }
+        if ($this->isIgnoredExtension($request)) {
+            return false;
+        }
+        if ($this->isBot($request)) {
+            return false;
+        }
 
         return true;
     }
@@ -186,36 +200,43 @@ class InternalAnalyticsService
                 return true;
             }
         }
+
         return false;
     }
 
     public function isIgnoredRoute(Request $request): bool
     {
         $routeName = $request->route()?->getName();
-        if (!$routeName) return false;
+        if (! $routeName) {
+            return false;
+        }
 
         foreach (config('internal-analytics.ignored_route_names', []) as $ignored) {
             if (Str::is($ignored, $routeName)) {
                 return true;
             }
         }
+
         return false;
     }
 
     protected function isIgnoredExtension(Request $request): bool
     {
         $extension = pathinfo($request->path(), PATHINFO_EXTENSION);
+
         return in_array(strtolower($extension), config('internal-analytics.ignored_extensions', []));
     }
 
     public function isBot(Request $request): bool
     {
-        if (!config('internal-analytics.bot_detection_enabled', true)) {
+        if (! config('internal-analytics.bot_detection_enabled', true)) {
             return false;
         }
 
         $ua = $request->userAgent();
-        if (!$ua) return true;
+        if (! $ua) {
+            return true;
+        }
 
         foreach (config('internal-analytics.ignored_user_agents', []) as $bot) {
             if (stripos($ua, $bot) !== false) {
@@ -233,6 +254,7 @@ class InternalAnalyticsService
                 return $guard;
             }
         }
+
         return null;
     }
 }

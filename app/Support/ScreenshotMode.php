@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 class ScreenshotMode
 {
     protected static bool $isActive = false;
+
     protected static ?int $userId = null;
 
     /**
@@ -16,6 +17,12 @@ class ScreenshotMode
     {
         static::$isActive = true;
         static::$userId = $userId;
+    }
+
+    public static function deactivate(): void
+    {
+        static::$isActive = false;
+        static::$userId = null;
     }
 
     /**

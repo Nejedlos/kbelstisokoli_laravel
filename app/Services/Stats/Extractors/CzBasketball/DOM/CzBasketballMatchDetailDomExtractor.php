@@ -22,7 +22,7 @@ class CzBasketballMatchDetailDomExtractor
 
         // 6. VALIDACE
         if (empty($teamBlocks) && empty($preview)) {
-            $warnings[] = "Neither boxscore nor preview section found.";
+            $warnings[] = 'Neither boxscore nor preview section found.';
         }
 
         return [
@@ -41,6 +41,7 @@ class CzBasketballMatchDetailDomExtractor
         // 3 sloupce: home_value, label, away_value
         $table = $crawler->filter('table')->reduce(function (Crawler $node) {
             $text = $node->text();
+
             return str_contains($text, 'Body na zápas') || str_contains($text, 'Doskoky');
         })->first();
 
@@ -95,14 +96,14 @@ class CzBasketballMatchDetailDomExtractor
         $details->each(function (Crawler $node) use (&$info) {
             $text = trim($node->text());
             if (preg_match('/\d+\.\s*\d+\.\s*\d{4}/', $text)) {
-                $info['date_time'] = $text . ($info['date_time'] ? ' ' . $info['date_time'] : '');
+                $info['date_time'] = $text.($info['date_time'] ? ' '.$info['date_time'] : '');
             } elseif (preg_match('/\d{2}:\d{2}/', $text)) {
-                $info['date_time'] .= ($info['date_time'] ? ' ' : '') . $text;
+                $info['date_time'] .= ($info['date_time'] ? ' ' : '').$text;
             } elseif (str_contains($text, 'hala') || $node->filter('a[href*="/hala/"]')->count() > 0) {
                 $info['venue'] = $text;
             } else {
                 // Možná soutěž
-                if (!empty($text) && !is_numeric($text)) {
+                if (! empty($text) && ! is_numeric($text)) {
                     $info['competition'] = $text;
                 }
             }
@@ -121,7 +122,7 @@ class CzBasketballMatchDetailDomExtractor
         // V reálu to může být i prostě heading
         if ($boxscoreHeading->count() === 0) {
             // Zkusíme najít h3
-            $boxscoreHeading = $crawler->filter('h3')->reduce(function(Crawler $node) {
+            $boxscoreHeading = $crawler->filter('h3')->reduce(function (Crawler $node) {
                 return str_contains($node->text(), 'Boxscore');
             });
         }
@@ -133,21 +134,25 @@ class CzBasketballMatchDetailDomExtractor
             $teamName = trim($h4->text());
 
             // Najdi nejbližší následující tabulku
-            $table = $h4->filterXPath("following-sibling::table[1]");
+            $table = $h4->nextAll()->filter('table')->first();
             if ($table->count() === 0) {
                 // Možná je to zabaleno v divu
-                $table = $h4->closest('div')->filter('table')->first();
-                if ($table->count() === 0 || !str_contains($table->filter('tr')->first()->text(), 'Hráč')) {
+                $container = $h4->closest('div');
+                if ($container === null) {
+                    return;
+                }
+                $table = $container->filter('table')->first();
+                if ($table->count() === 0 || ! str_contains($table->filter('tr')->first()->text(), 'Hráč')) {
                     return;
                 }
             }
 
             $rows = $this->extractBoxscoreTable($table);
 
-            if (!empty($rows)) {
+            if (! empty($rows)) {
                 $teamBlocks[] = [
                     'team_label' => $teamName,
-                    'rows' => $rows
+                    'rows' => $rows,
                 ];
             }
         });
@@ -168,7 +173,9 @@ class CzBasketballMatchDetailDomExtractor
         $rows = [];
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $headers) {
             $cells = $tr->filter('td');
-            if ($cells->count() === 0) return;
+            if ($cells->count() === 0) {
+                return;
+            }
 
             $playerCell = null;
             $playerCellIndex = -1;
@@ -179,7 +186,9 @@ class CzBasketballMatchDetailDomExtractor
                 }
             }
 
-            if ($playerCellIndex === -1) return;
+            if ($playerCellIndex === -1) {
+                return;
+            }
             $playerName = trim($cells->eq($playerCellIndex)->text());
 
             // FILTRY: ignoruj řádky, kde Hráč obsahuje “Tým/trenéři” nebo “Celkem”
@@ -191,7 +200,7 @@ class CzBasketballMatchDetailDomExtractor
                 'player_name' => $playerName,
                 'player_external_id' => null,
                 'jersey_number' => null,
-                'values' => []
+                'values' => [],
             ];
 
             $playerLink = $cells->eq($playerCellIndex)->filter('a[href*="/hrac/"]')->first();
@@ -203,12 +212,20 @@ class CzBasketballMatchDetailDomExtractor
 
             foreach ($headers as $index => $label) {
                 $cell = $cells->eq($index);
-                if ($cell->count() === 0) continue;
+                if ($cell->count() === 0) {
+                    continue;
+                }
                 $val = trim($cell->text());
 
-                if (str_contains($label, 'Číslo')) $rowData['jersey_number'] = $val;
-                if ($label === '2B') $rowData['values']['fg2_pts'] = $val;
-                if ($label === '3B') $rowData['values']['fg3_pts'] = $val;
+                if (str_contains($label, 'Číslo')) {
+                    $rowData['jersey_number'] = $val;
+                }
+                if ($label === '2B') {
+                    $rowData['values']['fg2_pts'] = $val;
+                }
+                if ($label === '3B') {
+                    $rowData['values']['fg3_pts'] = $val;
+                }
                 if ($label === 'TH') {
                     if (str_contains($val, '/')) {
                         $parts = explode('/', $val);
@@ -219,13 +236,19 @@ class CzBasketballMatchDetailDomExtractor
                         $rowData['values']['ft_att'] = '0';
                     }
                 }
-                if ($label === 'F-') $rowData['values']['fouls'] = $val;
-                if ($label === 'B') $rowData['values']['pts'] = $val;
-                if ($label === '+/-') $rowData['values']['plus_minus'] = $val;
+                if ($label === 'F-') {
+                    $rowData['values']['fouls'] = $val;
+                }
+                if ($label === 'B') {
+                    $rowData['values']['pts'] = $val;
+                }
+                if ($label === '+/-') {
+                    $rowData['values']['plus_minus'] = $val;
+                }
             }
 
             // Validace: hráčský řádek je ten, kde existuje /hrac/{id} link nebo player_name není prázdné a číslo je číslo
-            if ($rowData['player_external_id'] || (!empty($rowData['player_name']) && !empty($rowData['jersey_number']))) {
+            if ($rowData['player_external_id'] || (! empty($rowData['player_name']) && ! empty($rowData['jersey_number']))) {
                 $rows[] = $rowData;
             }
         });

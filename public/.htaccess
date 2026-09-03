@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # Canonical host before PHP, including static files; preserve POST bodies.
+    RewriteCond %{HTTP_HOST} ^www\.kbelstisokoli\.cz(?::[0-9]+)?$ [NC]
+    RewriteRule ^ https://kbelstisokoli.cz%{REQUEST_URI} [R=308,L]
+
     # Block access to .env file
     <Files .env>
         Order allow,deny
@@ -63,4 +67,9 @@
     ExpiresByType font/woff2 "access plus 1 year"
     ExpiresByType font/ttf "access plus 1 year"
     ExpiresDefault "access plus 2 days"
+</IfModule>
+
+# Request browser-provided device details, also on cached responses.
+<IfModule mod_headers.c>
+    Header always set Accept-CH "Sec-CH-UA-Model, Sec-CH-UA-Platform-Version, Sec-CH-UA-Full-Version-List"
 </IfModule>

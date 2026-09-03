@@ -9,7 +9,7 @@ class TeamPageClipperTest extends TestCase
 {
     private function sampleHtml(): string
     {
-        return <<<HTML
+        return <<<'HTML'
 <!DOCTYPE html>
 <html>
 <body>
@@ -52,10 +52,10 @@ class TeamPageClipperTest extends TestCase
       </thead>
       <tbody>
         <tr>
-          <td>104</td><td><a href="/soutez/4625">Přebor B</a></td><td>Domácí</td><td>2026-03-01</td><td><a href="/tym/7764">TJ ČSA</a></td><td>79:46</td><td>10</td><td>5</td><td>9</td><td>70</td>
+          <td><a href="/zapas/104">104</a></td><td><a href="/soutez/4625">Přebor B</a></td><td>Domácí</td><td>2026-03-01</td><td><a href="/tym/7764">TJ ČSA</a></td><td>79:46</td><td>10</td><td>5</td><td>9</td><td>70</td>
         </tr>
         <tr>
-          <td>105</td><td><a href="/soutez/4625">Přebor B</a></td><td>Hosté</td><td>2026-03-08</td><td><a href="/tym/8888">BK Test</a></td><td>65:60</td><td>8</td><td>7</td><td>10</td><td>68</td>
+          <td><a href="/zapas/105">105</a></td><td><a href="/soutez/4625">Přebor B</a></td><td>Hosté</td><td>2026-03-08</td><td><a href="/tym/8888">BK Test</a></td><td>65:60</td><td>8</td><td>7</td><td>10</td><td>68</td>
         </tr>
         <tr>
           <td>106</td><td><a href="/soutez/4625">Přebor B</a></td><td>Domácí</td><td>2026-03-15</td><td><a href="/tym/9999">USK</a></td><td>--</td><td></td><td></td><td></td><td></td>
@@ -88,12 +88,12 @@ HTML;
     public function test_team_page_clipper_finds_required_clips()
     {
         $html = $this->sampleHtml();
-        $clipper = new CzBasketballTeamPageClipper();
+        $clipper = new CzBasketballTeamPageClipper;
         $clips = $clipper->clip($html, 'https://cz.basketball/tym/123?y=2025');
 
         $this->assertNotEmpty($clips, 'No clips returned');
 
-        $ids = array_map(fn($c) => $c->id, $clips);
+        $ids = array_map(fn ($c) => $c->id, $clips);
         $this->assertContains('roster_table', $ids, 'Roster table not found');
         $this->assertContains('matches_table', $ids, 'Primary matches table not found');
         $this->assertContains('history_table', $ids, 'History table not found');

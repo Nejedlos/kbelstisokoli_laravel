@@ -221,6 +221,7 @@ class TrainingsTable
                             Select::make('teams')
                                 ->label(__('admin.resources.training.fields.teams'))
                                 ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                                ->dehydrated() // Bulk action synchronizes each selected record explicitly.
                                 ->multiple()
                                 ->searchable()
                                 ->preload()

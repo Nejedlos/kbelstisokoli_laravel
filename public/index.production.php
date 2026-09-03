@@ -1,42 +1,49 @@
 <?php
 
+use Dotenv\Dotenv;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mime\Email;
 
 define('LARAVEL_START', microtime(true));
 
 // --- EARLY EXIT FAST CACHE (Redis) ---
 // Pouze pro GET požadavky hostů na veřejných stránkách.
 // Bypasuje celý Laravel bootstrap a vendor autoloading.
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' 
-    && !isset($_COOKIE['kbelsti-sokoli-session'])
-    && !isset($_SERVER['HTTP_X_PRIME_CACHE'])
-    && !isset($_GET['screenshot_user_id'])
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'
+    && strtolower($_SERVER['HTTP_HOST'] ?? '') === 'kbelstisokoli.cz'
+    && ! isset($_COOKIE['kbelsti-sokoli-session'])
+    && ! isset($_SERVER['HTTP_X_PRIME_CACHE'])
+    && ! isset($_GET['screenshot_user_id'])
 ) {
     $uri_path = ltrim(explode('?', $_SERVER['REQUEST_URI'] ?? '/')[0], '/');
-    if ($uri_path === '') $uri_path = '/';
-    
+    if ($uri_path === '') {
+        $uri_path = '/';
+    }
+
     // Vyloučení administrace a členské sekce
-    if (!str_starts_with($uri_path, 'admin') && !str_starts_with($uri_path, 'clenska-sekce')) {
+    if (! str_starts_with($uri_path, 'admin') && ! str_starts_with($uri_path, 'clenska-sekce')) {
         $queryParams = $_GET;
         ksort($queryParams);
         $serializedParams = serialize($queryParams);
-        
-        $redis = new Redis();
+
+        $redis = new Redis;
         if (@$redis->connect('c-redis', 6379, 0.05)) {
             $redis->select(1);
             $prefix = 'kbelsti-sokoli-database-kbelsti-sokoli-cache-full_page_';
-            
+
             // Zkusíme oba jazyky (výchozí CS je první)
             foreach (['cs', 'en'] as $l) {
-                $key = $prefix . md5($uri_path . '_' . $serializedParams . '_' . $l);
+                $key = $prefix.md5($uri_path.'_'.$serializedParams.'_'.$l);
                 $cached = $redis->get($key);
                 if ($cached) {
                     $data = unserialize($cached);
                     if (isset($data['content'])) {
-                        header('Content-Type: ' . ($data['type'] ?? 'text/html; charset=UTF-8'));
+                        header('Content-Type: '.($data['type'] ?? 'text/html; charset=UTF-8'));
                         header('X-Page-Cache: fast-hit');
-                        header('X-Fast-Cache-Locale: ' . $l);
+                        header('X-Fast-Cache-Locale: '.$l);
                         header('Cache-Control: public, max-age=300, stale-while-revalidate=600');
                         echo $data['content'];
                         exit;
@@ -58,7 +65,7 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
 // Nouzové hlášení chyb před bootem Laravelu (pre-boot)
 (function () use ($APP_BASE) {
     // Definice cesty k logu pro pre-boot
-    $preBootLog = is_writable($APP_BASE . '/storage/logs') ? $APP_BASE . '/storage/logs/pre-boot.log' : sys_get_temp_dir() . '/kbelstisokoli-pre-boot.log';
+    $preBootLog = is_writable($APP_BASE.'/storage/logs') ? $APP_BASE.'/storage/logs/pre-boot.log' : sys_get_temp_dir().'/kbelstisokoli-pre-boot.log';
 
     /**
      * Jednoduchý logger, který funguje i před startem Laravelu
@@ -66,17 +73,17 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
     $GLOBALS['__PRE_LOGS'] = [];
     $preLog = function (string $message, array $context = []) {
         $microtime = microtime(true);
-        $timestamp = date('Y-m-d H:i:s') . '.' . sprintf('%03d', ($microtime - floor($microtime)) * 1000);
+        $timestamp = date('Y-m-d H:i:s').'.'.sprintf('%03d', ($microtime - floor($microtime)) * 1000);
         $pid = getmypid();
         $uri = $_SERVER['REQUEST_URI'] ?? 'CLI';
         $GLOBALS['__PRE_LOGS'][] = [
             'time' => $microtime,
-            'log' => sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : '')
+            'log' => sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : ''),
         ];
     };
 
     // Breadcrumb systém pro detekci zacyklení
-    if (!isset($GLOBALS['__BREADCRUMBS'])) {
+    if (! isset($GLOBALS['__BREADCRUMBS'])) {
         $GLOBALS['__BREADCRUMBS'] = [];
     }
 
@@ -102,22 +109,24 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
     };
 
     // Globální helpery (vždy dostupné přes include, aby byly v globálním scope i pro CLI)
-    if (!function_exists('pre_log')) {
-        function pre_log(string $message, array $context = []) {
+    if (! function_exists('pre_log')) {
+        function pre_log(string $message, array $context = [])
+        {
             $microtime = microtime(true);
-            $timestamp = date('Y-m-d H:i:s') . '.' . sprintf('%03d', ($microtime - floor($microtime)) * 1000);
+            $timestamp = date('Y-m-d H:i:s').'.'.sprintf('%03d', ($microtime - floor($microtime)) * 1000);
             $pid = getmypid();
             $uri = $_SERVER['REQUEST_URI'] ?? 'CLI';
             $GLOBALS['__PRE_LOGS'][] = [
                 'time' => $microtime,
-                'log' => sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : '')
+                'log' => sprintf("[%s] [%s] %s: %s %s\n", $timestamp, $pid, $uri, $message, $context ? json_encode($context, JSON_UNESCAPED_UNICODE) : ''),
             ];
         }
     }
 
-    if (!function_exists('add_breadcrumb')) {
-        function add_breadcrumb(string $label, array $data = []) {
-            if (!isset($GLOBALS['__BREADCRUMBS'])) {
+    if (! function_exists('add_breadcrumb')) {
+        function add_breadcrumb(string $label, array $data = [])
+        {
+            if (! isset($GLOBALS['__BREADCRUMBS'])) {
                 $GLOBALS['__BREADCRUMBS'] = [];
             }
 
@@ -146,18 +155,18 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
 
     try {
         $envPath = file_exists($APP_BASE.'/.env') ? $APP_BASE : (file_exists($APP_BASE.'/public/.env') ? $APP_BASE.'/public' : null);
-        if ($envPath && class_exists(\Dotenv\Dotenv::class)) {
-            \Dotenv\Dotenv::createImmutable($envPath)->safeLoad();
+        if ($envPath && class_exists(Dotenv::class)) {
+            Dotenv::createImmutable($envPath)->safeLoad();
         }
-    } catch (\Throwable $e) {
-        $preLog("Error loading .env", ['error' => $e->getMessage()]);
+    } catch (Throwable $e) {
+        $preLog('Error loading .env', ['error' => $e->getMessage()]);
     }
 
     $env = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'production';
     $debug = ($_ENV['APP_DEBUG'] ?? getenv('APP_DEBUG') ?? 'false') === 'true';
     $errorRecipient = $_ENV['ERROR_REPORT_EMAIL'] ?? getenv('ERROR_REPORT_EMAIL') ?: null;
 
-    $preLog("Request started", ['env' => $env, 'debug' => $debug, 'memory' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB']);
+    $preLog('Request started', ['env' => $env, 'debug' => $debug, 'memory' => round(memory_get_usage(true) / 1024 / 1024, 2).' MB']);
 
     // Pokud nejsme na produkci nebo máme zapnutý debug, zobrazujeme chyby
     if ($env !== 'production' || $debug) {
@@ -192,10 +201,10 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
                 $params ? ('?'.implode('&', $params)) : ''
             );
 
-            if (class_exists(\Symfony\Component\Mailer\Transport::class)) {
-                $transport = \Symfony\Component\Mailer\Transport::fromDsn($dsn);
-                $mailer = new \Symfony\Component\Mailer\Mailer($transport);
-                $email = (new \Symfony\Component\Mime\Email)
+            if (class_exists(Transport::class)) {
+                $transport = Transport::fromDsn($dsn);
+                $mailer = new Mailer($transport);
+                $email = (new Email)
                     ->from($from)
                     ->to($errorRecipient)
                     ->subject($subject)
@@ -204,36 +213,36 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
                 $mailer->send($email);
                 $preLog("Error email sent to $errorRecipient");
             } else {
-                $preLog("Cannot send email: Mailer classes not found yet (too early?)");
+                $preLog('Cannot send email: Mailer classes not found yet (too early?)');
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $preLog('Pre-boot error email failed: '.$e->getMessage());
         }
     };
 
     set_exception_handler(function ($e) use ($send, $env, $debug, $preLog) {
-        if (! $e instanceof \Throwable) {
+        if (! $e instanceof Throwable) {
             return;
         }
 
-        $preLog("Uncaught exception: " . get_class($e), [
+        $preLog('Uncaught exception: '.get_class($e), [
             'message' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'breadcrumbs' => array_slice($GLOBALS['__BREADCRUMBS'] ?? [], -10)
+            'breadcrumbs' => array_slice($GLOBALS['__BREADCRUMBS'] ?? [], -10),
         ]);
 
         // Pokud máme zobrazovat chyby, vypíšeme je i do výstupu
         if ($env !== 'production' || $debug) {
-            if (!headers_sent()) {
+            if (! headers_sent()) {
                 header('HTTP/1.1 500 Internal Server Error');
             }
             echo '<h1>Pre-boot Exception</h1>';
             echo '<p><strong>'.get_class($e)."</strong>: {$e->getMessage()}</p>";
             echo "<p>File: {$e->getFile()}:{$e->getLine()}</p>";
             echo "<pre>{$e->getTraceAsString()}</pre>";
-            if (!empty($GLOBALS['__BREADCRUMBS'])) {
-                echo "<h3>Last Breadcrumbs:</h3><pre>" . json_encode(array_slice($GLOBALS['__BREADCRUMBS'], -15), JSON_PRETTY_PRINT) . "</pre>";
+            if (! empty($GLOBALS['__BREADCRUMBS'])) {
+                echo '<h3>Last Breadcrumbs:</h3><pre>'.json_encode(array_slice($GLOBALS['__BREADCRUMBS'], -15), JSON_PRETTY_PRINT).'</pre>';
             }
         }
 
@@ -257,7 +266,7 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
 
         // Zapíšeme logy pouze pokud: nastala fatální chyba, nebo request trval déle než 500ms
         if ($isFatal || $totalTime > 500 || $debug) {
-            $preBootLog = is_writable($APP_BASE . '/storage/logs') ? $APP_BASE . '/storage/logs/pre-boot.log' : sys_get_temp_dir() . '/kbelstisokoli-pre-boot.log';
+            $preBootLog = is_writable($APP_BASE.'/storage/logs') ? $APP_BASE.'/storage/logs/pre-boot.log' : sys_get_temp_dir().'/kbelstisokoli-pre-boot.log';
             $allLogs = array_column($GLOBALS['__PRE_LOGS'] ?? [], 'log');
             if ($allLogs) {
                 @file_put_contents($preBootLog, implode('', $allLogs), FILE_APPEND);
@@ -268,24 +277,24 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
 
             $isMemoryIssue = (strpos($error['message'], 'Allowed memory size') !== false);
 
-            $preLog("Fatal error captured", [
+            $preLog('Fatal error captured', [
                 'type' => $error['type'],
                 'message' => $error['message'],
                 'file' => $error['file'],
                 'line' => $error['line'],
-                'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
-                'breadcrumbs' => array_slice($GLOBALS['__BREADCRUMBS'] ?? [], -15)
+                'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2).' MB',
+                'breadcrumbs' => array_slice($GLOBALS['__BREADCRUMBS'] ?? [], -15),
             ]);
 
             if ($env !== 'production' || $debug) {
-                if (!headers_sent()) {
+                if (! headers_sent()) {
                     header('HTTP/1.1 500 Internal Server Error');
                 }
                 echo '<h1>Pre-boot Fatal Error</h1>';
                 echo '<pre>'.print_r($error, true).'</pre>';
-                echo '<h3>Memory Usage: ' . round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB</h3>';
-                if (!empty($GLOBALS['__BREADCRUMBS'])) {
-                    echo "<h3>Last Breadcrumbs (Path to crash):</h3><pre>" . json_encode(array_slice($GLOBALS['__BREADCRUMBS'], -20), JSON_PRETTY_PRINT) . "</pre>";
+                echo '<h3>Memory Usage: '.round(memory_get_usage(true) / 1024 / 1024, 2).' MB</h3>';
+                if (! empty($GLOBALS['__BREADCRUMBS'])) {
+                    echo '<h3>Last Breadcrumbs (Path to crash):</h3><pre>'.json_encode(array_slice($GLOBALS['__BREADCRUMBS'], -20), JSON_PRETTY_PRINT).'</pre>';
                 }
             }
 

@@ -1,0 +1,1 @@
+Synthetic, minimal HTML regression samples for the supported CzBasketball page structures. All player data here is test data. Tests run offline and must fail if a fixture is missing. Keep URL entity IDs, team names and scores consistent across the four pages.

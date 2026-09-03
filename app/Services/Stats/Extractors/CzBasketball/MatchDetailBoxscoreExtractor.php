@@ -91,10 +91,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $tables = $crawler->filter('table');
 
         $allTablesData = [];
-        $allFragmentHtml = "<!-- Match Header -->\n" . json_encode($matchHeader) . "\n";
-        $allFragmentHtml .= "<!-- Leaders -->\n" . json_encode($bestPlayers) . "\n";
-        $allFragmentHtml .= "<!-- Comparison -->\n" . json_encode($teamComparison) . "\n";
-        $allFragmentHtml .= "<!-- Mutual -->\n" . json_encode($mutualMatches) . "\n";
+        $allFragmentHtml = "<!-- Match Header -->\n".json_encode($matchHeader)."\n";
+        $allFragmentHtml .= "<!-- Leaders -->\n".json_encode($bestPlayers)."\n";
+        $allFragmentHtml .= "<!-- Comparison -->\n".json_encode($teamComparison)."\n";
+        $allFragmentHtml .= "<!-- Mutual -->\n".json_encode($mutualMatches)."\n";
 
         $tables->each(function (Crawler $table, $i) use (&$allTablesData, &$allFragmentHtml, &$warnings, $matchHeader, $bestPlayers, $teamComparison, $lastMatches, $mutualMatches) {
             // Kontrola, zda je tabulka validní boxscore (musí mít aspoň 5 sloupců)
@@ -156,14 +156,12 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         // Vše podstatné by už mělo být vyřešeno v extractHeader().
 
         // Pro zjednodušení vracíme první tabulku jako hlavní data, ale v metadatech máme vše
-        $mainTable = $allTablesData[0] ?? new NormalizedTableDTO('Boxscore', [], [
-            'header' => $matchHeader,
-            'best_players' => $bestPlayers,
-            'team_comparison' => $teamComparison,
-            'last_matches' => $lastMatches,
-            'mutual_matches' => $mutualMatches,
-            'warnings' => ['No tables found'],
-        ]);
+        $mainTable = $allTablesData[0] ?? new NormalizedTableDTO(
+            name: 'Boxscore',
+            columns: [],
+            rows: [],
+            warnings: ['No tables found'],
+        );
 
         $mainTable->metadata = array_merge($mainTable->metadata, [
             'header' => $matchHeader,
@@ -198,6 +196,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             if (in_array('article-title', $classes) || in_array('score', $classes) || in_array('match-header-score', $classes)) {
                 return false;
             }
+
             return true;
         });
 
@@ -210,21 +209,24 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             if ($homeNode->count() > 0) {
                 try {
                     $header['home_team'] = trim($homeNode->text());
-                } catch (\Exception $e) {}
+                } catch (\Exception $e) {
+                }
             }
 
             $awayNodes = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2, h4.text-center');
             if ($awayNodes->count() >= 2) {
                 try {
                     $header['away_team'] = trim($awayNodes->eq(1)->text());
-                } catch (\Exception $e) {}
+                } catch (\Exception $e) {
+                }
             } elseif ($awayNodes->count() === 1) {
-                 $beta = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2')->first();
-                 if ($beta->count() > 0) {
-                     try {
-                         $header['away_team'] = trim($beta->text());
-                     } catch (\Exception $e) {}
-                 }
+                $beta = $searchIn->filter('.beta, .score-away-team, .team-away h1, .team-away h2')->first();
+                if ($beta->count() > 0) {
+                    try {
+                        $header['away_team'] = trim($beta->text());
+                    } catch (\Exception $e) {
+                    }
+                }
             }
         }
 
@@ -240,7 +242,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 // Regex pro skóre (např. 82:55), kterému nepředchází jiná čísla (aby se nevzalo datum 3.8.)
                 // Upraveno pro ignorování závorek a bílých znaků uvnitř závorek
                 if (preg_match('/(?<![\d:])(\d{1,3})\s*:\s*(\d{1,3})(?![\d:])/u', $text, $m)) {
-                    $header['score'] = $m[1] . ':' . $m[2];
+                    $header['score'] = $m[1].':'.$m[2];
                     break;
                 }
             }
@@ -256,12 +258,13 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $m)) {
                     foreach ($m[0] as $i => $pair) {
                         $periods[] = [
-                            'home' => (int)$m[1][$i],
-                            'away' => (int)$m[2][$i],
+                            'home' => (int) $m[1][$i],
+                            'away' => (int) $m[2][$i],
                         ];
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
 
         if (empty($periods)) {
@@ -287,8 +290,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                         $aVal = trim($awayRow->eq($i)->text());
                         if (is_numeric($hVal) && is_numeric($aVal)) {
                             $periods[] = [
-                                'home' => (int)$hVal,
-                                'away' => (int)$aVal,
+                                'home' => (int) $hVal,
+                                'away' => (int) $aVal,
                             ];
                         }
                     }
@@ -307,20 +310,20 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                     $parts = preg_split('/\s+/', $text);
                     if (count($parts) >= 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
                         $periods[] = [
-                            'home' => (int)$parts[0],
-                            'away' => (int)$parts[1],
+                            'home' => (int) $parts[0],
+                            'away' => (int) $parts[1],
                         ];
                     }
                 });
 
                 // Pokud jsme našli stavy, pravděpodobně jsou kumulativní (na cz.basketball běžné)
-                if (!empty($periods)) {
+                if (! empty($periods)) {
                     // 1. Přidáme konečné skóre jako poslední periodu, pokud se liší od poslední nalezené
                     if (isset($header['score'])) {
                         $scoreParts = explode(':', $header['score']);
                         if (count($scoreParts) === 2) {
-                            $finalHome = (int)$scoreParts[0];
-                            $finalAway = (int)$scoreParts[1];
+                            $finalHome = (int) $scoreParts[0];
+                            $finalAway = (int) $scoreParts[1];
                             $lastPeriod = end($periods);
 
                             if ($lastPeriod['home'] !== $finalHome || $lastPeriod['away'] !== $finalAway) {
@@ -357,15 +360,15 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 if (preg_match_all('/(\d+)\s*:\s*(\d+)/', $header['periods_text'], $pm)) {
                     foreach ($pm[0] as $i => $pair) {
                         $periods[] = [
-                            'home' => (int)$pm[1][$i],
-                            'away' => (int)$pm[2][$i],
+                            'home' => (int) $pm[1][$i],
+                            'away' => (int) $pm[2][$i],
                         ];
                     }
                 }
             }
         }
-        if (!empty($periods) && empty($header['periods_text'])) {
-            $header['periods_text'] = implode(', ', array_map(fn($p) => $p['home'] . ':' . $p['away'], $periods));
+        if (! empty($periods) && empty($header['periods_text'])) {
+            $header['periods_text'] = implode(', ', array_map(fn ($p) => $p['home'].':'.$p['away'], $periods));
         }
         $header['periods'] = $periods;
 
@@ -401,7 +404,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             } catch (\Exception $e) {
                 // Pokud selže, zkusíme najít datum v textu obecněji
                 if (preg_match('/(\d+\.\s*\d+\.\s*\d{4})\s*[\-\s]*(\d{1,2}:\d{2})/', $dateStr, $m)) {
-                    $cleanDateStr = preg_replace('/\s+/', ' ', trim($m[1] . ' ' . $m[2]));
+                    $cleanDateStr = preg_replace('/\s+/', ' ', trim($m[1].' '.$m[2]));
                     try {
                         $header['scheduled_at'] = Carbon::createFromFormat('j. n. Y G:i', $cleanDateStr, 'Europe/Prague')->toDateTimeString();
                     } catch (\Exception $e2) {
@@ -418,7 +421,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 // Pokud scheduled_at nemá čas (je tam jen datum), zkusíme ho vzít ze skóre (pokud vypadá jako čas)
                 if (str_contains($header['scheduled_at'], '00:00:00') && preg_match('/^\d{1,2}:\d{2}$/', $header['score'])) {
                     $datePart = explode(' ', $header['scheduled_at'])[0];
-                    $header['scheduled_at'] = $datePart . ' ' . $header['score'] . ':00';
+                    $header['scheduled_at'] = $datePart.' '.$header['score'].':00';
                     $header['is_future'] = true;
                     unset($header['score']);
                 }
@@ -454,7 +457,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                 $text = trim($node->text());
                 if (str_contains($text, 'Rozhodčí:')) {
                     $clean = trim(str_replace('Rozhodčí:', '', $text));
-                    if (!empty($clean)) {
+                    if (! empty($clean)) {
                         $header['referees'] = $clean;
                     }
                 }
@@ -510,7 +513,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
             $originalCategory = trim($categoryNode->text());
             $category = $categoryMapping[$originalCategory] ?? null;
 
-            if (!$category) {
+            if (! $category) {
                 return;
             }
 
@@ -571,10 +574,10 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $imgNode = $card->filter('img')->first();
         if ($imgNode->count() > 0) {
             $src = $imgNode->attr('data-src') ?: $imgNode->attr('src');
-            if ($src && !str_contains($src, 'data:image')) {
+            if ($src && ! str_contains($src, 'data:image')) {
                 // Převod na absolutní URL pokud je relativní
                 if (str_starts_with($src, '/')) {
-                    $src = 'https://cz.basketball' . $src;
+                    $src = 'https://cz.basketball'.$src;
                 }
                 $player['photo_url'] = $src;
             }
@@ -584,7 +587,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $valueNode = $card->filter('.gamma.text-green, .gamma.text-secondary, .value, .pts, .score')->first();
         $player['value'] = $valueNode->count() > 0 ? trim($valueNode->text()) : '';
 
-        return !empty($player['name']) ? $player : null;
+        return ! empty($player['name']) ? $player : null;
     }
 
     protected function extractTeamComparison(Crawler $crawler): array
@@ -633,6 +636,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         if (empty($comparison)) {
             $previewTable = $crawler->filter('table')->reduce(function (Crawler $node) {
                 $text = $node->text();
+
                 return str_contains($text, 'Body na zápas') || str_contains($text, 'Doskoky') || str_contains($text, 'Průměrný věk');
             })->first();
 
@@ -678,7 +682,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                         $scoreNode = $matchRow->filter('.col-2.text-center')->first();
 
                         if ($dateNode->count() > 0 && $teamsNode->count() > 0 && $scoreNode->count() > 0) {
-                            $date = trim(str_replace("\n", " ", $dateNode->text()));
+                            $date = trim(str_replace("\n", ' ', $dateNode->text()));
                             $date = preg_replace('/\s+/', ' ', $date);
 
                             $linkNode = $teamsNode->filter('a')->first();
@@ -781,7 +785,7 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         $headerRows = $table->filter('thead tr');
         $lastHeaderRow = $headerRows->last();
 
-        $lastHeaderRow->filter('th')->each(function (Crawler $th, $i) use (&$columns, $table, $headerRows) {
+        $lastHeaderRow->filter('th')->each(function (Crawler $th, $i) use (&$columns, $headerRows) {
             $label = trim($th->text());
             if ($th->attr('colspan') > 1 && $headerRows->count() > 1) {
                 return; // Přeskočíme hlavičku s colspan (např. "2 body")
@@ -871,9 +875,13 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
                         } else {
                             // Fallback pro 2B, 3B, TH klíče
                             $prefix = '';
-                            if ($key === 'fg2_made') $prefix = 'fg2';
-                            elseif ($key === 'fg3_made') $prefix = 'fg3';
-                            elseif ($key === 'ft_made') $prefix = 'ft';
+                            if ($key === 'fg2_made') {
+                                $prefix = 'fg2';
+                            } elseif ($key === 'fg3_made') {
+                                $prefix = 'fg3';
+                            } elseif ($key === 'ft_made') {
+                                $prefix = 'ft';
+                            }
 
                             if ($prefix) {
                                 $values[$prefix.'_made'] = $made;
