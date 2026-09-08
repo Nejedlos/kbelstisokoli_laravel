@@ -65,11 +65,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Nastavení public_path - musí fungovat i v Console (pro importy, seedy, media library)
         // Zabezpečení pro localhost: pokud jsme v local prostředí a produkční cesta neexistuje, nulujeme ji
-        $publicPath = config('app.prod_public_path');
+        $releasePublicPath = defined('LARAVEL_RELEASE_PUBLIC_PATH')
+            ? constant('LARAVEL_RELEASE_PUBLIC_PATH')
+            : null;
+        $publicPath = $releasePublicPath ?: config('app.prod_public_path');
 
-        if (config('app.public_path_mode') !== 'external' || ! $publicPath) {
+        if (! $releasePublicPath && (config('app.public_path_mode') !== 'external' || ! $publicPath)) {
             $publicPath = null;
-        } elseif (! file_exists($publicPath) && $app->environment('local')) {
+        } elseif (! $releasePublicPath && ! file_exists($publicPath) && $app->environment('local')) {
             $publicPath = null;
         }
 
@@ -89,6 +92,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
             $app->usePublicPath($publicPath);
             $app->instance('path.public', $publicPath);
             config(['filesystems.disks.public_path.root' => $publicPath]);
+        }
+
+        if (defined('LARAVEL_RELEASE_ID')) {
+            config(['app.release_sha' => constant('LARAVEL_RELEASE_ID')]);
         }
 
         // Vynucení HTTPS na produkci pro stabilní generování assetů (Vite, asset(), ...)

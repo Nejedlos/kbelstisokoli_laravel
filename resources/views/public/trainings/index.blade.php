@@ -41,6 +41,7 @@
                                             <div class="bg-white shadow-sm text-secondary p-3 rounded-xl text-center min-w-[70px] border border-slate-100 group-hover:bg-primary group-hover:text-white transition-colors">
                                                 <div class="text-[10px] font-black tracking-widest opacity-60"><x-weekday-short :date="$training->starts_at" /></div>
                                                 <div class="text-2xl font-black leading-none">{{ $training->starts_at->day }}</div>
+                                                <div class="mt-0.5 text-[10px] font-black uppercase tracking-widest opacity-60">{{ $training->starts_at->copy()->locale(app()->getLocale())->translatedFormat('M') }}</div>
                                             </div>
                                             <div class="flex-1">
                                                 <div class="flex items-center gap-2 mb-1">

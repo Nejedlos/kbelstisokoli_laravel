@@ -93,10 +93,11 @@
             @endif
 
             <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="flex items-center gap-4 sm:gap-5 flex-1 min-w-0 transition-all duration-500">
-                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-secondary leading-none border border-slate-100 shrink-0 group-hover:bg-white group-hover:shadow-md transition-all duration-500">
-                <span class="text-[8px] sm:text-[9px] font-black tracking-widest text-slate-400 mb-0.5"><x-weekday-short :date="$time" /></span>
-                <span class="text-lg sm:text-xl font-black tracking-tight">{{ $time->format('d') }}</span>
-            </div>
+                <div class="w-12 h-14 sm:w-14 sm:h-16 rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-secondary leading-none border border-slate-100 shrink-0 group-hover:bg-white group-hover:shadow-md transition-all duration-500">
+                    <span class="text-[8px] sm:text-[9px] font-black tracking-widest text-slate-400 mb-0.5"><x-weekday-short :date="$time" /></span>
+                    <span class="text-lg sm:text-xl font-black tracking-tight">{{ $time->format('d') }}</span>
+                    <span class="mt-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">{{ $time->copy()->locale(app()->getLocale())->translatedFormat('M') }}</span>
+                </div>
 
             <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2 sm:gap-4 mb-1 sm:mb-1.5">

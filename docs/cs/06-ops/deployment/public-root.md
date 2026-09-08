@@ -4,7 +4,9 @@ Tento dokument popisuje nastavení projektu pro provoz s veřejným adresářem 
 
 ## Architektura na produkci
 
-- **Kód aplikace:** `/home/html/kbelstisokoli.cz/public_html/secret`
+- **Sdílené produkční prostředí a storage:** `/home/html/kbelstisokoli.cz/public_html/secret`
+- **Releasy:** `/home/html/kbelstisokoli.cz/public_html/secret/deploy/releases/<git-sha>`
+- **Aktivní release:** `/home/html/kbelstisokoli.cz/public_html/secret/deploy/current`
 - **Veřejný adresář:** `/home/html/kbelstisokoli.cz/public_html/www`
 
 ## Konfigurace prostředí (.env)
@@ -30,11 +32,12 @@ APP_PUBLIC_PATH="/home/html/kbelstisokoli.cz/public_html/www"
 
 2.  **Vite build (`vite.config.js`):**
     - Při sestavování assetů (`npm run build`) Vite builduje do standardní složky `public/build`.
-    - Následně se o synchronizaci do externí složky `/www/build` postará **Envoy** v rámci `sync_public` úkolu.
-    - Toto sjednocení cest zajišťuje, že assety nejsou smazány při deploymentu.
+    - GitHub Actions vloží build do release archivu. `/www/build` je symlink přes `secret/deploy/current`, takže se PHP i assety přepnou na stejný commit.
+    - Starší hashované soubory se zachovají v následujícím releasu, aby rozečtená stránka během přepnutí neztratila asset.
 
 3.  **Vstupní bod (`index.php`):**
-    - V externí složce `/www` musí být `index.php`, který správně načte aplikaci ze složky `/secret`.
+    - V externí složce `/www` je stabilní `index.php`, který přes `realpath()` načte výhradně release pod `secret/deploy/releases` vybraný symlinkem `current`.
+    - Odpověď obsahuje `X-App-Release` s aktivním Git SHA. Stejný SHA je součástí namespace rychlé Redis cache.
 
 ## Soubory pro externí složku
 
@@ -49,8 +52,14 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Cesta k aplikaci
-$APP_BASE = __DIR__ . '/../../secret';
+// Zkrácený příklad; úplná verze je v public/index.production.php.
+$deployRoot = '/home/html/kbelstisokoli.cz/public_html/secret/deploy';
+$APP_BASE = realpath($deployRoot.'/current');
+
+if ($APP_BASE === false || ! str_starts_with($APP_BASE.'/', $deployRoot.'/releases/')) {
+    http_response_code(503);
+    exit('Application release is unavailable.');
+}
 
 // Maintenance mode
 if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) {
@@ -61,10 +70,8 @@ if (file_exists($maintenance = $APP_BASE.'/storage/framework/maintenance.php')) 
 require $APP_BASE.'/vendor/autoload.php';
 
 // Bootstrap
-$app = require_once $APP_BASE.'/bootstrap/app.php';
-
-// Spuštění
-$app->handleRequest(Request::capture());
+(require_once $APP_BASE.'/bootstrap/app.php')
+    ->handleRequest(Request::capture());
 ```
 
 ### .htaccess (standardní Laravel)
@@ -97,12 +104,6 @@ $app->handleRequest(Request::capture());
 
 Na lokálním prostředí ponechte `PUBLIC_PATH_MODE=default` (nebo proměnnou vůbec nedefinujte). Projekt se bude chovat jako standardní Laravel aplikace a bude používat složku `public/` uvnitř projektu.
 
-## Build příkaz
+## Build
 
-Vzhledem k verzi Node.js na hostingu Webglobe (v14) doporučujeme spouštět build **lokálně** a následně assety nahrát na server (viz dokumentace nasazení).
-
-Pokud je na serveru k dispozici Node.js 18+, lze build spustit i tam:
-```bash
-npm run build
-```
-Vite sestaví soubory do `public/build` a skript Envoy (nebo manuální synchronizace) je následně přenese do cílové složky `www`.
+Produkční build spouští pouze GitHub Actions na Node.js 22. Na Webglobe se Node.js ani NPM pro běžné nasazení nepoužívá.

@@ -81,7 +81,12 @@ Schedule::call(fn () => Artisan::call('page-cache:prime'))->name('page-cache:pri
 
 // Jednorázový dávkový worker pro hosting bez trvalého queue procesu.
 // Limity chrání HTTP cron před timeoutem, withoutOverlapping brání souběžným workerům.
-Schedule::command('queue:work --stop-when-empty --max-jobs=25 --max-time=120 --tries=3')
+Schedule::call(fn () => Artisan::call('queue:work', [
+    '--stop-when-empty' => true,
+    '--max-jobs' => 25,
+    '--max-time' => 120,
+    '--tries' => 3,
+]) === 0)
     ->name('queue-worker-maintenance')
     ->everyMinute()
     ->withoutOverlapping(5)

@@ -39,7 +39,9 @@ class FullPageCacheMiddleware
         $queryParams = $request->query();
         ksort($queryParams);
         $locale = app()->getLocale();
-        $cacheKey = 'full_page_'.md5($request->path().'_'.serialize($queryParams).'_'.$locale);
+        $release = config('app.release_sha');
+        $releaseNamespace = $release ? $release.'_' : '';
+        $cacheKey = 'full_page_'.$releaseNamespace.md5($request->path().'_'.serialize($queryParams).'_'.$locale);
         $ttl = config('performance.cache_ttl.full_page', 86400);
 
         if (Cache::has($cacheKey) && ! $request->hasHeader('X-Prime-Cache')) {

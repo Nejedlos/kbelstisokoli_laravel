@@ -2,15 +2,39 @@
 
 Projekt využívá moderní přístup k nasazení, který kombinuje **GitHub** ([https://github.com/Nejedlos/kbelstisokoli_laravel](https://github.com/Nejedlos/kbelstisokoli_laravel)) jako zdrojový repozitář a **SSH konzoli** na hostingu (Webglobe) pro finální kroky.
 
-> KRITICKÉ UPOZORNĚNÍ K ASSETŮM (Vite)
->
-> Po jakékoliv změně vzhledu (úprava CSS/JS) je NUTNÉ spustit `npm run build`, jinak se změny na produkci/pro náhled NEPROJEVÍ. Týká se to i Filament auth UI (`resources/css/filament-auth.css`, `resources/js/filament-error-handler.js`).
+> Assety pro produkci vždy sestaví workflow z přesného commitu. Při běžném nasazení proto lokálně nespouštějte ani nenahrávejte `public/build`; push do `main` udělá jediný reprodukovatelný build sám.
 
-## Automatizované nasazení (Doporučeno)
+## Automatizované nasazení z `main` (doporučeno)
 
-Pro maximální zjednodušení byly vytvořeny Artisan příkazy, které obstarají vše od prvotního nastavení (včetně Gitu s tokenem) až po pravidelné nasazování.
+Běžné produkční nasazení spouští push do větve `main`. GitHub Actions nejprve paralelně spustí testy, jednou sestaví Vite assety a rychlou kompresí vytvoří hotový produkční archiv včetně `vendor`. Statické soubory v `public/assets` mají vlastní obsahový hash a na server se přenesou jen při změně. Server už neprovádí Git reset, Composer install ani NPM build.
 
-### 1. Prvotní nastavení (Setup)
+### Produkční uspořádání Webglobe
+
+Doména stále obsluhuje skutečný adresář `/home/html/kbelstisokoli.cz/public_html/www`; nastavení hostingu se nemění. Jednotlivé verze aplikace jsou v `/home/html/kbelstisokoli.cz/public_html/secret/deploy/releases/<git-sha>` a symlink `secret/deploy/current` ukazuje na právě aktivní verzi.
+
+Stabilní `www/index.php` načítá aplikaci přes `current`. Verzované veřejné adresáře a kořenové soubory, například `assets`, `build`, `js`, `css`, `fonts`, `images`, favicony, manifest, `robots.txt` a sitemap, sledují stejný release. `assets` ukazuje na neměnný strom `secret/deploy/managed-assets/<hash>`; zapisovaný podadresář partnerských log v něm vede na `secret/deploy/shared/assets-partners`. `www/uploads`, `www/storage`, produkční `.env`, aplikační `storage` a vygenerovaná sada Blade ikon zůstávají na stabilních cestách. `.htaccess` se nemění.
+
+Deployment drží serverový `flock`, ověří SHA-256 archivu, připraví migrace a cache mimo běžící verzi a potom atomicky přepne `current`. Nový release musí na `/up` vrátit hlavičku `X-App-Release` s přesným SHA. Při neúspěchu se pointer vrátí na předchozí verzi. Redis full-page cache používá SHA v klíči, takže přepnutí nevyžaduje globální mazání cache.
+
+Pouze první přechod krátce zapne Laravel maintenance režim, počká na skutečné ukončení všech již běžících PHP requestů a přesune původní fyzický adresář partnerských log do sdílené cesty. Pokud se request neuvolní do pěti minut, deployment přesun zruší a aplikaci znovu zapne. Původní i nový release pak používají stejná data i při rollbacku. Další deploymenty tento krok přeskakují.
+
+### Běžné použití
+
+```bash
+git push origin main
+```
+
+Workflow `Validate and deploy` provede validaci i deployment. Není potřeba přihlašovat se na server ani spouštět `app:deploy`.
+
+### Ruční návrat aplikace
+
+Symlink `secret/deploy/previous` ukazuje na verzi aktivní před posledním úspěšným přepnutím. Návrat se provádí pouze při vědomé produkční údržbě atomickou výměnou `current`; před návratem je nutné ověřit kompatibilitu již provedených databázových migrací.
+
+## Starší nástroje pro ruční údržbu
+
+Následující příkazy zůstávají v projektu kvůli diagnostice a mimořádné ruční obnově. Pro běžné produkční nasazení se nepoužívají, protože pracují přímo v původním checkoutu `secret` a prodlužují odstávku. Standardem je workflow z `main` popsané výše.
+
+### Starší interaktivní nastavení (`app:production:setup`)
 Pokud nasazujete na nový server nebo chcete přenastavit parametry, spusťte:
 
 ```bash
@@ -41,8 +65,9 @@ Příkaz se vás interaktivně zeptá na následující údaje (které se pokus�
 **Proč jsou tyto údaje potřeba?**
 Bez přístupu k SSH konzoli (Host, Port, Uživatel) by nebylo možné automaticky provádět operace jako `git pull`, `composer install` nebo `npm run build` přímo na serveru. Systém tyto údaje používá k tomu, aby se za vás „přihlásil“ a provedl všechny potřebné kroky jedním příkazem z vašeho počítače.
 
-### 2. Pravidelné nasazení (Deploy)
-Jakmile máte setup hotový, stačí pro každé další nasazení spustit:
+### Starší ruční nasazení (`app:deploy`)
+
+Tento příkaz používejte jen při vědomé obnově, pokud není dostupné GitHub Actions. Běžné nasazení vždy spouští push do `main`.
 
 ```bash
 php artisan app:deploy
@@ -57,7 +82,7 @@ Tento příkaz automaticky:
 
 Pravidelné nasazení nikdy nespouští seedery, import statistik, financí nebo uživatelů, synchronizaci ikon, AI reindexaci ani `app:sync`.
 
-### 3. Synchronizace dat (Sync)
+### Synchronizace dat (Sync)
 Příkaz `app:sync` je samostatná údržbová operace pro agregovanou synchronizaci dat. Není součástí nasazení a spouští se pouze vědomě při plánované správě dat.
 
 ```bash
@@ -72,10 +97,11 @@ php artisan app:sync [--freshseed] [--stats] [--usersync]
 
 ---
 
-### 4. Nasazení přes FTP Sync (Alternativa)
-Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na serveru** (např. při potížích s verzemi) nebo pokud preferujete nahrávání souborů přes FTP.
+### Starší nasazení přes FTP Sync
 
-#### A) Kompletní synchronizace (Doporučeno)
+FTP postup je nouzová varianta pro obnovu jednotlivých souborů. Není vhodný pro běžné nasazení celé aplikace, protože nevytváří atomický release a může smíchat dvě verze kódu.
+
+#### A) Kompletní synchronizace
 1. **Lokálně** ve svém počítači připravte vše potřebné jedním příkazem:
    ```bash
    php artisan app:local:prepare
@@ -91,7 +117,7 @@ Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na se
 
 #### B) Pouze sestavení a nahrání assetů (Rychlá volba)
 
-**Přes SSH (SCP) - Doporučeno:**
+**Přes SSH (SCP):**
 Pokud máte nastaven SSH přístup, použijte tento moderní a rychlý příkaz:
 ```bash
 php artisan assets:deploy
@@ -118,7 +144,7 @@ php artisan app:deploy:local-assets --with-assets
 
 ---
 
-Je to **nejjednodušší a nejrobustnější cesta**, pokud nechcete na serveru řešit Git, NPM nebo verze Node.js.
+Tyto varianty jsou určené jen pro ruční obnovu. Automatický release z `main` rovněž nevyžaduje Git, Composer ani Node.js na produkčním serveru a navíc zachovává atomické přepnutí.
 
 ---
 
@@ -163,9 +189,9 @@ Navíc je bootstrap aplikace v `bootstrap/app.php` zabezpečen tak, aby selhán�
 
 ---
 
-## Robustní nasazení (Rsync + SSH Reset) - DOPORUČENO PŘI POTÍŽÍCH
+## Historický postup Rsync + SSH reset
 
-Tento postup je nejspolehlivější v situaci, kdy na serveru dochází ke konfliktům v Gitu, nebo když verze Node.js na serveru nepodporuje sestavení assetů (Vite v7 vyžaduje Node 20+, Webglobe má jako výchozí v14).
+Tento postup je archivován pouze pro dohledání starších zásahů. Na produkci se už nesmí používat: `git reset --hard` v původním adresáři může přepsat změny obnovené z FTP zálohy a přímá výměna souborů není atomická.
 
 ### 1. Fix ikon (Font Awesome 7 a Tailwind v4)
 V tomto projektu byl zaveden soubor `resources/css/icons-fix.css`, který je v layoutu nalinkován samostatně. Slouží k vynucení `font-weight: 300` pro `.fa-light` a k zajištění viditelnosti ikon, protože Tailwind v4 v produkčním buildu tyto definice někdy agresivně optimalizuje.
@@ -204,14 +230,16 @@ php8.4 artisan optimize
 
 ---
 
-## Předpoklady na serveru (Webglobe)
+## Předpoklady starších ručních postupů na serveru (Webglobe)
 1. **PHP:** Verze 8.4+ (včetně JIT optimalizací).
 2. **SSH Přístup:** Povoleno v administraci Webglobe (nutné pro příkazy `app:deploy` i `app:sync`).
 3. **Git:** Musí být nainstalován (pro `app:deploy`).
 4. **Composer:** Globálně dostupný (pro `app:deploy`).
 5. **Node.js & NPM:** Pro buildování assetů přímo na serveru (pro `app:deploy`). **Při použití metody FTP Sync (bod 3) není na serveru potřeba.**
 
-## Postup nasazení (Manuální přes SSH - příklad pro PHP 8.4)
+## Archivovaný manuální postup přes SSH
+
+> Tento blok je historická reference. Nepoužívejte jej pro produkční nasazení; aktuální workflow přenáší hotový release a přepíná symlink `current`.
 
 > Aktuální informace pro **upgrade na Laravel 13** naleznete v samostatném dokumentu: [02-upgrade-laravel-13.md](02-upgrade-laravel-13.md).
 
@@ -303,9 +331,9 @@ Před prvním automatickým nasazením uložte v Environment `production` tyto S
 - `PRODUCTION_SSH_PORT`
 - `PRODUCTION_SSH_USER`
 - `PRODUCTION_PATH`
+- `PRODUCTION_PUBLIC_PATH`
 - `PRODUCTION_SSH_PRIVATE_KEY`
 - `PRODUCTION_SSH_KNOWN_HOSTS` (výstup `ssh-keyscan` pro produkční hostitel)
 - `FONTAWESOME_TOKEN`
 
-Dokud některé z nich chybí, validace zůstane zelená a nasazovací úloha se záměrně přeskočí. Po jejich doplnění provede další push do `main` úplné produkční nasazení včetně instalace závislostí, sestavení Vite assetů, migrací a optimalizace cache.
-
+Pokud některý secret chybí, push workflow skončí chybou ještě před instalací závislostí. Po jejich doplnění provede push do `main` testy, jediný produkční build, přenos hotového release, migrace a atomické přepnutí verze.
