@@ -102,6 +102,17 @@ jobs:
                 fwrite(STDERR, "Missing PHP extensions: ".implode(", ", $missing)."\n");
                 exit(1);
             }
+            $memory = ini_get("memory_limit");
+            if ($memory !== "-1") {
+                $units = ["k" => 1024, "m" => 1024 ** 2, "g" => 1024 ** 3];
+                $suffix = strtolower(substr($memory, -1));
+                $bytes = (int) $memory * ($units[$suffix] ?? 1);
+                if ($bytes < 512 * 1024 ** 2) {
+                    fwrite(STDERR, "PHP memory_limit must be at least 512M for parallel tests.\n");
+                    exit(1);
+                }
+            }
+            printf("PHP %s, memory_limit=%s\n", PHP_VERSION, $memory);
           '
           composer --version
           node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)'

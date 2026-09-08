@@ -15,6 +15,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('timeout-minutes: 20', $workflow);
         $this->assertStringContainsString('Verify self-hosted toolchain', $workflow);
         $this->assertStringContainsString('version_compare(PHP_VERSION, "8.4.0", "<")', $workflow);
+        $this->assertStringContainsString('PHP memory_limit must be at least 512M for parallel tests.', $workflow);
         $this->assertStringContainsString('process.versions.node', $workflow);
         $this->assertSame(1, substr_count($workflow, 'npm run build'));
         $this->assertStringContainsString('PRODUCTION_PUBLIC_PATH: ${{ secrets.PRODUCTION_PUBLIC_PATH }}', $workflow);

@@ -8,7 +8,7 @@ Projekt využívá moderní přístup k nasazení, který kombinuje **GitHub** (
 
 Běžné produkční nasazení spouští push do větve `main`. GitHub Actions použije projektový macOS runner označený `kbelstisokoli-deploy`, nejprve paralelně spustí testy, jednou sestaví Vite assety a rychlou kompresí vytvoří hotový produkční archiv včetně `vendor`. Statické soubory v `public/assets` mají vlastní obsahový hash a na server se přenesou jen při změně. Server už neprovádí Git reset, Composer install ani NPM build.
 
-Produkční runner má vlastní registraci a pracovní adresář; nesdílí registraci s jiným repozitářem. Pull requesty zůstávají na GitHub-hosted runneru. Workflow používá již nainstalované PHP, Composer, Node a NPM a před každým během ověří jejich minimální verze a potřebná PHP rozšíření. SSH klíč z GitHub Environment se zapisuje pouze do `$RUNNER_TEMP` konkrétního jobu, takže workflow nemění osobní `~/.ssh` uživatele Macu.
+Produkční runner má vlastní registraci a pracovní adresář; nesdílí registraci s jiným repozitářem. Pull requesty zůstávají na GitHub-hosted runneru. Workflow používá již nainstalované PHP, Composer, Node a NPM a před každým během ověří jejich minimální verze, potřebná PHP rozšíření a paměť alespoň 512 MB pro paralelní testy. SSH klíč z GitHub Environment se zapisuje pouze do `$RUNNER_TEMP` konkrétního jobu, takže workflow nemění osobní `~/.ssh` uživatele Macu.
 
 ### Produkční uspořádání Webglobe
 
