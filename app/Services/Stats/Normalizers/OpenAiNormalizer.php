@@ -19,7 +19,7 @@ class OpenAiNormalizer implements StatNormalizerInterface
 
     public function __construct()
     {
-        $this->apiKey = config('services.openai.key', env('OPENAI_API_KEY'));
+        $this->apiKey = (string) (config('services.openai.key') ?? env('OPENAI_API_KEY') ?? '');
         $this->model = config('services.openai.model', env('OPENAI_DEFAULT_MODEL', 'gpt-4o-mini'));
         $this->baseUrl = config('services.openai.base_url', env('OPENAI_BASE_URL', 'https://api.openai.com/v1'));
     }
