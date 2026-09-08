@@ -39,6 +39,8 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('if [ "$status" -ne 255 ]; then', $upload);
         $this->assertStringContainsString('remote_release_checksum', $upload);
         $this->assertStringContainsString('StrictHostKeyChecking=yes', $upload);
+        $this->assertStringContainsString('remote_bash', $upload);
+        $this->assertStringContainsString('bash -lc', $upload);
 
         $localFallback = file_get_contents(base_path('scripts/deploy-production-from-local.sh'));
         $this->assertStringContainsString('Local fallback deploy requires a clean working tree.', $localFallback);

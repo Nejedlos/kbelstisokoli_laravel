@@ -72,9 +72,15 @@ assets_checksum=$(sha256_file "$assets_source")
 ssh_options=(-4 -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ConnectionAttempts=1 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
 scp_options=(-4 -P "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ConnectionAttempts=1 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
 
-retry_transport ssh "${ssh_options[@]}" "$remote" "mkdir -p $(printf '%q' "$incoming")"
+remote_bash() {
+    local remote_command=$1
 
-remote_release_checksum=$(retry_transport ssh "${ssh_options[@]}" "$remote" \
+    retry_transport ssh "${ssh_options[@]}" "$remote" "bash -lc $(printf '%q' "$remote_command")"
+}
+
+remote_bash "mkdir -p $(printf '%q' "$incoming")"
+
+remote_release_checksum=$(remote_bash \
     "if test -f $(printf '%q' "$release_archive"); then sha256sum $(printf '%q' "$release_archive") | cut -d ' ' -f 1; else printf missing; fi")
 if [ "$remote_release_checksum" = "$release_checksum" ]; then
     echo "Release archive $release_sha is already present on production."
@@ -84,10 +90,10 @@ fi
 
 retry_transport scp "${scp_options[@]}" "$script_dir/deploy-production-release.sh" "$remote:$remote_script"
 
-if retry_transport ssh "${ssh_options[@]}" "$remote" "test -d $(printf '%q' "$managed_assets")"; then
+if remote_bash "test -d $(printf '%q' "$managed_assets")"; then
     echo "Public assets $assets_sha are already present on production."
 else
-    remote_assets_checksum=$(retry_transport ssh "${ssh_options[@]}" "$remote" \
+    remote_assets_checksum=$(remote_bash \
         "if test -f $(printf '%q' "$assets_archive"); then sha256sum $(printf '%q' "$assets_archive") | cut -d ' ' -f 1; else printf missing; fi")
     if [ "$remote_assets_checksum" = "$assets_checksum" ]; then
         echo "Public assets archive $assets_sha is already present on production."
@@ -96,5 +102,5 @@ else
     fi
 fi
 
-retry_transport ssh "${ssh_options[@]}" "$remote" \
+remote_bash \
     "PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") PRODUCTION_PUBLIC_PATH=$(printf '%q' "$PRODUCTION_PUBLIC_PATH") RELEASE_SHA=$(printf '%q' "$release_sha") RELEASE_ARCHIVE=$(printf '%q' "$release_archive") RELEASE_CHECKSUM=$(printf '%q' "$release_checksum") ASSETS_SHA=$(printf '%q' "$assets_sha") ASSETS_ARCHIVE=$(printf '%q' "$assets_archive") ASSETS_CHECKSUM=$(printf '%q' "$assets_checksum") HEALTH_URL=$(printf '%q' "$health_url") PHP_BINARY=$(printf '%q' "$php_binary") bash $(printf '%q' "$remote_script")"
