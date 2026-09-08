@@ -99,7 +99,7 @@ jobs:
           PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
           FONTAWESOME_TOKEN: ${{ secrets.FONTAWESOME_TOKEN }}
         run: |
-          ssh -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes "$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST" \
+          ssh -4 -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes "$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST" \
             "PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") GITHUB_SHA=$(printf '%q' "$GITHUB_SHA") FONTAWESOME_TOKEN=$(printf '%q' "$FONTAWESOME_TOKEN") bash -se" <<'EOF'
           set -euo pipefail
 
